@@ -3,20 +3,17 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { HttpClient } from '@angular/common/http';
 import * as ConfigActions from './config.actions';
 import { catchError, map, mergeMap, of } from 'rxjs';
+import { ConfigModel } from './config.model';
 
 @Injectable()
 export class ConfigEffects {
   loadConfig$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ConfigActions.loadConfig),
-      mergeMap(() =>
-      {
-        console.log('loadConfig$');
-        return this.http.get('/config/config.json').pipe(
-          map(config => ConfigActions.loadConfigSuccess({ config })),
+      mergeMap(() =>this.http.get<ConfigModel>('/config/config.json').pipe(
+          map((config) => ConfigActions.loadConfigSuccess({ config })),
           catchError(error => of(ConfigActions.loadConfigFailure({ error }))),
         )
-    }
       )
     )
   );

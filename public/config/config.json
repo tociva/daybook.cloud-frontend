@@ -1,3 +1,12 @@
 {
-  "consentAppLoginUrl": "https://login.daybook.com/login"
+  "auth": {
+    "issuer": "https://hydra.daybook.com/",
+    "authority": "https://hydra.daybook.com/",
+    "clientId": "spa-client",
+    "redirectUri": "https://app.daybook.com/auth/callback",
+    "postLoginRedirect": "https://app.daybook.com/",
+    "loginUrl": "https://login.daybook.com/login",
+    "scope": "openid profile email"
+  },
+  "apiBaseUrl": "https://api.daybook.com"
 }
