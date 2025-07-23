@@ -1,30 +1,25 @@
+// auth.guard.ts
 import { inject } from '@angular/core';
-import { CanActivateFn } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { filter, map, switchMap, take } from 'rxjs/operators';
-import { selectConfigState } from '../config/store/config.selectors';
-import { ConfigState } from '../config/store/config.reducer';
-import { selectIsAuthenticated } from './store/auth.selectors';
-import { loginRedirect } from './store/auth.actions';
+import { CanActivateFn, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import { map, take, switchMap, filter } from 'rxjs/operators';
+import { AuthFacade } from './service/auth-facade.service';
 
-export const authGuard: CanActivateFn = (route, state) => {
-  const store = inject(Store);
+export const authGuard: CanActivateFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+  const authFacade:AuthFacade = inject(AuthFacade);
 
-  return store.select(selectConfigState).pipe(
-    filter((configState: ConfigState) => configState.loaded),
+  return authFacade.authReady$.pipe(
+    filter((ready) => !!ready),
     take(1),
-    switchMap((configState) => 
-      store.select(selectIsAuthenticated).pipe(
-        take(1),
-        map((isAuthenticated) => {
-          if (isAuthenticated) {
-            return true;
-          }
-          // Instead of redirecting here, dispatch an action
-          store.dispatch(loginRedirect({ callbackUrl: window.location.href }));
-          return false;
-        })
-      )
-    )
+    switchMap(() => authFacade.isAuthenticated$),
+    take(1),
+    map(isAuthenticated => {
+      if (isAuthenticated) {
+        return true;
+      } else {
+        localStorage.setItem('returnUrl', state.url);
+        authFacade.login();
+        return false;
+      }
+    })
   );
 };

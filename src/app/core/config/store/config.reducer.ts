@@ -18,6 +18,8 @@ const initialState: ConfigState = {
       postLoginRedirect: '',
       loginUrl: '',
       scope: '',
+      silentRedirectUri: '',
+      postLogoutRedirectUri: '',
     },
     apiBaseUrl: '',
   },

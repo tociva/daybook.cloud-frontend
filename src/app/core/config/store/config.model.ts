@@ -6,6 +6,8 @@ export interface AuthConfig {
   postLoginRedirect: string;
   loginUrl: string;
   scope: string;
+  silentRedirectUri: string;
+  postLogoutRedirectUri: string;
 }
   
   export interface ConfigModel {
