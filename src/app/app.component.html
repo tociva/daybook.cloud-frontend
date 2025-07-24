@@ -1,3 +1,45 @@
+<mat-sidenav-container class="sidenav-container">
+  <!-- Sidebar -->
+  <mat-sidenav #drawer mode="side" class="sidenav" fixedInViewport [opened]="true">
+    <div class="sidebar-header">
+      <img src="assets/logo.png" alt="Logo" class="logo" />
+      <span class="app-name">Daybook.Cloud</span>
+    </div>
+    <mat-nav-list>
+      <!-- Example navigation links -->
+      <a mat-list-item routerLink="/dashboard" routerLinkActive="active">
+        <mat-icon>dashboard</mat-icon>
+        Dashboard
+      </a>
+      <a mat-list-item routerLink="/reports" routerLinkActive="active">
+        <mat-icon>bar_chart</mat-icon>
+        Reports
+      </a>
+      <!-- Add more nav links as needed -->
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <!-- Main content area -->
+  <mat-sidenav-content>
+    <!-- Header -->
+    <mat-toolbar class="header" color="primary">
+      <button mat-icon-button (click)="drawer.toggle()" class="mobile-menu-btn" fxHide.gt-sm>
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span class="flex-spacer"></span>
+      <div class="profile" *ngIf="user">
+        <span class="user-name">{{ user.name }}</span>
+        <img [src]="user.picture" class="avatar" alt="Profile" />
+      </div>
+    </mat-toolbar>
+
+    <div class="main-content">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>
+
+<!-- Loading overlay as before -->
 <div *ngIf="!isInitialized() || (!isAuthenticated() && !isLoading())" class="loading-overlay">
   <div class="loading-content">
     <div class="branding-title">Daybook.Cloud</div>
@@ -8,4 +50,3 @@
     </div>
   </div>
 </div>
-<router-outlet></router-outlet>

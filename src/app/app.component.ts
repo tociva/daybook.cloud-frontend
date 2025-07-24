@@ -6,12 +6,23 @@ import * as AuthActions from './core/auth/store/auth.actions';
 import { selectIsAuthenticated, selectIsInitialized, selectIsLoading, selectUser } from './core/auth/store/auth.selectors';
 import { selectConfigLoaded } from './core/config/store/config.selectors';
 import { UserProfile } from './util/user-profile.type';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
-  imports: [CommonModule, RouterOutlet]
+  imports: [CommonModule,
+    RouterOutlet,
+    MatSidenavModule,
+    MatToolbarModule,
+    MatIconModule,
+    MatListModule,
+    MatButtonModule]
 })
 export class AppComponent {
 
@@ -20,7 +31,9 @@ export class AppComponent {
   readonly isLoading = this.store.selectSignal(selectIsLoading);
   readonly isInitialized = this.store.selectSignal(selectIsInitialized);
   readonly isAuthenticated = this.store.selectSignal(selectIsAuthenticated);
-  readonly user = this.store.selectSignal(selectUser);
+  readonly hydraUser = this.store.selectSignal(selectUser);
+
+  user!: UserProfile;
 
   readonly triggerAuthInit = effect(() => {
     const uri = window.location.pathname + window.location.search;
@@ -31,12 +44,9 @@ export class AppComponent {
   });
 
   readonly logUserEffect = effect(() => {
-    const userValue = this.user();
+    const userValue = this.hydraUser();
     if (userValue) {
-      const userProfile: UserProfile = userValue.profile['user'] as UserProfile;
-      console.log('Name', userProfile.name);
-      console.log('Email', userProfile.email);
-      console.log('Picture', userProfile.picture);
+      this.user = userValue.profile['user'] as UserProfile;
     }
   });
   

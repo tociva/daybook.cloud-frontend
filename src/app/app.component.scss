@@ -1,5 +1,6 @@
 @use '../styles/variables' as *;
 
+
 .loading-overlay {
   position: fixed;
   inset: 0;
@@ -49,5 +50,95 @@
   }
   30% {
     transform: translateY(-10px);
+  }
+}
+
+.sidenav-container {
+  height: 100vh;
+  background: $on-primary-color;
+}
+
+.sidenav {
+  width: 220px;
+  background: $primary-color;
+  color: $on-primary-color;
+
+  .sidebar-header {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1rem 0.5rem 1rem;
+    .logo {
+      width: 38px;
+      margin-right: 0.5rem;
+    }
+    .app-name {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: $on-primary-color;
+    }
+  }
+
+  mat-nav-list {
+    margin-top: 1rem;
+    a.mat-list-item {
+      color: $on-primary-color;
+      border-radius: 4px;
+      &:hover, &.active {
+        background: $primary-color-hover;
+      }
+      mat-icon {
+        margin-right: 12px;
+      }
+    }
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  background: $primary-color;
+  color: $on-primary-color;
+  height: 64px;
+  z-index: 2;
+
+  .flex-spacer {
+    flex: 1 1 auto;
+  }
+  .profile {
+    display: flex;
+    align-items: center;
+    .user-name {
+      margin-right: 10px;
+      font-weight: 500;
+    }
+    .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid $on-primary-color;
+      object-fit: cover;
+      background: white;
+    }
+  }
+  .mobile-menu-btn {
+    display: none;
+  }
+}
+
+// Main content styling
+.main-content {
+  padding: 1.5rem 2rem;
+  min-height: calc(100vh - 64px);
+  background: $on-primary-color;
+}
+
+@media (max-width: 600px) {
+  .sidenav {
+    width: 0;
+  }
+  .header {
+    .mobile-menu-btn {
+      display: block;
+    }
   }
 }
