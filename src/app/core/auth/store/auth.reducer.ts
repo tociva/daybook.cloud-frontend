@@ -17,7 +17,8 @@ export const authReducer = createReducer(
     error: null
   })),
   // Login Success
-  on(AuthActions.loginSuccess, (state, { user }) => ({
+  on(AuthActions.loginSuccess, (state, { user }) => {
+    return {
     ...state,
     user,
     isAuthenticated: true,
@@ -25,7 +26,7 @@ export const authReducer = createReducer(
     error: null,
     isInitialized: true,
     lastActivity: Date.now()
-  })),
+  }}),
 
   // Login Failure
   on(AuthActions.loginFailure, (state, { error }) => ({
@@ -79,6 +80,12 @@ export const authReducer = createReducer(
   on(AuthActions.setUser, (state, { user }) => ({
     ...state,
     user
+  })),
+
+  // Set hydrated state
+  on(AuthActions.setIsHydrated, (state, { isHydrated }) => ({
+    ...state,
+    isHydrated
   })),
 
   // Set error

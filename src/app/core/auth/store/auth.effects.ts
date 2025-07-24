@@ -1,14 +1,14 @@
 // store/auth.effects.ts
 
 import { inject, Injectable } from '@angular/core';
+import { Router } from '@angular/router';
 import { Actions, createEffect, ofType, ROOT_EFFECTS_INIT } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import * as AuthActions from './auth.actions';
+import { User, UserManager } from 'oidc-client-ts';
+import { catchError, filter, from, map, of, switchMap, tap, withLatestFrom } from 'rxjs';
 import { selectConfig } from '../../config/store/config.selectors';
-import { UserManager, User } from 'oidc-client-ts';
-import { Router } from '@angular/router';
-import { filter, map, switchMap, catchError, withLatestFrom, tap, of, from } from 'rxjs';
 import { getUserManager, isUserManagerInitialized, setUserManager } from '../user-manager-singleton';
+import * as AuthActions from './auth.actions';
 
 @Injectable()
 export class AuthEffects {
@@ -34,9 +34,10 @@ export class AuthEffects {
       switchMap(() => from(getUserManager().getUser())),
       map(user =>
         user && !user.expired
-          ? AuthActions.loginSuccess({ user })
-          : AuthActions.logoutSuccess()
-      )
+          ? [AuthActions.loginSuccess({ user }), AuthActions.setIsHydrated({ isHydrated: true })]
+          : [AuthActions.logoutSuccess(), AuthActions.setIsHydrated({ isHydrated: true })]
+      ),
+      switchMap(actions => actions)
     )
   );
 

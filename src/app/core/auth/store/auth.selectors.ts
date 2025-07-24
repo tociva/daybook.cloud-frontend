@@ -8,3 +8,4 @@ export const selectIsLoading = createSelector(selectAuthState, s => s.isLoading)
 export const selectIsInitialized = createSelector(selectAuthState, s => s.isInitialized);
 export const selectAuthError = createSelector(selectAuthState, s => s.error);
 export const selectReturnUri = createSelector(selectAuthState, s => s.returnUri);
+export const selectIsHydrated = createSelector(selectAuthState, s => s.isHydrated);

@@ -1,21 +1,21 @@
-import { filter } from "rxjs";
 import { inject } from '@angular/core';
 import { ActivatedRouteSnapshot, CanActivateFn, RouterStateSnapshot } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { map, switchMap, take } from 'rxjs/operators';
+import { combineLatest, filter } from "rxjs";
+import { map, take } from 'rxjs/operators';
 import * as AuthActions from './store/auth.actions';
-import { selectIsAuthenticated, selectIsInitialized } from './store/auth.selectors';
+import { selectIsAuthenticated, selectIsHydrated } from './store/auth.selectors';
 
 export const authGuard: CanActivateFn = (_route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
   const store = inject(Store);
 
-  return store.select(selectIsInitialized).pipe(
-    filter(init => init),
+  return combineLatest([
+    store.select(selectIsHydrated),
+    store.select(selectIsAuthenticated)
+  ]).pipe(
+    filter(([isHydrated, _]) => isHydrated), // Wait until hydration is done
     take(1),
-    switchMap(() =>
-      store.select(selectIsAuthenticated).pipe(take(1))
-    ),
-    map(isAuthenticated => {
+    map(([_, isAuthenticated]) => {
       if (isAuthenticated) {
         return true;
       } else {

@@ -35,6 +35,9 @@ export const setIsInitialized = createAction('[Auth] Set Is Initialized', props<
 // Set user
 export const setUser = createAction('[Auth] Set User', props<{ user: User | null }>());
 
+// Set hydrated state
+export const setIsHydrated = createAction('[Auth] Set Is Hydrated', props<{ isHydrated: boolean }>());
+
 // Set error
 export const setError = createAction('[Auth] Set Error', props<{ error: string | null }>());
 
