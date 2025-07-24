@@ -1,5 +1,3 @@
-// store/auth.effects.ts
-
 import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Actions, createEffect, ofType, ROOT_EFFECTS_INIT } from '@ngrx/effects';
@@ -139,6 +137,7 @@ export class AuthEffects {
       withLatestFrom(this.store.select(state => state.auth.returnUri)),
       tap(([_, returnUri]) => {
         this.router.navigateByUrl(returnUri || '/');
+        this.store.dispatch(AuthActions.setReturnUri({ returnUri: null }));
       })
     ),
     { dispatch: false }
@@ -151,6 +150,8 @@ export class AuthEffects {
         tap(({ returnUri }) => {
           if (returnUri) {
             localStorage.setItem('returnUri', returnUri);
+          }else{
+            localStorage.removeItem('returnUri');
           }
         })
       ),

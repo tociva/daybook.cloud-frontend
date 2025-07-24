@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { Store } from '@ngrx/store';
+import * as AuthActions from '../../core/auth/store/auth.actions';
 
 @Component({
   selector: 'app-home',
@@ -8,4 +10,9 @@ import { Component } from '@angular/core';
 })
 export class HomeComponent {
 
+  private store = inject(Store);
+  
+  logout() {
+    this.store.dispatch(AuthActions.logout());
+  }
 }
