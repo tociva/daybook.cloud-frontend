@@ -6,7 +6,7 @@ export interface AuthState {
   isLoading: boolean;
   isInitialized: boolean;
   error: string | null;
-  returnUrl: string | null;
+  returnUri: string | null;
   tokenExpiring: boolean;
   lastActivity: number;
 }
@@ -17,7 +17,7 @@ export const initialAuthState: AuthState = {
   isLoading: false,
   isInitialized: false,
   error: null,
-  returnUrl: null,
+  returnUri: null,
   tokenExpiring: false,
   lastActivity: Date.now()
 };

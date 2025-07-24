@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
-import { AuthFacade } from '../../service/auth-facade.service';
+import { Component, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Store } from '@ngrx/store';
+import * as AuthActions from '../../store/auth.actions';
+import { selectConfigLoaded } from '../../../config/store/config.selectors';
 
 @Component({
   selector: 'app-callback',
@@ -9,13 +11,13 @@ import { CommonModule } from '@angular/common';
   styleUrl: './callback.component.scss'
 })
 export class CallbackComponent {
-  constructor(public authFacade: AuthFacade) {}
-
-  ngOnInit(): void {
-    this.authFacade.handleCallback();
-  }
-
-  retry(): void {
-    this.authFacade.login();
-  }
+  private store = inject(Store);
+  
+  readonly configLoaded = this.store.selectSignal(selectConfigLoaded);
+  
+  readonly triggerAuthInit = effect(() => {
+    if (this.configLoaded()) {
+      this.store.dispatch(AuthActions.handleCallback());
+    }
+  });
 }

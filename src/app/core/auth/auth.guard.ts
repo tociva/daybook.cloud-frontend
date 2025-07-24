@@ -1,23 +1,26 @@
-// auth.guard.ts
+import { filter } from "rxjs";
 import { inject } from '@angular/core';
-import { CanActivateFn, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
-import { map, take, switchMap, filter } from 'rxjs/operators';
-import { AuthFacade } from './service/auth-facade.service';
+import { ActivatedRouteSnapshot, CanActivateFn, RouterStateSnapshot } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { map, switchMap, take } from 'rxjs/operators';
+import * as AuthActions from './store/auth.actions';
+import { selectIsAuthenticated, selectIsInitialized } from './store/auth.selectors';
 
-export const authGuard: CanActivateFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-  const authFacade:AuthFacade = inject(AuthFacade);
+export const authGuard: CanActivateFn = (_route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+  const store = inject(Store);
 
-  return authFacade.authReady$.pipe(
-    filter((ready) => !!ready),
+  return store.select(selectIsInitialized).pipe(
+    filter(init => init),
     take(1),
-    switchMap(() => authFacade.isAuthenticated$),
-    take(1),
+    switchMap(() =>
+      store.select(selectIsAuthenticated).pipe(take(1))
+    ),
     map(isAuthenticated => {
       if (isAuthenticated) {
         return true;
       } else {
-        localStorage.setItem('returnUrl', state.url);
-        authFacade.login();
+        store.dispatch(AuthActions.setReturnUri({ returnUri: state.url }));
+        store.dispatch(AuthActions.login());
         return false;
       }
     })

@@ -1,0 +1,53 @@
+@use '../styles/variables' as *;
+
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: $primary-color;
+  color: $on-primary-color;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.branding-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: $on-primary-color;
+  margin-bottom: 1.2rem;
+  animation: fadeInDown 1s ease;
+}
+
+.branding-caption {
+  font-size: 1.3rem;
+  font-weight: 500;
+  letter-spacing: 1px;
+  color: $on-primary-color;
+  display: flex;
+  justify-content: center;
+  gap: 1px;
+
+  span {
+    display: inline-block;
+    animation: wave 1.2s infinite;
+    animation-timing-function: ease-in-out;
+  }
+}
+
+@keyframes wave {
+  0%, 60%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-10px);
+  }
+}

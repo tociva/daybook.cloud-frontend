@@ -6,9 +6,10 @@ export const selectConfigState = createFeatureSelector<ConfigState>('config');
 
 export const selectConfigLoaded = createSelector(
   selectConfigState,
-  configState => configState?.loaded
+  configState => Boolean(configState?.loaded)
 );
-export const selectLoginUrl = createSelector(
+
+export const selectConfig = createSelector(
   selectConfigState,
-  configState => configState.config.auth.loginUrl
+  configState => configState?.config
 );

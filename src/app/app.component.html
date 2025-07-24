@@ -1,35 +1,11 @@
-<div class="app-container">
-    <!-- Loading indicator while auth initializes -->
-    <div *ngIf="!(authFacade.authReady$ | async)" class="auth-loading">
-      <div class="spinner"></div>
-      <p>Initializing...</p>
-    </div>
-
-    <!-- Main app content when auth is ready -->
-    <div *ngIf="authFacade.authReady$ | async">
-      <!-- Header with user info -->
-      <header class="app-header" *ngIf="authFacade.isAuthenticated$ | async">
-        <div class="user-info">
-          Welcome, {{ authFacade.userName$ | async }}!
-          <button (click)="logout()" class="logout-btn">Logout</button>
-        </div>
-        
-        <!-- Token expiry warning -->
-        <div *ngIf="authFacade.tokenExpiring$ | async" class="token-warning">
-          Your session is about to expire. 
-          <button (click)="refreshToken()">Extend Session</button>
-        </div>
-      </header>
-
-      <!-- Router outlet for app content -->
-      <main class="app-content">
-        <router-outlet></router-outlet>
-      </main>
-    </div>
-
-    <!-- Auth error display -->
-    <div *ngIf="authFacade.error$ | async as error" class="error-notification">
-      {{ error }}
-      <button (click)="clearError()" class="close-btn">×</button>
+<div *ngIf="!isInitialized() || (!isAuthenticated() && !isLoading())" class="loading-overlay">
+  <div class="loading-content">
+    <div class="branding-title">Daybook.Cloud</div>
+    <div class="branding-caption">
+      <ng-container *ngFor="let letter of 'Dive into simplicity'.split(''); let i = index">
+        <span [style.animation-delay.ms]="i * 80">{{ letter === ' ' ? '\u00A0' : letter }}</span>
+      </ng-container>
     </div>
   </div>
+</div>
+<router-outlet></router-outlet>

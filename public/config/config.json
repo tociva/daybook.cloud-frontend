@@ -4,8 +4,8 @@
     "authority": "https://hydra.daybook.com/",
     "clientId": "spa-client",
     "redirectUri": "https://app.daybook.com/auth/callback",
-    "postLoginRedirect": "https://app.daybook.com/",
-    "loginUrl": "https://login.daybook.com/login",
+    "postLogoutRedirectUri": "https://app.daybook.com/auth/logout",
+    "postLoginRedirect": "https://app.daybook.com/auth/silent-callback",
     "scope": "openid profile email"
   },
   "apiBaseUrl": "https://api.daybook.com"

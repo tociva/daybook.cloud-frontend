@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
-import { AuthFacade } from '../../service/auth-facade.service';
 import { CommonModule } from '@angular/common';
+import { Store } from '@ngrx/store';
+import * as AuthActions from '../../store/auth.actions';
 
 @Component({
   selector: 'app-silent-callback',
@@ -9,9 +10,9 @@ import { CommonModule } from '@angular/common';
   styleUrl: './silent-callback.component.scss'
 })
 export class SilentCallbackComponent {
-  constructor(private authFacade: AuthFacade) {}
+  constructor(private store: Store) {}
 
   ngOnInit(): void {
-    this.authFacade.handleSilentCallback();
+    this.store.dispatch(AuthActions.handleSilentCallback());
   }
 }

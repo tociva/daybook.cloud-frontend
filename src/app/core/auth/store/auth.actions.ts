@@ -1,72 +1,56 @@
+
 import { createAction, props } from '@ngrx/store';
 import { User } from 'oidc-client-ts';
 
-// Authentication Actions
+// Called when the app initializes or OIDC config is loaded
 export const initializeAuth = createAction('[Auth] Initialize');
-export const initializeAuthSuccess = createAction(
-  '[Auth] Initialize Success',
-  props<{ user: User | null }>()
-);
-export const initializeAuthFailure = createAction(
-  '[Auth] Initialize Failure',
-  props<{ error: string }>()
-);
 
-// Login Actions
+// User begins login process
 export const login = createAction('[Auth] Login');
-export const loginRedirect = createAction('[Auth] Login Redirect');
-export const loginSuccess = createAction(
-  '[Auth] Login Success',
-  props<{ user: User }>()
-);
-export const loginFailure = createAction(
-  '[Auth] Login Failure',
-  props<{ error: string }>()
-);
 
-// Callback Actions
-export const handleCallback = createAction('[Auth] Handle Callback');
-export const handleCallbackSuccess = createAction(
-  '[Auth] Handle Callback Success',
-  props<{ user: User; returnUrl?: string }>()
-);
-export const handleCallbackFailure = createAction(
-  '[Auth] Handle Callback Failure',
-  props<{ error: string }>()
-);
+// User login successful
+export const loginSuccess = createAction('[Auth] Login Success', props<{ user: User }>());
 
-// Silent Renewal Actions
-export const handleSilentCallback = createAction('[Auth] Handle Silent Callback');
-export const silentRenewal = createAction('[Auth] Silent Renewal');
-export const silentRenewalSuccess = createAction(
-  '[Auth] Silent Renewal Success',
-  props<{ user: User }>()
-);
-export const silentRenewalFailure = createAction(
-  '[Auth] Silent Renewal Failure',
-  props<{ error: string }>()
-);
+// User login failed
+export const loginFailure = createAction('[Auth] Login Failure', props<{ error: string }>());
 
-// Token Management
-export const tokenExpiring = createAction('[Auth] Token Expiring');
-export const tokenExpired = createAction('[Auth] Token Expired');
-export const refreshToken = createAction('[Auth] Refresh Token');
-
-// User Management
-export const userLoaded = createAction(
-  '[Auth] User Loaded',
-  props<{ user: User }>()
-);
-export const userUnloaded = createAction('[Auth] User Unloaded');
-
-// Logout Actions
+// User logged out
 export const logout = createAction('[Auth] Logout');
-export const logoutSuccess = createAction('[Auth] Logout Success');
-export const logoutFailure = createAction(
-  '[Auth] Logout Failure',
-  props<{ error: string }>()
-);
 
-// Session Management
-export const sessionChanged = createAction('[Auth] Session Changed');
-export const checkSession = createAction('[Auth] Check Session');
+// User logout completed
+export const logoutSuccess = createAction('[Auth] Logout Success');
+
+// User logout failed
+export const logoutFailure = createAction('[Auth] Logout Failure', props<{ error: string }>());
+
+// Set authenticated flag
+export const setIsAuthenticated = createAction('[Auth] Set Is Authenticated', props<{ isAuthenticated: boolean }>());
+
+// Set loading state
+export const setIsLoading = createAction('[Auth] Set Is Loading', props<{ isLoading: boolean }>());
+
+// Set initialized state
+export const setIsInitialized = createAction('[Auth] Set Is Initialized', props<{ isInitialized: boolean }>());
+
+// Set user
+export const setUser = createAction('[Auth] Set User', props<{ user: User | null }>());
+
+// Set error
+export const setError = createAction('[Auth] Set Error', props<{ error: string | null }>());
+
+// Set return URL
+export const setReturnUri = createAction('[Auth] Set Return Uri', props<{ returnUri: string | null }>());
+
+// Token expiring soon
+export const tokenExpiring = createAction('[Auth] Token Expiring');
+
+// Update last activity timestamp
+export const setLastActivity = createAction('[Auth] Set Last Activity', props<{ lastActivity: number }>());
+
+// For when OIDC callback handling begins
+export const handleCallback = createAction('[Auth] Handle Callback');
+
+export const handleLogoutCallback = createAction('[Auth] Handle Logout Callback');
+
+export const handleSilentCallback = createAction('[Auth] Handle Silent Callback');
+

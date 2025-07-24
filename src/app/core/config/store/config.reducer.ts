@@ -16,7 +16,6 @@ const initialState: ConfigState = {
       clientId: '',
       redirectUri: '',
       postLoginRedirect: '',
-      loginUrl: '',
       scope: '',
       silentRedirectUri: '',
       postLogoutRedirectUri: '',
