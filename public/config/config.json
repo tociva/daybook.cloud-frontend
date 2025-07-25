@@ -6,7 +6,7 @@
     "redirectUri": "https://app.daybook.com/auth/callback",
     "postLogoutRedirectUri": "https://app.daybook.com/auth/logout",
     "postLoginRedirect": "https://app.daybook.com/auth/silent-callback",
-    "scope": "openid profile email"
+    "scope": "openid profile email offline"
   },
   "apiBaseUrl": "https://api.daybook.com"
 }

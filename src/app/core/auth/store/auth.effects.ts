@@ -55,6 +55,8 @@ export class AuthEffects {
             post_logout_redirect_uri: config.auth.postLogoutRedirectUri,
             scope: config.auth.scope,
             response_type: 'code',
+            automaticSilentRenew: true,
+            silent_redirect_uri: config.auth.silentRedirectUri,
           });
   
           // Bind events to NgRx actions
