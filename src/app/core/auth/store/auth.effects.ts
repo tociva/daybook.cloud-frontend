@@ -103,15 +103,26 @@ export class AuthEffects {
   /** Handle OIDC redirect/callback */
   handleCallback$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(AuthActions.handleCallback), // You must dispatch this after the OIDC callback route!
+      ofType(AuthActions.handleCallback),
       switchMap(() =>
         from(getUserManager().signinRedirectCallback()).pipe(
           map(user => AuthActions.loginSuccess({ user })),
-          catchError(err => of(AuthActions.loginFailure({ error: err.message })))
+          catchError(err =>
+            from(getUserManager().getUser()).pipe(
+              map(user => {
+                if (user && !user.expired) {
+                  return AuthActions.loginSuccess({ user });
+                }
+                return AuthActions.loginFailure({ error: err.message });
+              }),
+              catchError(() => of(AuthActions.loginFailure({ error: err.message })))
+            )
+          )
         )
       )
     )
   );
+  
 
   logoutKratos$ = createEffect(() =>
     this.actions$.pipe(
@@ -180,13 +191,20 @@ export class AuthEffects {
     this.actions$.pipe(
       ofType(AuthActions.loginSuccess),
       withLatestFrom(this.store.select(state => state.auth.returnUri)),
-      tap(([_, returnUri]) => {
-        if (returnUri) {
+      filter(([_, returnUri]) => !!returnUri),
+      map(([_, returnUri]) => AuthActions.performRedirect({ returnUri }))
+    )
+  );
+
+  performRedirect$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(AuthActions.performRedirect),
+        tap(({ returnUri }) => {
           this.router.navigateByUrl(returnUri);
           this.store.dispatch(AuthActions.setReturnUri({ returnUri: null }));
-        }
-      })
-    ),
+        })
+      ),
     { dispatch: false }
   );
 

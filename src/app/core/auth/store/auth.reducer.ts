@@ -44,11 +44,6 @@ export const authReducer = createReducer(
     isLoading: true,
     error: null
   })),
-  on(AuthActions.logoutKratos, state => ({
-    ...state,
-    isLoading: true,
-    error: null
-  })),
   on(AuthActions.logoutSuccess, state => ({
     ...state,
     user: null,

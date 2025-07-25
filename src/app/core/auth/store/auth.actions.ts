@@ -66,3 +66,6 @@ export const silentRenewSuccess = createAction('[Auth] Silent Renew Success', pr
 
 // Silent login failure
 export const silentRenewFailure = createAction('[Auth] Silent Renew Failure', props<{ error: string }>());
+
+export const performRedirect = createAction('[Auth] Perform Redirect', props<{ returnUri: string }>());
+  

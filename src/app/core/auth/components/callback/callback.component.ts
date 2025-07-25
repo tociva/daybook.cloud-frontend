@@ -17,7 +17,11 @@ export class CallbackComponent {
   
   readonly triggerAuthInit = effect(() => {
     if (this.configLoaded()) {
-      this.store.dispatch(AuthActions.handleCallback());
+      // Delay dispatch to let sessionStorage initialize
+      queueMicrotask(() => {
+        this.store.dispatch(AuthActions.handleCallback());
+      });
     }
   });
+  
 }
