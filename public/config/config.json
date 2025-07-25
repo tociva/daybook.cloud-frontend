@@ -6,8 +6,7 @@
     "redirectUri": "https://app.daybook.com/auth/callback",
     "postLoginRedirect": "https://app.daybook.com/auth/silent-callback",
     "scope": "openid profile email offline",
-    "hydraLogoutRedirectUri": "https://app.daybook.com/auth/hydra-logout",
-    "kratosLogoutRedirectUri": "https://app.daybook.com/auth/kratos-logout",
+    "hydraLogoutRedirectUri": "https://app.daybook.com/auth/logout",
     "kratosUrl": "https://kratos.daybook.com"
   },
   "apiBaseUrl": "https://api.daybook.com"

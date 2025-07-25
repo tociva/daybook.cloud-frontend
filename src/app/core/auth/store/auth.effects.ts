@@ -52,7 +52,7 @@ export class AuthEffects {
             authority: config.auth.authority,
             client_id: config.auth.clientId,
             redirect_uri: config.auth.redirectUri,
-            post_logout_redirect_uri: config.auth.kratosLogoutRedirectUri,
+            post_logout_redirect_uri: config.auth.hydraLogoutRedirectUri,
             scope: config.auth.scope,
             response_type: 'code',
             automaticSilentRenew: true,
@@ -119,28 +119,37 @@ export class AuthEffects {
       withLatestFrom(this.config$),
       tap(([_, config]) => {
         const url = config.auth.kratosUrl;
-        const redirect = config.auth.kratosLogoutRedirectUri;
-        // Step 1: Get the logout token (expect JSON response)
-        fetch(`${url}/self-service/logout/browser?logout_redirect=${redirect}`, {
+  
+        fetch(`${url}/self-service/logout/browser`, {
           credentials: "include"
         })
-        .then(res => res.json())
-        .then(data => {
-          if (data.logout_url) {
-            // Step 2: Redirect the browser manually to complete logout
-            console.log('logout_url', data.logout_url);
-            window.location.href = `${data.logout_url}&logout_redirect=${redirect}`;
-          }
-        }).catch(err => {
-          console.error('Error getting logout token', err);
-          this.store.dispatch(AuthActions.logoutHydra());
-        });
-
+          .then(res => res.json())
+          .then(data => {
+            if (!data.logout_url) throw new Error('No logout_url received');
+  
+            // Call logout token URL via fetch
+            return fetch(data.logout_url, {
+              method: 'GET',
+              credentials: 'include',
+            });
+          })
+          .then(() => {
+            // At this point, the session is invalidated server-side
+  
+            // ⚠️ But you may still need to clear the cookie manually (some browsers may ignore Set-Cookie in fetch)
+            document.cookie = 'ory_kratos_session=; Max-Age=0; path=/; domain=.daybook.com; secure; SameSite=None';
+  
+            // Now continue to Hydra logout or redirect
+            this.store.dispatch(AuthActions.logoutHydra());
+          })
+          .catch(err => {
+            console.error('Error during Kratos logout via fetch', err);
+            this.store.dispatch(AuthActions.logoutHydra()); // Fallback
+          });
       })
     ),
     { dispatch: false }
   );
-
   
   /** Start logout (redirect to IdP logout) */
   logoutHydra$ = createEffect(() =>

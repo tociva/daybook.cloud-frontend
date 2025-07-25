@@ -19,7 +19,6 @@ const initialState: ConfigState = {
       scope: '',
       silentRedirectUri: '',
       hydraLogoutRedirectUri: '',
-      kratosLogoutRedirectUri: '',
       kratosUrl: '',
     },
     apiBaseUrl: '',

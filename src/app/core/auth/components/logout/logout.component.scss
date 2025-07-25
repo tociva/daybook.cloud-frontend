@@ -1,0 +1,75 @@
+@use '../../../../../styles/_variables.scss' as *;
+
+.logout-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: $primary-color;
+  padding: 1rem;
+}
+
+.logout-card {
+  padding: 2rem;
+  text-align: center;
+  border: 1px solid $border-color;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  max-width: 400px;
+  width: 100%;
+  background-color: #fff;
+
+  .logout-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+
+    h1 {
+      margin: 0;
+      font-size: 1.8rem;
+      color: $primary-color;
+    }
+
+    .logout-icon {
+      font-size: 1.7rem;
+      margin: 0;
+      color: $success-color;
+      line-height: 1;
+    }
+  }
+
+  .message {
+    margin: 0.5rem 0 1.5rem;
+    color: #555;
+  }
+
+  a[mat-flat-button] {
+    background-color: $primary-color;
+    color: $on-primary-color;
+
+    &:hover {
+      background-color: #0d1a33;
+    }
+  }
+}
+
+@media (max-width: $breakpoint-mobile) {
+  .logout-card {
+    padding: 1.5rem;
+  }
+
+  .logout-header {
+    flex-direction: column;
+    gap: 0.5rem;
+
+    h1 {
+      text-align: center;
+    }
+
+    .logout-icon {
+      font-size: 2rem;
+    }
+  }
+}
