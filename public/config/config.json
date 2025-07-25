@@ -4,9 +4,11 @@
     "authority": "https://hydra.daybook.com/",
     "clientId": "spa-client",
     "redirectUri": "https://app.daybook.com/auth/callback",
-    "postLogoutRedirectUri": "https://app.daybook.com/auth/logout",
     "postLoginRedirect": "https://app.daybook.com/auth/silent-callback",
-    "scope": "openid profile email offline"
+    "scope": "openid profile email offline",
+    "hydraLogoutRedirectUri": "https://app.daybook.com/auth/hydra-logout",
+    "kratosLogoutRedirectUri": "https://app.daybook.com/auth/kratos-logout",
+    "kratosUrl": "https://kratos.daybook.com"
   },
   "apiBaseUrl": "https://api.daybook.com"
 }

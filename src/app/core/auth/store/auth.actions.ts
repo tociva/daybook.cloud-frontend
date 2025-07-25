@@ -15,7 +15,8 @@ export const loginSuccess = createAction('[Auth] Login Success', props<{ user: U
 export const loginFailure = createAction('[Auth] Login Failure', props<{ error: string }>());
 
 // User logged out
-export const logout = createAction('[Auth] Logout');
+export const logoutHydra = createAction('[Auth] Logout Hydra');
+export const logoutKratos = createAction('[Auth] Logout Kratos');
 
 // User logout completed
 export const logoutSuccess = createAction('[Auth] Logout Success');

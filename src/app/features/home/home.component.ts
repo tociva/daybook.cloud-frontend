@@ -13,7 +13,7 @@ export class HomeComponent {
   private store = inject(Store);
   
   logout() {
-    this.store.dispatch(AuthActions.logout());
+    this.store.dispatch(AuthActions.logoutKratos());
   }
 
   silentLogin() {

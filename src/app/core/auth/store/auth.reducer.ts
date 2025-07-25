@@ -39,7 +39,12 @@ export const authReducer = createReducer(
   })),
 
   // Logout
-  on(AuthActions.logout, state => ({
+  on(AuthActions.logoutHydra, state => ({
+    ...state,
+    isLoading: true,
+    error: null
+  })),
+  on(AuthActions.logoutKratos, state => ({
     ...state,
     isLoading: true,
     error: null

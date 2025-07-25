@@ -52,11 +52,12 @@ export class AuthEffects {
             authority: config.auth.authority,
             client_id: config.auth.clientId,
             redirect_uri: config.auth.redirectUri,
-            post_logout_redirect_uri: config.auth.postLogoutRedirectUri,
+            post_logout_redirect_uri: config.auth.kratosLogoutRedirectUri,
             scope: config.auth.scope,
             response_type: 'code',
             automaticSilentRenew: true,
             silent_redirect_uri: config.auth.silentRedirectUri,
+            loadUserInfo: true,
           });
   
           // Bind events to NgRx actions
@@ -69,6 +70,9 @@ export class AuthEffects {
           });
           manager.events.addSilentRenewError(error => {
             this.store.dispatch(AuthActions.setError({ error: error.message }));
+          });
+          manager.events.addAccessTokenExpiring(() => {
+            this.store.dispatch(AuthActions.silentRenew());
           });
   
           // Set the singleton instance
@@ -109,10 +113,39 @@ export class AuthEffects {
     )
   );
 
-  /** Start logout (redirect to IdP logout) */
-  logout$ = createEffect(() =>
+  logoutKratos$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(AuthActions.logout),
+      ofType(AuthActions.logoutKratos),
+      withLatestFrom(this.config$),
+      tap(([_, config]) => {
+        const url = config.auth.kratosUrl;
+        const redirect = config.auth.kratosLogoutRedirectUri;
+        // Step 1: Get the logout token (expect JSON response)
+        fetch(`${url}/self-service/logout/browser?logout_redirect=${redirect}`, {
+          credentials: "include"
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.logout_url) {
+            // Step 2: Redirect the browser manually to complete logout
+            console.log('logout_url', data.logout_url);
+            window.location.href = `${data.logout_url}&logout_redirect=${redirect}`;
+          }
+        }).catch(err => {
+          console.error('Error getting logout token', err);
+          this.store.dispatch(AuthActions.logoutHydra());
+        });
+
+      })
+    ),
+    { dispatch: false }
+  );
+
+  
+  /** Start logout (redirect to IdP logout) */
+  logoutHydra$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AuthActions.logoutHydra),
       tap(() => {
         getUserManager().signoutRedirect();
       })
@@ -153,7 +186,6 @@ export class AuthEffects {
       this.actions$.pipe(
         ofType(AuthActions.setReturnUri),
         tap(({ returnUri }) => {
-          console.log('set ReturnUri', returnUri);
           if (returnUri) {
             localStorage.setItem('returnUri', returnUri);
           }else{

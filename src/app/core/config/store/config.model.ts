@@ -6,7 +6,9 @@ export interface AuthConfig {
   postLoginRedirect: string;
   scope: string;
   silentRedirectUri: string;
-  postLogoutRedirectUri: string;
+  hydraLogoutRedirectUri: string;
+  kratosLogoutRedirectUri: string;
+  kratosUrl: string;
 }
   
   export interface ConfigModel {
