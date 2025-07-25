@@ -19,8 +19,7 @@ export const authGuard: CanActivateFn = (_route: ActivatedRouteSnapshot, state: 
       if (isAuthenticated) {
         return true;
       } else {
-        store.dispatch(AuthActions.setReturnUri({ returnUri: state.url }));
-        store.dispatch(AuthActions.login());
+        store.dispatch(AuthActions.login({ returnUri: state.url }));
         return false;
       }
     })

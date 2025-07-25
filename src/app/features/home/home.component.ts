@@ -15,4 +15,8 @@ export class HomeComponent {
   logout() {
     this.store.dispatch(AuthActions.logout());
   }
+
+  silentLogin() {
+    this.store.dispatch(AuthActions.silentRenew());
+  } 
 }

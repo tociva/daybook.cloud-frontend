@@ -36,8 +36,6 @@ export class AppComponent {
   user!: UserProfile;
 
   readonly triggerAuthInit = effect(() => {
-    const uri = window.location.pathname + window.location.search;
-    this.store.dispatch(AuthActions.setReturnUri({ returnUri: uri }));
     if (this.configLoaded()) {
       this.store.dispatch(AuthActions.initializeAuth());
     }

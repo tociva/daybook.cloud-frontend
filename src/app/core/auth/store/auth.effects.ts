@@ -61,7 +61,6 @@ export class AuthEffects {
   
           // Bind events to NgRx actions
           manager.events.addUserLoaded((user: User) => {
-            this.store.dispatch(AuthActions.loginSuccess({ user }));
             this.store.dispatch(AuthActions.setIsAuthenticated({ isAuthenticated: true }));
           });
           manager.events.addUserUnloaded(() => {
@@ -88,7 +87,9 @@ export class AuthEffects {
   login$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AuthActions.login),
-      tap(() => {
+      tap(({returnUri}) => {
+        const uri = returnUri ?? (window.location.pathname + window.location.search);
+        this.store.dispatch(AuthActions.setReturnUri({ returnUri: uri }));
         getUserManager().signinRedirect();
       })
     ),
@@ -138,8 +139,10 @@ export class AuthEffects {
       ofType(AuthActions.loginSuccess),
       withLatestFrom(this.store.select(state => state.auth.returnUri)),
       tap(([_, returnUri]) => {
-        this.router.navigateByUrl(returnUri || '/');
-        this.store.dispatch(AuthActions.setReturnUri({ returnUri: null }));
+        if (returnUri) {
+          this.router.navigateByUrl(returnUri);
+          this.store.dispatch(AuthActions.setReturnUri({ returnUri: null }));
+        }
       })
     ),
     { dispatch: false }
@@ -150,6 +153,7 @@ export class AuthEffects {
       this.actions$.pipe(
         ofType(AuthActions.setReturnUri),
         tap(({ returnUri }) => {
+          console.log('set ReturnUri', returnUri);
           if (returnUri) {
             localStorage.setItem('returnUri', returnUri);
           }else{
@@ -159,5 +163,16 @@ export class AuthEffects {
       ),
     { dispatch: false }
   );
-  
+  silentRenew$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AuthActions.silentRenew),
+      switchMap(() =>
+        from(getUserManager().signinSilent()).pipe(
+          map(user => user ? AuthActions.silentRenewSuccess({ user }) : AuthActions.silentRenewFailure({ error: 'No user found' })),
+          catchError(error => of(AuthActions.silentRenewFailure({ error })))
+        )
+      )
+    )
+  );
+
 }

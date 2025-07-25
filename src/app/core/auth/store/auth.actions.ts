@@ -6,7 +6,7 @@ import { User } from 'oidc-client-ts';
 export const initializeAuth = createAction('[Auth] Initialize');
 
 // User begins login process
-export const login = createAction('[Auth] Login');
+export const login = createAction('[Auth] Login', props<{ returnUri?: string }>());
 
 // User login successful
 export const loginSuccess = createAction('[Auth] Login Success', props<{ user: User }>());
@@ -57,3 +57,11 @@ export const handleLogoutCallback = createAction('[Auth] Handle Logout Callback'
 
 export const handleSilentCallback = createAction('[Auth] Handle Silent Callback');
 
+// Silent login
+export const silentRenew = createAction('[Auth] Silent Renew');
+
+// Silent login success
+export const silentRenewSuccess = createAction('[Auth] Silent Renew Success', props<{ user: User }>());
+
+// Silent login failure
+export const silentRenewFailure = createAction('[Auth] Silent Renew Failure', props<{ error: string }>());
