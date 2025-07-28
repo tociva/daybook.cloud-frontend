@@ -14,15 +14,43 @@
   <ng-container *ngFor="let menu of menuList">
     <!-- Parent with submenu -->
     <ng-container *ngIf="menu.children?.length; else singleLink">
-      <div class="nav-item parent" (click)="toggleSubmenu(menu.name)">
+      <div class="nav-item parent" *ngIf="isOpen" (click)="toggleSubmenu(menu.name)">
         <div class="nav-left">
           <mat-icon>{{ menu.icon }}</mat-icon>
-          <span *ngIf="isOpen">{{ menu.name }}</span>
+          <span>{{ menu.name }}</span>
+          <mat-menu #menuRef="matMenu">
+            <button mat-menu-item *ngFor="let child of menu.children">
+              <mat-icon>{{ child.icon }}</mat-icon>
+              <span>{{ child.name }}</span>
+            </button>
+          </mat-menu>
         </div>
-        <mat-icon *ngIf="isOpen" class="expand-icon">
+        <mat-icon class="expand-icon">
           {{ isSubmenuOpen(menu.name) ? 'expand_less' : 'expand_more' }}
         </mat-icon>
       </div>
+      <!-- Menu trigger: div or button -->
+      <div class="nav-item parent"
+        *ngIf="!isOpen"
+        [matMenuTriggerFor]="menuRef"
+        #trigger="matMenuTrigger"
+        (click)="onMenuIconClick(trigger)"
+        matTooltip="{{menu.name}}"
+        matTooltipPosition="right"
+        >
+        <div class="nav-left">
+          <mat-icon>{{ menu.icon }}</mat-icon>
+        </div>
+      </div>
+
+      <!-- Menu definition: placed outside the trigger -->
+      <mat-menu #menuRef="matMenu" class="daybook-menu-panel">
+        <button mat-menu-item *ngFor="let child of menu.children" [routerLink]="child.path" class="daybook-menu-item">
+          <mat-icon>{{ child.icon }}</mat-icon>
+          <span>{{ child.name }}</span>
+        </button>
+      </mat-menu>
+
 
       <!-- Submenus -->
       <div *ngIf="isSubmenuOpen(menu.name) && isOpen" class="submenu">
@@ -42,10 +70,24 @@
       <a mat-list-item
          [routerLink]="menu.path"
          routerLinkActive="active"
-         class="nav-item">
+         class="nav-item"
+         *ngIf="isOpen"
+         >
         <div class="nav-left">
           <mat-icon>{{ menu.icon }}</mat-icon>
-          <span *ngIf="isOpen">{{ menu.name }}</span>
+          <span>{{ menu.name }}</span>
+        </div>
+      </a>
+      <a mat-list-item
+         [routerLink]="menu.path"
+         routerLinkActive="active"
+         class="nav-item"
+         matTooltip="{{menu.name}}"
+         matTooltipPosition="right"
+         *ngIf="!isOpen"
+         >
+        <div class="nav-left">
+          <mat-icon>{{ menu.icon }}</mat-icon>
         </div>
       </a>
     </ng-template>

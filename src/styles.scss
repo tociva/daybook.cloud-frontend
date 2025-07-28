@@ -1,3 +1,13 @@
+@use '@angular/material' as mat;
+@use './styles/variables' as *;
+
+:root {
+  @include mat.tooltip-overrides((
+    container-color: $primary-color,
+    supporting-text-color: $on-primary-color,
+  ));
+}
+
 @import 'material-design-icons-iconfont/dist/material-design-icons.css';
 @font-face {
   font-family: 'Lobster';
@@ -158,4 +168,14 @@ body {
   padding: 0;
   border: 0;
   box-sizing: border-box;
+}
+
+// Menu styles
+.daybook-menu-panel {
+  background-color: $primary-color !important;
+  color: $on-primary-color !important;
+  padding: 0 !important;
+}
+.daybook-menu-item:hover{
+  background-color: $primary-color-hover !important;
 }
