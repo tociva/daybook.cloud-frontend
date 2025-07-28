@@ -1,9 +1,13 @@
 <mat-sidenav-container class="sidenav-container" *ngIf="isAuthenticated()">
   <!-- Sidebar -->
-  <mat-sidenav #drawer mode="side" class="sidenav" fixedInViewport [opened]="true">
+  <mat-sidenav *ngIf="isOpen" #drawer mode="side" class="sidenav expanded" fixedInViewport [opened]="isOpen">
     <div class="sidebar-header">
-      <img src="assets/logo.png" alt="Logo" class="logo" />
-      <span class="app-name">Daybook.Cloud</span>
+      <svg width="160" height="40" viewBox="0 0 190 42" xmlns="http://www.w3.org/2000/svg">
+        <text x="95" y="25" font-family="Lobster" font-size="30" fill="#FFFFFF"
+          text-anchor="middle">Daybook.Cloud</text>
+        <text x="115" y="38" font-family="Lobster" font-size="15" fill="grey" text-anchor="middle">Dive into
+          Simplicity.</text>
+      </svg>
     </div>
     <mat-nav-list>
       <!-- Example navigation links -->
@@ -18,13 +22,32 @@
       <!-- Add more nav links as needed -->
     </mat-nav-list>
   </mat-sidenav>
+  <mat-sidenav *ngIf="!isOpen" #drawer mode="side" class="sidenav collapsed" fixedInViewport [opened]="!isOpen">
+    <div class="sidebar-header">
+
+    <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      <text x="20" y="30" font-family="Lobster" font-size="25" fill="#FFFFFF" text-anchor="middle">D.C</text>
+  </svg>
+    </div>
+    <mat-nav-list>
+      <!-- Example navigation links -->
+      <a mat-list-item routerLink="/dashboard" routerLinkActive="active">
+        <mat-icon>dashboard</mat-icon>
+      </a>
+      <a mat-list-item routerLink="/reports" routerLinkActive="active">
+        <mat-icon>bar_chart</mat-icon>
+      </a>
+      <!-- Add more nav links as needed -->
+    </mat-nav-list>
+  </mat-sidenav>
 
   <!-- Main content area -->
   <mat-sidenav-content>
     <!-- Header -->
     <mat-toolbar class="header" color="primary">
-      <button mat-icon-button (click)="drawer.toggle()" class="mobile-menu-btn" fxHide.gt-sm>
-        <mat-icon>menu</mat-icon>
+      <!-- Sidebar toggle button -->
+      <button mat-icon-button class="toggle-btn" (click)="toggleSidebar()">
+        <mat-icon>{{ isOpen ? 'menu_open' : 'menu' }}</mat-icon>
       </button>
       <span class="flex-spacer"></span>
       <div class="profile" *ngIf="user">

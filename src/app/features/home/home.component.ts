@@ -1,6 +1,4 @@
-import { Component, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
-import * as AuthActions from '../../core/auth/store/auth.actions';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-home',
@@ -10,13 +8,4 @@ import * as AuthActions from '../../core/auth/store/auth.actions';
 })
 export class HomeComponent {
 
-  private store = inject(Store);
-  
-  logout() {
-    this.store.dispatch(AuthActions.logoutKratos());
-  }
-
-  silentLogin() {
-    this.store.dispatch(AuthActions.silentRenew());
-  } 
 }

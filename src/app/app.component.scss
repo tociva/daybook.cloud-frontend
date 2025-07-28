@@ -59,13 +59,13 @@
 }
 
 .sidenav {
-  width: 220px;
   background: $primary-color;
   color: $on-primary-color;
 
   .sidebar-header {
     display: flex;
     align-items: center;
+    justify-content: space-between; // ✅ This spreads children left and right
     padding: 1rem 1rem 0.5rem 1rem;
     .logo {
       width: 38px;
@@ -92,14 +92,27 @@
     }
   }
 }
+.sidenav.expanded {
+  width: 200px;
+}
+
+.sidenav.collapsed {
+  width: 64px;
+
+  mat-list-item {
+    justify-content: center;
+  }
+}
 
 .header {
   display: flex;
   align-items: center;
-  background: $primary-color;
-  color: $on-primary-color;
+  background: $background-color;
+  color: $primary-color;
   height: 64px;
   z-index: 2;
+  border-bottom: 1px solid $border-color;
+  padding-left: 0px;
 
   .flex-spacer {
     flex: 1 1 auto;
@@ -107,19 +120,23 @@
   .profile {
     display: flex;
     align-items: center;
-    .user-name {
-      margin-right: 10px;
-      font-weight: 500;
+    cursor: pointer;
+  
+    .avatar-button {
+      padding: 0;
+      border: none;
+      background: transparent;
+      cursor: pointer;
     }
+  
     .avatar {
-      width: 38px;
-      height: 38px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
-      border: 2px solid $on-primary-color;
       object-fit: cover;
-      background: white;
     }
   }
+
   .mobile-menu-btn {
     display: none;
   }
@@ -129,7 +146,7 @@
 .main-content {
   padding: 1.5rem 2rem;
   min-height: calc(100vh - 64px);
-  background: $on-primary-color;
+  background: $background-color;
 }
 
 @media (max-width: 600px) {

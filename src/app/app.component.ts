@@ -1,16 +1,17 @@
 import { CommonModule } from '@angular/common';
 import { Component, effect, inject } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { Router, RouterOutlet } from '@angular/router';
 import { Store } from '@ngrx/store';
 import * as AuthActions from './core/auth/store/auth.actions';
-import { selectIsAuthenticated, selectIsInitialized, selectIsLoading, selectUser } from './core/auth/store/auth.selectors';
+import { selectIsAuthenticated, selectIsInitialized, selectUser } from './core/auth/store/auth.selectors';
 import { selectConfigLoaded } from './core/config/store/config.selectors';
 import { UserProfile } from './util/user-profile.type';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatIconModule } from '@angular/material/icon';
-import { MatListModule } from '@angular/material/list';
-import { MatButtonModule } from '@angular/material/button';
+import { MatMenuModule } from '@angular/material/menu';
 
 @Component({
   selector: 'app-root',
@@ -22,18 +23,21 @@ import { MatButtonModule } from '@angular/material/button';
     MatToolbarModule,
     MatIconModule,
     MatListModule,
-    MatButtonModule]
+    MatButtonModule,
+    MatMenuModule
+  ]
 })
 export class AppComponent {
 
   private store = inject(Store);
   private configLoaded = this.store.selectSignal(selectConfigLoaded);
-  readonly isLoading = this.store.selectSignal(selectIsLoading);
+  private readonly hydraUser = this.store.selectSignal(selectUser);
   readonly isInitialized = this.store.selectSignal(selectIsInitialized);
   readonly isAuthenticated = this.store.selectSignal(selectIsAuthenticated);
-  readonly hydraUser = this.store.selectSignal(selectUser);
-
+  private router = inject(Router);
   user!: UserProfile;
+  
+  isOpen = true;
 
   readonly triggerAuthInit = effect(() => {
     if (this.configLoaded()) {
@@ -47,5 +51,18 @@ export class AppComponent {
       this.user = userValue.profile['user'] as UserProfile;
     }
   });
+
+  goToSettings(): void {
+    this.router.navigate(['/settings']);
+  }
+  
+  logout(): void {
+    this.store.dispatch(AuthActions.logoutKratos());
+  }
+
+toggleSidebar() {
+  this.isOpen = !this.isOpen;
+}
+
   
 }
