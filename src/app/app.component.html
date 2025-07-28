@@ -1,9 +1,9 @@
 <mat-sidenav-container class="sidenav-container" *ngIf="isAuthenticated()">
   <!-- Sidebar -->
-  <mat-sidenav *ngIf="isOpen" #drawer mode="side" class="sidenav expanded" fixedInViewport [opened]="isOpen">
+  <mat-sidenav *ngIf="isOpen" #drawerBig [mode]="drawerMode" class="sidenav expanded" fixedInViewport [opened]="isOpen">
     <app-side-bar-content [isOpen]="isOpen"></app-side-bar-content>
   </mat-sidenav>
-  <mat-sidenav *ngIf="!isOpen" #drawer mode="side" class="sidenav collapsed" fixedInViewport [opened]="!isOpen">
+  <mat-sidenav *ngIf="!isOpen" #drawerSmall mode="side" class="sidenav collapsed" fixedInViewport [opened]="!isOpen">
     <app-side-bar-content [isOpen]="isOpen"></app-side-bar-content>
   </mat-sidenav>
 
@@ -12,9 +12,18 @@
     <!-- Header -->
     <mat-toolbar class="header" color="primary">
       <!-- Sidebar toggle button -->
-      <button mat-icon-button class="toggle-btn" (click)="toggleSidebar()">
+      <button mat-icon-button class="toggle-btn" (click)="toggleSidebar()" *ngIf="!isMobile">
         <mat-icon>{{ isOpen ? 'menu_open' : 'menu' }}</mat-icon>
       </button>
+      <button mat-icon-button class="toggle-btn" (click)="openSidebar()" *ngIf="isMobile">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <svg *ngIf="isMobile" width="160" height="40" viewBox="0 0 190 42" xmlns="http://www.w3.org/2000/svg">
+        <text x="95" y="25" font-family="Lobster" font-size="30" fill="#12284b"
+        text-anchor="middle">Daybook.Cloud</text>
+        <text x="115" y="38" font-family="Lobster" font-size="15" fill="grey" text-anchor="middle">Dive into
+        Simplicity.</text>
+      </svg>
       <span class="flex-spacer"></span>
       <div class="profile" *ngIf="user">
         <img [src]="user.picture" class="avatar" alt="Profile" [matMenuTriggerFor]="profileMenu"/>
