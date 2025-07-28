@@ -1,0 +1,53 @@
+<div class="sidebar-header" routerLink="/" routerLinkActive="active">
+  <svg *ngIf="isOpen" width="160" height="40" viewBox="0 0 190 42" xmlns="http://www.w3.org/2000/svg">
+    <text x="95" y="25" font-family="Lobster" font-size="30" fill="#FFFFFF"
+    text-anchor="middle">Daybook.Cloud</text>
+    <text x="115" y="38" font-family="Lobster" font-size="15" fill="grey" text-anchor="middle">Dive into
+    Simplicity.</text>
+  </svg>
+  <svg *ngIf="!isOpen" width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+    <text x="20" y="30" font-family="Lobster" font-size="25" fill="#FFFFFF" text-anchor="middle">D.C</text>
+  </svg>
+</div>
+
+<mat-nav-list>
+  <ng-container *ngFor="let menu of menuList">
+    <!-- Parent with submenu -->
+    <ng-container *ngIf="menu.children?.length; else singleLink">
+      <div class="nav-item parent" (click)="toggleSubmenu(menu.name)">
+        <div class="nav-left">
+          <mat-icon>{{ menu.icon }}</mat-icon>
+          <span *ngIf="isOpen">{{ menu.name }}</span>
+        </div>
+        <mat-icon *ngIf="isOpen" class="expand-icon">
+          {{ isSubmenuOpen(menu.name) ? 'expand_less' : 'expand_more' }}
+        </mat-icon>
+      </div>
+
+      <!-- Submenus -->
+      <div *ngIf="isSubmenuOpen(menu.name) && isOpen" class="submenu">
+        <div *ngFor="let child of menu.children"
+           mat-list-item
+           [routerLink]="child.path"
+           routerLinkActive="active"
+           class="sub-nav-item">
+          <mat-icon>{{ child.icon }}</mat-icon>
+          <span>{{ child.name }}</span>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Single link (no submenu) -->
+    <ng-template #singleLink>
+      <a mat-list-item
+         [routerLink]="menu.path"
+         routerLinkActive="active"
+         class="nav-item">
+        <div class="nav-left">
+          <mat-icon>{{ menu.icon }}</mat-icon>
+          <span *ngIf="isOpen">{{ menu.name }}</span>
+        </div>
+      </a>
+    </ng-template>
+  </ng-container>
+</mat-nav-list>

@@ -12,6 +12,7 @@ import { selectIsAuthenticated, selectIsInitialized, selectUser } from './core/a
 import { selectConfigLoaded } from './core/config/store/config.selectors';
 import { UserProfile } from './util/user-profile.type';
 import { MatMenuModule } from '@angular/material/menu';
+import { SideBarContent } from './features/layout/side-bar-content/side-bar-content';
 
 @Component({
   selector: 'app-root',
@@ -24,7 +25,8 @@ import { MatMenuModule } from '@angular/material/menu';
     MatIconModule,
     MatListModule,
     MatButtonModule,
-    MatMenuModule
+    MatMenuModule,
+    SideBarContent
   ]
 })
 export class AppComponent {

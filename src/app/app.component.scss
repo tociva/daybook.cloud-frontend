@@ -61,44 +61,14 @@
 .sidenav {
   background: $primary-color;
   color: $on-primary-color;
-
-  .sidebar-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between; // ✅ This spreads children left and right
-    padding: 1rem 1rem 0.5rem 1rem;
-    .logo {
-      width: 38px;
-      margin-right: 0.5rem;
-    }
-    .app-name {
-      font-size: 1.3rem;
-      font-weight: bold;
-      color: $on-primary-color;
-    }
-  }
-
-  mat-nav-list {
-    margin-top: 1rem;
-    a.mat-list-item {
-      color: $on-primary-color;
-      border-radius: 4px;
-      &:hover, &.active {
-        background: $primary-color-hover;
-      }
-      mat-icon {
-        margin-right: 12px;
-      }
-    }
-  }
 }
+
 .sidenav.expanded {
   width: 200px;
 }
 
 .sidenav.collapsed {
   width: 64px;
-
   mat-list-item {
     justify-content: center;
   }
