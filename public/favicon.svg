@@ -1,0 +1,17 @@
+<svg width="40" height="40" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    @font-face {
+      font-family: 'Lobster';
+      src: url('/assets/fonts/lobster/regular.woff2') format('woff2');
+    }
+    text {
+      font-family: 'Lobster', cursive;
+    }
+  </style>
+
+  <circle cx="25" cy="25" r="24" fill="#12284b" />
+  <text x="25" y="25" font-size="20" fill="#FFFFFF"
+        text-anchor="middle" dominant-baseline="middle">
+    D.C
+  </text>
+</svg>
