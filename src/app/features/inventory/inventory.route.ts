@@ -4,6 +4,6 @@ export const inventoryRoutes: Routes = [
   
   {
     path: 'bank-cash',
-    loadComponent: () => import('./bank-cash/bank-cash/bank-cash').then(m => m.BankCash),
+    loadChildren: () => import('./bank-cash/bank-cash.route').then(m => m.bankCashRoutes),  
   }
 ];

@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import * as ConfigActions from './config.actions';
 import { catchError, map, mergeMap, of } from 'rxjs';
 import { ConfigModel } from './config.model';
+import { ConfigService } from '../config.service';
 
 @Injectable()
 export class ConfigEffects {
@@ -11,12 +12,17 @@ export class ConfigEffects {
     this.actions$.pipe(
       ofType(ConfigActions.loadConfig),
       mergeMap(() =>this.http.get<ConfigModel>('/config/config.json').pipe(
-          map((config) => ConfigActions.loadConfigSuccess({ config })),
+          map(
+            (config: ConfigModel) => {
+              this.configService.setConfig(config);
+              return ConfigActions.loadConfigSuccess({ config });
+            }
+          ),
           catchError(error => of(ConfigActions.loadConfigFailure({ error }))),
         )
       )
     )
   );
 
-  constructor(private actions$: Actions, private http: HttpClient) {}
+  constructor(private actions$: Actions, private http: HttpClient, private configService: ConfigService) {}
 }
