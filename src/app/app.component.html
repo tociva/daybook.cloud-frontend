@@ -3,7 +3,7 @@
   <mat-sidenav *ngIf="isOpen" #drawerBig [mode]="drawerMode" class="sidenav expanded" fixedInViewport [opened]="isOpen">
     <app-side-bar-content [isOpen]="isOpen"></app-side-bar-content>
   </mat-sidenav>
-  <mat-sidenav *ngIf="!isOpen" #drawerSmall mode="side" class="sidenav collapsed" fixedInViewport [opened]="!isOpen">
+  <mat-sidenav *ngIf="!isOpen && !isMobile" #drawerSmall mode="side" class="sidenav collapsed" fixedInViewport [opened]="!isOpen">
     <app-side-bar-content [isOpen]="isOpen"></app-side-bar-content>
   </mat-sidenav>
 

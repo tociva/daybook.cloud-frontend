@@ -23,6 +23,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   styleUrl: './side-bar-content.scss'
 })
 export class SideBarContent {
+  
   @Input() isOpen = true;
 
   openSubmenus = new Set<string>();
@@ -34,7 +35,6 @@ export class SideBarContent {
     trigger.openMenu();
   }
   
-  
   toggleSubmenu(name: string): void {
     if (this.openSubmenus.has(name)) {
       this.openSubmenus.delete(name);
@@ -45,9 +45,5 @@ export class SideBarContent {
   
   isSubmenuOpen(name: string): boolean {
     return this.openSubmenus.has(name);
-  }
-
-  showSubmenu(name: string): void {
-    console.log(name);
   }
 }

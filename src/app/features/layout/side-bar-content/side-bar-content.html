@@ -45,7 +45,7 @@
 
       <!-- Menu definition: placed outside the trigger -->
       <mat-menu #menuRef="matMenu" class="daybook-menu-panel">
-        <button mat-menu-item *ngFor="let child of menu.children" [routerLink]="child.path" class="daybook-menu-item">
+        <button mat-menu-item *ngFor="let child of menu.children" [routerLink]="menu.path + '/' + child.path" class="daybook-menu-item">
           <mat-icon>{{ child.icon }}</mat-icon>
           <span>{{ child.name }}</span>
         </button>
@@ -56,7 +56,7 @@
       <div *ngIf="isSubmenuOpen(menu.name) && isOpen" class="submenu">
         <div *ngFor="let child of menu.children"
            mat-list-item
-           [routerLink]="child.path"
+           [routerLink]="menu.path + '/' + child.path"
            routerLinkActive="active"
            class="sub-nav-item">
           <mat-icon>{{ child.icon }}</mat-icon>

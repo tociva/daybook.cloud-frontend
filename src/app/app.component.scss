@@ -118,9 +118,3 @@
   min-height: calc(100vh - 64px);
   background: $background-color;
 }
-
-@media (max-width: $breakpoint-mobile) {
-  .sidenav.collapsed{
-    display: none;
-  }
-}
