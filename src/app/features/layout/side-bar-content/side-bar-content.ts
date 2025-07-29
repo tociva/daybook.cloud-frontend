@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
@@ -26,13 +26,19 @@ export class SideBarContent {
   
   @Input() isOpen = true;
 
+  @Output() closeSidebar = new EventEmitter<void>();
+
   openSubmenus = new Set<string>();
 
   menuList = menuList;
 
-  onMenuIconClick(trigger: MatMenuTrigger) {
+  onParentMenuClick(trigger: MatMenuTrigger) {
     // Optional: check logic, or just open
     trigger.openMenu();
+  }
+
+  onSubMenuClick() {
+    this.closeSidebar.emit();
   }
   
   toggleSubmenu(name: string): void {

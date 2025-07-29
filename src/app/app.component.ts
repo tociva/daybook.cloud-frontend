@@ -83,8 +83,11 @@ export class AppComponent {
 
   openSidebar() {
     this.isOpen = true;
-    this.drawerBig.open();
+    this.drawerBig?.open();
   }
 
+  closeSidebar() {
+    this.drawerBig?.close();
+  }
   
 }

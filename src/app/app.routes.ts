@@ -12,7 +12,7 @@ export const routes: Routes = [
       },
       {
         path: 'inventory',
-        loadComponent: () => import('./features/inventory/inventory.component').then(m => m.InventoryComponent),
+        loadChildren: () => import('./features/inventory/inventory.route').then(m => m.inventoryRoutes),
       }
     ]
   },
@@ -35,6 +35,7 @@ export const routes: Routes = [
   },
   {
     path: '**',
+    canActivate: [authGuard],
     loadComponent: () => import('./core/auth/components/not-found/not-found.component').then(m => m.NotFoundComponent),
   }
 ];

@@ -7,7 +7,7 @@ export const menuList: MenuNode[] = [
       icon: 'dashboard'
     },
     {
-        path: 'trading',
+        path: 'inventory',
         name: 'Trading',
         icon: 'account_balance_wallet',
         children: [

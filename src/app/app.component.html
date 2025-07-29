@@ -1,7 +1,7 @@
 <mat-sidenav-container class="sidenav-container" *ngIf="isAuthenticated()">
   <!-- Sidebar -->
   <mat-sidenav *ngIf="isOpen" #drawerBig [mode]="drawerMode" class="sidenav expanded" fixedInViewport [opened]="isOpen">
-    <app-side-bar-content [isOpen]="isOpen"></app-side-bar-content>
+    <app-side-bar-content [isOpen]="isOpen" (closeSidebar)="closeSidebar()"></app-side-bar-content>
   </mat-sidenav>
   <mat-sidenav *ngIf="!isOpen && !isMobile" #drawerSmall mode="side" class="sidenav collapsed" fixedInViewport [opened]="!isOpen">
     <app-side-bar-content [isOpen]="isOpen"></app-side-bar-content>

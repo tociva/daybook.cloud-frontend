@@ -34,7 +34,7 @@
         *ngIf="!isOpen"
         [matMenuTriggerFor]="menuRef"
         #trigger="matMenuTrigger"
-        (click)="onMenuIconClick(trigger)"
+        (click)="onParentMenuClick(trigger)"
         matTooltip="{{menu.name}}"
         matTooltipPosition="right"
         >
@@ -56,6 +56,7 @@
       <div *ngIf="isSubmenuOpen(menu.name) && isOpen" class="submenu">
         <div *ngFor="let child of menu.children"
            mat-list-item
+           (click)="onSubMenuClick()"
            [routerLink]="menu.path + '/' + child.path"
            routerLinkActive="active"
            class="sub-nav-item">
