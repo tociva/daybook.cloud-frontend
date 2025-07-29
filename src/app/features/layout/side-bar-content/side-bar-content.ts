@@ -7,6 +7,7 @@ import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { RouterLink } from '@angular/router';
 import { menuList } from '../../../util/menu-list';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { isMobile } from '../../../../util/daybook.util';
 
 @Component({
   selector: 'app-side-bar-content',
@@ -25,7 +26,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 export class SideBarContent {
   
   @Input() isOpen = true;
-
+  @Input() isMobile = isMobile();
   @Output() closeSidebar = new EventEmitter<void>();
 
   openSubmenus = new Set<string>();
@@ -38,7 +39,9 @@ export class SideBarContent {
   }
 
   onSubMenuClick() {
-    this.closeSidebar.emit();
+    if(this.isMobile){
+      this.closeSidebar.emit();
+    }
   }
   
   toggleSubmenu(name: string): void {
