@@ -3,8 +3,8 @@ import { ActivatedRouteSnapshot, CanActivateFn, RouterStateSnapshot } from '@ang
 import { Store } from '@ngrx/store';
 import { combineLatest, filter } from "rxjs";
 import { map, take } from 'rxjs/operators';
-import * as AuthActions from './store/auth.actions';
-import { selectIsAuthenticated, selectIsHydrated } from './store/auth.selectors';
+import * as AuthActions from './store/auth/auth.actions';
+import { selectIsAuthenticated, selectIsHydrated } from './store/auth/auth.selectors';
 
 export const authGuard: CanActivateFn = (_route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
   const store = inject(Store);

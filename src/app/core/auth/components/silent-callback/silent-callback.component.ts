@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
-import * as AuthActions from '../../store/auth.actions';
+import * as AuthActions from '../../store/auth/auth.actions';
 
 @Component({
   selector: 'app-silent-callback',

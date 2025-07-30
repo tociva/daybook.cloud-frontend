@@ -20,7 +20,7 @@ export class BankCashEffects {
 
   private getBaseUrl(): string {
     if (!this.baseUrl) {
-      this.baseUrl = `${this.configService.apiBaseUrl}/bank-cash`;
+      this.baseUrl = `${this.configService.apiBaseUrl}/inventory/bank-cash`;
     }
     return this.baseUrl;
   }

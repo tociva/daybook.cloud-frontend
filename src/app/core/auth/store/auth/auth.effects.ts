@@ -4,8 +4,8 @@ import { Actions, createEffect, ofType, ROOT_EFFECTS_INIT } from '@ngrx/effects'
 import { Store } from '@ngrx/store';
 import { User, UserManager } from 'oidc-client-ts';
 import { catchError, filter, from, map, of, switchMap, tap, withLatestFrom } from 'rxjs';
-import { selectConfig } from '../../config/store/config.selectors';
-import { getUserManager, isUserManagerInitialized, setUserManager } from '../user-manager-singleton';
+import { selectConfig } from '../../../config/store/config.selectors';
+import { getUserManager, isUserManagerInitialized, setUserManager } from '../../user-manager-singleton';
 import * as AuthActions from './auth.actions';
 
 @Injectable()
