@@ -67,8 +67,7 @@
               "buildTarget": "daybook.cloud-frontend:build:production"
             },
             "development": {
-              "buildTarget": "daybook.cloud-frontend:build:development",
-              "proxyConfig": "proxy.conf.json"
+              "buildTarget": "daybook.cloud-frontend:build:development"
             }
           },
           "defaultConfiguration": "development"

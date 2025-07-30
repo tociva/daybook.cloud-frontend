@@ -1,0 +1,13 @@
+{
+  "auth": {
+    "issuer": "$AUTH_ISSUER",
+    "authority": "$AUTH_AUTHORITY",
+    "clientId": "$AUTH_CLIENT_ID",
+    "redirectUri": "$AUTH_REDIRECT_URI",
+    "postLoginRedirect": "$AUTH_POST_LOGIN_REDIRECT",
+    "scope": "openid profile email offline",
+    "hydraLogoutRedirectUri": "$AUTH_HYDRA_LOGOUT_REDIRECT_URI",
+    "kratosUrl": "$AUTH_KRATOS_URL"
+  },
+  "apiBaseUrl": "$API_BASE_URL"
+}

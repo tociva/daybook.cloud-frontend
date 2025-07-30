@@ -18,8 +18,7 @@
     "start": "ng serve --host 0.0.0.0  --disable-host-check",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test",
-    "start:api": "prism mock openapi.json --port 9000 --dynamic"
+    "test": "ng test"
   },
   "private": true,
   "dependencies": {
