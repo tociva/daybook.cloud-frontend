@@ -15,14 +15,14 @@ import { bankCashReducer } from './features/inventory/bank-cash/store/bank-cash.
 import { BankCashEffects } from './features/inventory/bank-cash/store/bank-cash.effects';
 import { authInterceptor } from './core/auth/auth.interceptor';
 import { userSessionReducer } from './core/auth/store/user-session/user-session.reducer';
-import { organizationReducer } from './features/organization/organization/store/organization.reducer';
-import { branchReducer } from './features/organization/branch/store/branch.reducer';
-import { fiscalYearReducer } from './features/organization/fiscal-year/store/fiscal-year.reducer';
+import { organizationReducer } from './features/management/organization/store/organization.reducer';
+import { branchReducer } from './features/management/branch/store/branch.reducer';
+import { fiscalYearReducer } from './features/management/fiscal-year/store/fiscal-year.reducer';
 import { subscriptionReducer } from './features/subscription/subscription/store/subscription.reducer';
 import { UserSessionEffects } from './core/auth/store/user-session/user-session.effects';
-import { OrganizationEffects } from './features/organization/organization/store/organization.effects';
-import { BranchEffects } from './features/organization/branch/store/branch.effects';
-import { FiscalYearEffects } from './features/organization/fiscal-year/store/fiscal-year.effects';
+import { OrganizationEffects } from './features/management/organization/store/organization.effects';
+import { BranchEffects } from './features/management/branch/store/branch.effects';
+import { FiscalYearEffects } from './features/management/fiscal-year/store/fiscal-year.effects';
 import { SubscriptionEffects } from './features/subscription/subscription/store/subscription.effects';
 
 export const appConfig: ApplicationConfig = {

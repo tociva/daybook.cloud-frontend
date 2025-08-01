@@ -89,10 +89,14 @@ export const menuList: MenuNode[] = [
         ]
       },
       {
-        path: 'settings',
-        name: 'Settings',
-        icon: 'settings',
+        path: 'management',
+        name: 'Management',
+        icon: 'apartment',
         children: [
+          { path: 'organization',
+            name: 'Organization',
+            icon: 'business'
+            },
           { path: 'branch',
             name: 'Branch',
             icon: 'device_hub'

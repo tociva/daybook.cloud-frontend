@@ -1,7 +1,7 @@
 import { Subscription } from '../../../../features/subscription/subscription/store/subscription.models';
-import { Organization } from '../../../../features/organization/organization/store/organization.models';
-import { Branch } from '../../../../features/organization/branch/store/branch.models';
-import { FiscalYear } from '../../../../features/organization/fiscal-year/store/fiscal-year.models';
+import { Organization } from '../../../../features/management/organization/store/organization.models';
+import { Branch } from '../../../../features/management/branch/store/branch.models';
+import { FiscalYear } from '../../../../features/management/fiscal-year/store/fiscal-year.models';
 
 export interface UserSession {
   id?: string;

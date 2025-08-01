@@ -1,17 +1,18 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { HttpClient } from '@angular/common/http';
-import { catchError, map, mergeMap } from 'rxjs/operators';
+import { catchError, map, mergeMap, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import * as UserSessionActions from './user-session.actions';
 import { ConfigService } from '../../../../core/config/config.service';
 import { UserSession } from './user-session.models';
+import { Router } from '@angular/router';
 
 @Injectable()
 export class UserSessionEffects {
   private baseUrl: string = '';
 
-  constructor(private actions$: Actions, private http: HttpClient, private configService: ConfigService) {}
+  constructor(private actions$: Actions, private http: HttpClient, private configService: ConfigService, private router: Router) {}
 
   private getBaseUrl(): string {
     if (!this.baseUrl) {
@@ -81,6 +82,20 @@ export class UserSessionEffects {
       )
     )
   );
+
+  loadUserSessionSuccess$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(UserSessionActions.loadUserSessionSuccess),
+        tap(({ session }) => {
+          if (!session.ownorgs || session.ownorgs.length === 0) {
+            this.router.navigate(['/management/organization/create']);
+          }
+        })
+      ),
+    { dispatch: false }
+  );
+  
 
   deleteUserSession$ = createEffect(() =>
     this.actions$.pipe(

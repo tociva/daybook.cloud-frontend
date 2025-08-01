@@ -148,7 +148,7 @@ export class AuthEffects {
             // At this point, the session is invalidated server-side
   
             // ⚠️ But you may still need to clear the cookie manually (some browsers may ignore Set-Cookie in fetch)
-            document.cookie = 'ory_kratos_session=; Max-Age=0; path=/; domain=.daybook.com; secure; SameSite=None';
+            document.cookie = 'ory_kratos_session=; Max-Age=0; path=/; domain=.daybook.cloud; secure; SameSite=None';
   
             // Now continue to Hydra logout or redirect
             this.store.dispatch(AuthActions.logoutHydra());

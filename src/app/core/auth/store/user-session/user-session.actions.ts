@@ -1,6 +1,5 @@
 import { createAction, props } from '@ngrx/store';
 import { UserSession } from './user-session.models';
-import { Organization } from '../../../../features/organization/organization/store/organization.models';
 
 export const loadUserSession = createAction('[UserSession] Load User Session', props<{ userid: string }>());
 export const loadUserSessionSuccess = createAction('[UserSession] Load User Session Success', props<{ session: UserSession }>());

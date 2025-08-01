@@ -1,0 +1,42 @@
+<form [formGroup]="form()">
+    <ng-container *ngFor="let field of fieldConfigs(); trackBy: trackByFn">
+  
+      <!-- Text / Number Input -->
+      <mat-form-field *ngIf="field.type === 'text' || field.type === 'number'" appearance="fill" class="full-width">
+        <mat-label>{{ field.label || field.name }}</mat-label>
+        <input
+          matInput
+          [type]="field.type"
+          [formControlName]="field.name"
+          [placeholder]="field.label || field.name"
+        />
+      </mat-form-field>
+  
+      <!-- Checkbox -->
+      <mat-checkbox *ngIf="field.type === 'checkbox'" [formControlName]="field.name">
+        {{ field.label || field.name }}
+      </mat-checkbox>
+  
+      <!-- Autocomplete -->
+      <mat-form-field *ngIf="field.type === 'autocomplete'" appearance="fill" class="full-width">
+        <mat-label>{{ field.label || field.name }}</mat-label>
+        <input
+          type="text"
+          matInput
+          [formControlName]="field.name"
+          [matAutocomplete]="autoRef"
+          [placeholder]="field.label || field.name"
+        />
+        <mat-autocomplete #autoRef="matAutocomplete">
+          <mat-option
+            *ngFor="let option of filteredOptions[field.name]?.() ?? []"
+            [value]="option"
+          >
+            {{ option }}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+  
+    </ng-container>
+  </form>
+  

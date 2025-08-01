@@ -1,24 +1,21 @@
 import { CommonModule } from '@angular/common';
-import { Component, effect, inject, signal, ViewChild } from '@angular/core';
+import { Component, effect, inject, ViewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
-import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatDrawerMode, MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { Router, RouterOutlet } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { Subject } from 'rxjs';
+import { isMobile } from '../util/daybook.util';
 import * as AuthActions from './core/auth/store/auth/auth.actions';
 import { selectIsAuthenticated, selectIsInitialized, selectUser } from './core/auth/store/auth/auth.selectors';
-import { selectConfigLoaded } from './core/config/store/config.selectors';
-import { UserProfile } from './util/user-profile.type';
-import { MatMenuModule } from '@angular/material/menu';
-import { SideBarContent } from './features/layout/side-bar-content/side-bar-content';
-import { isMobile } from '../util/daybook.util';
-import { MatDrawerMode } from '@angular/material/sidenav';
 import * as UserSessionActions from './core/auth/store/user-session/user-session.actions';
-import { selectUserSession } from './core/auth/store/user-session/user-session.selectors';
-import { Subject, takeUntil, tap } from 'rxjs';
-import { selectOrganizations } from './features/organization/organization/store/organization.selectors';
+import { selectConfigLoaded } from './core/config/store/config.selectors';
+import { SideBarContent } from './features/layout/side-bar-content/side-bar-content';
+import { UserProfile } from './util/user-profile.type';
 
 @Component({
   selector: 'app-root',
@@ -43,7 +40,6 @@ export class AppComponent {
   readonly isInitialized = this.store.selectSignal(selectIsInitialized);
   readonly isAuthenticated = this.store.selectSignal(selectIsAuthenticated);
   private router = inject(Router);
-  private userSession = this.store.selectSignal(selectUserSession);
 
   user!: UserProfile;
   
@@ -75,23 +71,6 @@ export class AppComponent {
     if (userValue) {
       this.user = userValue.profile['user'] as UserProfile;
       this.store.dispatch(UserSessionActions.createUserSession());
-    }
-  });
-
-  readonly watchUserSessionEffect = effect(() => {
-    const session = this.userSession();
-    if (session && session.ownorgs?.length) {
-      console.log('Organization count:', session.ownorgs.length);
-  
-      if (session.ownorgs.length === 1) {
-        // Automatically select if only one org
-        this.store.select(selectOrganizations).pipe(
-          takeUntil(this.destroy$),
-          tap((organizations) => {
-            console.log('Organizations:', organizations);
-          })
-        );
-      }
     }
   });
   

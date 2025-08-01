@@ -1,19 +1,20 @@
-import { Component } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { loadBankCash } from '../store/bank-cash.actions';
-import { selectAllBankCash } from '../store/bank-cash.selectors';
 import { CommonModule } from '@angular/common';
-import { Subject, takeUntil } from 'rxjs';
-import { BankCash } from '../store/bank-cash.model';
+import { Component } from '@angular/core';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { Store } from '@ngrx/store';
+import { Subject, takeUntil } from 'rxjs';
 import { DataTable } from '../../../../core/common/data-table/data-table';
 import { DataTableColumnDefinition } from '../../../../core/common/data-table/data-table-column-defenition';
 import { Paginator } from '../../../../core/common/paginator/paginator';
+import { loadBankCash } from '../store/bank-cash.actions';
+import { BankCash } from '../store/bank-cash.model';
+import { selectAllBankCash } from '../store/bank-cash.selectors';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-list-bank-cash',
-  imports: [CommonModule, MatPaginatorModule, DataTable, Paginator],
+  imports: [CommonModule, MatPaginatorModule, DataTable, Paginator, MatButtonModule],
   templateUrl: './list-bank-cash.html',
   styleUrl: './list-bank-cash.scss'
 })

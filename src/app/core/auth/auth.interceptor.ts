@@ -1,9 +1,8 @@
 // auth.interceptor.ts
 import { HttpInterceptorFn } from '@angular/common/http';
-import { inject } from '@angular/core';
-import { getUserManager, isUserManagerInitialized } from './user-manager-singleton';
 import { from } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
+import { getUserManager, isUserManagerInitialized } from './user-manager-singleton';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   if (!isUserManagerInitialized()) {
