@@ -1,0 +1,38 @@
+@theme {
+    /* Colors - referencing your existing variables */
+    --color-background: var(--background-color);
+    --color-alternate-background: var(--alternate-background-color);
+    --color-text: var(--text-color);
+    
+    --color-primary: var(--primary-color);
+    --color-primary-hover: var(--primary-color-hover);
+    --color-on-primary: var(--on-primary-color);
+    
+    --color-danger: var(--danger-color);
+    --color-danger-hover: var(--danger-color-hover);
+    --color-on-danger: var(--on-danger-color);
+    
+    --color-warning: var(--warning-color);
+    --color-warning-hover: var(--warning-color-hover);
+    --color-on-warning: var(--on-warning-color);
+    
+    --color-success: var(--success-color);
+    --color-success-hover: var(--success-color-hover);
+    --color-on-success: var(--on-success-color);
+    
+    --color-info: var(--info-color);
+    --color-info-hover: var(--info-color-hover);
+    --color-on-info: var(--on-info-color);
+    
+    --color-border: var(--border-color);
+    --color-border-hover: var(--border-color-hover);
+    
+    --color-disabled: var(--disable-color);
+    
+    /* Font families */
+    --font-roboto: 'Roboto', sans-serif;
+    --font-lobster: "Lobster", cursive;
+
+    /* Breakpoints */
+    --breakpoint-mobile: var(--breakpoint-mobile);
+  }

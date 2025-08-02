@@ -1,45 +1,32 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './core/auth/auth.guard';
+import { authGuard } from './components/core/auth/auth.guard';
 
 export const routes: Routes = [
   {
     path: '',
     canActivate: [authGuard],
-    children: [
-      {
-        path: '',
-        loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent),
-      },
-      {
-        path: 'management',
-        loadChildren: () => import('./features/management/management.route').then(m => m.managementRoutes),
-      },
-      {
-        path: 'inventory',
-        loadChildren: () => import('./features/inventory/inventory.route').then(m => m.inventoryRoutes),
-      }
-    ]
+    loadChildren: () => import('./components/layout/main-layout.routes').then(m => m.MAIN_LAYOUT_ROUTES),
   },
   {
     path: 'auth',
     children: [
       {
         path: 'callback',
-        loadComponent: () => import('./core/auth/components/callback/callback.component').then(m => m.CallbackComponent),
+        loadComponent: () => import('./components/core/auth/callback/callback.component').then(m => m.CallbackComponent),
       },
       {
         path: 'silent-callback',
-        loadComponent: () => import('./core/auth/components/silent-callback/silent-callback.component').then(m => m.SilentCallbackComponent),
+        loadComponent: () => import('./components/core/auth/silent-callback/silent-callback.component').then(m => m.SilentCallbackComponent),
       },
       {
         path: 'logout',
-        loadComponent: () => import('./core/auth/components/logout/logout.component').then(m => m.LogoutComponent),
+        loadComponent: () => import('./components/core/auth/logout/logout.component').then(m => m.LogoutComponent),
       }
     ]
   },
   {
     path: '**',
     canActivate: [authGuard],
-    loadComponent: () => import('./core/auth/components/not-found/not-found.component').then(m => m.NotFoundComponent),
+    loadComponent: () => import('./components/core/auth/not-found/not-found.component').then(m => m.NotFoundComponent),
   }
 ];

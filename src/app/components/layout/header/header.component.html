@@ -1,0 +1,16 @@
+<header class="h-16 bg-background text-text border-b border-border flex items-center justify-between px-4 shadow-sm">
+    <!-- Left: Collapse toggle -->
+    <div (click)="viewStore.toggleCollapsed()" class="text-3xl text-primary cursor-pointer hover:opacity-80">
+      <ng-icon name="bootstrapList" class="w-full h-full block" *ngIf="!expanded" />
+      <ng-icon name="bootstrapTextIndentRight" class="w-full h-full block" *ngIf="expanded" />
+    </div>
+    
+    <!-- Right: Profile -->
+    <div class="flex items-center gap-3">
+      <img
+        [src]="user?.picture"
+        [alt]="user?.name"
+        class="h-10 w-10 rounded-full object-cover border border-border cursor-pointer hover:opacity-80"
+      />
+    </div>
+  </header>
