@@ -21,6 +21,10 @@ export const routes: Routes = [
       {
         path: 'logout',
         loadComponent: () => import('./components/core/auth/logout/logout.component').then(m => m.LogoutComponent),
+      },
+      {
+        path: 'login-failure',
+        loadComponent: () => import('./components/core/auth/login-failure/login-failure.component').then(m => m.LoginFailureComponent),
       }
     ]
   },

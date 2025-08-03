@@ -1,0 +1,33 @@
+<div class="h-screen w-screen bg-primary text-on-primary flex flex-col items-center justify-center px-4 text-center">
+
+  <!-- Logo -->
+  <app-logo-block class="mb-8"></app-logo-block>
+
+  <!-- Login Failure Message Section -->
+  <div class="text-warning">
+    <h2 class="text-3xl sm:text-4xl font-bold mb-2">
+      Login Failed
+    </h2>
+    <p class="text-base sm:text-lg text-warning/80 max-w-md mx-auto">
+      Something went wrong during login. Please try again or log out completely.
+    </p>
+
+    <!-- Actions -->
+    <div class="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
+      <button
+        (click)="retryLogin()"
+        class="px-6 py-2 rounded bg-warning text-on-warning hover:bg-warning/90 transition duration-200 font-semibold cursor-pointer"
+      >
+        Retry Login
+      </button>
+
+      <button
+        (click)="logoutCompletely()"
+        class="px-6 py-2 rounded border border-warning text-warning hover:bg-warning/10 transition duration-200 font-semibold cursor-pointer"
+      >
+        Logout Completely
+      </button>
+    </div>
+  </div>
+
+</div>

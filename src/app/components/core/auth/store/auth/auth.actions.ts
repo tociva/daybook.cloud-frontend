@@ -45,9 +45,6 @@ export const setError = createAction('[Auth] Set Error', props<{ error: string |
 // Set return URL
 export const setReturnUri = createAction('[Auth] Set Return Uri', props<{ returnUri: string | null }>());
 
-// Token expiring soon
-export const tokenExpiring = createAction('[Auth] Token Expiring');
-
 // Update last activity timestamp
 export const setLastActivity = createAction('[Auth] Set Last Activity', props<{ lastActivity: number }>());
 

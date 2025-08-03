@@ -1,7 +1,7 @@
-<ng-container *ngIf="!beforeHydration(); else appLoading">
+<ng-container *ngIf="status !== 'AUTH_IN_PROGRESS'">
   <router-outlet></router-outlet>
 </ng-container>
 
-<ng-template #appLoading>
+<ng-container *ngIf="status === 'AUTH_IN_PROGRESS'">
   <app-loading-screen></app-loading-screen>
-</ng-template>
+</ng-container>

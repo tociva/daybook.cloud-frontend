@@ -25,7 +25,7 @@ export const AuthStore = signalStore(
 
     // Useful for app.component to know when hydration is complete
     isHydrationComplete: () =>
-      ['authenticated', 'hydrated', 'unauthenticated', 'tokenExpiring', 'error'].includes(
+      ['authenticated', 'hydrated', 'unauthenticated', 'error'].includes(
         state.status()
       ),
     

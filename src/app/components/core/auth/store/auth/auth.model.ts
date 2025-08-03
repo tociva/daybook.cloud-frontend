@@ -6,7 +6,6 @@ export type AuthStatus =
   | 'authenticated'
   | 'unauthenticated'
   | 'hydrated'
-  | 'tokenExpiring'
   | 'error';
 
 export interface AuthModel {

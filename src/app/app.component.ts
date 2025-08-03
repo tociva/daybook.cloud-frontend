@@ -7,6 +7,11 @@ import { AuthStore } from './components/core/auth/store/auth/auth.store';
 import { CommonModule } from '@angular/common';
 import { LoadingScreenComponent } from './components/shared/loading-screen/loading-screen.component';
 
+enum LoadingStatus {
+  AUTH_IN_PROGRESS = 'AUTH_IN_PROGRESS',
+  ORGANIZATION_SETUP_NEEDED = 'ORGANIZATION_SETUP_NEEDED',
+  AUTH_COMPLETED = 'AUTH_COMPLETED',
+}
 @Component({
   selector: 'app-root',
   imports: [CommonModule,RouterOutlet,LoadingScreenComponent],
@@ -18,13 +23,20 @@ export class AppComponent {
   private readonly store = inject(Store);
   private readonly configStore = inject(ConfigStore);
   private readonly authStore = inject(AuthStore);
+  
+  status = LoadingStatus.AUTH_IN_PROGRESS;
 
   readonly triggerAuthInit = effect(() => {
     if (this.configStore.configLoaded()) {
       this.store.dispatch(AuthActions.initializeAuth());
     }
   });
-
-  beforeHydration = computed(() => !this.authStore.isHydrationComplete());
+  readonly watchHydration = effect(() => {
+    const isHydrated = this.authStore.isHydrationComplete(); // signal or selector
+  
+    this.status = isHydrated
+      ? LoadingStatus.AUTH_COMPLETED
+      : LoadingStatus.AUTH_IN_PROGRESS;
+  });
 
 }

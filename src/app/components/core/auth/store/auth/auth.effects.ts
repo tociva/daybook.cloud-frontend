@@ -66,10 +66,6 @@ export class AuthEffects {
               this.authStore.setError(error.message);
             });
   
-            manager.events.addAccessTokenExpiring(() => {
-              this.authStore.setStatus('tokenExpiring');
-            });
-  
             setUserManager(manager);
           }
   
@@ -130,6 +126,14 @@ export class AuthEffects {
     )
   );
   
+  loginFailure$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(AuthActions.loginFailure),
+      tap(() => {
+        this.router.navigate(['/auth/login-failure']);
+      })
+    )
+  );
 
   logoutKratos$ = createEffect(() =>
     this.actions$.pipe(

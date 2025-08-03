@@ -1,1 +1,23 @@
-<p>logout works!</p>
+<div class="h-screen w-screen bg-primary text-on-primary flex flex-col items-center justify-center px-4 text-center">
+
+  <!-- Logo + Tagline -->
+  <app-logo-block class="mb-8"></app-logo-block>
+
+  <!-- Logout Success Section -->
+  <div>
+    <h2 class="text-3xl sm:text-4xl font-bold mb-2 text-success">
+      You’ve been logged out successfully
+    </h2>
+    <p class="text-base sm:text-lg text-on-primary/70 max-w-md mx-auto">
+      Thank you for using our service. You can sign in again or return to the homepage.
+    </p>
+
+    <a
+      routerLink="/"
+      class="mt-6 inline-block px-6 py-2 rounded bg-on-primary text-primary hover:bg-on-primary/90 transition duration-200 font-semibold"
+    >
+      Go to Homepage
+    </a>
+  </div>
+
+</div>
