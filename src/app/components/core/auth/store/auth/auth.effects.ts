@@ -7,7 +7,7 @@ import { User, UserManager, WebStorageStateStore } from 'oidc-client-ts';
 import { catchError, filter, from, map, of, switchMap, tap, withLatestFrom } from 'rxjs';
 import { getUserManager, isUserManagerInitialized, setUserManager } from '../../user-manager-singleton';
 import { ConfigStore } from '../config/config.store';
-import * as AuthActions from './auth.actions';
+import { initializeAuth, login, loginSuccess, loginFailure, logoutHydra, logoutKratos, logoutSuccess, logoutFailure, performRedirect, silentRenew, silentRenewSuccess, silentRenewFailure, handleLogoutCallback, handleCallback } from './auth.actions';
 import { AuthStore } from './auth.store';
 
 
@@ -19,21 +19,23 @@ export class AuthEffects {
   private readonly configStore = inject(ConfigStore);
   private readonly authStore = inject(AuthStore);
 
-  hydrateReturnUri$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(ROOT_EFFECTS_INIT),
-      map(() => {
-        const returnUri = localStorage.getItem('returnUri');
-        return AuthActions.setReturnUri({ returnUri });
-      })
-    )
+  hydrateReturnUri$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(ROOT_EFFECTS_INIT),
+        tap(() => {
+          const returnUri = localStorage.getItem('returnUri');
+          this.authStore.setReturnUri(returnUri);
+        })
+      ),
+    { dispatch: false }
   );
 
   /** Initialize OIDC client after config is loaded */
   initializeAuth$ = createEffect(
     () =>
       this.actions$.pipe(
-        ofType(AuthActions.initializeAuth),
+        ofType(initializeAuth),
         map(() => this.configStore.config()),
         filter((config) => !!config),
         tap((config) => {
@@ -93,10 +95,10 @@ export class AuthEffects {
   /** Start login (redirect to IdP) */
   login$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(AuthActions.login),
-      tap(({returnUri}) => {
+      ofType(login),
+      tap(({ returnUri }) => {
         const uri = returnUri ?? (window.location.pathname + window.location.search);
-        this.store.dispatch(AuthActions.setReturnUri({ returnUri: uri }));
+        this.authStore.setReturnUri(uri); // ✅ signal store + localStorage
         getUserManager().signinRedirect();
       })
     ),
@@ -106,19 +108,19 @@ export class AuthEffects {
   /** Handle OIDC redirect/callback */
   handleCallback$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(AuthActions.handleCallback),
+      ofType(handleCallback),
       switchMap(() =>
         from(getUserManager().signinRedirectCallback()).pipe(
-          map(user => AuthActions.loginSuccess({ user })),
+          map(user => loginSuccess({ user })),
           catchError(err =>
             from(getUserManager().getUser()).pipe(
               map(user => {
                 if (user && !user.expired) {
-                  return AuthActions.loginSuccess({ user });
+                  return loginSuccess({ user });
                 }
-                return AuthActions.loginFailure({ error: err.message });
+                return loginFailure({ error: err.message });
               }),
-              catchError(() => of(AuthActions.loginFailure({ error: err.message })))
+              catchError(() => of(loginFailure({ error: err.message })))
             )
           )
         )
@@ -128,7 +130,7 @@ export class AuthEffects {
   
   loginFailure$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(AuthActions.loginFailure),
+      ofType(loginFailure),
       tap(() => {
         this.router.navigate(['/auth/login-failure']);
       })
@@ -137,47 +139,43 @@ export class AuthEffects {
 
   logoutKratos$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(AuthActions.logoutKratos),
+      ofType(logoutKratos),
       map(() => this.configStore.config()),
-      filter((config) => !!config),
-      tap((config) => {
-        const url = config.auth.kratosUrl;
-  
-        fetch(`${url}/self-service/logout/browser`, {
-          credentials: "include"
-        })
-          .then(res => res.json())
-          .then(data => {
-            if (!data.logout_url) throw new Error('No logout_url received');
-  
-            // Call logout token URL via fetch
-            return fetch(data.logout_url, {
-              method: 'GET',
-              credentials: 'include',
-            });
+      filter((config): config is NonNullable<typeof config> => !!config),
+      switchMap((config) =>
+        from(
+          fetch(`${config.auth.kratosUrl}/self-service/logout/browser`, {
+            credentials: 'include',
           })
-          .then(() => {
-            // At this point, the session is invalidated server-side
-  
-            // ⚠️ But you may still need to clear the cookie manually (some browsers may ignore Set-Cookie in fetch)
-            document.cookie = 'ory_kratos_session=; Max-Age=0; path=/; domain=.daybook.cloud; secure; SameSite=None';
-  
-            // Now continue to Hydra logout or redirect
-            this.store.dispatch(AuthActions.logoutHydra());
+            .then((res) => res.json())
+            .then((data) => {
+              if (!data.logout_url) throw new Error('No logout_url received');
+              return fetch(data.logout_url, {
+                method: 'GET',
+                credentials: 'include',
+              });
+            })
+            .then(() => {
+              // Optional: delete the session cookie explicitly
+              document.cookie = 'ory_kratos_session=; Max-Age=0; path=/; domain=.daybook.cloud; secure; SameSite=None';
+              return null; // resolve to continue
+            })
+        ).pipe(
+          map(() => logoutHydra()),
+          catchError((err) => {
+            console.error('Error during Kratos logout:', err);
+            return of(logoutHydra()); // fallback
           })
-          .catch(err => {
-            console.error('Error during Kratos logout via fetch', err);
-            this.store.dispatch(AuthActions.logoutHydra()); // Fallback
-          });
-      })
-    ),
-    { dispatch: false }
+        )
+      )
+    )
   );
+  
   
   /** Start logout (redirect to IdP logout) */
   logoutHydra$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(AuthActions.logoutHydra),
+      ofType(logoutHydra),
       tap(() => {
         getUserManager().signoutRedirect();
       })
@@ -188,11 +186,11 @@ export class AuthEffects {
   /** Handle logout callback (optional) */
   handleLogoutCallback$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(AuthActions.handleLogoutCallback),
+      ofType(handleLogoutCallback),
       switchMap(() =>
         from(getUserManager().signoutRedirectCallback()).pipe(
-          map(() => AuthActions.logoutSuccess()),
-          catchError(err => of(AuthActions.logoutFailure({ error: err.message })))
+          map(() => logoutSuccess()),
+          catchError(err => of(logoutFailure({ error: err.message })))
         )
       )
     )
@@ -201,48 +199,32 @@ export class AuthEffects {
   /** Optionally, on loginSuccess, redirect to returnUri or home */
   loginSuccessRedirect$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(AuthActions.loginSuccess),
+      ofType(loginSuccess),
       withLatestFrom(toObservable(this.authStore.returnUri)),
       filter(([, returnUri]) => Boolean(returnUri)),
-      map(([, returnUri]) => AuthActions.performRedirect({ returnUri: returnUri! }))
+      map(([, returnUri]) => performRedirect({ returnUri: returnUri! }))
     )
   );
   
-
   performRedirect$ = createEffect(
     () =>
       this.actions$.pipe(
-        ofType(AuthActions.performRedirect),
+        ofType(performRedirect),
         tap(({ returnUri }) => {
           this.router.navigateByUrl(returnUri);
-          this.store.dispatch(AuthActions.setReturnUri({ returnUri: null }));
+          this.authStore.setReturnUri(null); // ✅ signal + localStorage handled
         })
       ),
     { dispatch: false }
   );
 
-  setReturnUri$ = createEffect(
-    () =>
-      this.actions$.pipe(
-        ofType(AuthActions.setReturnUri),
-        tap(({ returnUri }) => {
-          this.authStore.setReturnUri(returnUri);
-          if (returnUri) {
-            localStorage.setItem('returnUri', returnUri);
-          }else{
-            this.authStore.setReturnUri(null);
-          }
-        })
-      ),
-    { dispatch: false }
-  );
   silentRenew$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(AuthActions.silentRenew),
+      ofType(silentRenew),
       switchMap(() =>
         from(getUserManager().signinSilent()).pipe(
-          map(user => user ? AuthActions.silentRenewSuccess({ user }) : AuthActions.silentRenewFailure({ error: 'No user found' })),
-          catchError(error => of(AuthActions.silentRenewFailure({ error })))
+          map(user => user ? silentRenewSuccess({ user }) : silentRenewFailure({ error: 'No user found' })),
+          catchError(error => of(silentRenewFailure({ error })))
         )
       )
     )

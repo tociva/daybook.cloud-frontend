@@ -16,6 +16,7 @@ export const loginFailure = createAction('[Auth] Login Failure', props<{ error: 
 
 // User logged out
 export const logoutHydra = createAction('[Auth] Logout Hydra');
+
 export const logoutKratos = createAction('[Auth] Logout Kratos');
 
 // User logout completed
@@ -41,9 +42,6 @@ export const setIsHydrated = createAction('[Auth] Set Is Hydrated', props<{ isHy
 
 // Set error
 export const setError = createAction('[Auth] Set Error', props<{ error: string | null }>());
-
-// Set return URL
-export const setReturnUri = createAction('[Auth] Set Return Uri', props<{ returnUri: string | null }>());
 
 // Update last activity timestamp
 export const setLastActivity = createAction('[Auth] Set Last Activity', props<{ lastActivity: number }>());

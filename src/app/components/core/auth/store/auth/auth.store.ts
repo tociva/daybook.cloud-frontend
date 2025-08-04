@@ -63,8 +63,13 @@ export const AuthStore = signalStore(
       patchState(store, initialAuthState);
     },
 
-    setReturnUri(returnUri: string | null) {
-      patchState(store, { returnUri });
+    setReturnUri(uri: string | null) {
+      patchState(store, { returnUri: uri });
+      if (uri) {
+        localStorage.setItem('returnUri', uri);
+      } else {
+        localStorage.removeItem('returnUri');
+      }
     },
   }))
 );
