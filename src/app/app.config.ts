@@ -12,6 +12,7 @@ import { ConfigEffects } from './components/core/auth/store/config/config.effect
 import { provideStore } from '@ngrx/store';
 import { provideAppIcons } from './providers/icons.provider';
 import { UserSessionEffects } from './components/core/auth/store/user-session/user-session.effects';
+import { OrganizationEffects } from './components/features/management/store/organization/organization.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -23,6 +24,7 @@ export const appConfig: ApplicationConfig = {
       ConfigEffects,
       AuthEffects,
       UserSessionEffects,
+      OrganizationEffects,
     ]),
     provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
     provideRouterStore(),

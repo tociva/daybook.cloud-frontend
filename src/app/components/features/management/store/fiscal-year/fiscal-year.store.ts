@@ -1,5 +1,5 @@
 import { signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
-import { createListQueryStore } from '../../../../../../util/create-list-query-store';
+import { createListQueryStore } from '../../../../../../util/store/create-list-query-store';
 import { initialFiscalYearState, FiscalYearModel } from './fiscal-year.state';
 import { Store } from '@ngrx/store';
 import { inject } from '@angular/core';

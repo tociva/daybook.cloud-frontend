@@ -1,11 +1,14 @@
+import { Currency } from "../../../../../../util/types/currency";
+import { Branch } from "../branch/branch.model";
+
 export interface FiscalYear {
   id?: string;
   name: string;
-  email: string;
-  mobile?: string;
-  address?: any;
-  description?: string;
-  createdat?: Date;
-  updatedat?: Date;
-  userid: string;
+  startdate: string;
+  enddate: string;
+  freezetill?: Date | null;
+  jnumber: string;
+  currency: Currency;
+  branchid: string;
+  branch: Branch;
 }
