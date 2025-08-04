@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { LogoBlockComponent } from '../../../shared/logo-block/logo-block.component';
+import { LogoBlockComponent } from '../../../../shared/logo-block/logo-block.component';
 import { RouterLink } from '@angular/router';
 
 @Component({

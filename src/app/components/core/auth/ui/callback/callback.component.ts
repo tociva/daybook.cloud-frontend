@@ -1,8 +1,8 @@
 import { Component, effect, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { LoadingScreenComponent } from '../../../shared/loading-screen/loading-screen.component';
-import * as AuthActions from '../store/auth/auth.actions';
-import { ConfigStore } from '../store/config/config.store';
+import { LoadingScreenComponent } from '../../../../shared/loading-screen/loading-screen.component';
+import * as AuthActions from '../../store/auth/auth.actions';
+import { ConfigStore } from '../../store/config/config.store';
 
 @Component({
   selector: 'app-callback',

@@ -6,6 +6,7 @@ import * as AuthActions from './components/core/auth/store/auth/auth.actions';
 import { AuthStore } from './components/core/auth/store/auth/auth.store';
 import { CommonModule } from '@angular/common';
 import { LoadingScreenComponent } from './components/shared/loading-screen/loading-screen.component';
+import * as UserSessionActions from './components/core/auth/store/user-session/user-session.actions';
 
 enum LoadingStatus {
   AUTH_IN_PROGRESS = 'AUTH_IN_PROGRESS',
@@ -37,6 +38,10 @@ export class AppComponent {
     this.status = isHydrated
       ? LoadingStatus.AUTH_COMPLETED
       : LoadingStatus.AUTH_IN_PROGRESS;
+
+      if(this.status === LoadingStatus.AUTH_COMPLETED){
+        this.store.dispatch(UserSessionActions.createUserSession());
+      }
   });
 
 }

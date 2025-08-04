@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { Organization } from './organization.models';
+import { Organization } from './organization.model';
 
 export const loadOrganizations = createAction('[Organization] Load Organizations', props<{ query?: any }>());
 export const loadOrganizationsSuccess = createAction('[Organization] Load Organizations Success', props<{ organizations: Organization[], count: number }>());

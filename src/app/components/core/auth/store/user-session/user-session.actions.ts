@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { UserSession } from './user-session.models';
+import { UserSession } from './user-session.model';
 
 export const loadUserSession = createAction('[UserSession] Load User Session', props<{ userid: string }>());
 export const loadUserSessionSuccess = createAction('[UserSession] Load User Session Success', props<{ session: UserSession }>());

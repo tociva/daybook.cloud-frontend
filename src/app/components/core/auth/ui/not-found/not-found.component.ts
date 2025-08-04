@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { LogoBlockComponent } from '../../../shared/logo-block/logo-block.component';
+import { LogoBlockComponent } from '../../../../shared/logo-block/logo-block.component';
 
 @Component({
   selector: 'app-not-found',

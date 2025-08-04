@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { Subscription } from './subscription.models';
+import { Subscription } from './subscription.model';
 
 export const loadSubscriptions = createAction('[Subscription] Load Subscriptions', props<{ query?: any }>());
 export const loadSubscriptionsSuccess = createAction('[Subscription] Load Subscriptions Success', props<{ subscriptions: Subscription[], count: number }>());

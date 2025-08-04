@@ -1,35 +1,34 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { HttpClient } from '@angular/common/http';
 import { catchError, map, mergeMap, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
-import * as UserSessionActions from './user-session.actions';
-import { ConfigService } from '../../../../core/config/config.service';
-import { UserSession } from './user-session.models';
 import { Router } from '@angular/router';
+import * as UserSessionActions from './user-session.actions';
+import { UserSession } from './user-session.model';
+import { ConfigStore } from '../config/config.store';
 
 @Injectable()
 export class UserSessionEffects {
-  private baseUrl: string = '';
+  private http = inject(HttpClient);
+  private actions$ = inject(Actions);
+  private router = inject(Router);
+  private configStore = inject(ConfigStore);
 
-  constructor(private actions$: Actions, private http: HttpClient, private configService: ConfigService, private router: Router) {}
-
-  private getBaseUrl(): string {
-    if (!this.baseUrl) {
-      this.baseUrl = `${this.configService.apiBaseUrl}/user/user-session`;
-    }
-    return this.baseUrl;
+  private get baseUrl(): string {
+    const envConfig = this.configStore.config();
+    return `${envConfig.apiBaseUrl}/user/user-session`;
   }
-
-  
 
   loadUserSession$ = createEffect(() =>
     this.actions$.pipe(
       ofType(UserSessionActions.loadUserSession),
       mergeMap(({ userid }) =>
-        this.http.get<UserSession>(`${this.getBaseUrl()}/${userid}`).pipe(
-          map(session => UserSessionActions.loadUserSessionSuccess({ session })),
-          catchError(error => of(UserSessionActions.loadUserSessionFailure({ error })))
+        this.http.get<UserSession>(`${this.baseUrl}/${userid}`).pipe(
+          map((session) => UserSessionActions.loadUserSessionSuccess({ session })),
+          catchError((error) =>
+            of(UserSessionActions.loadUserSessionFailure({ error }))
+          )
         )
       )
     )
@@ -39,10 +38,14 @@ export class UserSessionEffects {
     this.actions$.pipe(
       ofType(UserSessionActions.createUserSession),
       mergeMap(() =>
-        this.http.post<UserSession>(`${this.getBaseUrl()}`, {}).pipe(
-          map(session => UserSessionActions.loadUserSessionSuccess({ session })),
-          catchError(error => of(UserSessionActions.loadUserSessionFailure({ error })))
+        {
+          return this.http.post<UserSession>(`${this.baseUrl}`, {}).pipe(
+          map((session) => UserSessionActions.loadUserSessionSuccess({ session })),
+          catchError((error) =>
+            of(UserSessionActions.loadUserSessionFailure({ error }))
+          )
         )
+      }
       )
     )
   );
@@ -51,9 +54,11 @@ export class UserSessionEffects {
     this.actions$.pipe(
       ofType(UserSessionActions.selectOrganization),
       mergeMap(({ organizationid }) =>
-        this.http.post<UserSession>(`${this.getBaseUrl()}/select-organization`, { organizationid }).pipe(
-          map(session => UserSessionActions.loadUserSessionSuccess({ session })),
-          catchError(error => of(UserSessionActions.loadUserSessionFailure({ error })))
+        this.http.post<UserSession>(`${this.baseUrl}/select-organization`, { organizationid }).pipe(
+          map((session) => UserSessionActions.loadUserSessionSuccess({ session })),
+          catchError((error) =>
+            of(UserSessionActions.loadUserSessionFailure({ error }))
+          )
         )
       )
     )
@@ -63,9 +68,11 @@ export class UserSessionEffects {
     this.actions$.pipe(
       ofType(UserSessionActions.selectBranch),
       mergeMap(({ branchid }) =>
-        this.http.post<UserSession>(`${this.getBaseUrl()}/select-branch`, { branchid }).pipe(
-          map(session => UserSessionActions.loadUserSessionSuccess({ session })),
-          catchError(error => of(UserSessionActions.loadUserSessionFailure({ error })))
+        this.http.post<UserSession>(`${this.baseUrl}/select-branch`, { branchid }).pipe(
+          map((session) => UserSessionActions.loadUserSessionSuccess({ session })),
+          catchError((error) =>
+            of(UserSessionActions.loadUserSessionFailure({ error }))
+          )
         )
       )
     )
@@ -75,9 +82,11 @@ export class UserSessionEffects {
     this.actions$.pipe(
       ofType(UserSessionActions.selectFiscalYear),
       mergeMap(({ fiscalyearid }) =>
-        this.http.post<UserSession>(`${this.getBaseUrl()}/select-fiscal-year`, { fiscalyearid }).pipe(
-          map(session => UserSessionActions.loadUserSessionSuccess({ session })),
-          catchError(error => of(UserSessionActions.loadUserSessionFailure({ error })))
+        this.http.post<UserSession>(`${this.baseUrl}/select-fiscal-year`, { fiscalyearid }).pipe(
+          map((session) => UserSessionActions.loadUserSessionSuccess({ session })),
+          catchError((error) =>
+            of(UserSessionActions.loadUserSessionFailure({ error }))
+          )
         )
       )
     )
@@ -95,15 +104,16 @@ export class UserSessionEffects {
       ),
     { dispatch: false }
   );
-  
 
   deleteUserSession$ = createEffect(() =>
     this.actions$.pipe(
       ofType(UserSessionActions.deleteUserSession),
       mergeMap(({ id }) =>
-        this.http.delete<void>(`${this.getBaseUrl()}/${id}`).pipe(
+        this.http.delete<void>(`${this.baseUrl}/${id}`).pipe(
           map(() => UserSessionActions.clearUserSession()),
-          catchError(error => of(UserSessionActions.loadUserSessionFailure({ error })))
+          catchError((error) =>
+            of(UserSessionActions.loadUserSessionFailure({ error }))
+          )
         )
       )
     )

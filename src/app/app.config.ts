@@ -11,6 +11,7 @@ import { AuthEffects } from './components/core/auth/store/auth/auth.effects';
 import { ConfigEffects } from './components/core/auth/store/config/config.effects';
 import { provideStore } from '@ngrx/store';
 import { provideAppIcons } from './providers/icons.provider';
+import { UserSessionEffects } from './components/core/auth/store/user-session/user-session.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -21,6 +22,7 @@ export const appConfig: ApplicationConfig = {
     provideEffects([
       ConfigEffects,
       AuthEffects,
+      UserSessionEffects,
     ]),
     provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
     provideRouterStore(),

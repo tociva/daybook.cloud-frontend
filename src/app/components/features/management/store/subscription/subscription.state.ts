@@ -1,4 +1,4 @@
-import { Subscription } from './subscription.models';
+import { Subscription } from './subscription.model';
 import { BaseListModel } from '../../../../../../util/base-list.model';
 import { createInitialBaseListState } from '../../../../../../util/base-list.initial';
 

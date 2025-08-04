@@ -1,6 +1,6 @@
 import { createInitialBaseListState } from '../../../../../../util/base-list.initial';
 import { BaseListModel } from '../../../../../../util/base-list.model';
-import { Organization } from './organization.models';
+import { Organization } from './organization.model';
 
 export type OrganizationModel = BaseListModel<Organization>;
 
