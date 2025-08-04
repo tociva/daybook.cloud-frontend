@@ -1,5 +1,5 @@
 import { signal, computed } from '@angular/core';
-import { ListQueryParams, SortConfig } from './list-query-params.type';
+import { ListQueryParams, SortConfig } from './base-list.model';
 
 const _search = signal('');
 const _page = signal(1);

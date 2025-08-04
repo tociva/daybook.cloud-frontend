@@ -10,3 +10,10 @@ export interface ListQueryParams {
   sort?: SortConfig | null;
   filters?: Record<string, any>;
 }
+
+export interface BaseListModel<T> extends ListQueryParams {
+  items: T[];
+  error: unknown | null;
+  count: number;
+  page: number;
+}
