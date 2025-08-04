@@ -19,6 +19,10 @@ export const routes: Routes = [
         loadComponent: () => import('./components/core/auth/ui/silent-callback/silent-callback.component').then(m => m.SilentCallbackComponent),
       },
       {
+        path: 'do-logout',
+        loadComponent: () => import('./components/core/auth/ui/do-logout/do-logout.component').then(m => m.DoLogoutComponent),
+      },
+      {
         path: 'logout',
         loadComponent: () => import('./components/core/auth/ui/logout/logout.component').then(m => m.LogoutComponent),
       },

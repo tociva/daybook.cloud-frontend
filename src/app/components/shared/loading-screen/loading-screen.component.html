@@ -24,5 +24,11 @@
       <span class="wave-letter wave-delay-18">t</span>
       <span class="wave-letter wave-delay-19">y</span>
     </p>
-    
+    <p
+      *ngIf="message()"
+      class="mt-4 text-sm sm:text-base text-info bg-info/10 px-4 py-2 rounded"
+    >
+      {{ message() }}
+    </p>
+
   </div>

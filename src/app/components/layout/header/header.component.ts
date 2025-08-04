@@ -5,6 +5,7 @@ import { AuthStore } from '../../core/auth/store/auth/auth.store';
 import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import * as AuthActions from '../../core/auth/store/auth/auth.actions';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-header',
@@ -15,6 +16,7 @@ import * as AuthActions from '../../core/auth/store/auth/auth.actions';
 export class HeaderComponent {
   readonly viewStore = inject(ViewStore);
   readonly store = inject(Store);
+  readonly router = inject(Router);
   expanded = true;
   showMenu = false;
 
@@ -45,7 +47,7 @@ openProfileSettings() {
 }
 
 logout() {
-  this.store.dispatch(AuthActions.logoutKratos());
+  this.router.navigate(['/auth/do-logout']);
 }
 
 }
