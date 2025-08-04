@@ -1,12 +1,12 @@
-import { Component, computed, effect, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, effect, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { ConfigStore } from './components/core/auth/store/config/config.store';
 import * as AuthActions from './components/core/auth/store/auth/auth.actions';
 import { AuthStore } from './components/core/auth/store/auth/auth.store';
-import { CommonModule } from '@angular/common';
+import { ConfigStore } from './components/core/auth/store/config/config.store';
+import { createUserSession } from './components/core/auth/store/user-session/user-session.actions';
 import { LoadingScreenComponent } from './components/shared/loading-screen/loading-screen.component';
-import * as UserSessionActions from './components/core/auth/store/user-session/user-session.actions';
 
 enum LoadingStatus {
   AUTH_IN_PROGRESS = 'AUTH_IN_PROGRESS',
@@ -33,15 +33,17 @@ export class AppComponent {
     }
   });
   readonly watchHydration = effect(() => {
-    const isHydrated = this.authStore.isHydrationComplete(); // signal or selector
+    const isHydrated = this.authStore.isHydrationComplete();
+    const user = this.authStore.user();
   
     this.status = isHydrated
       ? LoadingStatus.AUTH_COMPLETED
       : LoadingStatus.AUTH_IN_PROGRESS;
-
-      if(this.status === LoadingStatus.AUTH_COMPLETED){
-        this.store.dispatch(UserSessionActions.createUserSession());
-      }
+  
+    if (this.status === LoadingStatus.AUTH_COMPLETED && user) {
+      this.store.dispatch(createUserSession());
+    }
   });
+  
 
 }

@@ -197,7 +197,7 @@ export class AuthEffects {
   );
 
   /** Optionally, on loginSuccess, redirect to returnUri or home */
-  loginSuccessRedirect$ = createEffect(() =>
+  loginSuccess$ = createEffect(() =>
     this.actions$.pipe(
       ofType(loginSuccess),
       withLatestFrom(toObservable(this.authStore.returnUri)),
