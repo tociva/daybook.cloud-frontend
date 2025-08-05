@@ -1,1 +1,92 @@
-<p>two-column-form works!</p>
+<!-- 🔷 Form Title -->
+<h1 class="text-2xl font-semibold text-gray-800 mb-6 text-center">
+  {{ model().title }}
+</h1>
+
+<!-- 🔳 Main Form -->
+<form
+  [formGroup]="model().form"
+  (ngSubmit)="onSubmit()"
+  class="grid grid-cols-1 gap-6 max-w-6xl mx-auto p-6 bg-white shadow rounded"
+>
+
+  <!-- 🔁 Loop over groups -->
+  @for (group of groupKeys(); track group) {
+    <div class="p-4 border border-gray-300 rounded bg-white">
+      <h2 class="font-semibold text-base mb-4">{{ group }}</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-25 gap-y-4">
+        @for (field of groupedFields()[group]; track field.key) {
+          <div class="flex flex-col gap-1">
+            <div class="flex items-center gap-2">
+              <label class="w-32 text-sm text-gray-700">
+                {{ field.label }}
+                @if (field.required) {
+                  <span class="text-danger">*</span>
+                }
+              </label>
+
+              <!-- 🔘 Input: text, email, date -->
+              @if (field.type === 'text' || field.type === 'email' || field.type === 'date') {
+                <input
+                  [formControl]="getControl(field.key)"
+                  [type]="field.type"
+                  [ngClass]="{
+                    'flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary': true,
+                    'border-b-gray-300': !(field.errors?.length),
+                    'border-b-danger': field.errors?.length
+                  }"
+                />
+              }
+
+              <!-- 📝 Textarea -->
+              @if (field.type === 'textarea') {
+                <textarea
+                  [formControl]="getControl(field.key)"
+                  rows="2"
+                  [ngClass]="{
+                    'flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary': true,
+                    'border-b-gray-300': !(field.errors?.length),
+                    'border-b-danger': field.errors?.length
+                  }"
+                ></textarea>
+              }
+
+              <!-- ⬇️ Select -->
+              @if (field.type === 'select') {
+                <select
+                  [formControl]="getControl(field.key)"
+                  [ngClass]="{
+                    'flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary': true,
+                    'border-b-gray-300': !(field.errors?.length),
+                    'border-b-danger': field.errors?.length
+                  }"
+                >
+                  @for (opt of field.options ?? []; track opt.value) {
+                    <option [value]="opt.value">{{ opt.label }}</option>
+                  }
+                </select>
+              }
+            </div>
+
+            <!-- 🔴 Error Display -->
+            @if (field.errors?.length) {
+              <ul class="ml-32 text-sm text-danger space-y-0.5">
+                @for (err of field.errors; track err) {
+                  <li>• {{ err }}</li>
+                }
+              </ul>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- ✅ Submit Button -->
+  <div class="pt-2">
+    <button type="submit" class="bg-primary text-white px-6 py-2 rounded hover:opacity-90">
+      Submit
+    </button>
+  </div>
+</form>

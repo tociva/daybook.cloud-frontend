@@ -1,11 +1,74 @@
-import { Component } from '@angular/core';
+import {
+  Component,
+  computed,
+  model,
+  output,
+  Signal
+} from '@angular/core';
+import {
+  FormGroup,
+  ReactiveFormsModule,
+  AbstractControl,
+  FormControl
+} from '@angular/forms';
+import { FormField } from '../../../../../util/types/form-field.model';
+import { NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-two-column-form',
-  imports: [],
+  standalone: true,
+  imports: [ReactiveFormsModule, NgClass],
   templateUrl: './two-column-form.component.html',
   styleUrl: './two-column-form.component.css'
 })
-export class TwoColumnFormComponent {
+export class TwoColumnFormComponent<T> {
 
+  readonly model = model<{
+    form: FormGroup;
+    fields: FormField[];
+    title: string;
+  }>({
+    form: new FormGroup({}),
+    fields: [],
+    title: '',
+  });
+
+  readonly formSubmit = output<T>();
+
+  readonly groupedFields: Signal<Record<string, FormField[]>> = computed(() => {
+    const fields = this.model().fields;
+    const grouped: Record<string, FormField[]> = {};
+
+    for (const field of fields) {
+      const group = field.group ?? 'Default';
+      grouped[group] ??= [];
+      grouped[group].push(field);
+    }
+    return grouped;
+  });
+
+  protected readonly groupKeys = computed(() => Object.keys(this.groupedFields()));
+
+  getControl<K extends string>(key: K): FormControl<unknown> {
+    const control = this.model().form.get(key);
+    if (!control || !(control instanceof FormControl)) {
+      throw new Error(`Form control not found or not a FormControl: ${key}`);
+    }
+    return control as FormControl<unknown>; // fallback default
+  }
+
+  onSubmit(): void {
+    const fields = this.model().fields.map(field => ({
+      ...field,
+      errors: [],
+    }));
+    
+    this.model.update((prev) => ({
+      ...prev,
+      fields,
+    }));
+  
+    this.formSubmit.emit(this.model().form.value as T);
+  }
+  
 }

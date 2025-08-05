@@ -1,1 +1,3 @@
-<app-two-column-form></app-two-column-form>
+<app-two-column-form [model]="formModel()"
+(formSubmit)="handleSubmit($event)"
+/>
