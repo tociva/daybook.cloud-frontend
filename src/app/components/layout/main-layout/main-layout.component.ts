@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, effect, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { AuthStore } from '../../core/auth/store/auth/auth.store';
@@ -8,7 +8,7 @@ import { HeaderComponent } from '../header/header.component';
 
 @Component({
   selector: 'app-main-layout',
-  imports: [CommonModule, RouterOutlet, LeftDrawerComponent, HeaderComponent],
+  imports: [RouterOutlet, LeftDrawerComponent, HeaderComponent],
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.css'
 })

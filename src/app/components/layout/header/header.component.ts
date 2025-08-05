@@ -2,14 +2,14 @@ import { Component, effect, HostListener, inject } from '@angular/core';
 import { NgIconComponent } from '@ng-icons/core';
 import { ViewStore } from '../store/view/view.store';
 import { AuthStore } from '../../core/auth/store/auth/auth.store';
-import { CommonModule } from '@angular/common';
+
 import { Store } from '@ngrx/store';
 import * as AuthActions from '../../core/auth/store/auth/auth.actions';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-header',
-  imports: [NgIconComponent, CommonModule],
+  imports: [NgIconComponent],
   templateUrl: './header.component.html',
   styleUrl: './header.component.css'
 })

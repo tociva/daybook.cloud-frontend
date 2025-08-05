@@ -1,34 +1,35 @@
 <div class="h-screen w-screen bg-primary text-on-primary flex flex-col items-center justify-center">
-    <h1 class="font-lobster text-5xl sm:text-6xl mb-2 tracking-wide">
-      Daybook.Cloud
-    </h1>
-    <p class="text-lg sm:text-xl font-medium opacity-80">
-      <span class="wave-letter wave-delay-0">D</span>
-      <span class="wave-letter wave-delay-1">i</span>
-      <span class="wave-letter wave-delay-2">v</span>
-      <span class="wave-letter wave-delay-3">e</span>
-      <span class="wave-letter wave-delay-4">&nbsp;</span>
-      <span class="wave-letter wave-delay-5">i</span>
-      <span class="wave-letter wave-delay-6">n</span>
-      <span class="wave-letter wave-delay-7">t</span>
-      <span class="wave-letter wave-delay-8">o</span>
-      <span class="wave-letter wave-delay-9">&nbsp;</span>
-      <span class="wave-letter wave-delay-10">s</span>
-      <span class="wave-letter wave-delay-11">i</span>
-      <span class="wave-letter wave-delay-12">m</span>
-      <span class="wave-letter wave-delay-13">p</span>
-      <span class="wave-letter wave-delay-14">l</span>
-      <span class="wave-letter wave-delay-15">i</span>
-      <span class="wave-letter wave-delay-16">c</span>
-      <span class="wave-letter wave-delay-17">i</span>
-      <span class="wave-letter wave-delay-18">t</span>
-      <span class="wave-letter wave-delay-19">y</span>
-    </p>
+  <h1 class="font-lobster text-5xl sm:text-6xl mb-2 tracking-wide">
+    Daybook.Cloud
+  </h1>
+  <p class="text-lg sm:text-xl font-medium opacity-80">
+    <span class="wave-letter wave-delay-0">D</span>
+    <span class="wave-letter wave-delay-1">i</span>
+    <span class="wave-letter wave-delay-2">v</span>
+    <span class="wave-letter wave-delay-3">e</span>
+    <span class="wave-letter wave-delay-4">&nbsp;</span>
+    <span class="wave-letter wave-delay-5">i</span>
+    <span class="wave-letter wave-delay-6">n</span>
+    <span class="wave-letter wave-delay-7">t</span>
+    <span class="wave-letter wave-delay-8">o</span>
+    <span class="wave-letter wave-delay-9">&nbsp;</span>
+    <span class="wave-letter wave-delay-10">s</span>
+    <span class="wave-letter wave-delay-11">i</span>
+    <span class="wave-letter wave-delay-12">m</span>
+    <span class="wave-letter wave-delay-13">p</span>
+    <span class="wave-letter wave-delay-14">l</span>
+    <span class="wave-letter wave-delay-15">i</span>
+    <span class="wave-letter wave-delay-16">c</span>
+    <span class="wave-letter wave-delay-17">i</span>
+    <span class="wave-letter wave-delay-18">t</span>
+    <span class="wave-letter wave-delay-19">y</span>
+  </p>
+  @if (message()) {
     <p
-      *ngIf="message()"
       class="mt-4 text-sm sm:text-base text-info bg-info/10 px-4 py-2 rounded"
-    >
+      >
       {{ message() }}
     </p>
+  }
 
-  </div>
+</div>

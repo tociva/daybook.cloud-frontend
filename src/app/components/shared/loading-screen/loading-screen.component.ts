@@ -1,9 +1,9 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, model } from '@angular/core';
 
 @Component({
   selector: 'app-loading-screen',
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './loading-screen.component.html',
   styleUrl: './loading-screen.component.css'
 })

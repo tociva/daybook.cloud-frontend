@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, effect, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Store } from '@ngrx/store';
@@ -15,7 +15,7 @@ enum LoadingStatus {
 }
 @Component({
   selector: 'app-root',
-  imports: [CommonModule,RouterOutlet,LoadingScreenComponent],
+  imports: [RouterOutlet, LoadingScreenComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
