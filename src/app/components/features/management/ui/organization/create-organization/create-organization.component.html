@@ -1,1 +1,156 @@
-<p>create-organization works!</p>
+<h1 class="text-2xl font-semibold text-gray-800 mb-4 text-center">Organization Setup</h1>
+
+<form
+  [formGroup]="form"
+  (ngSubmit)="submitForm()"
+  class="grid grid-cols-1 gap-6 max-w-6xl mx-auto p-6 bg-white shadow rounded"
+>
+
+  <!-- 🟦 Basic Details -->
+  <div class="p-4 border border-gray-300 rounded bg-white">
+    <h2 class="font-semibold text-base mb-4">Basic Details</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+      <div class="flex items-center gap-4">
+        <label class="w-32 text-sm text-gray-700">Name *</label>
+        <input type="text" formControlName="name" class="flex-1 border-0 border-b border-gray-300 bg-transparent
+         text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary" />
+      </div>
+      <div class="flex items-center gap-4">
+        <label class="w-32 text-sm text-gray-700">Email *</label>
+        <input type="email" formControlName="email"
+        class="flex-1 border-0 border-b border-gray-300 bg-transparent
+         text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary"/>
+      </div>
+      <div class="flex items-center gap-4">
+        <label class="w-32 text-sm text-gray-700">Mobile</label>
+        <input type="text" formControlName="mobile"
+        class="flex-1 border-0 border-b border-gray-300 bg-transparent
+         text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary"/>
+      </div>
+      <div class="flex items-center gap-4">
+        <label class="w-32 text-sm text-gray-700">State</label>
+        <input type="text" formControlName="state"
+        class="flex-1 border-0 border-b border-gray-300 bg-transparent
+         text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary"/>
+      </div>
+      <div class="md:col-span-2 flex items-center gap-4">
+        <label class="w-32 text-sm text-gray-700">Description</label>
+        <textarea formControlName="description" rows="2"
+        class="flex-1 border-0 border-b border-gray-300 bg-transparent
+         text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🟩 Address Info -->
+  <div class="p-4 border border-gray-300 rounded bg-white">
+    <h2 class="font-semibold text-base mb-4">Address Info</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4" formGroupName="address">
+      <div class="flex items-center gap-4">
+        <label class="w-32 text-sm text-gray-700">Line 1</label>
+        <input type="text" formControlName="line1"
+        class="flex-1 border-0 border-b border-gray-300 bg-transparent
+         text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary"/>
+      </div>
+      <div class="flex items-center gap-4">
+        <label class="w-32 text-sm text-gray-700">Line 2</label>
+        <input type="text" formControlName="line2"
+        class="flex-1 border-0 border-b border-gray-300 bg-transparent
+         text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary"/>
+      </div>
+      <div class="flex items-center gap-4">
+        <label class="w-32 text-sm text-gray-700">City</label>
+        <input type="text" formControlName="city"
+        class="flex-1 border-0 border-b border-gray-300 bg-transparent
+         text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary"/>
+      </div>
+      <div class="flex items-center gap-4">
+        <label class="w-32 text-sm text-gray-700">Pincode</label>
+        <input type="text" formControlName="pincode"
+        class="flex-1 border-0 border-b border-gray-300 bg-transparent
+         text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary"/>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mt-4">
+      <div class="flex items-center gap-4">
+        <label class="w-32 text-sm text-gray-700">GSTIN</label>
+        <input type="text" formControlName="gstin"
+        class="flex-1 border-0 border-b border-gray-300 bg-transparent
+         text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary"/>
+      </div>
+      <div class="flex items-center gap-4">
+        <label class="w-32 text-sm text-gray-700">Country</label>
+        <input type="text" formControlName="country"
+        class="flex-1 border-0 border-b border-gray-300 bg-transparent
+         text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary"/>
+      </div>
+      <div class="flex items-center gap-4">
+        <label class="w-32 text-sm text-gray-700">Currency</label>
+        <select formControlName="currency"
+        class="flex-1 border-0 border-b border-gray-300 bg-transparent
+         text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary">
+    <option value="INR">INR</option>
+    <option value="USD">USD</option>
+  </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🟨 Financial Info -->
+  <div class="p-4 border border-gray-300 rounded bg-white">
+    <h2 class="font-semibold text-base mb-4">Financial Info</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+      <div class="flex items-center gap-4">
+        <label class="w-32 text-sm text-gray-700">Fiscal Start *</label>
+        <input type="date" formControlName="fiscalstart"
+        class="flex-1 border-0 border-b border-gray-300 bg-transparent
+         text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary"/>
+      </div>
+      <div class="flex items-center gap-4">
+        <label class="w-32 text-sm text-gray-700">Fiscal Name *</label>
+        <input type="text" formControlName="fiscalname"
+        class="flex-1 border-0 border-b border-gray-300 bg-transparent
+         text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary"/>
+      </div>
+      <div class="flex items-center gap-4">
+        <label class="w-32 text-sm text-gray-700">Start Date *</label>
+        <input type="date" formControlName="startdate"
+        class="flex-1 border-0 border-b border-gray-300 bg-transparent
+         text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary"/>
+      </div>
+      <div class="flex items-center gap-4">
+        <label class="w-32 text-sm text-gray-700">End Date *</label>
+        <input type="date" formControlName="enddate"
+        class="flex-1 border-0 border-b border-gray-300 bg-transparent
+         text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔢 Numbering Formats -->
+  <div class="p-4 border border-gray-300 rounded bg-white">
+    <h2 class="font-semibold text-base mb-4">Numbering Formats</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+      <div class="flex items-center gap-4">
+        <label class="w-32 text-sm text-gray-700">Invoice No.</label>
+        <input type="text" formControlName="invnumber"
+        class="flex-1 border-0 border-b border-gray-300 bg-transparent
+         text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary"/>
+      </div>
+      <div class="flex items-center gap-4">
+        <label class="w-32 text-sm text-gray-700">Journal No.</label>
+        <input type="text" formControlName="jnumber"
+        class="flex-1 border-0 border-b border-gray-300 bg-transparent
+         text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🔘 Submit -->
+  <div class="pt-2">
+    <button type="submit" class="bg-primary text-white px-6 py-2 rounded hover:opacity-90">
+      Submit
+    </button>
+  </div>
+</form>
