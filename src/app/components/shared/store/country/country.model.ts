@@ -13,4 +13,5 @@ export interface CountryState {
   countries: Country[];
   loaded: boolean;
   error: string | null;
+  search: string;
 }

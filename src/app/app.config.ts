@@ -13,6 +13,7 @@ import { provideStore } from '@ngrx/store';
 import { provideAppIcons } from './providers/icons.provider';
 import { UserSessionEffects } from './components/core/auth/store/user-session/user-session.effects';
 import { OrganizationEffects } from './components/features/management/store/organization/organization.effects';
+import { CountryEffects } from './components/shared/store/country/country.effect';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -25,6 +26,7 @@ export const appConfig: ApplicationConfig = {
       AuthEffects,
       UserSessionEffects,
       OrganizationEffects,
+      CountryEffects,
     ]),
     provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
     provideRouterStore(),

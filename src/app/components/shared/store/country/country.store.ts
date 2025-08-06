@@ -8,7 +8,18 @@ export const CountryStore = signalStore(
   withState<CountryState>(initialCountryState),
 
   withComputed((state) => ({
-    countriesLoaded: () => Boolean(state.countries()),
+    countriesLoaded: () => {
+      const countries = state.countries();
+      return countries && countries.length > 0;
+    },
+
+    filteredCountries: () => {
+      const searchTerm = state.search().toLowerCase();
+      return state.countries().filter((country) =>
+        country.name.toLowerCase().includes(searchTerm)
+      );
+    },
+    
   })),
 
   withMethods((store) => ({
@@ -33,6 +44,10 @@ export const CountryStore = signalStore(
 
     setError(error: any) {
       patchState(store, { error });
+    },
+
+    setSearch(search: string) {
+      patchState(store, { search });
     },
 
     resetState() {

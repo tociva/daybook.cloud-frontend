@@ -1,3 +1,9 @@
 <app-two-column-form [model]="formModel()"
 (formSubmit)="handleSubmit($event)"
 />
+<app-auto-complete (onSearch)="onSearch($event)"
+[items]="countries"
+[displayValue]="findDisplayValue"
+[trackBy]="findTrackBy"
+/>
+

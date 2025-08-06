@@ -1,19 +1,21 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, effect, inject, model, signal } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { FormValidator } from '../../../../../../../util/form/form-validator';
 import { FormUtil } from '../../../../../../../util/form/form.util';
 import { willPassEmailValidation, willPassRequiredValidation } from '../../../../../../../util/form/validation.uti';
 import { FormField } from '../../../../../../../util/types/form-field.model';
+import { AutoComplete } from '../../../../../shared/auto-complete/auto-complete';
 import { TwoColumnFormComponent } from '../../../../../shared/forms/two-column-form/two-column-form.component';
 import { loadCountries } from '../../../../../shared/store/country/country.action';
+import { Country } from '../../../../../shared/store/country/country.model';
 import { CountryStore } from '../../../../../shared/store/country/country.store';
 import { OrganizationBootstrap } from '../../../store/organization/organization.model';
 
 @Component({
   selector: 'app-create-organization',
   standalone: true,
-  imports: [TwoColumnFormComponent],
+  imports: [TwoColumnFormComponent, AutoComplete],
   templateUrl: './create-organization.component.html',
   styleUrl: './create-organization.component.css',
 })
@@ -23,9 +25,9 @@ export class CreateOrganizationComponent {
   private readonly countryStore = inject(CountryStore);
 
   private readonly store = inject(Store);
+  countries:Country[] = [];
 
-  readonly countries = this.countryStore.countries;
-  readonly countriesLoaded = this.countryStore.countriesLoaded;
+  selectedCountry = signal<Country | null>(null);
   
   readonly orgFields = signal<FormField[]>([
     // 🟦 Basic Details
@@ -123,24 +125,19 @@ export class CreateOrganizationComponent {
     title: 'Organization Setup',
   });
 
-  readonly loadedCountries = computed(() => {
-    if (this.countriesLoaded()) {
-      return this.countries();
-    }
-    return [];
-  });
+
 
   constructor() {
+
     effect(() => {
-      if (this.countriesLoaded()) {
-        const list = this.countries();
-        console.log('Countries loaded:', list);
-        // You can trigger any additional logic here
+      if (this.countryStore.countriesLoaded()) {
+        this.countries = this.countryStore.filteredCountries();
+        
+      } 
+      else {
+        this.store.dispatch(loadCountries());
       }
     });
-
-    // Trigger the load
-    this.store.dispatch(loadCountries());
 
   }
   
@@ -158,5 +155,16 @@ export class CreateOrganizationComponent {
   
     console.log('✅ Valid submission:', data);
   }
-  
+
+  onSearch(value: string) {
+    this.countryStore.setSearch(value);
+  }
+
+  findDisplayValue(item: Country): string {
+    return item.name;
+  }
+
+  findTrackBy(item: Country): string {
+    return item.name;
+  }
 }
