@@ -25,23 +25,24 @@ export class CreateOrganizationComponent {
   private readonly countryStore = inject(CountryStore);
 
   private readonly store = inject(Store);
-  countries:Country[] = [];
+
+  countries = signal<Country[]>([]);
 
   selectedCountry = signal<Country | null>(null);
   
   readonly orgFields = signal<FormField[]>([
     // 🟦 Basic Details
-    { key: 'name', label: 'Name', type: 'text', required: true, group: 'Basic Details', validators:(value: string) => {
-      if(!willPassRequiredValidation(value)) {
+    { key: 'name', label: 'Name', type: 'text', required: true, group: 'Basic Details', validators:(value: unknown) => {
+      if(!willPassRequiredValidation(value as string)) {
         return ['Name is required'];
       }
       return [];
     } },
-    { key: 'email', label: 'Email', type: 'email', required: true, group: 'Basic Details', validators:(value: string) => {
-      if(!willPassRequiredValidation(value)) {
+    { key: 'email', label: 'Email', type: 'email', required: true, group: 'Basic Details', validators:(value: unknown) => {
+      if(!willPassRequiredValidation(value as string)) {
         return ['Email is required'];
       }
-      if(!willPassEmailValidation(value)) {
+      if(!willPassEmailValidation(value as string)) {
         return ['Invalid email address'];
       }
       return [];
@@ -51,8 +52,8 @@ export class CreateOrganizationComponent {
     { key: 'description', label: 'Description', type: 'textarea', group: 'Basic Details' },
   
     // 🟩 Address Info
-    { key: 'address.line1', label: 'Line 1', type: 'text', group: 'Address Info', required: true, validators:(value: string) => {
-      if(!willPassRequiredValidation(value)) {
+    { key: 'address.line1', label: 'Line 1', type: 'text', group: 'Address Info', required: true, validators:(value: unknown) => {
+      if(!willPassRequiredValidation(value as string)) {
         return ['Address Line 1 is required'];
       }
       return [];
@@ -61,7 +62,19 @@ export class CreateOrganizationComponent {
     { key: 'address.city', label: 'City', type: 'text', group: 'Address Info' },
     { key: 'address.pincode', label: 'Pincode', type: 'text', group: 'Address Info' },
     { key: 'gstin', label: 'GSTIN', type: 'text', group: 'Address Info' },
-    { key: 'country', label: 'Country', type: 'text', group: 'Address Info' },
+    { key: 'country', label: 'Country', type: 'auto-complete', group: 'Address Info',
+      autoComplete: {
+        items: this.countries,
+        displayValue: (item: Country) => item.name,
+        trackBy: (item: Country) => item.name,
+        onSearch: (value: string) => {
+          this.countryStore.setSearch(value);
+        },
+        onSelect: (item: Country) => {
+          this.selectedCountry.set(item);
+        }
+      }
+     },
     {
       key: 'currency',
       label: 'Currency',
@@ -75,40 +88,40 @@ export class CreateOrganizationComponent {
     },
   
     // 🟨 Financial Info
-    { key: 'fiscalstart', label: 'Fiscal Start', type: 'date', group: 'Financial Info', required: true, validators:(value: string) => {
-      if(!willPassRequiredValidation(value)) {
+    { key: 'fiscalstart', label: 'Fiscal Start', type: 'date', group: 'Financial Info', required: true, validators:(value: unknown) => {
+      if(!willPassRequiredValidation(value as string)) {
         return ['Fiscal Start is required'];
       }
       return [];
     } },
-    { key: 'fiscalname', label: 'Fiscal Name', type: 'text', group: 'Financial Info', required: true, validators:(value: string) => {
-      if(!willPassRequiredValidation(value)) {
+    { key: 'fiscalname', label: 'Fiscal Name', type: 'text', group: 'Financial Info', required: true, validators:(value: unknown) => {
+      if(!willPassRequiredValidation(value as string)) {
         return ['Fiscal Name is required'];
       }
       return [];
     } },
-    { key: 'startdate', label: 'Start Date', type: 'date', group: 'Financial Info', required: true, validators:(value: string) => {
-      if(!willPassRequiredValidation(value)) {
+    { key: 'startdate', label: 'Start Date', type: 'date', group: 'Financial Info', required: true, validators:(value: unknown) => {
+      if(!willPassRequiredValidation(value as string)) {
         return ['Start Date is required'];
       }
       return [];
     } },
-    { key: 'enddate', label: 'End Date', type: 'date', group: 'Financial Info', required: true, validators:(value: string) => {
-      if(!willPassRequiredValidation(value)) {
+    { key: 'enddate', label: 'End Date', type: 'date', group: 'Financial Info', required: true, validators:(value: unknown) => {
+      if(!willPassRequiredValidation(value as string)) {
         return ['End Date is required'];
       }
       return [];
     } },
   
     // 🔢 Numbering Formats
-    { key: 'invnumber', label: 'Invoice No.', type: 'text', group: 'Numbering Formats', required: true, validators:(value: string) => {
-      if(!willPassRequiredValidation(value)) {
+    { key: 'invnumber', label: 'Invoice No.', type: 'text', group: 'Numbering Formats', required: true, validators:(value: unknown) => {
+      if(!willPassRequiredValidation(value as string)) {
         return ['Invoice No. is required'];
       }
       return [];
     } },
-    { key: 'jnumber', label: 'Journal No.', type: 'text', group: 'Numbering Formats', required: true, validators:(value: string) => {
-      if(!willPassRequiredValidation(value)) {
+    { key: 'jnumber', label: 'Journal No.', type: 'text', group: 'Numbering Formats', required: true, validators:(value: unknown) => {
+      if(!willPassRequiredValidation(value as string)) {
         return ['Journal No. is required'];
       }
       return [];
@@ -131,7 +144,7 @@ export class CreateOrganizationComponent {
 
     effect(() => {
       if (this.countryStore.countriesLoaded()) {
-        this.countries = this.countryStore.filteredCountries();
+        this.countries.set(this.countryStore.filteredCountries());
         
       } 
       else {

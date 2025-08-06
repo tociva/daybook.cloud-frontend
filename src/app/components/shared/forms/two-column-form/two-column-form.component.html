@@ -67,6 +67,24 @@
                   }
                 </select>
               }
+
+              <!-- 🔍 Auto Complete -->
+              @if (field.type === 'auto-complete') {
+                <app-auto-complete
+                  class="flex-1"
+                  [items]="field.autoComplete?.items()"
+                  [displayValue]="field.autoComplete?.displayValue"
+                  [trackBy]="field.autoComplete?.trackBy"
+                  (onSearch)="field.autoComplete?.onSearch($event)"
+                  (onSelect)="handleAutoCompleteSelect(field, $event)"
+                  [inputClass]="{
+                    'flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary': true,
+                    'border-b-gray-300': !(field.errors?.length),
+                    'border-b-danger': !!field.errors?.length
+                  }"
+                />
+
+              }
             </div>
 
             <!-- 🔴 Error Display -->

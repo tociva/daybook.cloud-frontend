@@ -1,11 +1,6 @@
 import { FormField } from '../types/form-field.model';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 
-export type ExtractFormControlMap<T extends FormField[]> = {
-  [K in T[number] as K['key']]: K extends FormField<infer V> ? FormControl<V> : FormControl<unknown>;
-};
-
-
 export class FormUtil {
   public static buildForm(fields: FormField[], fb: FormBuilder): FormGroup {
     const root: any = {};

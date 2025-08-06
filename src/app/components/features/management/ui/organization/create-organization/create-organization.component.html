@@ -2,7 +2,7 @@
 (formSubmit)="handleSubmit($event)"
 />
 <app-auto-complete (onSearch)="onSearch($event)"
-[items]="countries"
+[items]="countries()"
 [displayValue]="findDisplayValue"
 [trackBy]="findTrackBy"
 />

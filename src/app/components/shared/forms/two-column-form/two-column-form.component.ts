@@ -1,3 +1,4 @@
+import { NgClass } from '@angular/common';
 import {
   Component,
   computed,
@@ -6,18 +7,17 @@ import {
   Signal
 } from '@angular/core';
 import {
+  FormControl,
   FormGroup,
-  ReactiveFormsModule,
-  AbstractControl,
-  FormControl
+  ReactiveFormsModule
 } from '@angular/forms';
 import { FormField } from '../../../../../util/types/form-field.model';
-import { NgClass } from '@angular/common';
+import { AutoComplete } from '../../auto-complete/auto-complete';
 
 @Component({
   selector: 'app-two-column-form',
   standalone: true,
-  imports: [ReactiveFormsModule, NgClass],
+  imports: [ReactiveFormsModule, NgClass, AutoComplete],
   templateUrl: './two-column-form.component.html',
   styleUrl: './two-column-form.component.css'
 })
@@ -69,6 +69,13 @@ export class TwoColumnFormComponent<T> {
     }));
   
     this.formSubmit.emit(this.model().form.value as T);
+  }
+  handleAutoCompleteSelect(field: FormField, value: any): void {
+    field.autoComplete?.onSelect?.(value);
+    this.getControl(field.key).setValue(value);
+    this.getControl(field.key).setValue(value, { emitEvent: true });
+    this.getControl(field.key).markAsDirty();
+    this.getControl(field.key).markAsTouched();
   }
   
 }

@@ -1,11 +1,31 @@
+<div class="relative">
+
 <input
   type="text"
-  class="flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary border-b-gray-300"
-  (input)="onSearch.emit($event.target.value)"
+  style="width: 100%;"
+  [value]="selectedDisplayValue()"
+  (input)="handleInput($event.target.value)"
+  [ngClass]="inputClass()"
+  (focus)="onFocus()"
+  (keydown)="handleKeyDown($event)"
+  (blur)="showDropdown.set(false)"
 />
-
-<div>
-  @for (item of items(); track findTrackBy(item)) {
-    <div>{{ findDisplayValue(item) }}</div>
-  }
+@if (showDropdown() && items()?.length) {
+  <div class="absolute z-10 w-full bg-white border rounded shadow mt-1 max-h-60 overflow-auto scroll-padded">
+    @for (item of items(); let i = $index; track findTrackBy(item)) {
+      <div
+        #optionRef
+        class="px-4 py-2 cursor-pointer hover:bg-primary hover:text-white"
+        [class.bg-primary]="i === activeIndex()"
+        [class.text-white]="i === activeIndex()"
+        (click)="handleItemSelect(item)"
+        (mouseenter)="activeIndex.set(i)"
+        [attr.data-index]="i"
+      >
+        {{ findDisplayValue(item) }}
+      </div>
+    }
+    
+  </div>
+}
 </div>
