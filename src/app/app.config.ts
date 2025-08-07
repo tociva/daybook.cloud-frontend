@@ -7,8 +7,8 @@ import { provideStoreDevtools } from '@ngrx/store-devtools';
 
 import { routes } from './app.routes';
 import { authInterceptor } from './components/core/auth/auth.interceptor';
-import { AuthEffects } from './components/core/auth/store/auth/auth.effects';
-import { ConfigEffects } from './components/core/auth/store/config/config.effects';
+import { authEffects } from './components/core/auth/store/auth/auth.effects';
+import { configEffects } from './components/core/auth/store/config/config.effects';
 import { provideStore } from '@ngrx/store';
 import { provideAppIcons } from './providers/icons.provider';
 import { UserSessionEffects } from './components/core/auth/store/user-session/user-session.effects';
@@ -25,8 +25,8 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([authInterceptor])),
     provideStore(),
     provideEffects([
-      ConfigEffects,
-      AuthEffects,
+      configEffects,
+      authEffects,
       UserSessionEffects,
       OrganizationEffects,
       CountryEffects,
