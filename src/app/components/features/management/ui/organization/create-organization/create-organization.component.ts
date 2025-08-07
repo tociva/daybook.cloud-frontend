@@ -44,7 +44,7 @@ export class CreateOrganizationComponent {
         return ['Name is required'];
       }
       return [];
-    } },
+    }, value: 'Test Organization' },
     { key: 'email', label: 'Email', type: 'email', required: true, group: 'Basic Details', validators:(value: unknown) => {
       if(!willPassRequiredValidation(value as string)) {
         return ['Email is required'];
@@ -53,23 +53,8 @@ export class CreateOrganizationComponent {
         return ['Invalid email address'];
       }
       return [];
-    } },
-    { key: 'mobile', label: 'Mobile', type: 'text', group: 'Basic Details' },
-    { key: 'state', label: 'State', type: 'text', group: 'Basic Details' },
-    { key: 'description', label: 'Description', type: 'textarea', group: 'Basic Details' },
-  
-    // 🟩 Address Info
-    { key: 'address.line1', label: 'Line 1', type: 'text', group: 'Address Info', required: true, validators:(value: unknown) => {
-      if(!willPassRequiredValidation(value as string)) {
-        return ['Address Line 1 is required'];
-      }
-      return [];
-    } },
-    { key: 'address.line2', label: 'Line 2', type: 'text', group: 'Address Info' },
-    { key: 'address.city', label: 'City', type: 'text', group: 'Address Info' },
-    { key: 'address.pincode', label: 'Pincode', type: 'text', group: 'Address Info' },
-    { key: 'gstin', label: 'GSTIN', type: 'text', group: 'Address Info' },
-    { key: 'country', label: 'Country', type: 'auto-complete', group: 'Address Info',
+    }, value: 'test@test.com' },
+    { key: 'country', label: 'Country', type: 'auto-complete', group: 'Basic Details',
       autoComplete: {
         items: this.countries,
         displayValue: (item: Country) => `${toFlagEmoji(item.iso)} ${item.name}`,
@@ -88,6 +73,10 @@ export class CreateOrganizationComponent {
             if(dateFormatF) {
               dateFormatF.value = item.dateFormat;
             }
+            const mobileF = fields.find(fld => fld.key === 'mobile');
+            if(mobileF){
+              mobileF.value = `+${item.code}-`;
+            }
   
             this.formModel.set({
               ...this.formModel(),
@@ -97,32 +86,47 @@ export class CreateOrganizationComponent {
         }
       }
      },
+    { key: 'mobile', label: 'Mobile', type: 'text', group: 'Basic Details', value: '9876543210' },
+    { key: 'state', label: 'State', type: 'text', group: 'Basic Details', value: 'Test State' },
+    { key: 'description', label: 'Description', type: 'textarea', group: 'Basic Details', value: 'Test Description' },
   
+    // 🟩 Address Info
+    { key: 'address.line1', label: 'Line 1', type: 'text', group: 'Address Info', required: true, validators:(value: unknown) => {
+      if(!willPassRequiredValidation(value as string)) {
+        return ['Address Line 1 is required'];
+      }
+      return [];
+    }, value: 'Test Line 1' },
+    { key: 'address.line2', label: 'Line 2', type: 'text', group: 'Address Info', value: 'Test Line 2' },
+    { key: 'address.city', label: 'City', type: 'text', group: 'Address Info', value: 'Test City' },
+    { key: 'address.pincode', label: 'Pincode', type: 'text', group: 'Address Info', value: '123456' },
+    { key: 'gstin', label: 'GSTIN', type: 'text', group: 'Address Info', value: '1234567890' },
+    
     // 🟨 Financial Info
     { key: 'fiscalstart', label: 'Fiscal Start', type: 'date', group: 'Financial Info', required: true, validators:(value: unknown) => {
       if(!willPassRequiredValidation(value as string)) {
         return ['Fiscal Start is required'];
       }
       return [];
-    } },
+    }, value: '2025-04-01' },
     { key: 'fiscalname', label: 'Fiscal Name', type: 'text', group: 'Financial Info', required: true, validators:(value: unknown) => {
       if(!willPassRequiredValidation(value as string)) {
         return ['Fiscal Name is required'];
       }
       return [];
-    } },
+    }, value: 'Test Fiscal Name' },
     { key: 'startdate', label: 'Start Date', type: 'date', group: 'Financial Info', required: true, validators:(value: unknown) => {
       if(!willPassRequiredValidation(value as string)) {
         return ['Start Date is required'];
       }
       return [];
-    } },
+    }, value: '2025-04-01' },
     { key: 'enddate', label: 'End Date', type: 'date', group: 'Financial Info', required: true, validators:(value: unknown) => {
       if(!willPassRequiredValidation(value as string)) {
         return ['End Date is required'];
       }
       return [];
-    } },
+    }, value: '2025-03-31' },
   
     // 🔢 Numbering Formats
     { key: 'invnumber', label: 'Invoice number format', type: 'text', group: 'Other Info', required: true, validators:(value: unknown) => {
@@ -130,13 +134,13 @@ export class CreateOrganizationComponent {
         return ['Invoice No. is required'];
       }
       return [];
-    } },
+    }, value: 'Test Invoice Number Format' },
     { key: 'jnumber', label: 'Journal number format', type: 'text', group: 'Other Info', required: true, validators:(value: unknown) => {
       if(!willPassRequiredValidation(value as string)) {
         return ['Journal No. is required'];
       }
       return [];
-    } },
+    }, value: 'Test Journal Number Format' },
     {
       key: 'currency',
       label: 'Currency',

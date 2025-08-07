@@ -2,8 +2,10 @@ import { NgClass } from '@angular/common';
 import {
   Component,
   computed,
+  effect,
   model,
   output,
+  signal,
   Signal
 } from '@angular/core';
 import {
@@ -35,7 +37,8 @@ export class TwoColumnFormComponent<T> {
   });
 
   readonly formSubmit = output<T>();
-
+  readonly submitting = signal(false);
+  
   readonly groupedFields: Signal<Record<string, FormField[]>> = computed(() => {
     const fields = this.model().fields;
     const grouped: Record<string, FormField[]> = {};
@@ -58,7 +61,18 @@ export class TwoColumnFormComponent<T> {
     return control as FormControl<unknown>; // fallback default
   }
 
+  constructor() {
+    effect(() => {
+      const _ = this.model();
+      this.submitting.set(false);
+    });
+  }
+
+  
   onSubmit(): void {
+    if (this.submitting()) return;
+    this.submitting.set(true);
+
     const fields = this.model().fields.map(field => ({
       ...field,
       errors: [],
@@ -79,7 +93,4 @@ export class TwoColumnFormComponent<T> {
     this.getControl(field.key).markAsTouched();
   }
 
-  onCancel(): void {
-  }
-  
 }

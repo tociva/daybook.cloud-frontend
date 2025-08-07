@@ -114,6 +114,11 @@
     <button
       type="submit"
       class="bg-primary text-white px-6 py-2 rounded hover:opacity-90 cursor-pointer"
+      [disabled]="submitting()"
+      [ngClass]="{
+        'cursor-not-allowed opacity-50': submitting(),
+        'cursor-pointer': !submitting()
+      }"
     >
       Submit
     </button>

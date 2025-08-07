@@ -16,8 +16,8 @@ export class FormUtil {
       }
 
       current[controlName] = field.required
-        ? fb.control(null, Validators.required)
-        : fb.control(null);
+        ? fb.control(field.value ?? null, Validators.required)
+        : fb.control(field.value ?? null);
     }
 
     return this.createNestedGroup(root, fb);
