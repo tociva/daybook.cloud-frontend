@@ -16,6 +16,7 @@ import { CurrencyStore } from '../../../../../shared/store/currency/currency.sto
 import { DateFormat } from '../../../../../shared/store/date-format/date-format.model';
 import { DateFormatStore } from '../../../../../shared/store/date-format/date-format.store';
 import { OrganizationBootstrap } from '../../../store/organization/organization.model';
+import { bootstrapOrganization } from '../../../store/organization/organization.actions';
 
 @Component({
   selector: 'app-create-organization',
@@ -96,32 +97,6 @@ export class CreateOrganizationComponent {
         }
       }
      },
-    {
-      key: 'currency',
-      label: 'Currency',
-      type: 'auto-complete',
-      group: 'Address Info',
-      required: true,
-      autoComplete: {
-        items: this.currencies,
-        displayValue: (item: Currency) => `${item.name} (${String.fromCharCode(parseInt(item.unicode, 16))})`,
-        trackBy: (item: Currency) => item.name,
-        onSearch: (value: string) => {
-          this.currencyStore.setSearch(value);
-        }
-      }
-    },
-    { key: 'dateformat', label: 'Date Format', type: 'auto-complete', group: 'Address Info',
-      required: true,
-      autoComplete: {
-        items: this.dateFormats,
-        displayValue: (item: DateFormat) => `${item.name} (${item.value})`,
-        trackBy: (item: DateFormat) => item.name,
-        onSearch: (value: string) => {
-          this.dateFormatStore.setSearch(value);
-        }
-      }
-    },
   
     // 🟨 Financial Info
     { key: 'fiscalstart', label: 'Fiscal Start', type: 'date', group: 'Financial Info', required: true, validators:(value: unknown) => {
@@ -150,18 +125,44 @@ export class CreateOrganizationComponent {
     } },
   
     // 🔢 Numbering Formats
-    { key: 'invnumber', label: 'Invoice No.', type: 'text', group: 'Numbering Formats', required: true, validators:(value: unknown) => {
+    { key: 'invnumber', label: 'Invoice number format', type: 'text', group: 'Other Info', required: true, validators:(value: unknown) => {
       if(!willPassRequiredValidation(value as string)) {
         return ['Invoice No. is required'];
       }
       return [];
     } },
-    { key: 'jnumber', label: 'Journal No.', type: 'text', group: 'Numbering Formats', required: true, validators:(value: unknown) => {
+    { key: 'jnumber', label: 'Journal number format', type: 'text', group: 'Other Info', required: true, validators:(value: unknown) => {
       if(!willPassRequiredValidation(value as string)) {
         return ['Journal No. is required'];
       }
       return [];
     } },
+    {
+      key: 'currency',
+      label: 'Currency',
+      type: 'auto-complete',
+      group: 'Other Info',
+      required: true,
+      autoComplete: {
+        items: this.currencies,
+        displayValue: (item: Currency) => `${item.name} (${String.fromCharCode(parseInt(item.unicode, 16))})`,
+        trackBy: (item: Currency) => item.name,
+        onSearch: (value: string) => {
+          this.currencyStore.setSearch(value);
+        }
+      }
+    },
+    { key: 'dateformat', label: 'Date Format', type: 'auto-complete', group: 'Other Info',
+      required: true,
+      autoComplete: {
+        items: this.dateFormats,
+        displayValue: (item: DateFormat) => `${item.name} (${item.value})`,
+        trackBy: (item: DateFormat) => item.name,
+        onSearch: (value: string) => {
+          this.dateFormatStore.setSearch(value);
+        }
+      }
+    },
   ]);
   
 
@@ -208,7 +209,7 @@ export class CreateOrganizationComponent {
       return;
     }
   
-    console.log('✅ Valid submission:', data);
+    this.store.dispatch(bootstrapOrganization({ organization: data }));
   }
 
   onSearch(value: string) {

@@ -13,11 +13,12 @@ import {
 } from '@angular/forms';
 import { FormField } from '../../../../util/types/form-field.model';
 import { AutoComplete } from '../../auto-complete/auto-complete';
+import { CancelButton } from '../../cancel-button/cancel-button';
 
 @Component({
   selector: 'app-two-column-form',
   standalone: true,
-  imports: [ReactiveFormsModule, NgClass, AutoComplete],
+  imports: [ReactiveFormsModule, NgClass, AutoComplete, CancelButton],
   templateUrl: './two-column-form.component.html',
   styleUrl: './two-column-form.component.css'
 })
@@ -76,6 +77,9 @@ export class TwoColumnFormComponent<T> {
     this.getControl(field.key).setValue(value, { emitEvent: true });
     this.getControl(field.key).markAsDirty();
     this.getControl(field.key).markAsTouched();
+  }
+
+  onCancel(): void {
   }
   
 }
