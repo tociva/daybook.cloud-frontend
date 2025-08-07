@@ -6,8 +6,6 @@ import { catchError, finalize, map, Observable, of, switchMap } from 'rxjs';
 import { ToastStore } from '../components/shared/store/toast/toast.store';
 import { UiStore } from '../state/ui/ui.store';
 
-
-
 // For simpler usage, let's create a more straightforward version
 export function handleHttpEffect<T>(
   options: {
@@ -20,12 +18,12 @@ export function handleHttpEffect<T>(
     errorMessage?: string;
   }
 ) {
-  const actions$ = inject(Actions);
-  const http = inject(HttpClient);
-  const toast = inject(ToastStore);
-  const ui = inject(UiStore);
-
   return createEffect(() => {
+    const actions$ = inject(Actions);
+    const http = inject(HttpClient);
+    const toast = inject(ToastStore);
+    const ui = inject(UiStore);
+
     return actions$.pipe(
       ofType(options.trigger),
       switchMap((action) => {
@@ -60,12 +58,12 @@ export function handleHttpEffectNonDispatching<T>(
     errorMessage?: string;
   }
 ) {
-  const actions$ = inject(Actions);
-  const http = inject(HttpClient);
-  const toast = inject(ToastStore);
-  const ui = inject(UiStore);
-
   return createEffect(() => {
+    const actions$ = inject(Actions);
+    const http = inject(HttpClient);
+    const toast = inject(ToastStore);
+    const ui = inject(UiStore);
+
     return actions$.pipe(
       ofType(options.trigger),
       switchMap((action) => {
