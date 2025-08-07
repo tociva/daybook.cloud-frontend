@@ -898,7 +898,7 @@
         },
         "dateFormat": {
           "name": "DD/MM/YYYY",
-          "value": "DD/MM/YYYY"
+          "value": "31/01/2022"
         }
       },
       {
@@ -914,8 +914,8 @@
           "fraction": "Cent"
         },
         "dateFormat": {
-          "name": "31.01.2022",
-          "value": "DD.MM.YYYY"
+          "name": "DD.MM.YYYY",
+          "value": "31.01.2022"
         }
       },
       {
@@ -932,7 +932,7 @@
         },
         "dateFormat": {
           "name": "DD/MM/YYYY",
-          "value": "DD/MM/YYYY"
+          "value": "31/01/2022"
         }
       },
       {
@@ -949,7 +949,7 @@
         },
         "dateFormat": {
           "name": "DD-MM-YYYY",
-          "value": "DD-MM-YYYY"
+          "value": "31-01-2022"
         }
       },
       {
@@ -966,7 +966,7 @@
         },
         "dateFormat": {
           "name": "DD/MM/YYYY",
-          "value": "DD/MM/YYYY"
+          "value": "31/01/2022"
         }
       },
       {
@@ -982,8 +982,8 @@
           "fraction": "Cent"
         },
         "dateFormat": {
-          "name": "31.01.2022",
-          "value": "DD.MM.YYYY"
+          "name": "DD.MM.YYYY",
+          "value": "31.01.2022"
         }
       },
     {
