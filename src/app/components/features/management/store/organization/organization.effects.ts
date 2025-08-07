@@ -1,58 +1,99 @@
-import { inject, Injectable } from '@angular/core';
+import { inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { organizationActions } from './organization.actions';
-import { tap } from 'rxjs/operators';
+import { tap, catchError, mergeMap, map } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { Organization } from './organization.model';
 import { OrganizationStore } from './organization.store';
 import { ConfigStore } from '../../../../core/auth/store/config/config.store';
-import { handleHttpEffect } from '../../../../../util/handle-http-effect';
+import { toastActions } from '../../../../shared/store/toast/toast.actions';
 
-@Injectable()
-export class OrganizationEffects {
-  private readonly http = inject(HttpClient);
-  private readonly configStore = inject(ConfigStore);
-  private readonly store = inject(OrganizationStore);
+export const organizationEffects = {
+  // Bootstrap organization effect using createEffect
+  bootstrapOrganization: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const http = inject(HttpClient);
+      const configStore = inject(ConfigStore);
 
-  private get baseUrl(): string {
-    const envConfig = this.configStore.config();
-    return `${envConfig.apiBaseUrl}/organization/organization`;
-  }
+      return actions$.pipe(
+        ofType(organizationActions.bootstrapOrganization),
+        mergeMap((action) => {
+          const baseUrl = `${configStore.config().apiBaseUrl}/organization/organization`;
+          return http.post<Organization>(`${baseUrl}/bootstrap`, action.organization).pipe(
+            map((organization) => organizationActions.bootstrapOrganizationSuccess({ organization })),
+            catchError((error) => of(organizationActions.bootstrapOrganizationFailure({ error })))
+          );
+        })
+      );
+    },
+    { functional: true }
+  ),
 
-  // ✅ Refactored bootstrap effect using handleHttpEffect
-  readonly bootstrapOrganization$ = handleHttpEffect({
-    trigger: organizationActions.bootstrapOrganization,
-    actionName: 'bootstrapOrganization',
-    httpCall: (http, action) =>
-      http.post<Organization>(`${this.baseUrl}/bootstrap`, action.organization),
-    onSuccess: (organization) => organizationActions.bootstrapOrganizationSuccess({ organization }),
-    onError: (error) => organizationActions.bootstrapOrganizationFailure({ error }),
-    successMessage: 'Organization bootstrapped!',
-    errorMessage: 'Failed to bootstrap organization.'
-  });
+  // Handle success
+  bootstrapSuccess: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const store = inject(OrganizationStore);
 
-  // ✅ Handle success
-  readonly bootstrapSuccess$ = createEffect(
-    () =>
-      inject(Actions).pipe(
+      return actions$.pipe(
         ofType(organizationActions.bootstrapOrganizationSuccess),
         tap(({ organization }) => {
-          this.store.setItems([organization]);
+          store.setItems([organization]);
         })
-      ),
-    { dispatch: false }
-  );
+      );
+    },
+    { functional: true, dispatch: false }
+  ),
 
-  // ✅ Handle failure
-  readonly bootstrapFailure$ = createEffect(
-    () =>
-      inject(Actions).pipe(
+  // Handle failure
+  bootstrapFailure: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const store = inject(OrganizationStore);
+
+      return actions$.pipe(
         ofType(organizationActions.bootstrapOrganizationFailure),
         tap(({ error }) => {
-          this.store.setError(error);
+          store.setError(error);
         })
-      ),
-    { dispatch: false }
-  );
-}
+      );
+    },
+    { functional: true, dispatch: false }
+  ),
+
+  // Show success toast
+  bootstrapSuccessToast: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+
+      return actions$.pipe(
+        ofType(organizationActions.bootstrapOrganizationSuccess),
+        map(() => toastActions.show({ 
+          message: 'Organization bootstrapped successfully!', 
+          toastType: 'success',
+          duration: 3000
+        }))
+      );
+    },
+    { functional: true }
+  ),
+
+  // Show error toast
+  bootstrapFailureToast: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+
+      return actions$.pipe(
+        ofType(organizationActions.bootstrapOrganizationFailure),
+        map(({ error }) => toastActions.show({ 
+          message: `Failed to bootstrap organization: ${error}`, 
+          toastType: 'error',
+          duration: 5000
+        }))
+      );
+    },
+    { functional: true }
+  )
+};

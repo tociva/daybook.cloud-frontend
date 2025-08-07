@@ -11,11 +11,11 @@ import { authEffects } from './components/core/auth/store/auth/auth.effects';
 import { configEffects } from './components/core/auth/store/config/config.effects';
 import { provideStore } from '@ngrx/store';
 import { provideAppIcons } from './providers/icons.provider';
-import { UserSessionEffects } from './components/core/auth/store/user-session/user-session.effects';
-import { OrganizationEffects } from './components/features/management/store/organization/organization.effects';
-import { CountryEffects } from './components/shared/store/country/country.effect';
-import { CurrencyEffects } from './components/shared/store/currency/currency.effect';
-import { DateFormatEffects } from './components/shared/store/date-format/date-format.effect';
+import { userSessionEffects } from './components/core/auth/store/user-session/user-session.effects';
+import { organizationEffects } from './components/features/management/store/organization/organization.effects';
+import { countryEffects } from './components/shared/store/country/country.effect';
+import { currencyEffects } from './components/shared/store/currency/currency.effect';
+import { dateFormatEffects } from './components/shared/store/date-format/date-format.effect';
 import { toastEffects } from './components/shared/store/toast/toast.effects';
 
 export const appConfig: ApplicationConfig = {
@@ -27,11 +27,11 @@ export const appConfig: ApplicationConfig = {
     provideEffects([
       configEffects,
       authEffects,
-      UserSessionEffects,
-      OrganizationEffects,
-      CountryEffects,
-      CurrencyEffects,
-      DateFormatEffects,
+      userSessionEffects,
+      organizationEffects,
+      countryEffects,
+      currencyEffects,
+      dateFormatEffects,
       toastEffects
     ]),
     provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),

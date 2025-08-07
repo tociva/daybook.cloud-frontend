@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { tap } from 'rxjs';
 import { loadDateFormats } from './date-format.action';
@@ -7,33 +7,32 @@ import { DateFormatStore } from './date-format.store';
 import { CountryStore } from '../country/country.store';
 import { COMMON_DATE_FORMATS } from '../../../../util/constants';
 
-@Injectable()
-export class DateFormatEffects {
-  private readonly actions$ = inject(Actions);
-  private readonly dateFormatStore = inject(DateFormatStore);
-  private readonly countryStore = inject(CountryStore);
+export const dateFormatEffects = {
+  loadDateFormats: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const dateFormatStore = inject(DateFormatStore);
+      const countryStore = inject(CountryStore);
 
-  loadDateFormats$ = createEffect(
-    () =>
-      this.actions$.pipe(
+      return actions$.pipe(
         ofType(loadDateFormats),
         tap(() => {
           try {
-            const countries = this.countryStore.countries();
+            const countries = countryStore.countries();
             const formatsFromCountries = countries.map((c) => c.dateFormat);
             const uniqueDateFormats: DateFormat[] = Array.from(
               new Map(
                 [...formatsFromCountries, ...COMMON_DATE_FORMATS].map((c) => [c.name, c])
               ).values()
             );
-            this.dateFormatStore.setState((state) => ({
+            dateFormatStore.setState((state) => ({
               ...state,
               dateFormats: uniqueDateFormats,
               loaded: true,
               error: null
             }));
           } catch (error) {
-            this.dateFormatStore.setState((state) => ({
+            dateFormatStore.setState((state) => ({
               ...state,
               dateFormats: [],
               loaded: false,
@@ -42,7 +41,8 @@ export class DateFormatEffects {
             console.error('[DateFormatEffects] Failed to extract date formats:', error);
           }
         })
-      ),
-    { dispatch: false }
-  );
-}
+      );
+    },
+    { functional: true, dispatch: false }
+  )
+};
