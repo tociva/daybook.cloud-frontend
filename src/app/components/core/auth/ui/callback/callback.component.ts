@@ -1,7 +1,7 @@
 import { Component, effect, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { LoadingScreenComponent } from '../../../../shared/loading-screen/loading-screen.component';
-import * as AuthActions from '../../store/auth/auth.actions';
+import { authActions } from '../../store/auth/auth.actions';
 import { ConfigStore } from '../../store/config/config.store';
 
 @Component({
@@ -18,7 +18,7 @@ export class CallbackComponent {
     if (this.configStore.configLoaded()) {
       // Delay dispatch to let sessionStorage initialize
       queueMicrotask(() => {
-        this.store.dispatch(AuthActions.handleCallback());
+        this.store.dispatch(authActions.handleCallback());
       });
     }
   });

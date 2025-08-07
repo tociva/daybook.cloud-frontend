@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, mergeMap, of, tap } from 'rxjs';
-import * as ConfigActions from './config.actions';
+import { configActions } from './config.actions';
 import { EnvConfig } from './config.model';
 import { ConfigStore } from './config.store';
 
@@ -14,7 +14,7 @@ export class ConfigEffects {
 
   loadConfig$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(ConfigActions.loadConfig),
+      ofType(configActions.load),
       mergeMap(() =>
         this.http.get<EnvConfig>('/config/config.json').pipe(
           tap((envConfig) => {

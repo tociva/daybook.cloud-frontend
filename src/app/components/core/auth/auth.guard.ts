@@ -4,7 +4,7 @@ import { filter, map, take } from 'rxjs/operators';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AuthStore } from './store/auth/auth.store';
 import { Store } from '@ngrx/store';
-import * as AuthActions from './store/auth/auth.actions';
+import { authActions } from './store/auth/auth.actions';
 
 export const authGuard: CanActivateFn = (
   _route: ActivatedRouteSnapshot,
@@ -24,7 +24,7 @@ export const authGuard: CanActivateFn = (
         return true;
       }
 
-      ngrxStore.dispatch(AuthActions.login({ returnUri: state.url }));
+      ngrxStore.dispatch(authActions.login({ returnUri: state.url }));
       return false;
     })
   );

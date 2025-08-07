@@ -7,7 +7,7 @@ import { User, UserManager, WebStorageStateStore } from 'oidc-client-ts';
 import { catchError, filter, from, map, of, switchMap, tap, withLatestFrom } from 'rxjs';
 import { getUserManager, isUserManagerInitialized, setUserManager } from '../../user-manager-singleton';
 import { ConfigStore } from '../config/config.store';
-import { initializeAuth, login, loginSuccess, loginFailure, logoutHydra, logoutKratos, logoutSuccess, logoutFailure, performRedirect, silentRenew, silentRenewSuccess, silentRenewFailure, handleLogoutCallback, handleCallback } from './auth.actions';
+import { authActions } from './auth.actions';
 import { AuthStore } from './auth.store';
 
 
@@ -35,7 +35,7 @@ export class AuthEffects {
   initializeAuth$ = createEffect(
     () =>
       this.actions$.pipe(
-        ofType(initializeAuth),
+        ofType(authActions.initialize),
         map(() => this.configStore.config()),
         filter((config) => !!config),
         tap((config) => {
@@ -95,7 +95,7 @@ export class AuthEffects {
   /** Start login (redirect to IdP) */
   login$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(login),
+      ofType(authActions.login),
       tap(({ returnUri }) => {
         const uri = returnUri ?? (window.location.pathname + window.location.search);
         this.authStore.setReturnUri(uri); // ✅ signal store + localStorage
@@ -108,19 +108,19 @@ export class AuthEffects {
   /** Handle OIDC redirect/callback */
   handleCallback$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(handleCallback),
+      ofType(authActions.handleCallback),
       switchMap(() =>
         from(getUserManager().signinRedirectCallback()).pipe(
-          map(user => loginSuccess({ user })),
+          map(user => authActions.loginSuccess({ user })),
           catchError(err =>
             from(getUserManager().getUser()).pipe(
               map(user => {
                 if (user && !user.expired) {
-                  return loginSuccess({ user });
+                  return authActions.loginSuccess({ user });
                 }
-                return loginFailure({ error: err.message });
+                return authActions.loginFailure({ error: err.message });
               }),
-              catchError(() => of(loginFailure({ error: err.message })))
+              catchError(() => of(authActions.loginFailure({ error: err.message })))
             )
           )
         )
@@ -130,7 +130,7 @@ export class AuthEffects {
   
   loginFailure$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(loginFailure),
+      ofType(authActions.loginFailure),
       tap(() => {
         this.router.navigate(['/auth/login-failure']);
       })
@@ -139,7 +139,7 @@ export class AuthEffects {
 
   logoutKratos$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(logoutKratos),
+      ofType(authActions.logoutKratos),
       map(() => this.configStore.config()),
       filter((config): config is NonNullable<typeof config> => !!config),
       switchMap((config) =>
@@ -161,10 +161,10 @@ export class AuthEffects {
               return null; // resolve to continue
             })
         ).pipe(
-          map(() => logoutHydra()),
+          map(() => authActions.logoutHydra()),
           catchError((err) => {
             console.error('Error during Kratos logout:', err);
-            return of(logoutHydra()); // fallback
+            return of(authActions.logoutHydra()); // fallback
           })
         )
       )
@@ -175,7 +175,7 @@ export class AuthEffects {
   /** Start logout (redirect to IdP logout) */
   logoutHydra$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(logoutHydra),
+      ofType(authActions.logoutHydra),
       tap(() => {
         getUserManager().signoutRedirect();
       })
@@ -186,11 +186,11 @@ export class AuthEffects {
   /** Handle logout callback (optional) */
   handleLogoutCallback$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(handleLogoutCallback),
+      ofType(authActions.handleLogoutCallback),
       switchMap(() =>
         from(getUserManager().signoutRedirectCallback()).pipe(
-          map(() => logoutSuccess()),
-          catchError(err => of(logoutFailure({ error: err.message })))
+          map(() => authActions.logoutSuccess()),
+          catchError(err => of(authActions.logoutFailure({ error: err.message })))
         )
       )
     )
@@ -199,17 +199,17 @@ export class AuthEffects {
   /** Optionally, on loginSuccess, redirect to returnUri or home */
   loginSuccess$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(loginSuccess),
+      ofType(authActions.loginSuccess),
       withLatestFrom(toObservable(this.authStore.returnUri)),
       filter(([, returnUri]) => Boolean(returnUri)),
-      map(([, returnUri]) => performRedirect({ returnUri: returnUri! }))
+      map(([, returnUri]) => authActions.performRedirect({ returnUri: returnUri! }))
     )
   );
   
   performRedirect$ = createEffect(
     () =>
       this.actions$.pipe(
-        ofType(performRedirect),
+        ofType(authActions.performRedirect),
         tap(({ returnUri }) => {
           this.router.navigateByUrl(returnUri);
           this.authStore.setReturnUri(null); // ✅ signal + localStorage handled
@@ -220,11 +220,11 @@ export class AuthEffects {
 
   silentRenew$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(silentRenew),
+      ofType(authActions.silentRenew),
       switchMap(() =>
         from(getUserManager().signinSilent()).pipe(
-          map(user => user ? silentRenewSuccess({ user }) : silentRenewFailure({ error: 'No user found' })),
-          catchError(error => of(silentRenewFailure({ error })))
+          map(user => user ? authActions.silentRenewSuccess({ user }) : authActions.silentRenewFailure({ error: 'No user found' })),
+          catchError(error => of(authActions.silentRenewFailure({ error })))
         )
       )
     )

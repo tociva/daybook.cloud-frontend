@@ -2,7 +2,7 @@
 import { Component, effect, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Store } from '@ngrx/store';
-import * as AuthActions from './components/core/auth/store/auth/auth.actions';
+import { authActions } from './components/core/auth/store/auth/auth.actions';
 import { AuthStore } from './components/core/auth/store/auth/auth.store';
 import { ConfigStore } from './components/core/auth/store/config/config.store';
 import { createUserSession } from './components/core/auth/store/user-session/user-session.actions';
@@ -31,7 +31,7 @@ export class AppComponent {
 
   readonly triggerAuthInit = effect(() => {
     if (this.configStore.configLoaded()) {
-      this.store.dispatch(AuthActions.initializeAuth());
+      this.store.dispatch(authActions.initialize());
     }
   });
   readonly watchHydration = effect(() => {

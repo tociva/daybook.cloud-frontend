@@ -4,7 +4,7 @@ import { ViewStore } from '../store/view/view.store';
 import { AuthStore } from '../../core/auth/store/auth/auth.store';
 
 import { Store } from '@ngrx/store';
-import * as AuthActions from '../../core/auth/store/auth/auth.actions';
+import { authActions } from '../../core/auth/store/auth/auth.actions';
 import { Router } from '@angular/router';
 
 @Component({

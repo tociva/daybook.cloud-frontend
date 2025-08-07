@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import * as AuthActions from '../../store/auth/auth.actions';
+import { authActions } from '../../store/auth/auth.actions';
 import { LogoBlockComponent } from '../../../../shared/logo-block/logo-block.component';
 
 @Component({
@@ -14,11 +14,11 @@ export class LoginFailureComponent {
   readonly store = inject(Store);
 
   retryLogin() {
-    this.store.dispatch(AuthActions.login({ returnUri: '/' }));
+    this.store.dispatch(authActions.login({ returnUri: '/' }));
   }
   
   logoutCompletely() {
-    this.store.dispatch(AuthActions.logoutKratos());
+    this.store.dispatch(authActions.logoutKratos());
   }
 
   
