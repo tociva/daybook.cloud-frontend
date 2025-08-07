@@ -3,7 +3,7 @@ import { createListQueryStore } from '../../../../../util/store/create-list-quer
 import { initialBranchState, BranchModel } from './branch.state';
 import { Store } from '@ngrx/store';
 import { inject } from '@angular/core';
-import { loadBranches } from './branch.actions';
+import { branchActions } from './branch.actions';
 
 const {
   query,
@@ -35,7 +35,7 @@ export const BranchStore = signalStore(
   withMethods(() => ({
     loadBranches() {
       const store = inject(Store);
-      store.dispatch(loadBranches({ query: query() }));
+      store.dispatch(branchActions.loadBranches({ query: query() }));
     },
 
     setSearch,

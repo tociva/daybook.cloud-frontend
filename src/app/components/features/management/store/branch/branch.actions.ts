@@ -1,6 +1,11 @@
-import { createAction, props } from '@ngrx/store';
+import { createActionGroup, props } from '@ngrx/store';
 import { Branch } from './branch.model';
 
-export const loadBranches = createAction('[Branch] Load Branches', props<{ query?: any }>());
-export const loadBranchesSuccess = createAction('[Branch] Load Branches Success', props<{ branches: Branch[], count: number }>());
-export const loadBranchesFailure = createAction('[Branch] Load Branches Failure', props<{ error: any }>()); 
+export const branchActions = createActionGroup({
+  source: 'Branch',
+  events: {
+    loadBranches: props<{ query?: any }>(),
+    loadBranchesSuccess: props<{ branches: Branch[], count: number }>(),
+    loadBranchesFailure: props<{ error: any }>()
+  }
+}); 

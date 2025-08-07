@@ -3,7 +3,7 @@ import { createListQueryStore } from '../../../../../util/store/create-list-quer
 import { initialFiscalYearState, FiscalYearModel } from './fiscal-year.state';
 import { Store } from '@ngrx/store';
 import { inject } from '@angular/core';
-import { loadFiscalYears } from './fiscal-year.actions';
+import { fiscalYearActions } from './fiscal-year.actions';
 
 const {
   query,
@@ -35,7 +35,7 @@ export const FiscalYearStore = signalStore(
   withMethods(() => ({
     loadFiscalYears() {
       const store = inject(Store);
-      store.dispatch(loadFiscalYears({ query: query() }));
+      store.dispatch(fiscalYearActions.loadFiscalYears({ query: query() }));
     },
 
     setSearch,

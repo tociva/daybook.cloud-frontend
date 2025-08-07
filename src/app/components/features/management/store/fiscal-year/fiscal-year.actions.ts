@@ -1,6 +1,11 @@
-import { createAction, props } from '@ngrx/store';
+import { createActionGroup, props } from '@ngrx/store';
 import { FiscalYear } from './fiscal-year.model';
 
-export const loadFiscalYears = createAction('[FiscalYear] Load Fiscal Years', props<{ query?: any }>());
-export const loadFiscalYearsSuccess = createAction('[FiscalYear] Load Fiscal Years Success', props<{ fiscalYears: FiscalYear[], count: number }>());
-export const loadFiscalYearsFailure = createAction('[FiscalYear] Load Fiscal Years Failure', props<{ error: any }>()); 
+export const fiscalYearActions = createActionGroup({
+  source: 'FiscalYear',
+  events: {
+    loadFiscalYears: props<{ query?: any }>(),
+    loadFiscalYearsSuccess: props<{ fiscalYears: FiscalYear[], count: number }>(),
+    loadFiscalYearsFailure: props<{ error: any }>()
+  }
+}); 

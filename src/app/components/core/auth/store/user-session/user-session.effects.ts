@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { catchError, map, mergeMap, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { Router } from '@angular/router';
-import * as UserSessionActions from './user-session.actions';
+import { userSessionActions } from './user-session.actions';
 import { UserSession } from './user-session.model';
 import { ConfigStore } from '../config/config.store';
 
@@ -22,12 +22,12 @@ export class UserSessionEffects {
 
   loadUserSession$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(UserSessionActions.loadUserSession),
+      ofType(userSessionActions.loadUserSession),
       mergeMap(({ userid }) =>
         this.http.get<UserSession>(`${this.baseUrl}/${userid}`).pipe(
-          map((session) => UserSessionActions.loadUserSessionSuccess({ session })),
+          map((session) => userSessionActions.loadUserSessionSuccess({ session })),
           catchError((error) =>
-            of(UserSessionActions.loadUserSessionFailure({ error }))
+            of(userSessionActions.loadUserSessionFailure({ error }))
           )
         )
       )
@@ -36,13 +36,13 @@ export class UserSessionEffects {
 
   createUserSession$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(UserSessionActions.createUserSession),
+      ofType(userSessionActions.createUserSession),
       mergeMap(() =>
         {
           return this.http.post<UserSession>(`${this.baseUrl}`, {}).pipe(
-          map((session) => UserSessionActions.loadUserSessionSuccess({ session })),
+          map((session) => userSessionActions.loadUserSessionSuccess({ session })),
           catchError((error) =>
-            of(UserSessionActions.loadUserSessionFailure({ error }))
+            of(userSessionActions.loadUserSessionFailure({ error }))
           )
         )
       }
@@ -52,12 +52,12 @@ export class UserSessionEffects {
 
   selectOrganization$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(UserSessionActions.selectOrganization),
+      ofType(userSessionActions.selectOrganization),
       mergeMap(({ organizationid }) =>
         this.http.post<UserSession>(`${this.baseUrl}/select-organization`, { organizationid }).pipe(
-          map((session) => UserSessionActions.loadUserSessionSuccess({ session })),
+          map((session) => userSessionActions.loadUserSessionSuccess({ session })),
           catchError((error) =>
-            of(UserSessionActions.loadUserSessionFailure({ error }))
+            of(userSessionActions.loadUserSessionFailure({ error }))
           )
         )
       )
@@ -66,12 +66,12 @@ export class UserSessionEffects {
 
   selectBranch$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(UserSessionActions.selectBranch),
+      ofType(userSessionActions.selectBranch),
       mergeMap(({ branchid }) =>
         this.http.post<UserSession>(`${this.baseUrl}/select-branch`, { branchid }).pipe(
-          map((session) => UserSessionActions.loadUserSessionSuccess({ session })),
+          map((session) => userSessionActions.loadUserSessionSuccess({ session })),
           catchError((error) =>
-            of(UserSessionActions.loadUserSessionFailure({ error }))
+            of(userSessionActions.loadUserSessionFailure({ error }))
           )
         )
       )
@@ -80,12 +80,12 @@ export class UserSessionEffects {
 
   selectFiscalYear$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(UserSessionActions.selectFiscalYear),
+      ofType(userSessionActions.selectFiscalYear),
       mergeMap(({ fiscalyearid }) =>
         this.http.post<UserSession>(`${this.baseUrl}/select-fiscal-year`, { fiscalyearid }).pipe(
-          map((session) => UserSessionActions.loadUserSessionSuccess({ session })),
+          map((session) => userSessionActions.loadUserSessionSuccess({ session })),
           catchError((error) =>
-            of(UserSessionActions.loadUserSessionFailure({ error }))
+            of(userSessionActions.loadUserSessionFailure({ error }))
           )
         )
       )
@@ -95,7 +95,7 @@ export class UserSessionEffects {
   loadUserSessionSuccess$ = createEffect(
     () =>
       this.actions$.pipe(
-        ofType(UserSessionActions.loadUserSessionSuccess),
+        ofType(userSessionActions.loadUserSessionSuccess),
         tap(({ session }) => {
           if (!session.ownorgs || session.ownorgs.length === 0) {
             this.router.navigate(['/management/organization/create']);
@@ -107,12 +107,12 @@ export class UserSessionEffects {
 
   deleteUserSession$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(UserSessionActions.deleteUserSession),
+      ofType(userSessionActions.deleteUserSession),
       mergeMap(({ id }) =>
         this.http.delete<void>(`${this.baseUrl}/${id}`).pipe(
-          map(() => UserSessionActions.clearUserSession()),
+          map(() => userSessionActions.clearUserSession()),
           catchError((error) =>
-            of(UserSessionActions.loadUserSessionFailure({ error }))
+            of(userSessionActions.loadUserSessionFailure({ error }))
           )
         )
       )

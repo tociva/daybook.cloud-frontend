@@ -3,7 +3,7 @@ import { createListQueryStore } from '../../../../../util/store/create-list-quer
 import { initialSubscriptionState, SubscriptionModel } from './subscription.state';
 import { Store } from '@ngrx/store';
 import { inject } from '@angular/core';
-import { loadSubscriptions } from './subscription.actions';
+import { subscriptionActions } from './subscription.actions';
 
 const {
   query,
@@ -35,7 +35,7 @@ export const SubscriptionStore = signalStore(
   withMethods(() => ({
     loadSubscriptions() {
       const store = inject(Store);
-      store.dispatch(loadSubscriptions({ query: query() }));
+      store.dispatch(subscriptionActions.loadSubscriptions({ query: query() }));
     },
 
     setSearch,

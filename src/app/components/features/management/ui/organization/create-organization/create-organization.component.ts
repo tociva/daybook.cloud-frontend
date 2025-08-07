@@ -16,7 +16,7 @@ import { CurrencyStore } from '../../../../../shared/store/currency/currency.sto
 import { DateFormat } from '../../../../../shared/store/date-format/date-format.model';
 import { DateFormatStore } from '../../../../../shared/store/date-format/date-format.store';
 import { OrganizationBootstrap } from '../../../store/organization/organization.model';
-import { bootstrapOrganization } from '../../../store/organization/organization.actions';
+import { organizationActions } from '../../../store/organization/organization.actions';
 
 @Component({
   selector: 'app-create-organization',
@@ -213,7 +213,7 @@ export class CreateOrganizationComponent {
       return;
     }
   
-    this.store.dispatch(bootstrapOrganization({ organization: data }));
+          this.store.dispatch(organizationActions.bootstrapOrganization({ organization: data }));
   }
 
   onSearch(value: string) {

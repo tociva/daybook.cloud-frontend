@@ -5,7 +5,7 @@ import { Store } from '@ngrx/store';
 import { authActions } from './components/core/auth/store/auth/auth.actions';
 import { AuthStore } from './components/core/auth/store/auth/auth.store';
 import { ConfigStore } from './components/core/auth/store/config/config.store';
-import { createUserSession } from './components/core/auth/store/user-session/user-session.actions';
+import { userSessionActions } from './components/core/auth/store/user-session/user-session.actions';
 import { LoadingScreenComponent } from './components/shared/loading-screen/loading-screen.component';
 import { ProgressLoader } from './components/shared/progress-loader/progress-loader';
 import { Toaster } from './components/shared/toaster/toaster';
@@ -43,7 +43,7 @@ export class AppComponent {
       : LoadingStatus.AUTH_IN_PROGRESS;
   
     if (this.status === LoadingStatus.AUTH_COMPLETED && user) {
-      this.store.dispatch(createUserSession());
+      this.store.dispatch(userSessionActions.createUserSession());
     }
   });
   

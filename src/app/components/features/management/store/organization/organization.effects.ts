@@ -1,11 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import {
-  bootstrapOrganization,
-  bootstrapOrganizationFailure,
-  bootstrapOrganizationSuccess,
-} from './organization.actions';
+import { organizationActions } from './organization.actions';
 import { tap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { Organization } from './organization.model';
@@ -26,12 +22,12 @@ export class OrganizationEffects {
 
   // ✅ Refactored bootstrap effect using handleHttpEffect
   readonly bootstrapOrganization$ = handleHttpEffect({
-    trigger: bootstrapOrganization,
+    trigger: organizationActions.bootstrapOrganization,
     actionName: 'bootstrapOrganization',
     httpCall: (http, action) =>
       http.post<Organization>(`${this.baseUrl}/bootstrap`, action.organization),
-    onSuccess: (organization) => bootstrapOrganizationSuccess({ organization }),
-    onError: (error) => bootstrapOrganizationFailure({ error }),
+    onSuccess: (organization) => organizationActions.bootstrapOrganizationSuccess({ organization }),
+    onError: (error) => organizationActions.bootstrapOrganizationFailure({ error }),
     successMessage: 'Organization bootstrapped!',
     errorMessage: 'Failed to bootstrap organization.'
   });
@@ -40,7 +36,7 @@ export class OrganizationEffects {
   readonly bootstrapSuccess$ = createEffect(
     () =>
       inject(Actions).pipe(
-        ofType(bootstrapOrganizationSuccess),
+        ofType(organizationActions.bootstrapOrganizationSuccess),
         tap(({ organization }) => {
           this.store.setItems([organization]);
         })
@@ -52,7 +48,7 @@ export class OrganizationEffects {
   readonly bootstrapFailure$ = createEffect(
     () =>
       inject(Actions).pipe(
-        ofType(bootstrapOrganizationFailure),
+        ofType(organizationActions.bootstrapOrganizationFailure),
         tap(({ error }) => {
           this.store.setError(error);
         })
