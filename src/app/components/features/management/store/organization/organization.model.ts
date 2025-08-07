@@ -1,7 +1,7 @@
-import { Address } from "../../../../../../util/types/address";
-import { Country } from "../../../../../../util/types/country";
-import { Currency } from "../../../../../../util/types/currency";
+import { Address } from "../../../../../util/types/address";
 import { Branch } from "../branch/branch.model";
+import { Country } from "../../../../shared/store/country/country.model";
+import { Currency } from "../../../../shared/store/currency/currency.model";
 
 export interface Organization {
   id?: string;

@@ -6,3 +6,10 @@ export interface Currency {
   shortName: string;
   fraction: string;
 }
+
+export interface CurrencyState {
+  currencies: Currency[];
+  loaded: boolean;
+  error: string | null;
+  search: string;
+} 

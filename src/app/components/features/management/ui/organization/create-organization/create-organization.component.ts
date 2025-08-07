@@ -1,15 +1,20 @@
-import { Component, effect, inject, model, signal } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
-import { FormValidator } from '../../../../../../../util/form/form-validator';
-import { FormUtil } from '../../../../../../../util/form/form.util';
-import { willPassEmailValidation, willPassRequiredValidation } from '../../../../../../../util/form/validation.uti';
-import { FormField } from '../../../../../../../util/types/form-field.model';
+import { toFlagEmoji } from '../../../../../../util/common.util';
+import { FormValidator } from '../../../../../../util/form/form-validator';
+import { FormUtil } from '../../../../../../util/form/form.util';
+import { willPassEmailValidation, willPassRequiredValidation } from '../../../../../../util/form/validation.uti';
+import { FormField } from '../../../../../../util/types/form-field.model';
 import { AutoComplete } from '../../../../../shared/auto-complete/auto-complete';
 import { TwoColumnFormComponent } from '../../../../../shared/forms/two-column-form/two-column-form.component';
 import { loadCountries } from '../../../../../shared/store/country/country.action';
 import { Country } from '../../../../../shared/store/country/country.model';
 import { CountryStore } from '../../../../../shared/store/country/country.store';
+import { Currency } from '../../../../../shared/store/currency/currency.model';
+import { CurrencyStore } from '../../../../../shared/store/currency/currency.store';
+import { DateFormat } from '../../../../../shared/store/date-format/date-format.model';
+import { DateFormatStore } from '../../../../../shared/store/date-format/date-format.store';
 import { OrganizationBootstrap } from '../../../store/organization/organization.model';
 
 @Component({
@@ -23,12 +28,13 @@ export class CreateOrganizationComponent {
   private readonly fb = inject(FormBuilder);
 
   private readonly countryStore = inject(CountryStore);
-
+  private readonly currencyStore = inject(CurrencyStore);
+  private readonly dateFormatStore = inject(DateFormatStore);
   private readonly store = inject(Store);
 
   countries = signal<Country[]>([]);
-
-  selectedCountry = signal<Country | null>(null);
+  currencies = signal<Currency[]>([]);
+  dateFormats = signal<DateFormat[]>([]);
   
   readonly orgFields = signal<FormField[]>([
     // 🟦 Basic Details
@@ -65,26 +71,62 @@ export class CreateOrganizationComponent {
     { key: 'country', label: 'Country', type: 'auto-complete', group: 'Address Info',
       autoComplete: {
         items: this.countries,
-        displayValue: (item: Country) => item.name,
+        displayValue: (item: Country) => `${toFlagEmoji(item.iso)} ${item.name}`,
         trackBy: (item: Country) => item.name,
         onSearch: (value: string) => {
           this.countryStore.setSearch(value);
         },
         onSelect: (item: Country) => {
-          this.selectedCountry.set(item);
+          
+            const fields = this.orgFields();
+            const currencyF = fields.find(fld => fld.key === 'currency');
+            if(currencyF) {
+              currencyF.value = item.currency;
+            }
+            const dateFormatF = fields.find(fld => fld.key === 'dateformat');
+            if(dateFormatF) {
+              dateFormatF.value = item.dateFormat;
+            }
+  
+            this.formModel.set({
+              ...this.formModel(),
+              fields
+            });
+  
         }
       }
      },
     {
       key: 'currency',
       label: 'Currency',
-      type: 'select',
+      type: 'auto-complete',
       group: 'Address Info',
       required: true,
-      options: [
-        { label: 'INR', value: 'INR' },
-        { label: 'USD', value: 'USD' },
-      ]
+      autoComplete: {
+        items: this.currencies,
+        displayValue: (item: Currency) => `${item.name} (${String.fromCharCode(parseInt(item.unicode, 16))})`,
+        trackBy: (item: Currency) => item.name,
+        onSearch: (value: string) => {
+          this.currencyStore.setSearch(value);
+        },
+        onSelect: (item: Currency) => {
+          console.log('🔍 Selected Currency:', item);
+        }
+      }
+    },
+    { key: 'dateformat', label: 'Date Format', type: 'auto-complete', group: 'Address Info',
+      required: true,
+      autoComplete: {
+        items: this.dateFormats,
+        displayValue: (item: DateFormat) => item.name,
+        trackBy: (item: DateFormat) => item.name,
+        onSearch: (value: string) => {
+          this.dateFormatStore.setSearch(value);
+        },
+        onSelect: (item: DateFormat) => {
+          console.log('🔍 Selected Date Format:', item);
+        }
+      }
     },
   
     // 🟨 Financial Info
@@ -149,6 +191,12 @@ export class CreateOrganizationComponent {
       } 
       else {
         this.store.dispatch(loadCountries());
+      }
+      if(this.currencyStore.currenciesLoaded()) {
+        this.currencies.set(this.currencyStore.filteredCurrencies());
+      }
+      if(this.dateFormatStore.dateFormatsLoaded()) {
+        this.dateFormats.set(this.dateFormatStore.filteredDateFormats());
       }
     });
 

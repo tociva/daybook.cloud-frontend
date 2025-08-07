@@ -14,7 +14,7 @@
       },
       "dateFormat": {
         "name": "MM/DD/YYYY",
-        "value": "MM/DD/YYYY"
+        "value": "01/31/2022"
       }
     },
     {
@@ -30,8 +30,8 @@
         "fraction": "Paisa"
       },
       "dateFormat": {
-        "name": "31-01-2022",
-        "value": "DD-MM-YYYY"
+        "name": "DD-MM-YYYY",
+        "value": "31-01-2022"
       }
     },
     {
@@ -48,7 +48,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -65,7 +65,7 @@
       },
       "dateFormat": {
         "name": "YYYY-MM-DD",
-        "value": "YYYY-MM-DD"
+        "value": "2022-01-31"
       }
     },
     {
@@ -81,8 +81,8 @@
         "fraction": "Cent"
       },
       "dateFormat": {
-        "name": "31/01/2022",
-        "value": "DD/MM/YYYY"
+        "name": "DD/MM/YYYY",
+        "value": "31/01/2022"
       }
     },
     {
@@ -98,8 +98,8 @@
         "fraction": "Pul"
       },
       "dateFormat": {
-        "name": "31/01/2022",
-        "value": "DD/MM/YYYY"
+        "name": "DD/MM/YYYY",
+        "value": "31/01/2022"
       }
     },
     {
@@ -115,8 +115,8 @@
         "fraction": "Qindarka"
       },
       "dateFormat": {
-        "name": "31-01-2022",
-        "value": "DD-MM-YYYY"
+        "name": "DD-MM-YYYY",
+        "value": "31-01-2022"
       }
     },
     {
@@ -132,8 +132,8 @@
         "fraction": "Centime"
       },
       "dateFormat": {
-        "name": "31/01/2022",
-        "value": "DD/MM/YYYY"
+        "name": "DD/MM/YYYY",
+        "value": "31/01/2022"
       }
     },
     {
@@ -149,8 +149,8 @@
         "fraction": "Cent"
       },
       "dateFormat": {
-        "name": "01/31/2022",
-        "value": "MM/DD/YYYY"
+        "name": "MM/DD/YYYY",
+        "value": "01/31/2022"
       }
     },
     {
@@ -166,8 +166,8 @@
         "fraction": "Cent"
       },
       "dateFormat": {
-        "name": "31-01-2022",
-        "value": "DD-MM-YYYY"
+        "name": "DD-MM-YYYY",
+        "value": "31-01-2022"
       }
     },
     {
@@ -183,8 +183,8 @@
         "fraction": "Cêntimo"
       },
       "dateFormat": {
-        "name": "31/01/2022",
-        "value": "DD/MM/YYYY"
+        "name": "DD/MM/YYYY",
+        "value": "31/01/2022"
       }
     },
     {
@@ -200,8 +200,8 @@
         "fraction": "Cent"
       },
       "dateFormat": {
-        "name": "01/31/2022",
-        "value": "MM/DD/YYYY"
+        "name": "MM/DD/YYYY",
+        "value": "01/31/2022"
       }
     },
     {
@@ -217,8 +217,8 @@
         "fraction": "N/A"
       },
       "dateFormat": {
-        "name": "31-01-2022",
-        "value": "DD-MM-YYYY"
+        "name": "DD-MM-YYYY",
+        "value": "31-01-2022"
       }
     },
     {
@@ -234,8 +234,8 @@
         "fraction": "Cent"
       },
       "dateFormat": {
-        "name": "01/31/2022",
-        "value": "MM/DD/YYYY"
+        "name": "MM/DD/YYYY",
+        "value": "01/31/2022"
       }
     },
     {
@@ -251,8 +251,8 @@
         "fraction": "Centavo"
       },
       "dateFormat": {
-        "name": "31/01/2022",
-        "value": "DD/MM/YYYY"
+        "name": "DD/MM/YYYY",
+        "value": "31/01/2022"
       }
     },
     {
@@ -268,8 +268,8 @@
         "fraction": "Luma"
       },
       "dateFormat": {
-        "name": "31-01-2022",
-        "value": "DD-MM-YYYY"
+        "name": "DD-MM-YYYY",
+        "value": "31-01-2022"
       }
     },
     {
@@ -285,8 +285,8 @@
         "fraction": "Cent"
       },
       "dateFormat": {
-        "name": "31/01/2022",
-        "value": "DD/MM/YYYY"
+        "name": "DD/MM/YYYY",
+        "value": "30/01/2022"
       }
     },
     {
@@ -302,8 +302,8 @@
         "fraction": "Cent"
       },
       "dateFormat": {
-        "name": "31.01.2022",
-        "value": "DD.MM.YYYY"
+        "name": "DD.MM.YYYY",
+        "value": "31.01.2022"
       }
     },
     {
@@ -319,8 +319,8 @@
         "fraction": "Manat"
       },
       "dateFormat": {
-        "name": "31.01.2022",
-        "value": "DD.MM.YYYY"
+        "name": "DD.MM.YYYY",
+        "value": "31.01.2022"
       }
     },
     {
@@ -336,8 +336,8 @@
         "fraction": "Cent"
       },
       "dateFormat": {
-        "name": "01/31/2022",
-        "value": "MM/DD/YYYY"
+        "name": "MM/DD/YYYY",
+        "value": "01/31/2022"
       }
     },
     {
@@ -353,8 +353,8 @@
         "fraction": "Fils"
       },
       "dateFormat": {
-        "name": "31/01/2022",
-        "value": "DD/MM/YYYY"
+        "name": "DD/MM/YYYY",
+        "value": "31/01/2022"
       }
     },
     {
@@ -370,8 +370,8 @@
         "fraction": "Paisa"
       },
       "dateFormat": {
-        "name": "31-01-2022",
-        "value": "DD-MM-YYYY"
+        "name": "DD-MM-YYYY",
+        "value": "31-01-2022"
       }
     },
     {
@@ -387,8 +387,8 @@
         "fraction": "Cent"
       },
       "dateFormat": {
-        "name": "01/31/2022",
-        "value": "MM/DD/YYYY"
+        "name": "MM/DD/YYYY",
+        "value": "01/31/2022"
       }
     },
     {
@@ -404,8 +404,8 @@
         "fraction": "Ruble"
       },
       "dateFormat": {
-        "name": "31.01.2022",
-        "value": "DD.MM.YYYY"
+        "name": "DD.MM.YYYY",
+        "value": "31.01.2022"
       }
     },
     {
@@ -421,8 +421,8 @@
         "fraction": "Cent"
       },
       "dateFormat": {
-        "name": "31.01.2022",
-        "value": "DD.MM.YYYY"
+        "name": "DD.MM.YYYY",
+        "value": "31.01.2022"
       }
     },
     {
@@ -438,8 +438,8 @@
         "fraction": "Cent"
       },
       "dateFormat": {
-        "name": "31/01/2022",
-        "value": "DD/MM/YYYY"
+        "name": "DD/MM/YYYY",
+        "value": "31/01/2022"
       }
     },
     {
@@ -455,8 +455,8 @@
         "fraction": "Cent"
       },
       "dateFormat": {
-        "name": "31/01/2022",
-        "value": "DD/MM/YYYY"
+        "name": "DD/MM/YYYY",
+        "value": "31/01/2022"
       }
     },
     {
@@ -472,8 +472,8 @@
         "fraction": "Cent"
       },
       "dateFormat": {
-        "name": "01/31/2022",
-        "value": "MM/DD/YYYY"
+        "name": "MM/DD/YYYY",
+        "value": "01/31/2022"
       }
     },
     {
@@ -489,8 +489,8 @@
         "fraction": "Ngultrum"
       },
       "dateFormat": {
-        "name": "31-01-2022",
-        "value": "DD-MM-YYYY"
+        "name": "DD-MM-YYYY",
+        "value": "31-01-2022"
       }
     },
     {
@@ -506,8 +506,8 @@
         "fraction": "Centavo"
       },
       "dateFormat": {
-        "name": "31/01/2022",
-        "value": "DD/MM/YYYY"
+        "name": "DD/MM/YYYY",
+        "value": "31/01/2022"
       }
     },
     {
@@ -523,8 +523,8 @@
         "fraction": "Mark"
       },
       "dateFormat": {
-        "name": "31.01.2022",
-        "value": "DD.MM.YYYY"
+        "name": "DD.MM.YYYY",
+        "value": "31.01.2022"
       }
     },
     {
@@ -540,8 +540,8 @@
         "fraction": "Pula"
       },
       "dateFormat": {
-        "name": "31/01/2022",
-        "value": "DD/MM/YYYY"
+        "name": "DD/MM/YYYY",
+        "value": "31/01/2022"
       }
     },
       {
@@ -557,8 +557,8 @@
           "fraction": "Centavo"
         },
         "dateFormat": {
-          "name": "31-01-2022",
-          "value": "DD-MM-YYYY"
+          "name": "DD-MM-YYYY",
+          "value": "31-01-2022"
         }
       },
       {
@@ -574,8 +574,8 @@
           "fraction": "Cent"
         },
         "dateFormat": {
-          "name": "01/31/2022",
-          "value": "MM/DD/YYYY"
+          "name": "MM/DD/YYYY",
+          "value": "01/31/2022"
         }
       },
       {
@@ -591,8 +591,8 @@
           "fraction": "Cent"
         },
         "dateFormat": {
-          "name": "01/31/2022",
-          "value": "MM/DD/YYYY"
+          "name": "MM/DD/YYYY",
+          "value": "01/31/2022"
         }
       },
       {
@@ -608,8 +608,8 @@
           "fraction": "Cent"
         },
         "dateFormat": {
-          "name": "31-01-2022",
-          "value": "DD-MM-YYYY"
+          "name": "DD-MM-YYYY",
+          "value": "31-01-2022"
         }
       },
       {
@@ -625,8 +625,8 @@
           "fraction": "Lev"
         },
         "dateFormat": {
-          "name": "31.01.2022",
-          "value": "DD.MM.YYYY"
+          "name": "DD.MM.YYYY",
+          "value": "31.01.2022"
         }
       },
       {
@@ -642,8 +642,8 @@
           "fraction": "Cent"
         },
         "dateFormat": {
-          "name": "31-01-2022",
-          "value": "DD-MM-YYYY"
+          "name": "DD-MM-YYYY",
+          "value": "31-01-2022"
         }
       },
       {
@@ -659,8 +659,8 @@
           "fraction": "Cent"
         },
         "dateFormat": {
-          "name": "31-01-2022",
-          "value": "DD-MM-YYYY"
+          "name": "DD-MM-YYYY",
+          "value": "31-01-2022"
         }
       },
       {
@@ -677,7 +677,7 @@
         },
         "dateFormat": {
           "name": "YYYY-MM-DD",
-          "value": "YYYY-MM-DD"
+          "value": "2022-01-31"
         }
       },
       {
@@ -693,8 +693,8 @@
           "fraction": "Cent"
         },
         "dateFormat": {
-          "name": "31-01-2022",
-          "value": "DD-MM-YYYY"
+          "name": "DD-MM-YYYY",
+          "value": "31-01-2022"
         }
       },
       {
@@ -710,8 +710,8 @@
           "fraction": "Cent"
         },
         "dateFormat": {
-          "name": "31-01-2022",
-          "value": "DD-MM-YYYY"
+          "name": "DD-MM-YYYY",
+          "value": "31-01-2022"
         }
       },
       {
@@ -727,8 +727,8 @@
           "fraction": "Cent"
         },
         "dateFormat": {
-          "name": "01/31/2022",
-          "value": "MM/DD/YYYY"
+          "name": "MM/DD/YYYY",
+          "value": "01/31/2022"
         }
       },
       {
@@ -744,8 +744,8 @@
           "fraction": "Cent"
         },
         "dateFormat": {
-          "name": "31-01-2022",
-          "value": "DD-MM-YYYY"
+          "name": "DD-MM-YYYY",
+          "value": "31-01-2022"
         }
       },
       {
@@ -761,8 +761,8 @@
           "fraction": "Cent"
         },
         "dateFormat": {
-          "name": "31-01-2022",
-          "value": "DD-MM-YYYY"
+          "name": "DD-MM-YYYY",
+          "value": "31-01-2022"
         }
       },
       {
@@ -778,8 +778,8 @@
           "fraction": "Centavo"
         },
         "dateFormat": {
-          "name": "31-01-2022",
-          "value": "DD-MM-YYYY"
+          "name": "DD-MM-YYYY",
+          "value": "31-01-2022"
         }
       },
       {
@@ -796,7 +796,7 @@
         },
         "dateFormat": {
           "name": "YYYY-MM-DD",
-          "value": "YYYY-MM-DD"
+          "value": "2022-01-31"
         }
       },
       {
@@ -813,7 +813,7 @@
         },
         "dateFormat": {
           "name": "DD/MM/YYYY",
-          "value": "DD/MM/YYYY"
+          "value": "31/01/2022"
         }
       },
       {
@@ -830,7 +830,7 @@
         },
         "dateFormat": {
           "name": "DD/MM/YYYY",
-          "value": "DD/MM/YYYY"
+          "value": "31/01/2022"
         }
       },
       {
@@ -846,8 +846,8 @@
           "fraction": "Centavo"
         },
         "dateFormat": {
-          "name": "31/01/2022",
-          "value": "DD/MM/YYYY"
+          "name": "DD/MM/YYYY",
+          "value": "31/01/2022"
         }
       },
       {
@@ -863,8 +863,8 @@
           "fraction": "Cent"
         },
         "dateFormat": {
-          "name": "31-01-2022",
-          "value": "DD-MM-YYYY"
+          "name": "DD-MM-YYYY",
+          "value": "31-01-2022"
         }
       },
       {
@@ -881,7 +881,7 @@
         },
         "dateFormat": {
           "name": "DD/MM/YYYY",
-          "value": "DD/MM/YYYY"
+          "value": "31/01/2022"
         }
       },
       {

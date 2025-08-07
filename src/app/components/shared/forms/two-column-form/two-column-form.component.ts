@@ -11,7 +11,7 @@ import {
   FormGroup,
   ReactiveFormsModule
 } from '@angular/forms';
-import { FormField } from '../../../../../util/types/form-field.model';
+import { FormField } from '../../../../util/types/form-field.model';
 import { AutoComplete } from '../../auto-complete/auto-complete';
 
 @Component({

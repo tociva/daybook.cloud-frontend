@@ -1,4 +1,4 @@
-import { Currency } from "../../../../../../util/types/currency";
+import { Currency } from "../../../../shared/store/currency/currency.model";
 import { Branch } from "../branch/branch.model";
 
 export interface FiscalYear {

@@ -1,5 +1,5 @@
-import { Address } from "../../../../../../util/types/address";
-import { Country } from "../../../../../../util/types/country";
+import { Address } from "../../../../../util/types/address";
+import { Country } from "../../../../shared/store/country/country.model";
 import { FiscalYear } from "../fiscal-year/fiscal-year.model";
 import { Organization } from "../organization/organization.model";
 

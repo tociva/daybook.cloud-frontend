@@ -31,6 +31,7 @@
                 <input
                   [formControl]="getControl(field.key)"
                   [type]="field.type"
+                  [value]="field.value"
                   [ngClass]="{
                     'flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary': true,
                     'border-b-gray-300': !(field.errors?.length),
@@ -43,13 +44,16 @@
               @if (field.type === 'textarea') {
                 <textarea
                   [formControl]="getControl(field.key)"
+                  [value]="field.value"
                   rows="2"
                   [ngClass]="{
                     'flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary': true,
                     'border-b-gray-300': !(field.errors?.length),
                     'border-b-danger': field.errors?.length
                   }"
-                ></textarea>
+                >
+                  {{ field.value }}
+              </textarea>
               }
 
               <!-- ⬇️ Select -->
@@ -61,6 +65,7 @@
                     'border-b-gray-300': !(field.errors?.length),
                     'border-b-danger': field.errors?.length
                   }"
+                  [value]="field.value"
                 >
                   @for (opt of field.options ?? []; track opt.value) {
                     <option [value]="opt.value">{{ opt.label }}</option>
@@ -72,6 +77,7 @@
               @if (field.type === 'auto-complete') {
                 <app-auto-complete
                   class="flex-1"
+                  [value]="field.value"
                   [items]="field.autoComplete?.items()"
                   [displayValue]="field.autoComplete?.displayValue"
                   [trackBy]="field.autoComplete?.trackBy"

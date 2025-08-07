@@ -8,7 +8,7 @@ import {
 import { AuthModel, AuthStatus } from './auth.model';
 import { initialAuthState } from './auth.state';
 import { User } from 'oidc-client-ts';
-import { JwtUser } from '../../../../../../util/token-payload.type';
+import { JwtUser } from '../../../../../util/token-payload.type';
 
 export const AuthStore = signalStore(
   { providedIn: 'root' },

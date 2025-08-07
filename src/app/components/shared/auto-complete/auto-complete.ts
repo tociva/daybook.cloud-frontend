@@ -16,6 +16,8 @@ export class AutoComplete<T> {
 
   readonly items = input<T[]>();
 
+  readonly value = input<T | null>();
+
   readonly onSearch = output<string>();
 
   readonly onSelect = output<T>();
@@ -32,38 +34,33 @@ export class AutoComplete<T> {
 
 
   constructor(private injector: EnvironmentInjector) {
-    document.addEventListener('click', this.handleOutsideClick);
     queueMicrotask(() => {
       this.setupScrollEffect();
+      this.setInitialValue();
     });
   }
 
+  private setInitialValue() {
+    effect(() => {
+      const val = this.value();
+      if (val) {
+        this.selectedDisplayValue.set(this.findDisplayValue(val));
+        this.onSearch.emit(this.findDisplayValue(val));
+      }
+    }, { injector: this.injector });
+    
+  }
+  
   private setupScrollEffect() {
-    this.injector.runInContext(() => {
-      effect(() => {
-        const el = this.optionElements?.get(this.activeIndex());
-        el?.nativeElement.scrollIntoView({
-          block: 'nearest',
-          behavior: 'smooth',
-        });
+    effect(() => {
+      const el = this.optionElements?.get(this.activeIndex());
+      el?.nativeElement.scrollIntoView({
+        block: 'nearest',
+        behavior: 'smooth',
       });
-    });
+    }, { injector: this.injector });
   }
   
-  handleOutsideClick = (event: MouseEvent) => {
-    const target = event.target as HTMLElement;
-    const root = document.querySelector('app-auto-complete');
-  
-    if (root && !root.contains(target)) {
-      this.showDropdown.set(false);
-    }
-  };
-  
-  ngOnDestroy(): void {
-    document.removeEventListener('click', this.handleOutsideClick);
-  }
-  
-
 
   findTrackBy(item: T): string {
     const trackBy = this.trackBy();
@@ -86,6 +83,7 @@ export class AutoComplete<T> {
     this.onSearch.emit(value);
     this.activeIndex.set(0);
     this.showDropdown.set(true);
+    this.selectedDisplayValue.set(value);
   }
 
   onFocus() {
@@ -95,7 +93,6 @@ export class AutoComplete<T> {
 
   handleItemSelect(item: T): void {
     const value = this.findDisplayValue(item);
-  
     this.selectedDisplayValue.set(value);
     this.onSearch.emit(value);
     this.showDropdown.set(false);
@@ -109,6 +106,8 @@ export class AutoComplete<T> {
   
     if (event.key === 'Escape' && isOpen) {
       event.preventDefault();
+      const input = event.target as HTMLInputElement;
+      this.onSearch.emit(input?.value ?? '');
       this.showDropdown.set(false);
       return;
     }
@@ -135,6 +134,14 @@ export class AutoComplete<T> {
       }
       return;
     }
+  }
+
+  handleOnBlur() {
+    const selected = this.items()?.[this.activeIndex()];
+      if (selected) {
+        this.handleItemSelect(selected);
+      }
+    this.showDropdown.set(false);
   }
   
 }
