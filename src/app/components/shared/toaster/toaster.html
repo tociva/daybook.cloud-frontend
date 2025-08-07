@@ -1,0 +1,25 @@
+<div
+  class="fixed top-4 right-4 z-50 flex flex-col gap-3 w-full max-w-sm"
+  role="status"
+>
+  @for (toast of toastStore.toasts(); track toast.id) {
+    <div
+      class="relative flex items-start px-4 py-3 rounded shadow-md text-sm text-white animate-slide-in"
+      [ngClass]="{
+        'bg-success': toast.type === 'success',
+        'bg-warning': toast.type === 'warning',
+        'bg-danger': toast.type === 'error',
+        'bg-info': toast.type === 'info'
+      }"
+    >
+      <div class="flex-1 pr-6">{{ toast.message }}</div>
+      <button
+        class="absolute top-1 right-2 text-white hover:text-white/80 cursor-pointer"
+        (click)="toastStore.dismiss(toast.id)"
+        aria-label="Close"
+      >
+        &times;
+      </button>
+    </div>
+  }
+</div>

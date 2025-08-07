@@ -8,6 +8,7 @@ import { ConfigStore } from './components/core/auth/store/config/config.store';
 import { createUserSession } from './components/core/auth/store/user-session/user-session.actions';
 import { LoadingScreenComponent } from './components/shared/loading-screen/loading-screen.component';
 import { ProgressLoader } from './components/shared/progress-loader/progress-loader';
+import { Toaster } from './components/shared/toaster/toaster';
 
 enum LoadingStatus {
   AUTH_IN_PROGRESS = 'AUTH_IN_PROGRESS',
@@ -16,7 +17,7 @@ enum LoadingStatus {
 }
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, LoadingScreenComponent, ProgressLoader],
+  imports: [RouterOutlet, LoadingScreenComponent, ProgressLoader, Toaster],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
