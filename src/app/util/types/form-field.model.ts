@@ -17,6 +17,6 @@ export interface FormField<T = unknown> {
     displayValue: (item: any) => string;
     trackBy: (item: any) => string;
     onSearch: (value: string) => void;
-    onSelect: (item: any) => void;
+    onSelect?: (item: any) => void;
   };
 }

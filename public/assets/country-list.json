@@ -990,52 +990,52 @@
       "name": "Democratic Republic of the Congo",
       "code": "243",
       "iso": "CD",
-      "currency": {
-        "name": "Congolese Franc",
-        "html": "&#70;&#67;",
-        "unicode": "46",
-        "decimal": 2,
-        "shortName": "CDF",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "31-01-2022",
-        "value": "DD-MM-YYYY"
-      }
+              "currency": {
+          "name": "Congolese Franc",
+          "html": "&#70;&#67;",
+          "unicode": "46",
+          "decimal": 2,
+          "shortName": "CDF",
+          "fraction": "Cent"
+        },
+        "dateFormat": {
+          "name": "DD.MM.YYYY",
+          "value": "31.01.2022"
+        }
     },
     {
       "name": "Denmark",
       "code": "45",
       "iso": "DK",
-      "currency": {
-        "name": "Danish Krone",
-        "html": "&#107;&#114;",
-        "unicode": "6B72",
-        "decimal": 2,
-        "shortName": "DKK",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "31-01-2022",
-        "value": "DD-MM-YYYY"
-      }
+              "currency": {
+          "name": "Danish Krone",
+          "html": "&#107;&#114;",
+          "unicode": "6B72",
+          "decimal": 2,
+          "shortName": "DKK",
+          "fraction": "Cent"
+        },
+        "dateFormat": {
+          "name": "DD.MM.YYYY",
+          "value": "31.01.2022"
+        }
     },
     {
       "name": "Djibouti",
       "code": "253",
       "iso": "DJ",
-      "currency": {
-        "name": "Djiboutian Franc",
-        "html": "&#70;&#100;&#106;",
-        "unicode": "46",
-        "decimal": 0,
-        "shortName": "DJF",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "31-01-2022",
-        "value": "DD-MM-YYYY"
-      }
+              "currency": {
+          "name": "Djiboutian Franc",
+          "html": "&#70;&#100;&#106;",
+          "unicode": "46",
+          "decimal": 0,
+          "shortName": "DJF",
+          "fraction": "Cent"
+        },
+        "dateFormat": {
+          "name": "DD.MM.YYYY",
+          "value": "31.01.2022"
+        }
     },
     {
       "name": "Dominica",
@@ -1050,8 +1050,8 @@
         "fraction": "Cent"
       },
       "dateFormat": {
-        "name": "01/31/2022",
-        "value": "MM/DD/YYYY"
+        "name": "MM/DD/YYYY",
+        "value": "01/31/2022"
       }
     },
     {
@@ -1068,7 +1068,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1084,8 +1084,8 @@
         "fraction": "Cent"
       },
       "dateFormat": {
-        "name": "01/31/2022",
-        "value": "MM/DD/YYYY"
+        "name": "MM/DD/YYYY",
+        "value": "01/31/2022"
       }
     },
     {
@@ -1101,8 +1101,8 @@
         "fraction": "Cent"
       },
       "dateFormat": {
-        "name": "01/31/2022",
-        "value": "MM/DD/YYYY"
+        "name": "MM/DD/YYYY",
+        "value": "01/31/2022"
       }
     },
     {
@@ -1118,8 +1118,8 @@
         "fraction": "Penny"
       },
       "dateFormat": {
-        "name": "31/01/2022",
-        "value": "DD/MM/YYYY"
+        "name": "DD.MM.YYYY",
+        "value": "31/01/2022"
       }
     },
     {
@@ -1136,7 +1136,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1152,8 +1152,8 @@
         "fraction": "Cent"
       },
       "dateFormat": {
-        "name": "31-01-2022",
-        "value": "DD-MM-YYYY"
+        "name": "DD.MM.YYYY",
+        "value": "31.01.2022"
       }
     },
     {
@@ -1169,8 +1169,8 @@
         "fraction": "Cent"
       },
       "dateFormat": {
-        "name": "31/01/2022",
-        "value": "DD/MM/YYYY"
+        "name": "DD.MM.YYYY",
+        "value": "31/01/2022"
       }
     },
     {
@@ -1187,7 +1187,7 @@
       },
       "dateFormat": {
         "name": "DD.MM.YYYY",
-        "value": "DD.MM.YYYY"
+        "value": "31.01.2022"
       }
     },
     {
@@ -1203,8 +1203,8 @@
         "fraction": "Cent"
       },
       "dateFormat": {
-        "name": "31/01/2022",
-        "value": "DD/MM/YYYY"
+        "name": "DD.MM.YYYY",
+        "value": "31/01/2022"
       }
     },
     {
@@ -1221,7 +1221,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1238,7 +1238,7 @@
       },
       "dateFormat": {
         "name": "DD-MM-YYYY",
-        "value": "DD-MM-YYYY"
+        "value": "31-01-2022"
       }
     },
     {
@@ -1255,7 +1255,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1272,7 +1272,7 @@
       },
       "dateFormat": {
         "name": "DD.MM.YYYY",
-        "value": "DD.MM.YYYY"
+        "value": "31.01.2022"
       }
     },
     {
@@ -1289,7 +1289,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1306,25 +1306,25 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
       "name": "Gabon",
       "code": "241",
       "iso": "GA",
-      "currency": {
-        "name": "Central African CFA Franc",
-        "html": "&#70;&#67;&#70;&#65;",
-        "unicode": "46C46",
-        "decimal": 0,
-        "shortName": "XAF",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "31-01-2022",
-        "value": "DD-MM-YYYY"
-      }
+              "currency": {
+          "name": "Central African CFA Franc",
+          "html": "&#70;&#67;&#70;&#65;",
+          "unicode": "46C46",
+          "decimal": 0,
+          "shortName": "XAF",
+          "fraction": "Cent"
+        },
+        "dateFormat": {
+          "name": "DD.MM.YYYY",
+          "value": "31.01.2022"
+        }
     },
   
     {
@@ -1341,7 +1341,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1358,7 +1358,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1375,7 +1375,7 @@
       },
       "dateFormat": {
         "name": "DD.MM.YYYY",
-        "value": "DD.MM.YYYY"
+        "value": "31.01.2022"
       }
     },
     {
@@ -1392,7 +1392,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1409,7 +1409,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1426,7 +1426,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1443,7 +1443,7 @@
       },
       "dateFormat": {
         "name": "DD-MM-YYYY",
-        "value": "DD-MM-YYYY"
+        "value": "31-01-2022"
       }
     },
     {
@@ -1460,7 +1460,7 @@
       },
       "dateFormat": {
         "name": "MM/DD/YYYY",
-        "value": "MM/DD/YYYY"
+        "value": "01/31/2022"
       }
     },
     {
@@ -1477,7 +1477,7 @@
       },
       "dateFormat": {
         "name": "MM/DD/YYYY",
-        "value": "MM/DD/YYYY"
+        "value": "01/31/2022"
       }
     },
     {
@@ -1494,7 +1494,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1511,7 +1511,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1528,7 +1528,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1545,7 +1545,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1562,7 +1562,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1579,7 +1579,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1596,7 +1596,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1613,25 +1613,25 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
       "name": "Hungary",
       "code": "36",
       "iso": "HU",
-      "currency": {
-        "name": "Hungarian Forint",
-        "html": "&#70;&#116;",
-        "unicode": "4674",
-        "decimal": 2,
-        "shortName": "HUF",
-        "fraction": "Fillér"
-      },
-      "dateFormat": {
-        "name": "YYYY.MM.DD",
-        "value": "YYYY.MM.DD"
-      }
+              "currency": {
+          "name": "Hungarian Forint",
+          "html": "&#70;&#116;",
+          "unicode": "4674",
+          "decimal": 2,
+          "shortName": "HUF",
+          "fraction": "Fillér"
+        },
+        "dateFormat": {
+          "name": "YYYY.MM.DD",
+          "value": "2022.01.31"
+        }
     },
     {
       "name": "Iceland",
@@ -1647,7 +1647,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1664,25 +1664,25 @@
       },
       "dateFormat": {
         "name": "DD-MM-YYYY",
-        "value": "DD-MM-YYYY"
+        "value": "31-01-2022"
       }
     },
     {
       "name": "Iran",
       "code": "98",
       "iso": "IR",
-      "currency": {
-        "name": "Iranian Rial",
-        "html": "&#65020;",
-        "unicode": "FDFC",
-        "decimal": 2,
-        "shortName": "IRR",
-        "fraction": "Rial"
-      },
-      "dateFormat": {
-        "name": "YYYY/MM/DD",
-        "value": "YYYY/MM/DD"
-      }
+              "currency": {
+          "name": "Iranian Rial",
+          "html": "&#65020;",
+          "unicode": "FDFC",
+          "decimal": 2,
+          "shortName": "IRR",
+          "fraction": "Rial"
+        },
+        "dateFormat": {
+          "name": "YYYY/MM/DD",
+          "value": "2022/01/31"
+        }
     },
     {
       "name": "Iraq",
@@ -1698,7 +1698,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1715,7 +1715,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1732,7 +1732,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1749,7 +1749,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1766,7 +1766,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1783,7 +1783,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1800,25 +1800,25 @@
       },
       "dateFormat": {
         "name": "MM/DD/YYYY",
-        "value": "MM/DD/YYYY"
+        "value": "01/31/2022"
       }
     },
     {
       "name": "Japan",
       "code": "81",
       "iso": "JP",
-      "currency": {
-        "name": "Japanese Yen",
-        "html": "&#165;",
-        "unicode": "A5",
-        "decimal": 0,
-        "shortName": "JPY",
-        "fraction": "Yen"
-      },
-      "dateFormat": {
-        "name": "YYYY/MM/DD",
-        "value": "YYYY/MM/DD"
-      }
+              "currency": {
+          "name": "Japanese Yen",
+          "html": "&#165;",
+          "unicode": "A5",
+          "decimal": 0,
+          "shortName": "JPY",
+          "fraction": "Yen"
+        },
+        "dateFormat": {
+          "name": "YYYY/MM/DD",
+          "value": "2022/01/31"
+        }
     },
     {
       "name": "Jersey",
@@ -1834,7 +1834,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1851,7 +1851,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1868,7 +1868,7 @@
       },
       "dateFormat": {
         "name": "DD.MM.YYYY",
-        "value": "DD.MM.YYYY"
+        "value": "31.01.2022"
       }
     },
     {
@@ -1885,7 +1885,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1902,7 +1902,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1919,7 +1919,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1936,7 +1936,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1953,7 +1953,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1970,7 +1970,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -1987,7 +1987,7 @@
       },
       "dateFormat": {
         "name": "DD.MM.YYYY",
-        "value": "DD.MM.YYYY"
+        "value": "31.01.2022"
       }
     },
     {
@@ -2004,7 +2004,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -2021,7 +2021,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -2038,7 +2038,7 @@
       },
       "dateFormat": {
         "name": "MM/DD/YYYY",
-        "value": "MM/DD/YYYY"
+        "value": "01/31/2022"
       }
     },
     {
@@ -2055,7 +2055,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -2072,7 +2072,7 @@
       },
       "dateFormat": {
         "name": "DD.MM.YYYY",
-        "value": "DD.MM.YYYY"
+        "value": "31.01.2022"
       }
     },
     {
@@ -2089,7 +2089,7 @@
       },
       "dateFormat": {
         "name": "YYYY-MM-DD",
-        "value": "YYYY-MM-DD"
+        "value": "2022-01-31"
       }
     },
     {
@@ -2106,25 +2106,25 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
       "name": "Macao",
       "code": "853",
       "iso": "MO",
-      "currency": {
-        "name": "Macanese Pataca",
-        "html": "&#77;&#79;&#80;&#36;",
-        "unicode": "4D4F5024",
-        "decimal": 2,
-        "shortName": "MOP",
-        "fraction": "Pataca"
-      },
-      "dateFormat": {
-        "name": "YYYY/MM/DD",
-        "value": "YYYY/MM/DD"
-      }
+              "currency": {
+          "name": "Macanese Pataca",
+          "html": "&#77;&#79;&#80;&#36;",
+          "unicode": "4D4F5024",
+          "decimal": 2,
+          "shortName": "MOP",
+          "fraction": "Pataca"
+        },
+        "dateFormat": {
+          "name": "YYYY/MM/DD",
+          "value": "2022/01/31"
+        }
     },
     {
       "name": "Macedonia",
@@ -2140,7 +2140,7 @@
       },
       "dateFormat": {
         "name": "DD.MM.YYYY",
-        "value": "DD.MM.YYYY"
+        "value": "31.01.2022"
       }
     },
     {
@@ -2157,7 +2157,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -2174,7 +2174,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -2191,7 +2191,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -2208,7 +2208,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -2225,7 +2225,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -2242,7 +2242,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -2259,7 +2259,7 @@
       },
       "dateFormat": {
         "name": "MM/DD/YYYY",
-        "value": "MM/DD/YYYY"
+        "value": "01/31/2022"
       }
     },
     {
@@ -2276,7 +2276,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -2293,7 +2293,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -2310,7 +2310,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -2327,7 +2327,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -2344,7 +2344,7 @@
       },
       "dateFormat": {
         "name": "MM/DD/YYYY",
-        "value": "MM/DD/YYYY"
+        "value": "01/31/2022"
       }
     },
     {
@@ -2361,7 +2361,7 @@
       },
       "dateFormat": {
         "name": "DD.MM.YYYY",
-        "value": "DD.MM.YYYY"
+        "value": "31.01.2022"
       }
     },
     {
@@ -2378,25 +2378,25 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
       "name": "Mongolia",
       "code": "976",
       "iso": "MN",
-      "currency": {
-        "name": "Mongolian Tögrög",
-        "html": "&#8366;",
-        "unicode": "20AE",
-        "decimal": 2,
-        "shortName": "MNT",
-        "fraction": "Tögrög"
-      },
-      "dateFormat": {
-        "name": "YYYY.MM.DD",
-        "value": "YYYY.MM.DD"
-      }
+              "currency": {
+          "name": "Mongolian Tögrög",
+          "html": "&#8366;",
+          "unicode": "20AE",
+          "decimal": 2,
+          "shortName": "MNT",
+          "fraction": "Tögrög"
+        },
+        "dateFormat": {
+          "name": "YYYY.MM.DD",
+          "value": "2022.01.31"
+        }
     },
     {
       "name": "Montenegro",
@@ -2412,7 +2412,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -2429,7 +2429,7 @@
       },
       "dateFormat": {
         "name": "MM/DD/YYYY",
-        "value": "MM/DD/YYYY"
+        "value": "01/31/2022"
       }
     },
     {
@@ -2446,7 +2446,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -2463,7 +2463,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -2480,7 +2480,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -2497,7 +2497,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -2514,7 +2514,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -2531,7 +2531,7 @@
       },
       "dateFormat": {
         "name": "YYYY-MM-DD",
-        "value": "YYYY-MM-DD"
+        "value": "2022-01-31"
       }
     },
     {
@@ -2548,7 +2548,7 @@
       },
       "dateFormat": {
         "name": "DD-MM-YYYY",
-        "value": "DD-MM-YYYY"
+        "value": "31-01-2022"
       }
     },
     {
@@ -2565,7 +2565,7 @@
       },
       "dateFormat": {
         "name": "DD-MM-YYYY",
-        "value": "DD-MM-YYYY"
+        "value": "31-01-2022"
       }
     },
     {
@@ -2582,7 +2582,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -2599,7 +2599,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -2616,7 +2616,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -2633,7 +2633,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -2650,7 +2650,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -2667,7 +2667,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -2684,7 +2684,7 @@
       },
       "dateFormat": {
         "name": "YYYY-MM-DD",
-        "value": "YYYY-MM-DD"
+        "value": "2022-01-31"
       }
     },
     {
@@ -2701,7 +2701,7 @@
       },
       "dateFormat": {
         "name": "MM/DD/YYYY",
-        "value": "MM/DD/YYYY"
+        "value": "01/31/2022"
       }
     },
     {
@@ -2718,7 +2718,7 @@
       },
       "dateFormat": {
         "name": "DD.MM.YYYY",
-        "value": "DD.MM.YYYY"
+        "value": "31.01.2022"
       }
     },
     {
@@ -2735,7 +2735,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
   
@@ -2753,7 +2753,7 @@
       },
       "dateFormat": {
         "name": "DD-MM-YYYY",
-        "value": "DD-MM-YYYY"
+        "value": "31-01-2022"
       }
     },
     {
@@ -2770,7 +2770,7 @@
       },
       "dateFormat": {
         "name": "MM/DD/YYYY",
-        "value": "MM/DD/YYYY"
+        "value": "01/31/2022"
       }
     },
     {
@@ -2787,7 +2787,7 @@
       },
       "dateFormat": {
         "name": "DD-MM-YYYY",
-        "value": "DD-MM-YYYY"
+        "value": "31-01-2022"
       }
     },
     {
@@ -2804,7 +2804,7 @@
       },
       "dateFormat": {
         "name": "MM/DD/YYYY",
-        "value": "MM/DD/YYYY"
+        "value": "01/31/2022"
       }
     },
     {
@@ -2821,7 +2821,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -2838,7 +2838,7 @@
       },
       "dateFormat": {
         "name": "DD-MM-YYYY",
-        "value": "DD-MM-YYYY"
+        "value": "31-01-2022"
       }
     },
     {
@@ -2855,7 +2855,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -2872,7 +2872,7 @@
       },
       "dateFormat": {
         "name": "MM/DD/YYYY",
-        "value": "MM/DD/YYYY"
+        "value": "01/31/2022"
       }
     },
     {
@@ -2889,7 +2889,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -2906,7 +2906,7 @@
       },
       "dateFormat": {
         "name": "DD-MM-YYYY",
-        "value": "DD-MM-YYYY"
+        "value": "31-01-2022"
       }
     },
     {
@@ -2923,7 +2923,7 @@
       },
       "dateFormat": {
         "name": "DD-MM-YYYY",
-        "value": "DD-MM-YYYY"
+        "value": "31-01-2022"
       }
     },
     {
@@ -2940,7 +2940,7 @@
       },
       "dateFormat": {
         "name": "MM/DD/YYYY",
-        "value": "MM/DD/YYYY"
+        "value": "01/31/2022"
       }
     },
     {
@@ -2957,7 +2957,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -2974,7 +2974,7 @@
       },
       "dateFormat": {
         "name": "DD-MM-YYYY",
-        "value": "DD-MM-YYYY"
+        "value": "31-01-2022"
       }
     },
     {
@@ -2991,7 +2991,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3008,7 +3008,7 @@
       },
       "dateFormat": {
         "name": "DD.MM.YYYY",
-        "value": "DD.MM.YYYY"
+        "value": "31.01.2022"
       }
     },
     {
@@ -3025,7 +3025,7 @@
       },
       "dateFormat": {
         "name": "DD.MM.YYYY",
-        "value": "DD.MM.YYYY"
+        "value": "31.01.2022"
       }
     },
     {
@@ -3042,7 +3042,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
   
@@ -3060,7 +3060,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3077,7 +3077,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3094,7 +3094,7 @@
       },
       "dateFormat": {
         "name": "MM/DD/YYYY",
-        "value": "MM/DD/YYYY"
+        "value": "01/31/2022"
       }
     },
     {
@@ -3111,7 +3111,7 @@
       },
       "dateFormat": {
         "name": "MM/DD/YYYY",
-        "value": "MM/DD/YYYY"
+        "value": "01/31/2022"
       }
     },
     {
@@ -3128,7 +3128,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3145,7 +3145,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3162,7 +3162,7 @@
       },
       "dateFormat": {
         "name": "MM/DD/YYYY",
-        "value": "MM/DD/YYYY"
+        "value": "01/31/2022"
       }
     },
     {
@@ -3179,7 +3179,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3196,7 +3196,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3213,7 +3213,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3230,7 +3230,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3247,7 +3247,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3264,7 +3264,7 @@
       },
       "dateFormat": {
         "name": "DD.MM.YYYY",
-        "value": "DD.MM.YYYY"
+        "value": "31.01.2022"
       }
     },
     {
@@ -3281,7 +3281,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3298,7 +3298,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3315,7 +3315,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3332,7 +3332,7 @@
       },
       "dateFormat": {
         "name": "DD-MM-YYYY",
-        "value": "DD-MM-YYYY"
+        "value": "31-01-2022"
       }
     },
     {
@@ -3349,7 +3349,7 @@
       },
       "dateFormat": {
         "name": "DD.MM.YYYY",
-        "value": "DD.MM.YYYY"
+        "value": "31.01.2022"
       }
     },
     {
@@ -3366,7 +3366,7 @@
       },
       "dateFormat": {
         "name": "DD.MM.YYYY",
-        "value": "DD.MM.YYYY"
+        "value": "31.01.2022"
       }
     },
     {
@@ -3383,7 +3383,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3400,42 +3400,42 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
       "name": "South Africa",
       "code": "27",
       "iso": "ZA",
-      "currency": {
-        "name": "South African Rand",
-        "html": "&#82;",
-        "unicode": "52",
-        "decimal": 2,
-        "shortName": "ZAR",
-        "fraction": "Rand"
-      },
-      "dateFormat": {
-        "name": "YYYY/MM/DD",
-        "value": "YYYY/MM/DD"
-      }
+              "currency": {
+          "name": "South African Rand",
+          "html": "&#82;",
+          "unicode": "52",
+          "decimal": 2,
+          "shortName": "ZAR",
+          "fraction": "Rand"
+        },
+        "dateFormat": {
+          "name": "YYYY/MM/DD",
+          "value": "2022/01/31"
+        }
     },
     {
       "name": "South Korea",
       "code": "82",
       "iso": "KR",
-      "currency": {
-        "name": "South Korean Won",
-        "html": "&#8361;",
-        "unicode": "20A9",
-        "decimal": 0,
-        "shortName": "KRW",
-        "fraction": "Won"
-      },
-      "dateFormat": {
-        "name": "YYYY.MM.DD",
-        "value": "YYYY.MM.DD"
-      }
+              "currency": {
+          "name": "South Korean Won",
+          "html": "&#8361;",
+          "unicode": "20A9",
+          "decimal": 0,
+          "shortName": "KRW",
+          "fraction": "Won"
+        },
+        "dateFormat": {
+          "name": "YYYY.MM.DD",
+          "value": "2022.01.31"
+        }
     },
     {
       "name": "South Sudan",
@@ -3451,7 +3451,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3468,7 +3468,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3485,7 +3485,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3502,7 +3502,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3519,7 +3519,7 @@
       },
       "dateFormat": {
         "name": "DD-MM-YYYY",
-        "value": "DD-MM-YYYY"
+        "value": "31-01-2022"
       }
     },
     {
@@ -3536,7 +3536,7 @@
       },
       "dateFormat": {
         "name": "DD.MM.YYYY",
-        "value": "DD.MM.YYYY"
+        "value": "31.01.2022"
       }
     },
     {
@@ -3553,7 +3553,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3570,7 +3570,7 @@
       },
       "dateFormat": {
         "name": "YYYY-MM-DD",
-        "value": "YYYY-MM-DD"
+        "value": "2022-01-31"
       }
     },
     {
@@ -3587,7 +3587,7 @@
       },
       "dateFormat": {
         "name": "DD.MM.YYYY",
-        "value": "DD.MM.YYYY"
+        "value": "31.01.2022"
       }
     },
     {
@@ -3604,7 +3604,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
   
@@ -3612,18 +3612,18 @@
       "name": "Taiwan",
       "code": "886",
       "iso": "TW",
-      "currency": {
-        "name": "New Taiwan Dollar",
-        "html": "&#78;&#84;&#36;",
-        "unicode": "4E5424",
-        "decimal": 2,
-        "shortName": "TWD",
-        "fraction": "Dollar"
-      },
-      "dateFormat": {
-        "name": "YYYY/MM/DD",
-        "value": "YYYY/MM/DD"
-      }
+              "currency": {
+          "name": "New Taiwan Dollar",
+          "html": "&#78;&#84;&#36;",
+          "unicode": "4E5424",
+          "decimal": 2,
+          "shortName": "TWD",
+          "fraction": "Dollar"
+        },
+        "dateFormat": {
+          "name": "YYYY/MM/DD",
+          "value": "2022/01/31"
+        }
     },
     {
       "name": "Tajikistan",
@@ -3639,7 +3639,7 @@
       },
       "dateFormat": {
         "name": "DD-MM-YYYY",
-        "value": "DD-MM-YYYY"
+        "value": "31-01-2022"
       }
     },
     {
@@ -3656,7 +3656,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3673,7 +3673,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3690,7 +3690,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3707,7 +3707,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3724,7 +3724,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3741,7 +3741,7 @@
       },
       "dateFormat": {
         "name": "MM/DD/YYYY",
-        "value": "MM/DD/YYYY"
+        "value": "01/31/2022"
       }
     },
     {
@@ -3758,7 +3758,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3775,7 +3775,7 @@
       },
       "dateFormat": {
         "name": "DD.MM.YYYY",
-        "value": "DD.MM.YYYY"
+        "value": "31.01.2022"
       }
     },
     {
@@ -3792,7 +3792,7 @@
       },
       "dateFormat": {
         "name": "DD.MM.YYYY",
-        "value": "DD.MM.YYYY"
+        "value": "31.01.2022"
       }
     },
     {
@@ -3809,7 +3809,7 @@
       },
       "dateFormat": {
         "name": "MM/DD/YYYY",
-        "value": "MM/DD/YYYY"
+        "value": "01/31/2022"
       }
     },
     {
@@ -3826,7 +3826,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3843,7 +3843,7 @@
       },
       "dateFormat": {
         "name": "MM/DD/YYYY",
-        "value": "MM/DD/YYYY"
+        "value": "01/31/2022"
       }
     },
     {
@@ -3860,7 +3860,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3877,7 +3877,7 @@
       },
       "dateFormat": {
         "name": "DD.MM.YYYY",
-        "value": "DD.MM.YYYY"
+        "value": "31.01.2022"
       }
     },
     {
@@ -3894,7 +3894,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3911,7 +3911,7 @@
       },
       "dateFormat": {
         "name": "DD.MM.YYYY",
-        "value": "DD.MM.YYYY"
+        "value": "31.01.2022"
       }
     },
     {
@@ -3928,7 +3928,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3945,7 +3945,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3962,7 +3962,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3979,7 +3979,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -3996,7 +3996,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -4013,7 +4013,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -4030,7 +4030,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -4047,7 +4047,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     },
     {
@@ -4064,7 +4064,7 @@
       },
       "dateFormat": {
         "name": "DD/MM/YYYY",
-        "value": "DD/MM/YYYY"
+        "value": "31/01/2022"
       }
     }
   

@@ -108,9 +108,6 @@ export class CreateOrganizationComponent {
         trackBy: (item: Currency) => item.name,
         onSearch: (value: string) => {
           this.currencyStore.setSearch(value);
-        },
-        onSelect: (item: Currency) => {
-          console.log('🔍 Selected Currency:', item);
         }
       }
     },
@@ -118,13 +115,10 @@ export class CreateOrganizationComponent {
       required: true,
       autoComplete: {
         items: this.dateFormats,
-        displayValue: (item: DateFormat) => item.name,
+        displayValue: (item: DateFormat) => `${item.name} (${item.value})`,
         trackBy: (item: DateFormat) => item.name,
         onSearch: (value: string) => {
           this.dateFormatStore.setSearch(value);
-        },
-        onSelect: (item: DateFormat) => {
-          console.log('🔍 Selected Date Format:', item);
         }
       }
     },
