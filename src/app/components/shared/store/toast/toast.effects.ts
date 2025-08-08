@@ -12,8 +12,8 @@ export const toastEffects = {
 
       return actions$.pipe(
         ofType(toastActions.show),
-        tap(({ message, toastType, duration }) => {
-          toastStore.show(message, toastType, duration);
+        tap(({ item, toastType, duration }) => {
+          toastStore.show(item, toastType, duration);
         })
       );
     },

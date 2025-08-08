@@ -17,6 +17,7 @@ import { DateFormat } from '../../../../../shared/store/date-format/date-format.
 import { DateFormatStore } from '../../../../../shared/store/date-format/date-format.store';
 import { OrganizationBootstrap } from '../../../store/organization/organization.model';
 import { organizationActions } from '../../../store/organization/organization.actions';
+import { DEFAULT_INVOICE_NUMBER_FORMAT, DEFAULT_JOURNAL_NUMBER_FORMAT } from '../../../../../../util/constants';
 
 @Component({
   selector: 'app-create-organization',
@@ -54,7 +55,13 @@ export class CreateOrganizationComponent {
       }
       return [];
     }, value: 'test@test.com' },
-    { key: 'country', label: 'Country', type: 'auto-complete', group: 'Basic Details',
+    { key: 'country', label: 'Country', type: 'auto-complete', required: true, group: 'Basic Details',
+      validators:(value: unknown) => {
+        if(!willPassRequiredValidation((value as Country)?.name)) {
+          return ['Country is required'];
+        }
+        return [];
+      },
       autoComplete: {
         items: this.countries,
         displayValue: (item: Country) => `${toFlagEmoji(item.iso)} ${item.name}`,
@@ -114,7 +121,7 @@ export class CreateOrganizationComponent {
         return ['Fiscal Name is required'];
       }
       return [];
-    }, value: 'Test Fiscal Name' },
+    }, value: '2025-2026' },
     { key: 'startdate', label: 'Start Date', type: 'date', group: 'Financial Info', required: true, validators:(value: unknown) => {
       if(!willPassRequiredValidation(value as string)) {
         return ['Start Date is required'];
@@ -126,7 +133,7 @@ export class CreateOrganizationComponent {
         return ['End Date is required'];
       }
       return [];
-    }, value: '2025-03-31' },
+    }, value: '2026-03-31' },
   
     // 🔢 Numbering Formats
     { key: 'invnumber', label: 'Invoice number format', type: 'text', group: 'Other Info', required: true, validators:(value: unknown) => {
@@ -134,19 +141,25 @@ export class CreateOrganizationComponent {
         return ['Invoice No. is required'];
       }
       return [];
-    }, value: 'Test Invoice Number Format' },
+    }, value: DEFAULT_INVOICE_NUMBER_FORMAT },
     { key: 'jnumber', label: 'Journal number format', type: 'text', group: 'Other Info', required: true, validators:(value: unknown) => {
       if(!willPassRequiredValidation(value as string)) {
         return ['Journal No. is required'];
       }
       return [];
-    }, value: 'Test Journal Number Format' },
+    }, value: DEFAULT_JOURNAL_NUMBER_FORMAT },
     {
       key: 'currency',
       label: 'Currency',
       type: 'auto-complete',
       group: 'Other Info',
       required: true,
+      validators:(value: unknown) => {
+        if(!willPassRequiredValidation((value as Currency)?.name)) {
+          return ['Currency is required'];
+        }
+        return [];
+      },
       autoComplete: {
         items: this.currencies,
         displayValue: (item: Currency) => `${item.name} (${String.fromCharCode(parseInt(item.unicode, 16))})`,
@@ -158,6 +171,13 @@ export class CreateOrganizationComponent {
     },
     { key: 'dateformat', label: 'Date Format', type: 'auto-complete', group: 'Other Info',
       required: true,
+      validators:(value: unknown) => {
+        console.log('value', value);
+        if(!willPassRequiredValidation((value as DateFormat)?.name)) {
+          return ['Date Format is required'];
+        }
+        return [];
+      },
       autoComplete: {
         items: this.dateFormats,
         displayValue: (item: DateFormat) => `${item.name} (${item.value})`,

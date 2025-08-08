@@ -29,7 +29,7 @@ export const httpEffects = {
           map((data) => {
             // Show success message if provided
             if (metadata.successMessage) {
-              toastStore.show(metadata.successMessage, 'success');
+              toastStore.show({ title: 'Success', message: metadata.successMessage }, 'success');
             }
             
             return httpActions.requestSuccess({ 
@@ -41,7 +41,7 @@ export const httpEffects = {
           catchError((error) => {
             // Show error message if provided
             if (metadata.errorMessage) {
-              toastStore.show(metadata.errorMessage, 'error');
+              toastStore.show({ title: metadata.errorMessage, message:error.message }, 'error');
             }
             
             return of(httpActions.requestFailure({ 

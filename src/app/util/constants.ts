@@ -21,3 +21,7 @@ export const COMMON_DATE_FORMATS = [
   { name: "dddd, MMMM D, YYYY", value: "Monday, January 31, 2022" },
   { name: "ddd, MMM D, YYYY", value: "Mon, Jan 31, 2022" }
 ]
+
+export const DEFAULT_JOURNAL_NUMBER_FORMAT =
+  '<<FISCAL_START_YY>>-<<FISCAL_END_YY>>/<<SERIAL1>>';
+export const DEFAULT_INVOICE_NUMBER_FORMAT = '<<YYYY>>/<<SERIAL3>>';

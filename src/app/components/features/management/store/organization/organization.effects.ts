@@ -21,7 +21,7 @@ export const organizationEffects = {
       return actions$.pipe(
         ofType(organizationActions.bootstrapOrganization),
         tap((action) => {
-          const baseUrl = `${configStore.config().apiBaseUrl}/organization/organization`;
+          const baseUrl = `${configStore.config().apiBaseUrl}/organization/organization/bootstrap`;
           const requestId = `${organizationActions.bootstrapOrganization.type}-${Date.now()}-${Math.random()}`;
           const options = {
             actionName: 'bootstrapOrganization',

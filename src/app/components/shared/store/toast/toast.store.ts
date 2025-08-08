@@ -1,5 +1,5 @@
 import { signalStore, withState, withMethods, patchState } from '@ngrx/signals';
-import { ToastMessage } from './toast.model';
+import { ToastItem, ToastMessage } from './toast.model';
 import { ToastState, initialToastState } from './toast.state';
 
 export const ToastStore = signalStore(
@@ -9,12 +9,12 @@ export const ToastStore = signalStore(
 
   withMethods((store) => {
     const show = (
-      message: string,
-      toastType: ToastMessage['type'] = 'info', // Changed parameter name to match action
+      item: ToastItem,
+      toastType: ToastMessage['type'] = 'info',
       duration = 5000
     ) => {
       const id = `${Date.now()}-${Math.random()}`;
-      const toast: ToastMessage = { id, type: toastType, message, duration }; // Use toastType parameter but keep type property for model
+      const toast: ToastMessage = { id, type: toastType, item, duration };
 
       patchState(store, {
         toasts: [...store.toasts(), toast]

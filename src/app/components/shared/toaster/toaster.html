@@ -12,7 +12,13 @@
         'bg-info': toast.type === 'info'
       }"
     >
-      <div class="flex-1 pr-6">{{ toast.message }}</div>
+      <div class="flex-1 pr-6">
+        @if (toast.item.title) {
+          <div class="font-bold mb-1">{{ toast.item.title }}</div>
+        }
+        <div>{{ toast.item.message }}</div>
+      </div>
+
       <button
         class="absolute top-1 right-2 text-white hover:text-white/80 cursor-pointer"
         (click)="toastStore.dismiss(toast.id)"
