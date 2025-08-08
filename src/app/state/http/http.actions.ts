@@ -1,0 +1,33 @@
+import { createActionGroup, props } from '@ngrx/store';
+import { HttpRequestConfig, HttpRequestMetadata } from './http.model';
+
+export const httpActions = createActionGroup({
+  source: 'Http',
+  events: {
+    // Generic HTTP request action - use unknown instead of any
+    executeRequest: props<{ 
+      config: HttpRequestConfig; 
+      metadata: HttpRequestMetadata<unknown, unknown>;
+    }>(),
+    
+    // Generic success/failure actions - use unknown for better type safety
+    requestSuccess: props<{ 
+      requestId: string; 
+      data: unknown; 
+      metadata: HttpRequestMetadata<unknown, unknown>;
+    }>(),
+    
+    requestFailure: props<{ 
+      requestId: string; 
+      error: unknown; 
+      metadata: HttpRequestMetadata<unknown, unknown>;
+    }>(),
+    
+    // Loading management - these don't need generics
+    startLoading: props<{ requestId: string }>(),
+    stopLoading: props<{ requestId: string }>(),
+    
+    // Clear error for specific request
+    clearError: props<{ requestId: string }>()
+  }
+});

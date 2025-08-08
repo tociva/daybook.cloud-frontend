@@ -17,6 +17,7 @@ import { countryEffects } from './components/shared/store/country/country.effect
 import { currencyEffects } from './components/shared/store/currency/currency.effect';
 import { dateFormatEffects } from './components/shared/store/date-format/date-format.effect';
 import { toastEffects } from './components/shared/store/toast/toast.effects';
+import { httpEffects } from './state/http/http.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -32,7 +33,8 @@ export const appConfig: ApplicationConfig = {
       countryEffects,
       currencyEffects,
       dateFormatEffects,
-      toastEffects
+      toastEffects,
+      httpEffects
     ]),
     provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
     provideRouterStore(),

@@ -1,50 +1,64 @@
 import { inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { tap } from 'rxjs/operators';
 import { organizationActions } from './organization.actions';
-import { tap, catchError, mergeMap, map } from 'rxjs/operators';
-import { of } from 'rxjs';
 import { Organization } from './organization.model';
 import { OrganizationStore } from './organization.store';
 import { ConfigStore } from '../../../../core/auth/store/config/config.store';
-import { ToastStore } from '../../../../shared/store/toast/toast.store';
-import { UiStore } from '../../../../../state/ui/ui.store';
+import { httpActions } from '../../../../../state/http/http.actions';
+import { HttpRequestConfig, HttpRequestMetadata } from '../../../../../state/http/http.model';
+import { Store } from '@ngrx/store';
 
 export const organizationEffects = {
-  // Bootstrap organization effect using createEffect
+  // Bootstrap organization effect using new HTTP functions
   bootstrapOrganization: createEffect(
     () => {
       const actions$ = inject(Actions);
-      const http = inject(HttpClient);
+      const organizationStore = inject(OrganizationStore);
       const configStore = inject(ConfigStore);
-      const toast = inject(ToastStore);
-      const ui = inject(UiStore);
+      const store = inject(Store);
 
       return actions$.pipe(
         ofType(organizationActions.bootstrapOrganization),
-        mergeMap((action) => {
-          const token = `bootstrapOrganization-${Date.now()}-${Math.random()}`;
-          ui.startLoading(token);
-
+        tap((action) => {
           const baseUrl = `${configStore.config().apiBaseUrl}/organization/organization`;
-          return http.post<Organization>(`${baseUrl}/bootstrap`, action.organization).pipe(
-            map((organization) => {
-              toast.show('Organization bootstrapped successfully!', 'success');
-              return organizationActions.bootstrapOrganizationSuccess({ organization });
-            }),
-            catchError((error) => {
-              toast.show('Failed to bootstrap organization', 'error');
-              return of(organizationActions.bootstrapOrganizationFailure({ error }));
-            }),
-            tap(() => ui.stopLoading(token))
-          );
+          const requestId = `${organizationActions.bootstrapOrganization.type}-${Date.now()}-${Math.random()}`;
+          const options = {
+            actionName: 'bootstrapOrganization',
+            successMessage: 'Organization bootstrapped successfully!',
+            errorMessage: 'Failed to bootstrap organization',
+            onSuccessAction: (organization: Organization) => organizationActions.bootstrapOrganizationSuccess({ organization }),
+            onErrorAction: (error: any) => organizationActions.bootstrapOrganizationFailure({ error }),
+            url: baseUrl,
+            body: action.organization,
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
+          const config: HttpRequestConfig = {
+            url: options.url,
+            method: 'POST',
+            body: options.body,
+            headers: options.headers,
+          };
+          const metadata: HttpRequestMetadata<Organization, Error> = {
+            requestId,
+            actionName: options.actionName,
+            successMessage: options.successMessage,
+            errorMessage: options.errorMessage,
+            onSuccessAction: (organization) => organizationActions.bootstrapOrganizationSuccess({ organization }),
+            onErrorAction: (error) => organizationActions.bootstrapOrganizationFailure({ error }),
+            
+          };
+          store.dispatch(httpActions.executeRequest({ config, metadata: metadata as HttpRequestMetadata<unknown, unknown> }));
         })
       );
     },
-    { functional: true }
+    { functional: true, dispatch: false }
   ),
 
-  // Handle success
+  // Keep these if you still need them for other effects that listen to success/failure actions
+  // You can remove these if nothing else depends on them
   bootstrapSuccess: createEffect(
     () => {
       const actions$ = inject(Actions);
@@ -60,7 +74,6 @@ export const organizationEffects = {
     { functional: true, dispatch: false }
   ),
 
-  // Handle failure
   bootstrapFailure: createEffect(
     () => {
       const actions$ = inject(Actions);
