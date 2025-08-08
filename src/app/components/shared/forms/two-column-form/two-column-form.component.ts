@@ -25,25 +25,18 @@ import { CancelButton } from '../../cancel-button/cancel-button';
   styleUrl: './two-column-form.component.css'
 })
 export class TwoColumnFormComponent<T> {
-
-  readonly model = model<{
-    form: FormGroup;
-    fields: FormField[];
-    title: string;
-  }>({
-    form: new FormGroup({}),
-    fields: [],
-    title: '',
-  });
+  readonly form = model<FormGroup>(new FormGroup({}));
+  readonly fields = model<FormField[]>([]);
+  readonly title = model<string>('');
 
   readonly formSubmit = output<T>();
   readonly submitting = signal(false);
   
   readonly groupedFields: Signal<Record<string, FormField[]>> = computed(() => {
-    const fields = this.model().fields;
+    const fieldList = this.fields();
     const grouped: Record<string, FormField[]> = {};
 
-    for (const field of fields) {
+    for (const field of fieldList) {
       const group = field.group ?? 'Default';
       grouped[group] ??= [];
       grouped[group].push(field);
@@ -54,37 +47,36 @@ export class TwoColumnFormComponent<T> {
   protected readonly groupKeys = computed(() => Object.keys(this.groupedFields()));
 
   getControl<K extends string>(key: K): FormControl<unknown> {
-    const control = this.model().form.get(key);
+    const control = this.form().get(key);
     if (!control || !(control instanceof FormControl)) {
       throw new Error(`Form control not found or not a FormControl: ${key}`);
     }
-    return control as FormControl<unknown>; // fallback default
+    return control as FormControl<unknown>;
   }
 
   constructor() {
     effect(() => {
-      const _ = this.model();
+      // React to any of the models changing
+      const _ = this.form();
+      const __ = this.fields();
+      const ___ = this.title();
       this.submitting.set(false);
     });
   }
 
-  
   onSubmit(): void {
     if (this.submitting()) return;
     this.submitting.set(true);
-
-    const fields = this.model().fields.map(field => ({
+    const clearedFields = this.fields().map(field => ({
       ...field,
       errors: [],
     }));
     
-    this.model.update((prev) => ({
-      ...prev,
-      fields,
-    }));
-  
-    this.formSubmit.emit(this.model().form.value as T);
+    this.fields.set(clearedFields);
+    const formValue = this.form().value;
+    this.formSubmit.emit(formValue as T);
   }
+
   handleAutoCompleteSelect(field: FormField, value: any): void {
     field.autoComplete?.onSelect?.(value);
     this.getControl(field.key).setValue(value);
@@ -92,5 +84,4 @@ export class TwoColumnFormComponent<T> {
     this.getControl(field.key).markAsDirty();
     this.getControl(field.key).markAsTouched();
   }
-
 }

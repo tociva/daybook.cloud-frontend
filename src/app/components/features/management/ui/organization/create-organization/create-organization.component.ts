@@ -2,11 +2,11 @@ import { Component, effect, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { toFlagEmoji } from '../../../../../../util/common.util';
+import { DEFAULT_INVOICE_NUMBER_FORMAT, DEFAULT_JOURNAL_NUMBER_FORMAT } from '../../../../../../util/constants';
 import { FormValidator } from '../../../../../../util/form/form-validator';
 import { FormUtil } from '../../../../../../util/form/form.util';
 import { willPassEmailValidation, willPassRequiredValidation } from '../../../../../../util/form/validation.uti';
 import { FormField } from '../../../../../../util/types/form-field.model';
-import { AutoComplete } from '../../../../../shared/auto-complete/auto-complete';
 import { TwoColumnFormComponent } from '../../../../../shared/forms/two-column-form/two-column-form.component';
 import { loadCountries } from '../../../../../shared/store/country/country.action';
 import { Country } from '../../../../../shared/store/country/country.model';
@@ -15,14 +15,13 @@ import { Currency } from '../../../../../shared/store/currency/currency.model';
 import { CurrencyStore } from '../../../../../shared/store/currency/currency.store';
 import { DateFormat } from '../../../../../shared/store/date-format/date-format.model';
 import { DateFormatStore } from '../../../../../shared/store/date-format/date-format.store';
-import { OrganizationBootstrap } from '../../../store/organization/organization.model';
 import { organizationActions } from '../../../store/organization/organization.actions';
-import { DEFAULT_INVOICE_NUMBER_FORMAT, DEFAULT_JOURNAL_NUMBER_FORMAT } from '../../../../../../util/constants';
+import { OrganizationBootstrap } from '../../../store/organization/organization.model';
 
 @Component({
   selector: 'app-create-organization',
   standalone: true,
-  imports: [TwoColumnFormComponent, AutoComplete],
+  imports: [TwoColumnFormComponent,],
   templateUrl: './create-organization.component.html',
   styleUrl: './create-organization.component.css',
 })
@@ -84,12 +83,6 @@ export class CreateOrganizationComponent {
             if(mobileF){
               mobileF.value = `+${item.code}-`;
             }
-  
-            this.formModel.set({
-              ...this.formModel(),
-              fields
-            });
-  
         }
       }
      },
@@ -192,13 +185,7 @@ export class CreateOrganizationComponent {
 
   readonly form: FormGroup = FormUtil.buildForm(this.orgFields(), this.fb);
 
-
-  readonly formModel = signal({
-    form: this.form,
-    fields: this.orgFields(),
-    title: 'Organization Setup',
-  });
-
+  readonly title = signal('Organization Setup');
 
 
   constructor() {
@@ -222,14 +209,13 @@ export class CreateOrganizationComponent {
   }
   
   handleSubmit(data: OrganizationBootstrap) {
+
+    console.log('data', data);
     const validatedFields = FormValidator.validate(data as any, this.orgFields());
   
     const hasErrors = validatedFields.some(fld => fld.errors?.length);
     if (hasErrors) {
-      this.formModel.set({
-        ...this.formModel(),
-        fields: validatedFields
-      });
+      this.orgFields.set(validatedFields);
       return;
     }
   

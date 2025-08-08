@@ -1,9 +1,5 @@
-<app-two-column-form [model]="formModel()"
+<app-two-column-form [form]="form"
+[fields]="orgFields()"
+[title]="title()"
 (formSubmit)="handleSubmit($event)"
 />
-<app-auto-complete (onSearch)="onSearch($event)"
-[items]="countries()"
-[displayValue]="findDisplayValue"
-[trackBy]="findTrackBy"
-/>
-
