@@ -32,11 +32,11 @@ export function handleHttpEffect<T>(
 
         return options.httpCall(http, action).pipe(
           map((data) => {
-            if (options.successMessage) toast.show(options.successMessage, 'success');
+            if (options.successMessage) toast.show({title: options.successMessage, message: ''}, 'success');
             return options.onSuccess(data);
           }),
           catchError((error) => {
-            if (options.errorMessage) toast.show(options.errorMessage, 'error');
+            if (options.errorMessage) toast.show({title: options.errorMessage, message: error.message}, 'error');
             return of(options.onError(error));
           }),
           finalize(() => ui.stopLoading(token))
@@ -72,12 +72,12 @@ export function handleHttpEffectNonDispatching<T>(
 
         return options.httpCall(http, action).pipe(
           map((data) => {
-            if (options.successMessage) toast.show(options.successMessage, 'success');
+            if (options.successMessage) toast.show({title: options.successMessage, message: ''}, 'success');
             if (options.onSuccess) options.onSuccess(data);
             return data;
           }),
           catchError((error) => {
-            if (options.errorMessage) toast.show(options.errorMessage, 'error');
+            if (options.errorMessage) toast.show({title: options.errorMessage, message: error.message}, 'error');
             if (options.onError) options.onError(error);
             return of(error);
           }),
@@ -87,28 +87,3 @@ export function handleHttpEffectNonDispatching<T>(
     );
   }, { functional: true, dispatch: false });
 }
-
-// Example usage:
-/*
-// Make sure your onSuccess and onError functions CALL the action creators:
-const loadUsersEffect = handleHttpEffect({
-  trigger: userActions.loadUsers,
-  actionName: 'loadUsers',
-  httpCall: (http, action) => http.get<User[]>('/api/users'),
-  onSuccess: (users) => userActions.loadUsersSuccess({ users }), // Call the action creator
-  onError: (error) => userActions.loadUsersFailure({ error: error.message }), // Call the action creator
-  successMessage: 'Users loaded successfully',
-  errorMessage: 'Failed to load users'
-});
-
-// For non-dispatching effects that update signal stores directly:
-const loadUsersEffectNonDispatching = handleHttpEffectNonDispatching({
-  trigger: userActions.loadUsers,
-  actionName: 'loadUsers',
-  httpCall: (http, action) => http.get<User[]>('/api/users'),
-  onSuccess: (users) => userStore.setUsers(users), // Update signal store directly
-  onError: (error) => console.error(error),
-  successMessage: 'Users loaded successfully',
-  errorMessage: 'Failed to load users'
-});
-*/

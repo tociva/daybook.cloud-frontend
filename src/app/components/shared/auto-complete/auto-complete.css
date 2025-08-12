@@ -1,4 +1,5 @@
+/* Optional: make scroll padding play nice when moving focus */
 .scroll-padded {
-  scroll-padding-top: 2.5rem;
-  scroll-padding-bottom: 2.5rem;
+  scroll-padding-top: 0.5rem;
+  scroll-padding-bottom: 0.5rem;
 }

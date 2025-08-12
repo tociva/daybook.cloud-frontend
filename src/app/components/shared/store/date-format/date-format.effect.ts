@@ -19,10 +19,10 @@ export const dateFormatEffects = {
         tap(() => {
           try {
             const countries = countryStore.countries();
-            const formatsFromCountries = countries.map((c) => c.dateFormat);
+            const formatsFromCountries = countries.map((country) => country.dateFormat);
             const uniqueDateFormats: DateFormat[] = Array.from(
               new Map(
-                [...formatsFromCountries, ...COMMON_DATE_FORMATS].map((c) => [c.name, c])
+                [...formatsFromCountries, ...COMMON_DATE_FORMATS].map((format) => [format?.name, format ?? {name: '', value: ''}])
               ).values()
             );
             dateFormatStore.setState((state) => ({

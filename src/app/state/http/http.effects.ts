@@ -39,9 +39,10 @@ export const httpEffects = {
             });
           }),
           catchError((error) => {
+            const errorMessage = error.error?.error.message ?? error.error?.message ?? error.message;
             // Show error message if provided
             if (metadata.errorMessage) {
-              toastStore.show({ title: metadata.errorMessage, message:error.message }, 'error');
+              toastStore.show({ title: metadata.errorMessage, message:errorMessage }, 'error');
             }
             
             return of(httpActions.requestFailure({ 

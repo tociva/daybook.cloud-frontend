@@ -1,31 +1,45 @@
 <div class="relative">
+  <input
+    #inputElement
+    type="text"
+    style="width: 100%;"
+    [value]="inputValue()"
+    [disabled]="disabled()"
+    [attr.placeholder]="placeholder()"
+    (input)="onInputChange($event)"
+    (focus)="onInputFocus()"
+    (blur)="onInputBlur()"
+    (keydown)="onKeyDown($event)"
+    [ngClass]="inputClass()"
+    autocomplete="off"
+    role="combobox"
+    aria-autocomplete="list"
+    [attr.aria-expanded]="isOpen()"
+    aria-haspopup="listbox"
+    [attr.aria-controls]="'ac-listbox'"
+  />
 
-<input
-  type="text"
-  style="width: 100%;"
-  [value]="selectedDisplayValue()"
-  (input)="handleInput($event.target.value)"
-  [ngClass]="inputClass()"
-  (focus)="onFocus()"
-  (keydown)="handleKeyDown($event)"
-  (blur)="handleOnBlur()"
-/>
-@if (showDropdown() && items()?.length) {
-  <div class="absolute z-10 w-full bg-white border rounded shadow mt-1 max-h-60 overflow-auto scroll-padded">
-    @for (item of items(); let i = $index; track findTrackBy(item)) {
-      <div
-        #optionRef
-        class="px-4 py-2 cursor-pointer hover:bg-primary hover:text-white"
-        [class.bg-primary]="i === activeIndex()"
-        [class.text-white]="i === activeIndex()"
-        (click)="handleItemSelect(item)"
-        (mouseenter)="activeIndex.set(i)"
-        [attr.data-index]="i"
-      >
-        {{ findDisplayValue(item) }}
-      </div>
-    }
-    
-  </div>
-}
+  @if (isOpen() && options().length) {
+    <div
+      #listbox
+      id="ac-listbox"
+      class="absolute z-10 w-full bg-white border rounded shadow mt-1 max-h-60 overflow-auto scroll-padded"
+      role="listbox"
+    >
+    @for (item of options(); let i = $index; track i) {
+
+        <div
+          class="px-4 py-2 cursor-pointer hover:bg-primary/90 hover:text-white"
+          [class.bg-primary]="i === focusedIndex()"
+          [class.text-white]="i === focusedIndex()"
+          role="option"
+          [attr.aria-selected]="i === focusedIndex()"
+          [attr.data-index]="i"
+          (mousedown)="onOptionMouseDown(item, i, $event)"
+        >
+          {{ findDisplayValue(item) }}
+        </div>
+      }
+    </div>
+  }
 </div>

@@ -37,6 +37,18 @@ export class CreateOrganizationComponent {
   currencies = signal<Currency[]>([]);
   dateFormats = signal<DateFormat[]>([]);
   
+  private setByPath(path: string, value: any, opts = { emitEvent: true }) {
+    const ctrl = this.form.get(path);
+    if (!ctrl) {
+      console.warn(`Form control not found for path: ${path}`);
+      return;
+    }
+    ctrl.setValue(value, opts);
+    // optionally:
+    ctrl.markAsDirty();
+    ctrl.updateValueAndValidity({ emitEvent: false });
+  }
+
   readonly orgFields = signal<FormField[]>([
     // 🟦 Basic Details
     { key: 'name', label: 'Name', type: 'text', required: true, group: 'Basic Details', validators:(value: unknown) => {
@@ -55,6 +67,7 @@ export class CreateOrganizationComponent {
       return [];
     }, value: 'test@test.com' },
     { key: 'country', label: 'Country', type: 'auto-complete', required: true, group: 'Basic Details',
+      placeholder: 'Search for a country',
       validators:(value: unknown) => {
         if(!willPassRequiredValidation((value as Country)?.name)) {
           return ['Country is required'];
@@ -68,21 +81,10 @@ export class CreateOrganizationComponent {
         onSearch: (value: string) => {
           this.countryStore.setSearch(value);
         },
-        onSelect: (item: Country) => {
-          
-            const fields = this.orgFields();
-            const currencyF = fields.find(fld => fld.key === 'currency');
-            if(currencyF) {
-              currencyF.value = item.currency;
-            }
-            const dateFormatF = fields.find(fld => fld.key === 'dateformat');
-            if(dateFormatF) {
-              dateFormatF.value = item.dateFormat;
-            }
-            const mobileF = fields.find(fld => fld.key === 'mobile');
-            if(mobileF){
-              mobileF.value = `+${item.code}-`;
-            }
+        onOptionSelected: (item: Country) => {
+          this.setByPath('currency', item.currency);
+          this.setByPath('dateformatForm', item.dateFormat);
+          this.setByPath('mobile', `+${item.code}-`);
         }
       }
      },
@@ -162,10 +164,9 @@ export class CreateOrganizationComponent {
         }
       }
     },
-    { key: 'dateformat', label: 'Date Format', type: 'auto-complete', group: 'Other Info',
+    { key: 'dateformatForm', label: 'Date Format', type: 'auto-complete', group: 'Other Info',
       required: true,
       validators:(value: unknown) => {
-        console.log('value', value);
         if(!willPassRequiredValidation((value as DateFormat)?.name)) {
           return ['Date Format is required'];
         }
@@ -210,7 +211,6 @@ export class CreateOrganizationComponent {
   
   handleSubmit(data: OrganizationBootstrap) {
 
-    console.log('data', data);
     const validatedFields = FormValidator.validate(data as any, this.orgFields());
   
     const hasErrors = validatedFields.some(fld => fld.errors?.length);
@@ -218,8 +218,9 @@ export class CreateOrganizationComponent {
       this.orgFields.set(validatedFields);
       return;
     }
-  
-          this.store.dispatch(organizationActions.bootstrapOrganization({ organization: data }));
+    const {dateformatForm, country, ...restData} = data;
+    const {dateFormat, ...restCountry} = country ?? {};
+    this.store.dispatch(organizationActions.bootstrapOrganization({ organization: {...restData, dateformat: dateformatForm?.name ?? '', country: {...restCountry, dateformat: dateFormat?.name ?? ''}} }));
   }
 
   onSearch(value: string) {

@@ -2,6 +2,7 @@ import { Address } from "../../../../../util/types/address";
 import { Branch } from "../branch/branch.model";
 import { Country } from "../../../../shared/store/country/country.model";
 import { Currency } from "../../../../shared/store/currency/currency.model";
+import { DateFormat } from "../../../../shared/util/date-format.model";
 
 export interface Organization {
   id?: string;
@@ -20,16 +21,18 @@ export interface OrganizationBootstrap {
   name: string;
   email: string;
   mobile?: string;
-  address?: Address;
+  address: Address;
   description?: string;
-  country?: Country;
+  country: Country;
   state?: string;
   fiscalstart: string;
   fiscalname: string;
   startdate: string;
   enddate: string;
   gstin?: string;
-  invnumber?: string;
-  currency?: Currency;
-  jnumber?: string;
+  invnumber: string;
+  currency: Currency;
+  jnumber: string;
+  dateformat: string;
+  dateformatForm?: DateFormat;
 }

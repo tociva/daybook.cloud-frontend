@@ -1,147 +1,214 @@
 import { NgClass } from '@angular/common';
-import { Component, effect, ElementRef, EnvironmentInjector, input, output, QueryList, signal, ViewChildren } from '@angular/core';
+import {
+  Component,
+  computed,
+  ElementRef,
+  forwardRef,
+  HostListener,
+  input,
+  output,
+  signal,
+  ViewChild,
+} from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 @Component({
   selector: 'app-auto-complete',
-  templateUrl: './auto-complete.html',
-  standalone: true,
-  styleUrl: './auto-complete.css',
   imports: [NgClass],
+  templateUrl: './auto-complete.html',
+  styleUrl: './auto-complete.css',
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => AutoComplete),
+      multi: true,
+    },
+  ],
 })
-export class AutoComplete<T> {
+export class AutoComplete<T> implements ControlValueAccessor {
+  @ViewChild('inputElement', { static: false }) inputElement!: ElementRef<HTMLInputElement>;
+  @ViewChild('listbox', { static: false }) listboxRef?: ElementRef<HTMLElement>;
 
-  @ViewChildren('optionRef') optionElements!: QueryList<ElementRef<HTMLElement>>;
-
-  readonly inputClass = input<string | string[] | Record<string, boolean>>('flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary border-b-gray-300');
-
-  readonly items = input<T[]>();
-
-  readonly value = input<T | null>();
-
-  readonly onSearch = output<string>();
-
-  readonly onSelect = output<T>();
-
+  // Inputs
+  options = input<T[]>([]);
+  placeholder = input<string>('Start typing...');
+  required = input<boolean>(false);
+  inputClass = input<string | string[] | Record<string, boolean>>(
+    'flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none'
+  );
   readonly displayValue = input<(item: T) => string>();
 
-  readonly trackBy = input<(item: T) => string>();
+  // Output
+  onOptionSelected = output<T>();
+  readonly onSearch = output<string>();
 
-  readonly showDropdown = signal(false);
+  // Internal state
+  inputValue = signal<string>('');          // store text, not T
+  selectedValue = signal<T | null>(null);
+  isOpen = signal<boolean>(false);
+  focusedIndex = signal<number>(-1);
+  disabled = signal<boolean>(false);
+  touched = signal<boolean>(false);
 
-  readonly activeIndex = signal(0);
+  // ---- Display resolver (no per-call allocation)
+  private readonly identity = (x: T) => String(x ?? '');
+  private readonly resolvedDisplay = computed<(item: T) => string>(
+    () => this.displayValue() ?? this.identity
+  );
 
-  readonly selectedDisplayValue = signal('');
+  findDisplayValue = (item: T): string => this.resolvedDisplay()(item);
 
+  // ---- ControlValueAccessor
+  private onChange: (value: T | null) => void = () => {};
+  private onTouched: () => void = () => {};
 
-  constructor(private injector: EnvironmentInjector) {
-    queueMicrotask(() => {
-      this.setupScrollEffect();
-      this.setInitialValue();
-    });
+  writeValue(value: T | null): void {
+    this.selectedValue.set(value);
+    const text = value == null ? '' : this.findDisplayValue(value);
+    this.inputValue.set(text);
+  }
+  registerOnChange(fn: any): void {
+    this.onChange = fn;
+  }
+  registerOnTouched(fn: any): void {
+    this.onTouched = fn;
+  }
+  setDisabledState(isDisabled: boolean): void {
+    this.disabled.set(isDisabled);
   }
 
-  private setInitialValue() {
-    effect(() => {
-      const val = this.value();
-      if (val) {
-        this.selectedDisplayValue.set(this.findDisplayValue(val));
-        this.onSearch.emit(this.findDisplayValue(val));
+  // ---- UI events
+  onInputChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const val = input.value ?? '';
+    this.inputValue.set(val);
+  
+    // Emit search term to parent
+    this.onSearch.emit(val);
+  
+    // Keep dropdown open and reset focus
+    this.openDropdown();
+  }
+
+  onInputFocus(): void {
+    this.openDropdown();
+  }
+
+  onInputBlur(): void {
+    // defer; actual close is handled via HostListener to allow option click
+    this.touched.set(true);
+    this.onTouched();
+  }
+
+  onKeyDown(event: KeyboardEvent): void {
+    const list = this.options();
+    if (!this.isOpen() && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
+      this.openDropdown();
+      event.preventDefault();
+      return;
+    }
+
+    switch (event.key) {
+      case 'ArrowDown': {
+        const next = Math.min(this.focusedIndex() + 1, list.length - 1);
+        this.focusedIndex.set(next);
+        event.preventDefault();
+        this.scrollFocusedIntoView();
+        break;
       }
-    }, { injector: this.injector });
-    
-  }
-  
-  private setupScrollEffect() {
-    effect(() => {
-      const el = this.optionElements?.get(this.activeIndex());
-      el?.nativeElement.scrollIntoView({
-        block: 'nearest',
-        behavior: 'smooth',
-      });
-    }, { injector: this.injector });
-  }
-  
-
-  findTrackBy(item: T): string {
-    const trackBy = this.trackBy();
-    if(!trackBy) {
-      return item as unknown as string;
-    }
-    return trackBy(item);
-  }
-
-  findDisplayValue(item: T): string {
-    const displayValue = this.displayValue();
-    if(!displayValue) {
-      return item as unknown as string;
-    }
-    
-    return displayValue(item);
-  }
-
-  handleInput(value: string) {
-    this.onSearch.emit(value);
-    this.activeIndex.set(0);
-    this.showDropdown.set(true);
-    this.selectedDisplayValue.set(value);
-  }
-
-  onFocus() {
-    this.activeIndex.set(0);
-    this.showDropdown.set(true);
-  }
-
-  handleItemSelect(item: T): void {
-    const value = this.findDisplayValue(item);
-    this.selectedDisplayValue.set(value);
-    this.onSearch.emit(value);
-    this.showDropdown.set(false);
-    this.onSelect.emit(item);
-  }
-  
-
-  handleKeyDown(event: KeyboardEvent): void {
-    const isOpen = this.showDropdown();
-    const count = this.items()?.length ?? 0;
-  
-    if (event.key === 'Escape' && isOpen) {
-      event.preventDefault();
-      const input = event.target as HTMLInputElement;
-      this.onSearch.emit(input?.value ?? '');
-      this.showDropdown.set(false);
-      return;
-    }
-  
-    if (event.key === 'ArrowDown' && isOpen) {
-      event.preventDefault();
-      const next = Math.min(this.activeIndex() + 1, count - 1);
-      this.activeIndex.set(next);
-      return;
-    }
-  
-    if (event.key === 'ArrowUp' && isOpen) {
-      event.preventDefault();
-      const prev = Math.max(this.activeIndex() - 1, 0);
-      this.activeIndex.set(prev);
-      return;
-    }
-  
-    if (event.key === 'Enter' && isOpen) {
-      event.preventDefault();
-      const selected = this.items()?.[this.activeIndex()];
-      if (selected) {
-        this.handleItemSelect(selected);
+      case 'ArrowUp': {
+        const prev = Math.max(this.focusedIndex() - 1, 0);
+        this.focusedIndex.set(prev);
+        event.preventDefault();
+        this.scrollFocusedIntoView();
+        break;
       }
-      return;
+      case 'Home': {
+        if (list.length) {
+          this.focusedIndex.set(0);
+          this.scrollFocusedIntoView();
+          event.preventDefault();
+        }
+        break;
+      }
+      case 'End': {
+        if (list.length) {
+          this.focusedIndex.set(list.length - 1);
+          this.scrollFocusedIntoView();
+          event.preventDefault();
+        }
+        break;
+      }
+      case 'Enter': {
+        const i = this.focusedIndex();
+        if (this.isOpen() && i >= 0 && list[i] !== undefined) {
+          this.select(list[i]);
+          event.preventDefault();
+        }
+        break;
+      }
+      case 'Escape': {
+        this.closeDropdown();
+        event.preventDefault();
+        break;
+      }
     }
   }
 
-  handleOnBlur() {
-    const selected = this.items()?.[this.activeIndex()];
-      if (selected) {
-        this.handleItemSelect(selected);
-      }
-    this.showDropdown.set(false);
+  // Mouse select (use mousedown to beat input blur)
+  onOptionMouseDown(item: T, index: number, ev: MouseEvent): void {
+    ev.preventDefault();
+    this.focusedIndex.set(index);
+    this.select(item);
   }
-  
+
+  // ---- Helpers
+  private openDropdown(): void {
+    this.isOpen.set(true);
+    if (this.options().length) {
+      // if we already have a selected value, focus that; else 0
+      const sel = this.selectedValue();
+      const idx = sel != null
+        ? this.options().findIndex(o => this.findDisplayValue(o) === this.findDisplayValue(sel))
+        : 0;
+      this.focusedIndex.set(idx >= 0 ? idx : 0);
+    } else {
+      this.focusedIndex.set(-1);
+    }
+  }
+
+  private closeDropdown(): void {
+    this.isOpen.set(false);
+    this.focusedIndex.set(-1);
+  }
+
+  private select(item: T): void {
+    this.selectedValue.set(item);
+    this.inputValue.set(this.findDisplayValue(item));
+    this.onChange(item);
+    this.onOptionSelected.emit(item);
+    this.closeDropdown();
+    // return focus to input for smooth UX
+    queueMicrotask(() => this.inputElement?.nativeElement?.focus());
+  }
+
+  private scrollFocusedIntoView(): void {
+    const listbox = this.listboxRef?.nativeElement;
+    if (!listbox) return;
+    const i = this.focusedIndex();
+    if (i < 0) return;
+    const el = listbox.querySelector<HTMLElement>(`[data-index="${i}"]`);
+    el?.scrollIntoView({ block: 'nearest' });
+  }
+
+  // ---- Click outside to close, but allow clicks inside
+  constructor(private host: ElementRef<HTMLElement>) {}
+
+  @HostListener('document:mousedown', ['$event'])
+  onDocMouseDown(ev: MouseEvent) {
+    const target = ev.target as Node;
+    if (!this.host.nativeElement.contains(target)) {
+      this.closeDropdown();
+    }
+  }
 }

@@ -6,7 +6,8 @@ export interface Country {
   code: string;
   iso: string;
   currency: Currency;
-  dateFormat: DateFormat;
+  dateFormat?: DateFormat;
+  dateformat: string;
 }
 
 export interface CountryState {

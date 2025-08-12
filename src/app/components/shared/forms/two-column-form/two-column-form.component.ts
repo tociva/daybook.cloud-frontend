@@ -77,11 +77,4 @@ export class TwoColumnFormComponent<T> {
     this.formSubmit.emit(formValue as T);
   }
 
-  handleAutoCompleteSelect(field: FormField, value: any): void {
-    field.autoComplete?.onSelect?.(value);
-    this.getControl(field.key).setValue(value);
-    this.getControl(field.key).setValue(value, { emitEvent: true });
-    this.getControl(field.key).markAsDirty();
-    this.getControl(field.key).markAsTouched();
-  }
 }

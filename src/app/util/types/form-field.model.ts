@@ -6,6 +6,7 @@ export interface FormField<T = unknown> {
   value?: T | null;
   key: string;
   label: string;
+  placeholder?: string;
   type: FormFieldType;
   required?: boolean;
   options?: { label: string; value: string }[];
@@ -17,6 +18,6 @@ export interface FormField<T = unknown> {
     displayValue: (item: any) => string;
     trackBy: (item: any) => string;
     onSearch: (value: string) => void;
-    onSelect?: (item: any) => void;
+    onOptionSelected?: (item: any) => void;
   };
 }
