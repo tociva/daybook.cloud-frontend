@@ -16,7 +16,11 @@ export const MAIN_LAYOUT_ROUTES: Routes = [
       },
       {
         path: 'management',
-        loadChildren: () => import('../features/management/management.route').then(m => m.managementRoutes),
+        loadChildren: () => import('../features/management/management.routes').then(m => m.managementRoutes),
+      },
+      {
+        path: 'trading',
+        loadChildren: () => import('../features/trading/trading.routes').then(m => m.tradingRoutes),
       },
     ]
   }

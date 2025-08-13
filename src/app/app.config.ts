@@ -18,6 +18,7 @@ import { currencyEffects } from './components/shared/store/currency/currency.eff
 import { dateFormatEffects } from './components/shared/store/date-format/date-format.effect';
 import { toastEffects } from './components/shared/store/toast/toast.effects';
 import { httpEffects } from './state/http/http.effects';
+import { bankCashEffects } from './components/features/trading/store/bank-cash/bank-cash.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -34,7 +35,8 @@ export const appConfig: ApplicationConfig = {
       currencyEffects,
       dateFormatEffects,
       toastEffects,
-      httpEffects
+      httpEffects,
+      bankCashEffects
     ]),
     provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
     provideRouterStore(),

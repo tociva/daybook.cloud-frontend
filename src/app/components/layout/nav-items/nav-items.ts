@@ -16,7 +16,11 @@ export class NavItems {
 
   menus = signal<MenuNode[]>(menuList);
   // open/closed state keyed by parent path
-  private openState = signal<Record<string, boolean>>({});
+  private openState = signal<Record<string, boolean>>({
+    'trading': true,
+    'accounts': true,
+    'management': true,
+  });
 
   isOpen = (path?: string) => !!this.openState()[path ?? ''];
   toggle = (path: string) =>
