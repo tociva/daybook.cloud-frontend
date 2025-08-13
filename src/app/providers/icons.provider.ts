@@ -1,8 +1,65 @@
-import { bootstrapCalendarMonth, bootstrapChevronDown, bootstrapList, bootstrapTextIndentRight } from '@ng-icons/bootstrap-icons';
+import {
+  bootstrapCalendarMonth,
+  bootstrapCashStack,
+  bootstrapChevronDown,
+  bootstrapClipboardData,
+  bootstrapList,
+  bootstrapTextIndentRight,
+  bootstrapBank,
+  bootstrapPercent,
+  bootstrapBoxSeam,
+  bootstrapPeople,
+  bootstrapFileEarmarkText,
+  bootstrapReceipt,
+  bootstrapTruck,
+  bootstrapFileEarmarkPlus,
+  bootstrapArrowCounterclockwise,
+  bootstrapFileEarmarkSpreadsheet,
+  bootstrapWallet2,
+  bootstrapBook,
+  bootstrapJournalText,
+  bootstrapFolder,
+  bootstrapDiagram3,
+  bootstrapCalendarDate,
+  bootstrapGraphUpArrow,
+  bootstrapBarChart,
+  bootstrapGear,
+  bootstrapBuildings,
+  bootstrapSignpost2,
+  bootstrapCalendar3,
+  bootstrapPersonBadge
+} from '@ng-icons/bootstrap-icons';
 import { provideIcons } from '@ng-icons/core';
-
 
 export const provideAppIcons = () =>
   provideIcons({
-    bootstrapTextIndentRight, bootstrapList, bootstrapChevronDown, bootstrapCalendarMonth
+    bootstrapTextIndentRight,
+    bootstrapList,
+    bootstrapChevronDown,
+    bootstrapCalendarMonth,
+    bootstrapClipboardData,
+    bootstrapCashStack,
+    bootstrapBank,
+    bootstrapPercent,
+    bootstrapBoxSeam,
+    bootstrapPeople,
+    bootstrapFileEarmarkText,
+    bootstrapReceipt,
+    bootstrapTruck,
+    bootstrapFileEarmarkPlus,
+    bootstrapArrowCounterclockwise,
+    bootstrapFileEarmarkSpreadsheet,
+    bootstrapWallet2,
+    bootstrapBook,
+    bootstrapJournalText,
+    bootstrapFolder,
+    bootstrapDiagram3,
+    bootstrapCalendarDate,
+    bootstrapGraphUpArrow,
+    bootstrapBarChart,
+    bootstrapGear,
+    bootstrapBuildings,
+    bootstrapSignpost2,
+    bootstrapCalendar3,
+    bootstrapPersonBadge
   });
