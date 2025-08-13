@@ -27,7 +27,8 @@ import {
   bootstrapBuildings,
   bootstrapSignpost2,
   bootstrapCalendar3,
-  bootstrapPersonBadge
+  bootstrapPersonBadge,
+  bootstrapCloudPlus
 } from '@ng-icons/bootstrap-icons';
 import { provideIcons } from '@ng-icons/core';
 
@@ -61,5 +62,6 @@ export const provideAppIcons = () =>
     bootstrapBuildings,
     bootstrapSignpost2,
     bootstrapCalendar3,
-    bootstrapPersonBadge
+    bootstrapPersonBadge,
+    bootstrapCloudPlus,
   });

@@ -3,16 +3,25 @@ import {
   Component,
   computed,
   effect,
+  inject,
+  input,
   model,
   output,
   signal,
-  Signal
+  Signal,
+  untracked
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import {
   FormControl,
   FormGroup,
   ReactiveFormsModule
 } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Actions, ofType } from '@ngrx/effects';
+import { ActionCreator } from '@ngrx/store';
+import { EMPTY } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
 import { FormField } from '../../../../util/types/form-field.model';
 import { AutoComplete } from '../../auto-complete/auto-complete';
 import { CancelButton } from '../../cancel-button/cancel-button';
@@ -26,13 +35,24 @@ import { MonthDatePicker } from '../../month-date-picker/month-date-picker';
   styleUrl: './two-column-form.component.css'
 })
 export class TwoColumnFormComponent<T> {
+
+  private actions$ = inject(Actions);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private backUrl = toSignal(
+    this.route.queryParams.pipe(
+      map(params => params['burl'] ?? null)
+    ),
+    { initialValue: null }
+  );
   readonly form = model<FormGroup>(new FormGroup({}));
   readonly fields = model<FormField[]>([]);
-  readonly title = model<string>('');
+  readonly title = input<string>('');
 
   readonly formSubmit = output<T>();
   readonly submitting = signal(false);
-  
+  readonly successAction = input<ActionCreator[] | ActionCreator | null>(null);
+
   readonly groupedFields: Signal<Record<string, FormField[]>> = computed(() => {
     const fieldList = this.fields();
     const grouped: Record<string, FormField[]> = {};
@@ -56,12 +76,37 @@ export class TwoColumnFormComponent<T> {
   }
 
   constructor() {
+    // EFFECT 1: stable listener for success action(s)
+    effect((onCleanup) => {
+      const creators = this.successAction();
+      if (!creators) return;
+    
+      // Normalize to array
+      const creatorArray = Array.isArray(creators) ? creators : [creators];
+      
+      const subscription = this.actions$.pipe(
+        ofType(...creatorArray), // ofType accepts multiple action creators
+        tap(() => {
+          const url = untracked(() => this.backUrl());
+          this.submitting.set(false);
+          this.router.navigate([url ?? '/']);
+        })
+      ).subscribe();
+    
+      onCleanup(() => subscription.unsubscribe());
+    });
+
+
+    // EFFECT 2: react to UI signals (no stream returned)
     effect(() => {
-      // React to any of the models changing
-      const _ = this.form();
-      const __ = this.fields();
-      const ___ = this.title();
-      this.submitting.set(false);
+      // track these freely; this effect doesn’t manage subscriptions
+      const _ = this.form?.();
+      const __ = this.fields?.();
+      const ___ = this.title?.();
+
+      // any UI-only side effects here (avoid calling actions$ here)
+      // e.g., reset a local flag when form/fields/title change:
+      // this.someUiFlag.set(false);
     });
   }
 

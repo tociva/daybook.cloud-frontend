@@ -1,14 +1,13 @@
 import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
 import { tap } from 'rxjs/operators';
+import { httpActions } from '../../../../../state/http/http.actions';
+import { HttpRequestConfig, HttpRequestMetadata } from '../../../../../state/http/http.model';
+import { ConfigStore } from '../../../../core/auth/store/config/config.store';
 import { organizationActions } from './organization.actions';
 import { Organization } from './organization.model';
 import { OrganizationStore } from './organization.store';
-import { ConfigStore } from '../../../../core/auth/store/config/config.store';
-import { httpActions } from '../../../../../state/http/http.actions';
-import { HttpRequestConfig, HttpRequestMetadata } from '../../../../../state/http/http.model';
-import { Store } from '@ngrx/store';
-import { Router } from '@angular/router';
 
 export const organizationEffects = {
   // Bootstrap organization effect using new HTTP functions
@@ -63,13 +62,11 @@ export const organizationEffects = {
     () => {
       const actions$ = inject(Actions);
       const store = inject(OrganizationStore);
-      const router = inject(Router);
 
       return actions$.pipe(
         ofType(organizationActions.bootstrapOrganizationSuccess),
         tap(({ organization }) => {
           store.setItems([organization]);
-          router.navigate(['/']);
         })
       );
     },

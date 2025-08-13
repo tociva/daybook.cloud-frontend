@@ -36,6 +36,8 @@ export class CreateOrganizationComponent {
   countries = signal<Country[]>([]);
   currencies = signal<Currency[]>([]);
   dateFormats = signal<DateFormat[]>([]);
+  successAction = organizationActions.bootstrapOrganizationSuccess;
+
   
   private setByPath(path: string, value: any, opts = { emitEvent: true }) {
     const ctrl = this.form.get(path);

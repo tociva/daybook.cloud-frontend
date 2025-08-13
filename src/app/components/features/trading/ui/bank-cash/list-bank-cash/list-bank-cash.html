@@ -14,11 +14,9 @@
     <!-- Right: Create Button -->
     <button
       (click)="onCreateBankCash()"
-      class="px-4 py-2 bg-primary text-on-primary rounded hover:bg-primary-hover transition-colors duration-200 flex items-center gap-2"
+      class="px-4 py-2 bg-primary text-on-primary rounded hover:bg-primary-hover transition-colors duration-200 flex items-center gap-2 cursor-pointer"
     >
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-      </svg>
+      <ng-icon name="bootstrapCloudPlus" class="w-4 h-4"></ng-icon>
       Create Bank/Cash
     </button>
   </div>
@@ -44,7 +42,7 @@
         <p class="text-danger mb-4">Failed to load bank/cash data</p>
         <button
           (click)="loadBankCashes()"
-          class="px-4 py-2 bg-primary text-on-primary rounded hover:bg-primary-hover transition-colors duration-200"
+          class="px-4 py-2 bg-primary text-on-primary rounded hover:bg-primary-hover transition-colors duration-200 cursor-pointer"
         >
           Try Again
         </button>
@@ -60,9 +58,6 @@
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-text/70 uppercase tracking-wider">
                 Name
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-text/70 uppercase tracking-wider">
-                Branch
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-text/70 uppercase tracking-wider">
                 Status
@@ -82,9 +77,6 @@
               <tr class="hover:bg-alternate-background/50 transition-colors duration-150">
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-medium text-text">{{ bankCash.name }}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-text">{{ bankCash.branch.name || 'N/A' }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span
@@ -140,8 +132,9 @@
         <p class="mb-4">Get started by creating your first bank or cash account.</p>
         <button
           (click)="onCreateBankCash()"
-          class="px-4 py-2 bg-primary text-on-primary rounded hover:bg-primary-hover transition-colors duration-200"
+          class="px-4 py-2 bg-primary text-on-primary rounded hover:bg-primary-hover transition-colors duration-200 cursor-pointer"
         >
+          <ng-icon name="bootstrapCloudPlus" class="w-4 h-4"></ng-icon>
           Create First Entry
         </button>
       </div>

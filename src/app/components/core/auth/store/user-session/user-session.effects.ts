@@ -155,5 +155,20 @@ export const userSessionEffects = {
       );
     },
     { functional: true }
-  )
+  ),
+
+  clearUserSessionFailure: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const router = inject(Router);
+
+      return actions$.pipe(
+        ofType(userSessionActions.createUserSessionFailure),
+        tap(({ error }) => {
+          router.navigate(['/auth/do-logout']);
+        })
+      );
+    },
+    { functional: true, dispatch: false }
+  ),
 };
