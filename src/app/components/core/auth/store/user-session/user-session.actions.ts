@@ -4,18 +4,17 @@ import { UserSession } from './user-session.model';
 export const userSessionActions = createActionGroup({
   source: 'UserSession',
   events: {
-    loadUserSession: props<{ userid: string }>(),
-    loadUserSessionSuccess: props<{ session: UserSession }>(),
-    loadUserSessionFailure: props<{ error: any }>(),
-    
     createUserSession: emptyProps(),
+    createUserSessionSuccess: props<{ session: UserSession }>(),
+    createUserSessionFailure: props<{ error: any }>(),
     
     selectOrganization: props<{ organizationid: string }>(),
     selectBranch: props<{ branchid: string }>(),
     selectFiscalYear: props<{ fiscalyearid: string }>(),
     selectOrganizations: emptyProps(),
     
-    deleteUserSession: props<{ id: string }>(),
-    clearUserSession: emptyProps()
+    clearUserSession: emptyProps(),
+    clearUserSessionSuccess: emptyProps(),
+    clearUserSessionFailure: props<{ error: any }>(),
   }
 });

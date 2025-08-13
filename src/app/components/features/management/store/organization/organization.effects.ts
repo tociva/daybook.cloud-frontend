@@ -8,13 +8,13 @@ import { ConfigStore } from '../../../../core/auth/store/config/config.store';
 import { httpActions } from '../../../../../state/http/http.actions';
 import { HttpRequestConfig, HttpRequestMetadata } from '../../../../../state/http/http.model';
 import { Store } from '@ngrx/store';
+import { Router } from '@angular/router';
 
 export const organizationEffects = {
   // Bootstrap organization effect using new HTTP functions
   bootstrapOrganization: createEffect(
     () => {
       const actions$ = inject(Actions);
-      const organizationStore = inject(OrganizationStore);
       const configStore = inject(ConfigStore);
       const store = inject(Store);
 
@@ -63,11 +63,13 @@ export const organizationEffects = {
     () => {
       const actions$ = inject(Actions);
       const store = inject(OrganizationStore);
+      const router = inject(Router);
 
       return actions$.pipe(
         ofType(organizationActions.bootstrapOrganizationSuccess),
         tap(({ organization }) => {
           store.setItems([organization]);
+          router.navigate(['/']);
         })
       );
     },

@@ -16,11 +16,12 @@ import {
 import { FormField } from '../../../../util/types/form-field.model';
 import { AutoComplete } from '../../auto-complete/auto-complete';
 import { CancelButton } from '../../cancel-button/cancel-button';
+import { MonthDatePicker } from '../../month-date-picker/month-date-picker';
 
 @Component({
   selector: 'app-two-column-form',
   standalone: true,
-  imports: [ReactiveFormsModule, NgClass, AutoComplete, CancelButton],
+  imports: [ReactiveFormsModule, NgClass, AutoComplete, CancelButton, MonthDatePicker],
   templateUrl: './two-column-form.component.html',
   styleUrl: './two-column-form.component.css'
 })

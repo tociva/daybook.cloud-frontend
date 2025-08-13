@@ -40,7 +40,6 @@ export class CreateOrganizationComponent {
   private setByPath(path: string, value: any, opts = { emitEvent: true }) {
     const ctrl = this.form.get(path);
     if (!ctrl) {
-      console.warn(`Form control not found for path: ${path}`);
       return;
     }
     ctrl.setValue(value, opts);
@@ -85,6 +84,7 @@ export class CreateOrganizationComponent {
           this.setByPath('currency', item.currency);
           this.setByPath('dateformatForm', item.dateFormat);
           this.setByPath('mobile', `+${item.code}-`);
+          this.setByPath('fiscalstart', item.fiscalstart ?? 'January-01');
         }
       }
      },
@@ -105,7 +105,7 @@ export class CreateOrganizationComponent {
     { key: 'gstin', label: 'GSTIN', type: 'text', group: 'Address Info', value: '1234567890' },
     
     // 🟨 Financial Info
-    { key: 'fiscalstart', label: 'Fiscal Start', type: 'date', group: 'Financial Info', required: true, validators:(value: unknown) => {
+    { key: 'fiscalstart', label: 'Fiscal Start', type: 'month-date', group: 'Financial Info', required: true, validators:(value: unknown) => {
       if(!willPassRequiredValidation(value as string)) {
         return ['Fiscal Start is required'];
       }

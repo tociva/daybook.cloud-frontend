@@ -8,6 +8,7 @@ export interface Country {
   currency: Currency;
   dateFormat?: DateFormat;
   dateformat: string;
+  fiscalstart: string;
 }
 
 export interface CountryState {

@@ -11,10 +11,11 @@ import {
   ViewChild,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { NgIconComponent } from '@ng-icons/core';
 
 @Component({
   selector: 'app-auto-complete',
-  imports: [NgClass],
+  imports: [NgClass, NgIconComponent],
   templateUrl: './auto-complete.html',
   styleUrl: './auto-complete.css',
   providers: [
@@ -33,7 +34,7 @@ export class AutoComplete<T> implements ControlValueAccessor {
   options = input<T[]>([]);
   placeholder = input<string>('Start typing...');
   required = input<boolean>(false);
-  inputClass = input<string | string[] | Record<string, boolean>>(
+  inputClass = input<string>(
     'flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none'
   );
   readonly displayValue = input<(item: T) => string>();

@@ -1,0 +1,111 @@
+<div class="relative inline-block w-full">
+  <!-- Icon inside input -->
+  <ng-icon
+    name="bootstrapCalendarMonth"
+    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"
+    size="20"
+  ></ng-icon>
+
+  <input
+    #inputElement
+    type="text"
+    class="pr-10"
+    [readOnly]="true"
+    style="width: 100%;"
+    [ngClass]="inputClass()"
+    [value]="preview()"
+    (focus)="openPopup()"
+    (click)="openPopup()"
+    (keydown)="onKeyDownInput($event)"
+    [attr.aria-haspopup]="'dialog'"
+    [attr.aria-expanded]="open()"
+    [attr.aria-controls]="'mdp-popup'"
+  />
+
+  @if (open()) {
+    <div
+      #popup
+      id="mdp-popup"
+      tabindex="-1"
+      class="absolute z-50 mt-2 w-[22rem] sm:w-[28rem] rounded-xl border border-primary shadow-lg p-3 bg-white"
+      (keydown)="onKeyDownPopup($event)"
+      role="dialog"
+      aria-label="Pick month and day"
+    >
+      <div class="flex flex-col sm:flex-row gap-3">
+        
+        <!-- LEFT: Month grid -->
+        <div class="sm:w-44 bg-primary/5 rounded-md p-2">
+          <div class="text-xs font-medium text-primary mb-1 px-1">Month</div>
+          <div class="grid grid-cols-3 gap-2">
+            @for (m of months; track m.name; let i = $index) {
+              <button
+                type="button"
+                class="px-2 py-1.5 rounded-md border text-sm w-full transition-colors"
+                [ngClass]="{
+                  'border-primary text-primary hover:bg-primary/10': monthIndex() !== i,
+                  'bg-primary text-white border-primary': monthIndex() === i
+                }"
+                (click)="onMonthClick(i)"
+              >
+                {{ m.name.slice(0, 3) }}
+              </button>
+            }
+          </div>
+        </div>
+  
+        <!-- RIGHT: Days grid -->
+        <div class="flex-1 bg-primary/5 rounded-md p-2">
+          <div class="text-xs font-medium text-primary mb-1 px-1">
+            @if (monthIndex() !== null) {
+              {{ months[monthIndex()!].name }} days
+            } @else {
+              Pick a month
+            }
+          </div>
+  
+          <div class="grid grid-cols-7 gap-1">
+            @for (d of daysArray(); track d) {
+              <button
+                type="button"
+                class="h-8 w-8 rounded-md text-sm border transition-colors"
+                [ngClass]="{
+                  'border-primary text-primary hover:bg-primary/10': day() !== d,
+                  'bg-primary text-white border-primary': day() === d
+                }"
+                (click)="onDayClick(d)"
+              >
+                {{ d }}
+              </button>
+            }
+          </div>
+  
+          <!-- Helper row -->
+          <div class="flex items-center justify-between mt-3 px-1">
+            <div class="text-xs text-primary">
+              {{ valueString() ?? '—' }}
+            </div>
+            <div class="space-x-2">
+              <button
+                type="button"
+                class="text-xs px-2 py-1 rounded border border-primary text-primary hover:bg-primary/10"
+                (click)="day.set(null)"
+              >
+                Clear
+              </button>
+              <button
+                type="button"
+                class="text-xs px-2 py-1 rounded border border-primary bg-primary text-white"
+                (click)="closePopup()"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+  
+      </div>
+    </div>
+  }
+  
+</div>

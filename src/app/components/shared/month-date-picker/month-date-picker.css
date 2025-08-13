@@ -1,0 +1,5 @@
+/* Keep it tiny; most styling is Tailwind. This helps prevent clipping near viewport edges. */
+:host {
+  display: inline-block;
+  width: 100%;
+}

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { authActions } from '../../store/auth/auth.actions';
 import { LoadingScreenComponent } from '../../../../shared/loading-screen/loading-screen.component';
+import { userSessionActions } from '../../store/user-session/user-session.actions';
 
 @Component({
   selector: 'app-do-logout',
@@ -12,6 +12,6 @@ import { LoadingScreenComponent } from '../../../../shared/loading-screen/loadin
 export class DoLogoutComponent {
 
   constructor(private readonly store: Store) {
-    this.store.dispatch(authActions.logoutKratos());
+    this.store.dispatch(userSessionActions.clearUserSession());
   }
 }

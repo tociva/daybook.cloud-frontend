@@ -1,12 +1,12 @@
-import { effect, inject } from '@angular/core';
+import { inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { Actions, createEffect, ofType, ROOT_EFFECTS_INIT } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
 import { User, UserManager, WebStorageStateStore } from 'oidc-client-ts';
 import { catchError, filter, from, map, of, switchMap, tap, withLatestFrom } from 'rxjs';
 import { getUserManager, isUserManagerInitialized, setUserManager } from '../../user-manager-singleton';
 import { ConfigStore } from '../config/config.store';
+import { userSessionActions } from '../user-session/user-session.actions';
 import { authActions } from './auth.actions';
 import { AuthStore } from './auth.store';
 
@@ -291,5 +291,17 @@ export const authEffects = {
       );
     },
     { functional: true, dispatch: false }
+  ),
+
+  continueWithKratosLogout: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      return actions$.pipe(
+        ofType(userSessionActions.clearUserSessionSuccess),
+        map(() => authActions.logoutKratos())
+      );
+    },
+    { functional: true }
   )
+  
 };

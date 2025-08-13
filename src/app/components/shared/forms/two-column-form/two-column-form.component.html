@@ -88,6 +88,14 @@
                 />
 
               }
+
+              @if (field.type === 'month-date') {
+                <app-month-date-picker
+                  class="flex-1"
+                  [formControl]="getControl(field.key)"
+                  [required]="field.required ?? false"
+                />
+              }
             </div>
 
             <!-- 🔴 Error Display -->
