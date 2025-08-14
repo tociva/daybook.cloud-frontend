@@ -1,0 +1,20 @@
+<div class="flex justify-between items-center mb-6">
+  <!-- Left: Table Header -->
+  <div class="flex items-center">
+    <h1 class="text-2xl font-semibold text-text">{{title()}}</h1>
+    @if (error()) {
+      <div class="ml-4 px-3 py-1 bg-danger/10 text-danger text-sm rounded">
+        {{error()?.title ?? 'Error loading data'}}
+      </div>
+    }
+  </div>
+
+  <!-- Right: Create Button -->
+  <button
+    (click)="onCreateItem()()"
+    class="px-4 py-2 bg-primary text-on-primary rounded hover:bg-primary-hover transition-colors duration-200 flex items-center gap-2 cursor-pointer"
+  >
+    <ng-icon name="bootstrapPlusLg" size="24"></ng-icon>
+    {{createButtonText()}}
+  </button>
+</div>

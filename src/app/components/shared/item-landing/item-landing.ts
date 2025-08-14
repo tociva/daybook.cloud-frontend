@@ -1,14 +1,14 @@
 import { Component, input } from '@angular/core';
-import { NgClass } from '@angular/common';
-import { NgIcon } from '@ng-icons/core';
+import { DbcColumn } from '../../../util/types/dbc-column.type';
 import { DbcError } from '../../../util/types/dbc-error.type';
 import { EmptyListMessage } from '../../../util/types/empty-list-message.type';
-import { DbcColumn } from '../../../util/types/dbc-column.type';
-import { Status } from '../../../util/types/status.type';
+import { ItemLandingHeader } from './item-landing-header/item-landing-header';
+import { ItemLandingTable } from './item-landing-table/item-landing-table';
+import { ItemLandingPaginator } from './item-landing-paginator/item-landing-paginator';
 
 @Component({
   selector: 'app-item-landing',
-  imports: [NgIcon, NgClass],
+  imports: [ItemLandingHeader, ItemLandingTable, ItemLandingPaginator],
   templateUrl: './item-landing.html',
   styleUrl: './item-landing.css'
 })
@@ -23,6 +23,9 @@ export class ItemLanding<T> {
     description: 'Get started by creating your first item.',
     buttonText: 'Create First Item'
   });
+  readonly totalItems = input<number>(0);
+  readonly pageSize = input<number>(10);
+  readonly currentPage = input<number>(1);
 
   readonly columns = input<DbcColumn<T>[]>([]);
 
@@ -37,15 +40,5 @@ export class ItemLanding<T> {
   readonly onEditItem = input<(item: T) => void>();
   readonly onDeleteItem = input<(item: T) => void>();
 
-  findValue(item: T, column: DbcColumn<T>): any {
-    return item[column.key as keyof T];
-  }
-  findTrackValue(item: T): string {
-    const idItem = item as unknown as { id: string };
-    return idItem.id;
-  }
-  isActive(item: T): boolean {
-    const status = item as unknown as { status: Status };
-    return status.status === Status.ACTIVE;
-  }
+  
 }

@@ -10,7 +10,11 @@ import {
   bootstrapCalendarMonth,
   bootstrapCartX,
   bootstrapCashStack,
+  bootstrapChevronDoubleLeft,
+  bootstrapChevronDoubleRight,
   bootstrapChevronDown,
+  bootstrapChevronLeft,
+  bootstrapChevronRight,
   bootstrapClipboardData,
   bootstrapDiagram3,
   bootstrapExclamationTriangle,
@@ -71,5 +75,9 @@ export const provideAppIcons = () =>
     bootstrapPencilSquare,
     bootstrapTrash,
     bootstrapCartX,
-    bootstrapExclamationTriangle
+    bootstrapExclamationTriangle,
+    bootstrapChevronLeft,
+    bootstrapChevronRight,
+    bootstrapChevronDoubleRight,
+    bootstrapChevronDoubleLeft
   });

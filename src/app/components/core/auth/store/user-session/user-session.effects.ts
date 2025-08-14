@@ -163,9 +163,9 @@ export const userSessionEffects = {
       const router = inject(Router);
 
       return actions$.pipe(
-        ofType(userSessionActions.createUserSessionFailure),
+        ofType(userSessionActions.clearUserSessionFailure),
         tap(({ error }) => {
-          router.navigate(['/auth/do-logout']);
+          router.navigate(['/auth/logout']);
         })
       );
     },

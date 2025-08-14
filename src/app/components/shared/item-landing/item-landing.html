@@ -1,129 +1,24 @@
 <div class="min-h-full bg-background">
   <!-- Header Section -->
-  <div class="flex justify-between items-center mb-6">
-    <!-- Left: Table Header -->
-    <div class="flex items-center">
-      <h1 class="text-2xl font-semibold text-text">{{title()}}</h1>
-      @if (error()) {
-        <div class="ml-4 px-3 py-1 bg-danger/10 text-danger text-sm rounded">
-          {{error()?.title ?? 'Error loading data'}}
-        </div>
-      }
-    </div>
-
-    <!-- Right: Create Button -->
-    <button
-      (click)="onCreateItem()()"
-      class="px-4 py-2 bg-primary text-on-primary rounded hover:bg-primary-hover transition-colors duration-200 flex items-center gap-2 cursor-pointer"
-    >
-      <ng-icon name="bootstrapPlusLg" size="24"></ng-icon>
-      {{createButtonText()}}
-    </button>
-  </div>
+  <app-item-landing-header
+    [title]="title()"
+    [error]="error()"
+    [createButtonText]="createButtonText()"
+    [onCreateItem]="onCreateItem()"
+  ></app-item-landing-header>
   <!-- Table Section -->
-  <div class="bg-white rounded-lg shadow border border-border overflow-hidden">
-    <!-- Loading State -->
-    @if (!items()) {
-      <div class="p-8 text-center text-text/60">
-        <div class="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
-        <p>Loading data...</p>
-      </div>
-    }
-
-    <!-- Error State -->
-    @if (error() && items()?.length === 0) {
-      <div class="p-8 text-center">
-        <div class="text-danger mb-4">
-          <ng-icon name="bootstrapExclamationTriangle" size="48" class="mx-auto mb-4 text-text/10"></ng-icon>
-        </div>
-        <p class="text-danger mb-4">{{ error()?.details ?? 'Failed to load data' }}</p>
-        <button
-          (click)="onRetry()()"
-          class="px-4 py-2 bg-primary text-on-primary rounded hover:bg-primary-hover transition-colors duration-200 cursor-pointer"
-        >
-          Try Again
-        </button>
-      </div>
-    }
-
-    <!-- Empty State - Only show when not loading, no error, and no items -->
-    @if (!error() && items()?.length === 0) {
-      <div class="p-8 text-center text-text/60 flex flex-col items-center justify-center">
-        <ng-icon name="bootstrapCartX" size="48" class="mx-auto mb-4 text-text/10"></ng-icon>
-
-        <p class="text-lg font-medium mb-2">{{emptyListMessage().title}}</p>
-        <p class="mb-4">{{emptyListMessage().description}}</p>
-        <button
-          (click)="onCreateItem()()"
-          class="px-4 py-2 bg-primary text-on-primary rounded hover:bg-primary-hover transition-colors duration-200 flex items-center gap-2 cursor-pointer"
-        >
-          <ng-icon name="bootstrapPlusLg" size="24"></ng-icon>
-          {{emptyListMessage().buttonText}}
-        </button>
-
-      </div>
-    }
-
-    <!-- Data Table -->
-    @if (items()?.length) {
-      <div class="overflow-x-auto">
-        <table class="w-full">
-          <!-- Table Header -->
-          <thead class="bg-alternate-background border-b border-border">
-            <tr>
-              @for (column of columns(); track column.key) {
-                <th class="px-6 py-3 text-left text-xs font-medium text-text/70 uppercase tracking-wider">
-                  {{column.header}}
-                </th>
-              }
-            </tr>
-          </thead>
-          <tbody>
-            @for (item of items(); track findTrackValue(item)) {
-              <tr class="hover:bg-alternate-background/50 transition-colors duration-150">
-                @for (column of columns(); track column.key) {
-                  <td class="px-6 py-4">
-                    @if (column.type === 'status') {
-                      @let active = isActive(item);
-                      <div class="flex items-center gap-2">
-                        <div class="w-2 h-2 rounded-full" [ngClass]="{'bg-success': active, 'bg-danger': !active}"></div>
-                        <span class="text-sm text-text/70">{{active ? 'Active' : 'Inactive'}}</span>
-                      </div>
-                    } @else if (column.type === 'action') {
-                      <div class="flex items-center gap-2">
-                        @if (onEditItem()) {
-                          <button
-                            class="text-info hover:text-info-hover transition-colors duration-200 cursor-pointer"
-                            title="Edit"
-                            (click)="onEditItem()?.(item)"
-                          >
-                            <ng-icon name="bootstrapPencilSquare" size="20"></ng-icon>
-                          </button>
-                        }
-                        @if (onDeleteItem()) {
-                          <button
-                            class="text-danger hover:text-danger-hover transition-colors duration-200 cursor-pointer"
-                            title="Delete"
-                            (click)="onDeleteItem()?.(item)"
-                          >
-                            <ng-icon name="bootstrapTrash" size="20"></ng-icon>
-                          </button>
-                        }
-                      </div>
-                    }
-                    @else {
-                    <div class="text-text/70 max-w-xs truncate">
-                      {{findValue(item, column)}}
-                    </div>
-                    }
-                  </td>
-                }
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    }
-  </div>
-
+  <app-item-landing-table
+    [items]="items()"
+    [columns]="columns()"
+    [onEditItem]="onEditItem()"
+    [onDeleteItem]="onDeleteItem()"
+    [emptyListMessage]="emptyListMessage()"
+    [onRetry]="onRetry()"
+    [onCreateItem]="onCreateItem()"
+  ></app-item-landing-table>
+  <app-item-landing-paginator
+    [totalItems]="totalItems()"
+    [pageSize]="pageSize()"
+    [currentPage]="currentPage()"
+  ></app-item-landing-paginator>
 </div>
