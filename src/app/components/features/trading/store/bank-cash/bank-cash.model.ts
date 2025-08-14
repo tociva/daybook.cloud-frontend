@@ -1,9 +1,10 @@
+import { Status } from '../../../../../util/types/status.type';
 import { Branch } from '../../../management/store/branch/branch.model';
 
 
 export interface BankCashCU {
   name: string;
-  status?: number;
+  status?: Status;
   description?: string;
   props?: { ledger?: string } & Record<string, unknown>;
 }

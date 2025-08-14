@@ -1,5 +1,6 @@
 import { createActionGroup, props } from '@ngrx/store';
 import { HttpRequestConfig, HttpRequestMetadata } from './http.model';
+import { DbcError } from '../../util/types/dbc-error.type';
 
 export const httpActions = createActionGroup({
   source: 'Http',
@@ -7,20 +8,20 @@ export const httpActions = createActionGroup({
     // Generic HTTP request action - use unknown instead of any
     executeRequest: props<{ 
       config: HttpRequestConfig; 
-      metadata: HttpRequestMetadata<unknown, unknown>;
+      metadata: HttpRequestMetadata<unknown>;
     }>(),
     
     // Generic success/failure actions - use unknown for better type safety
     requestSuccess: props<{ 
       requestId: string; 
       data: unknown; 
-      metadata: HttpRequestMetadata<unknown, unknown>;
+      metadata: HttpRequestMetadata<unknown>;
     }>(),
     
     requestFailure: props<{ 
       requestId: string; 
-      error: unknown; 
-      metadata: HttpRequestMetadata<unknown, unknown>;
+      error: DbcError; 
+      metadata: HttpRequestMetadata<unknown>;
     }>(),
     
     // Loading management - these don't need generics

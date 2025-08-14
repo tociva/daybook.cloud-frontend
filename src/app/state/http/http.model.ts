@@ -1,4 +1,5 @@
 import { Action } from "@ngrx/store";
+import { DbcError } from "../../util/types/dbc-error.type";
 
 export interface HttpRequestConfig {
   url: string;
@@ -8,11 +9,11 @@ export interface HttpRequestConfig {
   params?: Record<string, any>;
 }
 
-export interface HttpRequestMetadata<T = unknown, E = unknown> {
+export interface HttpRequestMetadata<T = unknown> {
   requestId: string;
   actionName: string;
   successMessage?: string;
   errorMessage?: string;
   onSuccessAction?: (data: T) => Action;
-  onErrorAction?: (error: E) => Action;
+  onErrorAction?: (error: DbcError) => Action;
 }

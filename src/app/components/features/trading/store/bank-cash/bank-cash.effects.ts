@@ -30,7 +30,7 @@ export const bankCashEffects = {
               'Content-Type': 'application/json'
             },
           };
-          const metadata: HttpRequestMetadata<BankCash, Error> = {
+          const metadata: HttpRequestMetadata<BankCash> = {
             requestId,
             actionName: 'createBankCash',
             successMessage: 'Bank cash created successfully!',
@@ -38,7 +38,7 @@ export const bankCashEffects = {
             onSuccessAction: (bankCash) => bankCashActions.createBankCashSuccess({ bankCash }),
             onErrorAction: (error) => bankCashActions.createBankCashFailure({ error }),
           };
-          store.dispatch(httpActions.executeRequest({ config, metadata: metadata as HttpRequestMetadata<unknown, unknown> }));
+          store.dispatch(httpActions.executeRequest({ config, metadata: metadata as HttpRequestMetadata<unknown> }));
         })
       );
     },
@@ -64,14 +64,14 @@ export const bankCashEffects = {
               'Content-Type': 'application/json'
             },
           };
-          const metadata: HttpRequestMetadata<BankCash, Error> = {
+          const metadata: HttpRequestMetadata<BankCash> = {
             requestId,
             actionName: 'loadBankCashById',
             errorMessage: 'Failed to load bank cash',
             onSuccessAction: (bankCash) => bankCashActions.loadBankCashByIdSuccess({ bankCash }),
             onErrorAction: (error) => bankCashActions.loadBankCashByIdFailure({ error }),
           };
-          store.dispatch(httpActions.executeRequest({ config, metadata: metadata as HttpRequestMetadata<unknown, unknown> }));
+          store.dispatch(httpActions.executeRequest({ config, metadata: metadata as HttpRequestMetadata<unknown> }));
         })
       );
     },
@@ -98,14 +98,14 @@ export const bankCashEffects = {
               'Content-Type': 'application/json'
             },
           };
-          const metadata: HttpRequestMetadata<BankCash[], Error> = {
+          const metadata: HttpRequestMetadata<BankCash[]> = {
             requestId,
             actionName: 'loadBankCashes',
             errorMessage: 'Failed to load bank cashes',
             onSuccessAction: (bankCashes) => bankCashActions.loadBankCashesSuccess({ bankCashes }),
             onErrorAction: (error) => bankCashActions.loadBankCashesFailure({ error }),
           };
-          store.dispatch(httpActions.executeRequest({ config, metadata: metadata as HttpRequestMetadata<unknown, unknown> }));
+          store.dispatch(httpActions.executeRequest({ config, metadata: metadata as HttpRequestMetadata<unknown> }));
         })
       );
     },
@@ -132,7 +132,7 @@ export const bankCashEffects = {
               'Content-Type': 'application/json'
             },
           };
-          const metadata: HttpRequestMetadata<BankCash, Error> = {
+          const metadata: HttpRequestMetadata<BankCash> = {
             requestId,
             actionName: 'updateBankCash',
             successMessage: 'Bank cash updated successfully!',
@@ -140,7 +140,7 @@ export const bankCashEffects = {
             onSuccessAction: (bankCash) => bankCashActions.updateBankCashSuccess({ bankCash }),
             onErrorAction: (error) => bankCashActions.updateBankCashFailure({ error }),
           };
-          store.dispatch(httpActions.executeRequest({ config, metadata: metadata as HttpRequestMetadata<unknown, unknown> }));
+          store.dispatch(httpActions.executeRequest({ config, metadata: metadata as HttpRequestMetadata<unknown> }));
         })
       );
     },
@@ -166,7 +166,7 @@ export const bankCashEffects = {
               'Content-Type': 'application/json'
             },
           };
-          const metadata: HttpRequestMetadata<void, Error> = {
+          const metadata: HttpRequestMetadata<void> = {
             requestId,
             actionName: 'deleteBankCash',
             successMessage: 'Bank cash deleted successfully!',
@@ -174,7 +174,7 @@ export const bankCashEffects = {
             onSuccessAction: () => bankCashActions.deleteBankCashSuccess({ id: action.id }),
             onErrorAction: (error) => bankCashActions.deleteBankCashFailure({ error }),
           };
-          store.dispatch(httpActions.executeRequest({ config, metadata: metadata as HttpRequestMetadata<unknown, unknown> }));
+          store.dispatch(httpActions.executeRequest({ config, metadata: metadata as HttpRequestMetadata<unknown> }));
         })
       );
     },

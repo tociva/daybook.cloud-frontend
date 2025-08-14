@@ -9,6 +9,7 @@ import { HttpStore } from './http.store';
 import { HttpRequestConfig } from './http.model';
 import { ToastStore } from '../../components/shared/store/toast/toast.store';
 import { UiStore } from '../ui/ui.store';
+import { DbcError } from '../../util/types/dbc-error.type';
 
 export const httpEffects = {
   executeRequest: createEffect(() => {
@@ -41,13 +42,16 @@ export const httpEffects = {
               metadata 
             });
           }),
-          catchError((error) => {
-            const errorMessage = error.error?.error.message ?? error.error?.message ?? error.message;
+          catchError((errorP) => {
+            const errorMessage = errorP.error?.error.message ?? errorP.error?.message ?? errorP.message;
             // Show error message if provided
             if (metadata.errorMessage) {
               toastStore.show({ title: metadata.errorMessage, message:errorMessage }, 'error');
             }
-            
+            const error: DbcError = {
+              details: errorMessage ?? 'Unknown error',
+              title: metadata.errorMessage ?? 'Error thrown from cloud server'
+            };
             return of(httpActions.requestFailure({ 
               requestId: metadata.requestId, 
               error, 

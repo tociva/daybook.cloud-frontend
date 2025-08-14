@@ -40,7 +40,7 @@ export const organizationEffects = {
             body: options.body,
             headers: options.headers,
           };
-          const metadata: HttpRequestMetadata<Organization, Error> = {
+          const metadata: HttpRequestMetadata<Organization> = {
             requestId,
             actionName: options.actionName,
             successMessage: options.successMessage,
@@ -49,7 +49,7 @@ export const organizationEffects = {
             onErrorAction: (error) => organizationActions.bootstrapOrganizationFailure({ error }),
             
           };
-          store.dispatch(httpActions.executeRequest({ config, metadata: metadata as HttpRequestMetadata<unknown, unknown> }));
+          store.dispatch(httpActions.executeRequest({ config, metadata: metadata as HttpRequestMetadata<unknown> }));
         })
       );
     },

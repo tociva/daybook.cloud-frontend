@@ -18,6 +18,7 @@ export class CreateBankCash {
 
   private readonly fb = inject(FormBuilder);
   private readonly store = inject(Store);
+  successAction = bankCashActions.createBankCashSuccess;
 
   readonly formFields = signal<FormField[]>([
     // 🟦 Basic Details

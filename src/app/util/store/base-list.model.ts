@@ -1,3 +1,5 @@
+import { DbcError } from "../types/dbc-error.type";
+
 export interface SortConfig {
   field: string;
   order: 'asc' | 'desc';
@@ -13,7 +15,7 @@ export interface ListQueryParams {
 
 export interface BaseListModel<T> extends ListQueryParams {
   items: T[];
-  error: unknown | null;
+  error: DbcError | null;
   count: number;
   page: number;
 }
