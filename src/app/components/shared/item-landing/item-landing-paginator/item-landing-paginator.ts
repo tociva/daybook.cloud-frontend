@@ -1,5 +1,6 @@
-import { Component, computed, input, signal } from '@angular/core';
+import { Component, computed, input, signal, output, inject } from '@angular/core';
 import { NgIcon } from '@ng-icons/core';
+import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-item-landing-paginator',
@@ -8,94 +9,141 @@ import { NgIcon } from '@ng-icons/core';
   styleUrl: './item-landing-paginator.css'
 })
 export class ItemLandingPaginator<T> {
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   readonly currentPage = input<number>(1);
   readonly pageSize = input<number>(10);
-  readonly totalItems = input<number>(0); // This should be updated when data loads
+  readonly count = input<number>(0);
+  readonly items = input<T[]>([]);
 
-// Computed values
-getTotalPages = computed(() => Math.ceil(this.totalItems() / this.pageSize()));
+  // Events
+  readonly pageChanged = output<{ page: number; pageSize: number; offset: number; limit: number }>();
 
-getShowingFrom = computed(() => {
-  const from = (this.currentPage() - 1) * this.pageSize() + 1;
-  return this.totalItems() === 0 ? 0 : from;
-});
+  // Computed values
+  getTotalPages = computed(() => Math.ceil(this.count() / this.pageSize()));
 
-getShowingTo = computed(() => {
-  const to = Math.min(this.currentPage() * this.pageSize(), this.totalItems());
-  return to;
-});
+  getShowingFrom = computed(() => {
+    const from = (this.currentPage() - 1) * this.pageSize() + 1;
+    return this.count() === 0 ? 0 : from;
+  });
 
-// Get paginated items (if you're doing client-side pagination)
-paginatedItems = computed(() => {
-  
-});
+  getShowingTo = computed(() => {
+    const to = Math.min(this.currentPage() * this.pageSize(), this.count());
+    return to;
+  });
 
-// Pagination methods
-goToPage(page: number): void {
-  
-}
+  // Get paginated items (for client-side pagination)
+  paginatedItems = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize();
+    const end = start + this.pageSize();
+    return this.items().slice(start, end);
+  });
 
-onPageSizeChange(event: Event): void {
-  
-}
+  // Get current offset for server-side pagination
+  getCurrentOffset = computed(() => (this.currentPage() - 1) * this.pageSize());
 
-getPageNumbers(): (number | string)[] {
-  const totalPages = this.getTotalPages();
-  const current = this.currentPage();
-  const pages: (number | string)[] = [];
-  
-  if (totalPages <= 7) {
-    // Show all pages if total pages <= 7
-    for (let i = 1; i <= totalPages; i++) {
-      pages.push(i);
+  // Pagination methods
+  goToPage(page: number): void {
+    if (page < 1 || page > this.getTotalPages() || page === this.currentPage()) {
+      return;
     }
-  } else {
-    // Always show first page
-    if (current > 3) {
-      pages.push(1);
-      if (current > 4) pages.push('...');
-    }
-    
-    // Show pages around current page
-    for (let i = Math.max(1, current - 2); i <= Math.min(totalPages, current + 2); i++) {
-      pages.push(i);
-    }
-    
-    // Always show last page
-    if (current < totalPages - 2) {
-      if (current < totalPages - 3) pages.push('...');
-      pages.push(totalPages);
-    }
+
+    this.updateUrlParams(page, this.pageSize());
   }
-  
-  return pages;
-}
 
-// Update your data loading method to handle pagination
-loadData(): void {
-  // Your existing loading logic here
-  // Make sure to update totalItems() when data is loaded
-  
-  // Example for server-side pagination:
-  // const params = {
-  //   page: this.currentPage(),
-  //   pageSize: this.pageSize(),
-  //   // other filters...
-  // };
-  // 
-  // this.dataService.loadData(params).subscribe(response => {
-  //   this.items.set(response.items);
-  //   this.totalItems.set(response.totalCount);
-  // });
-  
-  // Example for client-side pagination:
-  // this.dataService.loadAllData().subscribe(response => {
-  //   this.items.set(response.items);
-  //   this.totalItems.set(response.items.length);
-  // });
-}
+  onPageSizeChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    const newPageSize = parseInt(target.value, 10);
+    
+    // Calculate what page we should be on to show similar items
+    const currentFirstItem = (this.currentPage() - 1) * this.pageSize() + 1;
+    const newPage = Math.ceil(currentFirstItem / newPageSize);
+    
+    this.updateUrlParams(newPage, newPageSize);
+  }
 
-// If you want to use the paginated items in your template instead of all items,
-// replace items() with paginatedItems() in your table *ngFor
+  // Navigation methods
+  goToFirstPage(): void {
+    this.goToPage(1);
+  }
+
+  goToPreviousPage(): void {
+    this.goToPage(this.currentPage() - 1);
+  }
+
+  goToNextPage(): void {
+    this.goToPage(this.currentPage() + 1);
+  }
+
+  goToLastPage(): void {
+    this.goToPage(this.getTotalPages());
+  }
+
+  // Helper methods for template
+  isFirstPage(): boolean {
+    return this.currentPage() === 1;
+  }
+
+  isLastPage(): boolean {
+    return this.currentPage() === this.getTotalPages();
+  }
+
+  private updateUrlParams(page: number, pageSize: number): void {
+    const offset = (page - 1) * pageSize;
+    const limit = pageSize;
+
+    // Update URL query parameters
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        ...this.route.snapshot.queryParams, // Preserve other query params
+        page: page,
+        limit: limit,
+        offset: offset
+      },
+      queryParamsHandling: 'merge'
+    });
+
+    // Emit the page change event
+    this.pageChanged.emit({
+      page: page,
+      pageSize: pageSize,
+      offset: offset,
+      limit: limit
+    });
+  }
+
+  getPageNumbers(): (number | string)[] {
+    const totalPages = this.getTotalPages();
+    const current = this.currentPage();
+    const pages: (number | string)[] = [];
+    
+    if (totalPages <= 7) {
+      // Show all pages if total pages <= 7
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Always show first page
+      if (current > 3) {
+        pages.push(1);
+        if (current > 4) pages.push('...');
+      }
+      
+      // Show pages around current page
+      for (let i = Math.max(1, current - 2); i <= Math.min(totalPages, current + 2); i++) {
+        pages.push(i);
+      }
+      
+      // Always show last page
+      if (current < totalPages - 2) {
+        if (current < totalPages - 3) pages.push('...');
+        pages.push(totalPages);
+      }
+    }
+    
+    return pages;
+  }
+
 }

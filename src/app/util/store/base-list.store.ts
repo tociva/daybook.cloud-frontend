@@ -22,13 +22,7 @@ export function createBaseListStore<T>(
         const current: BaseListModel<T> = {
           items: store.items(),
           count: store.count(),
-          page: store.page(),
-          limit: store.limit(),
-          skip: store.skip(),
           error: store.error(),
-          search: store.search?.(),
-          sort: store.sort?.(),
-          filters: store.filters?.(),
         };
         patchState(store, stateFn(current));
       },
@@ -37,20 +31,12 @@ export function createBaseListStore<T>(
         patchState(store, { items, error: null });
       },
 
-      setError(error: DbcError) {
-        patchState(store, { error });
-      },
-
-      setPage(page: number) {
-        patchState(store, { page });
-      },
-
       setCount(count: number) {
         patchState(store, { count });
       },
 
-      setSearch(search: string) {
-        patchState(store, { search });
+      setError(error: DbcError) {
+        patchState(store, { error });
       },
 
       resetState() {

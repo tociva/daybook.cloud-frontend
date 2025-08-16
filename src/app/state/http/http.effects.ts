@@ -28,14 +28,12 @@ export const httpEffects = {
         
         // Prepare HTTP call based on method
         const httpCall = createHttpCall(http, config);
-        
         return httpCall.pipe(
           map((data) => {
             // Show success message if provided
             if (metadata.successMessage) {
               toastStore.show({ title: 'Success', message: metadata.successMessage }, 'success');
             }
-            
             return httpActions.requestSuccess({ 
               requestId: metadata.requestId, 
               data, 

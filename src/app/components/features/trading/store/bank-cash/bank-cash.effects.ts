@@ -4,6 +4,7 @@ import { Store } from '@ngrx/store';
 import { tap } from 'rxjs/operators';
 import { httpActions } from '../../../../../state/http/http.actions';
 import { HttpRequestConfig, HttpRequestMetadata } from '../../../../../state/http/http.model';
+import { Count, LB4QueryBuilder } from '../../../../../util/lb4-query-builder';
 import { ConfigStore } from '../../../../core/auth/store/config/config.store';
 import { bankCashActions } from './bank-cash.actions';
 import { BankCash } from './bank-cash.model';
@@ -88,12 +89,16 @@ export const bankCashEffects = {
       return actions$.pipe(
         ofType(bankCashActions.loadBankCashes),
         tap((action) => {
+          const { limit, offset } = action.query ?? {};
+          const filter = LB4QueryBuilder.create()
+          .applySignalStoreFilters(limit ?? 10, offset ?? 0, '', null, {})
+          .build();
           const baseUrl = `${configStore.config().apiBaseUrl}/inventory/bank-cash`;
           const requestId = `${bankCashActions.loadBankCashes.type}-${Date.now()}-${Math.random()}`;
           const config: HttpRequestConfig = {
             url: baseUrl,
             method: 'GET',
-            params: action.query as Record<string, unknown>,
+            params: {filter: JSON.stringify(filter)},
             headers: {
               'Content-Type': 'application/json'
             },
@@ -104,6 +109,40 @@ export const bankCashEffects = {
             errorMessage: 'Failed to load bank cashes',
             onSuccessAction: (bankCashes) => bankCashActions.loadBankCashesSuccess({ bankCashes }),
             onErrorAction: (error) => bankCashActions.loadBankCashesFailure({ error }),
+          };
+          store.dispatch(httpActions.executeRequest({ config, metadata: metadata as HttpRequestMetadata<unknown> }));
+        })
+      );
+    },
+    { functional: true, dispatch: false }
+  ),
+
+  // Count BankCashes effect
+  countBankCashes: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const configStore = inject(ConfigStore);
+      const store = inject(Store);
+
+      return actions$.pipe(
+        ofType(bankCashActions.countBankCashes),
+        tap((action) => {
+          const baseUrl = `${configStore.config().apiBaseUrl}/inventory/bank-cash/count`;
+          const requestId = `${bankCashActions.countBankCashes.type}-${Date.now()}-${Math.random()}`;
+          const config: HttpRequestConfig = {
+            url: baseUrl,
+            method: 'GET',
+            params: action.query,
+            headers: {
+              'Content-Type': 'application/json'
+            },
+          };
+          const metadata: HttpRequestMetadata<Count> = {
+            requestId,
+            actionName: 'countBankCashes',
+            errorMessage: 'Failed to count bank cashes',
+            onSuccessAction: (count) => bankCashActions.countBankCashesSuccess({ count }),
+            onErrorAction: (error) => bankCashActions.countBankCashesFailure({ error }),
           };
           store.dispatch(httpActions.executeRequest({ config, metadata: metadata as HttpRequestMetadata<unknown> }));
         })
@@ -221,7 +260,7 @@ export const bankCashEffects = {
     { functional: true, dispatch: false }
   ),
 
-  loadAllSuccess: createEffect(
+  loadBankCashesSuccess: createEffect(
     () => {
       const actions$ = inject(Actions);
       const store = inject(BankCashStore);
@@ -230,6 +269,22 @@ export const bankCashEffects = {
         ofType(bankCashActions.loadBankCashesSuccess),
         tap(({ bankCashes }) => {
           store.setItems(bankCashes);
+        })
+      );
+    },
+    { functional: true, dispatch: false }
+  ),
+
+  countBankCashesSuccess: createEffect(
+
+    () => {
+      const actions$ = inject(Actions);
+      const store = inject(BankCashStore);
+
+      return actions$.pipe(
+        ofType(bankCashActions.countBankCashesSuccess),
+        tap(({ count }) => {
+          store.setCount(count.count);
         })
       );
     },

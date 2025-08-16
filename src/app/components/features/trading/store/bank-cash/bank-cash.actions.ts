@@ -1,6 +1,8 @@
 import { createActionGroup, props } from '@ngrx/store';
-import { BankCash, BankCashCU } from './bank-cash.model';
+import { Count } from '../../../../../util/lb4-query-builder';
+import { QueryParamsRep } from '../../../../../util/query-params-rep';
 import { DbcError } from '../../../../../util/types/dbc-error.type';
+import { BankCash, BankCashCU } from './bank-cash.model';
 
 export const bankCashActions = createActionGroup({
   source: 'BankCash',
@@ -16,9 +18,14 @@ export const bankCashActions = createActionGroup({
     loadBankCashByIdFailure: props<{ error: DbcError }>(),
     
     // Get all with optional filter
-    loadBankCashes: props<{ query?: unknown }>(),
+    loadBankCashes: props<{ query?: QueryParamsRep }>(),
     loadBankCashesSuccess: props<{ bankCashes: BankCash[] }>(),
     loadBankCashesFailure: props<{ error: DbcError }>(),
+    
+    // Get all with optional filter 
+    countBankCashes: props<{ query?: QueryParamsRep }>(),
+    countBankCashesSuccess: props<{ count: Count }>(),
+    countBankCashesFailure: props<{ error: DbcError }>(),
     
     // Patch/Update
     updateBankCash: props<{ id: string; bankCash: BankCashCU }>(),

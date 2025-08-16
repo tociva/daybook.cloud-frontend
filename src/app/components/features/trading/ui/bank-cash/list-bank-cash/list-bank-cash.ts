@@ -1,10 +1,14 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
+import { Subject } from 'rxjs';
+import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import { LB4Filter } from '../../../../../../util/lb4-query-builder';
+import { DbcColumn } from '../../../../../../util/types/dbc-column.type';
+import { EmptyListMessage } from '../../../../../../util/types/empty-list-message.type';
 import { ItemLanding } from '../../../../../shared/item-landing/item-landing';
 import { BankCash, BankCashStore, bankCashActions } from '../../../store/bank-cash';
-import { EmptyListMessage } from '../../../../../../util/types/empty-list-message.type';
-import { DbcColumn } from '../../../../../../util/types/dbc-column.type';
 
 @Component({
   selector: 'app-list-bank-cash',
@@ -16,9 +20,11 @@ export class ListBankCash implements OnInit {
   private store = inject(Store);
   protected bankCashStore = inject(BankCashStore);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   // Direct access to signal store properties
   readonly items = this.bankCashStore.items;
+  readonly count = this.bankCashStore.count;
   readonly error = computed(() => {
     const storeError = this.bankCashStore.error();
     if (!storeError) return null;
@@ -52,12 +58,34 @@ export class ListBankCash implements OnInit {
     this.router.navigate(['/trading/bank-cash/delete', item.id], { queryParams: { burl: currentUrl } });
   });
 
+  private destroy$ = new Subject<void>();
+
+
+  private loadBankCashes(): void {
+    this.route.queryParams.pipe(
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe((params: LB4Filter) => {
+      const { limit, offset } = params;
+      console.log('limit', limit);
+      console.log('offset', offset);
+      
+      this.store.dispatch(bankCashActions.loadBankCashes({ 
+        query: { limit: limit ?? 10, offset: offset ?? 0 } 
+      }));
+    });
+    setTimeout(() => {
+      this.store.dispatch(bankCashActions.countBankCashes({ query: {} }));
+    }, 100);
+  }
+  
   ngOnInit(): void {
     this.loadBankCashes();
   }
-
-  loadBankCashes(): void {
-    this.store.dispatch(bankCashActions.loadBankCashes({ query: {} }));
+  
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   onCreateBankCash(): void {

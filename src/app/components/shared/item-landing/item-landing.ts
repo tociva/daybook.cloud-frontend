@@ -23,7 +23,7 @@ export class ItemLanding<T> {
     description: 'Get started by creating your first item.',
     buttonText: 'Create First Item'
   });
-  readonly totalItems = input<number>(0);
+  readonly count = input<number>(0);
   readonly pageSize = input<number>(10);
   readonly currentPage = input<number>(1);
 
