@@ -9,6 +9,7 @@ import { DbcColumn } from '../../../../../../util/types/dbc-column.type';
 import { EmptyListMessage } from '../../../../../../util/types/empty-list-message.type';
 import { ItemLanding } from '../../../../../shared/item-landing/item-landing';
 import { BankCash, BankCashStore, bankCashActions } from '../../../store/bank-cash';
+import { QueryParamsRep } from '../../../../../../util/query-params-rep';
 
 @Component({
   selector: 'app-list-bank-cash',
@@ -25,6 +26,9 @@ export class ListBankCash implements OnInit {
   // Direct access to signal store properties
   readonly items = this.bankCashStore.items;
   readonly count = this.bankCashStore.count;
+  readonly pageSize = signal<number>(10);
+  readonly currentPage = signal<number>(1);
+
   readonly error = computed(() => {
     const storeError = this.bankCashStore.error();
     if (!storeError) return null;
@@ -60,19 +64,16 @@ export class ListBankCash implements OnInit {
 
   private destroy$ = new Subject<void>();
 
-
   private loadBankCashes(): void {
     this.route.queryParams.pipe(
       distinctUntilChanged(),
       takeUntil(this.destroy$)
-    ).subscribe((params: LB4Filter) => {
-      const { limit, offset } = params;
-      console.log('limit', limit);
-      console.log('offset', offset);
-      
+    ).subscribe((params: QueryParamsRep) => {
+      const { limit, offset, page } = params;
       this.store.dispatch(bankCashActions.loadBankCashes({ 
         query: { limit: limit ?? 10, offset: offset ?? 0 } 
       }));
+      this.currentPage.set(page ?? 1);
     });
     setTimeout(() => {
       this.store.dispatch(bankCashActions.countBankCashes({ query: {} }));

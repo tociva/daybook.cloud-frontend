@@ -16,6 +16,7 @@ export class ItemLandingPaginator<T> {
   readonly pageSize = input<number>(10);
   readonly count = input<number>(0);
   readonly items = input<T[]>([]);
+  readonly page = input<number>(1);
 
   // Events
   readonly pageChanged = output<{ page: number; pageSize: number; offset: number; limit: number }>();
