@@ -69,10 +69,15 @@ export class ListBankCash implements OnInit {
       takeUntil(this.destroy$)
     ).subscribe((params: QueryParamsRep) => {
       const { limit, offset, page } = params;
+      if(this.pageSize() !== limit) {
+        this.pageSize.set(limit ?? 10);
+      }
       this.store.dispatch(bankCashActions.loadBankCashes({ 
         query: { limit: limit ?? 10, offset: offset ?? 0 } 
       }));
-      this.currentPage.set(page ?? 1);
+      if(this.currentPage() !== page) {
+        this.currentPage.set(page ?? 1);
+      }
     });
     setTimeout(() => {
       this.store.dispatch(bankCashActions.countBankCashes({ query: {} }));

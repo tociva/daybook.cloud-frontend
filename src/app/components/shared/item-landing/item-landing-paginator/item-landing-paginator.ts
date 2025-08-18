@@ -93,7 +93,6 @@ export class ItemLandingPaginator<T> {
   private updateUrlParams(page: number, pageSize: number): void {
     const offset = (page - 1) * pageSize;
     const limit = pageSize;
-
     // Update URL query parameters
     this.router.navigate([], {
       relativeTo: this.route,
