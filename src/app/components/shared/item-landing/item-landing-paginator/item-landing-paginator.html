@@ -31,7 +31,7 @@
         <!-- First page -->
         <button 
           [disabled]="currentPage() === 1"
-          (click)="goToPage(1)"
+          (click)="goToFirstPage()"
           class="px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 border bg-white text-text/60 border-border hover:bg-alternate-background hover:text-text disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           title="First page"
         >
@@ -41,7 +41,7 @@
         <!-- Previous page -->
         <button 
           [disabled]="currentPage() === 1"
-          (click)="goToPage(currentPage() - 1)"
+          (click)="goToPreviousPage()"
           class="px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 border bg-white text-text/60 border-border hover:bg-alternate-background hover:text-text disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           title="Previous page"
         >
@@ -55,6 +55,7 @@
               <span class="px-3 py-2 text-text/40">...</span>
             } @else {
               <button 
+                (click)="handlePageButtonClick(page)"
                 [class]="page === currentPage() ? 
                   'px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 border bg-primary text-on-primary border-primary' : 
                   'px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 border bg-white text-text/70 border-border hover:bg-alternate-background cursor-pointer'"
@@ -69,7 +70,7 @@
         <!-- Next page -->
         <button 
           [disabled]="currentPage() === getTotalPages()"
-          (click)="goToPage(currentPage() + 1)"
+          (click)="goToNextPage()"
           class="px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 border bg-white text-text/60 border-border hover:bg-alternate-background hover:text-text disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           title="Next page"
         >
@@ -79,7 +80,7 @@
         <!-- Last page -->
         <button 
           [disabled]="currentPage() === getTotalPages()"
-          (click)="goToPage(getTotalPages())"
+          (click)="goToLastPage()"
           class="px-3 py-2 text-sm font-medium rounded-md transition-all duration-200 border bg-white text-text/60 border-border hover:bg-alternate-background hover:text-text disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           title="Last page"
         >
@@ -93,7 +94,7 @@
       <div class="flex justify-between items-center">
         <button 
           [disabled]="currentPage() === 1"
-          (click)="goToPage(currentPage() - 1)"
+          (click)="goToPreviousPage()"
           class="px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 border bg-white text-text/60 border-border hover:bg-alternate-background hover:text-text disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 cursor-pointer"
         >
           <ng-icon name="bootstrapChevronLeft" size="16"></ng-icon>
@@ -106,7 +107,7 @@
         
         <button 
           [disabled]="currentPage() === getTotalPages()"
-          (click)="goToPage(currentPage() + 1)"
+          (click)="goToNextPage()"
           class="px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 border bg-white text-text/60 border-border hover:bg-alternate-background hover:text-text disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 cursor-pointer"
         >
           <span>Next</span>

@@ -1,15 +1,13 @@
-import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Subject } from 'rxjs';
-import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
-import { LB4Filter } from '../../../../../../util/lb4-query-builder';
+import { distinctUntilChanged, map, takeUntil } from 'rxjs/operators';
+import { QueryParamsOriginal, QueryParamsRep, parseQueryParams } from '../../../../../../util/query-params-util';
 import { DbcColumn } from '../../../../../../util/types/dbc-column.type';
 import { EmptyListMessage } from '../../../../../../util/types/empty-list-message.type';
 import { ItemLanding } from '../../../../../shared/item-landing/item-landing';
 import { BankCash, BankCashStore, bankCashActions } from '../../../store/bank-cash';
-import { QueryParamsRep } from '../../../../../../util/query-params-rep';
 
 @Component({
   selector: 'app-list-bank-cash',
@@ -67,6 +65,7 @@ export class ListBankCash implements OnInit {
   private loadBankCashes(): void {
     this.route.queryParams.pipe(
       distinctUntilChanged(),
+      map((params: QueryParamsOriginal) => parseQueryParams(params)),
       takeUntil(this.destroy$)
     ).subscribe((params: QueryParamsRep) => {
       const { limit, offset, page } = params;

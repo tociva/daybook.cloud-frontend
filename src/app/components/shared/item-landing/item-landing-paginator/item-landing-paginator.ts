@@ -45,7 +45,7 @@ export class ItemLandingPaginator<T> {
   getCurrentOffset = computed(() => (this.currentPage() - 1) * this.pageSize());
 
   // Pagination methods
-  goToPage(page: number): void {
+  private goToPage(page: number): void {
     if (page < 1 || page > this.getTotalPages() || page === this.currentPage()) {
       return;
     }
@@ -145,6 +145,10 @@ export class ItemLandingPaginator<T> {
     }
     
     return pages;
+  }
+
+  handlePageButtonClick(page: string | number): void {
+    this.goToPage(Number(page));
   }
 
 }

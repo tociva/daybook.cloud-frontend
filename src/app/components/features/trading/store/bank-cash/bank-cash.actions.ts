@@ -1,6 +1,6 @@
 import { createActionGroup, props } from '@ngrx/store';
 import { Count } from '../../../../../util/lb4-query-builder';
-import { QueryParamsRep } from '../../../../../util/query-params-rep';
+import { QueryParamsRep } from '../../../../../util/query-params-util';
 import { DbcError } from '../../../../../util/types/dbc-error.type';
 import { BankCash, BankCashCU } from './bank-cash.model';
 
