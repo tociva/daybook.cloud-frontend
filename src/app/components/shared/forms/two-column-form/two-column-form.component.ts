@@ -87,9 +87,19 @@ export class TwoColumnFormComponent<T> {
       const subscription = this.actions$.pipe(
         ofType(...creatorArray), // ofType accepts multiple action creators
         tap(() => {
-          const url = untracked(() => this.backUrl());
+          const url = untracked(this.backUrl);
           this.submitting.set(false);
-          this.router.navigate([url ?? '/']);
+        
+          if (url) {
+            // If the value looks like “…%3F…” (encoded ?), decode once heuristically
+            const normalized = url.includes('%3F') && !url.includes('?')
+              ? decodeURIComponent(url)
+              : url;
+        
+            this.router.navigateByUrl(normalized, { replaceUrl: true });
+          } else {
+            this.router.navigate(['/']);
+          }
         })
       ).subscribe();
     
