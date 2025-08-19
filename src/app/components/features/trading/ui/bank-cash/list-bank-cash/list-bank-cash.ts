@@ -72,8 +72,9 @@ export class ListBankCash implements OnInit {
       if(this.pageSize() !== limit) {
         this.pageSize.set(limit ?? 10);
       }
+      const search = {query: params.search?.query ?? '', fields: ['description', 'name']};
       this.store.dispatch(bankCashActions.loadBankCashes({ 
-        query: { limit: limit ?? 10, offset: offset ?? 0 } 
+        query: { limit: limit ?? 10, offset: offset ?? 0, search: search } 
       }));
       if(this.currentPage() !== page) {
         this.currentPage.set(page ?? 1);

@@ -1,6 +1,9 @@
+import { LB4Search } from "./query-params-util";
+
 export interface Count {
   count: number;
 }
+
 // LoopBack Query Builder Utility
 export interface LB4Filter {
   offset?: number;
@@ -51,10 +54,10 @@ export class LB4QueryBuilder {
   }
 
   // Search functionality
-  search(query: string, fields: string[] = ['name', 'description']): this {
+  search(query: string, fields: string[]): this {
     if (query && query.trim()) {
       const searchConditions = fields.map(field => ({
-        [field]: { like: `%${query}%`, options: 'i' }
+        [field]: { ilike: `%${query}%` }
       }));
       
       this.filter.where = {
@@ -119,7 +122,7 @@ export class LB4QueryBuilder {
   applySignalStoreFilters(
     limit: number,
     offset: number,
-    search: string,
+    search: LB4Search,
     sort: string | null,
     filters: Record<string, any>
   ): this {
@@ -128,7 +131,7 @@ export class LB4QueryBuilder {
 
     // Search
     if (search) {
-      this.search(search);
+      this.search(search.query, search.fields);
     }
 
     // Sort

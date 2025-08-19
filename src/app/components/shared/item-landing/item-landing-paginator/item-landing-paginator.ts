@@ -1,6 +1,7 @@
 import { Component, computed, input, signal, output, inject } from '@angular/core';
 import { NgIcon } from '@ng-icons/core';
 import { Router, ActivatedRoute } from '@angular/router';
+import { updateUrlParams } from '../../../../util/query-params-util';
 
 @Component({
   selector: 'app-item-landing-paginator',
@@ -94,15 +95,10 @@ export class ItemLandingPaginator<T> {
     const offset = (page - 1) * pageSize;
     const limit = pageSize;
     // Update URL query parameters
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: {
-        ...this.route.snapshot.queryParams, // Preserve other query params
-        page: page,
-        limit: limit,
-        offset: offset
-      },
-      queryParamsHandling: 'merge'
+    updateUrlParams(this.router, this.route, {
+      page: `${page}`,
+      limit: `${limit}`,
+      offset: `${offset}`
     });
 
     // Emit the page change event

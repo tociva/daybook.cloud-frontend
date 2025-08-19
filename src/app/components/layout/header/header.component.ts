@@ -1,15 +1,15 @@
 import { Component, effect, HostListener, inject } from '@angular/core';
 import { NgIconComponent } from '@ng-icons/core';
-import { ViewStore } from '../store/view/view.store';
 import { AuthStore } from '../../core/auth/store/auth/auth.store';
+import { ViewStore } from '../store/view/view.store';
 
-import { Store } from '@ngrx/store';
-import { authActions } from '../../core/auth/store/auth/auth.actions';
 import { Router } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { SearchBar } from '../search-bar/search-bar';
 
 @Component({
   selector: 'app-header',
-  imports: [NgIconComponent],
+  imports: [NgIconComponent, SearchBar],
   templateUrl: './header.component.html',
   styleUrl: './header.component.css'
 })
@@ -24,30 +24,34 @@ export class HeaderComponent {
   private readonly authStore = inject(AuthStore);
 
   readonly user = this.authStore.currentUser();
+
   constructor() {
     effect(() => {
       this.expanded = this.viewStore.isSidebarExpanded();
     });
   }
 
-toggleMenu() {
-  this.showMenu = !this.showMenu;
-}
-
-@HostListener('document:click', ['$event'])
-onClickOutside(event: MouseEvent) {
-  const target = event.target as HTMLElement;
-  if (!target.closest('.relative')) {
-    this.showMenu = false;
+  toggleMenu() {
+    this.showMenu = !this.showMenu;
   }
-}
 
-openProfileSettings() {
-  // route or open a dialog
-}
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.relative')) {
+      this.showMenu = false;
+    }
+  }
 
-logout() {
-  this.router.navigate(['/auth/do-logout']);
-}
+  openProfileSettings() {
+    // route or open a dialog
+  }
 
+  logout() {
+    this.router.navigate(['/auth/do-logout']);
+  }
+
+  onSearch() {
+    console.log('');
+  }
 }

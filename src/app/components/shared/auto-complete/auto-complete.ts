@@ -38,7 +38,7 @@ export class AutoComplete<T> implements ControlValueAccessor {
     'flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none'
   );
   readonly displayValue = input<(item: T) => string>();
-
+  readonly hideIcon = input<boolean>(false);
   // Output
   onOptionSelected = output<T>();
   readonly onSearch = output<string>();
@@ -83,7 +83,6 @@ export class AutoComplete<T> implements ControlValueAccessor {
     const input = event.target as HTMLInputElement;
     const val = input.value ?? '';
     this.inputValue.set(val);
-  
     // Emit search term to parent
     this.onSearch.emit(val);
   

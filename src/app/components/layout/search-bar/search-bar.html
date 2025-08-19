@@ -1,0 +1,30 @@
+<form
+  [formGroup]="form()"
+  (ngSubmit)="onSubmit()"
+  class="relative"
+>
+  <!-- Anchor the absolute icon with a relative wrapper -->
+  <div class="relative">
+    <ng-icon
+      name="bootstrapSearch"
+      class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none z-10"
+      aria-hidden="true"
+    ></ng-icon>
+
+    <app-auto-complete
+      class="block w-full"
+      formControlName="search"
+      [options]="options"
+      placeholder="Search..."
+      [required]="false"
+      [inputClass]="
+        'w-full border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 ' +
+        'placeholder-gray-400 focus:outline-none focus:border-b-primary border-b-gray-300 pl-9'
+      "
+      [displayValue]="displayValue"
+      (onSearch)="onSearch($event)"
+      (onOptionSelected)="onOptionSelected($event)"
+      [hideIcon]="true"
+    />
+  </div>
+</form>

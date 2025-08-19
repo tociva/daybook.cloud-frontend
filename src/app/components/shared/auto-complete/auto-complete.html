@@ -1,10 +1,12 @@
 <div class="relative">
   <!-- Icon inside input -->
-  <ng-icon
-    name="bootstrapChevronDown"
-    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"
-    size="20"
-  ></ng-icon>
+   @if (!hideIcon()) {
+    <ng-icon
+      name="bootstrapChevronDown"
+      class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"
+      size="20"
+    ></ng-icon>
+  }
 
   <input
     #inputElement
