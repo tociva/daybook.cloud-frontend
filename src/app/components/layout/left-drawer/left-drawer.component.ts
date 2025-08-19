@@ -13,7 +13,7 @@ import { NavItems } from '../nav-items/nav-items';
 })
 export class LeftDrawerComponent {
   
-  readonly viewStore = inject(ViewStore);
+  private readonly viewStore = inject(ViewStore);
   expanded = true;
 
   constructor() {

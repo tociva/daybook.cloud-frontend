@@ -1,14 +1,15 @@
-import { Component, signal } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
 import { MenuNode } from '../../../util/menu/menu-node';
 import { menuList } from '../../../util/menu/menu-list';
 import { Router, RouterLink } from '@angular/router';
 import { NgIconComponent } from '@ng-icons/core';
-import { NgClass } from '@angular/common';
+import { NgClass, NgStyle } from '@angular/common';
 import { MENU_ICONS } from '../../../util/menu/menu-icons';
+import { ViewStore } from '../store/view/view.store';
 
 @Component({
   selector: 'app-nav-items',
-  imports: [RouterLink, NgIconComponent, NgClass],
+  imports: [RouterLink, NgIconComponent, NgClass, NgStyle],
   templateUrl: './nav-items.html',
   styleUrl: './nav-items.css'
 })
@@ -22,11 +23,18 @@ export class NavItems {
     'management': true,
   });
 
+  private readonly viewStore = inject(ViewStore);
+  expanded = true;
+
   isOpen = (path?: string) => !!this.openState()[path ?? ''];
   toggle = (path: string) =>
   this.openState.update(s => ({ ...s, [path]: !s[path] }));
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) {
+    effect(() => {
+      this.expanded = this.viewStore.isSidebarExpanded();
+    });
+  }
 
   ngOnInit(): void {
     // Auto-open the parent that matches the current URL
