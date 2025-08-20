@@ -39,8 +39,7 @@ export class ItemLandingTable<T> {
   });
 
   // Sorting state
-  protected sortColumn = signal<keyof T | string | null>(null);
-  protected sortDirection = signal<SortDirection>(null);
+  private sortColumnDetails: Partial<Record<keyof T | string, SortDirection>> = {};
 
   findValue(item: T, column: DbcColumn<T>): any {
     return item[column.key as keyof T];
@@ -57,23 +56,21 @@ export class ItemLandingTable<T> {
   protected onSort(column: DbcColumn<T>): void {
     if (!column.sortable) return;
     
-    const currentColumn = this.sortColumn();
-    const currentDirection = this.sortDirection();
+    const {key} = column;
+    const sortDetails = this.sortColumnDetails[key];
     
-    if (currentColumn === column.key) {
+    if (sortDetails) {
       // Same column - cycle through directions
-      if (currentDirection === 'asc') {
-        this.sortDirection.set('desc');
-      } else if (currentDirection === 'desc') {
-        this.sortDirection.set(null);
-        this.sortColumn.set(null);
+      if (sortDetails === 'asc') {
+        this.sortColumnDetails[key] = 'desc';
+      } else if (sortDetails === 'desc') {
+        this.sortColumnDetails[key] = null;
       } else {
-        this.sortDirection.set('asc');
+        this.sortColumnDetails[key] = 'asc';
       }
     } else {
       // New column - start with ascending
-      this.sortColumn.set(column.key);
-      this.sortDirection.set('asc');
+      this.sortColumnDetails[key] = 'asc';
     }
     const queryParams = findQueryParamsOriginal(this.route);
     const {sort:sortQueryParam} = queryParams;
@@ -81,18 +78,18 @@ export class ItemLandingTable<T> {
       const sorts = sortQueryParam.split(',');
       const prevSort = sorts.find(sort => sort.startsWith(`${String(column.key)}:`));
       if(prevSort) {
-        if(this.sortDirection()) {
-          sorts.splice(sorts.indexOf(prevSort), 1, `${String(column.key)}:${this.sortDirection()}`);
+        if(this.sortColumnDetails[key]) {
+          sorts.splice(sorts.indexOf(prevSort), 1, `${String(column.key)}:${this.sortColumnDetails[key]}`);
         } else {
           sorts.splice(sorts.indexOf(prevSort), 1);
         }
       } else {
-        sorts.push(`${String(column.key)}:${this.sortDirection()}`);
+        sorts.push(`${String(column.key)}:${this.sortColumnDetails[key]}`);
       }
       const sort = sorts.length > 0 ? sorts.join(',') : null;
       updateUrlParams(this.router, this.route, { sort });
     } else {
-      const sort = `${String(column.key)}:${this.sortDirection()}`;
+      const sort = `${String(column.key)}:${this.sortColumnDetails[key]}`;
       updateUrlParams(this.router, this.route, { sort });
     }
     
@@ -102,10 +99,9 @@ export class ItemLandingTable<T> {
   protected getSortIcon(column: DbcColumn<T>): string {
     if (!column.sortable) return '';
     
-    const currentColumn = this.sortColumn();
-    const currentDirection = this.sortDirection();
-    
-    if (currentColumn !== column.key) {
+    const currentDirection = this.sortColumnDetails[column.key];
+
+    if (!currentDirection) {
       return 'bootstrapArrowsExpand'; // no-sort state
     }
     
