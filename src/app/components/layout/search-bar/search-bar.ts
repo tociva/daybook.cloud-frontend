@@ -48,6 +48,12 @@ export class SearchBar {
             search,
             type: 'search'
           }, { emitEvent: false });
+        } else {
+          this.form().get('search')?.setValue({
+            label: '',
+            search: '',
+            type: 'search'
+          }, { emitEvent: false });
         }
       });
   }
