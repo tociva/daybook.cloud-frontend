@@ -14,7 +14,10 @@ export const SearchItemStore = signalStore(
         return state.items();
       }
       const query = state.query()!;
-      const items : SearchItem[] = state.items().filter(item => item.value.toLowerCase().includes(query.toLowerCase()));
+      const items : SearchItem[] = state.items().filter(item => {
+        const lowerCaseQuery = query.toLowerCase();
+        return item.value.toLowerCase().includes(lowerCaseQuery) || item.displayValue.toLowerCase().includes(lowerCaseQuery);
+      });
       if(state.currentTitle()) {
         items.unshift({
           displayValue: `Search in ${state.currentTitle()} : ${query}`,

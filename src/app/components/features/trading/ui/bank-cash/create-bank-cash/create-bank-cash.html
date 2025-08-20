@@ -1,6 +1,14 @@
-<app-two-column-form [form]="form"
-[fields]="formFields()"
-[title]="title()"
-(formSubmit)="handleSubmit($event)"
-[successAction]="successAction"
-/>
+@if(loading) {
+  <app-skelton-loader 
+  variant="text"
+  [lines]="10"
+  width="100%"
+  [shimmer]="true" />
+} @else {
+  <app-two-column-form [form]="form"
+  [fields]="formFields()"
+  [title]="title()"
+  (formSubmit)="handleSubmit($event)"
+  [successAction]="successAction"
+  />
+}

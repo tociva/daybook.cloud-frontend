@@ -11,8 +11,14 @@ export const initialSearchItemState: SearchItemStateModel = {
   },
   {
     displayValue: 'List all Bank Cash',
-    value: 'Bank Cash',
+    value: 'Bank Cash : List',
     type: 'url',
     route: '/trading/bank-cash'
+  },
+  {
+    displayValue: 'Create Bank Cash',
+    value: 'Bank Cash : Create',
+    type: 'url',
+    route: '/trading/bank-cash/create'
   },],
 };
