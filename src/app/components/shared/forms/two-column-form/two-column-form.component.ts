@@ -20,6 +20,7 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { Actions, ofType } from '@ngrx/effects';
 import { ActionCreator } from '@ngrx/store';
+import { EMPTY } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { FormField } from '../../../../util/types/form-field.model';
 import { AutoComplete } from '../../auto-complete/auto-complete';
@@ -86,19 +87,9 @@ export class TwoColumnFormComponent<T> {
       const subscription = this.actions$.pipe(
         ofType(...creatorArray), // ofType accepts multiple action creators
         tap(() => {
-          const url = untracked(this.backUrl);
+          const url = untracked(() => this.backUrl());
           this.submitting.set(false);
-        
-          if (url) {
-            // If the value looks like “…%3F…” (encoded ?), decode once heuristically
-            const normalized = url.includes('%3F') && !url.includes('?')
-              ? decodeURIComponent(url)
-              : url;
-        
-            this.router.navigateByUrl(normalized, { replaceUrl: true });
-          } else {
-            this.router.navigate(['/']);
-          }
+          this.router.navigate([url ?? '/']);
         })
       ).subscribe();
     

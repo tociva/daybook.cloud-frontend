@@ -54,12 +54,12 @@ export class ListBankCash implements OnInit, OnDestroy {
 
   readonly handleOnEditItem = signal<(item: BankCash) => void>((item: BankCash) => {
     const currentUrl = this.router.url;
-    this.router.navigate(['/trading/bank-cash/edit', item.id], { queryParams: { burl: currentUrl } });
+    this.router.navigate(['/trading/bank-cash', item.id, 'edit'], { queryParams: { burl: currentUrl } });
   }); 
   
   readonly handleOnDeleteItem = signal<(item: BankCash) => void>((item: BankCash) => {
     const currentUrl = this.router.url;
-    this.router.navigate(['/trading/bank-cash/delete', item.id], { queryParams: { burl: currentUrl } });
+    this.router.navigate(['/trading/bank-cash', item.id, 'delete'], { queryParams: { burl: currentUrl } });
   });
 
   private destroy$ = new Subject<void>();

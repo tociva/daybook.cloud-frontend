@@ -5,5 +5,6 @@ export function createInitialBaseListState<T>(): BaseListModel<T> {
     items: [],
     count: 0,
     error: null,
+    selectedItem: null,
   };
 }

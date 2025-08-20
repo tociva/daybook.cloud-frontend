@@ -244,16 +244,7 @@ export const bankCashEffects = {
       return actions$.pipe(
         ofType(bankCashActions.loadBankCashByIdSuccess),
         tap(({ bankCash }) => {
-          const currentItems = store.items();
-          const existingIndex = currentItems.findIndex(item => item.id === bankCash.id);
-          
-          if (existingIndex >= 0) {
-            const updatedItems = [...currentItems];
-            updatedItems[existingIndex] = bankCash;
-            store.setItems(updatedItems);
-          } else {
-            store.setItems([...currentItems, bankCash]);
-          }
+          store.setSelectedItem(bankCash);
         })
       );
     },
@@ -301,7 +292,7 @@ export const bankCashEffects = {
         tap(({ bankCash }) => {
           const currentItems = store.items();
           const updatedItems = currentItems.map(item => 
-            item.id === bankCash.id ? bankCash : item
+            item.id === bankCash?.id ? bankCash : item
           );
           store.setItems(updatedItems);
         })

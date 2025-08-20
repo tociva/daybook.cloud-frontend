@@ -10,6 +10,7 @@ export function createBaseListStore<T>(
 ) {
   const initialState: BaseListModel<T> = {
     ...createInitialBaseListState<T>(),
+    selectedItem: null as T | null,
     ...options,
   };
 
@@ -23,6 +24,7 @@ export function createBaseListStore<T>(
           items: store.items(),
           count: store.count(),
           error: store.error(),
+          selectedItem: store.selectedItem(),
         };
         patchState(store, stateFn(current));
       },
@@ -39,8 +41,15 @@ export function createBaseListStore<T>(
         patchState(store, { error });
       },
 
+      setSelectedItem(item: T | null) {
+        patchState(store, { selectedItem: item });
+      },
+
       resetState() {
-        patchState(store, createInitialBaseListState<T>());
+        patchState(store, {
+          ...createInitialBaseListState<T>(),
+          selectedItem: null
+        });
       },
     }))
   );
