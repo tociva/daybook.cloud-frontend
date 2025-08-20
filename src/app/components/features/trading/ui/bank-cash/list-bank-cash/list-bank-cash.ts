@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Subject } from 'rxjs';
@@ -15,7 +15,8 @@ import { BankCash, BankCashStore, bankCashActions } from '../../../store/bank-ca
   templateUrl: './list-bank-cash.html',
   styleUrl: './list-bank-cash.css'
 })
-export class ListBankCash implements OnInit {
+export class ListBankCash implements OnInit, OnDestroy {
+ 
   private store = inject(Store);
   protected bankCashStore = inject(BankCashStore);
   private router = inject(Router);
@@ -46,7 +47,7 @@ export class ListBankCash implements OnInit {
   readonly columns = signal<DbcColumn<BankCash>[]>([
     { header: 'Name', key: 'name', type: 'text', sortable: true },
     { header: 'Status', key: 'status', type: 'status' },
-    { header: 'Description', key: 'description', type: 'text' },
+    { header: 'Description', key: 'description', type: 'text', sortable: true },
     { header: 'Actions', key: 'actions', type: 'action' }
   ]);
 
@@ -68,13 +69,13 @@ export class ListBankCash implements OnInit {
       map((params: QueryParamsOriginal) => parseQueryParams(params)),
       takeUntil(this.destroy$)
     ).subscribe((params: QueryParamsRep) => {
-      const { limit, offset, page } = params;
+      const { limit, offset, page, sort } = params;
       if(this.pageSize() !== limit) {
         this.pageSize.set(limit ?? 10);
       }
       const search = {query: params.search?.query ?? '', fields: ['description', 'name']};
       this.store.dispatch(bankCashActions.loadBankCashes({ 
-        query: { limit: limit ?? 10, offset: offset ?? 0, search: search } 
+        query: { limit: limit ?? 10, offset: offset ?? 0, search: search, sort: sort ?? [] } 
       }));
       if(this.currentPage() !== page) {
         this.currentPage.set(page ?? 1);

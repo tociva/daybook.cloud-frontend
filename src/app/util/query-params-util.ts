@@ -8,16 +8,26 @@ export interface QueryParamsRep {
   limit?: number,
   offset?: number,
   search?: LB4Search,
-  sort?: string,
+  sort?: [string, string][],
 };
 
 export interface QueryParamsOriginal {
-  page?:string;
-  limit?: string,
-  offset?: string,
-  search?: string,
-  sort?: string,
+  page?:string|null;
+  limit?: string|null,
+  offset?: string|null,
+  search?: string|null,
+  sort?: string|null,
 };
+
+export const findQueryParamsOriginal = (route: ActivatedRoute): QueryParamsOriginal => {
+  return {
+    page: route.snapshot.queryParams['page'] ?? '',
+    limit: route.snapshot.queryParams['limit'] ?? '',
+    offset: route.snapshot.queryParams['offset'] ?? '',
+    search: route.snapshot.queryParams['search'] ?? '',
+    sort: route.snapshot.queryParams['sort'] ?? '',
+  };
+};  
 
 export const parseQueryParams = (queryParams: QueryParamsOriginal): QueryParamsRep => {
   return {
@@ -25,11 +35,9 @@ export const parseQueryParams = (queryParams: QueryParamsOriginal): QueryParamsR
     limit: queryParams.limit ? parseInt(queryParams.limit) : 10,
     offset: queryParams.offset ? parseInt(queryParams.offset) : 0,
     search: {query: queryParams.search ?? '', fields: []},
-    sort: queryParams.sort ?? '',
+    sort: queryParams.sort ? queryParams.sort.split(',').map(sort => sort.split(':') as [string, string]) : [],
   };
 };
-
-
 
 export const updateUrlParams = (router: Router, route: ActivatedRoute, queryParams: QueryParamsOriginal): void => {
   // Update URL query parameters

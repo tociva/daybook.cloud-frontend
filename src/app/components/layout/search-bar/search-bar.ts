@@ -70,7 +70,7 @@ export class SearchBar {
   onOptionSelected = (item: SearchItem) => {
     if(item.type === 'search') {
       updateUrlParams(this.router, this.route, {
-        search: item.search
+        search: item.search,
       });
     }
   };

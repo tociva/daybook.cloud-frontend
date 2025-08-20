@@ -123,7 +123,7 @@ export class LB4QueryBuilder {
     limit: number,
     offset: number,
     search: LB4Search,
-    sort: string | null,
+    sort: [string, string][],
     filters: Record<string, any>
   ): this {
     // Pagination
@@ -135,9 +135,9 @@ export class LB4QueryBuilder {
     }
 
     // Sort
-    if (sort) {
+    if (sort && sort.length > 0) {
       // Assuming sort format is "field ASC" or "field DESC"
-      this.filter.order = sort;
+      this.filter.order = sort.map(sort => `${sort[0]} ${sort[1]}`).join(',');
     }
 
     // Apply additional filters

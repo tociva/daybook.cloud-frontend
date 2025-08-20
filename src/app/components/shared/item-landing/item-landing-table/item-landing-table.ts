@@ -1,10 +1,12 @@
 import { NgClass } from '@angular/common';
-import { Component, input, signal } from '@angular/core';
+import { Component, inject, input, signal } from '@angular/core';
 import { NgIcon } from '@ng-icons/core';
 import { DbcColumn } from '../../../../util/types/dbc-column.type';
 import { DbcError } from '../../../../util/types/dbc-error.type';
 import { EmptyListMessage } from '../../../../util/types/empty-list-message.type';
 import { Status } from '../../../../util/types/status.type';
+import { findQueryParamsOriginal, updateUrlParams } from '../../../../util/query-params-util';
+import { ActivatedRoute, Router } from '@angular/router';
 
 type SortDirection = 'asc' | 'desc' | null;
 
@@ -15,6 +17,9 @@ type SortDirection = 'asc' | 'desc' | null;
   styleUrl: './item-landing-table.css'
 })
 export class ItemLandingTable<T> {
+
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   readonly items = input<T[] | null>(null);
   readonly columns = input<DbcColumn<T>[]>([]);
@@ -70,13 +75,27 @@ export class ItemLandingTable<T> {
       this.sortColumn.set(column.key);
       this.sortDirection.set('asc');
     }
+    const queryParams = findQueryParamsOriginal(this.route);
+    const {sort:sortQueryParam} = queryParams;
+    if(sortQueryParam) {
+      const sorts = sortQueryParam.split(',');
+      const prevSort = sorts.find(sort => sort.startsWith(`${String(column.key)}:`));
+      if(prevSort) {
+        if(this.sortDirection()) {
+          sorts.splice(sorts.indexOf(prevSort), 1, `${String(column.key)}:${this.sortDirection()}`);
+        } else {
+          sorts.splice(sorts.indexOf(prevSort), 1);
+        }
+      } else {
+        sorts.push(`${String(column.key)}:${this.sortDirection()}`);
+      }
+      const sort = sorts.length > 0 ? sorts.join(',') : null;
+      updateUrlParams(this.router, this.route, { sort });
+    } else {
+      const sort = `${String(column.key)}:${this.sortDirection()}`;
+      updateUrlParams(this.router, this.route, { sort });
+    }
     
-    console.log('Sort clicked:', {
-      column: column.key,
-      header: column.header,
-      type: column.type,
-      direction: this.sortDirection()
-    });
   }
   
   // Get sort icon name
