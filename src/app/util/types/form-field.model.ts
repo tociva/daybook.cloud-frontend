@@ -15,7 +15,8 @@ export interface FormField<T = unknown> {
   validators?: (value: unknown, formData?: T) => string[];
   autoComplete?: {
     items: Signal<T[]>;
-    displayValue: (item: any) => string;
+    optionDisplayValue: (item: any) => string;
+    inputDisplayValue: (item: any) => string;
     trackBy: (item: any) => string;
     onSearch: (value: string) => void;
     onOptionSelected?: (item: any) => void;

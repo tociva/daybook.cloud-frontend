@@ -44,7 +44,7 @@ export class ListBankCash implements OnInit {
   });
 
   readonly columns = signal<DbcColumn<BankCash>[]>([
-    { header: 'Name', key: 'name', type: 'text' },
+    { header: 'Name', key: 'name', type: 'text', sortable: true },
     { header: 'Status', key: 'status', type: 'status' },
     { header: 'Description', key: 'description', type: 'text' },
     { header: 'Actions', key: 'actions', type: 'action' }

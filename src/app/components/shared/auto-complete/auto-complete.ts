@@ -37,7 +37,8 @@ export class AutoComplete<T> implements ControlValueAccessor {
   inputClass = input<string>(
     'flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none'
   );
-  readonly displayValue = input<(item: T) => string>();
+  readonly optionDisplayValue = input<(item: T) => string>();
+  readonly inputDisplayValue = input<(item: T) => string>();
   readonly hideIcon = input<boolean>(false);
   // Output
   onOptionSelected = output<T>();
@@ -53,11 +54,15 @@ export class AutoComplete<T> implements ControlValueAccessor {
 
   // ---- Display resolver (no per-call allocation)
   private readonly identity = (x: T) => String(x ?? '');
-  private readonly resolvedDisplay = computed<(item: T) => string>(
-    () => this.displayValue() ?? this.identity
+  private readonly resolveOptionDisplay = computed<(item: T) => string>(
+    () => this.optionDisplayValue() ?? this.identity
+  );
+  private readonly resolveInputDisplay = computed<(item: T) => string>(
+    () => this.inputDisplayValue() ?? this.identity
   );
 
-  findDisplayValue = (item: T): string => this.resolvedDisplay()(item);
+  findOptionDisplay = (item: T): string => this.resolveOptionDisplay()(item);
+  findInputDisplay = (item: T): string => this.resolveInputDisplay()(item);
 
   // ---- ControlValueAccessor
   private onChange: (value: T | null) => void = () => {};
@@ -65,7 +70,7 @@ export class AutoComplete<T> implements ControlValueAccessor {
 
   writeValue(value: T | null): void {
     this.selectedValue.set(value);
-    const text = value == null ? '' : this.findDisplayValue(value);
+    const text = value == null ? '' : this.findInputDisplay(value);
     this.inputValue.set(text);
   }
   registerOnChange(fn: any): void {
@@ -169,7 +174,7 @@ export class AutoComplete<T> implements ControlValueAccessor {
       // if we already have a selected value, focus that; else 0
       const sel = this.selectedValue();
       const idx = sel != null
-        ? this.options().findIndex(o => this.findDisplayValue(o) === this.findDisplayValue(sel))
+        ? this.options().findIndex(o => this.findOptionDisplay(o) === this.findOptionDisplay(sel))
         : 0;
       this.focusedIndex.set(idx >= 0 ? idx : 0);
     } else {
@@ -184,7 +189,7 @@ export class AutoComplete<T> implements ControlValueAccessor {
 
   private select(item: T): void {
     this.selectedValue.set(item);
-    this.inputValue.set(this.findDisplayValue(item));
+    this.inputValue.set(this.findInputDisplay(item));
     this.onChange(item);
     this.onOptionSelected.emit(item);
     this.closeDropdown();

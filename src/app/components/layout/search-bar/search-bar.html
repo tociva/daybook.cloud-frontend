@@ -18,10 +18,12 @@
       placeholder="Search..."
       [required]="false"
       [inputClass]="
-        'w-full border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 ' +
-        'placeholder-gray-400 focus:outline-none focus:border-b-primary border-b-gray-300 pl-9'
+        'w-full border-1 h-10 bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 
+        placeholder-gray-400 focus:outline-none focus:border-primary border-gray-300 pl-9 rounded
+        '
       "
-      [displayValue]="displayValue"
+      [optionDisplayValue]="optionDisplayValue"
+      [inputDisplayValue]="inputDisplayValue"
       (onSearch)="onSearch($event)"
       (onOptionSelected)="onOptionSelected($event)"
       [hideIcon]="true"

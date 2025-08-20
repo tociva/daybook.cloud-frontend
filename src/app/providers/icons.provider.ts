@@ -37,7 +37,10 @@ import {
   bootstrapTrash,
   bootstrapTruck,
   bootstrapWallet2,
-  bootstrapSearch
+  bootstrapSearch,
+  bootstrapSortUp,
+  bootstrapSortDown,
+  bootstrapArrowsExpand
 } from '@ng-icons/bootstrap-icons';
 import { provideIcons } from '@ng-icons/core';
 
@@ -81,5 +84,8 @@ export const provideAppIcons = () =>
     bootstrapChevronRight,
     bootstrapChevronDoubleRight,
     bootstrapChevronDoubleLeft,
-    bootstrapSearch
+    bootstrapSearch,
+    bootstrapSortUp,
+    bootstrapSortDown,
+    bootstrapArrowsExpand
   });

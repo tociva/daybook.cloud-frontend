@@ -77,7 +77,8 @@ export class CreateOrganizationComponent {
       },
       autoComplete: {
         items: this.countries,
-        displayValue: (item: Country) => `${toFlagEmoji(item.iso)} ${item.name}`,
+        optionDisplayValue: (item: Country) => `${toFlagEmoji(item.iso)} ${item.name}`,
+        inputDisplayValue: (item: Country) => `${toFlagEmoji(item.iso)} ${item.name}`,
         trackBy: (item: Country) => item.name,
         onSearch: (value: string) => {
           this.countryStore.setSearch(value);
@@ -159,7 +160,8 @@ export class CreateOrganizationComponent {
       },
       autoComplete: {
         items: this.currencies,
-        displayValue: (item: Currency) => `${item.name} (${String.fromCharCode(parseInt(item.unicode, 16))})`,
+        optionDisplayValue: (item: Currency) => `${item.name} (${String.fromCharCode(parseInt(item.unicode, 16))})`,
+        inputDisplayValue: (item: Currency) => `${item.name} (${String.fromCharCode(parseInt(item.unicode, 16))})`,
         trackBy: (item: Currency) => item.name,
         onSearch: (value: string) => {
           this.currencyStore.setSearch(value);
@@ -176,7 +178,8 @@ export class CreateOrganizationComponent {
       },
       autoComplete: {
         items: this.dateFormats,
-        displayValue: (item: DateFormat) => `${item.name} (${item.value})`,
+        optionDisplayValue: (item: DateFormat) => `${item.name} (${item.value})`,
+        inputDisplayValue: (item: DateFormat) => `${item.name} (${item.value})`,
         trackBy: (item: DateFormat) => item.name,
         onSearch: (value: string) => {
           this.dateFormatStore.setSearch(value);
