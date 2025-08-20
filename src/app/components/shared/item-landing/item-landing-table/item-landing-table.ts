@@ -41,6 +41,18 @@ export class ItemLandingTable<T> {
   // Sorting state
   private sortColumnDetails: Partial<Record<keyof T | string, SortDirection>> = {};
 
+  ngOnInit(): void {
+    const queryParams = findQueryParamsOriginal(this.route);
+    const {sort:sortQueryParam} = queryParams;
+    if(sortQueryParam) {
+      const sorts = sortQueryParam.split(',');
+      sorts.forEach(sort => {
+        const [column, direction] = sort.split(':');
+        this.sortColumnDetails[column as keyof T | string] = direction as SortDirection;
+      });
+    }
+  }
+
   findValue(item: T, column: DbcColumn<T>): any {
     return item[column.key as keyof T];
   }
