@@ -67,47 +67,49 @@ export class TwoColumnFormComponent<T> {
 
   protected readonly groupKeys = computed(() => Object.keys(this.groupedFields()));
 
+  // EFFECT 1: stable listener for success action(s)
+  private readonly successActionEffect = effect((onCleanup) => {
+    const creators = this.successAction();
+    if (!creators) return;
+  
+    // Normalize to array
+    const creatorArray = Array.isArray(creators) ? creators : [creators];
+    
+    const subscription = this.actions$.pipe(
+      ofType(...creatorArray), // ofType accepts multiple action creators
+      tap(() => {
+        const url = untracked(() => this.backUrl());
+        this.submitting.set(false);
+        this.router.navigate([url ?? '/']);
+      })
+    ).subscribe();
+  
+    onCleanup(() => subscription.unsubscribe());
+  });
+
+  // EFFECT 2: react to UI signals (no stream returned)
+  private readonly uiEffect = effect(() => {
+    // track these freely; this effect doesn't manage subscriptions
+    const _ = this.form?.();
+    const __ = this.fields?.();
+    const ___ = this.title?.();
+
+    // any UI-only side effects here (avoid calling actions$ here)
+    // e.g., reset a local flag when form/fields/title change:
+    // this.someUiFlag.set(false);
+  });
+
+  onDestroy() {
+    this.successActionEffect.destroy();
+    this.uiEffect.destroy();
+  }
+
   getControl<K extends string>(key: K): FormControl<unknown> {
     const control = this.form().get(key);
     if (!control || !(control instanceof FormControl)) {
       throw new Error(`Form control not found or not a FormControl: ${key}`);
     }
     return control as FormControl<unknown>;
-  }
-
-  constructor() {
-    // EFFECT 1: stable listener for success action(s)
-    effect((onCleanup) => {
-      const creators = this.successAction();
-      if (!creators) return;
-    
-      // Normalize to array
-      const creatorArray = Array.isArray(creators) ? creators : [creators];
-      
-      const subscription = this.actions$.pipe(
-        ofType(...creatorArray), // ofType accepts multiple action creators
-        tap(() => {
-          const url = untracked(() => this.backUrl());
-          this.submitting.set(false);
-          this.router.navigate([url ?? '/']);
-        })
-      ).subscribe();
-    
-      onCleanup(() => subscription.unsubscribe());
-    });
-
-
-    // EFFECT 2: react to UI signals (no stream returned)
-    effect(() => {
-      // track these freely; this effect doesn’t manage subscriptions
-      const _ = this.form?.();
-      const __ = this.fields?.();
-      const ___ = this.title?.();
-
-      // any UI-only side effects here (avoid calling actions$ here)
-      // e.g., reset a local flag when form/fields/title change:
-      // this.someUiFlag.set(false);
-    });
   }
 
   onSubmit(): void {
