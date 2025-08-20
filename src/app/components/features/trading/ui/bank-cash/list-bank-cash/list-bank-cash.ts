@@ -8,6 +8,7 @@ import { DbcColumn } from '../../../../../../util/types/dbc-column.type';
 import { EmptyListMessage } from '../../../../../../util/types/empty-list-message.type';
 import { ItemLanding } from '../../../../../shared/item-landing/item-landing';
 import { BankCash, BankCashStore, bankCashActions } from '../../../store/bank-cash';
+import { SearchItemStore } from '../../../../../../components/layout/store/search-item/search-item.store';
 
 @Component({
   selector: 'app-list-bank-cash',
@@ -21,7 +22,7 @@ export class ListBankCash implements OnInit, OnDestroy {
   protected bankCashStore = inject(BankCashStore);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-
+  private searchItemStore = inject(SearchItemStore);
   // Direct access to signal store properties
   readonly items = this.bankCashStore.items;
   readonly count = this.bankCashStore.count;
@@ -88,11 +89,13 @@ export class ListBankCash implements OnInit, OnDestroy {
   
   ngOnInit(): void {
     this.loadBankCashes();
+    this.searchItemStore.setCurrentTitle('Bank Cash');
   }
   
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.searchItemStore.setCurrentTitle(null);
   }
 
   onCreateBankCash(): void {

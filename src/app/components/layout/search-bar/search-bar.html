@@ -14,7 +14,7 @@
     <app-auto-complete
       class="block w-full"
       formControlName="search"
-      [options]="options"
+      [options]="searchItemStore.filteredItems()"
       placeholder="Search..."
       [required]="false"
       [inputClass]="

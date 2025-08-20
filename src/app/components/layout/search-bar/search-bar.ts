@@ -6,8 +6,9 @@ import { Subject } from 'rxjs';
 import { distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { QueryParamsOriginal, updateUrlParams } from '../../../util/query-params-util';
 import { AutoComplete } from '../../shared/auto-complete/auto-complete';
+import { SearchItem } from '../store/search-item/search-item.model';
+import { SearchItemStore } from '../store/search-item/search-item.store';
 
-type SearchItem = { label: string; search?: string, type:'url' | 'search' };
 
 @Component({
   selector: 'app-search-bar',
@@ -18,20 +19,18 @@ type SearchItem = { label: string; search?: string, type:'url' | 'search' };
 export class SearchBar {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  protected searchItemStore = inject(SearchItemStore);
   // Simple form with one control
   readonly form = model<FormGroup>(new FormGroup({
     search: new FormControl<string>('', { nonNullable: true, validators: [Validators.minLength(1)] })
   }));
 
-  // Options for the autocomplete
-  options: SearchItem[] = [];
-
-  optionDisplayValue = (item: SearchItem) => item?.label ?? '';
+  optionDisplayValue = (item: SearchItem) => item?.displayValue ?? '';
   inputDisplayValue = (item: SearchItem) => {
     if(!item) {
       return '';
     }
-    return item.search ?? '';
+    return item.value ?? '';
   };
 
   private destroy$ = new Subject<void>();
@@ -64,20 +63,23 @@ export class SearchBar {
   }
 
   // Fired when user hits Enter or your auto-complete emits search text
-  onSearch = (query?: string) => {
-    this.options = [{
-      label: `Search in Bank/Cash - ${query}`,
-      search: query,
-      type: 'search'
-    }]
+  onSearch = (query: string | null) => {
+    this.searchItemStore.setCurrentQuery(query);
   };
 
   // Fired when an option is picked
   onOptionSelected = (item: SearchItem) => {
     if(item.type === 'search') {
       updateUrlParams(this.router, this.route, {
-        search: item.search,
+        search: item.query,
       });
+    }else if(item.type === 'url') {
+      this.router.navigate([item.route]);
+      this.form().get('search')?.setValue({
+        displayValue: '',
+        value: '',
+        type: 'url'
+      }, { emitEvent: false });
     }
   };
   onSubmit = () => {
