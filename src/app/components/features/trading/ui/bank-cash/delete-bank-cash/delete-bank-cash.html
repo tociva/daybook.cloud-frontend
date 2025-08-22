@@ -48,16 +48,8 @@
       <div class="flex flex-col items-stretch justify-center gap-3 py-4 md:flex-row">
         <app-cancel-button></app-cancel-button>
 
-        <button
-          (click)="handleDelete()"
-          type="button"
-          [disabled]="!confirmDel.checked"
-          class="inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-danger 
-          rounded hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-danger/60 
-          disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-        >
-          Delete
-        </button>
+        <app-delete-button [disabled]="!confirmDel.checked" [onDelete]="handleDelete"
+        [successAction]="successAction"></app-delete-button>
       </div>
     </div>
   </section>

@@ -20,7 +20,6 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { Actions, ofType } from '@ngrx/effects';
 import { ActionCreator } from '@ngrx/store';
-import { EMPTY } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { FormField } from '../../../../util/types/form-field.model';
 import { AutoComplete } from '../../auto-complete/auto-complete';
