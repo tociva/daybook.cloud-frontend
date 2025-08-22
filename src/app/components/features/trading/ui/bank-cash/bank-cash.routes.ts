@@ -19,6 +19,6 @@ export const bankCashRoutes: Routes = [
   },
   {
     path: ':id/delete',
-    loadComponent: () => import('./create-bank-cash/create-bank-cash').then(m => m.CreateBankCash),
+    loadComponent: () => import('./delete-bank-cash/delete-bank-cash').then(m => m.DeleteBankCash),
   },
 ];

@@ -6,7 +6,7 @@
   class="h-screen min-h-0 bg-primary text-on-primary transition-all duration-200 flex flex-col"
 >
   <!-- Header must not grow/shrink -->
-  <div class="h-16 shrink-0 flex items-center justify-center text-lg font-semibold">
+  <div class="h-16 shrink-0 flex items-center justify-center text-lg font-semibold cursor-pointer" (click)="goHome()">
     @if (expanded) {
       <app-logo-block class="scale-50"></app-logo-block>
     }
