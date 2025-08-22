@@ -4,7 +4,8 @@
     [lines]="10"
     width="100%"
     [shimmer]="true" />
-} @else {
+}
+@if(!loading &&selectedBankCash()) {
   <section class="rounded border border-gray-200 bg-white p-5 shadow-sm">
     <header class="mb-4 flex items-center justify-between">
       <h2 class="text-base font-semibold text-gray-900">Delete Bank/Cash</h2>
@@ -53,4 +54,10 @@
       </div>
     </div>
   </section>
+} 
+@if (!loading && !selectedBankCash()) {
+  <app-item-not-found
+  title="Bank/Cash record not found"
+  description="It may have been deleted or the link is invalid."></app-item-not-found>
 }
+

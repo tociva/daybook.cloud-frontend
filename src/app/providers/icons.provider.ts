@@ -40,7 +40,8 @@ import {
   bootstrapSearch,
   bootstrapSortUp,
   bootstrapSortDown,
-  bootstrapArrowsExpand
+  bootstrapArrowsExpand,
+  bootstrapInfoCircle
 } from '@ng-icons/bootstrap-icons';
 import { provideIcons } from '@ng-icons/core';
 
@@ -87,5 +88,6 @@ export const provideAppIcons = () =>
     bootstrapSearch,
     bootstrapSortUp,
     bootstrapSortDown,
-    bootstrapArrowsExpand
+    bootstrapArrowsExpand,
+    bootstrapInfoCircle
   });

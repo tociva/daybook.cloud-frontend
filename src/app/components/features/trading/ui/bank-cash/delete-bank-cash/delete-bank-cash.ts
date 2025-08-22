@@ -3,12 +3,13 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { CancelButton } from '../../../../../shared/cancel-button/cancel-button';
 import { DeleteButton } from '../../../../../shared/delete-button/delete-button';
+import { ItemNotFound } from '../../../../../shared/item-not-found/item-not-found';
 import { SkeltonLoader } from '../../../../../shared/skelton-loader/skelton-loader';
 import { bankCashActions, BankCashStore } from '../../../store/bank-cash';
 
 @Component({
   selector: 'app-delete-bank-cash',
-  imports: [SkeltonLoader, CancelButton, DeleteButton],
+  imports: [SkeltonLoader, CancelButton, DeleteButton, ItemNotFound],
   templateUrl: './delete-bank-cash.html',
   styleUrl: './delete-bank-cash.css'
 })

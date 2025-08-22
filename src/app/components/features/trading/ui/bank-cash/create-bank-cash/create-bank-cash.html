@@ -4,11 +4,15 @@
   [lines]="10"
   width="100%"
   [shimmer]="true" />
-} @else {
+} @else if(!loading && (mode === 'create' || mode === 'edit') && !bankCashStore.error()) {
   <app-two-column-form [form]="form"
   [fields]="formFields()"
   [title]="title()"
   (formSubmit)="handleSubmit($event)"
   [successAction]="successAction()"
   />
+} @else if(!loading && mode === 'edit' && bankCashStore.error()) {
+  <app-item-not-found
+  title="Bank/Cash record not found"
+  description="It may have been deleted or the link is invalid."></app-item-not-found>
 }

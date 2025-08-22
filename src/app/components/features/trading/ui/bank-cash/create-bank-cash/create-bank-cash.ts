@@ -9,10 +9,11 @@ import { FormValidator } from '../../../../../../util/form/form-validator';
 import { ActionCreator, Store } from '@ngrx/store';
 import { SkeltonLoader } from '../../../../../shared/skelton-loader/skelton-loader';
 import { ActivatedRoute } from '@angular/router';
+import { ItemNotFound } from '../../../../../shared/item-not-found/item-not-found';
 
 @Component({
   selector: 'app-create-bank-cash',
-  imports: [TwoColumnFormComponent, SkeltonLoader],
+  imports: [TwoColumnFormComponent, SkeltonLoader, ItemNotFound],
   templateUrl: './create-bank-cash.html',
   styleUrl: './create-bank-cash.css'
 })
@@ -21,7 +22,7 @@ export class CreateBankCash implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly store = inject(Store);
   private readonly route = inject(ActivatedRoute);
-  private readonly bankCashStore = inject(BankCashStore);
+  readonly bankCashStore = inject(BankCashStore);
   readonly selectedBankCash = this.bankCashStore.selectedItem;
   successAction = signal<ActionCreator[] | ActionCreator | null>(null);
   protected loading = true;
@@ -52,6 +53,13 @@ export class CreateBankCash implements OnInit {
     }
   });
 
+  private loadErrorEffect = effect(() => {
+    const error = this.bankCashStore.error();
+    if (error && this.mode === 'edit') {
+      this.loading = false;
+    }
+  });
+
   ngOnInit(): void {
     const lastSegment = this.route.snapshot.url[this.route.snapshot.url.length - 1]?.path;
 
@@ -75,6 +83,7 @@ export class CreateBankCash implements OnInit {
 
   onDestroy() {
     this.fillFormEffect.destroy();
+    this.loadErrorEffect.destroy();
   }
 
   handleSubmit(data: BankCashCU) {
