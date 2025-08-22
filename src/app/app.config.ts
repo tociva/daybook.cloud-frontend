@@ -20,6 +20,7 @@ import { toastEffects } from './components/shared/store/toast/toast.effects';
 import { httpEffects } from './state/http/http.effects';
 import { bankCashEffects } from './components/features/trading/store/bank-cash/bank-cash.effects';
 import { taxEffects } from './components/features/trading/store/tax/tax.effects';
+import { customerEffects } from './components/features/trading/store/customer/customer.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -38,7 +39,8 @@ export const appConfig: ApplicationConfig = {
       toastEffects,
       httpEffects,
       bankCashEffects,
-      taxEffects
+      taxEffects,
+      customerEffects
     ]),
     provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
     provideRouterStore(),
