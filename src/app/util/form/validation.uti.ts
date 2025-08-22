@@ -1,5 +1,9 @@
-export const willPassRequiredValidation = (value: string|undefined|null): boolean => {
+export const willPassRequiredStringValidation = (value: string|undefined|null): boolean => {
   return value !== undefined && value !== null && value.trim() !== '';
+}
+
+export const willPassRequiredNumberValidation = (value: number|undefined|null): boolean => {
+  return value !== undefined && value !== null && !isNaN(value);
 }
 
 export const willPassEmailValidation = (value: string|undefined|null): boolean => {

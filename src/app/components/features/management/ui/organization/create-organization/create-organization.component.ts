@@ -5,7 +5,7 @@ import { toFlagEmoji } from '../../../../../../util/common.util';
 import { DEFAULT_INVOICE_NUMBER_FORMAT, DEFAULT_JOURNAL_NUMBER_FORMAT } from '../../../../../../util/constants';
 import { FormValidator } from '../../../../../../util/form/form-validator';
 import { FormUtil } from '../../../../../../util/form/form.util';
-import { willPassEmailValidation, willPassRequiredValidation } from '../../../../../../util/form/validation.uti';
+import { willPassEmailValidation, willPassRequiredStringValidation } from '../../../../../../util/form/validation.uti';
 import { FormField } from '../../../../../../util/types/form-field.model';
 import { TwoColumnFormComponent } from '../../../../../shared/forms/two-column-form/two-column-form.component';
 import { loadCountries } from '../../../../../shared/store/country/country.action';
@@ -53,13 +53,13 @@ export class CreateOrganizationComponent {
   readonly orgFields = signal<FormField[]>([
     // 🟦 Basic Details
     { key: 'name', label: 'Name', type: 'text', required: true, group: 'Basic Details', validators:(value: unknown) => {
-      if(!willPassRequiredValidation(value as string)) {
+      if(!willPassRequiredStringValidation(value as string)) {
         return ['Name is required'];
       }
       return [];
     }, value: 'Test Organization' },
     { key: 'email', label: 'Email', type: 'email', required: true, group: 'Basic Details', validators:(value: unknown) => {
-      if(!willPassRequiredValidation(value as string)) {
+      if(!willPassRequiredStringValidation(value as string)) {
         return ['Email is required'];
       }
       if(!willPassEmailValidation(value as string)) {
@@ -70,7 +70,7 @@ export class CreateOrganizationComponent {
     { key: 'country', label: 'Country', type: 'auto-complete', required: true, group: 'Basic Details',
       placeholder: 'Search for a country',
       validators:(value: unknown) => {
-        if(!willPassRequiredValidation((value as Country)?.name)) {
+        if(!willPassRequiredStringValidation((value as Country)?.name)) {
           return ['Country is required'];
         }
         return [];
@@ -97,7 +97,7 @@ export class CreateOrganizationComponent {
   
     // 🟩 Address Info
     { key: 'address.line1', label: 'Line 1', type: 'text', group: 'Address Info', required: true, validators:(value: unknown) => {
-      if(!willPassRequiredValidation(value as string)) {
+      if(!willPassRequiredStringValidation(value as string)) {
         return ['Address Line 1 is required'];
       }
       return [];
@@ -109,25 +109,25 @@ export class CreateOrganizationComponent {
     
     // 🟨 Financial Info
     { key: 'fiscalstart', label: 'Fiscal Start', type: 'month-date', group: 'Financial Info', required: true, validators:(value: unknown) => {
-      if(!willPassRequiredValidation(value as string)) {
+      if(!willPassRequiredStringValidation(value as string)) {
         return ['Fiscal Start is required'];
       }
       return [];
     }, value: '2025-04-01' },
     { key: 'fiscalname', label: 'Fiscal Name', type: 'text', group: 'Financial Info', required: true, validators:(value: unknown) => {
-      if(!willPassRequiredValidation(value as string)) {
+      if(!willPassRequiredStringValidation(value as string)) {
         return ['Fiscal Name is required'];
       }
       return [];
     }, value: '2025-2026' },
     { key: 'startdate', label: 'Start Date', type: 'date', group: 'Financial Info', required: true, validators:(value: unknown) => {
-      if(!willPassRequiredValidation(value as string)) {
+      if(!willPassRequiredStringValidation(value as string)) {
         return ['Start Date is required'];
       }
       return [];
     }, value: '2025-04-01' },
     { key: 'enddate', label: 'End Date', type: 'date', group: 'Financial Info', required: true, validators:(value: unknown) => {
-      if(!willPassRequiredValidation(value as string)) {
+      if(!willPassRequiredStringValidation(value as string)) {
         return ['End Date is required'];
       }
       return [];
@@ -135,13 +135,13 @@ export class CreateOrganizationComponent {
   
     // 🔢 Numbering Formats
     { key: 'invnumber', label: 'Invoice number format', type: 'text', group: 'Other Info', required: true, validators:(value: unknown) => {
-      if(!willPassRequiredValidation(value as string)) {
+      if(!willPassRequiredStringValidation(value as string)) {
         return ['Invoice No. is required'];
       }
       return [];
     }, value: DEFAULT_INVOICE_NUMBER_FORMAT },
     { key: 'jnumber', label: 'Journal number format', type: 'text', group: 'Other Info', required: true, validators:(value: unknown) => {
-      if(!willPassRequiredValidation(value as string)) {
+      if(!willPassRequiredStringValidation(value as string)) {
         return ['Journal No. is required'];
       }
       return [];
@@ -153,7 +153,7 @@ export class CreateOrganizationComponent {
       group: 'Other Info',
       required: true,
       validators:(value: unknown) => {
-        if(!willPassRequiredValidation((value as Currency)?.name)) {
+        if(!willPassRequiredStringValidation((value as Currency)?.name)) {
           return ['Currency is required'];
         }
         return [];
@@ -171,7 +171,7 @@ export class CreateOrganizationComponent {
     { key: 'dateformatForm', label: 'Date Format', type: 'auto-complete', group: 'Other Info',
       required: true,
       validators:(value: unknown) => {
-        if(!willPassRequiredValidation((value as DateFormat)?.name)) {
+        if(!willPassRequiredStringValidation((value as DateFormat)?.name)) {
           return ['Date Format is required'];
         }
         return [];

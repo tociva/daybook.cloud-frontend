@@ -19,6 +19,7 @@ import { dateFormatEffects } from './components/shared/store/date-format/date-fo
 import { toastEffects } from './components/shared/store/toast/toast.effects';
 import { httpEffects } from './state/http/http.effects';
 import { bankCashEffects } from './components/features/trading/store/bank-cash/bank-cash.effects';
+import { taxEffects } from './components/features/trading/store/tax/tax.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -36,7 +37,8 @@ export const appConfig: ApplicationConfig = {
       dateFormatEffects,
       toastEffects,
       httpEffects,
-      bankCashEffects
+      bankCashEffects,
+      taxEffects
     ]),
     provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
     provideRouterStore(),

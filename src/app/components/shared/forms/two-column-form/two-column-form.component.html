@@ -27,7 +27,7 @@
               </label>
 
               <!-- 🔘 Input: text, email, date -->
-              @if (field.type === 'text' || field.type === 'email' || field.type === 'date') {
+              @if (field.type === 'text' || field.type === 'email' || field.type === 'date' || field.type === 'number') {
                 <input
                   [formControl]="getControl(field.key)"
                   [type]="field.type"
