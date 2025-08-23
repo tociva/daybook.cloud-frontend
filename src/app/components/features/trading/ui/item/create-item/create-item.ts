@@ -1,17 +1,16 @@
 import { Component, effect, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { ActionCreator, Store } from '@ngrx/store';
+import { FormValidator } from '../../../../../../util/form/form-validator';
 import { FormUtil } from '../../../../../../util/form/form.util';
 import { willPassRequiredStringValidation } from '../../../../../../util/form/validation.uti';
 import { FormField } from '../../../../../../util/types/form-field.model';
 import { TwoColumnFormComponent } from '../../../../../shared/forms/two-column-form/two-column-form.component';
-import { itemActions, ItemCU, ItemStore } from '../../../store/item';
-import { FormValidator } from '../../../../../../util/form/form-validator';
-import { ActionCreator, Store } from '@ngrx/store';
-import { SkeltonLoader } from '../../../../../shared/skelton-loader/skelton-loader';
-import { ActivatedRoute } from '@angular/router';
 import { ItemNotFound } from '../../../../../shared/item-not-found/item-not-found';
-import { ItemCategory } from '../../../store/item-category';
-import { Branch } from '../../../../management/store/branch/branch.model';
+import { SkeltonLoader } from '../../../../../shared/skelton-loader/skelton-loader';
+import { Item, itemActions, ItemCU, ItemStore } from '../../../store/item';
+import { itemCategoryActions, ItemCategory, ItemCategoryStore } from '../../../store/item-category';
 
 @Component({
   selector: 'app-create-item',
@@ -25,14 +24,14 @@ export class CreateItem implements OnInit {
   private readonly store = inject(Store);
   private readonly route = inject(ActivatedRoute);
   readonly itemStore = inject(ItemStore);
+  readonly itemCategoryStore = inject(ItemCategoryStore);
   readonly selectedItem = this.itemStore.selectedItem;
   successAction = signal<ActionCreator[] | ActionCreator | null>(null);
   protected loading = true;
   protected mode:'create'|'edit' = 'create';
   private itemId = signal<string | null>(null);
 
-  // Mock categories for now - in a real app, you'd load these from a store
-  categories = signal<ItemCategory[]>([]);
+  categories = this.itemCategoryStore.items;
 
   readonly formFields = signal<FormField[]>([
     // 🟦 Basic Details
@@ -42,6 +41,21 @@ export class CreateItem implements OnInit {
       }
       return [];
     }},
+    { key: 'category', label: 'Category', type: 'auto-complete', required: false, group: 'Basic Details',
+      placeholder: 'Search for a category',
+      autoComplete: {
+        items: this.categories,
+        optionDisplayValue: (item: ItemCategory) => item.name,
+        inputDisplayValue: (item: ItemCategory) => item.name,
+        trackBy: (item: ItemCategory) => item.id!,
+        onSearch: (value: string) => {
+          this.store.dispatch(itemCategoryActions.loadItemCategories({ query: { search: { query: value, fields: ['name', 'code', 'description'] } } }));
+        },
+        onOptionSelected: (item: ItemCategory) => {
+          this.form.patchValue({ code: item.code});
+        }
+      }
+    },
     { key: 'code', label: 'Code', type: 'text', required: true, group: 'Basic Details', validators:(value: unknown) => {
       if(!willPassRequiredStringValidation(value as string)) {
         return ['Code is required'];
@@ -69,16 +83,6 @@ export class CreateItem implements OnInit {
     { key: 'barcode', label: 'Barcode', type: 'text', required: false, group: 'Basic Details'},
     { key: 'description', label: 'Description', type: 'text', required: false, group: 'Basic Details'},
     
-    // 🟦 Category & Ledger Details
-    { key: 'categoryid', label: 'Category', type: 'select', required: true, group: 'Category & Ledger Details',
-      options: this.categories().map(cat => ({ value: cat.id!, label: cat.name })),
-      validators:(value: unknown) => {
-        if(!willPassRequiredStringValidation(value as string)) {
-          return ['Category is required'];
-        }
-        return [];
-      }
-    },
     { key: 'purchaseledger', label: 'Purchase Ledger', type: 'text', required: false, group: 'Category & Ledger Details'},
     { key: 'salesledger', label: 'Sales Ledger', type: 'text', required: false, group: 'Category & Ledger Details'},
   ]);
@@ -115,7 +119,7 @@ export class CreateItem implements OnInit {
         this.successAction.set(itemActions.updateItemSuccess);
         this.mode = 'edit';
         this.loading = true;
-        this.store.dispatch(itemActions.loadItemById({ id: this.itemId()! }));
+        this.store.dispatch(itemActions.loadItemById({ id: this.itemId()!, query: { includes: ['category'] } }));
       }else{
         this.loading = false;
       }
@@ -127,17 +131,21 @@ export class CreateItem implements OnInit {
     this.loadErrorEffect.destroy();
   }
 
-  handleSubmit = (data: ItemCU) => {
-    const validatedFields = FormValidator.validate(data as any, this.formFields());
+  handleSubmit = (dataP: Item) => {
+    const validatedFields = FormValidator.validate(dataP as any, this.formFields());
     const hasErrors = validatedFields.some(fld => fld.errors?.length);
     if (hasErrors) {
       this.formFields.set(validatedFields);
       return;
     }
 
-    const item = {
+    const {category, purchaseledger, salesledger, ...data} = dataP;
+
+    const item:ItemCU = {
       ...data,
-      status: data.status !== undefined ? Number(data.status) : 1
+      categoryid: category.id!,
+      purchaseledger: purchaseledger ?? '',
+      salesledger: salesledger ?? '',
     };
 
     if(this.mode === 'create') {

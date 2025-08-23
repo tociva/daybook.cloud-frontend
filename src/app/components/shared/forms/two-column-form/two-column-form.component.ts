@@ -98,9 +98,20 @@ export class TwoColumnFormComponent<T> {
     // this.someUiFlag.set(false);
   });
 
+  // EFFECT 3: if fields carry validation errors, stop submitting spinner
+  private readonly validationErrorsEffect = effect(() => {
+    const fields = this.fields(); // reacts when parent sets validatedFields
+    const hasErrors = fields?.some(f => (f.errors?.length ?? 0) > 0);
+    if (hasErrors) {
+      this.submitting.set(false);
+    }
+  });
+
+
   onDestroy() {
     this.successActionEffect.destroy();
     this.uiEffect.destroy();
+    this.validationErrorsEffect.destroy();
   }
 
   getControl<K extends string>(key: K): FormControl<unknown> {

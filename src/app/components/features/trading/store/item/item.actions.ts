@@ -13,7 +13,7 @@ export const itemActions = createActionGroup({
     createItemFailure: props<{ error: DbcError }>(),
     
     // Get by Id
-    loadItemById: props<{ id: string }>(),
+    loadItemById: props<{ id: string, query?: QueryParamsRep }>(),
     loadItemByIdSuccess: props<{ item: Item }>(),
     loadItemByIdFailure: props<{ error: DbcError }>(),
     

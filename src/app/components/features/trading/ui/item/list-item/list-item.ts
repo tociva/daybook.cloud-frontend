@@ -85,7 +85,7 @@ export class ListItem implements OnInit, OnDestroy {
       }
       const search = {query: params.search?.query ?? '', fields: ['description', 'name', 'code', 'displayname', 'barcode']};
       this.store.dispatch(itemActions.loadItems({ 
-        query: { limit: limit ?? 10, offset: offset ?? 0, search: search, sort: sort ?? [] } 
+        query: { limit: limit ?? 10, offset: offset ?? 0, search: search, sort: sort ?? [], includes: ['category'] } 
       }));
       if(this.currentPage() !== page) {
         this.currentPage.set(page ?? 1);
