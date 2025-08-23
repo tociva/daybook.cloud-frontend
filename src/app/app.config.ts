@@ -21,6 +21,8 @@ import { httpEffects } from './state/http/http.effects';
 import { bankCashEffects } from './components/features/trading/store/bank-cash/bank-cash.effects';
 import { taxEffects } from './components/features/trading/store/tax/tax.effects';
 import { customerEffects } from './components/features/trading/store/customer/customer.effects';
+import { itemEffects } from './components/features/trading/store/item/item.effects';
+import { itemCategoryEffects } from './components/features/trading/store/item-category/item-category.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -40,7 +42,9 @@ export const appConfig: ApplicationConfig = {
       httpEffects,
       bankCashEffects,
       taxEffects,
-      customerEffects
+      customerEffects,
+      itemEffects,
+      itemCategoryEffects
     ]),
     provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
     provideRouterStore(),

@@ -1,14 +1,12 @@
 <app-item-landing
-  [error]="error()"
   [items]="items()"
   [count]="count()"
   [pageSize]="pageSize()"
   [currentPage]="currentPage()"
-  [title]="'Bank/Cash'"
-  [createButtonText]="'Create New Bank/Cash'"
+  [error]="error()"
+  [columns]="columns()"
   [emptyListMessage]="emptyListMessage()"
   [onCreateItem]="handleOnCreateItem()"
-  [columns]="columns()"
   [onEditItem]="handleOnEditItem()"
   [onDeleteItem]="handleOnDeleteItem()"
-></app-item-landing>
+/>
