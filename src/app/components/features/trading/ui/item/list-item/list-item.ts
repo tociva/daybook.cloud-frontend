@@ -67,6 +67,11 @@ export class ListItem implements OnInit, OnDestroy {
     this.router.navigate(['/trading/item', item.id, 'delete'], { queryParams: { burl: currentUrl } });
   });
 
+  readonly handleOnButton2Click = signal<() => void>(() => {
+    const currentUrl = this.router.url;
+    this.router.navigate(['/trading/item-category'], { queryParams: { burl: currentUrl } });
+  });
+
   private destroy$ = new Subject<void>();
 
   private loadItems(): void {

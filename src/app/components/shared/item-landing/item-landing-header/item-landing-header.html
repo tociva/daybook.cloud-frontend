@@ -9,12 +9,24 @@
     }
   </div>
 
-  <!-- Right: Create Button -->
-  <button
-    (click)="onCreateItem()()"
-    class="px-4 py-2 bg-primary text-on-primary rounded hover:bg-primary-hover transition-colors duration-200 flex items-center gap-2 cursor-pointer"
-  >
-    <ng-icon name="bootstrapPlusLg" size="24"></ng-icon>
-    {{createButtonText()}}
-  </button>
+  <!-- Right: Buttons Row -->
+  <div class="flex items-center gap-2">
+    @if (button2Caption()) {
+      <div class="flex items-center gap-2">
+        <button
+          (click)="onButton2Click()()"
+          class="px-4 py-2 bg-primary text-on-primary rounded hover:bg-primary-hover transition-colors duration-200 flex items-center gap-2 cursor-pointer"
+        >
+        <ng-icon name="bootstrapBuildingAdd" size="24"></ng-icon>
+          {{button2Caption()}}
+        </button>
+      </div>
+    }
+    <button
+      (click)="onCreateItem()()"
+      class="px-4 py-2 bg-primary text-on-primary rounded hover:bg-primary-hover transition-colors duration-200 flex items-center gap-2 cursor-pointer"
+    >
+      <ng-icon name="bootstrapPlusLg" size="24"></ng-icon>
+      {{createButtonText()}}
+    </button>
 </div>

@@ -32,16 +32,47 @@ function isAbortLike(err: unknown): boolean {
   if (err && typeof err === 'object' && (err as any).name === 'AbortError') return true;
   if (err instanceof DOMException && err.name === 'AbortError') return true;
 
+  // Firefox NS_BINDING_ABORTED - check error message
+  if (err && typeof err === 'object') {
+    const message = (err as any).message || '';
+    if (typeof message === 'string' && message.includes('NS_BINDING_ABORTED')) return true;
+  }
+
   // Angular HttpClient (XHR)
   if (err instanceof HttpErrorResponse) {
     const pe = err.error as ProgressEvent | undefined;
+    
+    // Explicit abort event
     if (pe?.type === 'abort') return true;
-    // Some environments report only status 0 for aborts; avoid treating them as fatal if clearly canceled
-    if (err.status === 0 && (pe?.type === 'error' || pe?.type === '')) {
-      // ambiguous: could be network error. Only treat as abort if you explicitly mark cancellations upstream.
-      // Leave as false here to avoid hiding real network errors.
+    
+    // Firefox NS_BINDING_ABORTED often comes as HttpErrorResponse
+    if (err.message && err.message.includes('NS_BINDING_ABORTED')) return true;
+    
+    // Status 0 with error/abort-like events (more permissive for cancellations)
+    if (err.status === 0) {
+      // Check for abort-like conditions
+      if (pe?.type === 'error' || pe?.type === 'abort' || pe?.type === '') {
+        // Additional checks to distinguish from real network errors
+        // If the error message suggests cancellation, treat as abort
+        if (err.message.includes('abort') || 
+            err.message.includes('cancel') || 
+            err.message.includes('NS_BINDING_ABORTED') ||
+            err.statusText === '' || 
+            err.statusText === 'Unknown Error') {
+          return true;
+        }
+      }
     }
   }
+
+  // Check for other common cancellation indicators
+  if (err && typeof err === 'object') {
+    const errObj = err as any;
+    // Some libraries use these properties for cancellations
+    if (errObj.cancelled === true || errObj.canceled === true) return true;
+    if (errObj.code === 'ABORT' || errObj.code === 'CANCELLED') return true;
+  }
+
   return false;
 }
 

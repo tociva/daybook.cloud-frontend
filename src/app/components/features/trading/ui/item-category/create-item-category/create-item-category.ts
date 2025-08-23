@@ -38,7 +38,6 @@ export class CreateItemCategory implements OnInit {
   ]);
 
   readonly formFields = signal<FormField[]>([
-    // 🟦 Basic Details
     { key: 'name', label: 'Name', type: 'text', required: true, group: 'Basic Details', validators:(value: unknown) => {
       if(!willPassRequiredStringValidation(value as string)) {
         return ['Name is required'];
@@ -51,15 +50,14 @@ export class CreateItemCategory implements OnInit {
       }
       return [];
     }},
-    { key: 'description', label: 'Description', type: 'text', required: false, group: 'Basic Details'},
-    
-    // 🟦 Parent Category
-    { key: 'parentid', label: 'Parent Category', type: 'select', required: false, group: 'Parent Category',
+    { key: 'parentid', label: 'Parent Category', type: 'select', required: false, group: 'Basic Details',
       options: [
         { value: '', label: 'No Parent (Root Category)' },
         ...this.parentCategories().map(cat => ({ value: cat.id!, label: cat.name }))
       ]
     },
+    { key: 'description', label: 'Description', type: 'text', required: false, group: 'Basic Details'},
+
   ]);
 
   readonly form: FormGroup = FormUtil.buildForm(this.formFields(), this.fb);

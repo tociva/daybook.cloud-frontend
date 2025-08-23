@@ -40,5 +40,8 @@ export class ItemLanding<T> {
   readonly onEditItem = input<(item: T) => void>();
   readonly onDeleteItem = input<(item: T) => void>();
 
-  
+  readonly button2Caption = input<string | null>(null);
+  readonly onButton2Click = input<() => void>(() => {
+    return void 0;
+  });
 }

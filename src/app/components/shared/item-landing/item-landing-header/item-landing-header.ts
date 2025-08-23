@@ -16,4 +16,8 @@ export class ItemLandingHeader {
   readonly onCreateItem = input<() => void>(() => {
     return void 0;
   });
+  readonly button2Caption = input<string | null>(null);
+  readonly onButton2Click = input<() => void>(() => {
+    return void 0;
+  });
 }
