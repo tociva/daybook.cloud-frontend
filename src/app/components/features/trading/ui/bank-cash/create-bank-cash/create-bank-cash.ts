@@ -1,15 +1,15 @@
 import { Component, effect, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { ActionCreator, Store } from '@ngrx/store';
+import { FormValidator } from '../../../../../../util/form/form-validator';
 import { FormUtil } from '../../../../../../util/form/form.util';
 import { willPassRequiredStringValidation } from '../../../../../../util/form/validation.uti';
 import { FormField } from '../../../../../../util/types/form-field.model';
 import { TwoColumnFormComponent } from '../../../../../shared/forms/two-column-form/two-column-form.component';
-import { bankCashActions, BankCashCU, BankCashStore } from '../../../store/bank-cash';
-import { FormValidator } from '../../../../../../util/form/form-validator';
-import { ActionCreator, Store } from '@ngrx/store';
-import { SkeltonLoader } from '../../../../../shared/skelton-loader/skelton-loader';
-import { ActivatedRoute } from '@angular/router';
 import { ItemNotFound } from '../../../../../shared/item-not-found/item-not-found';
+import { SkeltonLoader } from '../../../../../shared/skelton-loader/skelton-loader';
+import { BankCash, bankCashActions, BankCashStore } from '../../../store/bank-cash';
 
 @Component({
   selector: 'app-create-bank-cash',
@@ -86,7 +86,7 @@ export class CreateBankCash implements OnInit {
     this.loadErrorEffect.destroy();
   }
 
-  handleSubmit(data: BankCashCU) {
+  handleSubmit(data: BankCash) {
 
     const validatedFields = FormValidator.validate(data as any, this.formFields());
     const hasErrors = validatedFields.some(fld => fld.errors?.length);

@@ -54,12 +54,22 @@ export class ItemLandingTable<T> {
   }
 
   findValue(item: T, column: DbcColumn<T>): any {
-    return item[column.key as keyof T];
+    const key = column.key as string;
+  
+    return key.split('.').reduce((acc: any, part: string) => {
+      if (acc && typeof acc === 'object') {
+        return acc[part];
+      }
+      return undefined;
+    }, item);
   }
+  
+
   findTrackValue(item: T): string {
     const idItem = item as unknown as { id: string };
     return idItem.id;
   }
+
   isActive(item: T): boolean {
     const status = item as unknown as { status: Status };
     return status.status === Status.ACTIVE;

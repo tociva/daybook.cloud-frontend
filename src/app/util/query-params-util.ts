@@ -9,6 +9,7 @@ export interface QueryParamsRep {
   offset?: number,
   search?: LB4Search,
   sort?: [string, string][],
+  includes?: string[],
 };
 
 export interface QueryParamsOriginal {
@@ -17,6 +18,7 @@ export interface QueryParamsOriginal {
   offset?: string|null,
   search?: string|null,
   sort?: string|null,
+  includes?: string|null,
 };
 
 export const findQueryParamsOriginal = (route: ActivatedRoute): QueryParamsOriginal => {
@@ -26,6 +28,7 @@ export const findQueryParamsOriginal = (route: ActivatedRoute): QueryParamsOrigi
     offset: route.snapshot.queryParams['offset'] ?? '',
     search: route.snapshot.queryParams['search'] ?? '',
     sort: route.snapshot.queryParams['sort'] ?? '',
+    includes: route.snapshot.queryParams['includes'] ?? '',
   };
 };  
 
@@ -36,6 +39,7 @@ export const parseQueryParams = (queryParams: QueryParamsOriginal): QueryParamsR
     offset: queryParams.offset ? parseInt(queryParams.offset) : 0,
     search: {query: queryParams.search ?? '', fields: []},
     sort: queryParams.sort ? queryParams.sort.split(',').map(sort => sort.split(':') as [string, string]) : [],
+    includes: queryParams.includes ? queryParams.includes.split(',') : [],
   };
 };
 

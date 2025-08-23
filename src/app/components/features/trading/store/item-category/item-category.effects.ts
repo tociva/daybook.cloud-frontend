@@ -58,9 +58,13 @@ export const itemCategoryEffects = {
         tap((action) => {
           const baseUrl = `${configStore.config().apiBaseUrl}/inventory/item-category/${action.id}`;
           const requestId = `${itemCategoryActions.loadItemCategoryById.type}-${Date.now()}-${Math.random()}`;
+          const filter = LB4QueryBuilder.create()
+          .applySignalStoreIncludes(action.query?.includes)
+          .build();
           const config: HttpRequestConfig = {
             url: baseUrl,
             method: 'GET',
+            params: {filter: JSON.stringify(filter)},
             headers: {
               'Content-Type': 'application/json'
             },
@@ -89,9 +93,9 @@ export const itemCategoryEffects = {
       return actions$.pipe(
         ofType(itemCategoryActions.loadItemCategories),
         tap((action) => {
-          const { limit, offset, search, sort } = action.query ?? {};
+          const { limit, offset, search, sort, includes } = action.query ?? {};
           const filter = LB4QueryBuilder.create()
-          .applySignalStoreFilters(limit ?? 10, offset ?? 0, search ?? {query: '', fields: []}, sort ?? [], {})
+          .applySignalStoreFilters(limit ?? 10, offset ?? 0, search ?? {query: '', fields: []}, sort ?? [], includes)
           .build();
           const baseUrl = `${configStore.config().apiBaseUrl}/inventory/item-category`;
           const requestId = `${itemCategoryActions.loadItemCategories.type}-${Date.now()}-${Math.random()}`;

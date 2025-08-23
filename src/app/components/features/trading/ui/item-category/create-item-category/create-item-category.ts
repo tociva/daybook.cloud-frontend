@@ -1,15 +1,15 @@
 import { Component, effect, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { ActionCreator, Store } from '@ngrx/store';
+import { FormValidator } from '../../../../../../util/form/form-validator';
 import { FormUtil } from '../../../../../../util/form/form.util';
 import { willPassRequiredStringValidation } from '../../../../../../util/form/validation.uti';
 import { FormField } from '../../../../../../util/types/form-field.model';
 import { TwoColumnFormComponent } from '../../../../../shared/forms/two-column-form/two-column-form.component';
-import { itemCategoryActions, ItemCategoryCU, ItemCategoryStore } from '../../../store/item-category';
-import { FormValidator } from '../../../../../../util/form/form-validator';
-import { ActionCreator, Store } from '@ngrx/store';
-import { SkeltonLoader } from '../../../../../shared/skelton-loader/skelton-loader';
-import { ActivatedRoute } from '@angular/router';
 import { ItemNotFound } from '../../../../../shared/item-not-found/item-not-found';
+import { SkeltonLoader } from '../../../../../shared/skelton-loader/skelton-loader';
+import { itemCategoryActions, ItemCategoryStore } from '../../../store/item-category';
 import { ItemCategory } from '../../../store/item-category/item-category.model';
 
 @Component({
@@ -30,12 +30,7 @@ export class CreateItemCategory implements OnInit {
   protected mode:'create'|'edit' = 'create';
   private itemId = signal<string | null>(null);
 
-  // Mock parent categories for now - in a real app, you'd load these from the store
-  parentCategories = signal<ItemCategory[]>([
-    { id: '1', name: 'Electronics', code: 'ELEC', description: 'Electronic items', branch: {} as any, branchid: '' },
-    { id: '2', name: 'Clothing', code: 'CLOTH', description: 'Clothing items', branch: {} as any, branchid: '' },
-    { id: '3', name: 'Books', code: 'BOOKS', description: 'Book items', branch: {} as any, branchid: '' },
-  ]);
+  categories = this.itemCategoryStore.items;
 
   readonly formFields = signal<FormField[]>([
     { key: 'name', label: 'Name', type: 'text', required: true, group: 'Basic Details', validators:(value: unknown) => {
@@ -50,11 +45,17 @@ export class CreateItemCategory implements OnInit {
       }
       return [];
     }},
-    { key: 'parentid', label: 'Parent Category', type: 'select', required: false, group: 'Basic Details',
-      options: [
-        { value: '', label: 'No Parent (Root Category)' },
-        ...this.parentCategories().map(cat => ({ value: cat.id!, label: cat.name }))
-      ]
+    { key: 'parent', label: 'Parent Category', type: 'auto-complete', required: false, group: 'Basic Details',
+      placeholder: 'Search for a parent category',
+      autoComplete: {
+        items: this.categories,
+        optionDisplayValue: (item: ItemCategory) => item.name,
+        inputDisplayValue: (item: ItemCategory) => item.name,
+        trackBy: (item: ItemCategory) => item.id!,
+        onSearch: (value: string) => {
+          this.store.dispatch(itemCategoryActions.loadItemCategories({ query: { search: { query: value, fields: ['name', 'code', 'description'] } } }));
+        },
+      }
     },
     { key: 'description', label: 'Description', type: 'text', required: false, group: 'Basic Details'},
 
@@ -92,7 +93,7 @@ export class CreateItemCategory implements OnInit {
         this.successAction.set(itemCategoryActions.updateItemCategorySuccess);
         this.mode = 'edit';
         this.loading = true;
-        this.store.dispatch(itemCategoryActions.loadItemCategoryById({ id: this.itemId()! }));
+        this.store.dispatch(itemCategoryActions.loadItemCategoryById({ id: this.itemId()!, query: { includes: ['parent'] } }));
       }else{
         this.loading = false;
       }
@@ -104,17 +105,18 @@ export class CreateItemCategory implements OnInit {
     this.loadErrorEffect.destroy();
   }
 
-  handleSubmit = (data: ItemCategoryCU) => {
-    const validatedFields = FormValidator.validate(data as any, this.formFields());
+  handleSubmit = (dataP: ItemCategory) => {
+    const validatedFields = FormValidator.validate(dataP as any, this.formFields());
     const hasErrors = validatedFields.some(fld => fld.errors?.length);
     if (hasErrors) {
       this.formFields.set(validatedFields);
       return;
     }
 
+    const { parent, ...data } = dataP;
     const itemCategory = {
       ...data,
-      parentid: data.parentid || undefined // Remove empty string for parentid
+      parentid: parent?.id || undefined
     };
 
     if(this.mode === 'create') {

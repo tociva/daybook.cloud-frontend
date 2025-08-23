@@ -124,7 +124,7 @@ export class LB4QueryBuilder {
     offset: number,
     search: LB4Search,
     sort: [string, string][],
-    filters: Record<string, any>
+    includes?: string[]
   ): this {
     // Pagination
     this.offset(offset).limit(limit);
@@ -140,15 +140,18 @@ export class LB4QueryBuilder {
       this.filter.order = sort.map(sort => `${sort[0]} ${sort[1]}`).join(',');
     }
 
-    // Apply additional filters
-    if (filters && Object.keys(filters).length > 0) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== null && value !== undefined && value !== '') {
-          this.equal(key, value);
-        }
-      });
+    // Includes
+    if (includes && includes.length > 0) {
+      includes.forEach(include => this.include(include));
     }
 
+    return this;
+  }
+
+  applySignalStoreIncludes(includes?: string[]): this {
+    if (includes && includes.length > 0) {
+      includes.forEach(include => this.include(include));
+    }
     return this;
   }
 
@@ -171,20 +174,3 @@ export class LB4QueryBuilder {
     };
   }
 }
-
-// Usage examples:
-// const query = LB4QueryBuilder.create()
-//   .defaultBankCashFields()
-//   .includeBranch()
-//   .offset(0)
-//   .limit(10)
-//   .search('cash')
-//   .equal('status', 'active')
-//   .build();
-
-// Or with signal store:
-// const query = LB4QueryBuilder.create()
-//   .defaultBankCashFields()
-//   .includeBranch()
-//   .applySignalStoreFilters(limit, skip, search, sort, filters)
-//   .build();

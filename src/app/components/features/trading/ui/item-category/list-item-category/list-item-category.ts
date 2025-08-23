@@ -48,7 +48,7 @@ export class ListItemCategory implements OnInit, OnDestroy {
   readonly columns = signal<DbcColumn<ItemCategory>[]>([
     { header: 'Name', key: 'name', type: 'text', sortable: true },
     { header: 'Code', key: 'code', type: 'text', sortable: true },
-    { header: 'Parent Category', key: 'parent.name', type: 'text', sortable: true },
+    { header: 'Parent Category', key: 'parent.name', type: 'text', sortable: false },
     { header: 'Description', key: 'description', type: 'text', sortable: true },
     { header: 'Actions', key: 'actions', type: 'action' }
   ]);
@@ -63,6 +63,10 @@ export class ListItemCategory implements OnInit, OnDestroy {
     this.router.navigate(['/trading/item-category', item.id, 'delete'], { queryParams: { burl: currentUrl } });
   });
 
+  readonly handleOnButton2Click = signal<() => void>(() => {
+    this.router.navigate(['/trading/item']);
+  });
+
   private destroy$ = new Subject<void>();
 
   private loadItemCategories(): void {
@@ -75,9 +79,9 @@ export class ListItemCategory implements OnInit, OnDestroy {
       if(this.pageSize() !== limit) {
         this.pageSize.set(limit ?? 10);
       }
-      const search = {query: params.search?.query ?? '', fields: ['description', 'name', 'code']};
+      const search = {query: params.search?.query ?? '', fields: ['description', 'name', 'code'],};
       this.store.dispatch(itemCategoryActions.loadItemCategories({ 
-        query: { limit: limit ?? 10, offset: offset ?? 0, search: search, sort: sort ?? [] } 
+        query: { limit: limit ?? 10, offset: offset ?? 0, search: search, sort: sort ?? [], includes: ['parent'] } 
       }));
       if(this.currentPage() !== page) {
         this.currentPage.set(page ?? 1);
