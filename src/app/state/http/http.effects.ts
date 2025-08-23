@@ -8,7 +8,6 @@ import { httpActions } from './http.actions';
 import { HttpStore } from './http.store';
 import { HttpRequestConfig } from './http.model';
 import { ToastStore } from '../../components/shared/store/toast/toast.store';
-import { UiStore } from '../ui/ui.store';
 import { DbcError } from '../../util/types/dbc-error.type';
 
 export const httpEffects = {
@@ -17,13 +16,11 @@ export const httpEffects = {
     const http = inject(HttpClient);
     const httpStore = inject(HttpStore);
     const toastStore = inject(ToastStore);
-    const ui = inject(UiStore);
 
     return actions$.pipe(
       ofType(httpActions.executeRequest),
       switchMap(({ config, metadata }) => {
         // Start loading
-        ui.startLoading(metadata.requestId);
         httpStore.startLoading(metadata.requestId);
         
         // Prepare HTTP call based on method
@@ -65,14 +62,12 @@ export const httpEffects = {
     const actions$ = inject(Actions);
     const httpStore = inject(HttpStore);
     const store = inject(Store);
-    const ui = inject(UiStore);
     
     return actions$.pipe(
       ofType(httpActions.requestSuccess),
       tap(({ requestId, data, metadata }) => {
         // Stop loading
         httpStore.stopLoading(requestId);
-        ui.stopLoading(requestId);
         
         if (metadata.onSuccessAction) {
           const action = metadata.onSuccessAction(data);
@@ -86,14 +81,12 @@ export const httpEffects = {
     const actions$ = inject(Actions);
     const httpStore = inject(HttpStore);
     const store = inject(Store);
-    const ui = inject(UiStore);
 
     return actions$.pipe(
       ofType(httpActions.requestFailure),
       tap(({ requestId, error, metadata }) => {
         // Stop loading and set error
         httpStore.stopLoading(requestId);
-        ui.stopLoading(requestId);
         httpStore.setError(requestId, error);
         
         if (metadata.onErrorAction) {

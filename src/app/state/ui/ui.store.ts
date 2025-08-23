@@ -1,40 +1,24 @@
-import { Injectable, computed, signal } from '@angular/core';
-import { Observable } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+// ui.store.ts (optional simplified spinner)
+import { Injectable, computed, signal, inject } from '@angular/core';
+import { HttpStore } from '../http/http.store'; // adjust path
 
-/**
- * Tracks global loading state using a set of unique tokens.
- * Each API call gets a unique token; the loader stays active until all tokens are cleared.
- */
 @Injectable({ providedIn: 'root' })
 export class UiStore {
-  private readonly _loadingTokens = signal<Set<string>>(new Set());
+  // keep any other UI signals you already have...
+  private readonly http = inject(HttpStore);
 
-  /** Whether any loading token is active (used by global spinner) */
-  readonly isLoading = computed(() => this._loadingTokens().size > 0);
+  // Global spinner derived from HttpStore
+  readonly isLoading = computed(() => {
+    const map = this.http.loading(); // Record<string, boolean>
+    for (const k in map) if (map[k]) return true;
+    return false;
+  });
 
-  /** Add a loading token to indicate start of an async operation */
-  startLoading(token: string): void {
-    const current = new Set(this._loadingTokens());
-    current.add(token);
-    this._loadingTokens.set(current);
-  }
+  // If you still want ad-hoc/manual spinners elsewhere, you can keep token-based API:
+  private readonly _manual = signal(0);
+  startManual() { this._manual.set(this._manual() + 1); }
+  stopManual() { this._manual.set(Math.max(0, this._manual() - 1)); }
 
-  /** Remove a loading token to indicate completion of an async operation */
-  stopLoading(token: string): void {
-    const current = new Set(this._loadingTokens());
-    current.delete(token);
-    this._loadingTokens.set(current);
-  }
-
-  /**
-   * Wraps an observable to automatically start/stop loading token
-   */
-  track<T>(actionName: string, observable: Observable<T>): Observable<T> {
-    const token = `${actionName}-${Date.now()}-${Math.random()}`;
-    this.startLoading(token);
-    return observable.pipe(
-      finalize(() => this.stopLoading(token))
-    );
-  }
+  // Combined flag (HTTP or manual)
+  readonly isAnyLoading = computed(() => this.isLoading() || this._manual() > 0);
 }
