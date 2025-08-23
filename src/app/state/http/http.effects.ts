@@ -1,14 +1,60 @@
 import { inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { switchMap, map, catchError, tap } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { of, EMPTY } from 'rxjs';
 import { httpActions } from './http.actions';
 import { HttpStore } from './http.store';
 import { HttpRequestConfig } from './http.model';
 import { ToastStore } from '../../components/shared/store/toast/toast.store';
 import { DbcError } from '../../util/types/dbc-error.type';
+
+// Helper function to detect abort-like errors (same logic as in HttpStore)
+function isAbortLike(err: unknown): boolean {
+  // fetch-style AbortController
+  if (err && typeof err === 'object' && (err as any).name === 'AbortError') return true;
+  if (err instanceof DOMException && err.name === 'AbortError') return true;
+
+  // Firefox NS_BINDING_ABORTED - check error message
+  if (err && typeof err === 'object') {
+    const message = (err as any).message || '';
+    if (typeof message === 'string' && message.includes('NS_BINDING_ABORTED')) return true;
+  }
+
+  // Angular HttpClient (XHR)
+  if (err instanceof HttpErrorResponse) {
+    const pe = err.error as ProgressEvent | undefined;
+    
+    // Explicit abort event
+    if (pe?.type === 'abort') return true;
+    
+    // Firefox NS_BINDING_ABORTED often comes as HttpErrorResponse
+    if (err.message && err.message.includes('NS_BINDING_ABORTED')) return true;
+    
+    // Status 0 with abort-like conditions
+    if (err.status === 0) {
+      if (pe?.type === 'error' || pe?.type === 'abort' || pe?.type === '') {
+        if (err.message.includes('abort') || 
+            err.message.includes('cancel') || 
+            err.message.includes('NS_BINDING_ABORTED') ||
+            err.statusText === '' || 
+            err.statusText === 'Unknown Error') {
+          return true;
+        }
+      }
+    }
+  }
+
+  // Check for other common cancellation indicators
+  if (err && typeof err === 'object') {
+    const errObj = err as any;
+    if (errObj.cancelled === true || errObj.canceled === true) return true;
+    if (errObj.code === 'ABORT' || errObj.code === 'CANCELLED') return true;
+  }
+
+  return false;
+}
 
 export const httpEffects = {
   executeRequest: createEffect(() => {
@@ -20,12 +66,11 @@ export const httpEffects = {
     return actions$.pipe(
       ofType(httpActions.executeRequest),
       switchMap(({ config, metadata }) => {
-        // Start loading
-        httpStore.startLoading(metadata.requestId);
-        
-        // Prepare HTTP call based on method
+        // Create HTTP call
         const httpCall = createHttpCall(http, config);
-        return httpCall.pipe(
+        
+        // Use HttpStore.track() for proper loading/error handling including abort detection
+        return httpStore.track(metadata.requestId, httpCall).pipe(
           map((data) => {
             // Show success message if provided
             if (metadata.successMessage) {
@@ -38,15 +83,23 @@ export const httpEffects = {
             });
           }),
           catchError((errorP) => {
-            const errorMessage = errorP.error?.error.message ?? errorP.error?.message ?? errorP.message;
-            // Show error message if provided
-            if (metadata.errorMessage) {
-              toastStore.show({ title: metadata.errorMessage, message:errorMessage }, 'error');
+            // Double-check: if it's an abort error that somehow got through, ignore it
+            if (isAbortLike(errorP)) {
+              return EMPTY; // Silently ignore abort errors
             }
+
+            const errorMessage = errorP.error?.error?.message ?? errorP.error?.message ?? errorP.message;
+            
+            // Show error message if provided (only for real errors)
+            if (metadata.errorMessage) {
+              toastStore.show({ title: metadata.errorMessage, message: errorMessage }, 'error');
+            }
+            
             const error: DbcError = {
               details: errorMessage ?? 'Unknown error',
               title: metadata.errorMessage ?? 'Error thrown from cloud server'
             };
+            
             return of(httpActions.requestFailure({ 
               requestId: metadata.requestId, 
               error, 
@@ -60,15 +113,12 @@ export const httpEffects = {
 
   handleSuccess: createEffect(() => {
     const actions$ = inject(Actions);
-    const httpStore = inject(HttpStore);
     const store = inject(Store);
     
     return actions$.pipe(
       ofType(httpActions.requestSuccess),
-      tap(({ requestId, data, metadata }) => {
-        // Stop loading
-        httpStore.stopLoading(requestId);
-        
+      tap(({ data, metadata }) => {
+        // Note: Loading is already stopped by HttpStore.track()
         if (metadata.onSuccessAction) {
           const action = metadata.onSuccessAction(data);
           store.dispatch(action);
@@ -79,16 +129,12 @@ export const httpEffects = {
 
   handleFailure: createEffect(() => {
     const actions$ = inject(Actions);
-    const httpStore = inject(HttpStore);
     const store = inject(Store);
 
     return actions$.pipe(
       ofType(httpActions.requestFailure),
-      tap(({ requestId, error, metadata }) => {
-        // Stop loading and set error
-        httpStore.stopLoading(requestId);
-        httpStore.setError(requestId, error);
-        
+      tap(({ error, metadata }) => {
+        // Note: Loading is already stopped and error is already set by HttpStore.track()
         if (metadata.onErrorAction) {
           const action = metadata.onErrorAction(error);
           store.dispatch(action);
