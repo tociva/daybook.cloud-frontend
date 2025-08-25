@@ -4,14 +4,14 @@
   [lines]="10"
   width="100%"
   [shimmer]="true" />
-} @else if(!loading && (mode === 'create' || mode === 'edit') && !itemStore.error()) {
+} @else if(!loading && (mode() === 'create' || mode() === 'edit') && !itemStore.error()) {
   <app-two-column-form [form]="form"
   [fields]="formFields()"
   [title]="title()"
   (formSubmit)="handleSubmit($event)"
   [successAction]="successAction()"
   />
-} @else if(!loading && mode === 'edit' && itemStore.error()) {
+} @else if(!loading && mode() === 'edit' && itemStore.error()) {
   <app-item-not-found
   title="Item record not found"
   description="It may have been deleted or the link is invalid."></app-item-not-found>

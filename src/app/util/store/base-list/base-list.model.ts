@@ -1,4 +1,4 @@
-import { DbcError } from "../types/dbc-error.type";
+import { DbcError } from "../../types/dbc-error.type";
 
 
 export interface BaseListModel<T> {

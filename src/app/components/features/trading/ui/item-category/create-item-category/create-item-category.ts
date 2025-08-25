@@ -1,4 +1,4 @@
-import { Component, effect, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { ActionCreator, Store } from '@ngrx/store';
@@ -11,6 +11,8 @@ import { ItemNotFound } from '../../../../../shared/item-not-found/item-not-foun
 import { SkeltonLoader } from '../../../../../shared/skelton-loader/skelton-loader';
 import { itemCategoryActions, ItemCategoryStore } from '../../../store/item-category';
 import { ItemCategory } from '../../../store/item-category/item-category.model';
+import { WithFormDraftBinding } from '../../../../../../util/form/with-form-draft-binding';
+import { buildFormKey } from '../../../../../../util/common.util';
 
 @Component({
   selector: 'app-create-item-category',
@@ -18,7 +20,7 @@ import { ItemCategory } from '../../../store/item-category/item-category.model';
   templateUrl: './create-item-category.html',
   styleUrl: './create-item-category.css'
 })
-export class CreateItemCategory implements OnInit {
+export class CreateItemCategory extends WithFormDraftBinding implements OnInit {
 
   private readonly fb = inject(FormBuilder);
   private readonly store = inject(Store);
@@ -27,8 +29,9 @@ export class CreateItemCategory implements OnInit {
   readonly selectedItemCategory = this.itemCategoryStore.selectedItem;
   successAction = signal<ActionCreator[] | ActionCreator | null>(null);
   protected loading = true;
-  protected mode:'create'|'edit' = 'create';
+  protected readonly mode = signal<'create' | 'edit'>('create');
   private itemId = signal<string | null>(null);
+  readonly formKey = computed(() => buildFormKey('item-category', this.mode(), this.itemId()));
 
   categories = this.itemCategoryStore.items;
 
@@ -75,23 +78,33 @@ export class CreateItemCategory implements OnInit {
 
   private loadErrorEffect = effect(() => {
     const error = this.itemCategoryStore.error();
-    if (error && this.mode === 'edit') {
+    if (error && this.mode() === 'edit') {
       this.loading = false;
     }
   });
+
+  private readonly binder = this.bindFormToDraft<ItemCategory>(
+    this.form,
+    this.formKey,
+    {
+      selected: this.selectedItemCategory,
+      debounceMs: 500,
+      persistIf: (form, v) => form.dirty && !!v,
+    }
+  );
 
   ngOnInit(): void {
     const lastSegment = this.route.snapshot.url[this.route.snapshot.url.length - 1]?.path;
 
     if (lastSegment === 'create') {
-      this.mode = 'create';
+      this.mode.set('create');
       this.successAction.set(itemCategoryActions.createItemCategorySuccess);
       this.loading = false;
     } else if (lastSegment === 'edit') {
       this.itemId.set(this.route.snapshot.paramMap.get('id') || null);
       if(this.itemId()) {
         this.successAction.set(itemCategoryActions.updateItemCategorySuccess);
-        this.mode = 'edit';
+        this.mode.set('edit');
         this.loading = true;
         this.store.dispatch(itemCategoryActions.loadItemCategoryById({ id: this.itemId()!, query: { includes: ['parent'] } }));
       }else{
@@ -119,10 +132,11 @@ export class CreateItemCategory implements OnInit {
       parentid: parent?.id || undefined
     };
 
-    if(this.mode === 'create') {
+    if(this.mode() === 'create') {
       this.store.dispatch(itemCategoryActions.createItemCategory({ itemCategory }));
     }else{
       this.store.dispatch(itemCategoryActions.updateItemCategory({ id: this.itemId()!, itemCategory }));
     }
+    this.binder.clear();
   }
 }

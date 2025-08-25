@@ -2,9 +2,11 @@ import { Component, computed, effect, inject, OnInit, signal } from '@angular/co
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ActionCreator, Store } from '@ngrx/store';
+import { buildFormKey } from '../../../../../../util/common.util';
 import { FormValidator } from '../../../../../../util/form/form-validator';
 import { FormUtil } from '../../../../../../util/form/form.util';
 import { willPassRequiredStringValidation } from '../../../../../../util/form/validation.uti';
+import { WithFormDraftBinding } from '../../../../../../util/form/with-form-draft-binding';
 import { FormField } from '../../../../../../util/types/form-field.model';
 import { TwoColumnFormComponent } from '../../../../../shared/forms/two-column-form/two-column-form.component';
 import { ItemNotFound } from '../../../../../shared/item-not-found/item-not-found';
@@ -22,7 +24,7 @@ const itemTypes = [
   templateUrl: './create-item.html',
   styleUrl: './create-item.css'
 })
-export class CreateItem implements OnInit {
+export class CreateItem extends WithFormDraftBinding implements OnInit {
 
   private readonly fb = inject(FormBuilder);
   private readonly store = inject(Store);
@@ -32,10 +34,12 @@ export class CreateItem implements OnInit {
   readonly selectedItem = this.itemStore.selectedItem;
   successAction = signal<ActionCreator[] | ActionCreator | null>(null);
   protected loading = true;
-  protected mode:'create'|'edit' = 'create';
+  protected readonly mode = signal<'create' | 'edit'>('create');
   private itemId = signal<string | null>(null);
   private router = inject(Router);
+  readonly formKey = computed(() => buildFormKey('item', this.mode(), this.itemId()));
 
+  
   categories = this.itemCategoryStore.items;
   items = computed(() => [
     { id: 'Add New Category', name: 'Add New Category' },
@@ -43,7 +47,6 @@ export class CreateItem implements OnInit {
   ]);
   typeOptions = signal(itemTypes);
   readonly formFields = signal<FormField[]>([
-    // 🟦 Basic Details
     { key: 'name', label: 'Name', type: 'text', required: true, group: 'Basic Details', validators:(value: unknown) => {
       if(!willPassRequiredStringValidation(value as string)) {
         return ['Name is required'];
@@ -111,34 +114,35 @@ export class CreateItem implements OnInit {
 
   readonly title = signal('Item Setup');
 
-  private fillFormEffect = effect(() => {
-    const item = this.selectedItem();
-    if (item) {
-      this.form.patchValue(item);
-      this.loading = false;
-    }
-  });
-
   private loadErrorEffect = effect(() => {
     const error = this.itemStore.error();
-    if (error && this.mode === 'edit') {
+    if (error && this.mode() === 'edit') {
       this.loading = false;
     }
   });
-
-
+  
+  private readonly binder = this.bindFormToDraft<Item>(
+    this.form,
+    this.formKey,
+    {
+      selected: this.selectedItem,
+      debounceMs: 500,
+      persistIf: (form, v) => form.dirty && !!v,
+    }
+  );
+  
   ngOnInit(): void {
     const lastSegment = this.route.snapshot.url[this.route.snapshot.url.length - 1]?.path;
 
     if (lastSegment === 'create') {
-      this.mode = 'create';
+      this.mode.set('create');
       this.successAction.set(itemActions.createItemSuccess);
       this.loading = false;
     } else if (lastSegment === 'edit') {
       this.itemId.set(this.route.snapshot.paramMap.get('id') || null);
       if(this.itemId()) {
         this.successAction.set(itemActions.updateItemSuccess);
-        this.mode = 'edit';
+        this.mode.set('edit');
         this.loading = true;
         this.store.dispatch(itemActions.loadItemById({ id: this.itemId()!, query: { includes: ['category'] } }));
       }else{
@@ -148,7 +152,6 @@ export class CreateItem implements OnInit {
   }
 
   onDestroy() {
-    this.fillFormEffect.destroy();
     this.loadErrorEffect.destroy();
   }
 
@@ -171,10 +174,12 @@ export class CreateItem implements OnInit {
       ...(description && { description }),
     };
 
-    if(this.mode === 'create') {
+    if(this.mode() === 'create') {
       this.store.dispatch(itemActions.createItem({ item }));
     }else{
       this.store.dispatch(itemActions.updateItem({ id: this.itemId()!, item }));
     }
+    this.binder.clear();
+
   }
 }

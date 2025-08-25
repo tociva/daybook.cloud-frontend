@@ -2,7 +2,7 @@
 import { signalStore, withState, withMethods, patchState } from '@ngrx/signals';
 import { BaseListModel } from './base-list.model';
 import { createInitialBaseListState } from './base-list.initial';
-import { DbcError } from '../types/dbc-error.type';
+import { DbcError } from '../../types/dbc-error.type';
 
 export function createBaseListStore<T>(
   featureKey: string,
