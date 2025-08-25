@@ -1,6 +1,6 @@
-import { Component, effect, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ActionCreator, Store } from '@ngrx/store';
 import { FormValidator } from '../../../../../../util/form/form-validator';
 import { FormUtil } from '../../../../../../util/form/form.util';
@@ -10,8 +10,12 @@ import { TwoColumnFormComponent } from '../../../../../shared/forms/two-column-f
 import { ItemNotFound } from '../../../../../shared/item-not-found/item-not-found';
 import { SkeltonLoader } from '../../../../../shared/skelton-loader/skelton-loader';
 import { Item, itemActions, ItemCU, ItemStore } from '../../../store/item';
-import { itemCategoryActions, ItemCategory, ItemCategoryStore } from '../../../store/item-category';
+import { ItemCategory, itemCategoryActions, ItemCategoryStore } from '../../../store/item-category';
 
+const itemTypes = [
+  'Product',
+  'Service'
+];
 @Component({
   selector: 'app-create-item',
   imports: [TwoColumnFormComponent, SkeltonLoader, ItemNotFound],
@@ -30,9 +34,14 @@ export class CreateItem implements OnInit {
   protected loading = true;
   protected mode:'create'|'edit' = 'create';
   private itemId = signal<string | null>(null);
+  private router = inject(Router);
 
   categories = this.itemCategoryStore.items;
-
+  items = computed(() => [
+    { id: 'Add New Category', name: 'Add New Category' },
+    ...this.categories()
+  ]);
+  typeOptions = signal(itemTypes);
   readonly formFields = signal<FormField[]>([
     // 🟦 Basic Details
     { key: 'name', label: 'Name', type: 'text', required: true, group: 'Basic Details', validators:(value: unknown) => {
@@ -44,15 +53,21 @@ export class CreateItem implements OnInit {
     { key: 'category', label: 'Category', type: 'auto-complete', required: false, group: 'Basic Details',
       placeholder: 'Search for a category',
       autoComplete: {
-        items: this.categories,
-        optionDisplayValue: (item: ItemCategory) => item.name,
+        items: this.items,
+        optionDisplayValue: (item: ItemCategory) => item.id === 'Add New Category' ? `\u271A ${item.name}` : item.name,
         inputDisplayValue: (item: ItemCategory) => item.name,
         trackBy: (item: ItemCategory) => item.id!,
         onSearch: (value: string) => {
           this.store.dispatch(itemCategoryActions.loadItemCategories({ query: { search: { query: value, fields: ['name', 'code', 'description'] } } }));
         },
         onOptionSelected: (item: ItemCategory) => {
-          this.form.patchValue({ code: item.code});
+          if(item.id === 'Add New Category') {
+            this.form.patchValue({category: null, code: ''});
+            const burl = this.router.url;
+            this.router.navigate(['/trading/item-category/create'], { queryParams: { burl } });
+          }else{
+            this.form.patchValue({ category: item, code: item.code});
+          }
         }
       }
     },
@@ -68,11 +83,16 @@ export class CreateItem implements OnInit {
       }
       return [];
     }},
-    { key: 'type', label: 'Type', type: 'select', required: true, group: 'Basic Details', 
-      options: [
-        { value: 'Product', label: 'Product' },
-        { value: 'Service', label: 'Service' }
-      ],
+    { key: 'type', label: 'Type', type: 'auto-complete', required: true, group: 'Basic Details', 
+      autoComplete: {
+        items: this.typeOptions,
+        optionDisplayValue: (item: string) => item,
+        inputDisplayValue: (item: string) => item,
+        trackBy: (item: string) => item,
+        onSearch: (value: string) => {
+          this.typeOptions.set(itemTypes.filter(type => type.toLowerCase().includes(value.toLowerCase())));
+        },
+      },
       validators:(value: unknown) => {
         if(!willPassRequiredStringValidation(value as string)) {
           return ['Type is required'];
@@ -105,6 +125,7 @@ export class CreateItem implements OnInit {
       this.loading = false;
     }
   });
+
 
   ngOnInit(): void {
     const lastSegment = this.route.snapshot.url[this.route.snapshot.url.length - 1]?.path;
@@ -139,13 +160,15 @@ export class CreateItem implements OnInit {
       return;
     }
 
-    const {category, purchaseledger, salesledger, ...data} = dataP;
+    const {category, purchaseledger, salesledger,barcode, description, ...data} = dataP;
 
-    const item:ItemCU = {
+    const item: ItemCU = {
       ...data,
       categoryid: category.id!,
-      purchaseledger: purchaseledger ?? '',
-      salesledger: salesledger ?? '',
+      ...(purchaseledger && { purchaseledger }),
+      ...(salesledger && { salesledger }),
+      ...(barcode && { barcode }),
+      ...(description && { description }),
     };
 
     if(this.mode === 'create') {

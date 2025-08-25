@@ -17,7 +17,7 @@
     [disabled]="disabled()"
     [attr.placeholder]="placeholder()"
     (input)="onInputChange($event)"
-    (focus)="onInputFocus()"
+    (focus)="onInputFocus($event)"
     (blur)="onInputBlur()"
     (keydown)="onKeyDown($event)"
     [ngClass]="inputClass()"

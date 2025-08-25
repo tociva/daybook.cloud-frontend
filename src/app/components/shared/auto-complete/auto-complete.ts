@@ -95,7 +95,12 @@ export class AutoComplete<T> implements ControlValueAccessor {
     this.openDropdown();
   }
 
-  onInputFocus(): void {
+  onInputFocus(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const val = input.value ?? '';
+    this.inputValue.set(val);
+    // Emit search term to parent
+    this.onSearch.emit(val);
     this.openDropdown();
   }
 

@@ -48,7 +48,7 @@ export function createBaseListStore<T>(
       resetState() {
         patchState(store, {
           ...createInitialBaseListState<T>(),
-          selectedItem: null
+          selectedItem: null,
         });
       },
     }))

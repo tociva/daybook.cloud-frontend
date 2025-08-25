@@ -8,10 +8,8 @@ import {
   model,
   output,
   signal,
-  Signal,
-  untracked
+  Signal
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import {
   FormControl,
   FormGroup,
@@ -20,7 +18,7 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { Actions, ofType } from '@ngrx/effects';
 import { ActionCreator } from '@ngrx/store';
-import { map, tap } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 import { FormField } from '../../../../util/types/form-field.model';
 import { AutoComplete } from '../../auto-complete/auto-complete';
 import { CancelButton } from '../../cancel-button/cancel-button';
@@ -38,12 +36,7 @@ export class TwoColumnFormComponent<T> {
   private actions$ = inject(Actions);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-  private backUrl = toSignal(
-    this.route.queryParams.pipe(
-      map(params => params['burl'] ?? null)
-    ),
-    { initialValue: null }
-  );
+
   readonly form = model<FormGroup>(new FormGroup({}));
   readonly fields = model<FormField[]>([]);
   readonly title = input<string>('');
@@ -77,9 +70,8 @@ export class TwoColumnFormComponent<T> {
     const subscription = this.actions$.pipe(
       ofType(...creatorArray), // ofType accepts multiple action creators
       tap(() => {
-        const url = untracked(() => this.backUrl());
-        this.submitting.set(false);
-        this.router.navigate([url ?? '/']);
+        const burl = this.route.snapshot.queryParamMap.get('burl') ?? '/';
+        this.router.navigateByUrl(burl);
       })
     ).subscribe();
   
