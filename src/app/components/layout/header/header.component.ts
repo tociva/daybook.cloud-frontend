@@ -52,6 +52,6 @@ export class HeaderComponent {
   }
 
   onSearch() {
-    console.log('');
+    // TODO: Implement search
   }
 }

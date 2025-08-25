@@ -10,7 +10,7 @@ import { TwoColumnFormComponent } from '../../../../../shared/forms/two-column-f
 import { ItemNotFound } from '../../../../../shared/item-not-found/item-not-found';
 import { SkeltonLoader } from '../../../../../shared/skelton-loader/skelton-loader';
 import { itemCategoryActions, ItemCategoryStore } from '../../../store/item-category';
-import { ItemCategory } from '../../../store/item-category/item-category.model';
+import { ItemCategory, ItemCategoryCU } from '../../../store/item-category/item-category.model';
 import { WithFormDraftBinding } from '../../../../../../util/form/with-form-draft-binding';
 import { buildFormKey } from '../../../../../../util/common.util';
 
@@ -21,6 +21,8 @@ import { buildFormKey } from '../../../../../../util/common.util';
   styleUrl: './create-item-category.css'
 })
 export class CreateItemCategory extends WithFormDraftBinding implements OnInit {
+
+  public static readonly ONE_TIME_DRAFT_KEY = 'ONE_TIME_DRAFT_KEY_ITEM_CATEGORY';
 
   private readonly fb = inject(FormBuilder);
   private readonly store = inject(Store);
@@ -88,7 +90,6 @@ export class CreateItemCategory extends WithFormDraftBinding implements OnInit {
     this.formKey,
     {
       selected: this.selectedItemCategory,
-      debounceMs: 500,
       persistIf: (form, v) => form.dirty && !!v,
     }
   );
@@ -126,13 +127,14 @@ export class CreateItemCategory extends WithFormDraftBinding implements OnInit {
       return;
     }
 
-    const { parent, ...data } = dataP;
-    const itemCategory = {
-      ...data,
-      parentid: parent?.id || undefined
-    };
+    const { parent,description, ...data } = dataP;
 
+    const itemCategory: ItemCategoryCU = {
+      ...data,
+      ...(description && { description }),
+    };
     if(this.mode() === 'create') {
+      this.draftStore.setOneTimeDraft(CreateItemCategory.ONE_TIME_DRAFT_KEY, itemCategory);
       this.store.dispatch(itemCategoryActions.createItemCategory({ itemCategory }));
     }else{
       this.store.dispatch(itemCategoryActions.updateItemCategory({ id: this.itemId()!, itemCategory }));

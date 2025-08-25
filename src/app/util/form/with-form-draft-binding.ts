@@ -5,11 +5,11 @@ import { debounceTime } from 'rxjs/operators';
 import { DraftStore } from '../store/base-list/draft-store.service';
 
 export type BindFormDraftOptions<T> = {
-  selected?: Signal<T | null>;              // optional server/store entity
-  debounceMs?: number;                      // default 500
-  persistIf?: (form: FormGroup, v: T | undefined) => boolean; // default: form.dirty && v!==undefined
-  normalizePersist?: (v: T) => T;           // strip view-only fields, etc.
-  preferDraftOverSelected?: boolean;        // default true
+  selected?: Signal<T | null>;
+  persistIf?: (form: FormGroup, v: T | undefined) => boolean;
+  normalizePersist?: (v: T) => T;
+  preferDraftOverSelected?: boolean;
+  preHydrate?: (ctx: { value: T; draftStore: DraftStore; form: FormGroup }) => T;
 };
 
 export abstract class WithFormDraftBinding {
@@ -22,14 +22,14 @@ export abstract class WithFormDraftBinding {
   ) {
     const {
       selected,
-      debounceMs = 500,
       persistIf,
       normalizePersist,
       preferDraftOverSelected = true,
+      preHydrate,
     } = opts;
 
     const valueSig = toSignal<T | undefined>(
-      form.valueChanges.pipe(debounceTime(debounceMs)),
+      form.valueChanges.pipe(debounceTime(500)),
       { initialValue: undefined }
     );
 
@@ -37,8 +37,11 @@ export abstract class WithFormDraftBinding {
       const key = formKey();
       const draft = this.draftStore.select<T>(key)();
       const sel = selected?.() ?? null;
-      const source = preferDraftOverSelected ? (draft ?? sel) : (sel ?? draft);
+      let source = preferDraftOverSelected ? (draft ?? sel) : (sel ?? draft);
       if (!source) return;
+      if (preHydrate) {
+        source = preHydrate({ value: source as T, draftStore: this.draftStore, form });
+      }
       form.patchValue(source as Partial<T>, { emitEvent: false });
       form.markAsPristine();
     });

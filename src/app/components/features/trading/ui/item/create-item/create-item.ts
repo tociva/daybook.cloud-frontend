@@ -13,6 +13,7 @@ import { ItemNotFound } from '../../../../../shared/item-not-found/item-not-foun
 import { SkeltonLoader } from '../../../../../shared/skelton-loader/skelton-loader';
 import { Item, itemActions, ItemCU, ItemStore } from '../../../store/item';
 import { ItemCategory, itemCategoryActions, ItemCategoryStore } from '../../../store/item-category';
+import { CreateItemCategory } from '../../item-category/create-item-category/create-item-category';
 
 const itemTypes = [
   'Product',
@@ -126,8 +127,11 @@ export class CreateItem extends WithFormDraftBinding implements OnInit {
     this.formKey,
     {
       selected: this.selectedItem,
-      debounceMs: 500,
       persistIf: (form, v) => form.dirty && !!v,
+      preHydrate: ({ value, draftStore }) => {
+        const category = draftStore.consumeOneTimeDraft<ItemCategory, Item>(CreateItemCategory.ONE_TIME_DRAFT_KEY  );
+        return category ? { ...value, category } : value;
+      },
     }
   );
   
