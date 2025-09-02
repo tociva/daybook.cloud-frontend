@@ -17,8 +17,12 @@ export const DateFormatStore = signalStore(
       const searchTerm = state.search().toLowerCase();
       return state.dateFormats().filter((dateFormat) =>
         dateFormat.name.toLowerCase().includes(searchTerm) ||
-        dateFormat.value.toLowerCase().includes(searchTerm)
+        dateFormat.example.toLowerCase().includes(searchTerm)
       );
+    },
+
+    fetchAllDateFormats: () => {
+      return state.dateFormats();
     },
     
   })),

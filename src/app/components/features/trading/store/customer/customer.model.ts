@@ -2,6 +2,7 @@ import { Status } from '../../../../../util/types/status.type';
 import { Address } from '../../../../../util/types/address';
 import { Branch } from '../../../management/store/branch/branch.model';
 import { Currency } from '../../../../shared/store/currency/currency.model';
+import { Country } from '../../../../shared/store/country/country.model';
 
 export interface CustomerCU {
   name: string;
@@ -20,5 +21,6 @@ export interface CustomerCU {
 export interface Customer extends CustomerCU {
   id?: string;
   branch: Branch;
+  countryObj?: Country;
   branchid: string;
 }

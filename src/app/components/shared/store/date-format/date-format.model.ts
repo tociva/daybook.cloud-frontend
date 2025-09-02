@@ -1,6 +1,6 @@
 export interface DateFormat {
   name: string;
-  value: string;
+  example: string;
 }
 
 export interface DateFormatState {

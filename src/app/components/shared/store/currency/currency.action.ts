@@ -1,6 +1,12 @@
-import { createAction, props } from '@ngrx/store';
+import { createActionGroup, props } from '@ngrx/store';
 import { Currency } from './currency.model';
+import { DbcError } from '../../../../util/types/dbc-error.type';
 
-export const loadCurrencies = createAction('[Currency] Load Currencies');
-export const loadCurrenciesSuccess = createAction('[Currency] Load Currencies Success', props<{ currencies: Currency[] }>());
-export const loadCurrenciesFailure = createAction('[Currency] Load Currencies Failure', props<{ error: any }>()); 
+export const currencyActions = createActionGroup({
+  source: 'Currency',
+  events: {
+    loadCurrencies: props<{ query?: unknown }>(),
+    loadCurrenciesSuccess: props<{ currencies: Currency[] }>(),
+    loadCurrenciesFailure: props<{ error: DbcError }>(),
+  },
+});

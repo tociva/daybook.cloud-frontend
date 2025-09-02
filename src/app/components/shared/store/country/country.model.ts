@@ -2,13 +2,16 @@ import { DateFormat } from '../../util/date-format.model';
 import { Currency } from '../currency/currency.model';
 
 export interface Country {
-  name: string;
   code: string;
+  name: string;
   iso: string;
-  currency: Currency;
-  dateFormat?: DateFormat;
+  phone: string;
+  currencycode: string;
   dateformat: string;
   fiscalstart: string;
+  timezone?: string;
+  currency?: Currency;
+  dateFormat?: DateFormat;
 }
 
 export interface CountryState {

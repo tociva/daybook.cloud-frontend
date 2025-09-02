@@ -1,48 +1,52 @@
+import { HttpClient } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { tap } from 'rxjs';
-import { loadDateFormats } from './date-format.action';
+import { catchError, map, mergeMap, of, tap } from 'rxjs';
+import { dateFormatActions } from './date-format.action';
 import { DateFormat } from './date-format.model';
 import { DateFormatStore } from './date-format.store';
-import { CountryStore } from '../country/country.store';
-import { COMMON_DATE_FORMATS } from '../../../../util/constants';
+import { DbcError } from '../../../../util/types/dbc-error.type';
 
 export const dateFormatEffects = {
   loadDateFormats: createEffect(
     () => {
       const actions$ = inject(Actions);
+      const http = inject(HttpClient);
       const dateFormatStore = inject(DateFormatStore);
-      const countryStore = inject(CountryStore);
 
       return actions$.pipe(
-        ofType(loadDateFormats),
-        tap(() => {
-          try {
-            const countries = countryStore.countries();
-            const formatsFromCountries = countries.map((country) => country.dateFormat);
-            const uniqueDateFormats: DateFormat[] = Array.from(
-              new Map(
-                [...formatsFromCountries, ...COMMON_DATE_FORMATS].map((format) => [format?.name, format ?? {name: '', value: ''}])
-              ).values()
-            );
-            dateFormatStore.setState((state) => ({
-              ...state,
-              dateFormats: uniqueDateFormats,
-              loaded: true,
-              error: null
-            }));
-          } catch (error) {
-            dateFormatStore.setState((state) => ({
-              ...state,
-              dateFormats: [],
-              loaded: false,
-              error: error instanceof Error ? error.message : 'Unknown error'
-            }));
-            console.error('[DateFormatEffects] Failed to extract date formats:', error);
-          }
-        })
+        ofType(dateFormatActions.loadDateFormats),
+        mergeMap(() =>
+          http.get<DateFormat[]>('/assets/date-format-list.json').pipe(
+            tap((dateFormats) => {
+              dateFormatStore.setState((state) => ({
+                ...state,
+                dateFormats,
+                loaded: true,
+                error: null,
+              }));
+            }),
+            map((dateFormats) =>
+              dateFormatActions.loadDateFormatsSuccess({ dateFormats })
+            ),
+            catchError((error) => {
+              dateFormatStore.setState((state) => ({
+                ...state,
+                dateFormats: [],
+                loaded: false,
+                error,
+              }));
+              console.error('[DateFormatEffects] load failed:', error);
+              return of(
+                dateFormatActions.loadDateFormatsFailure({
+                  error: error as DbcError,
+                })
+              );
+            })
+          )
+        )
       );
     },
-    { functional: true, dispatch: false }
-  )
+    { functional: true }
+  ),
 };

@@ -1,0 +1,29 @@
+<div class="relative inline-block w-full">
+  <!-- Icon inside input -->
+  <ng-icon name="bootstrapCalendarMonth"
+    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" size="20"></ng-icon>
+  <input #fiscalDateRangePickerInput type="text" class="pr-10" [readOnly]="true" style="width: 100%;"
+    [ngClass]="inputClass()" [value]="displayDate()" (focus)="openPopup()" (click)="openPopup()"
+    (keydown)="onKeyDownInput($event)" [attr.aria-haspopup]="'dialog'" [attr.aria-expanded]="open()"
+    [attr.aria-controls]="'mdp-popup'" />
+
+  @if (open()) {
+  <div #popup id="mdp-popup" tabindex="-1"
+    class="absolute z-50 mt-2 w-[22rem] sm:w-[28rem] rounded-xl border border-primary shadow-lg p-3 bg-white"
+    (keydown)="onKeyDownPopup($event)" role="dialog" aria-label="Select an year">
+    <div role="listbox" class="grid sm:grid-cols-5 gap-2 max-h-64 overflow-auto p-1"
+    #yearPanel
+      aria-label="Choose fiscal start year">
+
+      @for (y of years(); track y) {
+      <button type="button" role="option" [attr.aria-selected]="y === year()" class="px-3 py-2 rounded-lg border text-sm outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 transition
+             hover:bg-gray-50" [class.bg-primary]="y === year()" [class.text-white]="y === year()"
+        (click)="selectYear(y)">
+        {{ y }}
+      </button>
+      }
+    </div>
+  </div>
+  }
+
+</div>

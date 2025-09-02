@@ -1,4092 +1,2492 @@
-
 [
-    {
-      "name": "United States (US)",
-      "code": "1",
-      "iso": "US",
-      "currency": {
-        "name": "United States Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "USD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "MM/DD/YYYY",
-        "value": "01/31/2022"
-      },
-      "fiscalstart": "January-01"
-    },
-    {
-      "name": "India (IN)",
-      "code": "91",
-      "iso": "IN",
-      "currency": {
-        "name": "Indian Rupee",
-        "html": "&#8377;",
-        "unicode": "20B9",
-        "decimal": 2,
-        "shortName": "INR",
-        "fraction": "Paisa"
-      },
-      "dateFormat": {
-        "name": "DD-MM-YYYY",
-        "value": "31-01-2022"
-      },
-      "fiscalstart": "April-01"
-    },
-    {
-      "name": "United Kingdom (GB)",
-      "code": "44",
-      "iso": "GB",
-      "currency": {
-        "name": "British Pound Sterling",
-        "html": "&#163;",
-        "unicode": "A3",  
-        "decimal": 2,
-        "shortName": "GBP",
-        "fraction": "Penny"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      },
-      "fiscalstart": "April-01"
-    },
-    {
-      "name": "Canada (CA)",
-      "code": "1",
-      "iso": "CA",
-      "currency": {
-        "name": "Canadian Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "CAD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "YYYY-MM-DD",
-        "value": "2022-01-31"
-      },
-      "fiscalstart": "April-01"
-    },
-    {
-      "name": "Australia (AU)",
-      "code": "61",
-      "iso": "AU",
-      "currency": {
-        "name": "Australian Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "AUD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      },
-      "fiscalstart": "July-01"
-    },
-    {
-      "name": "Afghanistan (AF)",
-      "code": "93",
-      "iso": "AF",
-      "currency": {
-        "name": "Afghan Afghani",
-        "html": "&#1547;",
-        "unicode": "60B",
-        "decimal": 2,
-        "shortName": "AFN",
-        "fraction": "Pul"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Albania",
-      "code": "355",
-      "iso": "AL",
-      "currency": {
-        "name": "Albanian Lek",
-        "html": "&#76;&#101;&#107;",
-        "unicode": "4C65",
-        "decimal": 2,
-        "shortName": "ALL",
-        "fraction": "Qindarka"
-      },
-      "dateFormat": {
-        "name": "DD-MM-YYYY",
-        "value": "31-01-2022"
-      }
-    },
-    {
-      "name": "Algeria",
-      "code": "213",
-      "iso": "DZ",
-      "currency": {
-        "name": "Algerian Dinar",
-        "html": "&#1583;.&#1580;",
-        "unicode": "62C2E",
-        "decimal": 2,
-        "shortName": "DZD",
-        "fraction": "Centime"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "American Samoa",
-      "code": "1-684",
-      "iso": "AS",
-      "currency": {
-        "name": "United States Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "USD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "MM/DD/YYYY",
-        "value": "01/31/2022"
-      }
-    },
-    {
-      "name": "Andorra",
-      "code": "376",
-      "iso": "AD",
-      "currency": {
-        "name": "Euro",
-        "html": "&#8364;",
-        "unicode": "20AC",
-        "decimal": 2,
-        "shortName": "EUR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD-MM-YYYY",
-        "value": "31-01-2022"
-      }
-    },
-    {
-      "name": "Angola",
-      "code": "244",
-      "iso": "AO",
-      "currency": {
-        "name": "Angolan Kwanza",
-        "html": "&#75;&#122;",
-        "unicode": "4B7A",
-        "decimal": 2,
-        "shortName": "AOA",
-        "fraction": "Cêntimo"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Anguilla",
-      "code": "1-264",
-      "iso": "AI",
-      "currency": {
-        "name": "Eastern Caribbean Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "XCD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "MM/DD/YYYY",
-        "value": "01/31/2022"
-      }
-    },
-    {
-      "name": "Antarctica",
-      "code": "672",
-      "iso": "AQ",
-      "currency": {
-        "name": "Varied",
-        "html": "N/A",
-        "unicode": "N/A",
-        "decimal": 0,
-        "shortName": "N/A",
-        "fraction": "N/A"
-      },
-      "dateFormat": {
-        "name": "DD-MM-YYYY",
-        "value": "31-01-2022"
-      }
-    },
-    {
-      "name": "Antigua and Barbuda",
-      "code": "1-268",
-      "iso": "AG",
-      "currency": {
-        "name": "Eastern Caribbean Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "XCD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "MM/DD/YYYY",
-        "value": "01/31/2022"
-      }
-    },
-    {
-      "name": "Argentina",
-      "code": "54",
-      "iso": "AR",
-      "currency": {
-        "name": "Argentine Peso",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "ARS",
-        "fraction": "Centavo"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Armenia",
-      "code": "374",
-      "iso": "AM",
-      "currency": {
-        "name": "Armenian Dram",
-        "html": "&#1423;",
-        "unicode": "058F",
-        "decimal": 2,
-        "shortName": "AMD",
-        "fraction": "Luma"
-      },
-      "dateFormat": {
-        "name": "DD-MM-YYYY",
-        "value": "31-01-2022"
-      }
-    },
-    {
-      "name": "Aruba",
-      "code": "297",
-      "iso": "AW",
-      "currency": {
-        "name": "Aruban Florin",
-        "html": "&#402;",
-        "unicode": "192",
-        "decimal": 2,
-        "shortName": "AWG",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "30/01/2022"
-      }
-    },
-    {
-      "name": "Austria",
-      "code": "43",
-      "iso": "AT",
-      "currency": {
-        "name": "Euro",
-        "html": "&#8364;",
-        "unicode": "20AC",
-        "decimal": 2,
-        "shortName": "EUR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD.MM.YYYY",
-        "value": "31.01.2022"
-      }
-    },
-    {
-      "name": "Azerbaijan",
-      "code": "994",
-      "iso": "AZ",
-      "currency": {
-        "name": "Azerbaijani Manat",
-        "html": "&#8380;",
-        "unicode": "20BC",
-        "decimal": 2,
-        "shortName": "AZN",
-        "fraction": "Manat"
-      },
-      "dateFormat": {
-        "name": "DD.MM.YYYY",
-        "value": "31.01.2022"
-      }
-    },
-    {
-      "name": "Bahamas",
-      "code": "1-242",
-      "iso": "BS",
-      "currency": {
-        "name": "Bahamian Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "BSD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "MM/DD/YYYY",
-        "value": "01/31/2022"
-      }
-    },
-    {
-      "name": "Bahrain",
-      "code": "973",
-      "iso": "BH",
-      "currency": {
-        "name": "Bahraini Dinar",
-        "html": "&#1583;.&#1576;",
-        "unicode": "62C2E",
-        "decimal": 3,
-        "shortName": "BHD",
-        "fraction": "Fils"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Bangladesh",
-      "code": "880",
-      "iso": "BD",
-      "currency": {
-        "name": "Bangladeshi Taka",
-        "html": "&#2547;",
-        "unicode": "9F3",
-        "decimal": 2,
-        "shortName": "BDT",
-        "fraction": "Paisa"
-      },
-      "dateFormat": {
-        "name": "DD-MM-YYYY",
-        "value": "31-01-2022"
-      },
-      "fiscalstart": "July-01"
-    },
-    {
-      "name": "Barbados",
-      "code": "1-246",
-      "iso": "BB",
-      "currency": {
-        "name": "Barbadian Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "BBD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "MM/DD/YYYY",
-        "value": "01/31/2022"
-      }
-    },
-    {
-      "name": "Belarus",
-      "code": "375",
-      "iso": "BY",
-      "currency": {
-        "name": "Belarusian Ruble",
-        "html": "&#112;&#46;",
-        "unicode": "70",
-        "decimal": 2,
-        "shortName": "BYN",
-        "fraction": "Ruble"
-      },
-      "dateFormat": {
-        "name": "DD.MM.YYYY",
-        "value": "31.01.2022"
-      }
-    },
-    {
-      "name": "Belgium",
-      "code": "32",
-      "iso": "BE",
-      "currency": {
-        "name": "Euro",
-        "html": "&#8364;",
-        "unicode": "20AC",
-        "decimal": 2,
-        "shortName": "EUR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD.MM.YYYY",
-        "value": "31.01.2022"
-      }
-    },
-    {
-      "name": "Belize",
-      "code": "501",
-      "iso": "BZ",
-      "currency": {
-        "name": "Belize Dollar",
-        "html": "&#66;&#90;&#36;",
-        "unicode": "425A24",
-        "decimal": 2,
-        "shortName": "BZD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Benin",
-      "code": "229",
-      "iso": "BJ",
-      "currency": {
-        "name": "West African CFA Franc",
-        "html": "&#70;&#67;&#70;&#65;",
-        "unicode": "46C46",
-        "decimal": 0,
-        "shortName": "XOF",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Bermuda",
-      "code": "1-441",
-      "iso": "BM",
-      "currency": {
-        "name": "Bermudian Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "BMD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "MM/DD/YYYY",
-        "value": "01/31/2022"
-      }
-    },
-    {
-      "name": "Bhutan",
-      "code": "975",
-      "iso": "BT",
-      "currency": {
-        "name": "Bhutanese Ngultrum",
-        "html": "&#78;&#117;&#46;",
-        "unicode": "4E75",
-        "decimal": 2,
-        "shortName": "BTN",
-        "fraction": "Ngultrum"
-      },
-      "dateFormat": {
-        "name": "DD-MM-YYYY",
-        "value": "31-01-2022"
-      }
-    },
-    {
-      "name": "Bolivia",
-      "code": "591",
-      "iso": "BO",
-      "currency": {
-        "name": "Bolivian Boliviano",
-        "html": "&#36;&#98;",
-        "unicode": "2437",
-        "decimal": 2,
-        "shortName": "BOB",
-        "fraction": "Centavo"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Bosnia and Herzegovina",
-      "code": "387",
-      "iso": "BA",
-      "currency": {
-        "name": "Bosnia and Herzegovina Convertible Mark",
-        "html": "&#75;&#77;",
-        "unicode": "4B4D",
-        "decimal": 2,
-        "shortName": "BAM",
-        "fraction": "Mark"
-      },
-      "dateFormat": {
-        "name": "DD.MM.YYYY",
-        "value": "31.01.2022"
-      }
-    },
-    {
-      "name": "Botswana",
-      "code": "267",
-      "iso": "BW",
-      "currency": {
-        "name": "Botswana Pula",
-        "html": "&#80;",
-        "unicode": "50",
-        "decimal": 2,
-        "shortName": "BWP",
-        "fraction": "Pula"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-      {
-        "name": "Brazil",
-        "code": "55",
-        "iso": "BR",
-        "currency": {
-          "name": "Brazilian Real",
-          "html": "&#82;&#36;",
-          "unicode": "5224",
-          "decimal": 2,
-          "shortName": "BRL",
-          "fraction": "Centavo"
-        },
-        "dateFormat": {
-          "name": "DD-MM-YYYY",
-          "value": "31-01-2022"
-        }
-      },
-      {
-        "name": "British Indian Ocean Territory",
-        "code": "246",
-        "iso": "IO",
-        "currency": {
-          "name": "United States Dollar",
-          "html": "&#36;",
-          "unicode": "24",
-          "decimal": 2,
-          "shortName": "USD",
-          "fraction": "Cent"
-        },
-        "dateFormat": {
-          "name": "MM/DD/YYYY",
-          "value": "01/31/2022"
-        }
-      },
-      {
-        "name": "British Virgin Islands",
-        "code": "1-284",
-        "iso": "VG",
-        "currency": {
-          "name": "United States Dollar",
-          "html": "&#36;",
-          "unicode": "24",
-          "decimal": 2,
-          "shortName": "USD",
-          "fraction": "Cent"
-        },
-        "dateFormat": {
-          "name": "MM/DD/YYYY",
-          "value": "01/31/2022"
-        }
-      },
-      {
-        "name": "Brunei",
-        "code": "673",
-        "iso": "BN",
-        "currency": {
-          "name": "Brunei Dollar",
-          "html": "&#66;&#36;",
-          "unicode": "4224",
-          "decimal": 2,
-          "shortName": "BND",
-          "fraction": "Cent"
-        },
-        "dateFormat": {
-          "name": "DD-MM-YYYY",
-          "value": "31-01-2022"
-        }
-      },
-      {
-        "name": "Bulgaria",
-        "code": "359",
-        "iso": "BG",
-        "currency": {
-          "name": "Bulgarian Lev",
-          "html": "&#1083;&#1074;",
-          "unicode": "43B432",
-          "decimal": 2,
-          "shortName": "BGN",
-          "fraction": "Lev"
-        },
-        "dateFormat": {
-          "name": "DD.MM.YYYY",
-          "value": "31.01.2022"
-        }
-      },
-      {
-        "name": "Burkina Faso",
-        "code": "226",
-        "iso": "BF",
-        "currency": {
-          "name": "West African CFA Franc",
-          "html": "&#70;&#67;&#70;&#65;",
-          "unicode": "46C46",
-          "decimal": 0,
-          "shortName": "XOF",
-          "fraction": "Cent"
-        },
-        "dateFormat": {
-          "name": "DD-MM-YYYY",
-          "value": "31-01-2022"
-        }
-      },
-      {
-        "name": "Burundi",
-        "code": "257",
-        "iso": "BI",
-        "currency": {
-          "name": "Burundian Franc",
-          "html": "&#70;&#66;&#117;",
-          "unicode": "46275",
-          "decimal": 0,
-          "shortName": "BIF",
-          "fraction": "Cent"
-        },
-        "dateFormat": {
-          "name": "DD-MM-YYYY",
-          "value": "31-01-2022"
-        }
-      },
-      {
-        "name": "Cambodia",
-        "code": "855",
-        "iso": "KH",
-        "currency": {
-          "name": "Cambodian Riel",
-          "html": "&#6107;",
-          "unicode": "17DB",
-          "decimal": 2,
-          "shortName": "KHR",
-          "fraction": "Riel"
-        },
-        "dateFormat": {
-          "name": "YYYY-MM-DD",
-          "value": "2022-01-31"
-        }
-      },
-      {
-        "name": "Cameroon",
-        "code": "237",
-        "iso": "CM",
-        "currency": {
-          "name": "Central African CFA Franc",
-          "html": "&#70;&#67;&#70;&#65;",
-          "unicode": "46C46",
-          "decimal": 0,
-          "shortName": "XAF",
-          "fraction": "Cent"
-        },
-        "dateFormat": {
-          "name": "DD-MM-YYYY",
-          "value": "31-01-2022"
-        }
-      },
-      {
-        "name": "Cape Verde",
-        "code": "238",
-        "iso": "CV",
-        "currency": {
-          "name": "Cape Verdean Escudo",
-          "html": "&#36;",
-          "unicode": "24",
-          "decimal": 2,
-          "shortName": "XOF",
-          "fraction": "Cent"
-        },
-        "dateFormat": {
-          "name": "DD-MM-YYYY",
-          "value": "31-01-2022"
-        }
-      },
-      {
-        "name": "Cayman Islands",
-        "code": "1-345",
-        "iso": "KY",
-        "currency": {
-          "name": "Cayman Islands Dollar",
-          "html": "&#36;",
-          "unicode": "24",
-          "decimal": 2,
-          "shortName": "KYD",
-          "fraction": "Cent"
-        },
-        "dateFormat": {
-          "name": "MM/DD/YYYY",
-          "value": "01/31/2022"
-        }
-      },
-      {
-        "name": "Central African Republic",
-        "code": "236",
-        "iso": "CF",
-        "currency": {
-          "name": "Central African CFA Franc",
-          "html": "&#70;&#67;&#70;&#65;",
-          "unicode": "46C46",
-          "decimal": 0,
-          "shortName": "XAF",
-          "fraction": "Cent"
-        },
-        "dateFormat": {
-          "name": "DD-MM-YYYY",
-          "value": "31-01-2022"
-        }
-      },
-      {
-        "name": "Chad",
-        "code": "235",
-        "iso": "TD",
-        "currency": {
-          "name": "Central African CFA Franc",
-          "html": "&#70;&#67;&#70;&#65;",
-          "unicode": "46C46",
-          "decimal": 0,
-          "shortName": "XAF",
-          "fraction": "Cent"
-        },
-        "dateFormat": {
-          "name": "DD-MM-YYYY",
-          "value": "31-01-2022"
-        }
-      },
-      {
-        "name": "Chile",
-        "code": "56",
-        "iso": "CL",
-        "currency": {
-          "name": "Chilean Peso",
-          "html": "&#36;",
-          "unicode": "24",
-          "decimal": 0,
-          "shortName": "CLP",
-          "fraction": "Centavo"
-        },
-        "dateFormat": {
-          "name": "DD-MM-YYYY",
-          "value": "31-01-2022"
-        }
-      },
-      {
-        "name": "China",
-        "code": "86",
-        "iso": "CN",
-        "currency": {
-          "name": "Chinese Yuan",
-          "html": "&#165;",
-          "unicode": "A5",
-          "decimal": 2,
-          "shortName": "CNY",
-          "fraction": "Cent"
-        },
-        "dateFormat": {
-          "name": "YYYY-MM-DD",
-          "value": "2022-01-31"
-        }
-      },
-      {
-        "name": "Christmas Island",
-        "code": "61",
-        "iso": "CX",
-        "currency": {
-          "name": "Australian Dollar",
-          "html": "&#36;",
-          "unicode": "24",
-          "decimal": 2,
-          "shortName": "AUD",
-          "fraction": "Cent"
-        },
-        "dateFormat": {
-          "name": "DD/MM/YYYY",
-          "value": "31/01/2022"
-        }
-      },
-      {
-        "name": "Cocos Islands",
-        "code": "61",
-        "iso": "CC",
-        "currency": {
-          "name": "Australian Dollar",
-          "html": "&#36;",
-          "unicode": "24",
-          "decimal": 2,
-          "shortName": "AUD",
-          "fraction": "Cent"
-        },
-        "dateFormat": {
-          "name": "DD/MM/YYYY",
-          "value": "31/01/2022"
-        }
-      },
-      {
-        "name": "Colombia",
-        "code": "57",
-        "iso": "CO",
-        "currency": {
-          "name": "Colombian Peso",
-          "html": "&#36;",
-          "unicode": "24",
-          "decimal": 2,
-          "shortName": "COP",
-          "fraction": "Centavo"
-        },
-        "dateFormat": {
-          "name": "DD/MM/YYYY",
-          "value": "31/01/2022"
-        }
-      },
-      {
-        "name": "Comoros",
-        "code": "269",
-        "iso": "KM",
-        "currency": {
-          "name": "Comorian Franc",
-          "html": "&#67;&#70;",
-          "unicode": "43",
-          "decimal": 0,
-          "shortName": "KMF",
-          "fraction": "Cent"
-        },
-        "dateFormat": {
-          "name": "DD-MM-YYYY",
-          "value": "31-01-2022"
-        }
-      },
-      {
-        "name": "Cook Islands",
-        "code": "682",
-        "iso": "CK",
-        "currency": {
-          "name": "Cook Islands Dollar",
-          "html": "&#36;",
-          "unicode": "24",
-          "decimal": 2,
-          "shortName": "CKD",
-          "fraction": "Cent"
-        },
-        "dateFormat": {
-          "name": "DD/MM/YYYY",
-          "value": "31/01/2022"
-        }
-      },
-      {
-        "name": "Costa Rica",
-        "code": "506",
-        "iso": "CR",
-        "currency": {
-          "name": "Costa Rican Colón",
-          "html": "&#8353;",
-          "unicode": "20A1",
-          "decimal": 2,
-          "shortName": "CRC",
-          "fraction": "Centavo"
-        },
-        "dateFormat": {
-          "name": "DD/MM/YYYY",
-          "value": "31/01/2022"
-        }
-      },
-      {
-        "name": "Croatia",
-        "code": "385",
-        "iso": "HR",
-        "currency": {
-          "name": "Croatian Kuna",
-          "html": "&#107;&#110;",
-          "unicode": "6B6E",
-          "decimal": 2,
-          "shortName": "HRK",
-          "fraction": "Cent"
-        },
-        "dateFormat": {
-          "name": "DD.MM.YYYY",
-          "value": "31.01.2022"
-        }
-      },
-      {
-        "name": "Cuba",
-        "code": "53",
-        "iso": "CU",
-        "currency": {
-          "name": "Cuban Peso",
-          "html": "&#36;",
-          "unicode": "24",
-          "decimal": 2,
-          "shortName": "CUP",
-          "fraction": "Centavo"
-        },
-        "dateFormat": {
-          "name": "DD/MM/YYYY",
-          "value": "31/01/2022"
-        }
-      },
-      {
-        "name": "Curacao",
-        "code": "599",
-        "iso": "CW",
-        "currency": {
-          "name": "Netherlands Antillean Guilder",
-          "html": "&#402;",
-          "unicode": "192",
-          "decimal": 2,
-          "shortName": "ANG",
-          "fraction": "Cent"
-        },
-        "dateFormat": {
-          "name": "DD-MM-YYYY",
-          "value": "31-01-2022"
-        }
-      },
-      {
-        "name": "Cyprus",
-        "code": "357",
-        "iso": "CY",
-        "currency": {
-          "name": "Euro",
-          "html": "&#8364;",
-          "unicode": "20AC",
-          "decimal": 2,
-          "shortName": "EUR",
-          "fraction": "Cent"
-        },
-        "dateFormat": {
-          "name": "DD/MM/YYYY",
-          "value": "31/01/2022"
-        }
-      },
-      {
-        "name": "Czech Republic",
-        "code": "420",
-        "iso": "CZ",
-        "currency": {
-          "name": "Czech Koruna",
-          "html": "&#75;&#269;",
-          "unicode": "4B10D",
-          "decimal": 2,
-          "shortName": "CZK",
-          "fraction": "Cent"
-        },
-        "dateFormat": {
-          "name": "DD.MM.YYYY",
-          "value": "31.01.2022"
-        }
-      },
-    {
-      "name": "Democratic Republic of the Congo",
-      "code": "243",
-      "iso": "CD",
-              "currency": {
-          "name": "Congolese Franc",
-          "html": "&#70;&#67;",
-          "unicode": "46",
-          "decimal": 2,
-          "shortName": "CDF",
-          "fraction": "Cent"
-        },
-        "dateFormat": {
-          "name": "DD.MM.YYYY",
-          "value": "31.01.2022"
-        }
-    },
-    {
-      "name": "Denmark",
-      "code": "45",
-      "iso": "DK",
-              "currency": {
-          "name": "Danish Krone",
-          "html": "&#107;&#114;",
-          "unicode": "6B72",
-          "decimal": 2,
-          "shortName": "DKK",
-          "fraction": "Cent"
-        },
-        "dateFormat": {
-          "name": "DD.MM.YYYY",
-          "value": "31.01.2022"
-        }
-    },
-    {
-      "name": "Djibouti",
-      "code": "253",
-      "iso": "DJ",
-              "currency": {
-          "name": "Djiboutian Franc",
-          "html": "&#70;&#100;&#106;",
-          "unicode": "46",
-          "decimal": 0,
-          "shortName": "DJF",
-          "fraction": "Cent"
-        },
-        "dateFormat": {
-          "name": "DD.MM.YYYY",
-          "value": "31.01.2022"
-        }
-    },
-    {
-      "name": "Dominica",
-      "code": "1-767",
-      "iso": "DM",
-      "currency": {
-        "name": "East Caribbean Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "XCD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "MM/DD/YYYY",
-        "value": "01/31/2022"
-      }
-    },
-    {
-      "name": "Dominican Republic",
-      "code": "1-809, 1-829, 1-849",
-      "iso": "DO",
-      "currency": {
-        "name": "Dominican Peso",
-        "html": "&#82;&#68;&#36;",
-        "unicode": "52",
-        "decimal": 2,
-        "shortName": "DOP",
-        "fraction": "Centavo"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "East Timor",
-      "code": "670",
-      "iso": "TL",
-      "currency": {
-        "name": "United States Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "USD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "MM/DD/YYYY",
-        "value": "01/31/2022"
-      }
-    },
-    {
-      "name": "Ecuador",
-      "code": "593",
-      "iso": "EC",
-      "currency": {
-        "name": "United States Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "USD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "MM/DD/YYYY",
-        "value": "01/31/2022"
-      }
-    },
-    {
-      "name": "Egypt",
-      "code": "20",
-      "iso": "EG",
-      "currency": {
-        "name": "Egyptian Pound",
-        "html": "&#163;",
-        "unicode": "A3",
-        "decimal": 2,
-        "shortName": "EGP",
-        "fraction": "Penny"
-      },
-      "dateFormat": {
-        "name": "DD.MM.YYYY",
-        "value": "31/01/2022"
-      },
-      "fiscalstart": "July-01"
-    },
-    {
-      "name": "El Salvador",
-      "code": "503",
-      "iso": "SV",
-      "currency": {
-        "name": "United States Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "USD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Equatorial Guinea",
-      "code": "240",
-      "iso": "GQ",
-      "currency": {
-        "name": "Central African CFA Franc",
-        "html": "&#70;&#67;&#70;&#65;",
-        "unicode": "46C46",
-        "decimal": 0,
-        "shortName": "XAF",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD.MM.YYYY",
-        "value": "31.01.2022"
-      }
-    },
-    {
-      "name": "Eritrea",
-      "code": "291",
-      "iso": "ER",
-      "currency": {
-        "name": "Eritrean Nakfa",
-        "html": "&#78;&#102;&#107;",
-        "unicode": "4E",
-        "decimal": 2,
-        "shortName": "ERN",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD.MM.YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Estonia",
-      "code": "372",
-      "iso": "EE",
-      "currency": {
-        "name": "Euro",
-        "html": "&#8364;",
-        "unicode": "20AC",
-        "decimal": 2,
-        "shortName": "EUR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD.MM.YYYY",
-        "value": "31.01.2022"
-      }
-    },
-    {
-      "name": "Ethiopia",
-      "code": "251",
-      "iso": "ET",
-      "currency": {
-        "name": "Ethiopian Birr",
-        "html": "&#66;&#114;",
-        "unicode": "42",
-        "decimal": 2,
-        "shortName": "ETB",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD.MM.YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Falkland Islands",
-      "code": "500",
-      "iso": "FK",
-      "currency": {
-        "name": "Falkland Islands Pound",
-        "html": "&#163;",
-        "unicode": "A3",
-        "decimal": 2,
-        "shortName": "FKP",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Faroe Islands",
-      "code": "298",
-      "iso": "FO",
-      "currency": {
-        "name": "Danish Krone",
-        "html": "&#107;&#114;",
-        "unicode": "6B72",
-        "decimal": 2,
-        "shortName": "DKK",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD-MM-YYYY",
-        "value": "31-01-2022"
-      }
-    },
-    {
-      "name": "Fiji",
-      "code": "679",
-      "iso": "FJ",
-      "currency": {
-        "name": "Fijian Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "FJD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Finland",
-      "code": "358",
-      "iso": "FI",
-      "currency": {
-        "name": "Euro",
-        "html": "&#8364;",
-        "unicode": "20AC",
-        "decimal": 2,
-        "shortName": "EUR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD.MM.YYYY",
-        "value": "31.01.2022"
-      }
-    },
-    {
-      "name": "France",
-      "code": "33",
-      "iso": "FR",
-      "currency": {
-        "name": "Euro",
-        "html": "&#8364;",
-        "unicode": "20AC",
-        "decimal": 2,
-        "shortName": "EUR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "French Polynesia",
-      "code": "689",
-      "iso": "PF",
-      "currency": {
-        "name": "CFP Franc",
-        "html": "&#70;",
-        "unicode": "46",
-        "decimal": 0,
-        "shortName": "XPF",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Gabon",
-      "code": "241",
-      "iso": "GA",
-              "currency": {
-          "name": "Central African CFA Franc",
-          "html": "&#70;&#67;&#70;&#65;",
-          "unicode": "46C46",
-          "decimal": 0,
-          "shortName": "XAF",
-          "fraction": "Cent"
-        },
-        "dateFormat": {
-          "name": "DD.MM.YYYY",
-          "value": "31.01.2022"
-        }
-    },
-  
-    {
-      "name": "Gambia",
-      "code": "220",
-      "iso": "GM",
-      "currency": {
-        "name": "Gambian Dalasi",
-        "html": "&#68;",
-        "unicode": "44",
-        "decimal": 2,
-        "shortName": "GMD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Georgia",
-      "code": "995",
-      "iso": "GE",
-      "currency": {
-        "name": "Georgian Lari",
-        "html": "&#8382;",
-        "unicode": "20BE",
-        "decimal": 2,
-        "shortName": "GEL",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Germany",
-      "code": "49",
-      "iso": "DE",
-      "currency": {
-        "name": "Euro",
-        "html": "&#8364;",
-        "unicode": "20AC",
-        "decimal": 2,
-        "shortName": "EUR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD.MM.YYYY",
-        "value": "31.01.2022"
-      }
-    },
-    {
-      "name": "Ghana",
-      "code": "233",
-      "iso": "GH",
-      "currency": {
-        "name": "Ghanaian Cedi",
-        "html": "&#8373;",
-        "unicode": "20B5",
-        "decimal": 2,
-        "shortName": "GHS",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Gibraltar",
-      "code": "350",
-      "iso": "GI",
-      "currency": {
-        "name": "Gibraltar Pound",
-        "html": "&#163;",
-        "unicode": "A3",
-        "decimal": 2,
-        "shortName": "GIP",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Greece",
-      "code": "30",
-      "iso": "GR",
-      "currency": {
-        "name": "Euro",
-        "html": "&#8364;",
-        "unicode": "20AC",
-        "decimal": 2,
-        "shortName": "EUR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Greenland",
-      "code": "299",
-      "iso": "GL",
-      "currency": {
-        "name": "Danish Krone",
-        "html": "&#107;&#114;",
-        "unicode": "6B72",
-        "decimal": 2,
-        "shortName": "DKK",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD-MM-YYYY",
-        "value": "31-01-2022"
-      }
-    },
-    {
-      "name": "Grenada",
-      "code": "1-473",
-      "iso": "GD",
-      "currency": {
-        "name": "Eastern Caribbean Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "XCD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "MM/DD/YYYY",
-        "value": "01/31/2022"
-      }
-    },
-    {
-      "name": "Guam",
-      "code": "1-671",
-      "iso": "GU",
-      "currency": {
-        "name": "United States Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "USD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "MM/DD/YYYY",
-        "value": "01/31/2022"
-      }
-    },
-    {
-      "name": "Guatemala",
-      "code": "502",
-      "iso": "GT",
-      "currency": {
-        "name": "Guatemalan Quetzal",
-        "html": "&#81;",
-        "unicode": "51",
-        "decimal": 2,
-        "shortName": "HTG",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Guernsey",
-      "code": "44-1481",
-      "iso": "GG",
-      "currency": {
-        "name": "British Pound Sterling",
-        "html": "&#163;",
-        "unicode": "A3",
-        "decimal": 2,
-        "shortName": "GBP",
-        "fraction": "Penny"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Guinea",
-      "code": "224",
-      "iso": "GN",
-      "currency": {
-        "name": "Guinean Franc",
-        "html": "&#70;&#71;",
-        "unicode": "46",
-        "decimal": 0,
-        "shortName": "GNF",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Guinea-Bissau",
-      "code": "245",
-      "iso": "GW",
-      "currency": {
-        "name": "West African CFA Franc",
-        "html": "&#70;&#67;&#70;&#65;",
-        "unicode": "46C46",
-        "decimal": 0,
-        "shortName": "XOF",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Guyana",
-      "code": "592",
-      "iso": "GY",
-      "currency": {
-        "name": "Guyanese Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "GYD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Haiti",
-      "code": "509",
-      "iso": "HT",
-      "currency": {
-        "name": "Haitian Gourde",
-        "html": "&#71;",
-        "unicode": "47",
-        "decimal": 2,
-        "shortName": "HTG",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Honduras",
-      "code": "504",
-      "iso": "HN",
-      "currency": {
-        "name": "Honduran Lempira",
-        "html": "&#76;",
-        "unicode": "4C",
-        "decimal": 2,
-        "shortName": "HNL",
-        "fraction": "Centavo"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Hong Kong",
-      "code": "852",
-      "iso": "HK",
-      "currency": {
-        "name": "Hong Kong Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "HKD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      },
-      "fiscalstart": "April-01"
-    },
-    {
-      "name": "Hungary",
-      "code": "36",
-      "iso": "HU",
-              "currency": {
-          "name": "Hungarian Forint",
-          "html": "&#70;&#116;",
-          "unicode": "4674",
-          "decimal": 2,
-          "shortName": "HUF",
-          "fraction": "Fillér"
-        },
-        "dateFormat": {
-          "name": "YYYY.MM.DD",
-          "value": "2022.01.31"
-        }
-    },
-    {
-      "name": "Iceland",
-      "code": "354",
-      "iso": "IS",
-      "currency": {
-        "name": "Icelandic Króna",
-        "html": "&#107;&#114;",
-        "unicode": "6B72",
-        "decimal": 0,
-        "shortName": "ISK",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Indonesia",
-      "code": "62",
-      "iso": "ID",
-      "currency": {
-        "name": "Indonesian Rupiah",
-        "html": "&#82;&#112;",
-        "unicode": "5270",
-        "decimal": 2,
-        "shortName": "IDR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD-MM-YYYY",
-        "value": "31-01-2022"
-      }
-    },
-    {
-      "name": "Iran",
-      "code": "98",
-      "iso": "IR",
-              "currency": {
-          "name": "Iranian Rial",
-          "html": "&#65020;",
-          "unicode": "FDFC",
-          "decimal": 2,
-          "shortName": "IRR",
-          "fraction": "Rial"
-        },
-        "dateFormat": {
-          "name": "YYYY/MM/DD",
-          "value": "2022/01/31"
-        },
-        "fiscalstart": "March-21"
-    },
-    {
-      "name": "Iraq",
-      "code": "964",
-      "iso": "IQ",
-      "currency": {
-        "name": "Iraqi Dinar",
-        "html": "&#1593;.&#1583;",
-        "unicode": "6392E",
-        "decimal": 3,
-        "shortName": "IQD",
-        "fraction": "Dinar"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Ireland",
-      "code": "353",
-      "iso": "IE",
-      "currency": {
-        "name": "Euro",
-        "html": "&#8364;",
-        "unicode": "20AC",
-        "decimal": 2,
-        "shortName": "EUR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Isle of Man",
-      "code": "44-1624",
-      "iso": "IM",
-      "currency": {
-        "name": "British Pound Sterling",
-        "html": "&#163;",
-        "unicode": "A3",
-        "decimal": 2,
-        "shortName": "GBP",
-        "fraction": "Penny"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Israel",
-      "code": "972",
-      "iso": "IL",
-      "currency": {
-        "name": "Israeli New Shekel",
-        "html": "&#8362;",
-        "unicode": "20AA",
-        "decimal": 2,
-        "shortName": "ILS",
-        "fraction": "Shekel"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Italy",
-      "code": "39",
-      "iso": "IT",
-      "currency": {
-        "name": "Euro",
-        "html": "&#8364;",
-        "unicode": "20AC",
-        "decimal": 2,
-        "shortName": "EUR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Ivory Coast",
-      "code": "225",
-      "iso": "CI",
-      "currency": {
-        "name": "West African CFA Franc",
-        "html": "&#70;&#67;&#70;&#65;",
-        "unicode": "46C46",
-        "decimal": 0,
-        "shortName": "XOF",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Jamaica",
-      "code": "1-876",
-      "iso": "JM",
-      "currency": {
-        "name": "Jamaican Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "JMD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "MM/DD/YYYY",
-        "value": "01/31/2022"
-      }
-    },
-    {
-      "name": "Japan",
-      "code": "81",
-      "iso": "JP",
-              "currency": {
-          "name": "Japanese Yen",
-          "html": "&#165;",
-          "unicode": "A5",
-          "decimal": 0,
-          "shortName": "JPY",
-          "fraction": "Yen"
-        },
-        "dateFormat": {
-          "name": "YYYY/MM/DD",
-          "value": "2022/01/31"
-        },
-        "fiscalstart": "April-01"
-    },
-    {
-      "name": "Jersey",
-      "code": "44-1534",
-      "iso": "JE",
-      "currency": {
-        "name": "British Pound Sterling",
-        "html": "&#163;",
-        "unicode": "A3",
-        "decimal": 2,
-        "shortName": "GBP",
-        "fraction": "Penny"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Jordan",
-      "code": "962",
-      "iso": "JO",
-      "currency": {
-        "name": "Jordanian Dinar",
-        "html": "&#1583;.&#1571;",
-        "unicode": "62C2E1",
-        "decimal": 3,
-        "shortName": "JOD",
-        "fraction": "Dinar"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Kazakhstan",
-      "code": "7",
-      "iso": "KZ",
-      "currency": {
-        "name": "Kazakhstani Tenge",
-        "html": "&#8376;",
-        "unicode": "20B8",
-        "decimal": 2,
-        "shortName": "KZT",
-        "fraction": "Tenge"
-      },
-      "dateFormat": {
-        "name": "DD.MM.YYYY",
-        "value": "31.01.2022"
-      }
-    },
-    {
-      "name": "Kenya",
-      "code": "254",
-      "iso": "KE",
-      "currency": {
-        "name": "Kenyan Shilling",
-        "html": "&#75;&#83;&#104;",
-        "unicode": "4B5348",
-        "decimal": 2,
-        "shortName": "KES",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      },
-      "fiscalstart": "July-01"
-    },
-    {
-      "name": "Kiribati",
-      "code": "686",
-      "iso": "KI",
-      "currency": {
-        "name": "Australian Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "AUD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Kosovo",
-      "code": "383",
-      "iso": "XK",
-      "currency": {
-        "name": "Euro",
-        "html": "&#8364;",
-        "unicode": "20AC",
-        "decimal": 2,
-        "shortName": "EUR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Kuwait",
-      "code": "965",
-      "iso": "KW",
-      "currency": {
-        "name": "Kuwaiti Dinar",
-        "html": "&#1583;.&#1603;",
-        "unicode": "62C2E3",
-        "decimal": 3,
-        "shortName": "KWD",
-        "fraction": "Dinar"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Kyrgyzstan",
-      "code": "996",
-      "iso": "KG",
-      "currency": {
-        "name": "Kyrgyzstani Som",
-        "html": "&#1083;&#1074;",
-        "unicode": "43B432",
-        "decimal": 2,
-        "shortName": "KGS",
-        "fraction": "Som"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Laos",
-      "code": "856",
-      "iso": "LA",
-      "currency": {
-        "name": "Lao Kip",
-        "html": "&#8365;",
-        "unicode": "20AD",
-        "decimal": 2,
-        "shortName": "LAK",
-        "fraction": "Kip"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Latvia",
-      "code": "371",
-      "iso": "LV",
-      "currency": {
-        "name": "Euro",
-        "html": "&#8364;",
-        "unicode": "20AC",
-        "decimal": 2,
-        "shortName": "EUR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD.MM.YYYY",
-        "value": "31.01.2022"
-      }
-    },
-    {
-      "name": "Lebanon",
-      "code": "961",
-      "iso": "LB",
-      "currency": {
-        "name": "Lebanese Pound",
-        "html": "&#163;",
-        "unicode": "A3",
-        "decimal": 2,
-        "shortName": "LBP",
-        "fraction": "Piastre"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Lesotho",
-      "code": "266",
-      "iso": "LS",
-      "currency": {
-        "name": "Lesotho Loti",
-        "html": "&#76;",
-        "unicode": "4C",
-        "decimal": 2,
-        "shortName": "LSL",
-        "fraction": "Loti"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Liberia",
-      "code": "231",
-      "iso": "LR",
-      "currency": {
-        "name": "Liberian Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "LRD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "MM/DD/YYYY",
-        "value": "01/31/2022"
-      }
-    },
-    {
-      "name": "Libya",
-      "code": "218",
-      "iso": "LY",
-      "currency": {
-        "name": "Libyan Dinar",
-        "html": "&#1604;.&#1583;",
-        "unicode": "6442E3",
-        "decimal": 3,
-        "shortName": "LYD",
-        "fraction": "Dinar"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Liechtenstein",
-      "code": "423",
-      "iso": "LI",
-      "currency": {
-        "name": "Swiss Franc",
-        "html": "&#67;&#72;&#70;",
-        "unicode": "43",
-        "decimal": 2,
-        "shortName": "CHF",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD.MM.YYYY",
-        "value": "31.01.2022"
-      }
-    },
-    {
-      "name": "Lithuania",
-      "code": "370",
-      "iso": "LT",
-      "currency": {
-        "name": "Euro",
-        "html": "&#8364;",
-        "unicode": "20AC",
-        "decimal": 2,
-        "shortName": "EUR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "YYYY-MM-DD",
-        "value": "2022-01-31"
-      }
-    },
-    {
-      "name": "Luxembourg",
-      "code": "352",
-      "iso": "LU",
-      "currency": {
-        "name": "Euro",
-        "html": "&#8364;",
-        "unicode": "20AC",
-        "decimal": 2,
-        "shortName": "EUR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Macao",
-      "code": "853",
-      "iso": "MO",
-              "currency": {
-          "name": "Macanese Pataca",
-          "html": "&#77;&#79;&#80;&#36;",
-          "unicode": "4D4F5024",
-          "decimal": 2,
-          "shortName": "MOP",
-          "fraction": "Pataca"
-        },
-        "dateFormat": {
-          "name": "YYYY/MM/DD",
-          "value": "2022/01/31"
-        }
-    },
-    {
-      "name": "Macedonia",
-      "code": "389",
-      "iso": "MK",
-      "currency": {
-        "name": "Macedonian Denar",
-        "html": "&#1076;&#1077;&#1085;",
-        "unicode": "4345D",
-        "decimal": 2,
-        "shortName": "MKD",
-        "fraction": "Denar"
-      },
-      "dateFormat": {
-        "name": "DD.MM.YYYY",
-        "value": "31.01.2022"
-      }
-    },
-    {
-      "name": "Madagascar",
-      "code": "261",
-      "iso": "MG",
-      "currency": {
-        "name": "Malagasy Ariary",
-        "html": "&#65;&#114;",
-        "unicode": "4172",
-        "decimal": 2,
-        "shortName": "MGA",
-        "fraction": "Ariary"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Malawi",
-      "code": "265",
-      "iso": "MW",
-      "currency": {
-        "name": "Malawian Kwacha",
-        "html": "&#77;&#75;",
-        "unicode": "4D4B",
-        "decimal": 2,
-        "shortName": "MWK",
-        "fraction": "Kwacha"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Malaysia",
-      "code": "60",
-      "iso": "MY",
-      "currency": {
-        "name": "Malaysian Ringgit",
-        "html": "&#82;&#77;",
-        "unicode": "525D",
-        "decimal": 2,
-        "shortName": "MYR",
-        "fraction": "Ringgit"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Maldives",
-      "code": "960",
-      "iso": "MV",
-      "currency": {
-        "name": "Maldivian Rufiyaa",
-        "html": "&#46;&#82;&#102;",
-        "unicode": "2E5266",
-        "decimal": 2,
-        "shortName": "MVR",
-        "fraction": "Rufiyaa"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Mali",
-      "code": "223",
-      "iso": "ML",
-      "currency": {
-        "name": "West African CFA Franc",
-        "html": "&#70;&#67;&#70;&#65;",
-        "unicode": "46C46",
-        "decimal": 0,
-        "shortName": "XOF",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Malta",
-      "code": "356",
-      "iso": "MT",
-      "currency": {
-        "name": "Euro",
-        "html": "&#8364;",
-        "unicode": "20AC",
-        "decimal": 2,
-        "shortName": "EUR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Marshall Islands",
-      "code": "692",
-      "iso": "MH",
-      "currency": {
-        "name": "United States Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "USD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "MM/DD/YYYY",
-        "value": "01/31/2022"
-      }
-    },
-    {
-      "name": "Mauritania",
-      "code": "222",
-      "iso": "MR",
-      "currency": {
-        "name": "Mauritanian Ouguiya",
-        "html": "&#85;&#77;",
-        "unicode": "555D",
-        "decimal": 2,
-        "shortName": "MRO",
-        "fraction": "Ouguiya"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Mauritius",
-      "code": "230",
-      "iso": "MU",
-      "currency": {
-        "name": "Mauritian Rupee",
-        "html": "&#82;&#115;",
-        "unicode": "5273",
-        "decimal": 2,
-        "shortName": "MUR",
-        "fraction": "Rupee"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Mayotte",
-      "code": "262",
-      "iso": "YT",
-      "currency": {
-        "name": "Euro",
-        "html": "&#8364;",
-        "unicode": "20AC",
-        "decimal": 2,
-        "shortName": "EUR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Mexico",
-      "code": "52",
-      "iso": "MX",
-      "currency": {
-        "name": "Mexican Peso",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "USD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Micronesia",
-      "code": "691",
-      "iso": "FM",
-      "currency": {
-        "name": "United States Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "USD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "MM/DD/YYYY",
-        "value": "01/31/2022"
-      }
-    },
-    {
-      "name": "Moldova",
-      "code": "373",
-      "iso": "MD",
-      "currency": {
-        "name": "Moldovan Leu",
-        "html": "&#76;",
-        "unicode": "4C",
-        "decimal": 2,
-        "shortName": "MDL",
-        "fraction": "Leu"
-      },
-      "dateFormat": {
-        "name": "DD.MM.YYYY",
-        "value": "31.01.2022"
-      }
-    },
-    {
-      "name": "Monaco",
-      "code": "377",
-      "iso": "MC",
-      "currency": {
-        "name": "Euro",
-        "html": "&#8364;",
-        "unicode": "20AC",
-        "decimal": 2,
-        "shortName": "EUR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Mongolia",
-      "code": "976",
-      "iso": "MN",
-              "currency": {
-          "name": "Mongolian Tögrög",
-          "html": "&#8366;",
-          "unicode": "20AE",
-          "decimal": 2,
-          "shortName": "MNT",
-          "fraction": "Tögrög"
-        },
-        "dateFormat": {
-          "name": "YYYY.MM.DD",
-          "value": "2022.01.31"
-        }
-    },
-    {
-      "name": "Montenegro",
-      "code": "382",
-      "iso": "ME",
-      "currency": {
-        "name": "Euro",
-        "html": "&#8364;",
-        "unicode": "20AC",
-        "decimal": 2,
-        "shortName": "EUR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Montserrat",
-      "code": "1-664",
-      "iso": "MS",
-      "currency": {
-        "name": "Eastern Caribbean Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "XCD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "MM/DD/YYYY",
-        "value": "01/31/2022"
-      }
-    },
-    {
-      "name": "Morocco",
-      "code": "212",
-      "iso": "MA",
-      "currency": {
-        "name": "Moroccan Dirham",
-        "html": "&#1583;.&#1605;.",
-        "unicode": "62C2E",
-        "decimal": 2,
-        "shortName": "MAD",
-        "fraction": "Dirham"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Mozambique",
-      "code": "258",
-      "iso": "MZ",
-      "currency": {
-        "name": "Mozambican Metical",
-        "html": "&#77;&#84;",
-        "unicode": "4D54",
-        "decimal": 2,
-        "shortName": "MZN",
-        "fraction": "Metical"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Myanmar",
-      "code": "95",
-      "iso": "MM",
-      "currency": {
-        "name": "Burmese Kyat",
-        "html": "&#75;&#115;",
-        "unicode": "4B73",
-        "decimal": 2,
-        "shortName": "MMK",
-        "fraction": "Kyat"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      },
-      "fiscalstart": "October-01"
-    },
-    {
-      "name": "Namibia",
-      "code": "264",
-      "iso": "NA",
-      "currency": {
-        "name": "Namibian Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "NAD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Nauru",
-      "code": "674",
-      "iso": "NR",
-      "currency": {
-        "name": "Australian Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "AUD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Nepal",
-      "code": "977",
-      "iso": "NP",
-      "currency": {
-        "name": "Nepalese Rupee",
-        "html": "&#8360;",
-        "unicode": "20A8",
-        "decimal": 2,
-        "shortName": "NPR",
-        "fraction": "Rupee"
-      },
-      "dateFormat": {
-        "name": "YYYY-MM-DD",
-        "value": "2022-01-31"
-      },
-      "fiscalstart": "July-01"
-    },
-    {
-      "name": "Netherlands",
-      "code": "31",
-      "iso": "NL",
-      "currency": {
-        "name": "Euro",
-        "html": "&#8364;",
-        "unicode": "20AC",
-        "decimal": 2,
-        "shortName": "EUR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD-MM-YYYY",
-        "value": "31-01-2022"
-      }
-    },
-    {
-      "name": "Netherlands Antilles",
-      "code": "599",
-      "iso": "AN",
-      "currency": {
-        "name": "Netherlands Antillean Guilder",
-        "html": "&#402;",
-        "unicode": "192",
-        "decimal": 2,
-        "shortName": "ANG",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD-MM-YYYY",
-        "value": "31-01-2022"
-      }
-    },
-    {
-      "name": "New Caledonia",
-      "code": "687",
-      "iso": "NC",
-      "currency": {
-        "name": "CFP Franc",
-        "html": "&#8355;",
-        "unicode": "20AB",
-        "decimal": 0,
-        "shortName": "XPF",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "New Zealand",
-      "code": "64",
-      "iso": "NZ",
-      "currency": {
-        "name": "New Zealand Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "NZD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      },
-      "fiscalstart": "July-01"
-    },
-    {
-      "name": "Nicaragua",
-      "code": "505",
-      "iso": "NI",
-      "currency": {
-        "name": "Nicaraguan Córdoba",
-        "html": "&#67;&#36;",
-        "unicode": "43",
-        "decimal": 2,
-        "shortName": "NIO",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Niger",
-      "code": "227",
-      "iso": "NE",
-      "currency": {
-        "name": "West African CFA Franc",
-        "html": "&#70;&#67;&#70;&#65;",
-        "unicode": "46C46",
-        "decimal": 0,
-        "shortName": "XOF",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Nigeria",
-      "code": "234",
-      "iso": "NG",
-      "currency": {
-        "name": "Nigerian Naira",
-        "html": "&#8358;",
-        "unicode": "20A6",
-        "decimal": 2,
-        "shortName": "NGN",
-        "fraction": "Naira"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Niue",
-      "code": "683",
-      "iso": "NU",
-      "currency": {
-        "name": "New Zealand Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "NZD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "North Korea",
-      "code": "850",
-      "iso": "KP",
-      "currency": {
-        "name": "North Korean Won",
-        "html": "&#8361;",
-        "unicode": "20A9",
-        "decimal": 2,
-        "shortName": "KPW",
-        "fraction": "Won"
-      },
-      "dateFormat": {
-        "name": "YYYY-MM-DD",
-        "value": "2022-01-31"
-      }
-    },
-    {
-      "name": "Northern Mariana Islands",
-      "code": "1-670",
-      "iso": "MP",
-      "currency": {
-        "name": "United States Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "NOK",
-        "fraction": "Krone"
-      },
-      "dateFormat": {
-        "name": "MM/DD/YYYY",
-        "value": "01/31/2022"
-      }
-    },
-    {
-      "name": "Norway",
-      "code": "47",
-      "iso": "NO",
-      "currency": {
-        "name": "Norwegian Krone",
-        "html": "&#107;&#114;",
-        "unicode": "6B72",
-        "decimal": 2,
-        "shortName": "NOK",
-        "fraction": "Krone"
-      },
-      "dateFormat": {
-        "name": "DD.MM.YYYY",
-        "value": "31.01.2022"
-      }
-    },
-    {
-      "name": "Oman",
-      "code": "968",
-      "iso": "OM",
-      "currency": {
-        "name": "Omani Rial",
-        "html": "&#65020;",
-        "unicode": "FDFC",
-        "decimal": 3,
-        "shortName": "OMR",
-        "fraction": "Rial"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-  
-    {
-      "name": "Pakistan",
-      "code": "92",
-      "iso": "PK",
-      "currency": {
-        "name": "Pakistani Rupee",
-        "html": "&#8360;",
-        "unicode": "20A8",
-        "decimal": 2,
-        "shortName": "PKR",
-        "fraction": "Rupee"
-      },
-      "dateFormat": {
-        "name": "DD-MM-YYYY",
-        "value": "31-01-2022"
-      },
-      "fiscalstart": "July-01"
-    },
-    {
-      "name": "Palau",
-      "code": "680",
-      "iso": "PW",
-      "currency": {
-        "name": "United States Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "USD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "MM/DD/YYYY",
-        "value": "01/31/2022"
-      }
-    },
-    {
-      "name": "Palestine",
-      "code": "970",
-      "iso": "PS",
-      "currency": {
-        "name": "Israeli New Sheqel",
-        "html": "&#8362;",
-        "unicode": "20AA",
-        "decimal": 2,
-        "shortName": "ILS",
-        "fraction": "Shekel"
-      },
-      "dateFormat": {
-        "name": "DD-MM-YYYY",
-        "value": "31-01-2022"
-      }
-    },
-    {
-      "name": "Panama",
-      "code": "507",
-      "iso": "PA",
-      "currency": {
-        "name": "Panamanian Balboa",
-        "html": "&#66;&#47;&#46;",
-        "unicode": "422F2E",
-        "decimal": 2,
-        "shortName": "USD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "MM/DD/YYYY",
-        "value": "01/31/2022"
-      }
-    },
-    {
-      "name": "Papua New Guinea",
-      "code": "675",
-      "iso": "PG",
-      "currency": {
-        "name": "Papua New Guinean Kina",
-        "html": "&#75;",
-        "unicode": "4B",
-        "decimal": 2,
-        "shortName": "PGK",
-        "fraction": "Kina"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Paraguay",
-      "code": "595",
-      "iso": "PY",
-      "currency": {
-        "name": "Paraguayan Guaraní",
-        "html": "&#8370;",
-        "unicode": "20B2",
-        "decimal": 0,
-        "shortName": "PYG",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD-MM-YYYY",
-        "value": "31-01-2022"
-      }
-    },
-    {
-      "name": "Peru",
-      "code": "51",
-      "iso": "PE",
-      "currency": {
-        "name": "Peruvian Sol",
-        "html": "&#83;&#47;&#46;",
-        "unicode": "532F2E",
-        "decimal": 2,
-        "shortName": "PEN",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Philippines",
-      "code": "63",
-      "iso": "PH",
-      "currency": {
-        "name": "Philippine Piso",
-        "html": "&#8369;",
-        "unicode": "20B1",
-        "decimal": 2,
-        "shortName": "PHP",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "MM/DD/YYYY",
-        "value": "01/31/2022"
-      }
-    },
-    {
-      "name": "Pitcairn",
-      "code": "64",
-      "iso": "PN",
-      "currency": {
-        "name": "New Zealand Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "NZD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Poland",
-      "code": "48",
-      "iso": "PL",
-      "currency": {
-        "name": "Polish Złoty",
-        "html": "&#122;&#322;",
-        "unicode": "7A142",
-        "decimal": 2,
-        "shortName": "PLN",
-        "fraction": "Złoty"
-      },
-      "dateFormat": {
-        "name": "DD-MM-YYYY",
-        "value": "31-01-2022"
-      }
-    },
-    {
-      "name": "Portugal",
-      "code": "351",
-      "iso": "PT",
-      "currency": {
-        "name": "Euro",
-        "html": "&#8364;",
-        "unicode": "20AC",
-        "decimal": 2,
-        "shortName": "EUR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD-MM-YYYY",
-        "value": "31-01-2022"
-      }
-    },
-    {
-      "name": "Puerto Rico",
-      "code": "1-787, 1-939",
-      "iso": "PR",
-      "currency": {
-        "name": "United States Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "USD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "MM/DD/YYYY",
-        "value": "01/31/2022"
-      }
-    },
-    {
-      "name": "Qatar",
-      "code": "974",
-      "iso": "QA",
-      "currency": {
-        "name": "Qatari Riyal",
-        "html": "&#65020;",
-        "unicode": "FDFC",
-        "decimal": 2,
-        "shortName": "QAR",
-        "fraction": "Rial"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Republic of the Congo",
-      "code": "242",
-      "iso": "CG",
-      "currency": {
-        "name": "Central African CFA Franc",
-        "html": "&#70;&#67;&#70;&#65;",
-        "unicode": "46C46",
-        "decimal": 0,
-        "shortName": "XAF",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD-MM-YYYY",
-        "value": "31-01-2022"
-      }
-    },
-    {
-      "name": "Reunion",
-      "code": "262",
-      "iso": "RE",
-      "currency": {
-        "name": "Euro",
-        "html": "&#8364;",
-        "unicode": "20AC",
-        "decimal": 2,
-        "shortName": "EUR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Romania",
-      "code": "40",
-      "iso": "RO",
-      "currency": {
-        "name": "Romanian Leu",
-        "html": "&#76;",
-        "unicode": "4C",
-        "decimal": 2,
-        "shortName": "RON",
-        "fraction": "Leu"
-      },
-      "dateFormat": {
-        "name": "DD.MM.YYYY",
-        "value": "31.01.2022"
-      }
-    },
-    {
-      "name": "Russia",
-      "code": "7",
-      "iso": "RU",
-      "currency": {
-        "name": "Russian Ruble",
-        "html": "&#8381;",
-        "unicode": "20BD",
-        "decimal": 2,
-        "shortName": "RUB",
-        "fraction": "Ruble"
-      },
-      "dateFormat": {
-        "name": "DD.MM.YYYY",
-        "value": "31.01.2022"
-      }
-    },
-    {
-      "name": "Rwanda",
-      "code": "250",
-      "iso": "RW",
-      "currency": {
-        "name": "Rwandan Franc",
-        "html": "&#1585;.&#1601;",
-        "unicode": "6312E",
-        "decimal": 0,
-        "shortName": "RWF",
-        "fraction": "Franc"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-  
-    {
-      "name": "Saint Barthelemy",
-      "code": "590",
-      "iso": "BL",
-      "currency": {
-        "name": "Euro",
-        "html": "&#8364;",
-        "unicode": "20AC",
-        "decimal": 2,
-        "shortName": "EUR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Saint Helena",
-      "code": "290",
-      "iso": "SH",
-      "currency": {
-        "name": "Saint Helena Pound",
-        "html": "&#163;",
-        "unicode": "A3",
-        "decimal": 2,
-        "shortName": "SHP",
-        "fraction": "Pound"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Saint Kitts and Nevis",
-      "code": "1-869",
-      "iso": "KN",
-      "currency": {
-        "name": "Eastern Caribbean Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "XCD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "MM/DD/YYYY",
-        "value": "01/31/2022"
-      }
-    },
-    {
-      "name": "Saint Lucia",
-      "code": "1-758",
-      "iso": "LC",
-      "currency": {
-        "name": "Eastern Caribbean Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "XCD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "MM/DD/YYYY",
-        "value": "01/31/2022"
-      }
-    },
-    {
-      "name": "Saint Martin",
-      "code": "590",
-      "iso": "MF",
-      "currency": {
-        "name": "Euro",
-        "html": "&#8364;",
-        "unicode": "20AC",
-        "decimal": 2,
-        "shortName": "EUR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Saint Pierre and Miquelon",
-      "code": "508",
-      "iso": "PM",
-      "currency": {
-        "name": "Euro",
-        "html": "&#8364;",
-        "unicode": "20AC",
-        "decimal": 2,
-        "shortName": "EUR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Saint Vincent and the Grenadines",
-      "code": "1-784",
-      "iso": "VC",
-      "currency": {
-        "name": "Eastern Caribbean Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "XCD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "MM/DD/YYYY",
-        "value": "01/31/2022"
-      }
-    },
-    {
-      "name": "Samoa",
-      "code": "685",
-      "iso": "WS",
-      "currency": {
-        "name": "Samoan Tālā",
-        "html": "&#87;&#83;&#36;",
-        "unicode": "575324",
-        "decimal": 2,
-        "shortName": "WST",
-        "fraction": "Tala"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "San Marino",
-      "code": "378",
-      "iso": "SM",
-      "currency": {
-        "name": "Euro",
-        "html": "&#8364;",
-        "unicode": "20AC",
-        "decimal": 2,
-        "shortName": "EUR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Sao Tome and Principe",
-      "code": "239",
-      "iso": "ST",
-      "currency": {
-        "name": "São Tomé and Príncipe Dobra",
-        "html": "&#68;&#98;",
-        "unicode": "44",
-        "decimal": 2,
-        "shortName": "STN",
-        "fraction": "Dobra"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Saudi Arabia",
-      "code": "966",
-      "iso": "SA",
-      "currency": {
-        "name": "Saudi Riyal",
-        "html": "&#65020;",
-        "unicode": "FDFC",
-        "decimal": 2,
-        "shortName": "SAR",
-        "fraction": "Rial"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Senegal",
-      "code": "221",
-      "iso": "SN",
-      "currency": {
-        "name": "West African CFA Franc",
-        "html": "&#70;&#67;&#70;&#65;",
-        "unicode": "46C46",
-        "decimal": 0,
-        "shortName": "XOF",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Serbia",
-      "code": "381",
-      "iso": "RS",
-      "currency": {
-        "name": "Serbian Dinar",
-        "html": "&#1044;&#1080;&#1085;&#46;",
-        "unicode": "4149D",
-        "decimal": 2,
-        "shortName": "RSD",
-        "fraction": "Dinar"
-      },
-      "dateFormat": {
-        "name": "DD.MM.YYYY",
-        "value": "31.01.2022"
-      }
-    },
-    {
-      "name": "Seychelles",
-      "code": "248",
-      "iso": "SC",
-      "currency": {
-        "name": "Seychellois Rupee",
-        "html": "&#82;&#115;",
-        "unicode": "5273",
-        "decimal": 2,
-        "shortName": "SCR",
-        "fraction": "Rupee"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Sierra Leone",
-      "code": "232",
-      "iso": "SL",
-      "currency": {
-        "name": "Sierra Leonean Leone",
-        "html": "&#76;&#101;",
-        "unicode": "4C65",
-        "decimal": 2,
-        "shortName": "SLL",
-        "fraction": "Leone"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Singapore",
-      "code": "65",
-      "iso": "SG",
-      "currency": {
-        "name": "Singapore Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "SGD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      },
-      "fiscalstart": "April-01"
-    },
-    {
-      "name": "Sint Maarten",
-      "code": "1-721",
-      "iso": "SX",
-      "currency": {
-        "name": "Netherlands Antillean Guilder",
-        "html": "&#402;",
-        "unicode": "192",
-        "decimal": 2,
-        "shortName": "ANG",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD-MM-YYYY",
-        "value": "31-01-2022"
-      }
-    },
-    {
-      "name": "Slovakia",
-      "code": "421",
-      "iso": "SK",
-      "currency": {
-        "name": "Euro",
-        "html": "&#8364;",
-        "unicode": "20AC",
-        "decimal": 2,
-        "shortName": "EUR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD.MM.YYYY",
-        "value": "31.01.2022"
-      }
-    },
-    {
-      "name": "Slovenia",
-      "code": "386",
-      "iso": "SI",
-      "currency": {
-        "name": "Euro",
-        "html": "&#8364;",
-        "unicode": "20AC",
-        "decimal": 2,
-        "shortName": "EUR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD.MM.YYYY",
-        "value": "31.01.2022"
-      }
-    },
-    {
-      "name": "Solomon Islands",
-      "code": "677",
-      "iso": "SB",
-      "currency": {
-        "name": "Solomon Islands Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "SBD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Somalia",
-      "code": "252",
-      "iso": "SO",
-      "currency": {
-        "name": "Somali Shilling",
-        "html": "&#83;",
-        "unicode": "53",
-        "decimal": 0,
-        "shortName": "SOS",
-        "fraction": "Shilling"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "South Africa",
-      "code": "27",
-      "iso": "ZA",
-              "currency": {
-          "name": "South African Rand",
-          "html": "&#82;",
-          "unicode": "52",
-          "decimal": 2,
-          "shortName": "ZAR",
-          "fraction": "Rand"
-        },
-        "dateFormat": {
-          "name": "YYYY/MM/DD",
-          "value": "2022/01/31"
-        },
-        "fiscalstart": "April-01"
-    },
-    {
-      "name": "South Korea",
-      "code": "82",
-      "iso": "KR",
-              "currency": {
-          "name": "South Korean Won",
-          "html": "&#8361;",
-          "unicode": "20A9",
-          "decimal": 0,
-          "shortName": "KRW",
-          "fraction": "Won"
-        },
-        "dateFormat": {
-          "name": "YYYY.MM.DD",
-          "value": "2022.01.31"
-        }
-    },
-    {
-      "name": "South Sudan",
-      "code": "211",
-      "iso": "SS",
-      "currency": {
-        "name": "South Sudanese Pound",
-        "html": "&#163;",
-        "unicode": "A3",
-        "decimal": 2,
-        "shortName": "SSP",
-        "fraction": "Pound"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Spain",
-      "code": "34",
-      "iso": "ES",
-      "currency": {
-        "name": "Euro",
-        "html": "&#8364;",
-        "unicode": "20AC",
-        "decimal": 2,
-        "shortName": "EUR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Sri Lanka",
-      "code": "94",
-      "iso": "LK",
-      "currency": {
-        "name": "Sri Lankan Rupee",
-        "html": "&#8360;",
-        "unicode": "20A8",
-        "decimal": 2,
-        "shortName": "LKR",
-        "fraction": "Rupee"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Sudan",
-      "code": "249",
-      "iso": "SD",
-      "currency": {
-        "name": "Sudanese Pound",
-        "html": "&#163;",
-        "unicode": "A3",
-        "decimal": 2,
-        "shortName": "SDG",
-        "fraction": "Pound"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Suriname",
-      "code": "597",
-      "iso": "SR",
-      "currency": {
-        "name": "Surinamese Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "SRD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD-MM-YYYY",
-        "value": "31-01-2022"
-      }
-    },
-    {
-      "name": "Svalbard and Jan Mayen",
-      "code": "47",
-      "iso": "SJ",
-      "currency": {
-        "name": "Norwegian Krone",
-        "html": "&#107;&#114;",
-        "unicode": "6B72",
-        "decimal": 2,
-        "shortName": "NOK",
-        "fraction": "Krone"
-      },
-      "dateFormat": {
-        "name": "DD.MM.YYYY",
-        "value": "31.01.2022"
-      }
-    },
-    {
-      "name": "Swaziland",
-      "code": "268",
-      "iso": "SZ",
-      "currency": {
-        "name": "Swazi Lilangeni",
-        "html": "&#76;",
-        "unicode": "4C",
-        "decimal": 2,
-        "shortName": "SZL",
-        "fraction": "Lilangeni"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Sweden",
-      "code": "46",
-      "iso": "SE",
-      "currency": {
-        "name": "Swedish Krona",
-        "html": "&#107;&#114;",
-        "unicode": "6B72",
-        "decimal": 2,
-        "shortName": "SEK",
-        "fraction": "Krona"
-      },
-      "dateFormat": {
-        "name": "YYYY-MM-DD",
-        "value": "2022-01-31"
-      }
-    },
-    {
-      "name": "Switzerland",
-      "code": "41",
-      "iso": "CH",
-      "currency": {
-        "name": "Swiss Franc",
-        "html": "&#67;&#72;&#70;",
-        "unicode": "43",
-        "decimal": 2,
-        "shortName": "CHF",
-        "fraction": "Franc"
-      },
-      "dateFormat": {
-        "name": "DD.MM.YYYY",
-        "value": "31.01.2022"
-      }
-    },
-    {
-      "name": "Syria",
-      "code": "963",
-      "iso": "SY",
-      "currency": {
-        "name": "Syrian Pound",
-        "html": "&#163;",
-        "unicode": "A3",
-        "decimal": 2,
-        "shortName": "SYP",
-        "fraction": "Pound"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-  
-    {
-      "name": "Taiwan",
-      "code": "886",
-      "iso": "TW",
-              "currency": {
-          "name": "New Taiwan Dollar",
-          "html": "&#78;&#84;&#36;",
-          "unicode": "4E5424",
-          "decimal": 2,
-          "shortName": "TWD",
-          "fraction": "Dollar"
-        },
-        "dateFormat": {
-          "name": "YYYY/MM/DD",
-          "value": "2022/01/31"
-        }
-    },
-    {
-      "name": "Tajikistan",
-      "code": "992",
-      "iso": "TJ",
-      "currency": {
-        "name": "Tajikistani Somoni",
-        "html": "&#83;&#77;",
-        "unicode": "534D",
-        "decimal": 2,
-        "shortName": "TJS",
-        "fraction": "Somoni"
-      },
-      "dateFormat": {
-        "name": "DD-MM-YYYY",
-        "value": "31-01-2022"
-      }
-    },
-    {
-      "name": "Tanzania",
-      "code": "255",
-      "iso": "TZ",
-      "currency": {
-        "name": "Tanzanian Shilling",
-        "html": "&#84;&#83;&#104;",
-        "unicode": "545368",
-        "decimal": 2,
-        "shortName": "TZS",
-        "fraction": "Shilling"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      },
-      "fiscalstart": "July-01"
-    },
-    {
-      "name": "Thailand",
-      "code": "66",
-      "iso": "TH",
-      "currency": {
-        "name": "Thai Baht",
-        "html": "&#3647;",
-        "unicode": "E3F",
-        "decimal": 2,
-        "shortName": "THB",
-        "fraction": "Baht"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      },
-      "fiscalstart": "October-01"
-    },
-    {
-      "name": "Togo",
-      "code": "228",
-      "iso": "TG",
-      "currency": {
-        "name": "West African CFA Franc",
-        "html": "&#70;&#67;&#70;&#65;",
-        "unicode": "46C46",
-        "decimal": 0,
-        "shortName": "XOF",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Tokelau",
-      "code": "690",
-      "iso": "TK",
-      "currency": {
-        "name": "New Zealand Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "NZD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Tonga",
-      "code": "676",
-      "iso": "TO",
-      "currency": {
-        "name": "Tongan Paʻanga",
-        "html": "&#84;&#36;",
-        "unicode": "54",
-        "decimal": 2,
-        "shortName": "TOP",
-        "fraction": "Paʻanga"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Trinidad and Tobago",
-      "code": "1-868",
-      "iso": "TT",
-      "currency": {
-        "name": "Trinidad and Tobago Dollar",
-        "html": "&#84;&#84;&#36;",
-        "unicode": "545424",
-        "decimal": 2,
-        "shortName": "TTD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "MM/DD/YYYY",
-        "value": "01/31/2022"
-      }
-    },
-    {
-      "name": "Tunisia",
-      "code": "216",
-      "iso": "TN",
-      "currency": {
-        "name": "Tunisian Dinar",
-        "html": "&#1583;.&#1578;",
-        "unicode": "62C2E",
-        "decimal": 3,
-        "shortName": "TND",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Turkey",
-      "code": "90",
-      "iso": "TR",
-      "currency": {
-        "name": "Turkish Lira",
-        "html": "&#8378;",
-        "unicode": "20BA",
-        "decimal": 2,
-        "shortName": "TRY",
-        "fraction": "Lira"
-      },
-      "dateFormat": {
-        "name": "DD.MM.YYYY",
-        "value": "31.01.2022"
-      }
-    },
-    {
-      "name": "Turkmenistan",
-      "code": "993",
-      "iso": "TM",
-      "currency": {
-        "name": "Turkmenistan Manat",
-        "html": "&#109;",
-        "unicode": "6D",
-        "decimal": 2,
-        "shortName": "TMT",
-        "fraction": "Manat"
-      },
-      "dateFormat": {
-        "name": "DD.MM.YYYY",
-        "value": "31.01.2022"
-      }
-    },
-    {
-      "name": "Turks and Caicos Islands",
-      "code": "1-649",
-      "iso": "TC",
-      "currency": {
-        "name": "United States Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "USD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "MM/DD/YYYY",
-        "value": "01/31/2022"
-      }
-    },
-    {
-      "name": "Tuvalu",
-      "code": "688",
-      "iso": "TV",
-      "currency": {
-        "name": "Australian Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "AUD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "U.S. Virgin Islands",
-      "code": "1-340",
-      "iso": "VI",
-      "currency": {
-        "name": "United States Dollar",
-        "html": "&#36;",
-        "unicode": "24",
-        "decimal": 2,
-        "shortName": "USD",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "MM/DD/YYYY",
-        "value": "01/31/2022"
-      }
-    },
-    {
-      "name": "Uganda",
-      "code": "256",
-      "iso": "UG",
-      "currency": {
-        "name": "Ugandan Shilling",
-        "html": "&#85;&#83;&#104;",
-        "unicode": "555368",
-        "decimal": 0,
-        "shortName": "UGX",
-        "fraction": "Shilling"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      },
-      "fiscalstart": "July-01"
-    },
-    {
-      "name": "Ukraine",
-      "code": "380",
-      "iso": "UA",
-      "currency": {
-        "name": "Ukrainian Hryvnia",
-        "html": "&#8372;",
-        "unicode": "20B4",
-        "decimal": 2,
-        "shortName": "UAH",
-        "fraction": "Hryvnia"
-      },
-      "dateFormat": {
-        "name": "DD.MM.YYYY",
-        "value": "31.01.2022"
-      }
-    },
-    {
-      "name": "Uruguay",
-      "code": "598",
-      "iso": "UY",
-      "currency": {
-        "name": "Uruguayan Peso",
-        "html": "&#36;&#85;",
-        "unicode": "2455",
-        "decimal": 2,
-        "shortName": "UYU",
-        "fraction": "Peso"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Uzbekistan",
-      "code": "998",
-      "iso": "UZ",
-      "currency": {
-        "name": "Uzbekistani So\"m",
-        "html": "&#1083;&#1074;",
-        "unicode": "43B432",
-        "decimal": 2,
-        "shortName": "UZS",
-        "fraction": "Som"
-      },
-      "dateFormat": {
-        "name": "DD.MM.YYYY",
-        "value": "31.01.2022"
-      }
-    },
-    {
-      "name": "Vanuatu",
-      "code": "678",
-      "iso": "VU",
-      "currency": {
-        "name": "Vanuatu Vatu",
-        "html": "&#86;&#84;",
-        "unicode": "5654",
-        "decimal": 0,
-        "shortName": "VUV",
-        "fraction": "Vatu"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Vatican",
-      "code": "379",
-      "iso": "VA",
-      "currency": {
-        "name": "Euro",
-        "html": "&#8364;",
-        "unicode": "20AC",
-        "decimal": 2,
-        "shortName": "EUR",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Venezuela",
-      "code": "58",
-      "iso": "VE",
-      "currency": {
-        "name": "Venezuelan Bolívar",
-        "html": "&#66;&#115;",
-        "unicode": "4273",
-        "decimal": 2,
-        "shortName": "VES",
-        "fraction": "Bolívar"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Vietnam",
-      "code": "84",
-      "iso": "VN",
-      "currency": {
-        "name": "Vietnamese Đồng",
-        "html": "&#8363;",
-        "unicode": "20AB",
-        "decimal": 0,
-        "shortName": "VND",
-        "fraction": "Dong"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Wallis and Futuna",
-      "code": "681",
-      "iso": "WF",
-      "currency": {
-        "name": "CFP Franc",
-        "html": "&#70;",
-        "unicode": "46",
-        "decimal": 0,
-        "shortName": "XPF",
-        "fraction": "Cent"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Western Sahara",
-      "code": "212",
-      "iso": "EH",
-      "currency": {
-        "name": "Moroccan Dirham",
-        "html": "&#1583;.&#1605;.",
-        "unicode": "62C2E",
-        "decimal": 2,
-        "shortName": "MAD",
-        "fraction": "Dirham"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Yemen",
-      "code": "967",
-      "iso": "YE",
-      "currency": {
-        "name": "Yemeni Rial",
-        "html": "&#65020;",
-        "unicode": "FDFC",
-        "decimal": 2,
-        "shortName": "YER",
-        "fraction": "Rial"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Zambia",
-      "code": "260",
-      "iso": "ZM",
-      "currency": {
-        "name": "Zambian Kwacha",
-        "html": "&#90;&#75;",
-        "unicode": "5A4B",
-        "decimal": 2,
-        "shortName": "ZMW",
-        "fraction": "Kwacha"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    },
-    {
-      "name": "Zimbabwe",
-      "code": "263",
-      "iso": "ZW",
-      "currency": {
-        "name": "Zimbabwean Dollar",
-        "html": "&#90;&#36;",
-        "unicode": "5A24",
-        "decimal": 2,
-        "shortName": "ZWL",
-        "fraction": "Dollar"
-      },
-      "dateFormat": {
-        "name": "DD/MM/YYYY",
-        "value": "31/01/2022"
-      }
-    }
-  
-  ]
-  
+  {
+    "code": "AF",
+    "name": "Afghanistan",
+    "iso": "AFG",
+    "phone": "93",
+    "currencycode": "AFN",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Kabul"
+  },
+  {
+    "code": "AX",
+    "name": "Åland Islands",
+    "iso": "ALA",
+    "phone": "358",
+    "currencycode": "EUR",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Mariehamn"
+  },
+  {
+    "code": "AL",
+    "name": "Albania",
+    "iso": "ALB",
+    "phone": "355",
+    "currencycode": "ALL",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Tirane"
+  },
+  {
+    "code": "DZ",
+    "name": "Algeria",
+    "iso": "DZA",
+    "phone": "213",
+    "currencycode": "DZD",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Algiers"
+  },
+  {
+    "code": "AS",
+    "name": "American Samoa",
+    "iso": "ASM",
+    "phone": "1684",
+    "currencycode": "USD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Pacific/Pago_Pago"
+  },
+  {
+    "code": "AD",
+    "name": "Andorra",
+    "iso": "AND",
+    "phone": "376",
+    "currencycode": "EUR",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Andorra"
+  },
+  {
+    "code": "AO",
+    "name": "Angola",
+    "iso": "AGO",
+    "phone": "244",
+    "currencycode": "AOA",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Luanda"
+  },
+  {
+    "code": "AI",
+    "name": "Anguilla",
+    "iso": "AIA",
+    "phone": "1264",
+    "currencycode": "XCD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Anguilla"
+  },
+  {
+    "code": "AQ",
+    "name": "Antarctica",
+    "iso": "ATA",
+    "phone": "672",
+    "currencycode": "USD",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Antarctica/Vostok"
+  },
+  {
+    "code": "AG",
+    "name": "Antigua and Barbuda",
+    "iso": "ATG",
+    "phone": "1268",
+    "currencycode": "XCD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Antigua"
+  },
+  {
+    "code": "AR",
+    "name": "Argentina",
+    "iso": "ARG",
+    "phone": "54",
+    "currencycode": "ARS",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Argentina/Ushuaia"
+  },
+  {
+    "code": "AM",
+    "name": "Armenia",
+    "iso": "ARM",
+    "phone": "374",
+    "currencycode": "AMD",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Yerevan"
+  },
+  {
+    "code": "AW",
+    "name": "Aruba",
+    "iso": "ABW",
+    "phone": "297",
+    "currencycode": "AWG",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Aruba"
+  },
+  {
+    "code": "AU",
+    "name": "Australia",
+    "iso": "AUS",
+    "phone": "61",
+    "currencycode": "AUD",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "July-01",
+    "timezone": "Australia/Sydney"
+  },
+  {
+    "code": "AT",
+    "name": "Austria",
+    "iso": "AUT",
+    "phone": "43",
+    "currencycode": "EUR",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Vienna"
+  },
+  {
+    "code": "AZ",
+    "name": "Azerbaijan",
+    "iso": "AZE",
+    "phone": "994",
+    "currencycode": "AZN",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Baku"
+  },
+  {
+    "code": "BS",
+    "name": "Bahamas",
+    "iso": "BHS",
+    "phone": "1242",
+    "currencycode": "BSD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Nassau"
+  },
+  {
+    "code": "BH",
+    "name": "Bahrain",
+    "iso": "BHR",
+    "phone": "973",
+    "currencycode": "BHD",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Bahrain"
+  },
+  {
+    "code": "BD",
+    "name": "Bangladesh",
+    "iso": "BGD",
+    "phone": "880",
+    "currencycode": "BDT",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "July-01",
+    "timezone": "Asia/Dhaka"
+  },
+  {
+    "code": "BB",
+    "name": "Barbados",
+    "iso": "BRB",
+    "phone": "1246",
+    "currencycode": "BBD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Barbados"
+  },
+  {
+    "code": "BY",
+    "name": "Belarus",
+    "iso": "BLR",
+    "phone": "375",
+    "currencycode": "BYN",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Minsk"
+  },
+  {
+    "code": "BE",
+    "name": "Belgium",
+    "iso": "BEL",
+    "phone": "32",
+    "currencycode": "EUR",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Brussels"
+  },
+  {
+    "code": "BZ",
+    "name": "Belize",
+    "iso": "BLZ",
+    "phone": "501",
+    "currencycode": "BZD",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Belize"
+  },
+  {
+    "code": "BJ",
+    "name": "Benin",
+    "iso": "BEN",
+    "phone": "229",
+    "currencycode": "XOF",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Porto-Novo"
+  },
+  {
+    "code": "BM",
+    "name": "Bermuda",
+    "iso": "BMU",
+    "phone": "1441",
+    "currencycode": "BMD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Atlantic/Bermuda"
+  },
+  {
+    "code": "BT",
+    "name": "Bhutan",
+    "iso": "BTN",
+    "phone": "975",
+    "currencycode": "BTN",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Thimphu"
+  },
+  {
+    "code": "BO",
+    "name": "Bolivia, Plurinational State of",
+    "iso": "BOL",
+    "phone": "591",
+    "currencycode": "BOB",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/La_Paz"
+  },
+  {
+    "code": "BQ",
+    "name": "Bonaire, Sint Eustatius and Saba",
+    "iso": "BES",
+    "phone": "5997",
+    "currencycode": "USD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Kralendijk"
+  },
+  {
+    "code": "BA",
+    "name": "Bosnia and Herzegovina",
+    "iso": "BIH",
+    "phone": "387",
+    "currencycode": "BAM",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Sarajevo"
+  },
+  {
+    "code": "BW",
+    "name": "Botswana",
+    "iso": "BWA",
+    "phone": "267",
+    "currencycode": "BWP",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Gaborone"
+  },
+  {
+    "code": "BV",
+    "name": "Bouvet Island",
+    "iso": "BVT",
+    "phone": "47",
+    "currencycode": "NOK",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Etc/UTC"
+  },
+  {
+    "code": "BR",
+    "name": "Brazil",
+    "iso": "BRA",
+    "phone": "55",
+    "currencycode": "BRL",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Sao_Paulo"
+  },
+  {
+    "code": "IO",
+    "name": "British Indian Ocean Territory",
+    "iso": "IOT",
+    "phone": "246",
+    "currencycode": "USD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Indian/Chagos"
+  },
+  {
+    "code": "BN",
+    "name": "Brunei Darussalam",
+    "iso": "BRN",
+    "phone": "673",
+    "currencycode": "BND",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Brunei"
+  },
+  {
+    "code": "BG",
+    "name": "Bulgaria",
+    "iso": "BGR",
+    "phone": "359",
+    "currencycode": "BGN",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Sofia"
+  },
+  {
+    "code": "BF",
+    "name": "Burkina Faso",
+    "iso": "BFA",
+    "phone": "226",
+    "currencycode": "XOF",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Ouagadougou"
+  },
+  {
+    "code": "BI",
+    "name": "Burundi",
+    "iso": "BDI",
+    "phone": "257",
+    "currencycode": "BIF",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Bujumbura"
+  },
+  {
+    "code": "CV",
+    "name": "Cabo Verde",
+    "iso": "CPV",
+    "phone": "238",
+    "currencycode": "CVE",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Atlantic/Cape_Verde"
+  },
+  {
+    "code": "KH",
+    "name": "Cambodia",
+    "iso": "KHM",
+    "phone": "855",
+    "currencycode": "KHR",
+    "dateformat": "YYYY-MM-DD",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Phnom_Penh"
+  },
+  {
+    "code": "CM",
+    "name": "Cameroon",
+    "iso": "CMR",
+    "phone": "237",
+    "currencycode": "XAF",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Douala"
+  },
+  {
+    "code": "CA",
+    "name": "Canada",
+    "iso": "CAN",
+    "phone": "1",
+    "currencycode": "CAD",
+    "dateformat": "YYYY-MM-DD",
+    "fiscalstart": "April-01",
+    "timezone": "America/Winnipeg"
+  },
+  {
+    "code": "KY",
+    "name": "Cayman Islands",
+    "iso": "CYM",
+    "phone": "1345",
+    "currencycode": "KYD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Cayman"
+  },
+  {
+    "code": "CF",
+    "name": "Central African Republic",
+    "iso": "CAF",
+    "phone": "236",
+    "currencycode": "XAF",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Bangui"
+  },
+  {
+    "code": "TD",
+    "name": "Chad",
+    "iso": "TCD",
+    "phone": "235",
+    "currencycode": "XAF",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Ndjamena"
+  },
+  {
+    "code": "CL",
+    "name": "Chile",
+    "iso": "CHL",
+    "phone": "56",
+    "currencycode": "CLP",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Pacific/Easter"
+  },
+  {
+    "code": "CN",
+    "name": "China",
+    "iso": "CHN",
+    "phone": "86",
+    "currencycode": "CNY",
+    "dateformat": "YYYY-MM-DD",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Urumqi"
+  },
+  {
+    "code": "CX",
+    "name": "Christmas Island",
+    "iso": "CXR",
+    "phone": "61",
+    "currencycode": "AUD",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Indian/Christmas"
+  },
+  {
+    "code": "CC",
+    "name": "Cocos (Keeling) Islands",
+    "iso": "CCK",
+    "phone": "61",
+    "currencycode": "AUD",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Indian/Cocos"
+  },
+  {
+    "code": "CO",
+    "name": "Colombia",
+    "iso": "COL",
+    "phone": "57",
+    "currencycode": "COP",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Bogota"
+  },
+  {
+    "code": "KM",
+    "name": "Comoros",
+    "iso": "COM",
+    "phone": "269",
+    "currencycode": "KMF",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Indian/Comoro"
+  },
+  {
+    "code": "CG",
+    "name": "Congo",
+    "iso": "COG",
+    "phone": "242",
+    "currencycode": "XAF",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Brazzaville"
+  },
+  {
+    "code": "CD",
+    "name": "Congo, Democratic Republic of the",
+    "iso": "COD",
+    "phone": "243",
+    "currencycode": "CDF",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Lubumbashi"
+  },
+  {
+    "code": "CK",
+    "name": "Cook Islands",
+    "iso": "COK",
+    "phone": "682",
+    "currencycode": "NZD",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Pacific/Rarotonga"
+  },
+  {
+    "code": "CR",
+    "name": "Costa Rica",
+    "iso": "CRI",
+    "phone": "506",
+    "currencycode": "CRC",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Costa_Rica"
+  },
+  {
+    "code": "CI",
+    "name": "Côte d'Ivoire",
+    "iso": "CIV",
+    "phone": "225",
+    "currencycode": "XOF",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Abidjan"
+  },
+  {
+    "code": "HR",
+    "name": "Croatia",
+    "iso": "HRV",
+    "phone": "385",
+    "currencycode": "EUR",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Zagreb"
+  },
+  {
+    "code": "CU",
+    "name": "Cuba",
+    "iso": "CUB",
+    "phone": "53",
+    "currencycode": "CUP",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Havana"
+  },
+  {
+    "code": "CW",
+    "name": "Curaçao",
+    "iso": "CUW",
+    "phone": "5999",
+    "currencycode": "ANG",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Curacao"
+  },
+  {
+    "code": "CY",
+    "name": "Cyprus",
+    "iso": "CYP",
+    "phone": "357",
+    "currencycode": "EUR",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Nicosia"
+  },
+  {
+    "code": "CZ",
+    "name": "Czechia",
+    "iso": "CZE",
+    "phone": "420",
+    "currencycode": "CZK",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Prague"
+  },
+  {
+    "code": "DK",
+    "name": "Denmark",
+    "iso": "DNK",
+    "phone": "45",
+    "currencycode": "DKK",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Copenhagen"
+  },
+  {
+    "code": "DJ",
+    "name": "Djibouti",
+    "iso": "DJI",
+    "phone": "253",
+    "currencycode": "DJF",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Djibouti"
+  },
+  {
+    "code": "DM",
+    "name": "Dominica",
+    "iso": "DMA",
+    "phone": "1767",
+    "currencycode": "XCD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Dominica"
+  },
+  {
+    "code": "DO",
+    "name": "Dominican Republic",
+    "iso": "DOM",
+    "phone": "1809",
+    "currencycode": "DOP",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Santo_Domingo"
+  },
+  {
+    "code": "EC",
+    "name": "Ecuador",
+    "iso": "ECU",
+    "phone": "593",
+    "currencycode": "USD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Pacific/Galapagos"
+  },
+  {
+    "code": "EG",
+    "name": "Egypt",
+    "iso": "EGY",
+    "phone": "20",
+    "currencycode": "EGP",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "July-01",
+    "timezone": "Africa/Cairo"
+  },
+  {
+    "code": "SV",
+    "name": "El Salvador",
+    "iso": "SLV",
+    "phone": "503",
+    "currencycode": "SVC",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/El_Salvador"
+  },
+  {
+    "code": "GQ",
+    "name": "Equatorial Guinea",
+    "iso": "GNQ",
+    "phone": "240",
+    "currencycode": "XAF",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Malabo"
+  },
+  {
+    "code": "ER",
+    "name": "Eritrea",
+    "iso": "ERI",
+    "phone": "291",
+    "currencycode": "ERN",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Asmara"
+  },
+  {
+    "code": "EE",
+    "name": "Estonia",
+    "iso": "EST",
+    "phone": "372",
+    "currencycode": "EUR",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Tallinn"
+  },
+  {
+    "code": "SZ",
+    "name": "Eswatini",
+    "iso": "SWZ",
+    "phone": "268",
+    "currencycode": "SZL",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Mbabane"
+  },
+  {
+    "code": "ET",
+    "name": "Ethiopia",
+    "iso": "ETH",
+    "phone": "251",
+    "currencycode": "ETB",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Addis_Ababa"
+  },
+  {
+    "code": "FK",
+    "name": "Falkland Islands (Malvinas)",
+    "iso": "FLK",
+    "phone": "500",
+    "currencycode": "FKP",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Atlantic/Stanley"
+  },
+  {
+    "code": "FO",
+    "name": "Faroe Islands",
+    "iso": "FRO",
+    "phone": "298",
+    "currencycode": "DKK",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Atlantic/Faroe"
+  },
+  {
+    "code": "FJ",
+    "name": "Fiji",
+    "iso": "FJI",
+    "phone": "679",
+    "currencycode": "FJD",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Pacific/Fiji"
+  },
+  {
+    "code": "FI",
+    "name": "Finland",
+    "iso": "FIN",
+    "phone": "358",
+    "currencycode": "EUR",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Helsinki"
+  },
+  {
+    "code": "FR",
+    "name": "France",
+    "iso": "FRA",
+    "phone": "33",
+    "currencycode": "EUR",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Paris"
+  },
+  {
+    "code": "GF",
+    "name": "French Guiana",
+    "iso": "GUF",
+    "phone": "594",
+    "currencycode": "EUR",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Cayenne"
+  },
+  {
+    "code": "PF",
+    "name": "French Polynesia",
+    "iso": "PYF",
+    "phone": "689",
+    "currencycode": "XPF",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Pacific/Tahiti"
+  },
+  {
+    "code": "TF",
+    "name": "French Southern Territories",
+    "iso": "ATF",
+    "phone": "262",
+    "currencycode": "EUR",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Indian/Kerguelen"
+  },
+  {
+    "code": "GA",
+    "name": "Gabon",
+    "iso": "GAB",
+    "phone": "241",
+    "currencycode": "XAF",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Libreville"
+  },
+  {
+    "code": "GM",
+    "name": "Gambia",
+    "iso": "GMB",
+    "phone": "220",
+    "currencycode": "GMD",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Banjul"
+  },
+  {
+    "code": "GE",
+    "name": "Georgia",
+    "iso": "GEO",
+    "phone": "995",
+    "currencycode": "GEL",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Tbilisi"
+  },
+  {
+    "code": "DE",
+    "name": "Germany",
+    "iso": "DEU",
+    "phone": "49",
+    "currencycode": "EUR",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Busingen"
+  },
+  {
+    "code": "GH",
+    "name": "Ghana",
+    "iso": "GHA",
+    "phone": "233",
+    "currencycode": "GHS",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Accra"
+  },
+  {
+    "code": "GI",
+    "name": "Gibraltar",
+    "iso": "GIB",
+    "phone": "350",
+    "currencycode": "GIP",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Gibraltar"
+  },
+  {
+    "code": "GR",
+    "name": "Greece",
+    "iso": "GRC",
+    "phone": "30",
+    "currencycode": "EUR",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Athens"
+  },
+  {
+    "code": "GL",
+    "name": "Greenland",
+    "iso": "GRL",
+    "phone": "299",
+    "currencycode": "DKK",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Thule"
+  },
+  {
+    "code": "GD",
+    "name": "Grenada",
+    "iso": "GRD",
+    "phone": "1473",
+    "currencycode": "XCD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Grenada"
+  },
+  {
+    "code": "GP",
+    "name": "Guadeloupe",
+    "iso": "GLP",
+    "phone": "590",
+    "currencycode": "EUR",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Guadeloupe"
+  },
+  {
+    "code": "GU",
+    "name": "Guam",
+    "iso": "GUM",
+    "phone": "1671",
+    "currencycode": "USD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Pacific/Guam"
+  },
+  {
+    "code": "GT",
+    "name": "Guatemala",
+    "iso": "GTM",
+    "phone": "502",
+    "currencycode": "GTQ",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Guatemala"
+  },
+  {
+    "code": "GG",
+    "name": "Guernsey",
+    "iso": "GGY",
+    "phone": "44",
+    "currencycode": "GBP",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Guernsey"
+  },
+  {
+    "code": "GN",
+    "name": "Guinea",
+    "iso": "GIN",
+    "phone": "224",
+    "currencycode": "GNF",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Conakry"
+  },
+  {
+    "code": "GW",
+    "name": "Guinea-Bissau",
+    "iso": "GNB",
+    "phone": "245",
+    "currencycode": "XOF",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Bissau"
+  },
+  {
+    "code": "GY",
+    "name": "Guyana",
+    "iso": "GUY",
+    "phone": "592",
+    "currencycode": "GYD",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Guyana"
+  },
+  {
+    "code": "HT",
+    "name": "Haiti",
+    "iso": "HTI",
+    "phone": "509",
+    "currencycode": "HTG",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Port-au-Prince"
+  },
+  {
+    "code": "HM",
+    "name": "Heard Island and McDonald Islands",
+    "iso": "HMD",
+    "phone": "61",
+    "currencycode": "AUD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Indian/Kerguelen"
+  },
+  {
+    "code": "VA",
+    "name": "Holy See",
+    "iso": "VAT",
+    "phone": "379",
+    "currencycode": "EUR",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Vatican"
+  },
+  {
+    "code": "HN",
+    "name": "Honduras",
+    "iso": "HND",
+    "phone": "504",
+    "currencycode": "HNL",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Tegucigalpa"
+  },
+  {
+    "code": "HK",
+    "name": "Hong Kong",
+    "iso": "HKG",
+    "phone": "852",
+    "currencycode": "HKD",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "April-01",
+    "timezone": "Asia/Hong_Kong"
+  },
+  {
+    "code": "HU",
+    "name": "Hungary",
+    "iso": "HUN",
+    "phone": "36",
+    "currencycode": "HUF",
+    "dateformat": "YYYY.MM.DD",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Budapest"
+  },
+  {
+    "code": "IS",
+    "name": "Iceland",
+    "iso": "ISL",
+    "phone": "354",
+    "currencycode": "ISK",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Atlantic/Reykjavik"
+  },
+  {
+    "code": "IN",
+    "name": "India",
+    "iso": "IND",
+    "phone": "91",
+    "currencycode": "INR",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "April-01",
+    "timezone": "Asia/Kolkata"
+  },
+  {
+    "code": "ID",
+    "name": "Indonesia",
+    "iso": "IDN",
+    "phone": "62",
+    "currencycode": "IDR",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Pontianak"
+  },
+  {
+    "code": "IR",
+    "name": "Iran, Islamic Republic of",
+    "iso": "IRN",
+    "phone": "98",
+    "currencycode": "IRR",
+    "dateformat": "YYYY/MM/DD",
+    "fiscalstart": "March-21",
+    "timezone": "Asia/Tehran"
+  },
+  {
+    "code": "IQ",
+    "name": "Iraq",
+    "iso": "IRQ",
+    "phone": "964",
+    "currencycode": "IQD",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Baghdad"
+  },
+  {
+    "code": "IE",
+    "name": "Ireland",
+    "iso": "IRL",
+    "phone": "353",
+    "currencycode": "EUR",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Dublin"
+  },
+  {
+    "code": "IM",
+    "name": "Isle of Man",
+    "iso": "IMN",
+    "phone": "44",
+    "currencycode": "GBP",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Isle_of_Man"
+  },
+  {
+    "code": "IL",
+    "name": "Israel",
+    "iso": "ISR",
+    "phone": "972",
+    "currencycode": "ILS",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Jerusalem"
+  },
+  {
+    "code": "IT",
+    "name": "Italy",
+    "iso": "ITA",
+    "phone": "39",
+    "currencycode": "EUR",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Rome"
+  },
+  {
+    "code": "JM",
+    "name": "Jamaica",
+    "iso": "JAM",
+    "phone": "1876",
+    "currencycode": "JMD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Jamaica"
+  },
+  {
+    "code": "JP",
+    "name": "Japan",
+    "iso": "JPN",
+    "phone": "81",
+    "currencycode": "JPY",
+    "dateformat": "YYYY/MM/DD",
+    "fiscalstart": "April-01",
+    "timezone": "Asia/Tokyo"
+  },
+  {
+    "code": "JE",
+    "name": "Jersey",
+    "iso": "JEY",
+    "phone": "44",
+    "currencycode": "GBP",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Jersey"
+  },
+  {
+    "code": "JO",
+    "name": "Jordan",
+    "iso": "JOR",
+    "phone": "962",
+    "currencycode": "JOD",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Amman"
+  },
+  {
+    "code": "KZ",
+    "name": "Kazakhstan",
+    "iso": "KAZ",
+    "phone": "7",
+    "currencycode": "KZT",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Qyzylorda"
+  },
+  {
+    "code": "KE",
+    "name": "Kenya",
+    "iso": "KEN",
+    "phone": "254",
+    "currencycode": "KES",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "July-01",
+    "timezone": "Africa/Nairobi"
+  },
+  {
+    "code": "KI",
+    "name": "Kiribati",
+    "iso": "KIR",
+    "phone": "686",
+    "currencycode": "AUD",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Pacific/Tarawa"
+  },
+  {
+    "code": "KP",
+    "name": "Korea, Democratic People's Republic of",
+    "iso": "PRK",
+    "phone": "850",
+    "currencycode": "KPW",
+    "dateformat": "YYYY-MM-DD",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Pyongyang"
+  },
+  {
+    "code": "KR",
+    "name": "Korea, Republic of",
+    "iso": "KOR",
+    "phone": "82",
+    "currencycode": "KRW",
+    "dateformat": "YYYY.MM.DD",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Seoul"
+  },
+  {
+    "code": "KW",
+    "name": "Kuwait",
+    "iso": "KWT",
+    "phone": "965",
+    "currencycode": "KWD",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Kuwait"
+  },
+  {
+    "code": "KG",
+    "name": "Kyrgyzstan",
+    "iso": "KGZ",
+    "phone": "996",
+    "currencycode": "KGS",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Bishkek"
+  },
+  {
+    "code": "LA",
+    "name": "Lao People's Democratic Republic",
+    "iso": "LAO",
+    "phone": "856",
+    "currencycode": "LAK",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Vientiane"
+  },
+  {
+    "code": "LV",
+    "name": "Latvia",
+    "iso": "LVA",
+    "phone": "371",
+    "currencycode": "EUR",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Riga"
+  },
+  {
+    "code": "LB",
+    "name": "Lebanon",
+    "iso": "LBN",
+    "phone": "961",
+    "currencycode": "LBP",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Beirut"
+  },
+  {
+    "code": "LS",
+    "name": "Lesotho",
+    "iso": "LSO",
+    "phone": "266",
+    "currencycode": "LSL",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Maseru"
+  },
+  {
+    "code": "LR",
+    "name": "Liberia",
+    "iso": "LBR",
+    "phone": "231",
+    "currencycode": "LRD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Monrovia"
+  },
+  {
+    "code": "LY",
+    "name": "Libya",
+    "iso": "LBY",
+    "phone": "218",
+    "currencycode": "LYD",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Tripoli"
+  },
+  {
+    "code": "LI",
+    "name": "Liechtenstein",
+    "iso": "LIE",
+    "phone": "423",
+    "currencycode": "CHF",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Vaduz"
+  },
+  {
+    "code": "LT",
+    "name": "Lithuania",
+    "iso": "LTU",
+    "phone": "370",
+    "currencycode": "EUR",
+    "dateformat": "YYYY-MM-DD",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Vilnius"
+  },
+  {
+    "code": "LU",
+    "name": "Luxembourg",
+    "iso": "LUX",
+    "phone": "352",
+    "currencycode": "EUR",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Luxembourg"
+  },
+  {
+    "code": "MO",
+    "name": "Macao",
+    "iso": "MAC",
+    "phone": "853",
+    "currencycode": "MOP",
+    "dateformat": "YYYY/MM/DD",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Macau"
+  },
+  {
+    "code": "MG",
+    "name": "Madagascar",
+    "iso": "MDG",
+    "phone": "261",
+    "currencycode": "MGA",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Indian/Antananarivo"
+  },
+  {
+    "code": "MW",
+    "name": "Malawi",
+    "iso": "MWI",
+    "phone": "265",
+    "currencycode": "MWK",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Blantyre"
+  },
+  {
+    "code": "MY",
+    "name": "Malaysia",
+    "iso": "MYS",
+    "phone": "60",
+    "currencycode": "MYR",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Kuching"
+  },
+  {
+    "code": "MV",
+    "name": "Maldives",
+    "iso": "MDV",
+    "phone": "960",
+    "currencycode": "MVR",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Indian/Maldives"
+  },
+  {
+    "code": "ML",
+    "name": "Mali",
+    "iso": "MLI",
+    "phone": "223",
+    "currencycode": "XOF",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Bamako"
+  },
+  {
+    "code": "MT",
+    "name": "Malta",
+    "iso": "MLT",
+    "phone": "356",
+    "currencycode": "EUR",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Malta"
+  },
+  {
+    "code": "MH",
+    "name": "Marshall Islands",
+    "iso": "MHL",
+    "phone": "692",
+    "currencycode": "USD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Pacific/Majuro"
+  },
+  {
+    "code": "MQ",
+    "name": "Martinique",
+    "iso": "MTQ",
+    "phone": "596",
+    "currencycode": "EUR",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Martinique"
+  },
+  {
+    "code": "MR",
+    "name": "Mauritania",
+    "iso": "MRT",
+    "phone": "222",
+    "currencycode": "MRU",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Nouakchott"
+  },
+  {
+    "code": "MU",
+    "name": "Mauritius",
+    "iso": "MUS",
+    "phone": "230",
+    "currencycode": "MUR",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Indian/Mauritius"
+  },
+  {
+    "code": "YT",
+    "name": "Mayotte",
+    "iso": "MYT",
+    "phone": "262",
+    "currencycode": "EUR",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Indian/Mayotte"
+  },
+  {
+    "code": "MX",
+    "name": "Mexico",
+    "iso": "MEX",
+    "phone": "52",
+    "currencycode": "MXN",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Tijuana"
+  },
+  {
+    "code": "FM",
+    "name": "Micronesia, Federated States of",
+    "iso": "FSM",
+    "phone": "691",
+    "currencycode": "USD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Pacific/Pohnpei"
+  },
+  {
+    "code": "MD",
+    "name": "Moldova, Republic of",
+    "iso": "MDA",
+    "phone": "373",
+    "currencycode": "MDL",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Chisinau"
+  },
+  {
+    "code": "MC",
+    "name": "Monaco",
+    "iso": "MCO",
+    "phone": "377",
+    "currencycode": "EUR",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Monaco"
+  },
+  {
+    "code": "MN",
+    "name": "Mongolia",
+    "iso": "MNG",
+    "phone": "976",
+    "currencycode": "MNT",
+    "dateformat": "YYYY.MM.DD",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Ulaanbaatar"
+  },
+  {
+    "code": "ME",
+    "name": "Montenegro",
+    "iso": "MNE",
+    "phone": "382",
+    "currencycode": "EUR",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Podgorica"
+  },
+  {
+    "code": "MS",
+    "name": "Montserrat",
+    "iso": "MSR",
+    "phone": "1664",
+    "currencycode": "XCD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Montserrat"
+  },
+  {
+    "code": "MA",
+    "name": "Morocco",
+    "iso": "MAR",
+    "phone": "212",
+    "currencycode": "MAD",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/El_Aaiun"
+  },
+  {
+    "code": "MZ",
+    "name": "Mozambique",
+    "iso": "MOZ",
+    "phone": "258",
+    "currencycode": "MZN",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Maputo"
+  },
+  {
+    "code": "MM",
+    "name": "Myanmar",
+    "iso": "MMR",
+    "phone": "95",
+    "currencycode": "MMK",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "October-01",
+    "timezone": "Asia/Yangon"
+  },
+  {
+    "code": "NA",
+    "name": "Namibia",
+    "iso": "NAM",
+    "phone": "264",
+    "currencycode": "NAD",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Windhoek"
+  },
+  {
+    "code": "NR",
+    "name": "Nauru",
+    "iso": "NRU",
+    "phone": "674",
+    "currencycode": "AUD",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Pacific/Nauru"
+  },
+  {
+    "code": "NP",
+    "name": "Nepal",
+    "iso": "NPL",
+    "phone": "977",
+    "currencycode": "NPR",
+    "dateformat": "YYYY-MM-DD",
+    "fiscalstart": "July-01",
+    "timezone": "Asia/Kathmandu"
+  },
+  {
+    "code": "NL",
+    "name": "Netherlands, Kingdom of the",
+    "iso": "NLD",
+    "phone": "31",
+    "currencycode": "EUR",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Amsterdam"
+  },
+  {
+    "code": "NC",
+    "name": "New Caledonia",
+    "iso": "NCL",
+    "phone": "687",
+    "currencycode": "XPF",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Pacific/Noumea"
+  },
+  {
+    "code": "NZ",
+    "name": "New Zealand",
+    "iso": "NZL",
+    "phone": "64",
+    "currencycode": "NZD",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "July-01",
+    "timezone": "Pacific/Chatham"
+  },
+  {
+    "code": "NI",
+    "name": "Nicaragua",
+    "iso": "NIC",
+    "phone": "505",
+    "currencycode": "NIO",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Managua"
+  },
+  {
+    "code": "NE",
+    "name": "Niger",
+    "iso": "NER",
+    "phone": "227",
+    "currencycode": "XOF",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Niamey"
+  },
+  {
+    "code": "NG",
+    "name": "Nigeria",
+    "iso": "NGA",
+    "phone": "234",
+    "currencycode": "NGN",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Lagos"
+  },
+  {
+    "code": "NU",
+    "name": "Niue",
+    "iso": "NIU",
+    "phone": "683",
+    "currencycode": "NZD",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Pacific/Niue"
+  },
+  {
+    "code": "NF",
+    "name": "Norfolk Island",
+    "iso": "NFK",
+    "phone": "672",
+    "currencycode": "AUD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Pacific/Norfolk"
+  },
+  {
+    "code": "MK",
+    "name": "North Macedonia",
+    "iso": "MKD",
+    "phone": "389",
+    "currencycode": "MKD",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Skopje"
+  },
+  {
+    "code": "MP",
+    "name": "Northern Mariana Islands",
+    "iso": "MNP",
+    "phone": "1670",
+    "currencycode": "USD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Pacific/Saipan"
+  },
+  {
+    "code": "NO",
+    "name": "Norway",
+    "iso": "NOR",
+    "phone": "47",
+    "currencycode": "NOK",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Oslo"
+  },
+  {
+    "code": "OM",
+    "name": "Oman",
+    "iso": "OMN",
+    "phone": "968",
+    "currencycode": "OMR",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Muscat"
+  },
+  {
+    "code": "PK",
+    "name": "Pakistan",
+    "iso": "PAK",
+    "phone": "92",
+    "currencycode": "PKR",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "July-01",
+    "timezone": "Asia/Karachi"
+  },
+  {
+    "code": "PW",
+    "name": "Palau",
+    "iso": "PLW",
+    "phone": "680",
+    "currencycode": "USD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Pacific/Palau"
+  },
+  {
+    "code": "PS",
+    "name": "Palestine, State of",
+    "iso": "PSE",
+    "phone": "970",
+    "currencycode": "ILS",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Hebron"
+  },
+  {
+    "code": "PA",
+    "name": "Panama",
+    "iso": "PAN",
+    "phone": "507",
+    "currencycode": "PAB",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Panama"
+  },
+  {
+    "code": "PG",
+    "name": "Papua New Guinea",
+    "iso": "PNG",
+    "phone": "675",
+    "currencycode": "PGK",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Pacific/Port_Moresby"
+  },
+  {
+    "code": "PY",
+    "name": "Paraguay",
+    "iso": "PRY",
+    "phone": "595",
+    "currencycode": "PYG",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Asuncion"
+  },
+  {
+    "code": "PE",
+    "name": "Peru",
+    "iso": "PER",
+    "phone": "51",
+    "currencycode": "PEN",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Lima"
+  },
+  {
+    "code": "PH",
+    "name": "Philippines",
+    "iso": "PHL",
+    "phone": "63",
+    "currencycode": "PHP",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Manila"
+  },
+  {
+    "code": "PN",
+    "name": "Pitcairn",
+    "iso": "PCN",
+    "phone": "64",
+    "currencycode": "NZD",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Pacific/Pitcairn"
+  },
+  {
+    "code": "PL",
+    "name": "Poland",
+    "iso": "POL",
+    "phone": "48",
+    "currencycode": "PLN",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Warsaw"
+  },
+  {
+    "code": "PT",
+    "name": "Portugal",
+    "iso": "PRT",
+    "phone": "351",
+    "currencycode": "EUR",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Lisbon"
+  },
+  {
+    "code": "PR",
+    "name": "Puerto Rico",
+    "iso": "PRI",
+    "phone": "1787",
+    "currencycode": "USD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Puerto_Rico"
+  },
+  {
+    "code": "QA",
+    "name": "Qatar",
+    "iso": "QAT",
+    "phone": "974",
+    "currencycode": "QAR",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Qatar"
+  },
+  {
+    "code": "RE",
+    "name": "Réunion",
+    "iso": "REU",
+    "phone": "262",
+    "currencycode": "EUR",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Indian/Reunion"
+  },
+  {
+    "code": "RO",
+    "name": "Romania",
+    "iso": "ROU",
+    "phone": "40",
+    "currencycode": "RON",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Bucharest"
+  },
+  {
+    "code": "RU",
+    "name": "Russian Federation",
+    "iso": "RUS",
+    "phone": "7",
+    "currencycode": "RUB",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Volgograd"
+  },
+  {
+    "code": "RW",
+    "name": "Rwanda",
+    "iso": "RWA",
+    "phone": "250",
+    "currencycode": "RWF",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Kigali"
+  },
+  {
+    "code": "BL",
+    "name": "Saint Barthélemy",
+    "iso": "BLM",
+    "phone": "590",
+    "currencycode": "EUR",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/St_Barthelemy"
+  },
+  {
+    "code": "SH",
+    "name": "Saint Helena, Ascension and Tristan da Cunha",
+    "iso": "SHN",
+    "phone": "290",
+    "currencycode": "SHP",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Atlantic/St_Helena"
+  },
+  {
+    "code": "KN",
+    "name": "Saint Kitts and Nevis",
+    "iso": "KNA",
+    "phone": "1869",
+    "currencycode": "XCD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/St_Kitts"
+  },
+  {
+    "code": "LC",
+    "name": "Saint Lucia",
+    "iso": "LCA",
+    "phone": "1758",
+    "currencycode": "XCD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/St_Lucia"
+  },
+  {
+    "code": "MF",
+    "name": "Saint Martin (French part)",
+    "iso": "MAF",
+    "phone": "590",
+    "currencycode": "EUR",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Marigot"
+  },
+  {
+    "code": "PM",
+    "name": "Saint Pierre and Miquelon",
+    "iso": "SPM",
+    "phone": "508",
+    "currencycode": "EUR",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Miquelon"
+  },
+  {
+    "code": "VC",
+    "name": "Saint Vincent and the Grenadines",
+    "iso": "VCT",
+    "phone": "1784",
+    "currencycode": "XCD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/St_Vincent"
+  },
+  {
+    "code": "WS",
+    "name": "Samoa",
+    "iso": "WSM",
+    "phone": "685",
+    "currencycode": "WST",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Pacific/Apia"
+  },
+  {
+    "code": "SM",
+    "name": "San Marino",
+    "iso": "SMR",
+    "phone": "378",
+    "currencycode": "EUR",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/San_Marino"
+  },
+  {
+    "code": "ST",
+    "name": "Sao Tome and Principe",
+    "iso": "STP",
+    "phone": "239",
+    "currencycode": "STN",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Sao_Tome"
+  },
+  {
+    "code": "SA",
+    "name": "Saudi Arabia",
+    "iso": "SAU",
+    "phone": "966",
+    "currencycode": "SAR",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Riyadh"
+  },
+  {
+    "code": "SN",
+    "name": "Senegal",
+    "iso": "SEN",
+    "phone": "221",
+    "currencycode": "XOF",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Dakar"
+  },
+  {
+    "code": "RS",
+    "name": "Serbia",
+    "iso": "SRB",
+    "phone": "381",
+    "currencycode": "RSD",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Belgrade"
+  },
+  {
+    "code": "SC",
+    "name": "Seychelles",
+    "iso": "SYC",
+    "phone": "248",
+    "currencycode": "SCR",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Indian/Mahe"
+  },
+  {
+    "code": "SL",
+    "name": "Sierra Leone",
+    "iso": "SLE",
+    "phone": "232",
+    "currencycode": "SLL",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Freetown"
+  },
+  {
+    "code": "SG",
+    "name": "Singapore",
+    "iso": "SGP",
+    "phone": "65",
+    "currencycode": "SGD",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "April-01",
+    "timezone": "Asia/Singapore"
+  },
+  {
+    "code": "SX",
+    "name": "Sint Maarten (Dutch part)",
+    "iso": "SXM",
+    "phone": "1721",
+    "currencycode": "ANG",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Lower_Princes"
+  },
+  {
+    "code": "SK",
+    "name": "Slovakia",
+    "iso": "SVK",
+    "phone": "421",
+    "currencycode": "EUR",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Bratislava"
+  },
+  {
+    "code": "SI",
+    "name": "Slovenia",
+    "iso": "SVN",
+    "phone": "386",
+    "currencycode": "EUR",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Ljubljana"
+  },
+  {
+    "code": "SB",
+    "name": "Solomon Islands",
+    "iso": "SLB",
+    "phone": "677",
+    "currencycode": "SBD",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Pacific/Guadalcanal"
+  },
+  {
+    "code": "SO",
+    "name": "Somalia",
+    "iso": "SOM",
+    "phone": "252",
+    "currencycode": "SOS",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Mogadishu"
+  },
+  {
+    "code": "ZA",
+    "name": "South Africa",
+    "iso": "ZAF",
+    "phone": "27",
+    "currencycode": "ZAR",
+    "dateformat": "YYYY/MM/DD",
+    "fiscalstart": "April-01",
+    "timezone": "Africa/Johannesburg"
+  },
+  {
+    "code": "GS",
+    "name": "South Georgia and the South Sandwich Islands",
+    "iso": "SGS",
+    "phone": "500",
+    "currencycode": "GBP",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Atlantic/South_Georgia"
+  },
+  {
+    "code": "SS",
+    "name": "South Sudan",
+    "iso": "SSD",
+    "phone": "211",
+    "currencycode": "SSP",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Juba"
+  },
+  {
+    "code": "ES",
+    "name": "Spain",
+    "iso": "ESP",
+    "phone": "34",
+    "currencycode": "EUR",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Madrid"
+  },
+  {
+    "code": "LK",
+    "name": "Sri Lanka",
+    "iso": "LKA",
+    "phone": "94",
+    "currencycode": "LKR",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Colombo"
+  },
+  {
+    "code": "SD",
+    "name": "Sudan",
+    "iso": "SDN",
+    "phone": "249",
+    "currencycode": "SDG",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Khartoum"
+  },
+  {
+    "code": "SR",
+    "name": "Suriname",
+    "iso": "SUR",
+    "phone": "597",
+    "currencycode": "SRD",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Paramaribo"
+  },
+  {
+    "code": "SJ",
+    "name": "Svalbard and Jan Mayen",
+    "iso": "SJM",
+    "phone": "4779",
+    "currencycode": "NOK",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Arctic/Longyearbyen"
+  },
+  {
+    "code": "SE",
+    "name": "Sweden",
+    "iso": "SWE",
+    "phone": "46",
+    "currencycode": "SEK",
+    "dateformat": "YYYY-MM-DD",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Stockholm"
+  },
+  {
+    "code": "CH",
+    "name": "Switzerland",
+    "iso": "CHE",
+    "phone": "41",
+    "currencycode": "CHF",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Zurich"
+  },
+  {
+    "code": "SY",
+    "name": "Syrian Arab Republic",
+    "iso": "SYR",
+    "phone": "963",
+    "currencycode": "SYP",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Damascus"
+  },
+  {
+    "code": "TW",
+    "name": "Taiwan, Province of China",
+    "iso": "TWN",
+    "phone": "886",
+    "currencycode": "TWD",
+    "dateformat": "YYYY/MM/DD",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Taipei"
+  },
+  {
+    "code": "TJ",
+    "name": "Tajikistan",
+    "iso": "TJK",
+    "phone": "992",
+    "currencycode": "TJS",
+    "dateformat": "DD-MM-YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Dushanbe"
+  },
+  {
+    "code": "TZ",
+    "name": "Tanzania, United Republic of",
+    "iso": "TZA",
+    "phone": "255",
+    "currencycode": "TZS",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "July-01",
+    "timezone": "Africa/Dar_es_Salaam"
+  },
+  {
+    "code": "TH",
+    "name": "Thailand",
+    "iso": "THA",
+    "phone": "66",
+    "currencycode": "THB",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "October-01",
+    "timezone": "Asia/Bangkok"
+  },
+  {
+    "code": "TL",
+    "name": "Timor-Leste",
+    "iso": "TLS",
+    "phone": "670",
+    "currencycode": "USD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Dili"
+  },
+  {
+    "code": "TG",
+    "name": "Togo",
+    "iso": "TGO",
+    "phone": "228",
+    "currencycode": "XOF",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Lome"
+  },
+  {
+    "code": "TK",
+    "name": "Tokelau",
+    "iso": "TKL",
+    "phone": "690",
+    "currencycode": "NZD",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Pacific/Fakaofo"
+  },
+  {
+    "code": "TO",
+    "name": "Tonga",
+    "iso": "TON",
+    "phone": "676",
+    "currencycode": "TOP",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Pacific/Tongatapu"
+  },
+  {
+    "code": "TT",
+    "name": "Trinidad and Tobago",
+    "iso": "TTO",
+    "phone": "1868",
+    "currencycode": "TTD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Port_of_Spain"
+  },
+  {
+    "code": "TN",
+    "name": "Tunisia",
+    "iso": "TUN",
+    "phone": "216",
+    "currencycode": "TND",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Tunis"
+  },
+  {
+    "code": "TR",
+    "name": "Türkiye",
+    "iso": "TUR",
+    "phone": "90",
+    "currencycode": "TRY",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Istanbul"
+  },
+  {
+    "code": "TM",
+    "name": "Turkmenistan",
+    "iso": "TKM",
+    "phone": "993",
+    "currencycode": "TMT",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Ashgabat"
+  },
+  {
+    "code": "TC",
+    "name": "Turks and Caicos Islands",
+    "iso": "TCA",
+    "phone": "1649",
+    "currencycode": "USD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Grand_Turk"
+  },
+  {
+    "code": "TV",
+    "name": "Tuvalu",
+    "iso": "TUV",
+    "phone": "688",
+    "currencycode": "AUD",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Pacific/Funafuti"
+  },
+  {
+    "code": "UG",
+    "name": "Uganda",
+    "iso": "UGA",
+    "phone": "256",
+    "currencycode": "UGX",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "July-01",
+    "timezone": "Africa/Kampala"
+  },
+  {
+    "code": "UA",
+    "name": "Ukraine",
+    "iso": "UKR",
+    "phone": "380",
+    "currencycode": "UAH",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Europe/Simferopol"
+  },
+  {
+    "code": "AE",
+    "name": "United Arab Emirates",
+    "iso": "ARE",
+    "phone": "971",
+    "currencycode": "AED",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Dubai"
+  },
+  {
+    "code": "GB",
+    "name": "United Kingdom of Great Britain and Northern Ireland",
+    "iso": "GBR",
+    "phone": "44",
+    "currencycode": "GBP",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "April-01",
+    "timezone": "Europe/London"
+  },
+  {
+    "code": "US",
+    "name": "United States of America",
+    "iso": "USA",
+    "phone": "1",
+    "currencycode": "USD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Pacific/Honolulu"
+  },
+  {
+    "code": "UM",
+    "name": "United States Minor Outlying Islands",
+    "iso": "UMI",
+    "phone": "1",
+    "currencycode": "USD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Pacific/Wake"
+  },
+  {
+    "code": "UY",
+    "name": "Uruguay",
+    "iso": "URY",
+    "phone": "598",
+    "currencycode": "UYU",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Montevideo"
+  },
+  {
+    "code": "UZ",
+    "name": "Uzbekistan",
+    "iso": "UZB",
+    "phone": "998",
+    "currencycode": "UZS",
+    "dateformat": "DD.MM.YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Tashkent"
+  },
+  {
+    "code": "VU",
+    "name": "Vanuatu",
+    "iso": "VUT",
+    "phone": "678",
+    "currencycode": "VUV",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Pacific/Efate"
+  },
+  {
+    "code": "VE",
+    "name": "Venezuela, Bolivarian Republic of",
+    "iso": "VEN",
+    "phone": "58",
+    "currencycode": "VEF",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Caracas"
+  },
+  {
+    "code": "VN",
+    "name": "Viet Nam",
+    "iso": "VNM",
+    "phone": "84",
+    "currencycode": "VND",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Ho_Chi_Minh"
+  },
+  {
+    "code": "VG",
+    "name": "Virgin Islands (British)",
+    "iso": "VGB",
+    "phone": "1284",
+    "currencycode": "USD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/Tortola"
+  },
+  {
+    "code": "VI",
+    "name": "Virgin Islands (U.S.)",
+    "iso": "VIR",
+    "phone": "1340",
+    "currencycode": "USD",
+    "dateformat": "MM/DD/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "America/St_Thomas"
+  },
+  {
+    "code": "WF",
+    "name": "Wallis and Futuna",
+    "iso": "WLF",
+    "phone": "681",
+    "currencycode": "XPF",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Pacific/Wallis"
+  },
+  {
+    "code": "EH",
+    "name": "Western Sahara",
+    "iso": "ESH",
+    "phone": "212",
+    "currencycode": "MAD",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/El_Aaiun"
+  },
+  {
+    "code": "YE",
+    "name": "Yemen",
+    "iso": "YEM",
+    "phone": "967",
+    "currencycode": "YER",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Asia/Aden"
+  },
+  {
+    "code": "ZM",
+    "name": "Zambia",
+    "iso": "ZMB",
+    "phone": "260",
+    "currencycode": "ZMW",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Lusaka"
+  },
+  {
+    "code": "ZW",
+    "name": "Zimbabwe",
+    "iso": "ZWE",
+    "phone": "263",
+    "currencycode": "USD",
+    "dateformat": "DD/MM/YYYY",
+    "fiscalstart": "January-01",
+    "timezone": "Africa/Harare"
+  }
+]

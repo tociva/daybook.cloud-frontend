@@ -36,3 +36,22 @@ export interface OrganizationBootstrap {
   dateformat: string;
   dateformatForm?: DateFormat;
 }
+
+export interface OrganizationBootstrapFormData {
+  name: string;
+  email: string;
+  mobile?: string;
+  address: Address;
+  description?: string;
+  country: Country;
+  state?: string;
+  fiscalstart: string;
+  fiscalname: string;
+  fiscaldaterange: string[];
+  gstin?: string;
+  invnumber: string;
+  currency: Currency;
+  jnumber: string;
+  dateformat: string;
+  dateformatForm?: DateFormat;
+}

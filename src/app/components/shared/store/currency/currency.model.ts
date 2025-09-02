@@ -1,10 +1,10 @@
 export interface Currency {
+  code: string;
   name: string;
-  html: string;
-  unicode: string;
-  decimal: number;
-  shortName: string;
-  fraction: string;
+  symbol: string;
+  numericcode: number;
+  minorunit: number | null;
+  fraction?: string;
 }
 
 export interface CurrencyState {

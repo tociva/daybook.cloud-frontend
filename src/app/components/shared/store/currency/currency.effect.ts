@@ -1,47 +1,51 @@
+import { HttpClient } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { tap } from 'rxjs';
-import { CountryStore } from '../country/country.store';
-import { loadCurrencies } from './currency.action';
+import { catchError, map, mergeMap, of, tap } from 'rxjs';
+import { currencyActions } from './currency.action';
 import { Currency } from './currency.model';
 import { CurrencyStore } from './currency.store';
+import { DbcError } from '../../../../util/types/dbc-error.type';
 
 export const currencyEffects = {
   loadCurrencies: createEffect(
     () => {
       const actions$ = inject(Actions);
+      const http = inject(HttpClient);
       const currencyStore = inject(CurrencyStore);
-      const countryStore = inject(CountryStore);
 
       return actions$.pipe(
-        ofType(loadCurrencies),
-        tap(() => {
-          try {
-            const countries = countryStore.countries();
-            const uniqueCurrencies: Currency[] = Array.from(
-              new Map(
-                countries.map((c) => [c.currency.name, c.currency])
-              ).values()
-            );
-
-            currencyStore.setState((state) => ({
-              ...state,
-              currencies: uniqueCurrencies,
-              loaded: true,
-              error: null
-            }));
-          } catch (error) {
-            currencyStore.setState((state) => ({
-              ...state,
-              currencies: [],
-              loaded: false,
-              error: error instanceof Error ? error.message : 'Unknown error'
-            }));
-            console.error('[CurrencyEffects] Failed to extract currencies:', error);
-          }
-        })
+        ofType(currencyActions.loadCurrencies),
+        mergeMap(() =>
+          http.get<Currency[]>('/assets/currency-list.json').pipe(
+            tap((currencies) => {
+              currencyStore.setState((state) => ({
+                ...state,
+                currencies,
+                loaded: true,
+                error: null,
+              }));
+            }),
+            map((currencies) =>
+              currencyActions.loadCurrenciesSuccess({ currencies })
+            ),
+            catchError((error) => {
+              currencyStore.setState((state) => ({
+                ...state,
+                loaded: false,
+                error,
+              }));
+              console.error('[CurrencyEffects] currency load failed:', error);
+              return of(
+                currencyActions.loadCurrenciesFailure({
+                  error: error as DbcError,
+                })
+              );
+            })
+          )
+        )
       );
     },
-    { functional: true, dispatch: false }
-  )
+    { functional: true }
+  ),
 };

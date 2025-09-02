@@ -12,7 +12,7 @@ import { SkeltonLoader } from '../../../../../shared/skelton-loader/skelton-load
 import { customerActions, CustomerCU, CustomerStore } from '../../../store/customer';
 import { Country } from '../../../../../shared/store/country/country.model';
 import { toFlagEmoji } from '../../../../../../util/common.util';
-import { loadCountries } from '../../../../../shared/store/country/country.action';
+import { countryActions } from '../../../../../shared/store/country/country.action';
 import { CountryStore } from '../../../../../shared/store/country/country.store';
 import { CurrencyStore } from '../../../../../shared/store/currency/currency.store';
 import { DateFormatStore } from '../../../../../shared/store/date-format/date-format.store';
@@ -42,16 +42,15 @@ export class CreateCustomer implements OnInit {
   dateFormatStore = inject(DateFormatStore);
   currencies = signal<Currency[]>([]);
   dateFormats = signal<DateFormat[]>([]);
-  
+
   constructor() {
 
     effect(() => {
       if (this.countryStore.countriesLoaded()) {
         this.countries.set(this.countryStore.filteredCountries());
-        
       } 
       else {
-        this.store.dispatch(loadCountries());
+        this.store.dispatch(countryActions.loadCountries({query: {}}));
       }
       if(this.currencyStore.currenciesLoaded()) {
         this.currencies.set(this.currencyStore.filteredCurrencies());
@@ -76,7 +75,7 @@ export class CreateCustomer implements OnInit {
     { key: 'gstin', label: 'GSTIN', type: 'text', required: false, group: 'Basic Details'},
     
     // 🟦 Additional Details
-    { key: 'country', label: 'Country', type: 'auto-complete', required: true, group: 'Basic Details',
+    { key: 'countryObj', label: 'Country', type: 'auto-complete', required: true, group: 'Basic Details',
       placeholder: 'Search for a country',
       validators:(value: unknown) => {
         if(!willPassRequiredStringValidation((value as Country)?.name)) {
@@ -95,6 +94,29 @@ export class CreateCustomer implements OnInit {
       }
      },
     { key: 'state', label: 'State', type: 'text', required: false, group: 'Basic Details'},
+    {
+      key: 'currency',
+      label: 'Currency',
+      type: 'auto-complete',
+      required: true,
+      group: 'Basic Details',
+      placeholder: 'Search for a currency',
+      validators:(value: unknown) => {
+        if(!willPassRequiredStringValidation((value as Currency)?.name)) {
+          return ['Currency is required'];
+        }
+        return [];
+      },
+      autoComplete: {
+        items: this.currencies,
+        optionDisplayValue: (item: Currency) => item.name,
+        inputDisplayValue: (item: Currency) => item.name,
+        trackBy: (item: Currency) => item.name,
+        onSearch: (value: string) => {
+          this.currencyStore.setSearch(value);
+        },
+      }
+    },
     { key: 'description', label: 'Description', type: 'text', required: false, group: 'Basic Details'},
     
     // 🟦 Address Details
@@ -104,7 +126,7 @@ export class CreateCustomer implements OnInit {
     { key: 'address.street', label: 'Street', type: 'text', required: false, group: 'Address Details'},
     { key: 'address.city', label: 'City', type: 'text', required: false, group: 'Address Details'},
     { key: 'address.state', label: 'State', type: 'text', required: false, group: 'Address Details'},
-    { key: 'address.zip', label: '`ZIP` Code', type: 'text', required: false, group: 'Address Details'},
+    { key: 'address.zip', label: 'ZIP Code', type: 'text', required: false, group: 'Address Details'},
     { key: 'address.country', label: 'Country', type: 'text', required: false, group: 'Address Details'},
   ]);
 

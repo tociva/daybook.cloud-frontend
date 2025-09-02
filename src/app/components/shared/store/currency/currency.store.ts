@@ -17,8 +17,12 @@ export const CurrencyStore = signalStore(
       const searchTerm = state.search().toLowerCase();
       return state.currencies().filter((currency) =>
         currency.name.toLowerCase().includes(searchTerm) ||
-        currency.shortName.toLowerCase().includes(searchTerm)
+        currency.code.toLowerCase().includes(searchTerm)
       );
+    },
+
+    fetchAllCurrencies: () => {
+      return state.currencies();
     },
     
   })),

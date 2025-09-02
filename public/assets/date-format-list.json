@@ -1,0 +1,33 @@
+[
+  { "name": "DD/MM/YYYY", "example": "05/01/2025" },
+  { "name": "MM/DD/YYYY", "example": "01/05/2025" },
+  { "name": "DD-MM-YYYY", "example": "05-01-2025" },
+  { "name": "DD.MM.YYYY", "example": "05.01.2025" },
+  { "name": "YYYY-MM-DD", "example": "2025-01-05" },
+  { "name": "YYYY.MM.DD", "example": "2025.01.05" },
+  { "name": "YYYY/MM/DD", "example": "2025/01/05" },
+
+  { "name": "DD/MM/YY", "example": "05/01/25" },
+  { "name": "MM/DD/YY", "example": "01/05/25" },
+  { "name": "YY/MM/DD", "example": "25/01/05" },
+  { "name": "YY-MM-DD", "example": "25-01-05" },
+
+  { "name": "DD-MMM-YYYY", "example": "05-Jan-2025" },
+  { "name": "DD-MMMM-YYYY", "example": "05-January-2025" },
+  { "name": "MMM-DD-YYYY", "example": "Jan-05-2025" },
+  { "name": "MMMM-DD-YYYY", "example": "January-05-2025" },
+  { "name": "YYYY-MMM-DD", "example": "2025-Jan-05" },
+  { "name": "YYYY-MMMM-DD", "example": "2025-January-05" },
+
+  { "name": "DD MMM YYYY", "example": "05 Jan 2025" },
+  { "name": "DD MMMM YYYY", "example": "05 January 2025" },
+  { "name": "MMM DD, YYYY", "example": "Jan 05, 2025" },
+  { "name": "MMMM DD, YYYY", "example": "January 05, 2025" },
+  { "name": "YYYY MMM DD", "example": "2025 Jan 05" },
+  { "name": "YYYY MMMM DD", "example": "2025 January 05" },
+
+  { "name": "Do MMM YYYY", "example": "5th Jan 2025" },
+  { "name": "Do MMMM YYYY", "example": "5th January 2025" },
+
+  { "name": "YYYYMMDD", "example": "20250105" }
+]
