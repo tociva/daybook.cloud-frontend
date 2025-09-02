@@ -280,9 +280,40 @@ export class CreateOrganizationComponent {
       this.orgFields.set(validatedFields);
       return;
     }
-    const {dateformatForm, country, fiscaldaterange, ...restData} = data;
+    const {name,
+      email,
+      mobile,
+      address,
+      description,
+      country,
+      state,
+      fiscalstart,
+      fiscalname,
+      fiscaldaterange,
+      gstin,
+      invnumber,
+      currency,
+      jnumber,
+      dateformatForm} = data;
     const [startdate, enddate] = fiscaldaterange;
-    this.store.dispatch(organizationActions.bootstrapOrganization({ organization: {...restData, startdate, enddate, dateformat: dateformatForm?.name ?? '', country: {...country, dateformat: dateformatForm?.name ?? ''}} }));
+    this.store.dispatch(organizationActions.bootstrapOrganization({ organization: {
+      name,
+      email,
+      mobile,
+      address,
+      description,
+      countrycode: country.code,
+      currencycode: currency.code,
+      fiscalstart,
+      fiscalname,
+      gstin : gstin ?? '',
+      invnumber,
+      jnumber,
+      dateformat: dateformatForm?.name ?? '',
+      startdate,
+      enddate,
+      state,
+    } }));
   }
 
   onSearch(value: string) {

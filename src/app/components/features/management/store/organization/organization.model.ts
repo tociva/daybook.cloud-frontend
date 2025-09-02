@@ -23,7 +23,7 @@ export interface OrganizationBootstrap {
   mobile?: string;
   address: Address;
   description?: string;
-  country: Country;
+  countrycode: string;
   state?: string;
   fiscalstart: string;
   fiscalname: string;
@@ -31,10 +31,9 @@ export interface OrganizationBootstrap {
   enddate: string;
   gstin?: string;
   invnumber: string;
-  currency: Currency;
+  currencycode: string;
   jnumber: string;
   dateformat: string;
-  dateformatForm?: DateFormat;
 }
 
 export interface OrganizationBootstrapFormData {
@@ -52,6 +51,5 @@ export interface OrganizationBootstrapFormData {
   invnumber: string;
   currency: Currency;
   jnumber: string;
-  dateformat: string;
   dateformatForm?: DateFormat;
 }

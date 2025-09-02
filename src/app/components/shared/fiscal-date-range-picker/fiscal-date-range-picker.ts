@@ -75,7 +75,7 @@ export class FiscalDateRangePicker implements ControlValueAccessor {
     const max = this.maxYear() ?? 2300;
     if (max >= min) {
       const arr: number[] = [];
-      for (let y = max; y >= min; y--) arr.push(y);
+      for (let y = min; y <= max; y++) arr.push(y);
       return arr;
     }
     return [];
@@ -166,12 +166,12 @@ export class FiscalDateRangePicker implements ControlValueAccessor {
     const step = (n: number) => this.changeYear(this.year() + n);
 
     switch (e.key) {
-      case 'ArrowUp':   e.preventDefault(); step(5);  break;
-      case 'ArrowLeft': e.preventDefault(); step(1);  break;
-      case 'ArrowDown': e.preventDefault(); step(-5); break;
-      case 'ArrowRight':e.preventDefault(); step(-1); break;
-      case 'PageUp':    e.preventDefault(); step(-10); break;
-      case 'PageDown':  e.preventDefault(); step(10);  break;
+      case 'ArrowUp':   e.preventDefault(); step(-5);  break;
+      case 'ArrowLeft': e.preventDefault(); step(-1);  break;
+      case 'ArrowDown': e.preventDefault(); step(5); break;
+      case 'ArrowRight':e.preventDefault(); step(1); break;
+      case 'PageUp':    e.preventDefault(); step(10); break;
+      case 'PageDown':  e.preventDefault(); step(-10);  break;
       case 'Home':
         e.preventDefault();
         if (this.minYear() != null) this.changeYear(this.minYear()!);
