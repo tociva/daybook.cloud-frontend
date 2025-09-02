@@ -3,7 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import dayjs from 'dayjs';
-import { toFlagEmoji } from '../../../../../../util/common.util';
+import { sanitizeQuery, toFlagEmoji } from '../../../../../../util/common.util';
 import { DEFAULT_INVOICE_NUMBER_FORMAT, DEFAULT_JOURNAL_NUMBER_FORMAT, DEFAULT_NODE_DATE_FORMAT } from '../../../../../../util/constants';
 import { FormValidator } from '../../../../../../util/form/form-validator';
 import { FormUtil } from '../../../../../../util/form/form.util';
@@ -88,7 +88,8 @@ export class CreateOrganizationComponent {
         inputDisplayValue: (item: Country) => `${toFlagEmoji(item.code)} ${item.name}`,
         trackBy: (item: Country) => item.name,
         onSearch: (value: string) => {
-          this.countryStore.setSearch(value);
+          const sanitized = sanitizeQuery(value);
+          this.countryStore.setSearch(sanitized);
         },
         onOptionSelected: (item: Country) => {
           const currency = this.allCurrencies().find(currency => currency.code === item.currencycode);
