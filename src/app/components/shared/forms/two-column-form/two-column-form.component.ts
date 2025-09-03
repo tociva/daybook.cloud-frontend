@@ -44,6 +44,7 @@ export class TwoColumnFormComponent<T> {
   readonly formSubmit = output<T>();
   readonly submitting = signal(false);
   readonly successAction = input<ActionCreator[] | ActionCreator | null>(null);
+  readonly failureAction = input<ActionCreator[] | ActionCreator | null>(null);
 
   readonly groupedFields: Signal<Record<string, FormField[]>> = computed(() => {
     const fieldList = this.fields();
@@ -77,6 +78,22 @@ export class TwoColumnFormComponent<T> {
   
     onCleanup(() => subscription.unsubscribe());
   });
+  private readonly failureActionEffect = effect((onCleanup) => {
+    const creators = this.failureAction();
+    if (!creators) return;
+  
+    // Normalize to array
+    const creatorArray = Array.isArray(creators) ? creators : [creators];
+    
+    const subscription = this.actions$.pipe(
+      ofType(...creatorArray), // ofType accepts multiple action creators
+      tap(() => {
+        this.submitting.set(false);
+      })
+    ).subscribe();
+  
+    onCleanup(() => subscription.unsubscribe());
+  });
 
   // EFFECT 2: react to UI signals (no stream returned)
   private readonly uiEffect = effect(() => {
@@ -104,6 +121,7 @@ export class TwoColumnFormComponent<T> {
     this.successActionEffect.destroy();
     this.uiEffect.destroy();
     this.validationErrorsEffect.destroy();
+    this.failureActionEffect.destroy();
   }
 
   getControl<K extends string>(key: K): FormControl<unknown> {

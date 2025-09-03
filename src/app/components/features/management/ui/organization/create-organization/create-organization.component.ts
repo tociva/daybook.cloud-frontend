@@ -45,17 +45,6 @@ export class CreateOrganizationComponent {
   allCurrencies = signal<Currency[]>([]);
   allDateFormats = signal<DateFormat[]>([]);
 
-  
-  private setByPath(path: string, value: any, opts = { emitEvent: true }) {
-    const ctrl = this.form.get(path);
-    if (!ctrl) {
-      return;
-    }
-    ctrl.setValue(value, opts);
-    // optionally:
-    ctrl.markAsDirty();
-    ctrl.updateValueAndValidity({ emitEvent: false });
-  }
 
   readonly orgFields = signal<FormField[]>([
     // 🟦 Basic Details
@@ -94,14 +83,14 @@ export class CreateOrganizationComponent {
         onOptionSelected: (item: Country) => {
           const currency = this.allCurrencies().find(currency => currency.code === item.currencycode);
           if(currency) {
-            this.setByPath('currency', currency);
+            FormUtil.setByPath(this.form, 'currency', currency);
           } 
           const dateFormat = this.allDateFormats().find(dateFormat => dateFormat.name === item.dateformat);
           if(dateFormat) {
-            this.setByPath('dateformatForm', dateFormat);
+            FormUtil.setByPath(this.form, 'dateformatForm', dateFormat);
           }
-          this.setByPath('mobile', `+${item.phone}-`);
-          this.setByPath('fiscalstart', item.fiscalstart ?? 'January-01');
+          FormUtil.setByPath(this.form, 'mobile', `+${item.phone}-`);
+          FormUtil.setByPath(this.form, 'fiscalstart', item.fiscalstart ?? 'January-01');
         }
       }
      },
@@ -267,7 +256,7 @@ export class CreateOrganizationComponent {
       if (currentRange && currentRange[0] === newStart && currentRange[1] === newEnd) return;
     
       // update the form (your helper)
-      this.setByPath('fiscaldaterange', [newStart, newEnd]);
+      FormUtil.setByPath(this.form, 'fiscaldaterange', [newStart, newEnd]);
     });
   }
   

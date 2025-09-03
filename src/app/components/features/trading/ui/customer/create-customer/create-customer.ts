@@ -2,6 +2,7 @@ import { Component, effect, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { ActionCreator, Store } from '@ngrx/store';
+import { sanitizeQuery, toFlagEmoji } from '../../../../../../util/common.util';
 import { FormValidator } from '../../../../../../util/form/form-validator';
 import { FormUtil } from '../../../../../../util/form/form.util';
 import { willPassRequiredStringValidation } from '../../../../../../util/form/validation.uti';
@@ -9,15 +10,13 @@ import { FormField } from '../../../../../../util/types/form-field.model';
 import { TwoColumnFormComponent } from '../../../../../shared/forms/two-column-form/two-column-form.component';
 import { ItemNotFound } from '../../../../../shared/item-not-found/item-not-found';
 import { SkeltonLoader } from '../../../../../shared/skelton-loader/skelton-loader';
-import { customerActions, CustomerCU, CustomerStore } from '../../../store/customer';
-import { Country } from '../../../../../shared/store/country/country.model';
-import { toFlagEmoji } from '../../../../../../util/common.util';
 import { countryActions } from '../../../../../shared/store/country/country.action';
+import { Country } from '../../../../../shared/store/country/country.model';
 import { CountryStore } from '../../../../../shared/store/country/country.store';
-import { CurrencyStore } from '../../../../../shared/store/currency/currency.store';
-import { DateFormatStore } from '../../../../../shared/store/date-format/date-format.store';
+import { currencyActions } from '../../../../../shared/store/currency/currency.action';
 import { Currency } from '../../../../../shared/store/currency/currency.model';
-import { DateFormat } from '../../../../../shared/store/date-format/date-format.model';
+import { CurrencyStore } from '../../../../../shared/store/currency/currency.store';
+import { customerActions, CustomerCU, CustomerStore } from '../../../store/customer';
 
 @Component({
   selector: 'app-create-customer',
@@ -39,9 +38,9 @@ export class CreateCustomer implements OnInit {
   countries = signal<Country[]>([]);
   countryStore = inject(CountryStore);
   currencyStore = inject(CurrencyStore);
-  dateFormatStore = inject(DateFormatStore);
   currencies = signal<Currency[]>([]);
-  dateFormats = signal<DateFormat[]>([]);
+
+  allCurrencies = signal<Currency[]>([]);
 
   constructor() {
 
@@ -52,11 +51,12 @@ export class CreateCustomer implements OnInit {
       else {
         this.store.dispatch(countryActions.loadCountries({query: {}}));
       }
+
       if(this.currencyStore.currenciesLoaded()) {
         this.currencies.set(this.currencyStore.filteredCurrencies());
-      }
-      if(this.dateFormatStore.dateFormatsLoaded()) {
-        this.dateFormats.set(this.dateFormatStore.filteredDateFormats());
+        this.allCurrencies.set(this.currencyStore.fetchAllCurrencies());
+      }else{
+        this.store.dispatch(currencyActions.loadCurrencies({query: {}}));
       }
     });
 
@@ -85,12 +85,19 @@ export class CreateCustomer implements OnInit {
       },
       autoComplete: {
         items: this.countries,
-        optionDisplayValue: (item: Country) => `${toFlagEmoji(item.iso)} ${item.name}`,
-        inputDisplayValue: (item: Country) => `${toFlagEmoji(item.iso)} ${item.name}`,
+        optionDisplayValue: (item: Country) => `${toFlagEmoji(item.code)} ${item.name}`,
+        inputDisplayValue: (item: Country) => `${toFlagEmoji(item.code)} ${item.name}`,
         trackBy: (item: Country) => item.name,
         onSearch: (value: string) => {
-          this.countryStore.setSearch(value);
+          const sanitized = sanitizeQuery(value);
+          this.countryStore.setSearch(sanitized);
         },
+        onOptionSelected: (item: Country) => {
+          const currency = this.allCurrencies().find(currency => currency.code === item.currencycode);
+          if(currency) {
+            this.form.patchValue({currency});
+          } 
+        }
       }
      },
     { key: 'state', label: 'State', type: 'text', required: false, group: 'Basic Details'},
@@ -109,11 +116,12 @@ export class CreateCustomer implements OnInit {
       },
       autoComplete: {
         items: this.currencies,
-        optionDisplayValue: (item: Currency) => item.name,
-        inputDisplayValue: (item: Currency) => item.name,
+        optionDisplayValue: (item: Currency) => `${item.symbol} ${item.name}`,
+        inputDisplayValue: (item: Currency) => `${item.symbol} ${item.name}`,
         trackBy: (item: Currency) => item.name,
         onSearch: (value: string) => {
-          this.currencyStore.setSearch(value);
+          const sanitized = sanitizeQuery(value);
+          this.currencyStore.setSearch(sanitized);
         },
       }
     },
@@ -125,9 +133,7 @@ export class CreateCustomer implements OnInit {
     { key: 'address.line2', label: 'Address Line 2', type: 'text', required: false, group: 'Address Details'},
     { key: 'address.street', label: 'Street', type: 'text', required: false, group: 'Address Details'},
     { key: 'address.city', label: 'City', type: 'text', required: false, group: 'Address Details'},
-    { key: 'address.state', label: 'State', type: 'text', required: false, group: 'Address Details'},
     { key: 'address.zip', label: 'ZIP Code', type: 'text', required: false, group: 'Address Details'},
-    { key: 'address.country', label: 'Country', type: 'text', required: false, group: 'Address Details'},
   ]);
 
   readonly form: FormGroup = FormUtil.buildForm(this.formFields(), this.fb);

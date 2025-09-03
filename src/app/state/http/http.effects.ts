@@ -96,6 +96,7 @@ export const httpEffects = {
             }
             
             const error: DbcError = {
+              statusCode: errorP.status,
               details: errorMessage ?? 'Unknown error',
               title: metadata.errorMessage ?? 'Error thrown from cloud server'
             };

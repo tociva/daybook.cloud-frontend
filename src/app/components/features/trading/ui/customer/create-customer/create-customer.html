@@ -4,15 +4,15 @@
   [lines]="10"
   width="100%"
   [shimmer]="true" />
-} @else if(!loading && (mode === 'create' || mode === 'edit') && !customerStore.error()) {
+} @else if(!loading && mode === 'edit' && customerStore.error()?.statusCode === 404) {
+  <app-item-not-found
+  title="Customer record not found"
+  description="It may have been deleted or the link is invalid."></app-item-not-found>
+} @else if(!loading && (mode === 'create' || mode === 'edit')) {
   <app-two-column-form [form]="form"
   [fields]="formFields()"
   [title]="title()"
   (formSubmit)="handleSubmit($event)"
   [successAction]="successAction()"
   />
-} @else if(!loading && mode === 'edit' && customerStore.error()) {
-  <app-item-not-found
-  title="Customer record not found"
-  description="It may have been deleted or the link is invalid."></app-item-not-found>
 }

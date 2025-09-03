@@ -25,6 +25,7 @@ export class CreateBankCash implements OnInit {
   readonly bankCashStore = inject(BankCashStore);
   readonly selectedBankCash = this.bankCashStore.selectedItem;
   successAction = signal<ActionCreator[] | ActionCreator | null>(null);
+  failureAction = signal<ActionCreator[] | ActionCreator | null>(null);
   protected loading = true;
   protected mode:'create'|'edit' = 'create';
   private itemId = signal<string | null>(null);
@@ -66,6 +67,7 @@ export class CreateBankCash implements OnInit {
     if (lastSegment === 'create') {
       this.mode = 'create';
       this.successAction.set(bankCashActions.createBankCashSuccess);
+      this.failureAction.set(bankCashActions.createBankCashFailure);
       this.loading = false;
     } else if (lastSegment === 'edit') {
       this.itemId.set(this.route.snapshot.paramMap.get('id') || null);

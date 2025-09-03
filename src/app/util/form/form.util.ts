@@ -2,6 +2,22 @@ import { FormField } from '../types/form-field.model';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 
 export class FormUtil {
+
+  private static createNestedGroup(obj: any, fb: FormBuilder): FormGroup {
+    const group: Record<string, any> = {};
+
+    for (const key of Object.keys(obj)) {
+      const value = obj[key];
+      if (value instanceof FormControl) {
+        group[key] = value;
+      } else {
+        group[key] = this.createNestedGroup(value, fb);
+      }
+    }
+
+    return fb.group(group);
+  }
+
   public static buildForm(fields: FormField[], fb: FormBuilder): FormGroup {
     const root: any = {};
 
@@ -23,18 +39,15 @@ export class FormUtil {
     return this.createNestedGroup(root, fb);
   }
 
-  private static createNestedGroup(obj: any, fb: FormBuilder): FormGroup {
-    const group: Record<string, any> = {};
 
-    for (const key of Object.keys(obj)) {
-      const value = obj[key];
-      if (value instanceof FormControl) {
-        group[key] = value;
-      } else {
-        group[key] = this.createNestedGroup(value, fb);
-      }
+  public static setByPath(form: FormGroup, path: string, value: any, opts = { emitEvent: true }) {
+    const ctrl = form.get(path);
+    if (!ctrl) {
+      return;
     }
-
-    return fb.group(group);
+    ctrl.setValue(value, opts);
+    // optionally:
+    ctrl.markAsDirty();
+    ctrl.updateValueAndValidity({ emitEvent: false });
   }
 }
