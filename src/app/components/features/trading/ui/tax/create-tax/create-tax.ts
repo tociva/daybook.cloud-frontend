@@ -25,6 +25,7 @@ export class CreateTax implements OnInit {
   readonly taxStore = inject(TaxStore);
   readonly selectedTax = this.taxStore.selectedItem;
   successAction = signal<ActionCreator[] | ActionCreator | null>(null);
+  failureAction = signal<ActionCreator[] | ActionCreator | null>(null);
   protected loading = true;
   protected mode:'create'|'edit' = 'create';
   private itemId = signal<string | null>(null);
@@ -89,6 +90,7 @@ export class CreateTax implements OnInit {
     if (lastSegment === 'create') {
       this.mode = 'create';
       this.successAction.set(taxActions.createTaxSuccess);
+      this.failureAction.set(taxActions.createTaxFailure);
       this.loading = false;
     } else if (lastSegment === 'edit') {
       this.itemId.set(this.route.snapshot.paramMap.get('id') || null);

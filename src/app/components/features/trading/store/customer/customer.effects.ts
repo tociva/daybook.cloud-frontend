@@ -64,6 +64,7 @@ export const customerEffects = {
             headers: {
               'Content-Type': 'application/json'
             },
+            params: action.query as Record<string, unknown>
           };
           const metadata: HttpRequestMetadata<Customer> = {
             requestId,

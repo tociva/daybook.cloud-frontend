@@ -41,6 +41,7 @@ export class CreateOrganizationComponent {
   currencies = signal<Currency[]>([]);
   dateFormats = signal<DateFormat[]>([]);
   successAction = organizationActions.bootstrapOrganizationSuccess;
+  failureAction = organizationActions.bootstrapOrganizationFailure;
 
   allCurrencies = signal<Currency[]>([]);
   allDateFormats = signal<DateFormat[]>([]);
@@ -66,7 +67,7 @@ export class CreateOrganizationComponent {
     { key: 'country', label: 'Country', type: 'auto-complete', required: true, group: 'Basic Details',
       placeholder: 'Search for a country',
       validators:(value: unknown) => {
-        if(!willPassRequiredStringValidation((value as Country)?.name)) {
+        if(!willPassRequiredStringValidation((value as Country)?.code)) {
           return ['Country is required'];
         }
         return [];
@@ -153,7 +154,7 @@ export class CreateOrganizationComponent {
       group: 'Other Info',
       required: true,
       validators:(value: unknown) => {
-        if(!willPassRequiredStringValidation((value as Currency)?.name)) {
+        if(!willPassRequiredStringValidation((value as Currency)?.code)) {
           return ['Currency is required'];
         }
         return [];

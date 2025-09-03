@@ -13,7 +13,7 @@ export const customerActions = createActionGroup({
     createCustomerFailure: props<{ error: DbcError }>(),
     
     // Get by Id
-    loadCustomerById: props<{ id: string }>(),
+    loadCustomerById: props<{ id: string, query?: unknown }>(),
     loadCustomerByIdSuccess: props<{ customer: Customer }>(),
     loadCustomerByIdFailure: props<{ error: DbcError }>(),
     

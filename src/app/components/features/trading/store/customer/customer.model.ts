@@ -10,9 +10,9 @@ export interface CustomerCU {
   email?: string;
   gstin?: string;
   address: Address;
-  country?: string;
+  countrycode: string;
   state?: string;
-  currency?: Currency;
+  currencycode: string;
   description?: string;
   props?: { ledger?: string } & Record<string, unknown>;
   status?: Status;
@@ -21,6 +21,7 @@ export interface CustomerCU {
 export interface Customer extends CustomerCU {
   id?: string;
   branch: Branch;
-  countryObj?: Country;
+  country?: Country;
+  currency?: Currency;
   branchid: string;
 }

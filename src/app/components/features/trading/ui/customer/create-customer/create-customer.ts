@@ -16,7 +16,7 @@ import { CountryStore } from '../../../../../shared/store/country/country.store'
 import { currencyActions } from '../../../../../shared/store/currency/currency.action';
 import { Currency } from '../../../../../shared/store/currency/currency.model';
 import { CurrencyStore } from '../../../../../shared/store/currency/currency.store';
-import { customerActions, CustomerCU, CustomerStore } from '../../../store/customer';
+import { Customer, customerActions, CustomerCU, CustomerStore } from '../../../store/customer';
 
 @Component({
   selector: 'app-create-customer',
@@ -32,6 +32,7 @@ export class CreateCustomer implements OnInit {
   readonly customerStore = inject(CustomerStore);
   readonly selectedCustomer = this.customerStore.selectedItem;
   successAction = signal<ActionCreator[] | ActionCreator | null>(null);
+  failureAction = signal<ActionCreator[] | ActionCreator | null>(null);
   protected loading = true;
   protected mode:'create'|'edit' = 'create';
   private itemId = signal<string | null>(null);
@@ -75,10 +76,10 @@ export class CreateCustomer implements OnInit {
     { key: 'gstin', label: 'GSTIN', type: 'text', required: false, group: 'Basic Details'},
     
     // 🟦 Additional Details
-    { key: 'countryObj', label: 'Country', type: 'auto-complete', required: true, group: 'Basic Details',
+    { key: 'country', label: 'Country', type: 'auto-complete', required: true, group: 'Basic Details',
       placeholder: 'Search for a country',
       validators:(value: unknown) => {
-        if(!willPassRequiredStringValidation((value as Country)?.name)) {
+        if(!willPassRequiredStringValidation((value as Country)?.code)) {
           return ['Country is required'];
         }
         return [];
@@ -161,6 +162,7 @@ export class CreateCustomer implements OnInit {
     if (lastSegment === 'create') {
       this.mode = 'create';
       this.successAction.set(customerActions.createCustomerSuccess);
+      this.failureAction.set(customerActions.createCustomerFailure);
       this.loading = false;
     } else if (lastSegment === 'edit') {
       this.itemId.set(this.route.snapshot.paramMap.get('id') || null);
@@ -168,7 +170,13 @@ export class CreateCustomer implements OnInit {
         this.successAction.set(customerActions.updateCustomerSuccess);
         this.mode = 'edit';
         this.loading = true;
-        this.store.dispatch(customerActions.loadCustomerById({ id: this.itemId()! }));
+        this.store.dispatch(customerActions.loadCustomerById({ id: this.itemId()!, query: { filter: JSON.stringify({
+          "include": [
+            { "relation": "country" },
+            { "relation": "currency" }
+          ]
+        }
+        ) } }));
       }else{
         this.loading = false;
       }
@@ -180,7 +188,7 @@ export class CreateCustomer implements OnInit {
     this.loadErrorEffect.destroy();
   }
 
-  handleSubmit = (data: CustomerCU) => {
+  handleSubmit = (data: Customer) => {
     const validatedFields = FormValidator.validate(data as any, this.formFields());
     const hasErrors = validatedFields.some(fld => fld.errors?.length);
     if (hasErrors) {
@@ -188,20 +196,29 @@ export class CreateCustomer implements OnInit {
       return;
     }
 
+    const {country, currency, name, mobile, email, gstin, address, state, description, status} = data;
+
     // Ensure address object is properly structured
     const customer = {
-      ...data,
+      name,
+      mobile,
+      email,
+      gstin,
+      countrycode: country?.code as string,
+      currencycode: currency?.code as string,
+      state,
+      description,
       address: {
-        name: data.address?.name || '',
-        line1: data.address?.line1 || '',
-        line2: data.address?.line2 || '',
-        street: data.address?.street || '',
-        city: data.address?.city || '',
-        state: data.address?.state || '',
-        zip: data.address?.zip || '',
-        country: data.address?.country || '',
+        name: address?.name || '',
+        line1: address?.line1 || '',
+        line2: address?.line2 || '',
+        street: address?.street || '',
+        city: address?.city || '',
+        state: state || '',
+        zip: address?.zip || '',
+        country: country?.name || '',
       },
-      status: data.status !== undefined ? Number(data.status) : 1
+      status: status !== undefined ? Number(status) : 1
     };
 
     if(this.mode === 'create') {

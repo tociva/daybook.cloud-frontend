@@ -34,6 +34,7 @@ export class CreateItem extends WithFormDraftBinding implements OnInit {
   readonly itemCategoryStore = inject(ItemCategoryStore);
   readonly selectedItem = this.itemStore.selectedItem;
   successAction = signal<ActionCreator[] | ActionCreator | null>(null);
+  failureAction = signal<ActionCreator[] | ActionCreator | null>(null);
   protected loading = true;
   protected readonly mode = signal<'create' | 'edit'>('create');
   private itemId = signal<string | null>(null);
@@ -141,6 +142,7 @@ export class CreateItem extends WithFormDraftBinding implements OnInit {
     if (lastSegment === 'create') {
       this.mode.set('create');
       this.successAction.set(itemActions.createItemSuccess);
+      this.failureAction.set(itemActions.createItemFailure);
       this.loading = false;
     } else if (lastSegment === 'edit') {
       this.itemId.set(this.route.snapshot.paramMap.get('id') || null);
