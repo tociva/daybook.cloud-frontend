@@ -18,7 +18,7 @@
     [attr.placeholder]="placeholder()"
     (input)="onInputChange($event)"
     (focus)="onInputFocus($event)"
-    (blur)="onInputBlur()"
+    (blur)="onInputBlur($event)"
     (keydown)="onKeyDown($event)"
     [ngClass]="inputClass()"
     autocomplete="off"

@@ -104,10 +104,18 @@ export class AutoComplete<T> implements ControlValueAccessor {
     this.openDropdown();
   }
 
-  onInputBlur(): void {
+  onInputBlur(event: FocusEvent): void {
     // defer; actual close is handled via HostListener to allow option click
     this.touched.set(true);
     this.onTouched();
+
+    const next = event.relatedTarget as Node | null;
+    const stayingInside = !!next && this.host.nativeElement.contains(next);
+
+    // Close only if focus moved outside (TAB / SHIFT+TAB, or clicking elsewhere)
+    if (!stayingInside) {
+      this.closeDropdown();
+    }
   }
 
   onKeyDown(event: KeyboardEvent): void {
@@ -221,4 +229,14 @@ export class AutoComplete<T> implements ControlValueAccessor {
       this.closeDropdown();
     }
   }
+  // 2) (Optional but robust) also listen for focusout on the host to catch any edge cases
+  @HostListener('focusout', ['$event'])
+  onHostFocusOut(ev: FocusEvent) {
+    // If focus is leaving the whole component, close the dropdown.
+    const next = ev.relatedTarget as Node | null;
+    if (!next || !this.host.nativeElement.contains(next)) {
+      this.closeDropdown();
+    }
+  }
+
 }
