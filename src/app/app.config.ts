@@ -23,6 +23,7 @@ import { taxEffects } from './components/features/trading/store/tax/tax.effects'
 import { customerEffects } from './components/features/trading/store/customer/customer.effects';
 import { itemEffects } from './components/features/trading/store/item/item.effects';
 import { itemCategoryEffects } from './components/features/trading/store/item-category/item-category.effects';
+import { vendorEffects } from './components/features/trading/store/vendor/vendor.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -44,7 +45,8 @@ export const appConfig: ApplicationConfig = {
       taxEffects,
       customerEffects,
       itemEffects,
-      itemCategoryEffects
+      itemCategoryEffects,
+      vendorEffects,
     ]),
     provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
     provideRouterStore(),

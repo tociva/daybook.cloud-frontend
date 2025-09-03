@@ -1,0 +1,19 @@
+@if(loading) {
+  <app-skelton-loader 
+  variant="text"
+  [lines]="10"
+  width="100%"
+  [shimmer]="true" />
+} @else if(!loading && mode === 'edit' && vendorStore.error()?.statusCode === 404) {
+  <app-item-not-found
+  title="Vendor record not found"
+  description="It may have been deleted or the link is invalid."></app-item-not-found>
+} @else if(!loading && (mode === 'create' || mode === 'edit')) {
+  <app-two-column-form [form]="form"
+  [fields]="formFields()"
+  [title]="title()"
+  (formSubmit)="handleSubmit($event)"
+  [successAction]="successAction()"
+  [failureAction]="failureAction()"
+  />
+}
