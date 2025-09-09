@@ -116,6 +116,13 @@ export class CreateItem extends WithFormDraftBinding implements OnInit {
 
   readonly title = signal('Item Setup');
 
+  private fillFormEffect = effect(() => {
+    const item = this.selectedItem();
+    if (item) {
+      this.form.patchValue(item);
+      this.loading = false;
+    }
+  });
   private loadErrorEffect = effect(() => {
     const error = this.itemStore.error();
     if (error && this.mode() === 'edit') {
@@ -158,6 +165,7 @@ export class CreateItem extends WithFormDraftBinding implements OnInit {
   }
 
   onDestroy() {
+    this.fillFormEffect.destroy();
     this.loadErrorEffect.destroy();
   }
 

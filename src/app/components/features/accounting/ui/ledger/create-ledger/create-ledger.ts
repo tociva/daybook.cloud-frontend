@@ -77,6 +77,14 @@ export class CreateLedger extends WithFormDraftBinding implements OnInit {
 
   readonly title = signal('Ledger Setup');
 
+  private fillFormEffect = effect(() => {
+    const ledger = this.selectedLedger();
+    if (ledger) {
+      this.form.patchValue(ledger);
+      this.loading = false;
+    }
+  });
+
   private loadErrorEffect = effect(() => {
     const error = this.ledgerStore.error();
     if (error && this.mode() === 'edit') {
@@ -119,6 +127,7 @@ export class CreateLedger extends WithFormDraftBinding implements OnInit {
   }
 
   onDestroy() {
+    this.fillFormEffect.destroy();
     this.loadErrorEffect.destroy();
   }
 
