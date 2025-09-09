@@ -19,7 +19,7 @@ export class NavItems {
   // open/closed state keyed by parent path
   private openState = signal<Record<string, boolean>>({
     'trading': true,
-    'accounts': true,
+    'accounting': true,
     'management': true,
   });
 

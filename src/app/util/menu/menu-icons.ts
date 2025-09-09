@@ -12,7 +12,7 @@ export const MENU_ICONS: Record<string, string> = {
   'Purchase Return': 'bootstrapArrowCounterclockwise',
   'GST Reconciliation': 'bootstrapFileEarmarkSpreadsheet',
 
-  'Accounts': 'bootstrapWallet2',
+  'Accounting': 'bootstrapWallet2',
   'Ledger': 'bootstrapBook',
   'Journal': 'bootstrapJournalText',
   'Documents': 'bootstrapFolder',

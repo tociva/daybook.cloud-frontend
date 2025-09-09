@@ -22,6 +22,14 @@ export const MAIN_LAYOUT_ROUTES: Routes = [
         path: 'trading',
         loadChildren: () => import('../features/trading/trading.routes').then(m => m.tradingRoutes),
       },
+      {
+        path: 'accounting',
+        loadChildren: () => import('../features/accounting/accounting.routes').then(m => m.ACCOUNTING_ROUTES),
+      },
+      {
+        path: 'accounting',
+        loadChildren: () => import('../features/accounting/accounting.routes').then(m => m.ACCOUNTING_ROUTES),
+      },
     ]
   }
 ];

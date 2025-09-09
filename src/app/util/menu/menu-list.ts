@@ -42,8 +42,8 @@ export const menuList: MenuNode[] = [
         ]
       },
       {
-        path: 'accounts',
-        name: 'Accounts',
+        path: 'accounting',
+        name: 'Accounting',
         children: [
           { path: 'ledger',
             name: 'Ledger',

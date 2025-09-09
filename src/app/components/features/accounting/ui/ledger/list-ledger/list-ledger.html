@@ -1,0 +1,16 @@
+<app-item-landing
+  [items]="ledgers()"
+  [count]="count()"
+  [createButtonText]="'Create New Ledger'"
+  [title]="'Ledger'"
+  [pageSize]="pageSize()"
+  [currentPage]="currentPage()"
+  [error]="error()"
+  [columns]="columns()"
+  [emptyListMessage]="emptyListMessage()"
+  [onCreateItem]="handleOnCreateItem()"
+  [onEditItem]="handleOnEditItem()"
+  [onDeleteItem]="handleOnDeleteItem()"
+  [button2Caption]="'Manage Ledger Categories'"
+  [onButton2Click]="handleOnButton2Click()"
+/>

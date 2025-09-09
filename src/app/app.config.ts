@@ -24,6 +24,8 @@ import { customerEffects } from './components/features/trading/store/customer/cu
 import { itemEffects } from './components/features/trading/store/item/item.effects';
 import { itemCategoryEffects } from './components/features/trading/store/item-category/item-category.effects';
 import { vendorEffects } from './components/features/trading/store/vendor/vendor.effects';
+import { ledgerEffects } from './components/features/accounting/store/ledger/ledger.effects';
+import { ledgerCategoryEffects } from './components/features/accounting/store/ledger-category/ledger-category.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -47,6 +49,8 @@ export const appConfig: ApplicationConfig = {
       itemEffects,
       itemCategoryEffects,
       vendorEffects,
+      ledgerEffects,
+      ledgerCategoryEffects,
     ]),
     provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
     provideRouterStore(),
