@@ -4,6 +4,10 @@
   [lines]="10"
   width="100%"
   [shimmer]="true" />
+} @else if(!loading && mode() === 'edit' && itemCategoryStore.error()) {
+  <app-item-not-found
+  title="Item category record not found"
+  description="It may have been deleted or the link is invalid."></app-item-not-found>
 } @else if(!loading && (mode() === 'create' || mode() === 'edit') && !itemCategoryStore.error()) {
   <app-two-column-form [form]="form"
   [fields]="formFields()"
@@ -11,8 +15,4 @@
   (formSubmit)="handleSubmit($event)"
   [successAction]="successAction()"
   />
-} @else if(!loading && mode() === 'edit' && itemCategoryStore.error()) {
-  <app-item-not-found
-  title="Item category record not found"
-  description="It may have been deleted or the link is invalid."></app-item-not-found>
 }

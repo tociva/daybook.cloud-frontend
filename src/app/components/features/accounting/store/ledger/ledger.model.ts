@@ -9,11 +9,9 @@ export interface LedgerCU {
   openingcr?: number;
   props?: Record<string, unknown>;
   categoryid: string;
-  fiscalyearid: string;
 }
 
 export interface Ledger extends LedgerCU {
   id?: string;
   category: LedgerCategory;
-  fiscalyear: FiscalYear;
 }
