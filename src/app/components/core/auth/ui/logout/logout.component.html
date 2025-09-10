@@ -12,12 +12,23 @@
       Thank you for using our service. You can sign in again or return to the homepage.
     </p>
 
+    <!-- Homepage button -->
     <a
       routerLink="/"
       class="mt-6 inline-block px-6 py-2 rounded bg-on-primary text-primary hover:bg-on-primary/90 transition duration-200 font-semibold"
     >
       Go to Homepage
     </a>
+
+    <!-- Extra logout option -->
+    <div class="mt-4">
+      <button
+        (click)="logoutCompletely()"
+        class="text-sm text-on-primary/80 underline hover:text-on-primary transition duration-200"
+      >
+        Still having problems with logout? Click here to logout completely
+      </button>
+    </div>
   </div>
 
 </div>
