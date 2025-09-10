@@ -1,1 +1,14 @@
-<p>list-fiscal-year works!</p>
+<app-item-landing
+  [error]="error()"
+  [items]="items()"
+  [count]="count()"
+  [pageSize]="pageSize()"
+  [currentPage]="currentPage()"
+  [title]="'Branch'"
+  [createButtonText]="'Create New Branch'"
+  [emptyListMessage]="emptyListMessage()"
+  [onCreateItem]="handleOnCreateItem()"
+  [columns]="columns()"
+  [onEditItem]="handleOnEditItem()"
+  [onDeleteItem]="handleOnDeleteItem()"
+></app-item-landing>

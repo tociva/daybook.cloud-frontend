@@ -27,6 +27,7 @@ import { vendorEffects } from './components/features/trading/store/vendor/vendor
 import { ledgerEffects } from './components/features/accounting/store/ledger/ledger.effects';
 import { ledgerCategoryEffects } from './components/features/accounting/store/ledger-category/ledger-category.effects';
 import { branchEffects } from './components/features/management/store/branch/branch.effects';
+import { fiscalYearEffects } from './components/features/management/store/fiscal-year/fiscal-year.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -40,6 +41,7 @@ export const appConfig: ApplicationConfig = {
       userSessionEffects,
       organizationEffects,
       branchEffects,
+      fiscalYearEffects,
       countryEffects,
       currencyEffects,
       dateFormatEffects,
