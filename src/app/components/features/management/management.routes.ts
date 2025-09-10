@@ -5,4 +5,8 @@ export const managementRoutes: Routes = [
     path: 'organization',
     loadChildren: () => import('./ui/organization/organization.route').then(m => m.organizationRoutes),
   },
+  {
+    path: 'branch',
+    loadChildren: () => import('./ui/branch/branch.route').then(m => m.branchRoutes),
+  },
 ];

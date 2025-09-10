@@ -93,17 +93,12 @@ export class ListOrganizationComponent implements OnInit, OnDestroy {
   
   ngOnInit(): void {
     this.loadOrganizations();
-    this.searchItemStore.setCurrentTitle('Bank Cash');
+    this.searchItemStore.setCurrentTitle('Organization');
   }
   
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
     this.searchItemStore.setCurrentTitle(null);
-  }
-
-  onCreateBankCash(): void {
-    const currentUrl = this.router.url;
-    this.router.navigate(['/management/organization/create'], { queryParams: { burl: currentUrl } });
   }
 }

@@ -90,7 +90,7 @@ export const organizationEffects = {
   ),
 
   // Normal endpoint effects
-  // Create BankCash effect
+  // Create Organization effect
   createOrganization: createEffect(
     () => {
       const actions$ = inject(Actions);
@@ -113,7 +113,7 @@ export const organizationEffects = {
           const metadata: HttpRequestMetadata<Organization> = {
             requestId,
             actionName: 'createOrganization',
-            successMessage: 'Bank cash created successfully!',
+            successMessage: 'Organization created successfully!',
             errorMessage: 'Failed to create bank cash',
             onSuccessAction: (organization) => organizationActions.createOrganizationSuccess({ organization }),
             onErrorAction: (error) => organizationActions.createOrganizationFailure({ error }),
@@ -158,7 +158,7 @@ export const organizationEffects = {
     { functional: true, dispatch: false }
   ),
 
-  // Load all BankCashes effect
+  // Load all Organizations effect
   loadOrganizations: createEffect(
     () => {
       const actions$ = inject(Actions);
@@ -196,7 +196,7 @@ export const organizationEffects = {
     { functional: true, dispatch: false }
   ),
 
-  // Count BankCashes effect
+  // Count Organizations effect
   countOrganizations: createEffect(
     () => {
       const actions$ = inject(Actions);
@@ -265,7 +265,7 @@ export const organizationEffects = {
     { functional: true, dispatch: false }
   ),
 
-  // Delete BankCash effect
+  // Delete Organization effect
   deleteOrganization: createEffect(
     () => {
       const actions$ = inject(Actions);
