@@ -1,0 +1,36 @@
+<label class="inline-flex items-start gap-3 select-none cursor-pointer"
+       [class.opacity-50]="disabled()">
+  <!-- Clickable box -->
+  <button #btn
+          type="button"
+          data-checkbox
+          class="relative grid place-items-center border rounded-sm transition-all duration-150 focus:outline-none"
+          [class]="boxSizeClass() + ' ' + colorClasses() + ' ' + ringClasses() + ' ' + boxClass()"
+          role="checkbox"
+          [attr.aria-checked]="ariaChecked()"
+          [attr.aria-disabled]="disabled()"
+          [disabled]="disabled()"
+          (click)="onClick()"
+          (keydown)="onKeyDown($event)"
+          (focus)="onFocus()"
+          (blur)="onBlur()">
+    <!-- Check / Mixed icon -->
+    @if (isChecked()) {
+      <ng-icon name="bootstrapCheckLg" class="pointer-events-none"></ng-icon>
+    }
+    @if (isMixed()) {
+      <ng-icon name="bootstrapDashLg" class="pointer-events-none"></ng-icon>
+    }
+  </button>
+
+  <!-- Text block -->
+  <span class="flex flex-col">
+    <span class="font-medium"
+          [class]="labelSizeClass() + ' ' + labelClass()">
+      {{ label() }}
+    </span>
+    @if (hint()) {
+      <span class="text-xs text-gray-500 leading-tight mt-0.5">{{ hint() }}</span>
+    }
+  </span>
+</label>

@@ -20,7 +20,7 @@ export interface CustomerCU {
 
 export interface Customer extends CustomerCU {
   id?: string;
-  branch: Branch;
+  branch?: Branch;
   country?: Country;
   currency?: Currency;
   branchid: string;

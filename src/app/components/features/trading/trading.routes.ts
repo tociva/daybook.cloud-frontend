@@ -25,4 +25,8 @@ export const tradingRoutes: Routes = [
     path: 'item-category',
     loadChildren: () => import('./ui/item-category/item-category.routes').then(m => m.itemCategoryRoutes),
   },
+  {
+    path: 'sale-invoice',
+    loadChildren: () => import('./ui/sale-invoice/sale-invoice.routes').then(m => m.saleInvoiceRoutes),
+  },
 ];

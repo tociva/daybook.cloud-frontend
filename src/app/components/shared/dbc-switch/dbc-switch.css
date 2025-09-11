@@ -1,0 +1,7 @@
+:host {
+  display: inline-block;
+}
+button[data-switch] {
+  line-height: 1;
+  padding: 0; /* keep it compact */
+}

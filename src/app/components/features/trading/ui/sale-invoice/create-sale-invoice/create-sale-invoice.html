@@ -1,0 +1,97 @@
+<div class="grid grid-cols-3 gap-4" [formGroup]="form">
+  <div class="col-span-2 p-4 border border-gray-300 rounded bg-white">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="font-semibold text-base">Customer Details</h2>
+      <button type="button"
+        class="flex items-center px-3 py-1.5 text-sm font-medium bg-primary text-white rounded hover:bg-primary-hover cursor-pointer"
+        (click)="onNewCustomer()">
+        <ng-icon name="bootstrapPlus" class="w-4 h-4 mr-1" size="24"></ng-icon>
+        New Customer
+      </button>
+    </div>
+
+    <app-auto-complete [formControl]="form.controls.customer" [options]="customers()"
+      placeholder="Search for a customer" [required]="true"
+      inputClass="flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 placeholder-gray-400 focus:outline-none focus:border-b-primary border-b-gray-300"
+      [optionDisplayValue]="findCustomerDisplayValue" [inputDisplayValue]="findCustomerDisplayValue"
+      (onSearch)="onCustomerSearch($event)" (onOptionSelected)="onCustomerSelected($event)">
+    </app-auto-complete>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+      <div class="p-4 border border-gray-200 rounded">
+        <h3 class="font-semibold text-sm mb-3">Billing Address</h3>
+        <dbc-address-form [group]="form.controls.billingaddress">
+        </dbc-address-form>
+      </div>
+
+      <div class="p-4 border border-gray-200 rounded">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-semibold text-sm">Shipping Address</h3>
+          <label class="flex items-center gap-2 text-xs text-gray-600"> Same as Billing
+            <dbc-switch [formControl]="form.controls.useBillingForShipping"> </dbc-switch> 
+          </label>
+        </div>
+        <dbc-address-form [group]="form.controls.shippingaddress">
+        </dbc-address-form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-span-1 p-4 border border-gray-300 rounded bg-white">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="font-semibold text-base mb-4">Invoice Details</h2>
+      <label class="flex items-center gap-2 text-xs text-gray-600"> Auto Numbering
+        <dbc-switch [formControl]="form.controls.autoNumbering"> </dbc-switch> </label>
+    </div>
+    <div class="space-y-3">
+      <div class="flex items-center gap-2 mb-2">
+        <label class="w-28 text-sm text-gray-700">Number:</label>
+        <input [formControl]="form.controls.number" type="text" appTextInput />
+      </div>
+      <div class="flex items-center gap-2 mb-2">
+        <label class="w-28 text-sm text-gray-700">Date:</label>
+        <input [formControl]="form.controls.date" type="date" appTextInput />
+      </div>
+      <div class="flex items-center gap-2 mb-2">
+        <label class="w-28 text-sm text-gray-700">Due Date:</label>
+        <input [formControl]="form.controls.duedate" type="date" appTextInput />
+      </div>
+      <div class="flex items-center gap-2 mb-2">
+        <label class="w-28 text-sm text-gray-700">Currency:</label>
+        <app-auto-complete [formControl]="form.controls.currency" [options]="currencies()"
+          placeholder="Search for a currency" [required]="true"
+          class="flex-1"
+          inputClass="flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 placeholder-gray-400 focus:outline-none focus:border-b-primary border-b-gray-300"
+          [optionDisplayValue]="findCurrencyDisplayValue" [inputDisplayValue]="findCurrencyDisplayValue"
+          (onSearch)="onCurrencySearch($event)" (onOptionSelected)="onCurrencySelected($event)">
+        </app-auto-complete>
+      </div>
+      <div class="flex items-center gap-2 mb-2">
+        <label class="w-28 text-sm text-gray-700">Delivery State:</label>
+        <input [formControl]="form.controls.deliveryState" type="text" appTextInput />
+      </div>
+      <div class="flex items-center gap-2 mb-2">
+        <label class="w-28 text-sm text-gray-700">Tax Option:</label>
+        <app-auto-complete [formControl]="form.controls.taxOption" [options]="taxOptions()"
+          placeholder="Search for a tax option" [required]="true"
+          class="flex-1"
+          inputClass="flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 placeholder-gray-400 focus:outline-none focus:border-b-primary border-b-gray-300"
+          [optionDisplayValue]="findTaxOptionDisplayValue" [inputDisplayValue]="findTaxOptionDisplayValue"
+          (onSearch)="onTaxOptionSearch($event)" (onOptionSelected)="onTaxOptionSelected($event)">
+        </app-auto-complete>
+      </div>
+      <div class="flex items-center gap-2 mb-2">
+        <label class="w-28 text-sm text-gray-700">Description:</label>
+        <dbc-switch [formControl]="form.controls.showDescription"> </dbc-switch>
+      </div>
+      <div class="flex items-center gap-2 mb-2">
+        <label class="w-28 text-sm text-gray-700">Discount:</label>
+        <dbc-switch [formControl]="form.controls.showDiscount"> </dbc-switch>
+      </div>
+      <div class="flex items-center gap-2 mb-2">
+        <label class="w-28 text-sm text-gray-700">Journal:</label>
+        <input [formControl]="form.controls.journal" type="text" appTextInput />
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,27 @@
+<label class="inline-flex items-center gap-3 select-none cursor-pointer"
+       [class.opacity-50]="disabled()">
+  <button
+    type="button"
+    data-switch
+    role="switch"
+    class="relative rounded-full transition-colors focus:outline-none cursor-pointer"
+    [class]="trackClass() + ' ' + (isOn() ? 'bg-primary' : 'bg-gray-300') + ' ' + (focused() ? 'ring-2 ring-offset-2 ring-primary/40' : '')"
+    [attr.aria-checked]="isOn()"
+    [disabled]="disabled()"
+    (click)="toggle()"
+    (keydown)="onKeyDown($event)"
+    (focus)="onFocus()"
+    (blur)="onBlur()">
+
+    <!-- Thumb -->
+    <span
+      class="absolute top-0.5 left-0.5 rounded-full bg-white shadow transform transition-transform duration-150 ease-out"
+      [class]="thumbSizeClass() + ' ' + thumbTranslateClass()">
+    </span>
+  </button>
+
+  @if (label()) {
+    <span class="text-sm font-medium">{{ label() }}</span>
+  }
+</label>
+ 

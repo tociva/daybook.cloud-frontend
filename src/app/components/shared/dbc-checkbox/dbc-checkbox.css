@@ -1,0 +1,8 @@
+/* Minimal, rely mostly on Tailwind utilities in template */
+:host {
+  display: inline-block;
+}
+button[data-checkbox] {
+  /* ensure icon sits nicely without jumping */
+  line-height: 1;
+}

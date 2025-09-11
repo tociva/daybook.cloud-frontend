@@ -90,9 +90,10 @@ export const customerEffects = {
       return actions$.pipe(
         ofType(customerActions.loadCustomers),
         tap((action) => {
-          const { limit, offset, search, sort } = action.query ?? {};
+          const { limit, offset, search, sort, includes } = action.query ?? {};
           const filter = LB4QueryBuilder.create()
           .applySignalStoreFilters(limit ?? 10, offset ?? 0, search ?? {query: '', fields: []}, sort ?? [])
+          .applySignalStoreIncludes(includes ?? [])
           .build();
           const baseUrl = `${configStore.config().apiBaseUrl}/inventory/customer`;
           const requestId = `${customerActions.loadCustomers.type}-${Date.now()}-${Math.random()}`;

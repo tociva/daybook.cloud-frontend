@@ -1,0 +1,51 @@
+<div class="space-y-3" [formGroup]="group()">
+  <div class="flex items-center gap-2 mb-2">
+    <label class="{{ labelWidth() }} text-sm text-gray-700">Name:</label>
+    <input formControlName="name" type="text" appTextInput />
+  </div>
+
+  <div class="flex items-center gap-2 mb-2">
+    <label class="{{ labelWidth() }} text-sm text-gray-700">Line 1:</label>
+    <input formControlName="line1" type="text" appTextInput />
+  </div>
+
+  <div class="flex items-center gap-2 mb-2">
+    <label class="{{ labelWidth() }} text-sm text-gray-700">Line 2:</label>
+    <input formControlName="line2" type="text" appTextInput />
+  </div>
+
+  <div class="flex items-center gap-2 mb-2">
+    <label class="{{ labelWidth() }} text-sm text-gray-700">Street:</label>
+    <input formControlName="street" type="text" appTextInput />
+  </div>
+
+  <div class="flex items-center gap-2 mb-2">
+    <label class="{{ labelWidth() }} text-sm text-gray-700">City:</label>
+    <input formControlName="city" type="text" appTextInput />
+  </div>
+
+  <div class="flex items-center gap-2 mb-2">
+    <label class="{{ labelWidth() }} text-sm text-gray-700">State:</label>
+    <input formControlName="state" type="text" appTextInput />
+  </div>
+
+  <div class="flex items-center gap-2 mb-2">
+    <label class="{{ labelWidth() }} text-sm text-gray-700">ZIP:</label>
+    <input formControlName="zip" type="text" appTextInput />
+  </div>
+
+  <div class="flex items-center gap-2 mb-2">
+    <label class="{{ labelWidth() }} text-sm text-gray-700">Country:</label>
+    <input formControlName="country" type="text" appTextInput />
+  </div>
+
+  <div class="flex items-center gap-2 mb-2">
+    <label class="{{ labelWidth() }} text-sm text-gray-700">Mobile:</label>
+    <input formControlName="mobile" type="tel" appTextInput />
+  </div>
+
+  <div class="flex items-center gap-2 mb-2">
+    <label class="{{ labelWidth() }} text-sm text-gray-700">Email:</label>
+    <input formControlName="email" type="email" appTextInput />
+  </div>
+</div>

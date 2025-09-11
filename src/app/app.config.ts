@@ -28,6 +28,7 @@ import { ledgerEffects } from './components/features/accounting/store/ledger/led
 import { ledgerCategoryEffects } from './components/features/accounting/store/ledger-category/ledger-category.effects';
 import { branchEffects } from './components/features/management/store/branch/branch.effects';
 import { fiscalYearEffects } from './components/features/management/store/fiscal-year/fiscal-year.effects';
+import { saleInvoiceEffects } from './components/features/trading/store/sale-invoice/sale-invoice.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -55,6 +56,7 @@ export const appConfig: ApplicationConfig = {
       vendorEffects,
       ledgerEffects,
       ledgerCategoryEffects,
+      saleInvoiceEffects,
     ]),
     provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
     provideRouterStore(),
