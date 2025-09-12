@@ -1,4 +1,5 @@
 import { Component, effect, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgIconComponent } from '@ng-icons/core';
@@ -36,6 +37,21 @@ export class CreateSaleInvoice {
 
   readonly form:  FormGroup<SaleInvoiceForm> = this.formSvc.createForm(); 
 
+  useBillingForShippingSig = toSignal(
+    this.form.controls.useBillingForShipping.valueChanges,
+    { initialValue: this.form.controls.useBillingForShipping.value }
+  );
+
+  billingAddressSig = toSignal(
+    this.form.controls.billingaddress.valueChanges,
+    { initialValue: this.form.controls.billingaddress.value }
+  );
+
+  autoNumbering = toSignal(
+    this.form.controls.autoNumbering.valueChanges,
+    { initialValue: this.form.controls.autoNumbering.value }
+  );
+
   constructor() {
 
     effect(() => {
@@ -45,8 +61,32 @@ export class CreateSaleInvoice {
         this.store.dispatch(currencyActions.loadCurrencies({query: {}}));
       }
     });
-  }
 
+    effect(() => {
+      const isSameAsBilling = this.useBillingForShippingSig();
+      if(isSameAsBilling) {
+        this.form.patchValue({ shippingaddress: this.form.controls.billingaddress.value });
+      }
+    });
+
+    effect(() => {
+      const billingAddress = this.billingAddressSig();
+      if(billingAddress && this.form.controls.useBillingForShipping.value) {
+        this.form.patchValue({ shippingaddress: billingAddress});
+      }
+    });
+
+    effect(() => {
+      if(this.autoNumbering()) {
+        this.form.patchValue({ number: '' });
+        this.form.controls.number.disable();
+      } else {
+        this.form.controls.number.enable();
+      }
+    });
+
+  }
+  
   findCustomerDisplayValue = (customer: Customer) => customer?.name ?? '';
 
   onCustomerSearch(value: string) {
@@ -66,6 +106,14 @@ export class CreateSaleInvoice {
   onNewCustomer() {
     const burl = this.router.url;
     this.router.navigate(['/trading/customer/create'], { queryParams: { burl } });
+  }
+
+  onEditBillingAddress() {
+    this.form.patchValue({ billingaddressreadonly: !this.form.controls.billingaddressreadonly.value });
+  }
+
+  onEditShippingAddress() {
+    this.form.patchValue({ shippingaddressreadonly: !this.form.controls.shippingaddressreadonly.value });
   }
 
   onCurrencySearch(value: string) {
@@ -90,5 +138,16 @@ export class CreateSaleInvoice {
 
   findTaxOptionDisplayValue(taxOption: TaxOptions) {
     return taxOption;
+  }
+
+  addItemRow() {
+  }
+
+  removeItemRow(index: number) {
+    this.form.controls.items.removeAt(index);
+  }
+
+  onItemChanged() {
+    this.form.controls.items.updateValueAndValidity();
   }
 }
