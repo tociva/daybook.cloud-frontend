@@ -4,8 +4,9 @@ import { Address } from "../../../../../../util/types/address";
 import { TaxOptions } from "../../../../../../util/types/tax-options.type";
 import { Currency } from "../../../../../shared/store/currency/currency.model";
 import { SaleInvoice } from "../../../store/sale-invoice/sale-invoice.model";
-import { AddressGroup, SaleInvoiceForm, SaleItemForm } from "./sale-invoice-form.type";
+import { AddressGroup, SaleInvoiceForm, SaleItemForm, SaleItemTaxForm } from "./sale-invoice-form.type";
 import { SaleItem } from "../../../store/sale-invoice/sale-item.model";
+import { SaleItemTax } from "../../../store/sale-invoice/sale-item-tax.model";
 
 
 @Injectable({ providedIn: 'root' })
@@ -28,6 +29,59 @@ export class SaleInvoiceFormService {
   });
 }
 
+private buildSaleItemTaxGroup(tax: Partial<SaleItemTax> = {}): FormGroup<SaleItemTaxForm> {
+  return this.fb.group<SaleItemTaxForm>({
+    name: this.fb.control(tax.name ?? '', { nonNullable: true, validators: [Validators.required] }),
+    shortname: this.fb.control(tax.shortname ?? '', { nonNullable: true, validators: [Validators.required] }),
+    rate: this.fb.control(tax.rate ?? 0, { nonNullable: true, validators: [Validators.min(0)] }),
+    appliedto: this.fb.control(tax.appliedto ?? 0, { nonNullable: true, validators: [Validators.min(0)] }),
+    amount: this.fb.control(tax.amount ?? 0, { nonNullable: true, validators: [Validators.min(0)] }),
+    saleitemid: this.fb.control(tax.saleitemid ?? '', { nonNullable: true, validators: [Validators.required] }),
+    taxid: this.fb.control(tax.taxid ?? '', { nonNullable: true, validators: [Validators.required] }),
+  });
+}
+
+private createItemTaxesArray(taxes: Partial<SaleItemTax>[] = []): FormArray<FormGroup<SaleItemTaxForm>> {
+  const formArray = this.fb.array<FormGroup<SaleItemTaxForm>>(
+    taxes.map(t => this.buildSaleItemTaxGroup(t))
+  );
+  return formArray;
+}
+
+public addEmptyItemRow = (formArray: FormArray<FormGroup<SaleItemForm>>)=> {
+  // Add an empty item at the last
+  formArray.push(this.buildSaleItemGroup({
+    taxes: [{
+      name: '',
+      shortname: '',
+      rate: 0,
+      appliedto: 0,
+      amount: 0,
+      saleitemid: '',
+      taxid: '',
+    },
+    {
+      name: '',
+      shortname: '',
+      rate: 0,
+      appliedto: 0,
+      amount: 0,
+      saleitemid: '',
+      taxid: '',
+    }],
+  }));
+}
+
+private createItemsArray(items: Partial<SaleItem>[] = []): FormArray<FormGroup<SaleItemForm>> {
+  const formArray = this.fb.array<FormGroup<SaleItemForm>>(
+    items.map(i => this.buildSaleItemGroup(i))
+  );
+
+  this.addEmptyItemRow(formArray);
+
+  return formArray;
+}
+
 private buildSaleItemGroup(item: Partial<SaleItem> = {}): FormGroup<SaleItemForm> {
   return this.fb.group<SaleItemForm>({
     name: this.fb.control(item.name ?? '', { nonNullable: true, validators: [Validators.required] }),
@@ -40,6 +94,7 @@ private buildSaleItemGroup(item: Partial<SaleItem> = {}): FormGroup<SaleItemForm
     discpercent: this.fb.control(item.discpercent ?? null, { validators: [Validators.min(0), Validators.max(100)] }),
     discamount: this.fb.control(item.discamount ?? null, { validators: [Validators.min(0)] }),
     subtotal: this.fb.control(item.subtotal ?? 0, { nonNullable: true, validators: [Validators.min(0)] }),
+    taxes: this.createItemTaxesArray(item.taxes as Partial<SaleItemTax>[] | undefined),
     taxamount: this.fb.control(item.taxamount ?? null, { validators: [Validators.min(0)] }),
     grandtotal: this.fb.control(item.grandtotal ?? 0, { nonNullable: true, validators: [Validators.min(0)] }),
     saleinvoiceid: this.fb.control(item.saleinvoiceid ?? null),
@@ -48,9 +103,6 @@ private buildSaleItemGroup(item: Partial<SaleItem> = {}): FormGroup<SaleItemForm
   });
 }
 
-private createItemsArray(items: Partial<SaleItem>[] = []): FormArray<FormGroup<SaleItemForm>> {
-  return this.fb.array(items.map(i => this.buildSaleItemGroup(i)));
-}
 
   createForm(
     init: Partial<SaleInvoice> = {}

@@ -1,6 +1,7 @@
 import {
   bootstrapArrowCounterclockwise,
   bootstrapArrowsExpand,
+  bootstrapBagPlus,
   bootstrapBank,
   bootstrapBarChart,
   bootstrapBook,
@@ -100,4 +101,5 @@ export const provideAppIcons = () =>
     bootstrapDashLg,
     bootstrapPlus,
     bootstrapPencil,
+    bootstrapBagPlus,
   });

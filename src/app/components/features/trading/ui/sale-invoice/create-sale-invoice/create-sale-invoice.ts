@@ -15,6 +15,7 @@ import { CurrencyStore } from '../../../../../shared/store/currency/currency.sto
 import { Customer, customerActions, CustomerStore } from '../../../store/customer';
 import { SaleInvoiceFormService } from '../util/sale-invoice-form.service';
 import { SaleInvoiceForm } from '../util/sale-invoice-form.type';
+import { Item, itemActions, ItemStore } from '../../../store/item';
 
 @Component({
   selector: 'app-create-sale-in voice',
@@ -29,8 +30,10 @@ export class CreateSaleInvoice {
   private readonly router = inject(Router);
   readonly customerStore = inject(CustomerStore);
   readonly currencyStore = inject(CurrencyStore);
+  readonly itemStore = inject(ItemStore);
 
   readonly customers = this.customerStore.items;
+  readonly items = this.itemStore.items;
   currencies = signal<Currency[]>([]);
   private taxOptionsArray = Object.values(TaxOptions);
   taxOptions = signal(this.taxOptionsArray);
@@ -89,6 +92,8 @@ export class CreateSaleInvoice {
   
   findCustomerDisplayValue = (customer: Customer) => customer?.name ?? '';
 
+  findItemDisplayValue = (item: Item) => item?.name ?? '';
+
   onCustomerSearch(value: string) {
     this.store.dispatch(customerActions.loadCustomers({ query: { search: { query: value, fields: ['name', 'mobile', 'description','email'] }, includes: ['currency'] } }));
   }
@@ -141,6 +146,7 @@ export class CreateSaleInvoice {
   }
 
   addItemRow() {
+    this.formSvc.addEmptyItemRow(this.form.controls.items);
   }
 
   removeItemRow(index: number) {
@@ -149,5 +155,13 @@ export class CreateSaleInvoice {
 
   onItemChanged() {
     this.form.controls.items.updateValueAndValidity();
+  }
+
+  onItemSearch = (value: string) => {
+    this.store.dispatch(itemActions.loadItems({ query: { search: { query: value, fields: ['name', 'code', 'description', 'displayname', 'barcode'] } } }));
+  }
+
+  onItemSelected = (item: Item) => {
+    this.form.patchValue({ items: [item] });
   }
 }

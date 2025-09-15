@@ -17,6 +17,16 @@ export type AddressGroup = {
   email: FormControl<string | null>;
 };
 
+export interface SaleItemTaxForm {
+  name: FormControl<string>;
+  shortname: FormControl<string>;
+  rate: FormControl<number>;
+  appliedto: FormControl<number>;
+  amount: FormControl<number>;
+  saleitemid: FormControl<string>;
+  taxid: FormControl<string>;
+}
+
 export interface SaleItemForm {
   name: FormControl<string>;
   description: FormControl<string | null>;
@@ -28,6 +38,7 @@ export interface SaleItemForm {
   discpercent: FormControl<number | null>;
   discamount: FormControl<number | null>;
   subtotal: FormControl<number>;
+  taxes: FormArray<FormGroup<SaleItemTaxForm>>;
   taxamount: FormControl<number | null>;
   grandtotal: FormControl<number>;
   saleinvoiceid: FormControl<string | null>;
