@@ -188,13 +188,13 @@
     <div class="col-span-2 flex items-center justify-center py-2">Grand Total</div>
     <div class="col-span-1 flex items-center justify-center py-2">Action</div>
   </div>
-  @for (g of form.controls.items.controls; track g; let i = $index) {
+  @for (g of form.controls.items.controls; track i; let i = $index) {
     <div class="grid grid-cols-23 text-xs font-medium text-gray-500 border-b border-gray-400">
       <app-auto-complete [formControl]="g.controls.item" [options]="items()" class="flex-1 col-span-8"
         placeholder="Search for an item" [required]="true"
-        inputClass="flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 placeholder-gray-400 focus:outline-none focus:border-b-primary border-b-gray-300"
+        inputClass="flex-1 h-16 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 placeholder-gray-400 focus:outline-none focus:border-b-primary border-b-gray-300"
         [optionDisplayValue]="findItemDisplayValue" [inputDisplayValue]="findItemDisplayValue"
-        (onSearch)="onItemSearch($event)" (onOptionSelected)="onItemSelected($event)">
+        (onSearch)="onItemSearch($event)" (onOptionSelected)="onItemSelected(i)($event)">
       </app-auto-complete>
       
       <div class="col-span-2 border-r border-gray-200 text-center py-2 h-16">

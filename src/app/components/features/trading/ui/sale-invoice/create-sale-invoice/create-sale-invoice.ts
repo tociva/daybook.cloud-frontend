@@ -161,7 +161,8 @@ export class CreateSaleInvoice {
     this.store.dispatch(itemActions.loadItems({ query: { search: { query: value, fields: ['name', 'code', 'description', 'displayname', 'barcode'] } } }));
   }
 
-  onItemSelected = (item: Item) => {
-    this.form.patchValue({ items: [item] });
-  }
+  onItemSelected = (index: number) => (item: Item) => {
+    this.form.controls.items.at(index).patchValue({ item, code: item.code, name: item.name });
+  };
+  
 }
