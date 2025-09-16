@@ -38,7 +38,15 @@ export class CreateSaleInvoice {
   private taxOptionsArray = Object.values(TaxOptions);
   taxOptions = signal(this.taxOptionsArray);
 
-  readonly form:  FormGroup<SaleInvoiceForm> = this.formSvc.createForm(); 
+  readonly form:  FormGroup<SaleInvoiceForm> = this.formSvc.createForm({
+    billingaddressreadonly: true,
+    shippingaddressreadonly: true,
+    useBillingForShipping: true,
+    autoNumbering: true,
+    showDescription: false,
+    showDiscount: true,
+    taxOption: TaxOptions.CGST_SGST,
+  }); 
 
   useBillingForShippingSig = toSignal(
     this.form.controls.useBillingForShipping.valueChanges,

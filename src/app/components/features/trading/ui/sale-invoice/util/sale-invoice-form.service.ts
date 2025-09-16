@@ -4,7 +4,7 @@ import { Address } from "../../../../../../util/types/address";
 import { TaxOptions } from "../../../../../../util/types/tax-options.type";
 import { Currency } from "../../../../../shared/store/currency/currency.model";
 import { SaleInvoice } from "../../../store/sale-invoice/sale-invoice.model";
-import { AddressGroup, SaleInvoiceForm, SaleItemForm, SaleItemTaxForm } from "./sale-invoice-form.type";
+import { AddressGroup, SaleInvoiceDAO, SaleInvoiceForm, SaleItemForm, SaleItemTaxForm } from "./sale-invoice-form.type";
 import { SaleItem } from "../../../store/sale-invoice/sale-item.model";
 import { SaleItemTax } from "../../../store/sale-invoice/sale-item-tax.model";
 
@@ -105,15 +105,15 @@ private buildSaleItemGroup(item: Partial<SaleItem> = {}): FormGroup<SaleItemForm
 
 
   createForm(
-    init: Partial<SaleInvoice> = {}
+    init: Partial<SaleInvoiceDAO> = {}
   ): FormGroup<SaleInvoiceForm> {
     return this.fb.group<SaleInvoiceForm>({
       customer: this.fb.control(init.customer ?? null, { nonNullable: true, validators: [Validators.required] }),
       billingaddress: this.buildAddressGroup(this.fb),
-      billingaddressreadonly: this.fb.control(true, { nonNullable: true }),
+      billingaddressreadonly: this.fb.control(init.billingaddressreadonly ?? true, { nonNullable: true }),
       shippingaddress: this.buildAddressGroup(this.fb),
-      shippingaddressreadonly: this.fb.control(true, { nonNullable: true }),
-      useBillingForShipping: this.fb.control(true, { nonNullable: true }),
+      shippingaddressreadonly: this.fb.control(init.shippingaddressreadonly ?? true, { nonNullable: true }),
+      useBillingForShipping: this.fb.control(init.useBillingForShipping ?? true, { nonNullable: true }),
       number: this.fb.control(init.number ?? '', { nonNullable: true, validators: [Validators.required] }),
       date: this.fb.control(init.date ?? '', { nonNullable: true, validators: [Validators.required] }),
       duedate: this.fb.control(init.duedate ?? '', { nonNullable: true, validators: [Validators.required] }),
@@ -125,19 +125,19 @@ private buildSaleItemGroup(item: Partial<SaleItem> = {}): FormGroup<SaleItemForm
       grandtotal: this.fb.control(init.grandtotal ?? 0, { nonNullable: true, validators: [Validators.required, Validators.min(0)] }),
       currency: this.fb.control(init.currency ?? null, { nonNullable: true, validators: [Validators.required] }),
       description: this.fb.control<string | null>(init.description ?? null),
-      autoNumbering: this.fb.control(Boolean(init.number), { nonNullable: true }),
-      deliveryState: this.fb.control(String(init.sprops?.['deliveryState'] ?? ''), { nonNullable: true }),
-      taxOption: this.fb.control(TaxOptions.CGST_SGST, { nonNullable: true }),
-      showDescription: this.fb.control(Boolean(init.description), { nonNullable: true }),
-      showDiscount: this.fb.control(Boolean(init.discount), { nonNullable: true }),
-      journal: this.fb.control(String(init.sprops?.['journal'] ?? ''), { nonNullable: true }),
+      autoNumbering: this.fb.control(init.autoNumbering ?? Boolean(init.number), { nonNullable: true }),
+      deliveryState: this.fb.control(init.deliveryState ?? String(init.sprops?.['deliveryState'] ?? ''), { nonNullable: true }),
+      taxOption: this.fb.control(init.taxOption ?? TaxOptions.CGST_SGST, { nonNullable: true }),
+      showDescription: this.fb.control(init.showDescription ?? Boolean(init.description), { nonNullable: true }),
+      showDiscount: this.fb.control(init.showDiscount ?? Boolean(init.discount), { nonNullable: true }),
+      journal: this.fb.control(init.journal ?? String(init.sprops?.['journal'] ?? ''), { nonNullable: true }),
       items: this.createItemsArray(init.items as Partial<SaleItem>[] | undefined),
     });
   }
 
   patchForm(  
     form: FormGroup<SaleInvoiceForm>,
-    dto: Partial<SaleInvoice>
+    dto: Partial<SaleInvoiceDAO>
   ): void {
     form.patchValue({
       customer: dto.customer ?? form.controls.customer.value,

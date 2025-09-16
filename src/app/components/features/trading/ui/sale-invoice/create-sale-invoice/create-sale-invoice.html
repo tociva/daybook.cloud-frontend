@@ -263,16 +263,54 @@
                           title="Remove Item"
                           (click)="removeItemRow(i)"
                         >
-                          <ng-icon name="bootstrapTrash" size="24"/>
+                          <ng-icon name="bootstrapTrash" size="16"/>
                         </button>
               <button
                           class="text-primary hover:text-primary-hover transition-colors duration-200 cursor-pointer"
                           title="Add Item"
                           (click)="addItemRow()"
                         >
-                          <ng-icon name="bootstrapBagPlus" size="24"/>
+                          <ng-icon name="bootstrapBagPlus" size="16"/>
                         </button>
             </div>              
     </div>
   }
+</div>
+
+<!-- summary row -->
+<div class="bg-white p-4 border border-gray-200 rounded flex gap-4 justify-between mt-2">
+  <div>
+    <!-- Amount in words -->
+  </div>
+    <div class="bg-alternate-background p-2">
+      <div class="flex items-center justify-between mb-1">
+        <h2 class="font-semibold text-base mb-4">Summary</h2>
+      </div>
+      <div class="space-y-3">
+        <div class="flex items-center gap-2 mb-2">
+          <label class="w-28 text-sm text-gray-700">Item Total:</label>
+          <input [formControl]="form.controls.itemtotal" type="text" appTextInput />
+        </div>
+        <div class="flex items-center gap-2 mb-2">
+          <label class="w-28 text-sm text-gray-700">Discount:</label>
+          <input [formControl]="form.controls.discount" type="text" appTextInput />
+        </div>
+        <div class="flex items-center gap-2 mb-2">
+          <label class="w-28 text-sm text-gray-700">Subtotal:</label>
+          <input [formControl]="form.controls.subtotal" type="text" appTextInput />
+        </div>
+        <div class="flex items-center gap-2 mb-2">
+          <label class="w-28 text-sm text-gray-700">Tax:</label>
+          <input [formControl]="form.controls.tax" type="text" appTextInput />
+        </div>
+        <div class="flex items-center gap-2 mb-2">
+          <label class="w-28 text-sm text-gray-700">Roundoff:</label>
+          <input [formControl]="form.controls.roundoff" type="text" appTextInput />
+        </div>
+        <div class="flex items-center gap-2 mb-2">
+          <label class="w-28 text-sm text-gray-700">Grand Total:</label>
+          <input [formControl]="form.controls.grandtotal" type="text" appTextInput />
+        </div>
+      </div>
+    </div>
 </div>

@@ -3,6 +3,8 @@ import { Customer } from "../../../store/customer";
 import { Currency } from "../../../../../shared/store/currency/currency.model";
 import { TaxOptions } from "../../../../../../util/types/tax-options.type";
 import { Item } from "../../../store/item/item.model";
+import { SaleInvoice } from "../../../store/sale-invoice/sale-invoice.model";
+import { SaleItem } from "../../../store/sale-invoice/sale-item.model";
 
 export type AddressGroup = {
   name: FormControl<string>;
@@ -78,3 +80,18 @@ export type SaleInvoiceForm = {
   items: FormArray<FormGroup<SaleItemForm>>;
 
 };
+
+export interface SaleInvoiceDAO extends SaleInvoice {
+
+  billingaddressreadonly: boolean;
+  shippingaddressreadonly: boolean;
+  useBillingForShipping: boolean;
+  autoNumbering: boolean;
+  currency: Currency;
+  deliveryState: string;
+  taxOption: TaxOptions;
+  showDescription: boolean;
+  showDiscount: boolean;
+  journal: string;
+
+}
