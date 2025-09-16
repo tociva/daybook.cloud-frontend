@@ -9,6 +9,7 @@ import { ConfigStore } from '../config/config.store';
 import { userSessionActions } from '../user-session/user-session.actions';
 import { authActions } from './auth.actions';
 import { AuthStore } from './auth.store';
+import { Store } from '@ngrx/store';
 
 export const authEffects = {
   hydrateReturnUri: createEffect(
@@ -261,6 +262,33 @@ export const authEffects = {
       );
     },
     { functional: true }
+  ),
+
+  silentRenewFailure: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      return actions$.pipe(
+        ofType(authActions.silentRenewFailure),
+        tap(({ error }) => {
+          console.log('Error during silent renew:', error);
+          const store = inject(Store);
+          store.dispatch(authActions.logoutHydra());
+        })
+      );
+    },
+    { functional: true, dispatch: false }
+  ),
+  silentRenewSuccess: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      return actions$.pipe(
+        ofType(authActions.silentRenewSuccess),
+        tap(({ user }) => {
+          console.log('Silent renew success: user is still authenticated');
+        })
+      );
+    },
+    { functional: true, dispatch: false }
   ),
 
   // Session hydration effect using createEffect instead of Angular's effect()
