@@ -189,128 +189,87 @@
     <div class="col-span-1 flex items-center justify-center py-2">Action</div>
   </div>
   @for (g of form.controls.items.controls; track i; let i = $index) {
-    <div class="grid grid-cols-23 text-xs font-medium text-gray-500 border-b border-gray-400">
-      <app-auto-complete [formControl]="g.controls.item" [options]="items()" class="flex-1 col-span-8"
-        placeholder="Search for an item" [required]="true"
-        inputClass="flex-1 h-16 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 placeholder-gray-400 focus:outline-none focus:border-b-primary border-b-gray-300"
-        [optionDisplayValue]="findItemDisplayValue" [inputDisplayValue]="findItemDisplayValue"
-        (onSearch)="onItemSearch($event)" (onOptionSelected)="onItemSelected(i)($event)">
-      </app-auto-complete>
-      
-      <div class="col-span-2 border-r border-gray-200 text-center py-2 h-16">
-        <input
-              class="border-r border-gray-200 h-7 w-full"
-              type="text"
-              appTextInput
-              [formControl]="g.controls.price"/>
-        <input
-              class="border-r border-gray-200 h-7 w-full"
-              type="text"
-              appTextInput
-              [formControl]="g.controls.code"/>
-      </div>
-      <div class="col-span-2 border-r border-gray-200 text-center py-2 h-16">
-        <input
-              class="border-r border-gray-200 h-7 w-full"
-              type="text"
-              appTextInput
-              [formControl]="g.controls.quantity"/>
-        <input
-              class="border-r border-gray-200 h-7 w-full"
-              type="text"
-              appTextInput
-              [formControl]="g.controls.itemtotal"/>
-      </div>
-      <div class="col-span-2 border-r border-gray-200 text-center py-2 h-16">
-        <input
-              class="border-r border-gray-200 h-7 w-full"
-              type="text"
-              appTextInput
-              [formControl]="g.controls.discpercent"/>
-        <input
-              class="border-r border-gray-200 h-7 w-full"
-              type="text"
-              appTextInput
-              [formControl]="g.controls.discamount"/>
-      </div>
-      <input
-              class="col-span-2 border-r border-l border-gray-200 h-16"
-              type="text"
-              appTextInput
-              [formControl]="g.controls.subtotal"/>
-              @for (t of g.controls.taxes.controls; track t; let i = $index) {
-                <div class="col-span-2 border-r border-gray-200 text-center py-2 h-16">
-                  <input
-                        class="border-r border-gray-200 h-7 w-full"
-                        type="text"
-                        appTextInput
-                        [formControl]="t.controls.rate"/>
-                  <input
-                        class="border-r border-gray-200 h-7 w-full"
-                        type="text"
-                        appTextInput
-                        [formControl]="t.controls.amount"/>
-                </div>
-              }
-              <input
-                      class="col-span-2 border-r border-l border-gray-200 h-16"
-                      type="text"
-                      appTextInput
-                      [formControl]="g.controls.grandtotal"/>
-            <div class="col-span-1 flex gap-2 items-center justify-center py-2 border-r border-b border-gray-200">
-              <button
-                          class="text-danger hover:text-danger-hover transition-colors duration-200 cursor-pointer"
-                          title="Remove Item"
-                          (click)="removeItemRow(i)"
-                        >
-                          <ng-icon name="bootstrapTrash" size="16"/>
-                        </button>
-              <button
-                          class="text-primary hover:text-primary-hover transition-colors duration-200 cursor-pointer"
-                          title="Add Item"
-                          (click)="addItemRow()"
-                        >
-                          <ng-icon name="bootstrapBagPlus" size="16"/>
-                        </button>
-            </div>              
+  <div class="grid grid-cols-23 text-xs font-medium text-gray-500 border-b border-gray-400">
+    <app-auto-complete [formControl]="g.controls.item" [options]="items()" class="flex-1 col-span-8"
+      placeholder="Search for an item" [required]="true"
+      inputClass="flex-1 h-16 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 placeholder-gray-400 focus:outline-none focus:border-b-primary border-b-gray-300"
+      [optionDisplayValue]="findItemDisplayValue" [inputDisplayValue]="findItemDisplayValue"
+      (onSearch)="onItemSearch($event)" (onOptionSelected)="onItemSelected(i)($event)">
+    </app-auto-complete>
+
+    <div class="col-span-2 border-r border-gray-200 text-center py-2 h-16">
+      <input class="border-r border-gray-200 h-7 w-full" type="text" appTextInput [formControl]="g.controls.price" />
+      <input class="border-r border-gray-200 h-7 w-full" type="text" appTextInput [formControl]="g.controls.code" />
     </div>
+    <div class="col-span-2 border-r border-gray-200 text-center py-2 h-16">
+      <input class="border-r border-gray-200 h-7 w-full" type="text" appTextInput [formControl]="g.controls.quantity" />
+      <input class="border-r border-gray-200 h-7 w-full" type="text" appTextInput
+        [formControl]="g.controls.itemtotal" />
+    </div>
+    <div class="col-span-2 border-r border-gray-200 text-center py-2 h-16">
+      <input class="border-r border-gray-200 h-7 w-full" type="text" appTextInput
+        [formControl]="g.controls.discpercent" />
+      <input class="border-r border-gray-200 h-7 w-full" type="text" appTextInput
+        [formControl]="g.controls.discamount" />
+    </div>
+    <input class="col-span-2 border-r border-l border-gray-200 h-16" type="text" appTextInput
+      [formControl]="g.controls.subtotal" />
+    @for (t of g.controls.taxes.controls; track t; let i = $index) {
+    <div class="col-span-2 border-r border-gray-200 text-center py-2 h-16">
+      <input class="border-r border-gray-200 h-7 w-full" type="text" appTextInput [formControl]="t.controls.rate" />
+      <input class="border-r border-gray-200 h-7 w-full" type="text" appTextInput [formControl]="t.controls.amount" />
+    </div>
+    }
+    <input class="col-span-2 border-r border-l border-gray-200 h-16" type="text" appTextInput
+      [formControl]="g.controls.grandtotal" />
+    <div class="col-span-1 flex gap-2 items-center justify-center py-2 border-r border-b border-gray-200">
+      <button class="text-danger hover:text-danger-hover transition-colors duration-200 cursor-pointer"
+        title="Remove Item" (click)="removeItemRow(i)">
+        <ng-icon name="bootstrapTrash" size="16" />
+      </button>
+      <button class="text-primary hover:text-primary-hover transition-colors duration-200 cursor-pointer"
+        title="Add Item" (click)="addItemRow()">
+        <ng-icon name="bootstrapBagPlus" size="16" />
+      </button>
+    </div>
+  </div>
   }
 </div>
 
 <!-- summary row -->
-<div class="bg-white p-4 border border-gray-200 rounded flex gap-4 justify-between mt-2">
-  <div>
+<div class="grid grid-cols-4 bg-white p-4 border border-gray-200 rounded gap-4 mt-2">
+  <div class="col-span-3">
     <!-- Amount in words -->
   </div>
-    <div class="bg-alternate-background p-2">
-      <div class="flex items-center justify-between mb-1">
-        <h2 class="font-semibold text-base mb-4">Summary</h2>
+  <div class="col-span-1 bg-alternate-background p-2">
+    <div class="flex items-center justify-between mb-1">
+      <h2 class="font-semibold text-base mb-4">Summary</h2>
+    </div>
+    <div class="space-y-3">
+      <div class="flex items-center gap-2 mb-2">
+        <label class="w-28 text-sm text-gray-700">Item Total:</label>
+        <input [formControl]="form.controls.itemtotal" type="text" appTextInput />
       </div>
-      <div class="space-y-3">
-        <div class="flex items-center gap-2 mb-2">
-          <label class="w-28 text-sm text-gray-700">Item Total:</label>
-          <input [formControl]="form.controls.itemtotal" type="text" appTextInput />
-        </div>
-        <div class="flex items-center gap-2 mb-2">
-          <label class="w-28 text-sm text-gray-700">Discount:</label>
-          <input [formControl]="form.controls.discount" type="text" appTextInput />
-        </div>
-        <div class="flex items-center gap-2 mb-2">
-          <label class="w-28 text-sm text-gray-700">Subtotal:</label>
-          <input [formControl]="form.controls.subtotal" type="text" appTextInput />
-        </div>
-        <div class="flex items-center gap-2 mb-2">
-          <label class="w-28 text-sm text-gray-700">Tax:</label>
-          <input [formControl]="form.controls.tax" type="text" appTextInput />
-        </div>
-        <div class="flex items-center gap-2 mb-2">
-          <label class="w-28 text-sm text-gray-700">Roundoff:</label>
-          <input [formControl]="form.controls.roundoff" type="text" appTextInput />
-        </div>
-        <div class="flex items-center gap-2 mb-2">
-          <label class="w-28 text-sm text-gray-700">Grand Total:</label>
-          <input [formControl]="form.controls.grandtotal" type="text" appTextInput />
-        </div>
+      <div class="flex items-center gap-2 mb-2">
+        <label class="w-28 text-sm text-gray-700">Discount:</label>
+        <input [formControl]="form.controls.discount" type="text" appTextInput />
+      </div>
+      <div class="flex items-center gap-2 mb-2">
+        <label class="w-28 text-sm text-gray-700">Subtotal:</label>
+        <input [formControl]="form.controls.subtotal" type="text" appTextInput />
+      </div>
+      <div class="flex items-center gap-2 mb-2">
+        <label class="w-28 text-sm text-gray-700">Tax:</label>
+        <input [formControl]="form.controls.tax" type="text" appTextInput />
+      </div>
+      <div class="flex items-center gap-2 mb-2">
+        <label class="w-28 text-sm text-gray-700">Roundoff:</label>
+        <input [formControl]="form.controls.roundoff" type="text" appTextInput />
+      </div>
+      <div class="flex items-center gap-2 mb-2">
+        <label class="w-28 text-sm text-gray-700">Grand Total:</label>
+        <input [formControl]="form.controls.grandtotal" type="text" appTextInput />
       </div>
     </div>
+  </div>
 </div>
