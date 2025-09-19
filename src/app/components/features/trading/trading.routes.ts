@@ -10,6 +10,10 @@ export const tradingRoutes: Routes = [
     loadChildren: () => import('./ui/tax/tax.routes').then(m => m.taxRoutes),
   },
   {
+    path: 'tax-group',
+    loadChildren: () => import('./ui/tax-group/tax-group.routes').then(m => m.taxGroupRoutes),
+  },
+  {
     path: 'customer',
     loadChildren: () => import('./ui/customer/customer.routes').then(m => m.customerRoutes),
   },

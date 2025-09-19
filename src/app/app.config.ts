@@ -29,6 +29,7 @@ import { ledgerCategoryEffects } from './components/features/accounting/store/le
 import { branchEffects } from './components/features/management/store/branch/branch.effects';
 import { fiscalYearEffects } from './components/features/management/store/fiscal-year/fiscal-year.effects';
 import { saleInvoiceEffects } from './components/features/trading/store/sale-invoice/sale-invoice.effects';
+import { taxGroupEffects } from './components/features/trading/store/tax-group/tax-group.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -50,6 +51,7 @@ export const appConfig: ApplicationConfig = {
       httpEffects,
       bankCashEffects,
       taxEffects,
+      taxGroupEffects,
       customerEffects,
       itemEffects,
       itemCategoryEffects,

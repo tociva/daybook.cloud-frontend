@@ -100,4 +100,8 @@ export class ListTax implements OnInit, OnDestroy {
     this.destroy$.complete();
     this.searchItemStore.setCurrentTitle(null);
   }
+
+  readonly handleOnButton2Click = signal<() => void>(() => {
+    this.router.navigate(['/trading/tax-group']);
+  });
 }

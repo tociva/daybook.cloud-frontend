@@ -1,0 +1,83 @@
+@if (loading) {
+  <app-skelton-loader
+    variant="text"
+    [lines]="10"
+    width="100%"
+    [shimmer]="true" />
+}
+@if(!loading &&selectedTaxGroup()) {
+  <section class="rounded border border-gray-200 bg-white p-5 shadow-sm">
+    <header class="mb-4 flex items-center justify-between">
+      <h2 class="text-base font-semibold text-gray-900">Delete Tax Group</h2>
+    </header>
+
+    <div class="divide-y divide-gray-100">
+      <!-- Details -->
+      <dl class="grid grid-cols-1 gap-y-3 py-2 md:grid-cols-2 md:gap-x-8">
+        <div class="flex items-start gap-3">
+          <dt class="w-40 shrink-0 text-sm text-gray-600">Name</dt>
+          <dd class="text-sm text-gray-900 truncate">
+            {{ selectedTaxGroup()?.name || '—' }}
+          </dd>
+        </div>
+
+        <div class="flex items-start gap-3">
+          <dt class="w-40 shrink-0 text-sm text-gray-600">Rate</dt>
+          <dd class="text-sm text-gray-900 truncate">
+            {{ selectedTaxGroup()?.rate || '—' }}%
+          </dd>
+        </div>
+
+        <div class="flex items-start gap-3">
+          <dt class="w-40 shrink-0 text-sm text-gray-600">Description</dt>
+          <dd class="text-sm text-gray-900 break-words">
+            {{ selectedTaxGroup()?.description || '—' }}
+          </dd>
+        </div>
+
+        <div class="flex items-start gap-3">
+          <dt class="w-40 shrink-0 text-sm text-gray-600">Tax Groups</dt>
+          <dd class="text-sm text-gray-900 break-words">
+            <div class="space-y-1">
+              @for (group of selectedTaxGroup()?.groups; track group.mode) {
+                <div class="text-xs">
+                  <span class="font-medium">{{ group.mode }}:</span>
+                  <span class="ml-1">{{ group.taxids.length }} tax(es)</span>
+                </div>
+              }
+            </div>
+          </dd>
+        </div>
+      </dl>
+
+      <!-- Confirmation -->
+      <div class="flex items-start gap-3 py-4">
+        <input
+          id="confirm-delete"
+          type="checkbox"
+          #confirmDel
+          class="mt-0.5 h-4 w-4 rounded border-gray-300"
+          aria-describedby="confirm-help"
+        />
+        <label for="confirm-delete" class="text-sm text-gray-800">
+          I understand this will permanently delete this Tax Group ({{
+            selectedTaxGroup()?.name
+          }}) and cannot be undone.
+        </label>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex flex-col items-stretch justify-center gap-3 py-4 md:flex-row">
+        <app-cancel-button></app-cancel-button>
+
+        <app-delete-button [disabled]="!confirmDel.checked" [onDelete]="handleDelete"
+        [successAction]="successAction"></app-delete-button>
+      </div>
+    </div>
+  </section>
+} 
+@if (!loading && !selectedTaxGroup()) {
+  <app-item-not-found
+  title="Tax group record not found"
+  description="It may have been deleted or the link is invalid."></app-item-not-found>
+}
