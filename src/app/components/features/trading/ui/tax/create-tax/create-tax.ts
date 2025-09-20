@@ -113,10 +113,12 @@ export class CreateTax implements OnInit {
   handleSubmit = (data: TaxCU) => {
     const validatedFields = FormValidator.validate(data as any, this.formFields());
     const hasErrors = validatedFields.some(fld => fld.errors?.length);
-    const {appliedto, rate, ...rest} = data;
+    const {rate, shortname, name, appliedto, description} = data;
 
     const tax = {
-      ...rest,
+      name,
+      shortname,
+      ...(description && { description }),
       appliedto: Number(appliedto),
       rate: Number(rate)
     }

@@ -1,22 +1,27 @@
+import { NgClass } from '@angular/common';
 import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ActionCreator, Store } from '@ngrx/store';
 import { buildFormKey } from '../../../../../../util/common.util';
-import { FormUtil } from '../../../../../../util/form/form.util';
-import { willPassRequiredStringValidation } from '../../../../../../util/form/validation.uti';
 import { WithFormDraftBinding } from '../../../../../../util/form/with-form-draft-binding';
-import { FormField } from '../../../../../../util/types/form-field.model';
-import { TwoColumnFormComponent } from '../../../../../shared/forms/two-column-form/two-column-form.component';
 import { ItemNotFound } from '../../../../../shared/item-not-found/item-not-found';
 import { SkeltonLoader } from '../../../../../shared/skelton-loader/skelton-loader';
 import { taxActions, TaxStore } from '../../../store/tax';
 import { taxGroupActions, TaxGroupStore } from '../../../store/tax-group';
-import { TaxGroup, TaxGroupCU } from '../../../store/tax-group/tax-group.model';
+import { TaxGroupCU } from '../../../store/tax-group/tax-group.model';
+import { Tax } from '../../../store/tax/tax.model';
+import { AutoComplete } from '../../../../../shared/auto-complete/auto-complete';
 
+type GroupForm = FormGroup<{
+  mode: FormControl<string>;
+  taxids: FormArray<FormControl<string>>;
+  taxes: FormArray<FormControl<Tax>>;
+  tax: FormControl<Tax>;
+}>;
 @Component({
   selector: 'app-create-tax-group',
-  imports: [TwoColumnFormComponent, SkeltonLoader, ItemNotFound],
+  imports: [SkeltonLoader, ItemNotFound, NgClass, ReactiveFormsModule, AutoComplete],
   templateUrl: './create-tax-group.html',
   styleUrl: './create-tax-group.css'
 })
@@ -38,26 +43,25 @@ export class CreateTaxGroup extends WithFormDraftBinding implements OnInit {
   private router = inject(Router);
   readonly formKey = computed(() => buildFormKey('tax-group', this.mode(), this.taxGroupId()));
 
+
   taxes = this.taxStore.items;
+  readonly form: FormGroup;
 
-  readonly formFields = signal<FormField[]>([
-    { key: 'name', label: 'Name', type: 'text', required: true, group: 'Basic Details', validators:(value: unknown) => {
-      if(!willPassRequiredStringValidation(value as string)) {
-        return ['Name is required'];
-      }
-      return [];
-    }},
-    { key: 'rate', label: 'Rate (%)', type: 'number', required: true, group: 'Basic Details', validators:(value: unknown) => {
-      if(!value || isNaN(Number(value)) || Number(value) < 0) {
-        return ['Rate is required and must be a positive number'];
-      }
-      return [];
-    }},
-    { key: 'description', label: 'Description', type: 'text', required: false, group: 'Basic Details'},
-    
-  ]);
-
-  readonly form: FormGroup = FormUtil.buildForm(this.formFields(), this.fb);
+  constructor() {
+    super();
+    this.form = this.fb.group({
+      name: new FormControl<string | null>(null, {
+        validators: [Validators.required],
+        nonNullable: false,
+      }),
+      rate: new FormControl<number | null>(null, {
+        validators: [Validators.required, Validators.min(0)],
+        nonNullable: false,
+      }),
+      description: new FormControl<string | null>(null),
+      groups: this.fb.array<GroupForm>([])
+    });
+  }
 
   readonly title = signal('Tax Group Setup');
 
@@ -76,14 +80,6 @@ export class CreateTaxGroup extends WithFormDraftBinding implements OnInit {
     }
   });
 
-  private readonly binder = this.bindFormToDraft<TaxGroup>(
-    this.form,
-    this.formKey,
-    {
-      selected: this.selectedTaxGroup,
-      persistIf: (form, v) => form.dirty && !!v,
-    }
-  );
 
   ngOnInit(): void {
     const lastSegment = this.route.snapshot.url[this.route.snapshot.url.length - 1]?.path;
@@ -112,14 +108,81 @@ export class CreateTaxGroup extends WithFormDraftBinding implements OnInit {
     this.store.dispatch(taxActions.loadTaxes({}));
   }
 
-  handleSubmit(formData: TaxGroupCU): void {
+  ngOnDestroy(): void {
+    this.fillFormEffect.destroy();
+    this.loadErrorEffect.destroy();
+  }
+
+  handleSubmit(): void {
+    const formData = this.form.value as TaxGroupCU;
     if (this.mode() === 'create') {
-      this.store.dispatch(taxGroupActions.createTaxGroup({ taxGroup: formData }));
+      const {name, rate, description, groups} = formData;
+      const newTaxGroup = {
+        name,
+        rate: Number(rate),
+        ...(description && { description }),
+        groups: groups ? groups.map(group => ({
+          mode: group.mode,
+          taxids: group.taxids
+        })) : []
+      };
+      this.store.dispatch(taxGroupActions.createTaxGroup({ taxGroup: newTaxGroup }));
     } else if (this.mode() === 'edit' && this.taxGroupId()) {
       this.store.dispatch(taxGroupActions.updateTaxGroup({ 
         id: this.taxGroupId()!, 
         taxGroup: formData 
       }));
     }
+  }
+
+  // getters in your component.ts
+get groups(): FormArray<GroupForm> {
+  return this.form.get('groups') as FormArray<GroupForm>;
+}
+
+taxidsAt(i: number): FormArray<FormControl<string>> {
+  return this.groups.at(i).get('taxids') as FormArray<FormControl<string>>;
+}
+
+taxesAt(i: number): FormArray<FormControl<Tax>> {
+  return this.groups.at(i).get('taxes') as FormArray<FormControl<Tax>>;
+}
+
+  addGroup(): void {
+    const groups = this.form.get('groups') as FormArray
+    groups.push(this.fb.group({
+      mode: new FormControl<string>(''),
+      taxids: this.fb.array<FormControl<string>>([]),
+      taxes: this.fb.array<FormControl<Tax>>([])
+    }));
+  }
+  
+  removeGroup(index: number): void {
+    const groups = this.form.get('groups') as FormArray
+    groups.removeAt(index);
+  }
+  
+  addTaxId(index: number): void {
+    
+  }
+
+  removeTaxId(index: number, taxIdIndex: number): void {
+  }
+  
+  onTaxSearch(value: string) {
+    this.store.dispatch(taxActions.loadTaxes({ query: { search: { query: value, fields: ['name', 'description'] } } }));
+  }
+
+  onTaxSelected(tax: Tax, index: number) {
+    this.form.patchValue({ tax:  null});
+    this.taxesAt(index).push(new FormControl<Tax>(tax) as FormControl<Tax>);
+  }
+
+  findTaxDisplayValue(tax: Tax) {
+    return tax.name;
+  }
+
+  findTaxInputDisplayValue(tax: Tax) {
+    return '';
   }
 }

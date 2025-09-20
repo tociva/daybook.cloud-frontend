@@ -1,18 +1,144 @@
 @if(loading) {
-  <app-skelton-loader 
-  variant="text"
-  [lines]="10"
-  width="100%"
-  [shimmer]="true" />
+<app-skelton-loader variant="text" [lines]="10" width="100%" [shimmer]="true" />
 } @else if(!loading && mode() === 'edit' && taxGroupStore.error()) {
-  <app-item-not-found
-  title="Tax group record not found"
+<app-item-not-found title="Tax group record not found"
   description="It may have been deleted or the link is invalid."></app-item-not-found>
 } @else if(!loading && (mode() === 'create' || mode() === 'edit') && !taxGroupStore.error()) {
-  <app-two-column-form [form]="form"
-  [fields]="formFields()"
-  [title]="title()"
-  (formSubmit)="handleSubmit($event)"
-  [successAction]="successAction()"
-  />
+  <!-- 🔷 Form Title -->
+<h1 class="text-2xl font-semibold text-gray-800 mb-6 text-center">
+  {{ title() }}
+</h1>
+<form [formGroup]="form" (ngSubmit)="handleSubmit()"
+  class="grid grid-cols-1 gap-6 max-w-6xl mx-auto p-6 bg-white shadow rounded">
+
+  <div class="p-4 border border-gray-300 rounded bg-white">
+    <h2 class="font-semibold text-base mb-4">Basic Details</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-25 gap-y-4">
+
+      <!-- Name -->
+      <div class="flex flex-col gap-1">
+        @let name = form.get('name');
+        @let nameInvalid = name?.invalid && (name?.dirty || name?.touched);
+
+        <div class="flex items-center gap-2">
+          <label class="w-32 text-sm text-gray-700">
+            Name <span class="text-danger">*</span>
+          </label>
+
+          <input formControlName="name" type="text" [ngClass]="{
+              'flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none': true,
+              'focus:border-b-primary border-b-gray-300': !nameInvalid,
+              'border-b-danger': nameInvalid
+            }" />
+        </div>
+
+        @if (name?.hasError('required') && (name?.dirty || name?.touched)) {
+        <p class="text-danger text-xs mt-1">Name is required.</p>
+        }
+      </div>
+
+      <!-- Rate -->
+      <div class="flex flex-col gap-1">
+        @let rate = form.get('rate');
+        @let rateInvalid = rate?.invalid && (rate?.dirty || rate?.touched);
+
+        <div class="flex items-center gap-2">
+          <label class="w-32 text-sm text-gray-700">
+            Rate (%) <span class="text-danger">*</span>
+          </label>
+
+          <input formControlName="rate" type="number" inputmode="decimal" [ngClass]="{
+              'flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none': true,
+              'focus:border-b-primary border-b-gray-300': !rateInvalid,
+              'border-b-danger': rateInvalid
+            }" />
+        </div>
+
+        @if (rate?.hasError('required') && (rate?.dirty || rate?.touched)) {
+        <p class="text-danger text-xs mt-1">Rate is required.</p>
+        }
+        @if (rate?.hasError('min') && (rate?.dirty || rate?.touched)) {
+        <p class="text-danger text-xs mt-1">Rate must be a positive number.</p>
+        }
+      </div>
+
+      <!-- Description -->
+      <div class="flex flex-col gap-1 md:col-span-2">
+        <div class="flex items-start gap-2">
+          <label class="w-32 text-sm text-gray-700 pt-1">Description</label>
+          <textarea formControlName="description" rows="2"
+            class="flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary border-b-gray-300"></textarea>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div formArrayName="groups" class="p-4 border border-gray-300 rounded bg-white mt-6">
+
+    <h2 class="font-semibold text-base mb-4">Tax Groups</h2>
+
+    @for (group of groups.controls; track $index; let i = $index) {
+    <fieldset [formGroupName]="i"
+      class="mb-6 p-4 border border-gray-200 rounded grid grid-cols-1 md:grid-cols-2 gap-x-25 gap-y-4">
+
+      <!-- Mode -->
+      <div class="flex flex-col gap-1 mb-3">
+        @let modeCtrl = group.get('mode');
+        <div class="flex items-center gap-2">
+          <p class="w-32 text-sm text-gray-700">
+            Mode/Name <br/>
+            <span class="text-xs text-gray-500">Ex. GST-18%, GST-5%, EXPORT, NON-TAXABLE etc.</span>
+             <span class="text-danger">*</span></p>
+          <input type="text" formControlName="mode" [ngClass]="{
+                'flex-1 border-0 border-b bg-transparent text-sm pt-0.5 pb-1 focus:outline-none': true,
+                'border-b-danger': modeCtrl?.invalid && (modeCtrl?.touched || modeCtrl?.dirty),
+                'border-b-gray-300': !(modeCtrl?.invalid && (modeCtrl?.touched || modeCtrl?.dirty))
+              }" />
+        </div>
+        @if (modeCtrl?.hasError('required') && (modeCtrl?.touched || modeCtrl?.dirty)) {
+        <p class="text-danger text-xs mt-1">Mode/Name is required.</p>
+        }
+      </div>
+
+      <!-- Tax -->
+      <div class="flex flex-col gap-1 mb-3">
+        <div class="flex items-center gap-2">
+          <label class="w-32 text-sm text-gray-700">Taxes</label>
+      
+          <app-auto-complete
+            formControlName="tax"
+            [options]="taxes()"
+            class="flex-1"
+            placeholder="Search for a tax"
+            [required]="true"
+            inputClass="flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 placeholder-gray-400 focus:outline-none focus:border-b-primary border-b-gray-300"
+            [optionDisplayValue]="findTaxDisplayValue"
+            [inputDisplayValue]="findTaxInputDisplayValue"
+            (onSearch)="onTaxSearch($event)"
+            (onOptionSelected)="onTaxSelected($event, i)">
+          </app-auto-complete>
+        </div>
+      
+        <!-- MUST have this wrapper so [formControlName]="j" resolves -->
+        <div formArrayName="taxes">
+          @for (tax of taxesAt(i).controls; track $index; let j = $index) {
+            <label class="text-sm text-gray-700">{{findTaxDisplayValue(tax.value)}}</label>
+            @if(j < taxesAt(i).controls.length - 1) {
+              <span class="text-gray-500">, </span>
+            }
+          }
+        </div>
+      </div>
+      
+    </fieldset>
+    }
+
+    <button type="button" class="text-primary text-sm cursor-pointer" (click)="addGroup()">
+      + Add Group
+    </button>
+  </div>
+
+
+</form>
 }
