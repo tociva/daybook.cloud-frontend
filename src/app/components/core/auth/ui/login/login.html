@@ -1,0 +1,25 @@
+<div class="h-screen w-screen bg-primary text-on-primary flex flex-col items-center justify-center px-4 text-center">
+
+  <!-- Logo -->
+  <app-logo-block class="mb-8"></app-logo-block>
+
+  <!-- Login Failure Message Section -->
+  <div class="text-warning">
+    <h2 class="text-3xl sm:text-4xl font-bold mb-2">
+      No active session found
+    </h2>
+
+    <!-- Actions -->
+    <div class="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
+      <button
+        (click)="doLogin()"
+        class="px-6 py-2 rounded bg-on-primary text-primary hover:bg-on-primary/90 transition duration-200 font-semibold cursor-pointer text-primary"
+      >
+        Click to login
+      </button>
+
+      
+    </div>
+  </div>
+
+</div>

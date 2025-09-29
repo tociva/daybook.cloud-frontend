@@ -17,3 +17,20 @@ export function sanitizeQuery(input: string): string {
     .replace(/\s+/g, ' ')                       // collapse spaces
     .trim();
 }
+
+
+/** Multi-pass URL decoder for double/triple-encoded values. */
+export function multiDecode(input: string | null | undefined, max = 5): string | null {
+  if (!input) return null;
+  let v = input;
+  for (let i = 0; i < max; i++) {
+    // stop if there’s nothing left to decode
+    if (!/%[0-9A-Fa-f]{2}/.test(v)) break;
+    try {
+      v = decodeURIComponent(v);
+    } catch {
+      break; // malformed sequence; keep best-effort value
+    }
+  }
+  return v;
+}

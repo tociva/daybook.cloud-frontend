@@ -19,9 +19,6 @@ export const authActions = createActionGroup({
     
     // User logged out
     logoutHydra: emptyProps(),
-    
-    logoutKratos: emptyProps(),
-    
     // User logout completed
     logoutSuccess: emptyProps(),
     
@@ -42,6 +39,9 @@ export const authActions = createActionGroup({
     
     // Set hydrated state
     setIsHydrated: props<{ isHydrated: boolean }>(),
+
+    // Set hydration state
+    hydration: emptyProps(),
     
     // Set error
     setError: props<{ error: string | null }>(),

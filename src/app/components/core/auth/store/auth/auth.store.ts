@@ -18,17 +18,11 @@ export const AuthStore = signalStore(
   withComputed((state) => ({
     // Use this if you want to guard routes based on login + session restored
     isLoggedInAndHydrated: () =>
-      state.status() === 'authenticated' || state.status() === 'hydrated',
+      state.status() === AuthStatus.AUTHENTICATED || state.status() === AuthStatus.HYDRATED_VALID_USER,
 
     // Useful for error banners or fallback routes
-    hasAuthError: () => state.status() === 'error' && !!state.error(),
+    hasAuthError: () => state.status() === AuthStatus.ERROR && !!state.error(),
 
-    // Useful for app.component to know when hydration is complete
-    isHydrationComplete: () =>
-      ['authenticated', 'hydrated', 'unauthenticated', 'error'].includes(
-        state.status()
-      ),
-    
     currentUser: () => {
       const user = state.user();
       return user?.profile?.['user'] as JwtUser | null;
@@ -47,14 +41,14 @@ export const AuthStore = signalStore(
     setError(error: string) {
       patchState(store, {
         error,
-        status: 'error',
+        status: AuthStatus.ERROR,
       });
     },
 
     logout() {
       patchState(store, {
         user: null,
-        status: 'unauthenticated',
+        status: AuthStatus.UNAUTHENTICATED,
         error: null,
       });
     },

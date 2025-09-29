@@ -18,7 +18,7 @@ export class LoginFailureComponent {
   }
   
   logoutCompletely() {
-    this.store.dispatch(authActions.logoutKratos());
+    this.store.dispatch(authActions.logoutHydra());
   }
 
   

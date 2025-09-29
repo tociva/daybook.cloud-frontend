@@ -2,14 +2,15 @@ import { inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { Actions, createEffect, ofType, ROOT_EFFECTS_INIT } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
 import { User, UserManager, WebStorageStateStore } from 'oidc-client-ts';
 import { catchError, filter, from, map, of, switchMap, tap, withLatestFrom } from 'rxjs';
 import { getUserManager, isUserManagerInitialized, setUserManager } from '../../user-manager-singleton';
 import { ConfigStore } from '../config/config.store';
 import { userSessionActions } from '../user-session/user-session.actions';
 import { authActions } from './auth.actions';
+import { AuthStatus } from './auth.model';
 import { AuthStore } from './auth.store';
-import { Store } from '@ngrx/store';
 
 export const authEffects = {
   hydrateReturnUri: createEffect(
@@ -40,16 +41,16 @@ export const authEffects = {
         map(() => configStore.config()),
         filter((config) => !!config),
         tap((config) => {
+          authStore.setStatus(AuthStatus.USER_MANAGER_INITIALIZING);
           if (!isUserManagerInitialized()) {
             const manager = new UserManager({
               authority: config.auth.authority,
               client_id: config.auth.clientId,
               redirect_uri: config.auth.redirectUri,
-              post_logout_redirect_uri: config.auth.hydraLogoutRedirectUri,
+              post_logout_redirect_uri: config.auth.postLogoutRedirect,
               scope: config.auth.scope,
               response_type: 'code',
               automaticSilentRenew: true,
-              silent_redirect_uri: config.auth.silentRedirectUri,
               loadUserInfo: true,
               userStore: new WebStorageStateStore({ store: window.localStorage })
             });
@@ -57,12 +58,12 @@ export const authEffects = {
             // Event handlers
             manager.events.addUserLoaded((user: User) => {
               authStore.setUser(user);
-              authStore.setStatus('authenticated');
+              authStore.setStatus(AuthStatus.AUTHENTICATED);
             });
   
             manager.events.addUserUnloaded(() => {
               authStore.setUser(null);
-              authStore.setStatus('unauthenticated');
+              authStore.setStatus(AuthStatus.UNAUTHENTICATED);
             });
   
             manager.events.addSilentRenewError(error => {
@@ -72,9 +73,48 @@ export const authEffects = {
             setUserManager(manager);
           }
   
-          // Status transition: from uninitialized → initializing → hydrated/authenticated
-          authStore.setStatus('initializing');
+          authStore.setStatus(AuthStatus.USER_MANAGER_INITIALIZED);
         })
+      );
+    },
+    { functional: true, dispatch: false }
+  ),
+
+  // Session hydration effect using createEffect instead of Angular's effect()
+  hydrateSession: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const authStore = inject(AuthStore);
+
+      return actions$.pipe(
+        ofType(authActions.hydration),
+        switchMap(() => 
+          from(getUserManager().getUser()).pipe(
+            map(user => {
+              if(!user){
+                authStore.setStatus(AuthStatus.HYDRATED_NO_USER);
+              }else if(user.expired){
+                getUserManager().removeUser().then(() => {
+                  authStore.setStatus(AuthStatus.HYDRATED_EXPIRED_USER);
+                  authStore.setUser(null);
+                }).catch((error) => {
+                  authStore.setStatus(AuthStatus.HYDRATED_ERROR);
+                  authStore.setError(error.message);
+                });
+
+              }else{
+                authStore.setUser(user);
+                authStore.setStatus(AuthStatus.HYDRATED_VALID_USER);
+              }
+              return null; // No action to dispatch
+            }),
+            catchError((error) => {
+              authStore.setStatus(AuthStatus.HYDRATED_ERROR);
+              authStore.setError(error.message);
+              return of(null);
+            })
+          )
+        )
       );
     },
     { functional: true, dispatch: false }
@@ -125,6 +165,25 @@ export const authEffects = {
     },
     { functional: true }
   ),
+
+  /** Optionally, on loginSuccess, redirect to returnUri or home */
+  loginSuccess: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const authStore = inject(AuthStore);
+
+      return actions$.pipe(
+        ofType(authActions.loginSuccess),
+        withLatestFrom(toObservable(authStore.returnUri)),
+        filter(([, returnUri]) => Boolean(returnUri)),
+        map(([, returnUri]) => {
+          authStore.setStatus(AuthStatus.AUTHENTICATED);
+          return authActions.performRedirect({ returnUri: returnUri! })
+        })
+      );
+    },
+    { functional: true }
+  ),
   
   loginFailure: createEffect(
     () => {
@@ -140,56 +199,20 @@ export const authEffects = {
     },
     { functional: true, dispatch: false }
   ),
-
-  logoutKratos: createEffect(
-    () => {
-      const actions$ = inject(Actions);
-      const configStore = inject(ConfigStore);
-
-      return actions$.pipe(
-        ofType(authActions.logoutKratos),
-        map(() => configStore.config()),
-        filter((config): config is NonNullable<typeof config> => !!config),
-        switchMap((config) =>
-          from(
-            fetch(`${config.auth.kratosUrl}/self-service/logout/browser`, {
-              credentials: 'include',
-            })
-              .then((res) => res.json())
-              .then((data) => {
-                if (!data.logout_url) throw new Error('No logout_url received');
-                return fetch(data.logout_url, {
-                  method: 'GET',
-                  credentials: 'include',
-                });
-              })
-              .then(() => {
-                // Optional: delete the session cookie explicitly
-                document.cookie = 'ory_kratos_session=; Max-Age=0; path=/; domain=.daybook.cloud; secure; SameSite=None';
-                return null; // resolve to continue
-              })
-          ).pipe(
-            map(() => authActions.logoutHydra()),
-            catchError((err) => {
-              console.error('Error during Kratos logout:', err);
-              return of(authActions.logoutHydra()); // fallback
-            })
-          )
-        )
-      );
-    },
-    { functional: true }
-  ),
   
   /** Start logout (redirect to IdP logout) */
   logoutHydra: createEffect(
     () => {
       const actions$ = inject(Actions);
-
       return actions$.pipe(
         ofType(authActions.logoutHydra),
-        tap(() => {
-          getUserManager().signoutRedirect();
+        tap(async () => {
+          const userManager = getUserManager();
+          const user = await userManager.getUser();
+          userManager.removeUser();
+          userManager.signoutRedirect({
+            id_token_hint: user?.id_token,
+          });
         })
       );
     },
@@ -209,22 +232,6 @@ export const authEffects = {
             catchError(err => of(authActions.logoutFailure({ error: err.message })))
           )
         )
-      );
-    },
-    { functional: true }
-  ),
-
-  /** Optionally, on loginSuccess, redirect to returnUri or home */
-  loginSuccess: createEffect(
-    () => {
-      const actions$ = inject(Actions);
-      const authStore = inject(AuthStore);
-
-      return actions$.pipe(
-        ofType(authActions.loginSuccess),
-        withLatestFrom(toObservable(authStore.returnUri)),
-        filter(([, returnUri]) => Boolean(returnUri)),
-        map(([, returnUri]) => authActions.performRedirect({ returnUri: returnUri! }))
       );
     },
     { functional: true }
@@ -270,7 +277,7 @@ export const authEffects = {
       return actions$.pipe(
         ofType(authActions.silentRenewFailure),
         tap(({ error }) => {
-          console.log('Error during silent renew:', error);
+          console.warn('Error during silent renew:', error);
           const store = inject(Store);
           store.dispatch(authActions.logoutHydra());
         })
@@ -278,55 +285,26 @@ export const authEffects = {
     },
     { functional: true, dispatch: false }
   ),
+
   silentRenewSuccess: createEffect(
     () => {
       const actions$ = inject(Actions);
       return actions$.pipe(
         ofType(authActions.silentRenewSuccess),
         tap(({ user }) => {
-          console.log('Silent renew success: user is still authenticated');
+          console.info('Silent renew success: user is still authenticated');
         })
       );
     },
     { functional: true, dispatch: false }
   ),
 
-  // Session hydration effect using createEffect instead of Angular's effect()
-  hydrateSession: createEffect(
-    () => {
-      const actions$ = inject(Actions);
-      const authStore = inject(AuthStore);
-
-      return actions$.pipe(
-        ofType(authActions.initialize),
-        switchMap(() => 
-          from(getUserManager().getUser()).pipe(
-            map(user => {
-              if (user && !user.expired) {
-                authStore.setUser(user);
-                authStore.setStatus('authenticated');
-              } else {
-                authStore.logout();
-              }
-              return null; // No action to dispatch
-            }),
-            catchError(() => {
-              authStore.logout();
-              return of(null);
-            })
-          )
-        )
-      );
-    },
-    { functional: true, dispatch: false }
-  ),
-
-  continueWithKratosLogout: createEffect(
+  continueWithHydraLogout: createEffect(
     () => {
       const actions$ = inject(Actions);
       return actions$.pipe(
         ofType(userSessionActions.clearUserSessionSuccess),
-        map(() => authActions.logoutKratos())
+        map(() =>  authActions.logoutHydra())
       );
     },
     { functional: true }

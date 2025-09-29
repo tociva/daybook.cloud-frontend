@@ -5,6 +5,8 @@ import { catchError, mergeMap, of, tap } from 'rxjs';
 import { configActions } from './config.actions';
 import { EnvConfig } from './config.model';
 import { ConfigStore } from './config.store';
+import { AuthStore } from '../auth/auth.store';
+import { AuthStatus } from '../auth/auth.model';
 
 export const configEffects = {
   load: createEffect(
@@ -12,11 +14,14 @@ export const configEffects = {
       const actions$ = inject(Actions);
       const http = inject(HttpClient);
       const configStore = inject(ConfigStore);
+      const authStore = inject(AuthStore);
 
       return actions$.pipe(
         ofType(configActions.load),
         mergeMap(() =>
-          http.get<EnvConfig>('/config/config.json').pipe(
+          {
+            authStore.setStatus(AuthStatus.CONFIG_LOADING);
+            return http.get<EnvConfig>('/config/config.json').pipe(
             tap((envConfig) => {
               configStore.setState((state) => ({
                 ...state,
@@ -24,6 +29,7 @@ export const configEffects = {
                 loaded: true,
                 error: null
               }));
+              authStore.setStatus(AuthStatus.CONFIG_LOADED);
             }),
             catchError((error) => {
               configStore.setState((state) => ({
@@ -31,10 +37,12 @@ export const configEffects = {
                 loaded: false,
                 error
               }));
+              authStore.setStatus(AuthStatus.CONFIG_LOAD_ERROR);
               console.error('[ConfigEffects] config load failed:', error);
               return of(); // or return EMPTY;
             })
           )
+        }
         )
       );
     },

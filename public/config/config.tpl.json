@@ -5,7 +5,7 @@
     "clientId": "$AUTH_CLIENT_ID",
     "redirectUri": "$AUTH_REDIRECT_URI",
     "postLoginRedirect": "$AUTH_POST_LOGIN_REDIRECT",
-    "scope": "openid profile email offline",
+    "scope": "openid profile email offline_access",
     "hydraLogoutRedirectUri": "$AUTH_HYDRA_LOGOUT_REDIRECT_URI",
     "kratosUrl": "$AUTH_KRATOS_URL"
   },

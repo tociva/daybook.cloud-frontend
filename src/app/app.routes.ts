@@ -1,40 +1,14 @@
 import { Routes } from '@angular/router';
-import { authGuard } from './components/core/auth/auth.guard';
 
 export const routes: Routes = [
   {
-    path: '',
-    canActivate: [authGuard],
-    loadChildren: () => import('./components/layout/main-layout.routes').then(m => m.MAIN_LAYOUT_ROUTES),
+    path: 'app',
+    loadChildren: () => import('./components/core/app/app.routes').then(m => m.APP_ROUTES),
   },
   {
     path: 'auth',
-    children: [
-      {
-        path: 'callback',
-        loadComponent: () => import('./components/core/auth/ui/callback/callback.component').then(m => m.CallbackComponent),
-      },
-      {
-        path: 'silent-callback',
-        loadComponent: () => import('./components/core/auth/ui/silent-callback/silent-callback.component').then(m => m.SilentCallbackComponent),
-      },
-      {
-        path: 'do-logout',
-        loadComponent: () => import('./components/core/auth/ui/do-logout/do-logout.component').then(m => m.DoLogoutComponent),
-      },
-      {
-        path: 'logout',
-        loadComponent: () => import('./components/core/auth/ui/logout/logout.component').then(m => m.LogoutComponent),
-      },
-      {
-        path: 'login-failure',
-        loadComponent: () => import('./components/core/auth/ui/login-failure/login-failure.component').then(m => m.LoginFailureComponent),
-      }
-    ]
+    loadChildren: () => import('./components/core/auth/auth.routes').then(m => m.AUTH_ROUTES),
   },
-  {
-    path: '**',
-    canActivate: [authGuard],
-    loadComponent: () => import('./components/core/auth/ui/not-found/not-found.component').then(m => m.NotFoundComponent),
-  }
+  { path: '', pathMatch: 'full', redirectTo: 'app' },
+
 ];

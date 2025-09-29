@@ -147,9 +147,7 @@ export const userSessionEffects = {
         mergeMap(() =>
           http.delete<void>(getBaseUrl()).pipe(
             map(() => userSessionActions.clearUserSessionSuccess()),
-            catchError((error) =>
-              of(userSessionActions.clearUserSessionFailure({ error }))
-            )
+            catchError((error) => of(userSessionActions.clearUserSessionFailure({ error })))
           )
         )
       );
@@ -165,7 +163,7 @@ export const userSessionEffects = {
       return actions$.pipe(
         ofType(userSessionActions.clearUserSessionFailure),
         tap(({ error }) => {
-          router.navigate(['/auth/logout']);
+          router.navigate(['/auth/logout'],{ queryParams: { error: encodeURIComponent(JSON.stringify(error)) } });
         })
       );
     },

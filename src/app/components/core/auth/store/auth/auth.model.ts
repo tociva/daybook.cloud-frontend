@@ -1,12 +1,21 @@
 import { User } from 'oidc-client-ts';
 
-export type AuthStatus =
-  | 'uninitialized'
-  | 'initializing'
-  | 'authenticated'
-  | 'unauthenticated'
-  | 'hydrated'
-  | 'error';
+export enum AuthStatus {
+  UN_INITIALIZED = 'UN_INITIALIZED',
+  CONFIG_LOADING = 'CONFIG_LOADING',
+  CONFIG_LOADED = 'CONFIG_LOADED',
+  CONFIG_LOAD_ERROR = 'CONFIG_LOAD_ERROR',
+  USER_MANAGER_INITIALIZING = 'USER_MANAGER_INITIALIZING',
+  USER_MANAGER_INITIALIZED = 'USER_MANAGER_INITIALIZED',
+  HYDRATED_NO_USER = 'HYDRATED_NO_USER',
+  HYDRATED_EXPIRED_USER = 'HYDRATED_EXPIRED_USER',
+  HYDRATED_VALID_USER = 'HYDRATED_VALID_USER',
+  HYDRATED_ERROR = 'HYDRATED_ERROR',
+  RETURNED_TO_AUTH = 'RETURNED_TO_AUTH',
+  AUTHENTICATED = 'AUTHENTICATED',
+  UNAUTHENTICATED = 'UNAUTHENTICATED',
+  ERROR = 'ERROR' ,
+}
 
 export interface AuthModel {
   user: User | null;

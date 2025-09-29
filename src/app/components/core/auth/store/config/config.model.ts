@@ -1,13 +1,9 @@
 export interface AuthConfig {
-  issuer: string;
   authority: string;
   clientId: string;
   redirectUri: string;
-  postLoginRedirect: string;
   scope: string;
-  silentRedirectUri: string;
-  hydraLogoutRedirectUri: string;
-  kratosUrl: string;
+  postLogoutRedirect: string;
 }
 
 export interface EnvConfig {

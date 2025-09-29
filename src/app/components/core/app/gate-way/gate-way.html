@@ -1,0 +1,16 @@
+@if (status() === AuthStatus.CONFIG_LOADED) {
+  <app-loading-screen message="Config is loaded, initializing auth"></app-loading-screen>
+} @else if (status() === AuthStatus.USER_MANAGER_INITIALIZING) {
+  <app-loading-screen message="Auth is initializing, please wait"></app-loading-screen>
+} @else if (status() === AuthStatus.USER_MANAGER_INITIALIZED) {
+  <app-loading-screen message="Auth is initialized, hydrating user"></app-loading-screen>
+} @else if (status() === AuthStatus.HYDRATED_NO_USER) {
+  <app-loading-screen message="Hydration completed, no user found"></app-loading-screen>
+} @else if (status() === AuthStatus.HYDRATED_EXPIRED_USER) {
+  <app-loading-screen message="Hydration completed, expired user found"></app-loading-screen>
+} @else if (status() === AuthStatus.HYDRATED_ERROR) {
+  <app-loading-screen message="Hydration completed, error found"></app-loading-screen>
+}
+@else {
+  <router-outlet></router-outlet>
+} 
