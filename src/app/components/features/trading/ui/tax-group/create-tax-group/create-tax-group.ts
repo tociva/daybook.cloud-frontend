@@ -12,6 +12,7 @@ import { taxGroupActions, TaxGroupStore } from '../../../store/tax-group';
 import { TaxGroupCU } from '../../../store/tax-group/tax-group.model';
 import { Tax } from '../../../store/tax/tax.model';
 import { AutoComplete } from '../../../../../shared/auto-complete/auto-complete';
+import { CancelButton } from '../../../../../shared/cancel-button/cancel-button';
 
 type GroupForm = FormGroup<{
   mode: FormControl<string>;
@@ -21,7 +22,7 @@ type GroupForm = FormGroup<{
 }>;
 @Component({
   selector: 'app-create-tax-group',
-  imports: [SkeltonLoader, ItemNotFound, NgClass, ReactiveFormsModule, AutoComplete],
+  imports: [SkeltonLoader, ItemNotFound, NgClass, ReactiveFormsModule, AutoComplete, CancelButton],
   templateUrl: './create-tax-group.html',
   styleUrl: './create-tax-group.css'
 })
@@ -42,10 +43,12 @@ export class CreateTaxGroup extends WithFormDraftBinding implements OnInit {
   private taxGroupId = signal<string | null>(null);
   private router = inject(Router);
   readonly formKey = computed(() => buildFormKey('tax-group', this.mode(), this.taxGroupId()));
+  readonly submitting = signal(false);
 
 
   taxes = this.taxStore.items;
   readonly form: FormGroup;
+
 
   constructor() {
     super();
@@ -114,6 +117,8 @@ export class CreateTaxGroup extends WithFormDraftBinding implements OnInit {
   }
 
   handleSubmit(): void {
+    if (this.submitting()) return;
+    this.submitting.set(true);
     const formData = this.form.value as TaxGroupCU;
     if (this.mode() === 'create') {
       const {name, rate, description, groups} = formData;

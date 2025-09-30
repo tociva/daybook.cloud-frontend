@@ -139,6 +139,21 @@
     </button>
   </div>
 
+<!-- ✅ Submit Button -->
+<div class="pt-2 mt-4 text-center">
+  <app-cancel-button></app-cancel-button>
 
+  <button
+    type="submit"
+    class="bg-primary text-white px-6 py-2 rounded hover:opacity-90 cursor-pointer"
+    [disabled]="submitting()"
+    [ngClass]="{
+      'cursor-not-allowed opacity-50': submitting(),
+      'cursor-pointer': !submitting()
+    }"
+  >
+    Submit
+  </button>
+</div>
 </form>
 }
