@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { ItemLanding } from '../../../../../shared/item-landing/item-landing';
@@ -6,6 +6,9 @@ import { DbcColumn } from '../../../../../../util/types/dbc-column.type';
 import { EmptyListMessage } from '../../../../../../util/types/empty-list-message.type';
 import { taxGroupActions, TaxGroupStore } from '../../../store/tax-group';
 import { SearchItemStore } from '../../../../../../components/layout/store/search-item/search-item.store';
+import { Actions } from '@ngrx/effects';
+import { ofType } from '@ngrx/effects';
+import { tap } from 'rxjs';
 
 @Component({
   selector: 'app-list-tax-group',
@@ -15,6 +18,7 @@ import { SearchItemStore } from '../../../../../../components/layout/store/searc
 })
 export class ListTaxGroup implements OnInit, OnDestroy {
  
+  private actions$ = inject(Actions);
   private store = inject(Store);
   protected taxGroupStore = inject(TaxGroupStore);
   private router = inject(Router);
@@ -61,6 +65,20 @@ export class ListTaxGroup implements OnInit, OnDestroy {
 
   readonly handleOnButton2Click = signal<() => void>(() => {
     this.router.navigate(['/app/trading/tax']);
+  });
+
+  readonly countTaxGroupsSuccessEffect = effect((onCleanup) => {
+
+    // Normalize to array
+    
+    const subscription = this.actions$.pipe(
+      ofType(taxGroupActions.countTaxGroupsSuccess),
+      tap(() => {
+        this.store.dispatch(taxGroupActions.loadTaxGroups({}));
+      })
+    ).subscribe();
+
+    onCleanup(() => subscription.unsubscribe());
   });
 
   ngOnInit(): void {

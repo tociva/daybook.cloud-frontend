@@ -13,6 +13,8 @@ import { TaxGroupCU } from '../../../store/tax-group/tax-group.model';
 import { Tax } from '../../../store/tax/tax.model';
 import { AutoComplete } from '../../../../../shared/auto-complete/auto-complete';
 import { CancelButton } from '../../../../../shared/cancel-button/cancel-button';
+import { Actions, ofType } from '@ngrx/effects';
+import { tap } from 'rxjs';
 
 type GroupForm = FormGroup<{
   mode: FormControl<string>;
@@ -36,6 +38,7 @@ export class CreateTaxGroup extends WithFormDraftBinding implements OnInit {
   readonly taxGroupStore = inject(TaxGroupStore);
   readonly taxStore = inject(TaxStore);
   readonly selectedTaxGroup = this.taxGroupStore.selectedItem;
+  readonly actions$ = inject(Actions);
   successAction = signal<ActionCreator[] | ActionCreator | null>(null);
   failureAction = signal<ActionCreator[] | ActionCreator | null>(null);
   protected loading = true;
@@ -83,6 +86,40 @@ export class CreateTaxGroup extends WithFormDraftBinding implements OnInit {
     }
   });
 
+  readonly saveSuccessEffect = effect((onCleanup) => {
+    const creators = this.successAction();
+    if (!creators) return;
+
+    // Normalize to array
+    const creatorArray = Array.isArray(creators) ? creators : [creators];
+    
+    const subscription = this.actions$.pipe(
+      ofType(...creatorArray),
+      tap(() => {
+        const burl = this.route.snapshot.queryParamMap.get('burl') ?? '/app/trading/tax-group';
+        this.router.navigateByUrl(burl);
+      })
+    ).subscribe();
+
+    onCleanup(() => subscription.unsubscribe());
+  });
+
+  readonly failureActionEffect = effect((onCleanup) => {
+    const creators = this.failureAction();
+    if (!creators) return;
+  
+    // Normalize to array
+    const creatorArray = Array.isArray(creators) ? creators : [creators];
+    
+    const subscription = this.actions$.pipe(
+      ofType(...creatorArray), // ofType accepts multiple action creators
+      tap(() => {
+        this.submitting.set(false);
+      })
+    ).subscribe();
+  
+    onCleanup(() => subscription.unsubscribe());
+  });
 
   ngOnInit(): void {
     const lastSegment = this.route.snapshot.url[this.route.snapshot.url.length - 1]?.path;
