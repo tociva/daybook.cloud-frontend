@@ -41,7 +41,7 @@ export class ListSaleInvoice {
   });
   readonly handleOnCreateItem = signal<() => void>(() => {
     const currentUrl = this.router.url;
-    this.router.navigate(['/trading/sale-invoice/create'], { queryParams: { burl: currentUrl } });
+    this.router.navigate(['/app/trading/sale-invoice/create'], { queryParams: { burl: currentUrl } });
   });
 
   readonly emptyListMessage = signal<EmptyListMessage>({
@@ -60,12 +60,12 @@ export class ListSaleInvoice {
 
   readonly handleOnEditItem = signal<(item: SaleInvoice) => void>((item: SaleInvoice) => {
     const currentUrl = this.router.url;
-    this.router.navigate(['/trading/sale-invoice', item.id, 'edit'], { queryParams: { burl: currentUrl } });
+    this.router.navigate(['/app/trading/sale-invoice', item.id, 'edit'], { queryParams: { burl: currentUrl } });
   }); 
   
   readonly handleOnDeleteItem = signal<(item: SaleInvoice) => void>((item: SaleInvoice) => {
     const currentUrl = this.router.url;
-    this.router.navigate(['/trading/sale-invoice', item.id, 'delete'], { queryParams: { burl: currentUrl } });
+    this.router.navigate(['/app/trading/sale-invoice', item.id, 'delete'], { queryParams: { burl: currentUrl } });
   });
 
   private destroy$ = new Subject<void>();

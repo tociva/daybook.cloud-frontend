@@ -123,7 +123,7 @@ export const userSessionEffects = {
         ofType(userSessionActions.createUserSessionSuccess),
         tap(({ session }) => {
           if (!session.ownorgs || session.ownorgs.length === 0) {
-            router.navigate(['/management/organization/create']);
+            router.navigate(['/app/management/organization/create']);
           }
         })
       );

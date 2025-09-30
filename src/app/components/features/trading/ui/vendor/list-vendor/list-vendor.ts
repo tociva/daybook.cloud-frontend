@@ -36,7 +36,7 @@ export class ListVendor implements OnInit, OnDestroy {
   });
   readonly handleOnCreateItem = signal<() => void>(() => {
     const currentUrl = this.router.url;
-    this.router.navigate(['/trading/vendor/create'], { queryParams: { burl: currentUrl } });
+    this.router.navigate(['/app/trading/vendor/create'], { queryParams: { burl: currentUrl } });
   });
 
   readonly emptyListMessage = signal<EmptyListMessage>({
@@ -60,12 +60,12 @@ export class ListVendor implements OnInit, OnDestroy {
 
   readonly handleOnEditItem = signal<(item: Vendor) => void>((item: Vendor) => {
     const currentUrl = this.router.url;
-    this.router.navigate(['/trading/vendor', item.id, 'edit'], { queryParams: { burl: currentUrl } });
+    this.router.navigate(['/app/trading/vendor', item.id, 'edit'], { queryParams: { burl: currentUrl } });
   }); 
   
   readonly handleOnDeleteItem = signal<(item: Vendor) => void>((item: Vendor) => {
     const currentUrl = this.router.url;
-    this.router.navigate(['/trading/vendor', item.id, 'delete'], { queryParams: { burl: currentUrl } });
+    this.router.navigate(['/app/trading/vendor', item.id, 'delete'], { queryParams: { burl: currentUrl } });
   });
 
   private destroy$ = new Subject<void>();

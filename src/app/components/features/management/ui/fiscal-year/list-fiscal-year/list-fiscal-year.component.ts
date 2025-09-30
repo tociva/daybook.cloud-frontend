@@ -36,7 +36,7 @@ export class ListFiscalYearComponent {
   });
   readonly handleOnCreateItem = signal<() => void>(() => {
     const currentUrl = this.router.url;
-    this.router.navigate(['/management/fiscal-year/create'], { queryParams: { burl: currentUrl } });
+    this.router.navigate(['/app/management/fiscal-year/create'], { queryParams: { burl: currentUrl } });
   });
 
   readonly emptyListMessage = signal<EmptyListMessage>({
@@ -53,12 +53,12 @@ export class ListFiscalYearComponent {
 
   readonly handleOnEditItem = signal<(item: FiscalYear) => void>((item: FiscalYear) => {
     const currentUrl = this.router.url;
-    this.router.navigate(['/management/fiscal-year', item.id, 'edit'], { queryParams: { burl: currentUrl } });
+    this.router.navigate(['/app/management/fiscal-year', item.id, 'edit'], { queryParams: { burl: currentUrl } });
   }); 
   
   readonly handleOnDeleteItem = signal<(item: FiscalYear) => void>((item: FiscalYear) => {
     const currentUrl = this.router.url;
-    this.router.navigate(['/management/fiscal-year', item.id, 'delete'], { queryParams: { burl: currentUrl } });
+    this.router.navigate(['/app/management/fiscal-year', item.id, 'delete'], { queryParams: { burl: currentUrl } });
   });
 
   private destroy$ = new Subject<void>();

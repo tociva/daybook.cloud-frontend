@@ -118,7 +118,7 @@ export class CreateSaleInvoice {
 
   onNewCustomer() {
     const burl = this.router.url;
-    this.router.navigate(['/trading/customer/create'], { queryParams: { burl } });
+    this.router.navigate(['/app/trading/customer/create'], { queryParams: { burl } });
   }
 
   onEditBillingAddress() {

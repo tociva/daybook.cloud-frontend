@@ -36,7 +36,7 @@ export class ListLedger implements OnInit, OnDestroy {
   });
   readonly handleOnCreateItem = signal<() => void>(() => {
     const currentUrl = this.router.url;
-    this.router.navigate(['/accounting/ledger/create'], { queryParams: { burl: currentUrl } });
+    this.router.navigate(['/app/accounting/ledger/create'], { queryParams: { burl: currentUrl } });
   });
 
   readonly emptyListMessage = signal<EmptyListMessage>({
@@ -57,16 +57,16 @@ export class ListLedger implements OnInit, OnDestroy {
 
   readonly handleOnEditItem = signal<(ledger: Ledger) => void>((ledger: Ledger) => {
     const currentUrl = this.router.url;
-    this.router.navigate(['/accounting/ledger', ledger.id, 'edit'], { queryParams: { burl: currentUrl } });
+    this.router.navigate(['/app/accounting/ledger', ledger.id, 'edit'], { queryParams: { burl: currentUrl } });
   }); 
   
   readonly handleOnDeleteItem = signal<(ledger: Ledger) => void>((ledger: Ledger) => {
     const currentUrl = this.router.url;
-    this.router.navigate(['/accounting/ledger', ledger.id, 'delete'], { queryParams: { burl: currentUrl } });
+    this.router.navigate(['/app/accounting/ledger', ledger.id, 'delete'], { queryParams: { burl: currentUrl } });
   });
 
   readonly handleOnButton2Click = signal<() => void>(() => {
-    this.router.navigate(['/accounting/ledger-category']);
+    this.router.navigate(['/app/accounting/ledger-category']);
   });
 
   private destroy$ = new Subject<void>();

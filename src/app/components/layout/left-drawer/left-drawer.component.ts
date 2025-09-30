@@ -24,6 +24,6 @@ export class LeftDrawerComponent {
   }
 
   goHome() {
-    this.router.navigate(['/']);
+    this.router.navigate(['/app']);
   }
 }

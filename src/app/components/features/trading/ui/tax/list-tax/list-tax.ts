@@ -36,7 +36,7 @@ export class ListTax implements OnInit, OnDestroy {
   });
   readonly handleOnCreateItem = signal<() => void>(() => {
     const currentUrl = this.router.url;
-    this.router.navigate(['/trading/tax/create'], { queryParams: { burl: currentUrl } });
+    this.router.navigate(['/app/trading/tax/create'], { queryParams: { burl: currentUrl } });
   });
 
   readonly emptyListMessage = signal<EmptyListMessage>({
@@ -57,12 +57,12 @@ export class ListTax implements OnInit, OnDestroy {
 
   readonly handleOnEditItem = signal<(item: Tax) => void>((item: Tax) => {
     const currentUrl = this.router.url;
-    this.router.navigate(['/trading/tax', item.id, 'edit'], { queryParams: { burl: currentUrl } });
+    this.router.navigate(['/app/trading/tax', item.id, 'edit'], { queryParams: { burl: currentUrl } });
   }); 
   
   readonly handleOnDeleteItem = signal<(item: Tax) => void>((item: Tax) => {
     const currentUrl = this.router.url;
-    this.router.navigate(['/trading/tax', item.id, 'delete'], { queryParams: { burl: currentUrl } });
+    this.router.navigate(['/app/trading/tax', item.id, 'delete'], { queryParams: { burl: currentUrl } });
   });
 
   private destroy$ = new Subject<void>();
@@ -102,6 +102,6 @@ export class ListTax implements OnInit, OnDestroy {
   }
 
   readonly handleOnButton2Click = signal<() => void>(() => {
-    this.router.navigate(['/trading/tax-group']);
+    this.router.navigate(['/app/trading/tax-group']);
   });
 }

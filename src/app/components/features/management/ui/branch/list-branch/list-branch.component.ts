@@ -39,7 +39,7 @@ export class ListBranchComponent {
   });
   readonly handleOnCreateItem = signal<() => void>(() => {
     const currentUrl = this.router.url;
-    this.router.navigate(['/management/branch/create'], { queryParams: { burl: currentUrl } });
+    this.router.navigate(['/app/management/branch/create'], { queryParams: { burl: currentUrl } });
   });
 
   readonly emptyListMessage = signal<EmptyListMessage>({
@@ -58,12 +58,12 @@ export class ListBranchComponent {
 
   readonly handleOnEditItem = signal<(item: Branch) => void>((item: Branch) => {
     const currentUrl = this.router.url;
-    this.router.navigate(['/management/branch', item.id, 'edit'], { queryParams: { burl: currentUrl } });
+    this.router.navigate(['/app/management/branch', item.id, 'edit'], { queryParams: { burl: currentUrl } });
   }); 
   
   readonly handleOnDeleteItem = signal<(item: Branch) => void>((item: Branch) => {
     const currentUrl = this.router.url;
-    this.router.navigate(['/management/branch', item.id, 'delete'], { queryParams: { burl: currentUrl } });
+    this.router.navigate(['/app/management/branch', item.id, 'delete'], { queryParams: { burl: currentUrl } });
   });
 
   private destroy$ = new Subject<void>();

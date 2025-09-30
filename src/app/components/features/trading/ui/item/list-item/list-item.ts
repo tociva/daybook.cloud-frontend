@@ -36,7 +36,7 @@ export class ListItem implements OnInit, OnDestroy {
   });
   readonly handleOnCreateItem = signal<() => void>(() => {
     const currentUrl = this.router.url;
-    this.router.navigate(['/trading/item/create'], { queryParams: { burl: currentUrl } });
+    this.router.navigate(['/app/trading/item/create'], { queryParams: { burl: currentUrl } });
   });
 
   readonly emptyListMessage = signal<EmptyListMessage>({
@@ -59,16 +59,16 @@ export class ListItem implements OnInit, OnDestroy {
 
   readonly handleOnEditItem = signal<(item: Item) => void>((item: Item) => {
     const currentUrl = this.router.url;
-    this.router.navigate(['/trading/item', item.id, 'edit'], { queryParams: { burl: currentUrl } });
+    this.router.navigate(['/app/trading/item', item.id, 'edit'], { queryParams: { burl: currentUrl } });
   }); 
   
   readonly handleOnDeleteItem = signal<(item: Item) => void>((item: Item) => {
     const currentUrl = this.router.url;
-    this.router.navigate(['/trading/item', item.id, 'delete'], { queryParams: { burl: currentUrl } });
+    this.router.navigate(['/app/trading/item', item.id, 'delete'], { queryParams: { burl: currentUrl } });
   });
 
   readonly handleOnButton2Click = signal<() => void>(() => {
-    this.router.navigate(['/trading/item-category']);
+    this.router.navigate(['/app/trading/item-category']);
   });
 
   private destroy$ = new Subject<void>();

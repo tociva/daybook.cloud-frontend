@@ -39,7 +39,7 @@ export class ListOrganizationComponent implements OnInit, OnDestroy {
   });
   readonly handleOnCreateItem = signal<() => void>(() => {
     const currentUrl = this.router.url;
-    this.router.navigate(['/management/organization/create'], { queryParams: { burl: currentUrl } });
+    this.router.navigate(['/app/management/organization/create'], { queryParams: { burl: currentUrl } });
   });
 
   readonly emptyListMessage = signal<EmptyListMessage>({
@@ -58,12 +58,12 @@ export class ListOrganizationComponent implements OnInit, OnDestroy {
 
   readonly handleOnEditItem = signal<(item: Organization) => void>((item: Organization) => {
     const currentUrl = this.router.url;
-    this.router.navigate(['/management/organization', item.id, 'edit'], { queryParams: { burl: currentUrl } });
+    this.router.navigate(['/app/management/organization', item.id, 'edit'], { queryParams: { burl: currentUrl } });
   }); 
   
   readonly handleOnDeleteItem = signal<(item: Organization) => void>((item: Organization) => {
     const currentUrl = this.router.url;
-    this.router.navigate(['/management/organization', item.id, 'delete'], { queryParams: { burl: currentUrl } });
+    this.router.navigate(['/app/management/organization', item.id, 'delete'], { queryParams: { burl: currentUrl } });
   });
 
   private destroy$ = new Subject<void>();

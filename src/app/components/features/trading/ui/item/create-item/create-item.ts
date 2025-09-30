@@ -69,7 +69,7 @@ export class CreateItem extends WithFormDraftBinding implements OnInit {
           if(item.id === 'Add New Category') {
             this.form.patchValue({category: null, code: ''});
             const burl = this.router.url;
-            this.router.navigate(['/trading/item-category/create'], { queryParams: { burl } });
+            this.router.navigate(['/app/trading/item-category/create'], { queryParams: { burl } });
           }else{
             this.form.patchValue({ category: item, code: item.code});
           }
