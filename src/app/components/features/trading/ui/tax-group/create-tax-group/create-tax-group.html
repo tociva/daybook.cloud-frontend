@@ -4,7 +4,7 @@
 <app-item-not-found title="Tax group record not found"
   description="It may have been deleted or the link is invalid."></app-item-not-found>
 } @else if(!loading && (mode() === 'create' || mode() === 'edit') && !taxGroupStore.error()) {
-  <!-- 🔷 Form Title -->
+<!-- 🔷 Form Title -->
 <h1 class="text-2xl font-semibold text-gray-800 mb-6 text-center">
   {{ title() }}
 </h1>
@@ -79,59 +79,77 @@
     <h2 class="font-semibold text-base mb-4">Tax Groups</h2>
 
     @for (group of groups.controls; track $index; let i = $index) {
-    <fieldset [formGroupName]="i"
-      class="mb-6 p-4 border border-gray-200 rounded grid grid-cols-1 md:grid-cols-2 gap-x-25 gap-y-4">
-
-      <!-- Mode -->
-      <div class="flex flex-col gap-1 mb-3">
-        @let modeCtrl = group.get('mode');
-        <div class="flex items-center gap-2">
-          <p class="w-32 text-sm text-gray-700">
-            Mode/Name <br/>
-            <span class="text-xs text-gray-500">Ex. GST-18%, GST-5%, EXPORT, NON-TAXABLE etc.</span>
-             <span class="text-danger">*</span></p>
-          <input type="text" formControlName="mode" [ngClass]="{
-                'flex-1 border-0 border-b bg-transparent text-sm pt-0.5 pb-1 focus:outline-none': true,
-                'border-b-danger': modeCtrl?.invalid && (modeCtrl?.touched || modeCtrl?.dirty),
-                'border-b-gray-300': !(modeCtrl?.invalid && (modeCtrl?.touched || modeCtrl?.dirty))
-              }" />
+      <div class="flex flex-col mb-6">
+    
+        <!-- Trash icon aligned to right -->
+        <div class="flex justify-end mb-1">
+          <button type="button"
+            class="text-danger hover:text-primary transition cursor-pointer"
+            (click)="removeGroup(i)">
+            <ng-icon name="bootstrapTrash"></ng-icon>
+          </button>
         </div>
-        @if (modeCtrl?.hasError('required') && (modeCtrl?.touched || modeCtrl?.dirty)) {
-        <p class="text-danger text-xs mt-1">Mode/Name is required.</p>
-        }
-      </div>
-
-      <!-- Tax -->
-      <div class="flex flex-col gap-1 mb-3">
-        <div class="flex items-center gap-2">
-          <label class="w-32 text-sm text-gray-700">Taxes</label>
-      
-          <app-auto-complete
-            formControlName="tax"
-            [options]="taxes()"
-            class="flex-1"
-            placeholder="Search for a tax"
-            [required]="true"
-            inputClass="flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 placeholder-gray-400 focus:outline-none focus:border-b-primary border-b-gray-300"
-            [optionDisplayValue]="findTaxDisplayValue"
-            [inputDisplayValue]="findTaxInputDisplayValue"
-            (onSearch)="onTaxSearch($event)"
-            (onOptionSelected)="onTaxSelected($event, i)">
-          </app-auto-complete>
-        </div>
-      
-        <!-- MUST have this wrapper so [formControlName]="j" resolves -->
-        <div formArrayName="taxes">
-          @for (tax of taxesAt(i).controls; track $index; let j = $index) {
-            <label class="text-sm text-gray-700">{{findTaxDisplayValue(tax.value)}}</label>
-            @if(j < taxesAt(i).controls.length - 1) {
-              <span class="text-gray-500">, </span>
+    
+        <!-- Section -->
+        <fieldset [formGroupName]="i"
+          class="p-4 border border-gray-200 rounded grid grid-cols-1 md:grid-cols-2 gap-x-25 gap-y-4">
+    
+          <!-- Mode -->
+          <div class="flex flex-col gap-1 mb-3">
+            @let modeCtrl = group.get('mode');
+            <div class="flex items-center gap-2">
+              <p class="w-32 text-sm text-gray-700">
+                Mode/Name <br/>
+                <span class="text-xs text-gray-500">Ex. GST-18%, GST-5%, EXPORT, NON-TAXABLE etc.</span>
+                <span class="text-danger">*</span>
+              </p>
+              <input type="text" formControlName="mode" [ngClass]="{
+                    'flex-1 border-0 border-b bg-transparent text-sm pt-0.5 pb-1 focus:outline-none': true,
+                    'border-b-danger': modeCtrl?.invalid && (modeCtrl?.touched || modeCtrl?.dirty),
+                    'border-b-gray-300': !(modeCtrl?.invalid && (modeCtrl?.touched || modeCtrl?.dirty))
+                  }" />
+            </div>
+            @if (modeCtrl?.hasError('required') && (modeCtrl?.touched || modeCtrl?.dirty)) {
+              <p class="text-danger text-xs mt-1">Mode/Name is required.</p>
             }
-          }
-        </div>
+          </div>
+    
+          <!-- Tax -->
+          <div class="flex flex-col gap-1 mb-3">
+            <div class="flex items-center gap-2">
+              <label class="w-32 text-sm text-gray-700">Taxes</label>
+          
+              <app-auto-complete
+                formControlName="tax"
+                [options]="filteredTaxes()"
+                class="flex-1"
+                placeholder="Search for a tax"
+                [required]="true"
+                inputClass="flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 placeholder-gray-400 focus:outline-none focus:border-b-primary border-b-gray-300"
+                [optionDisplayValue]="findTaxDisplayValue"
+                [inputDisplayValue]="findTaxInputDisplayValue"
+                (onSearch)="onTaxSearch($event)"
+                (onOptionSelected)="onTaxSelected($event, i)">
+              </app-auto-complete>
+            </div>
+          
+            <div formArrayName="taxes" class="flex flex-wrap gap-2 mt-2">
+              @for (tax of taxesAt(i).controls; track $index; let j = $index) {
+                <span class="flex items-center gap-1 px-2 py-0.5 bg-gray-100 border border-gray-300 rounded-full text-sm text-gray-700">
+                  {{ findTaxDisplayValue(tax.value) }}
+                  <button type="button"
+                    class="text-gray-400 hover:text-danger focus:outline-none cursor-pointer"
+                    (click)="removeTax(i, j)">
+                    <ng-icon name="bootstrapX"></ng-icon>
+                  </button>
+                </span>
+              }
+            </div>
+            
+          </div>
+    
+        </fieldset>
       </div>
-      
-    </fieldset>
     }
 
     <button type="button" class="text-primary text-sm cursor-pointer" (click)="addGroup()">
@@ -139,21 +157,17 @@
     </button>
   </div>
 
-<!-- ✅ Submit Button -->
-<div class="pt-2 mt-4 text-center">
-  <app-cancel-button></app-cancel-button>
+  <!-- ✅ Submit Button -->
+  <div class="pt-2 mt-4 text-center">
+    <app-cancel-button></app-cancel-button>
 
-  <button
-    type="submit"
-    class="bg-primary text-white px-6 py-2 rounded hover:opacity-90 cursor-pointer"
-    [disabled]="submitting()"
-    [ngClass]="{
+    <button type="submit" class="bg-primary text-white px-6 py-2 rounded hover:opacity-90 cursor-pointer"
+      [disabled]="submitting()" [ngClass]="{
       'cursor-not-allowed opacity-50': submitting(),
       'cursor-pointer': !submitting()
-    }"
-  >
-    Submit
-  </button>
-</div>
+    }">
+      Submit
+    </button>
+  </div>
 </form>
 }

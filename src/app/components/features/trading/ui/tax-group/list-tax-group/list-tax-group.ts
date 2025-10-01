@@ -69,8 +69,6 @@ export class ListTaxGroup implements OnInit, OnDestroy {
 
   readonly countTaxGroupsSuccessEffect = effect((onCleanup) => {
 
-    // Normalize to array
-    
     const subscription = this.actions$.pipe(
       ofType(taxGroupActions.countTaxGroupsSuccess),
       tap(() => {

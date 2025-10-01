@@ -1,14 +1,16 @@
-import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Subject } from 'rxjs';
-import { distinctUntilChanged, map, takeUntil } from 'rxjs/operators';
+import { distinctUntilChanged, map, takeUntil, tap } from 'rxjs/operators';
 import { QueryParamsOriginal, QueryParamsRep, parseQueryParams } from '../../../../../../util/query-params-util';
 import { DbcColumn } from '../../../../../../util/types/dbc-column.type';
 import { EmptyListMessage } from '../../../../../../util/types/empty-list-message.type';
 import { ItemLanding } from '../../../../../shared/item-landing/item-landing';
 import { Tax, TaxStore, taxActions } from '../../../store/tax';
 import { SearchItemStore } from '../../../../../../components/layout/store/search-item/search-item.store';
+import { Actions, ofType } from '@ngrx/effects';
+import { taxGroupActions } from '../../../store/tax-group';
 
 @Component({
   selector: 'app-list-tax',
@@ -28,6 +30,8 @@ export class ListTax implements OnInit, OnDestroy {
   readonly count = this.taxStore.count;
   readonly pageSize = signal<number>(10);
   readonly currentPage = signal<number>(1);
+  private query!:QueryParamsRep;
+  private actions$ = inject(Actions);
 
   readonly error = computed(() => {
     const storeError = this.taxStore.error();
@@ -64,7 +68,18 @@ export class ListTax implements OnInit, OnDestroy {
     const currentUrl = this.router.url;
     this.router.navigate(['/app/trading/tax', item.id, 'delete'], { queryParams: { burl: currentUrl } });
   });
+  readonly countTaxGroupsSuccessEffect = effect((onCleanup) => {
 
+    const subscription = this.actions$.pipe(
+      ofType(taxActions.countTaxesSuccess),
+      tap(() => {
+        this.store.dispatch(taxActions.loadTaxes({}));
+      })
+    ).subscribe();
+
+    onCleanup(() => subscription.unsubscribe());
+  });
+  
   private destroy$ = new Subject<void>();
 
   private loadTaxes(): void {
@@ -78,16 +93,16 @@ export class ListTax implements OnInit, OnDestroy {
         this.pageSize.set(limit ?? 10);
       }
       const search = {query: params.search?.query ?? '', fields: ['description', 'name', 'shortname']};
-      this.store.dispatch(taxActions.loadTaxes({ 
-        query: { limit: limit ?? 10, offset: offset ?? 0, search: search, sort: sort ?? [] } 
-      }));
+      this.query = { limit: limit ?? 10, offset: offset ?? 0, search: search, sort: sort ?? [] };
       if(this.currentPage() !== page) {
         this.currentPage.set(page ?? 1);
       }
+      this.store.dispatch(taxActions.countTaxes({ query: this.query }));
+      this.store.dispatch(taxActions.loadTaxes({ 
+        query: this.query 
+      }));
+      
     });
-    setTimeout(() => {
-      this.store.dispatch(taxActions.countTaxes({ query: {} }));
-    }, 100);
   }
   
   ngOnInit(): void {

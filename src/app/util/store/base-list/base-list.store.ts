@@ -37,7 +37,7 @@ export function createBaseListStore<T>(
         patchState(store, { count });
       },
 
-      setError(error: DbcError) {
+      setError(error: DbcError | null) {
         patchState(store, { error });
       },
 

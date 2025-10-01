@@ -2,29 +2,40 @@ import { NgClass } from '@angular/common';
 import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ActionCreator, Store } from '@ngrx/store';
+import { Actions, ofType } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
+import { tap } from 'rxjs';
 import { buildFormKey } from '../../../../../../util/common.util';
 import { WithFormDraftBinding } from '../../../../../../util/form/with-form-draft-binding';
+import { TaxGroupJSON } from '../../../../../../util/types/tax-group.type';
+import { AutoComplete } from '../../../../../shared/auto-complete/auto-complete';
+import { CancelButton } from '../../../../../shared/cancel-button/cancel-button';
 import { ItemNotFound } from '../../../../../shared/item-not-found/item-not-found';
 import { SkeltonLoader } from '../../../../../shared/skelton-loader/skelton-loader';
 import { taxActions, TaxStore } from '../../../store/tax';
 import { taxGroupActions, TaxGroupStore } from '../../../store/tax-group';
 import { TaxGroupCU } from '../../../store/tax-group/tax-group.model';
 import { Tax } from '../../../store/tax/tax.model';
-import { AutoComplete } from '../../../../../shared/auto-complete/auto-complete';
-import { CancelButton } from '../../../../../shared/cancel-button/cancel-button';
-import { Actions, ofType } from '@ngrx/effects';
-import { tap } from 'rxjs';
+import { NgIcon } from '@ng-icons/core';
+
+interface TaxGroupForm {
+  name: string;
+  rate: number;
+  description?: string;
+  groups: Array<{
+    mode: string;
+    taxes: Tax[];
+  }>;
+}
 
 type GroupForm = FormGroup<{
   mode: FormControl<string>;
-  taxids: FormArray<FormControl<string>>;
   taxes: FormArray<FormControl<Tax>>;
   tax: FormControl<Tax>;
 }>;
 @Component({
   selector: 'app-create-tax-group',
-  imports: [SkeltonLoader, ItemNotFound, NgClass, ReactiveFormsModule, AutoComplete, CancelButton],
+  imports: [SkeltonLoader, ItemNotFound, NgClass, ReactiveFormsModule, AutoComplete, CancelButton, NgIcon],
   templateUrl: './create-tax-group.html',
   styleUrl: './create-tax-group.css'
 })
@@ -39,8 +50,6 @@ export class CreateTaxGroup extends WithFormDraftBinding implements OnInit {
   readonly taxStore = inject(TaxStore);
   readonly selectedTaxGroup = this.taxGroupStore.selectedItem;
   readonly actions$ = inject(Actions);
-  successAction = signal<ActionCreator[] | ActionCreator | null>(null);
-  failureAction = signal<ActionCreator[] | ActionCreator | null>(null);
   protected loading = true;
   protected readonly mode = signal<'create' | 'edit'>('create');
   private taxGroupId = signal<string | null>(null);
@@ -50,8 +59,19 @@ export class CreateTaxGroup extends WithFormDraftBinding implements OnInit {
 
 
   taxes = this.taxStore.items;
+  filteredTaxes = signal<Tax[]>([]);
   readonly form: FormGroup;
 
+  private buildGroupRow(group: TaxGroupJSON): GroupForm {
+    const taxes = this.taxes();
+    const groupTaxes = taxes.filter(t => group.taxids.includes(t.id ?? ''));
+  
+    return this.fb.group({
+      mode: this.fb.control(group.mode ?? 'include', { nonNullable: true }),
+      taxes: this.fb.array(groupTaxes.map(t => this.fb.control<Tax>(t, { nonNullable: true }))),
+      tax: this.fb.control<Tax | null>(null),
+    }) as GroupForm;
+  }
 
   constructor() {
     super();
@@ -71,12 +91,40 @@ export class CreateTaxGroup extends WithFormDraftBinding implements OnInit {
 
   readonly title = signal('Tax Group Setup');
 
+  private loadTaxGroupById = () => {
+    const lastSegment = this.route.snapshot.url[this.route.snapshot.url.length - 1]?.path;
+    const id = this.route.snapshot.paramMap.get('id');
+    
+    if (lastSegment === 'create') {
+      this.mode.set('create');
+      this.loading = false;
+    } else if (lastSegment === 'edit' && id) {
+      this.mode.set('edit');
+      this.taxGroupId.set(id);
+      this.loading = true;
+      this.store.dispatch(taxGroupActions.loadTaxGroupById({ id }));
+    } else if (lastSegment === 'view' && id) {
+      this.mode.set('edit');
+      this.taxGroupId.set(id);
+      this.loading = true;
+      this.store.dispatch(taxGroupActions.loadTaxGroupById({ id }));
+    }
+  }
+
   private fillFormEffect = effect(() => {
     const taxGroup = this.selectedTaxGroup();
-    if (taxGroup) {
-      this.form.patchValue(taxGroup);
-      this.loading = false;
-    }
+    if (!taxGroup) return;
+    this.form.patchValue({
+      name: taxGroup.name ?? null,
+      rate: taxGroup.rate ?? null,
+      description: taxGroup.description ?? null,
+    });
+  
+    const rows = taxGroup.groups.map(g => this.buildGroupRow(g));
+    const groupsFA = this.fb.array<GroupForm>(rows);
+  
+    this.form.setControl('groups', groupsFA);
+    this.loading = false;
   });
 
   private loadErrorEffect = effect(() => {
@@ -86,18 +134,16 @@ export class CreateTaxGroup extends WithFormDraftBinding implements OnInit {
     }
   });
 
-  readonly saveSuccessEffect = effect((onCleanup) => {
-    const creators = this.successAction();
-    if (!creators) return;
+  private goBack = () => {
+    const burl = this.route.snapshot.queryParamMap.get('burl') ?? '/app/trading/tax-group';
+    this.router.navigateByUrl(burl);
+  }
 
-    // Normalize to array
-    const creatorArray = Array.isArray(creators) ? creators : [creators];
-    
+  readonly saveSuccessEffect = effect((onCleanup) => {
     const subscription = this.actions$.pipe(
-      ofType(...creatorArray),
+      ofType(taxGroupActions.createTaxGroupSuccess),
       tap(() => {
-        const burl = this.route.snapshot.queryParamMap.get('burl') ?? '/app/trading/tax-group';
-        this.router.navigateByUrl(burl);
+        this.goBack();
       })
     ).subscribe();
 
@@ -105,45 +151,55 @@ export class CreateTaxGroup extends WithFormDraftBinding implements OnInit {
   });
 
   readonly failureActionEffect = effect((onCleanup) => {
-    const creators = this.failureAction();
-    if (!creators) return;
-  
-    // Normalize to array
-    const creatorArray = Array.isArray(creators) ? creators : [creators];
-    
     const subscription = this.actions$.pipe(
-      ofType(...creatorArray), // ofType accepts multiple action creators
+      ofType(taxGroupActions.createTaxGroupFailure),
       tap(() => {
         this.submitting.set(false);
+        this.taxGroupStore.setError(null);
       })
     ).subscribe();
   
     onCleanup(() => subscription.unsubscribe());
   });
 
-  ngOnInit(): void {
-    const lastSegment = this.route.snapshot.url[this.route.snapshot.url.length - 1]?.path;
-    const id = this.route.snapshot.paramMap.get('id');
-    
-    if (lastSegment === 'create') {
-      this.mode.set('create');
-      this.successAction.set(taxGroupActions.createTaxGroupSuccess);
-      this.failureAction.set(taxGroupActions.createTaxGroupFailure);
-      this.loading = false;
-    } else if (lastSegment === 'edit' && id) {
-      this.mode.set('edit');
-      this.taxGroupId.set(id);
-      this.successAction.set(taxGroupActions.updateTaxGroupSuccess);
-      this.failureAction.set(taxGroupActions.updateTaxGroupFailure);
-      this.loading = true;
-      this.store.dispatch(taxGroupActions.loadTaxGroupById({ id }));
-    } else if (lastSegment === 'view' && id) {
-      this.mode.set('edit');
-      this.taxGroupId.set(id);
-      this.loading = true;
-      this.store.dispatch(taxGroupActions.loadTaxGroupById({ id }));
-    }
+  readonly updateSuccessEffect = effect((onCleanup) => {
+    const subscription = this.actions$.pipe(
+      ofType(taxGroupActions.updateTaxGroupSuccess),
+      tap(() => {
+        this.submitting.set(false);
+        this.goBack();
+      })
+    ).subscribe();
 
+    onCleanup(() => subscription.unsubscribe());
+  });
+
+  readonly updateFailureEffect = effect((onCleanup) => {
+    const subscription = this.actions$.pipe(
+      ofType(taxGroupActions.updateTaxGroupFailure),
+      tap(() => {
+        this.taxGroupStore.setError(null);
+        this.submitting.set(false);
+      })
+    ).subscribe();
+
+    onCleanup(() => subscription.unsubscribe());
+  });
+
+  readonly loadTaxesSuccessEffect = effect((onCleanup) => {
+    const subscription = this.actions$.pipe(
+      ofType(taxActions.loadTaxesSuccess),
+      tap(() => {
+        this.loading = false;
+        this.loadTaxGroupById();
+      })
+    ).subscribe();
+
+    onCleanup(() => subscription.unsubscribe());
+  });
+
+  ngOnInit(): void {
+    this.loading = true;
     // Load taxes for the tax group selector
     this.store.dispatch(taxActions.loadTaxes({}));
   }
@@ -156,23 +212,24 @@ export class CreateTaxGroup extends WithFormDraftBinding implements OnInit {
   handleSubmit(): void {
     if (this.submitting()) return;
     this.submitting.set(true);
-    const formData = this.form.value as TaxGroupCU;
+    const formData = this.form.value as TaxGroupForm;
+    const {name, rate, description, groups} = formData;
+    const nGroups = groups.map(group => ({
+      mode: group.mode,
+      taxids: group.taxes.map(tax => tax.id ?? '')
+    }));
+    const newTaxGroup: TaxGroupCU = {
+      name,
+      rate: Number(rate),
+      ...(description && { description }),
+      groups: nGroups
+    };
     if (this.mode() === 'create') {
-      const {name, rate, description, groups} = formData;
-      const newTaxGroup = {
-        name,
-        rate: Number(rate),
-        ...(description && { description }),
-        groups: groups ? groups.map(group => ({
-          mode: group.mode,
-          taxids: group.taxids
-        })) : []
-      };
       this.store.dispatch(taxGroupActions.createTaxGroup({ taxGroup: newTaxGroup }));
     } else if (this.mode() === 'edit' && this.taxGroupId()) {
       this.store.dispatch(taxGroupActions.updateTaxGroup({ 
         id: this.taxGroupId()!, 
-        taxGroup: formData 
+        taxGroup: newTaxGroup
       }));
     }
   }
@@ -180,10 +237,6 @@ export class CreateTaxGroup extends WithFormDraftBinding implements OnInit {
   // getters in your component.ts
 get groups(): FormArray<GroupForm> {
   return this.form.get('groups') as FormArray<GroupForm>;
-}
-
-taxidsAt(i: number): FormArray<FormControl<string>> {
-  return this.groups.at(i).get('taxids') as FormArray<FormControl<string>>;
 }
 
 taxesAt(i: number): FormArray<FormControl<Tax>> {
@@ -194,8 +247,8 @@ taxesAt(i: number): FormArray<FormControl<Tax>> {
     const groups = this.form.get('groups') as FormArray
     groups.push(this.fb.group({
       mode: new FormControl<string>(''),
-      taxids: this.fb.array<FormControl<string>>([]),
-      taxes: this.fb.array<FormControl<Tax>>([])
+      taxes: this.fb.array<FormControl<Tax>>([]),
+      tax: new FormControl<Tax | null>(null)
     }));
   }
   
@@ -207,12 +260,14 @@ taxesAt(i: number): FormArray<FormControl<Tax>> {
   addTaxId(index: number): void {
     
   }
-
-  removeTaxId(index: number, taxIdIndex: number): void {
+  removeTax(groupIndex: number, taxIndex: number) {
+    this.taxesAt(groupIndex).removeAt(taxIndex);
   }
   
   onTaxSearch(value: string) {
-    this.store.dispatch(taxActions.loadTaxes({ query: { search: { query: value, fields: ['name', 'description'] } } }));
+    const filteredTaxes = this.taxes().filter(tax => tax.name?.toLowerCase().includes(value.toLowerCase()));
+    this.filteredTaxes.set(filteredTaxes);
+    // this.store.dispatch(taxActions.loadTaxes({ query: { search: { query: value, fields: ['name', 'description'] } } }));
   }
 
   onTaxSelected(tax: Tax, index: number) {

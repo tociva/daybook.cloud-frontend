@@ -47,7 +47,8 @@ import {
   bootstrapTextIndentRight,
   bootstrapTrash,
   bootstrapTruck,
-  bootstrapWallet2
+  bootstrapWallet2,
+  bootstrapX
 } from '@ng-icons/bootstrap-icons';
 import { provideIcons } from '@ng-icons/core';
 
@@ -102,4 +103,5 @@ export const provideAppIcons = () =>
     bootstrapPlus,
     bootstrapPencil,
     bootstrapBagPlus,
+    bootstrapX,
   });
