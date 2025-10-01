@@ -270,32 +270,20 @@ export const authEffects = {
     },
     { functional: true }
   ),
-
+  
   silentRenewFailure: createEffect(
-    () => {
-      const actions$ = inject(Actions);
-      return actions$.pipe(
+    (actions$ = inject(Actions)) =>
+      actions$.pipe(
         ofType(authActions.silentRenewFailure),
-        tap(({ error }) => {
-          console.warn('Error during silent renew:', error);
-          const store = inject(Store);
-          store.dispatch(authActions.logoutHydra());
-        })
-      );
-    },
-    { functional: true, dispatch: false }
+        tap(({ error }) => console.warn('Error during silent renew:', error)),
+        map(() => authActions.logoutHydra())
+      ),
+    { functional: true }
   ),
 
   silentRenewSuccess: createEffect(
-    () => {
-      const actions$ = inject(Actions);
-      return actions$.pipe(
-        ofType(authActions.silentRenewSuccess),
-        tap(({ user }) => {
-          console.info('Silent renew success: user is still authenticated');
-        })
-      );
-    },
+    (actions$ = inject(Actions)) =>
+      actions$.pipe(ofType(authActions.silentRenewSuccess)),
     { functional: true, dispatch: false }
   ),
 
