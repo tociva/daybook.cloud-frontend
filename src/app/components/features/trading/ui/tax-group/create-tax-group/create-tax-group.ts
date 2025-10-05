@@ -2,6 +2,7 @@ import { NgClass } from '@angular/common';
 import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { NgIcon } from '@ng-icons/core';
 import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { tap } from 'rxjs';
@@ -10,13 +11,13 @@ import { WithFormDraftBinding } from '../../../../../../util/form/with-form-draf
 import { TaxGroupJSON } from '../../../../../../util/types/tax-group.type';
 import { AutoComplete } from '../../../../../shared/auto-complete/auto-complete';
 import { CancelButton } from '../../../../../shared/cancel-button/cancel-button';
+import { InputWithSuggestion } from '../../../../../shared/input-with-suggestion/input-with-suggestion';
 import { ItemNotFound } from '../../../../../shared/item-not-found/item-not-found';
 import { SkeltonLoader } from '../../../../../shared/skelton-loader/skelton-loader';
 import { taxActions, TaxStore } from '../../../store/tax';
-import { taxGroupActions, TaxGroupStore } from '../../../store/tax-group';
+import { taxGroupActions, TaxGroupModeStore, TaxGroupStore } from '../../../store/tax-group';
 import { TaxGroupCU } from '../../../store/tax-group/tax-group.model';
 import { Tax } from '../../../store/tax/tax.model';
-import { NgIcon } from '@ng-icons/core';
 
 interface TaxGroupForm {
   name: string;
@@ -35,7 +36,7 @@ type GroupForm = FormGroup<{
 }>;
 @Component({
   selector: 'app-create-tax-group',
-  imports: [SkeltonLoader, ItemNotFound, NgClass, ReactiveFormsModule, AutoComplete, CancelButton, NgIcon],
+  imports: [SkeltonLoader, ItemNotFound, NgClass, ReactiveFormsModule, AutoComplete, CancelButton, NgIcon, InputWithSuggestion],
   templateUrl: './create-tax-group.html',
   styleUrl: './create-tax-group.css'
 })
@@ -47,10 +48,11 @@ export class CreateTaxGroup extends WithFormDraftBinding implements OnInit {
   private readonly store = inject(Store);
   private readonly route = inject(ActivatedRoute);
   readonly taxGroupStore = inject(TaxGroupStore);
+  readonly taxGroupModeStore = inject(TaxGroupModeStore);
   readonly taxStore = inject(TaxStore);
   readonly selectedTaxGroup = this.taxGroupStore.selectedItem;
   readonly actions$ = inject(Actions);
-  protected loading = true;
+  protected loading = 0;
   protected readonly mode = signal<'create' | 'edit'>('create');
   private taxGroupId = signal<string | null>(null);
   private router = inject(Router);
@@ -60,6 +62,8 @@ export class CreateTaxGroup extends WithFormDraftBinding implements OnInit {
 
   taxes = this.taxStore.items;
   filteredTaxes = signal<Tax[]>([]);
+  modes = this.taxGroupModeStore.items;
+  filteredModes = signal<string[]>([]);
   readonly form: FormGroup;
 
   private buildGroupRow(group: TaxGroupJSON): GroupForm {
@@ -97,16 +101,15 @@ export class CreateTaxGroup extends WithFormDraftBinding implements OnInit {
     
     if (lastSegment === 'create') {
       this.mode.set('create');
-      this.loading = false;
     } else if (lastSegment === 'edit' && id) {
       this.mode.set('edit');
       this.taxGroupId.set(id);
-      this.loading = true;
+      this.loading++;
       this.store.dispatch(taxGroupActions.loadTaxGroupById({ id }));
     } else if (lastSegment === 'view' && id) {
       this.mode.set('edit');
       this.taxGroupId.set(id);
-      this.loading = true;
+      this.loading++;
       this.store.dispatch(taxGroupActions.loadTaxGroupById({ id }));
     }
   }
@@ -124,13 +127,13 @@ export class CreateTaxGroup extends WithFormDraftBinding implements OnInit {
     const groupsFA = this.fb.array<GroupForm>(rows);
   
     this.form.setControl('groups', groupsFA);
-    this.loading = false;
+    this.loading--;
   });
 
   private loadErrorEffect = effect(() => {
     const error = this.taxGroupStore.error();
     if (error && this.mode() === 'edit') {
-      this.loading = false;
+      this.loading--;
     }
   });
 
@@ -190,8 +193,39 @@ export class CreateTaxGroup extends WithFormDraftBinding implements OnInit {
     const subscription = this.actions$.pipe(
       ofType(taxActions.loadTaxesSuccess),
       tap(() => {
-        this.loading = false;
-        this.loadTaxGroupById();
+        this.loading--;
+      })
+    ).subscribe();
+
+    onCleanup(() => subscription.unsubscribe());
+  });
+
+  readonly loadTaxesFailureEffect = effect((onCleanup) => {
+    const subscription = this.actions$.pipe(
+      ofType(taxActions.loadTaxesFailure),
+      tap(() => {
+        this.loading--;
+      })
+    ).subscribe();
+
+    onCleanup(() => subscription.unsubscribe());
+  });
+
+  readonly loadTaxGroupModesSuccessEffect = effect((onCleanup) => {
+    const subscription = this.actions$.pipe(
+      ofType(taxGroupActions.loadTaxGroupModesSuccess),
+      tap(() => {
+        this.loading--;
+      })
+    ).subscribe();
+
+    onCleanup(() => subscription.unsubscribe());
+  });
+  readonly loadTaxGroupModesFailureEffect = effect((onCleanup) => {
+    const subscription = this.actions$.pipe(
+      ofType(taxGroupActions.loadTaxGroupModesFailure),
+      tap(() => {
+        this.loading--;
       })
     ).subscribe();
 
@@ -199,9 +233,14 @@ export class CreateTaxGroup extends WithFormDraftBinding implements OnInit {
   });
 
   ngOnInit(): void {
-    this.loading = true;
     // Load taxes for the tax group selector
+    this.loading++;
     this.store.dispatch(taxActions.loadTaxes({}));
+    // Load tax group modes for the tax group selector
+    this.loading++;
+    this.store.dispatch(taxGroupActions.loadTaxGroupModes({}));
+    this.loadTaxGroupById();
+
   }
 
   ngOnDestroy(): void {
@@ -218,6 +257,7 @@ export class CreateTaxGroup extends WithFormDraftBinding implements OnInit {
       mode: group.mode,
       taxids: group.taxes.map(tax => tax.id ?? '')
     }));
+    console.log(nGroups);
     const newTaxGroup: TaxGroupCU = {
       name,
       rate: Number(rate),
@@ -267,7 +307,6 @@ taxesAt(i: number): FormArray<FormControl<Tax>> {
   onTaxSearch(value: string) {
     const filteredTaxes = this.taxes().filter(tax => tax.name?.toLowerCase().includes(value.toLowerCase()));
     this.filteredTaxes.set(filteredTaxes);
-    // this.store.dispatch(taxActions.loadTaxes({ query: { search: { query: value, fields: ['name', 'description'] } } }));
   }
 
   onTaxSelected(tax: Tax, index: number) {
@@ -281,5 +320,11 @@ taxesAt(i: number): FormArray<FormControl<Tax>> {
 
   findTaxInputDisplayValue(tax: Tax) {
     return '';
+  }
+  onModeSearch(value: string) {
+    const filteredModes = this.modes().filter(mode => mode.toLowerCase().includes(value.toLowerCase()));
+    this.filteredModes.set(filteredModes);
+  }
+  onModeSelected(mode: string, index: number) {
   }
 }

@@ -35,6 +35,11 @@ export const taxGroupActions = createActionGroup({
     // Delete
     deleteTaxGroup: props<{ id: string }>(),
     deleteTaxGroupSuccess: props<{ id: string }>(),
-    deleteTaxGroupFailure: props<{ error: DbcError }>()
+    deleteTaxGroupFailure: props<{ error: DbcError }>(),
+
+    // Load tax group modes
+    loadTaxGroupModes: props<{ query?: QueryParamsRep }>(),
+    loadTaxGroupModesSuccess: props<{ modes: string[] }>(),
+    loadTaxGroupModesFailure: props<{ error: DbcError }>(),
   }
 });

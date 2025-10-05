@@ -8,7 +8,7 @@ import { Count, LB4QueryBuilder } from '../../../../../util/lb4-query-builder';
 import { ConfigStore } from '../../../../core/auth/store/config/config.store';
 import { taxGroupActions } from './tax-group.actions';
 import { TaxGroup } from './tax-group.model';
-import { TaxGroupStore } from './tax-group.store';
+import { TaxGroupModeStore, TaxGroupStore } from './tax-group.store';
 
 export const taxGroupEffects = {
   // Create TaxGroup effect
@@ -395,5 +395,70 @@ export const taxGroupEffects = {
       );
     },
     { functional: true, dispatch: false }
-  )
+  ),
+
+
+
+  // Load all TaxGroups modes effect
+  loadTaxGroupModes: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const configStore = inject(ConfigStore);
+      const store = inject(Store);
+
+      return actions$.pipe(
+        ofType(taxGroupActions.loadTaxGroupModes),
+        tap((action) => {
+          const baseUrl = `${configStore.config().apiBaseUrl}/inventory/tax-group/modes`;
+          const requestId = `${taxGroupActions.loadTaxGroupModes.type}-${Date.now()}-${Math.random()}`;
+          const config: HttpRequestConfig = {
+            url: baseUrl,
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+          };
+          const metadata: HttpRequestMetadata<string[]> = {
+            requestId,
+            actionName: 'loadTaxGroupModes',
+            errorMessage: 'Failed to load tax group modes',
+            onSuccessAction: (modes) => taxGroupActions.loadTaxGroupModesSuccess({ modes }),
+            onErrorAction: (error) => taxGroupActions.loadTaxGroupModesFailure({ error }),
+          };
+          store.dispatch(httpActions.executeRequest({ config, metadata: metadata as HttpRequestMetadata<unknown> }));
+        })
+      );
+    },
+    { functional: true, dispatch: false }
+  ),
+
+  loadTaxGroupModesSuccess: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const store = inject(TaxGroupModeStore);
+
+      return actions$.pipe(
+        ofType(taxGroupActions.loadTaxGroupModesSuccess),
+        tap(({ modes }) => {
+          store.setItems(modes);
+        })
+      );
+    },
+    { functional: true, dispatch: false }
+  ),
+
+  loadTaxGroupModesFailure: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const store = inject(TaxGroupModeStore);
+
+      return actions$.pipe(
+        ofType(taxGroupActions.loadTaxGroupModesFailure),
+        tap(({ error }) => {
+          store.setError(error);
+        })
+      );
+    },
+    { functional: true, dispatch: false }
+  ),
 };

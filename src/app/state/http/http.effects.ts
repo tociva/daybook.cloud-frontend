@@ -2,7 +2,7 @@ import { inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { switchMap, map, catchError, tap } from 'rxjs/operators';
+import { switchMap, map, catchError, tap, mergeMap } from 'rxjs/operators';
 import { of, EMPTY } from 'rxjs';
 import { httpActions } from './http.actions';
 import { HttpStore } from './http.store';
@@ -57,60 +57,43 @@ function isAbortLike(err: unknown): boolean {
 }
 
 export const httpEffects = {
+  
   executeRequest: createEffect(() => {
     const actions$ = inject(Actions);
     const http = inject(HttpClient);
     const httpStore = inject(HttpStore);
     const toastStore = inject(ToastStore);
-
+  
     return actions$.pipe(
       ofType(httpActions.executeRequest),
-      switchMap(({ config, metadata }) => {
-        // Create HTTP call
+      mergeMap(({ config, metadata }) => {          // <-- changed from switchMap
         const httpCall = createHttpCall(http, config);
-        
-        // Use HttpStore.track() for proper loading/error handling including abort detection
+  
         return httpStore.track(metadata.requestId, httpCall).pipe(
           map((data) => {
-            // Show success message if provided
             if (metadata.successMessage) {
               toastStore.show({ title: 'Success', message: metadata.successMessage }, 'success');
             }
-            return httpActions.requestSuccess({ 
-              requestId: metadata.requestId, 
-              data, 
-              metadata 
-            });
+            return httpActions.requestSuccess({ requestId: metadata.requestId, data, metadata });
           }),
           catchError((errorP) => {
-            // Double-check: if it's an abort error that somehow got through, ignore it
-            if (isAbortLike(errorP)) {
-              return EMPTY; // Silently ignore abort errors
-            }
-
+            if (isAbortLike(errorP)) return EMPTY;
             const errorMessage = errorP.error?.error?.message ?? errorP.error?.message ?? errorP.message;
-            
-            // Show error message if provided (only for real errors)
             if (metadata.errorMessage) {
               toastStore.show({ title: metadata.errorMessage, message: errorMessage }, 'error');
             }
-            
             const error: DbcError = {
               statusCode: errorP.status,
               details: errorMessage ?? 'Unknown error',
               title: metadata.errorMessage ?? 'Error thrown from cloud server'
             };
-            
-            return of(httpActions.requestFailure({ 
-              requestId: metadata.requestId, 
-              error, 
-              metadata 
-            }));
+            return of(httpActions.requestFailure({ requestId: metadata.requestId, error, metadata }));
           })
         );
       })
     );
   }, { functional: true }),
+  
 
   handleSuccess: createEffect(() => {
     const actions$ = inject(Actions);

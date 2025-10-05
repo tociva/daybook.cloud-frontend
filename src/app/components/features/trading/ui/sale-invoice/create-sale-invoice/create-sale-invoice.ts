@@ -5,7 +5,6 @@ import { Router } from '@angular/router';
 import { NgIconComponent } from '@ng-icons/core';
 import { Store } from '@ngrx/store';
 import { TextInputDirective } from '../../../../../../util/directives/text-input-directive';
-import { TaxOptions } from '../../../../../../util/types/tax-options.type';
 import { AutoComplete } from '../../../../../shared/auto-complete/auto-complete';
 import { DbcAddressForm } from '../../../../../shared/dbc-address-form/dbc-address-form';
 import { DbcSwitch } from '../../../../../shared/dbc-switch/dbc-switch';
@@ -16,6 +15,7 @@ import { Customer, customerActions, CustomerStore } from '../../../store/custome
 import { SaleInvoiceFormService } from '../util/sale-invoice-form.service';
 import { SaleInvoiceForm } from '../util/sale-invoice-form.type';
 import { Item, itemActions, ItemStore } from '../../../store/item';
+import { taxGroupActions, TaxGroupModeStore } from '../../../store/tax-group';
 
 @Component({
   selector: 'app-create-sale-in voice',
@@ -31,12 +31,12 @@ export class CreateSaleInvoice {
   readonly customerStore = inject(CustomerStore);
   readonly currencyStore = inject(CurrencyStore);
   readonly itemStore = inject(ItemStore);
-
+  readonly taxGroupModeStore = inject(TaxGroupModeStore);
   readonly customers = this.customerStore.items;
   readonly items = this.itemStore.items;
   currencies = signal<Currency[]>([]);
-  private taxOptionsArray = Object.values(TaxOptions);
-  taxOptions = signal(this.taxOptionsArray);
+  modes = this.taxGroupModeStore.items;
+  filteredModes = signal<string[]>([]);
 
   readonly form:  FormGroup<SaleInvoiceForm> = this.formSvc.createForm({
     billingaddressreadonly: true,
@@ -45,7 +45,7 @@ export class CreateSaleInvoice {
     autoNumbering: true,
     showDescription: false,
     showDiscount: true,
-    taxOption: TaxOptions.CGST_SGST,
+    taxOption: '',
   }); 
 
   useBillingForShippingSig = toSignal(
@@ -97,6 +97,10 @@ export class CreateSaleInvoice {
     });
 
   }
+
+  ngOnInit() {
+    this.store.dispatch(taxGroupActions.loadTaxGroupModes({}));
+  }
   
   findCustomerDisplayValue = (customer: Customer) => customer?.name ?? '';
 
@@ -142,15 +146,11 @@ export class CreateSaleInvoice {
   }
 
   onTaxOptionSearch(value: string) {
-    this.taxOptions.set(this.taxOptionsArray.filter(option => option.toLowerCase().includes(value.toLowerCase())));
+    this.filteredModes.set(this.modes().filter(option => option.toLowerCase().includes(value.toLowerCase())));
   }
 
-  onTaxOptionSelected(taxOption: TaxOptions) {
+  onTaxOptionSelected(taxOption: string) {
     this.form.patchValue({ taxOption: taxOption });
-  }
-
-  findTaxOptionDisplayValue(taxOption: TaxOptions) {
-    return taxOption;
   }
 
   addItemRow() {

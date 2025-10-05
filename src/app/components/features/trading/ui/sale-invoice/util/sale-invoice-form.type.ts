@@ -1,10 +1,8 @@
 import { FormArray, FormControl, FormGroup } from "@angular/forms";
-import { Customer } from "../../../store/customer";
 import { Currency } from "../../../../../shared/store/currency/currency.model";
-import { TaxOptions } from "../../../../../../util/types/tax-options.type";
+import { Customer } from "../../../store/customer";
 import { Item } from "../../../store/item/item.model";
 import { SaleInvoice } from "../../../store/sale-invoice/sale-invoice.model";
-import { SaleItem } from "../../../store/sale-invoice/sale-item.model";
 
 export type AddressGroup = {
   name: FormControl<string>;
@@ -64,7 +62,7 @@ export type SaleInvoiceForm = {
   duedate: FormControl<string>;
   currency: FormControl<Currency | null>;
   deliveryState: FormControl<string>;
-  taxOption: FormControl<TaxOptions>;
+  taxOption: FormControl<string>;
   showDescription: FormControl<boolean>;
   showDiscount: FormControl<boolean>;
   journal: FormControl<string>;
@@ -89,7 +87,7 @@ export interface SaleInvoiceDAO extends SaleInvoice {
   autoNumbering: boolean;
   currency: Currency;
   deliveryState: string;
-  taxOption: TaxOptions;
+  taxOption: string;
   showDescription: boolean;
   showDiscount: boolean;
   journal: string;

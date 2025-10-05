@@ -15,10 +15,6 @@ import { Item, itemActions, ItemCU, ItemStore } from '../../../store/item';
 import { ItemCategory, itemCategoryActions, ItemCategoryStore } from '../../../store/item-category';
 import { CreateItemCategory } from '../../item-category/create-item-category/create-item-category';
 
-const itemTypes = [
-  'Product',
-  'Service'
-];
 @Component({
   selector: 'app-create-item',
   imports: [TwoColumnFormComponent, SkeltonLoader, ItemNotFound],
@@ -47,7 +43,7 @@ export class CreateItem extends WithFormDraftBinding implements OnInit {
     { id: 'Add New Category', name: 'Add New Category' },
     ...this.categories()
   ]);
-  typeOptions = signal(itemTypes);
+  
   readonly formFields = signal<FormField[]>([
     { key: 'name', label: 'Name', type: 'text', required: true, group: 'Basic Details', validators:(value: unknown) => {
       if(!willPassRequiredStringValidation(value as string)) {
@@ -88,23 +84,6 @@ export class CreateItem extends WithFormDraftBinding implements OnInit {
       }
       return [];
     }},
-    { key: 'type', label: 'Type', type: 'auto-complete', required: true, group: 'Basic Details', 
-      autoComplete: {
-        items: this.typeOptions,
-        optionDisplayValue: (item: string) => item,
-        inputDisplayValue: (item: string) => item,
-        trackBy: (item: string) => item,
-        onSearch: (value: string) => {
-          this.typeOptions.set(itemTypes.filter(type => type.toLowerCase().includes(value.toLowerCase())));
-        },
-      },
-      validators:(value: unknown) => {
-        if(!willPassRequiredStringValidation(value as string)) {
-          return ['Type is required'];
-        }
-        return [];
-      }
-    },
     { key: 'barcode', label: 'Barcode', type: 'text', required: false, group: 'Basic Details'},
     { key: 'description', label: 'Description', type: 'text', required: false, group: 'Basic Details'},
     
@@ -137,7 +116,7 @@ export class CreateItem extends WithFormDraftBinding implements OnInit {
       selected: this.selectedItem,
       persistIf: (form, v) => form.dirty && !!v,
       preHydrate: ({ value, draftStore }) => {
-        const category = draftStore.consumeOneTimeDraft<ItemCategory, Item>(CreateItemCategory.ONE_TIME_DRAFT_KEY  );
+        const category = draftStore.consumeOneTimeDraft<Item, ItemCategory>(CreateItemCategory.ONE_TIME_DRAFT_KEY  );
         return category ? { ...value, category } : value;
       },
     }

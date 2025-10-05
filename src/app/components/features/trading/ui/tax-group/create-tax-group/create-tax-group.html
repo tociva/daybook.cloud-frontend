@@ -100,14 +100,24 @@
             <div class="flex items-center gap-2">
               <p class="w-32 text-sm text-gray-700">
                 Mode/Name <br/>
-                <span class="text-xs text-gray-500">Ex. GST-18%, GST-5%, EXPORT, NON-TAXABLE etc.</span>
+                <span class="text-xs text-gray-500">Ex. Inter State, Intra State, EXPORT, NON-TAXABLE etc.</span>
                 <span class="text-danger">*</span>
               </p>
-              <input type="text" formControlName="mode" [ngClass]="{
+              <!-- <input type="text" formControlName="mode" [ngClass]="{
                     'flex-1 border-0 border-b bg-transparent text-sm pt-0.5 pb-1 focus:outline-none': true,
                     'border-b-danger': modeCtrl?.invalid && (modeCtrl?.touched || modeCtrl?.dirty),
                     'border-b-gray-300': !(modeCtrl?.invalid && (modeCtrl?.touched || modeCtrl?.dirty))
-                  }" />
+                  }" /> -->
+                  <app-input-with-suggestion
+                formControlName="mode"
+                [options]="filteredModes()"
+                class="flex-1"
+                placeholder="Search for a mode or type new one..."
+                [required]="true"
+                inputClass="flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 placeholder-gray-400 focus:outline-none focus:border-b-primary border-b-gray-300"
+                (onSearch)="onModeSearch($event)"
+                (onOptionSelected)="onModeSelected($event, i)">
+              </app-input-with-suggestion>
             </div>
             @if (modeCtrl?.hasError('required') && (modeCtrl?.touched || modeCtrl?.dirty)) {
               <p class="text-danger text-xs mt-1">Mode/Name is required.</p>

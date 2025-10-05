@@ -13,7 +13,13 @@ import { itemCategoryActions, ItemCategoryStore } from '../../../store/item-cate
 import { ItemCategory, ItemCategoryCU } from '../../../store/item-category/item-category.model';
 import { WithFormDraftBinding } from '../../../../../../util/form/with-form-draft-binding';
 import { buildFormKey } from '../../../../../../util/common.util';
+import { TaxGroup } from '../../../store/tax-group/tax-group.model';
+import { taxGroupActions, TaxGroupStore } from '../../../store/tax-group';
 
+const itemTypes = [
+  'Product',
+  'Service'
+];
 @Component({
   selector: 'app-create-item-category',
   imports: [TwoColumnFormComponent, SkeltonLoader, ItemNotFound],
@@ -28,15 +34,18 @@ export class CreateItemCategory extends WithFormDraftBinding implements OnInit {
   private readonly store = inject(Store);
   private readonly route = inject(ActivatedRoute);
   readonly itemCategoryStore = inject(ItemCategoryStore);
+  readonly taxGroupStore = inject(TaxGroupStore);
   readonly selectedItemCategory = this.itemCategoryStore.selectedItem;
   successAction = signal<ActionCreator[] | ActionCreator | null>(null);
   protected loading = true;
   protected readonly mode = signal<'create' | 'edit'>('create');
   private itemId = signal<string | null>(null);
   readonly formKey = computed(() => buildFormKey('item-category', this.mode(), this.itemId()));
+  readonly taxGroups = this.taxGroupStore.items;
 
   categories = this.itemCategoryStore.items;
-
+  typeOptions = signal(itemTypes);
+  
   readonly formFields = signal<FormField[]>([
     { key: 'name', label: 'Name', type: 'text', required: true, group: 'Basic Details', validators:(value: unknown) => {
       if(!willPassRequiredStringValidation(value as string)) {
@@ -44,6 +53,23 @@ export class CreateItemCategory extends WithFormDraftBinding implements OnInit {
       }
       return [];
     }},
+    { key: 'type', label: 'Type', type: 'auto-complete', required: true, group: 'Basic Details', 
+      autoComplete: {
+        items: this.typeOptions,
+        optionDisplayValue: (item: string) => item,
+        inputDisplayValue: (item: string) => item,
+        trackBy: (item: string) => item,
+        onSearch: (value: string) => {
+          this.typeOptions.set(itemTypes.filter(type => type.toLowerCase().includes(value.toLowerCase())));
+        },
+      },
+      validators:(value: unknown) => {
+        if(!willPassRequiredStringValidation(value as string)) {
+          return ['Type is required'];
+        }
+        return [];
+      }
+    },
     { key: 'code', label: 'Code', type: 'text', required: true, group: 'Basic Details', validators:(value: unknown) => {
       if(!willPassRequiredStringValidation(value as string)) {
         return ['Code is required'];
@@ -63,7 +89,18 @@ export class CreateItemCategory extends WithFormDraftBinding implements OnInit {
       }
     },
     { key: 'description', label: 'Description', type: 'text', required: false, group: 'Basic Details'},
-
+    { key: 'taxgroup', label: 'Tax Group', type: 'auto-complete', required: false, group: 'Basic Details',
+      placeholder: 'Search for a tax group',
+      autoComplete: {
+        items: this.taxGroups,
+        optionDisplayValue: (item: TaxGroup) => item.name,
+        inputDisplayValue: (item: TaxGroup) => item.name,
+        trackBy: (item: TaxGroup) => item.id!,
+        onSearch: (value: string) => {
+          this.store.dispatch(taxGroupActions.loadTaxGroups({ query: { search: { query: value, fields: ['name', 'description'] } } }));
+        },
+      }
+    }
   ]);
 
   readonly form: FormGroup = FormUtil.buildForm(this.formFields(), this.fb);
@@ -127,11 +164,12 @@ export class CreateItemCategory extends WithFormDraftBinding implements OnInit {
       return;
     }
 
-    const { parent,description, ...data } = dataP;
+    const { parent,description, taxgroup, ...data } = dataP;
 
     const itemCategory: ItemCategoryCU = {
       ...data,
       ...(description && { description }),
+      ...(taxgroup && { taxgroupid: taxgroup.id }),
     };
     if(this.mode() === 'create') {
       this.draftStore.setOneTimeDraft(CreateItemCategory.ONE_TIME_DRAFT_KEY, itemCategory);

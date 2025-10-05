@@ -110,11 +110,10 @@
       <div class="space-y-3">
         <div class="flex items-center gap-2 mb-2">
           <label class="w-28 text-sm text-gray-700">Tax Option:</label>
-          <app-auto-complete [formControl]="form.controls.taxOption" [options]="taxOptions()"
+          <app-auto-complete [formControl]="form.controls.taxOption" [options]="filteredModes()"
             placeholder="Search for a tax option" [required]="true" class="flex-1"
             inputClass="flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 placeholder-gray-400 focus:outline-none focus:border-b-primary border-b-gray-300"
-            [optionDisplayValue]="findTaxOptionDisplayValue" [inputDisplayValue]="findTaxOptionDisplayValue"
-            (onSearch)="onTaxOptionSearch($event)" (onOptionSelected)="onTaxOptionSelected($event)">
+            (onSearch)="onTaxOptionSearch($event)">
           </app-auto-complete>
         </div>
         <div class="flex items-center gap-2 mb-2">

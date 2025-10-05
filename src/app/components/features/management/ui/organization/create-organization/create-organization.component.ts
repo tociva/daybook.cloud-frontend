@@ -289,20 +289,20 @@ export class CreateOrganizationComponent {
     this.store.dispatch(organizationActions.bootstrapOrganization({ organization: {
       name,
       email,
-      mobile,
+      ...(mobile && { mobile }),
       address,
-      description,
+      ...(description && { description }),
       countrycode: country.code,
       currencycode: currency.code,
       fiscalstart,
       fiscalname,
-      gstin : gstin ?? '',
+      ...(gstin && { gstin }),
       invnumber,
       jnumber,
       dateformat: dateformatForm?.name ?? '',
       startdate,
       enddate,
-      state,
+      ...(state && { state }),
     } }));
   }
 

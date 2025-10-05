@@ -1,7 +1,6 @@
 import { inject, Injectable } from "@angular/core";
 import { FormArray, FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { Address } from "../../../../../../util/types/address";
-import { TaxOptions } from "../../../../../../util/types/tax-options.type";
 import { Currency } from "../../../../../shared/store/currency/currency.model";
 import { SaleInvoice } from "../../../store/sale-invoice/sale-invoice.model";
 import { AddressGroup, SaleInvoiceDAO, SaleInvoiceForm, SaleItemForm, SaleItemTaxForm } from "./sale-invoice-form.type";
@@ -127,7 +126,7 @@ private buildSaleItemGroup(item: Partial<SaleItem> = {}): FormGroup<SaleItemForm
       description: this.fb.control<string | null>(init.description ?? null),
       autoNumbering: this.fb.control(init.autoNumbering ?? Boolean(init.number), { nonNullable: true }),
       deliveryState: this.fb.control(init.deliveryState ?? String(init.sprops?.['deliveryState'] ?? ''), { nonNullable: true }),
-      taxOption: this.fb.control(init.taxOption ?? TaxOptions.CGST_SGST, { nonNullable: true }),
+      taxOption: this.fb.control(init.taxOption ?? '', { nonNullable: true }),
       showDescription: this.fb.control(init.showDescription ?? Boolean(init.description), { nonNullable: true }),
       showDiscount: this.fb.control(init.showDiscount ?? Boolean(init.discount), { nonNullable: true }),
       journal: this.fb.control(init.journal ?? String(init.sprops?.['journal'] ?? ''), { nonNullable: true }),
