@@ -104,7 +104,20 @@ export class CreateSaleInvoice {
   
   findCustomerDisplayValue = (customer: Customer) => customer?.name ?? '';
 
-  findItemDisplayValue = (item: Item) => item?.name ?? '';
+  findItemDisplayValue = (item: Item) => {
+    const name = item?.displayname ?? item?.name ?? '';
+    if(item.code) {
+      return `${name} (${item.code})`;
+    }
+    return name;
+  }
+  findItemOptionDisplayValue = (item: Item) => {
+    const name = item?.name ?? item?.displayname ?? '';
+    if(item.code) {
+      return `${name} (${item.code})`;
+    }
+    return name;
+  }
 
   onCustomerSearch(value: string) {
     this.store.dispatch(customerActions.loadCustomers({ query: { search: { query: value, fields: ['name', 'mobile', 'description','email'] }, includes: ['currency'] } }));

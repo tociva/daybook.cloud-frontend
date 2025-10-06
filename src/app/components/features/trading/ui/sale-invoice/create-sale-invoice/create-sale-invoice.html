@@ -138,10 +138,7 @@
 <div class="p-4 border border-gray-200 rounded mt-4">
   <div class="grid grid-cols-23 text-xs font-semibold text-gray-700 bg-gray-50 border-b border-gray-200">
     <div class="col-span-8 flex items-center justify-center border-r border-gray-200 py-2">Name</div>
-    <div class="col-span-2 border-r border-gray-200 text-center py-2">
-      <div>Price</div>
-      <div class="mt-1 border-t border-gray-200 pt-1">HSN Code</div>
-    </div>
+    <div class="col-span-2 flex items-center justify-center border-r border-gray-200 py-2">Price</div>
     <div class="col-span-2 border-r border-gray-200 text-center py-2">
       <div>Quantity</div>
       <div class="mt-1 border-t border-gray-200 pt-1">Item Total</div>
@@ -192,14 +189,12 @@
     <app-auto-complete [formControl]="g.controls.item" [options]="items()" class="flex-1 col-span-8"
       placeholder="Search for an item" [required]="true"
       inputClass="flex-1 h-16 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 placeholder-gray-400 focus:outline-none focus:border-b-primary border-b-gray-300"
-      [optionDisplayValue]="findItemDisplayValue" [inputDisplayValue]="findItemDisplayValue"
+      [optionDisplayValue]="findItemOptionDisplayValue" [inputDisplayValue]="findItemDisplayValue"
       (onSearch)="onItemSearch($event)" (onOptionSelected)="onItemSelected(i)($event)">
     </app-auto-complete>
 
-    <div class="col-span-2 border-r border-gray-200 text-center py-2 h-16">
-      <input class="border-r border-gray-200 h-7 w-full" type="text" appTextInput [formControl]="g.controls.price" />
-      <input class="border-r border-gray-200 h-7 w-full" type="text" appTextInput [formControl]="g.controls.code" />
-    </div>
+    <input class="col-span-2 border-r border-l border-gray-200 h-16 text-right pr-2" type="text" appTextInput
+      [formControl]="g.controls.price" />
     <div class="col-span-2 border-r border-gray-200 text-center py-2 h-16">
       <input class="border-r border-gray-200 h-7 w-full" type="text" appTextInput [formControl]="g.controls.quantity" />
       <input class="border-r border-gray-200 h-7 w-full" type="text" appTextInput
