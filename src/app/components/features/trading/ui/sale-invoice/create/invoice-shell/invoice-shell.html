@@ -1,0 +1,11 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+<app-invoice-customer [form]="customerGroup()"></app-invoice-customer>
+
+
+<app-invoice-properties></app-invoice-properties>
+
+<app-invoice-items></app-invoice-items>
+
+<app-invoice-summary></app-invoice-summary>
+
+</form>
