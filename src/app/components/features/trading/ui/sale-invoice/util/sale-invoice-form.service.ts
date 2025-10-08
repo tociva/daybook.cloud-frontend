@@ -2,7 +2,8 @@ import { inject, Injectable } from "@angular/core";
 import { FormBuilder, Validators } from "@angular/forms";
 import { Address } from "../../../../../../util/types/address";
 import { Customer } from "../../../store/customer/customer.model";
-import { AddressGroup, SaleInvoiceCustomerForm, SaleInvoiceForm } from "./sale-invoice-form.type";
+import { AddressGroup, SaleInvoiceCustomerForm, SaleInvoiceForm, SaleInvoicePropertiesForm } from "./sale-invoice-form.type";
+import { Currency } from "../../../../../shared/store/currency/currency.model";
 
 @Injectable({ providedIn: 'root' })
 export class SaleInvoiceFormService { 
@@ -31,6 +32,16 @@ export class SaleInvoiceFormService {
       billingaddress: this.buildAddressGroup(),
       shippingaddress: this.buildAddressGroup(),
       useBillingForShipping: this.fb.control(true, { nonNullable: true }),
+    }),
+    properties: this.fb.nonNullable.group<SaleInvoicePropertiesForm>({
+      number: this.fb.control('', { nonNullable: true }),
+      date: this.fb.control('', { nonNullable: true }),
+      duedate: this.fb.control('', { nonNullable: true }),
+      journal: this.fb.control('', { nonNullable: true }),
+      currency: this.fb.control({} as Currency, { nonNullable: true }),
+      deliverystate: this.fb.control('', { nonNullable: true }),
+      autoNumbering: this.fb.control(true, { nonNullable: true }),
+      taxoption: this.fb.control('', { nonNullable: true }),
     }),
   });
 

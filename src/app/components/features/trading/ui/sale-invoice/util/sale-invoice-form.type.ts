@@ -2,6 +2,7 @@ import { FormArray, FormControl, FormGroup } from "@angular/forms";
 import { Customer } from "../../../store/customer";
 import { Item } from "../../../store/item/item.model";
 import { SaleItemTax } from "../../../store/sale-invoice/sale-item-tax.model";
+import { Currency } from "../../../../../shared/store/currency/currency.model";
 
 export interface SaleItemTaxForm {
   rate: FormControl<number>;
@@ -28,10 +29,14 @@ export interface SaleItemForm {
 }
 
 export type SaleInvoicePropertiesForm = {
-  autoNumbering: FormControl<boolean>;
   number: FormControl<string>;
   date: FormControl<string>;
   duedate: FormControl<string>;
+  journal: FormControl<string>;
+  currency: FormControl<Currency>;
+  deliverystate: FormControl<string>;
+  autoNumbering: FormControl<boolean>;
+  taxoption: FormControl<string>;
 }
 
 export type SaleInvoiceSummaryForm = {
@@ -65,7 +70,7 @@ export type SaleInvoiceCustomerForm = {
 
 export type SaleInvoiceForm = {
   customer: FormGroup<SaleInvoiceCustomerForm>;
+  properties: FormGroup<SaleInvoicePropertiesForm>;
 }
-// properties: FormGroup<SaleInvoicePropertiesForm>;
 // items: FormArray<FormGroup<SaleItemForm>>;
 // summary: FormGroup<SaleInvoiceSummaryForm>;
