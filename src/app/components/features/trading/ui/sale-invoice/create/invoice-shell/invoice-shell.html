@@ -1,7 +1,7 @@
 <h1 class="text-2xl font-semibold text-gray-800 mb-6 text-center">
   Create New Sale Invoice
 </h1>
-<form [formGroup]="form" (ngSubmit)="onSubmit()">
+<form [formGroup]="form">
 <!-- parent.component.html -->
 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
   <!-- Left: first half -->
@@ -16,9 +16,24 @@
   </div>
 </div>
 
+<app-invoice-items [formArray]="itemsGroup()" [taxMode]="taxMode()" [fractions]="fractions()" (onItemUpdate)="onItemUpdate()"></app-invoice-items>
+<app-invoice-summary [form]="summaryGroup()" (onRoundoffChange)="onRoundoffChange()"></app-invoice-summary>
+<!-- ✅ Submit Button -->
+<div class="pt-2 mt-4 text-center">
+  <app-cancel-button></app-cancel-button>
 
-<app-invoice-items></app-invoice-items>
+  <button
+  type="submit"
+  (click)="onSubmit()"
+  class="bg-primary text-white px-6 py-2 rounded transition-opacity duration-200"
+  [disabled]="submitting()"
+  [ngClass]="{
+    'cursor-not-allowed bg-gray-400 text-gray-200 opacity-60': submitting(),
+    'hover:opacity-90 cursor-pointer': !submitting()
+  }"
+>
+  Submit
+</button>
 
-<app-invoice-summary></app-invoice-summary>
-
+</div>
 </form>

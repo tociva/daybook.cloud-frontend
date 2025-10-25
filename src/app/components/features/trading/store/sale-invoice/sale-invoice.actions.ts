@@ -4,12 +4,13 @@ import { Count } from '../../../../../util/lb4-query-builder';
 import { QueryParamsRep } from '../../../../../util/query-params-util';
 import { DbcError } from '../../../../../util/types/dbc-error.type';
 import { SaleInvoice, SaleInvoiceCU } from './sale-invoice.model';
+import { SaleInvoiceRequest } from './sale-invoice-request.type';
 
 export const saleInvoiceActions = createActionGroup({
   source: 'SaleInvoice',
   events: {
     // Create
-    createSaleInvoice: props<{ saleInvoice: SaleInvoiceCU }>(),
+    createSaleInvoice: props<{ saleInvoice: SaleInvoiceRequest }>(),
     createSaleInvoiceSuccess: props<{ saleInvoice: SaleInvoice }>(),
     createSaleInvoiceFailure: props<{ error: DbcError }>(),
 
@@ -29,7 +30,7 @@ export const saleInvoiceActions = createActionGroup({
     countSaleInvoicesFailure: props<{ error: DbcError }>(),
 
     // Update
-    updateSaleInvoice: props<{ id: string; saleInvoice: SaleInvoiceCU }>() ,
+    updateSaleInvoice: props<{ id: string; saleInvoice: Partial<SaleInvoiceRequest> }>() ,
     updateSaleInvoiceSuccess: props<{ saleInvoice: SaleInvoice }>() ,
     updateSaleInvoiceFailure: props<{ error: DbcError }>() ,
 

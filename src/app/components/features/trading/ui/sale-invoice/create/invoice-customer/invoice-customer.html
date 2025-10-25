@@ -56,12 +56,15 @@
   } @else {
     <div class="p-4">
       <div class="flex items-center justify-between mb-3">
-        <h3 class="font-semibold text-xl text-sm mb-3 flex items-center gap-1">
-          Please select a customer or <button type="button"
-          class="flex items-center px-3 py-1.5 font-medium bg-primary text-white rounded hover:bg-primary-hover"
-          (click)="onNewCustomer()">
-          create a new customer
-        </button>
+        <h3 class="font-semibold text-xl text-sm mb-3 flex items-center gap-1 text-gray-600">
+          Please select a customer or
+          <button
+            type="button"
+            class="text-primary font-medium underline underline-offset-2 hover:text-primary-hover cursor-pointer focus:outline-none transition-colors"
+            (click)="onNewCustomer()"
+          >
+            create a new customer
+          </button>
         </h3>
       </div>
     </div>

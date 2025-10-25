@@ -2,6 +2,9 @@
 @import "tailwindcss";
 @import './tailwind-config.css';
 
+/* optional: safelist dynamic utilities */
+@source inline("grid-cols-{1..48} col-span-{1..48}");
+
 :root {
     --background-color: #FFFFFF;
     --alternate-background-color: #f8f9fa;

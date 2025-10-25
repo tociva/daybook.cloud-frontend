@@ -1,30 +1,55 @@
 import { FormArray, FormControl, FormGroup } from "@angular/forms";
+import { Currency } from "../../../../../shared/store/currency/currency.model";
 import { Customer } from "../../../store/customer";
 import { Item } from "../../../store/item/item.model";
-import { SaleItemTax } from "../../../store/sale-invoice/sale-item-tax.model";
-import { Currency } from "../../../../../shared/store/currency/currency.model";
+import { Tax } from "../../../store/tax";
+import { Address } from "../../../../../../util/types/address";
 
+export interface SaleItemTaxFormValue {
+  rate: number;
+  appliedto: number;
+  amount: number;
+  name: string;
+  shortname: string;
+  tax: Tax;
+}
+export interface SaleItemFormValue {
+  name: string;
+  displayname?: string;
+  description?: string;
+  code: string;
+  price: number;
+  quantity: number;
+  itemtotal: number;
+  discpercent: number | null;
+  discamount: number | null;
+  subtotal: number;
+  taxes: SaleItemTaxFormValue[];
+  taxamount: number | null;
+  grandtotal: number;
+  item: Item;
+}
 export interface SaleItemTaxForm {
-  rate: FormControl<number>;
+  rate: FormControl<string | null>;
   appliedto: FormControl<number>;
-  amount: FormControl<number>;
+  amount: FormControl<string | null>;
   name: FormControl<string>;
   shortname: FormControl<string>;
-  tax: FormControl<SaleItemTax>;
+  tax: FormControl<Tax>;
 }
 export interface SaleItemForm {
   name: FormControl<string>;
   description: FormControl<string | null>;
   code: FormControl<string>;
-  price: FormControl<number>;
-  quantity: FormControl<number>;
-  itemtotal: FormControl<number>;
-  discpercent: FormControl<number | null>;
-  discamount: FormControl<number | null>;
-  subtotal: FormControl<number>;
+  price: FormControl<string | null>;
+  quantity: FormControl<string | null>;
+  itemtotal: FormControl<string | null>;
+  discpercent: FormControl<string | null>;
+  discamount: FormControl<string | null>;
+  subtotal: FormControl<string | null>;
   taxes: FormArray<FormGroup<SaleItemTaxForm>>;
-  taxamount: FormControl<number | null>;
-  grandtotal: FormControl<number>;
+  taxamount: FormControl<string | null>;
+  grandtotal: FormControl<string | null>;
   item: FormControl<Item>;
 }
 
@@ -39,13 +64,35 @@ export type SaleInvoicePropertiesForm = {
   taxoption: FormControl<string>;
 }
 
+export type SaleInvoicePropertiesFormValue = {
+  number: string;
+  date: string;
+  duedate: string;
+  journal: string;
+  currency: Currency;
+  deliverystate: string;
+  autoNumbering: boolean;
+  taxoption: string;
+}
+
 export type SaleInvoiceSummaryForm = {
-  itemtotal: FormControl<number>;
-  discount: FormControl<number | null>;
-  subtotal: FormControl<number>;
-  tax: FormControl<number | null>;
-  roundoff: FormControl<number | null>;
-  grandtotal: FormControl<number>;
+  itemtotal: FormControl<string | null>;
+  discount: FormControl<string | null>;
+  subtotal: FormControl<string | null>;
+  tax: FormControl<string | null>;
+  roundoff: FormControl<string | null>;
+  grandtotal: FormControl<string | null>;
+  words: FormControl<string | null>;
+}
+
+export type SaleInvoiceSummaryFormValue = {
+  itemtotal: number;
+  discount: number;
+  subtotal: number;
+  tax: number;
+  roundoff: number;
+  grandtotal: number;
+  words: string;
 }
 
 export type AddressGroup = {
@@ -68,9 +115,23 @@ export type SaleInvoiceCustomerForm = {
   useBillingForShipping: FormControl<boolean>;
 }
 
+export type SaleInvoiceCustomerFormValue = {
+  customer: Customer;
+  billingaddress: Address;
+  shippingaddress: Address;
+  useBillingForShipping: boolean;
+}
+
 export type SaleInvoiceForm = {
   customer: FormGroup<SaleInvoiceCustomerForm>;
   properties: FormGroup<SaleInvoicePropertiesForm>;
+  items: FormArray<FormGroup<SaleItemForm>>;
+  summary: FormGroup<SaleInvoiceSummaryForm>;
 }
-// items: FormArray<FormGroup<SaleItemForm>>;
-// summary: FormGroup<SaleInvoiceSummaryForm>;
+
+export type SaleInvoiceFormValue = {
+  customer: SaleInvoiceCustomerFormValue;
+  properties: SaleInvoicePropertiesFormValue;
+  items: SaleItemFormValue[];
+  summary: SaleInvoiceSummaryFormValue;
+}

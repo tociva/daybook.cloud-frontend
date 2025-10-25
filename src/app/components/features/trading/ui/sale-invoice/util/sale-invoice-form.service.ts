@@ -1,9 +1,17 @@
 import { inject, Injectable } from "@angular/core";
-import { FormBuilder, Validators } from "@angular/forms";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { Address } from "../../../../../../util/types/address";
 import { Customer } from "../../../store/customer/customer.model";
-import { AddressGroup, SaleInvoiceCustomerForm, SaleInvoiceForm, SaleInvoicePropertiesForm } from "./sale-invoice-form.type";
+import { AddressGroup, SaleInvoiceCustomerForm, SaleInvoiceForm, SaleInvoicePropertiesForm, SaleInvoiceSummaryForm, SaleItemForm, SaleItemTaxForm } from "./sale-invoice-form.type";
 import { Currency } from "../../../../../shared/store/currency/currency.model";
+import { SaleItem } from "../../../store/sale-invoice/sale-item.model";
+import { Item } from "../../../store/item/item.model";
+import { SaleItemTax } from "../../../store/sale-invoice/sale-item-tax.model";
+import { Tax } from "../../../store/tax";
+import { formatAmountToFraction } from "../../../../../../util/currency.util";
+import { convertToNodeDateFormat } from "../../../../../../util/date.util";
+import { DEFAULT_NODE_DATE_FORMAT } from "../../../../../../util/constants";
+import dayjs from "dayjs";
 
 @Injectable({ providedIn: 'root' })
 export class SaleInvoiceFormService { 
@@ -26,23 +34,72 @@ export class SaleInvoiceFormService {
   });
 }
 
-  readonly createSaleInvoiceForm = () => this.fb.nonNullable.group<SaleInvoiceForm>({
-    customer: this.fb.nonNullable.group<SaleInvoiceCustomerForm>({
-      customer: this.fb.nonNullable.control({} as Customer, { validators: [Validators.required] }),
-      billingaddress: this.buildAddressGroup(),
-      shippingaddress: this.buildAddressGroup(),
-      useBillingForShipping: this.fb.control(true, { nonNullable: true }),
-    }),
-    properties: this.fb.nonNullable.group<SaleInvoicePropertiesForm>({
-      number: this.fb.control('', { nonNullable: true }),
-      date: this.fb.control('', { nonNullable: true }),
-      duedate: this.fb.control('', { nonNullable: true }),
-      journal: this.fb.control('', { nonNullable: true }),
-      currency: this.fb.control({} as Currency, { nonNullable: true }),
-      deliverystate: this.fb.control('', { nonNullable: true }),
-      autoNumbering: this.fb.control(true, { nonNullable: true }),
-      taxoption: this.fb.control('', { nonNullable: true }),
-    }),
+private buildSaleItemTaxForm(seed?: Partial<SaleItemTax>, fractions = 2):FormGroup<SaleItemTaxForm> {
+  return this.fb.nonNullable.group<SaleItemTaxForm>({
+    rate: this.fb.control({value: formatAmountToFraction(seed?.rate , fractions), disabled: true}, { nonNullable: true }),
+    appliedto: this.fb.control({value: seed?.appliedto ?? 0, disabled: true}, { nonNullable: true }),
+    amount: this.fb.control({value: formatAmountToFraction(seed?.amount, fractions), disabled: true}, { nonNullable: true }),
+    name: this.fb.control({value: seed?.name ?? '', disabled: true}, { nonNullable: true }),
+    shortname: this.fb.control({value: seed?.shortname ?? '', disabled: true}, { nonNullable: true }),
+    tax: this.fb.control(seed?.tax ?? {} as Tax, { nonNullable: true }),
   });
+}
+
+private buildSaleItemTaxesForm(seed?: Partial<SaleItemTax>):Array<FormGroup<SaleItemTaxForm>> {
+  return [this.buildSaleItemTaxForm(seed), this.buildSaleItemTaxForm(seed)];
+}
+
+public readonly buildSaleItemForm = (seed?: Partial<SaleItem>, fractions = 2):FormGroup<SaleItemForm> => {
+  return this.fb.nonNullable.group<SaleItemForm>({
+    name: this.fb.control(seed?.name ?? '', { nonNullable: true }),
+    description: this.fb.control(seed?.description ?? null),
+    code: this.fb.control(seed?.code ?? '', { nonNullable: true }),
+    price: this.fb.control(formatAmountToFraction(seed?.price, fractions), { nonNullable: true }),
+    quantity: this.fb.control(formatAmountToFraction(seed?.quantity, fractions), { nonNullable: true }),
+    itemtotal: this.fb.control({value: formatAmountToFraction(seed?.itemtotal, fractions), disabled: true}, { nonNullable: true }),
+    discpercent: this.fb.control(formatAmountToFraction(seed?.discpercent, fractions), { nonNullable: true }),
+    discamount: this.fb.control({value: formatAmountToFraction(seed?.discamount, fractions), disabled: true}),
+    subtotal: this.fb.control({value: formatAmountToFraction(seed?.subtotal, fractions), disabled: true}, { nonNullable: true }),
+    taxes: this.fb.nonNullable.array<FormGroup<SaleItemTaxForm>>(this.buildSaleItemTaxesForm(seed), { validators: [Validators.required] }),
+    taxamount: this.fb.control({value: formatAmountToFraction(seed?.taxamount, fractions), disabled: true}),
+    grandtotal: this.fb.control({value: formatAmountToFraction(seed?.grandtotal, fractions), disabled: true}, { nonNullable: true }),
+    item: this.fb.control(seed?.item ?? {} as Item, { nonNullable: true }),
+  });
+}
+
+  public readonly createSaleInvoiceForm = () => 
+    {
+      const today = dayjs();
+      const invDate = today.format(DEFAULT_NODE_DATE_FORMAT);
+      const duedate = today.add(7, 'days').format(DEFAULT_NODE_DATE_FORMAT);
+      return this.fb.nonNullable.group<SaleInvoiceForm>({
+        customer: this.fb.nonNullable.group<SaleInvoiceCustomerForm>({
+          customer: this.fb.nonNullable.control({} as Customer, { validators: [Validators.required] }),
+          billingaddress: this.buildAddressGroup(),
+          shippingaddress: this.buildAddressGroup(),
+          useBillingForShipping: this.fb.control(true, { nonNullable: true }),
+        }),
+        properties: this.fb.nonNullable.group<SaleInvoicePropertiesForm>({
+          number: this.fb.control('', { nonNullable: true }),
+          date: this.fb.control(invDate, { nonNullable: true }),
+          duedate: this.fb.control(duedate, { nonNullable: true }),
+          journal: this.fb.control('', { nonNullable: true }),
+          currency: this.fb.control({} as Currency, { nonNullable: true }),
+          deliverystate: this.fb.control('', { nonNullable: true }),
+          autoNumbering: this.fb.control(true, { nonNullable: true }),
+          taxoption: this.fb.control('', { nonNullable: true }),
+        }),
+        items: this.fb.nonNullable.array<FormGroup<SaleItemForm>>([this.buildSaleItemForm()], { validators: [Validators.required] }),
+        summary: this.fb.nonNullable.group<SaleInvoiceSummaryForm>({
+          itemtotal: this.fb.control({value: '', disabled: true}, { nonNullable: true }),
+          discount: this.fb.control({value: '', disabled: true}),
+          subtotal: this.fb.control({value: '', disabled: true}, { nonNullable: true }),
+          tax: this.fb.control({value: '', disabled: true}),
+          roundoff: this.fb.control({value: '', disabled: false}),
+          grandtotal: this.fb.control({value: '', disabled: true}, { nonNullable: true }),
+          words: this.fb.control({value: '', disabled: true}, { nonNullable: true }),
+        }),
+  })
+};
 
 }

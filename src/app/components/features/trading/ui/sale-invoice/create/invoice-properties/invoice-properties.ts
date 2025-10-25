@@ -8,7 +8,7 @@ import { Currency } from '../../../../../../shared/store/currency/currency.model
 import { TaxGroupModeStore } from '../../../../store/tax-group/tax-group.store';
 import { currencyActions } from '../../../../../../shared/store/currency/currency.action';
 import { Store } from '@ngrx/store';
-import { TextInputDirective } from '../../../../../../../util/directives/text-input-directive';
+import { TextInputDirective } from '../../../../../../../util/directives/text-input.directive';
 import { distinctUntilChanged, of, startWith, switchMap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { taxGroupActions } from '../../../../store/tax-group/tax-group.actions';

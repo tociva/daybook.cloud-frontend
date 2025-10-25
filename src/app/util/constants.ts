@@ -27,3 +27,5 @@ export const DEFAULT_JOURNAL_NUMBER_FORMAT =
 export const DEFAULT_INVOICE_NUMBER_FORMAT = '<<YYYY>>/<<SERIAL3>>';
 
 export const DEFAULT_NODE_DATE_FORMAT = 'YYYY-MM-DD';
+
+export const TWO = 2;

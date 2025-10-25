@@ -10,7 +10,7 @@ import {
   signal
 } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { TextInputDirective } from '../../../util/directives/text-input-directive';
+import { TextInputDirective } from '../../../util/directives/text-input.directive';
 
 @Component({
   selector: 'dbc-address-form',
