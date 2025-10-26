@@ -28,4 +28,6 @@ export const DEFAULT_INVOICE_NUMBER_FORMAT = '<<YYYY>>/<<SERIAL3>>';
 
 export const DEFAULT_NODE_DATE_FORMAT = 'YYYY-MM-DD';
 
+export const DEFAULT_DATE_FORMAT = 'DD-MMM-YYYY';
+
 export const TWO = 2;

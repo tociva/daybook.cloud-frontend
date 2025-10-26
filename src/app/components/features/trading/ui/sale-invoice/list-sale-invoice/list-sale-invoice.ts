@@ -51,10 +51,13 @@ export class ListSaleInvoice {
   });
 
   readonly columns = signal<DbcColumn<SaleInvoice>[]>([
-    { header: 'Name', key: 'name', type: 'text', sortable: true },
-    { header: 'Code', key: 'code', type: 'text', sortable: true },
+    { header: 'Number', key: 'number', type: 'text', sortable: true },
     { header: 'Customer', key: 'customer.name', type: 'text', sortable: false },
-    { header: 'Description', key: 'description', type: 'text', sortable: true },
+    { header: 'Date', key: 'date', type: 'date', sortable: true },
+    { header: 'Sub Total', key: 'subtotal', type: 'number', sortable: true },
+    { header: 'Tax', key: 'tax', type: 'number', sortable: true },
+    { header: 'Discount', key: 'discount', type: 'number', sortable: true },
+    { header: 'Grand Total', key: 'grandtotal', type: 'number', sortable: true },
     { header: 'Actions', key: 'actions', type: 'action' }
   ]);
 

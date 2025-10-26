@@ -13,10 +13,14 @@ export interface Branch {
   state?: string;
   description?: string;
   fiscalstart: string;
+  dateformat: string;
+  timezone: string;
   gstin?: string;
   invnumber: string;
   organization: Organization;
   organizationid: string;
+  currencycode: string;
+  countrycode: string;
   fiscalyears: FiscalYear[];
   createdat?: Date;
   updatedat?: Date;

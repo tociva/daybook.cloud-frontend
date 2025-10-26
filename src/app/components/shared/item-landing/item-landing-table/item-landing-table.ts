@@ -1,12 +1,17 @@
 import { NgClass } from '@angular/common';
-import { Component, inject, input, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
+import dayjs from 'dayjs';
+import { DEFAULT_DATE_FORMAT } from '../../../../util/constants';
+import { findQueryParamsOriginal, updateUrlParams } from '../../../../util/query-params-util';
 import { DbcColumn } from '../../../../util/types/dbc-column.type';
 import { DbcError } from '../../../../util/types/dbc-error.type';
 import { EmptyListMessage } from '../../../../util/types/empty-list-message.type';
 import { Status } from '../../../../util/types/status.type';
-import { findQueryParamsOriginal, updateUrlParams } from '../../../../util/query-params-util';
-import { ActivatedRoute, Router } from '@angular/router';
+import { UserSessionStore } from '../../../core/auth/store/user-session/user-session.store';
+import { formatAmountToFraction } from '../../../../util/currency.util';
+import { CurrencyStore } from '../../store/currency/currency.store';
 
 type SortDirection = 'asc' | 'desc' | null;
 
@@ -20,7 +25,11 @@ export class ItemLandingTable<T> {
 
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-
+  private dateFormat = signal<string>(DEFAULT_DATE_FORMAT);
+  private userSessionStore = inject(UserSessionStore);
+  private currencyStore = inject(CurrencyStore);
+  private currencies = this.currencyStore.currencies;
+  private fractions = signal<number>(2);
   readonly items = input<T[] | null>(null);
   readonly columns = input<DbcColumn<T>[]>([]);
   readonly error = input<DbcError | null>(null);
@@ -38,6 +47,25 @@ export class ItemLandingTable<T> {
     return void 0;
   });
 
+  // react when branch changes; allow writes
+private readonly dateFormatEffect = effect(() => {
+  const branch = this.userSessionStore.branch(); // registers dependency
+  if (branch?.dateformat) {
+    this.dateFormat.set(branch.dateformat);
+  }
+}, { allowSignalWrites: true });
+
+private readonly fractionsEffect = effect(() => {
+  const fiscalYear = this.userSessionStore.fiscalYear(); // registers dependency
+  const currencycode = fiscalYear?.currencycode;
+  if(currencycode) {
+    const currency = this.currencies().find(currency => currency.code === currencycode);
+    if(currency) {
+      this.fractions.set(currency.minorunit ?? 2);
+    }
+  }
+}, { allowSignalWrites: true });
+
   // Sorting state
   private sortColumnDetails: Partial<Record<keyof T | string, SortDirection>> = {};
 
@@ -52,16 +80,26 @@ export class ItemLandingTable<T> {
       });
     }
   }
+  ngOnDestroy(): void {
+    this.dateFormatEffect.destroy();
+    this.fractionsEffect.destroy();
+  }
 
-  findValue(item: T, column: DbcColumn<T>): any {
+  findValue(item: T, column: DbcColumn<T>): unknown {
     const key = column.key as string;
-  
-    return key.split('.').reduce((acc: any, part: string) => {
+    const value = key.split('.').reduce((acc: unknown, part: string) => {
       if (acc && typeof acc === 'object') {
-        return acc[part];
+        return (acc as Record<string, unknown>)[part];
       }
-      return undefined;
+      return null;
     }, item);
+  if(column.type === 'date') {
+    const dateFormat = this.dateFormat();
+    return dayjs(value as string).format(dateFormat);
+  } else if(column.type === 'number') {
+    return formatAmountToFraction(value as number, this.fractions());
+  }
+    return value;
   }
   
 

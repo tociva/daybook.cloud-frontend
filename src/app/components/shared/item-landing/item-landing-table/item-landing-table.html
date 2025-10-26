@@ -102,10 +102,15 @@
                       }
                     </div>
                   }
+                  @else if (column.type === 'number') {
+                    <div class="text-text/70 max-w-xs truncate text-right">
+                      {{findValue(item, column)}}
+                    </div>
+                  }
                   @else {
-                  <div class="text-text/70 max-w-xs truncate">
-                    {{findValue(item, column)}}
-                  </div>
+                    <div class="text-text/70 max-w-xs truncate">
+                      {{findValue(item, column)}}
+                    </div>
                   }
                 </td>
               }

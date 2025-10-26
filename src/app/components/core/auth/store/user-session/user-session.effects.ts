@@ -7,6 +7,7 @@ import { Router } from '@angular/router';
 import { userSessionActions } from './user-session.actions';
 import { UserSession } from './user-session.model';
 import { ConfigStore } from '../config/config.store';
+import { UserSessionStore } from './user-session.store';
 
 export const userSessionEffects = {
 
@@ -118,10 +119,14 @@ export const userSessionEffects = {
     () => {
       const actions$ = inject(Actions);
       const router = inject(Router);
+      const userSessionStore = inject(UserSessionStore);
+
 
       return actions$.pipe(
         ofType(userSessionActions.createUserSessionSuccess),
         tap(({ session }) => {
+          // 1) Update the SignalStore first so components see it immediately
+        userSessionStore.setSession(session);
           if (!session.ownorgs || session.ownorgs.length === 0) {
             router.navigate(['/app/management/organization/create']);
           }

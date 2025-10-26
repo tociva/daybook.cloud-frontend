@@ -8,6 +8,7 @@ export interface FiscalYear {
   enddate: string;
   freezetill?: Date | null;
   jnumber: string;
+  currencycode: string;
   currency: Currency;
   branchid: string;
   branch: Branch;
