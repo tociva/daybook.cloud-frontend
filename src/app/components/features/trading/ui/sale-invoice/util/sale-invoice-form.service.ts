@@ -10,7 +10,7 @@ import { Item } from "../../../store/item/item.model";
 import { SaleItemTax } from "../../../store/sale-invoice/sale-item-tax.model";
 import { SaleItem } from "../../../store/sale-invoice/sale-item.model";
 import { Tax } from "../../../store/tax";
-import { AddressGroup, SaleInvoiceCustomerForm, SaleInvoiceForm, SaleInvoicePropertiesForm, SaleInvoiceSummaryForm, SaleInvoiceTaxDisplayModeType, SaleItemForm, SaleItemTaxForm } from "./sale-invoice-form.type";
+import { AddressGroup, SaleInvoiceCustomerForm, SaleInvoiceForm, SaleInvoicePropertiesForm, SaleInvoiceSummaryForm, SaleInvoiceTaxDisplayModeType, SaleItemForm, SaleItemFormValue, SaleItemTaxForm } from "./sale-invoice-form.type";
 
 @Injectable({ providedIn: 'root' })
 export class SaleInvoiceFormService { 
@@ -48,7 +48,7 @@ public buildSaleItemTaxesForm(taxes?: Partial<SaleItemTax>[]):FormArray<FormGrou
   return this.fb.nonNullable.array<FormGroup<SaleItemTaxForm>>(tagGroupArray, { validators: [Validators.required] });
 }
 
-public readonly buildSaleItemForm = (seed?: SaleItem, fractions = 2):FormGroup<SaleItemForm> => {
+public readonly buildSaleItemForm = (seed?: SaleItemFormValue, fractions = 2):FormGroup<SaleItemForm> => {
   return this.fb.nonNullable.group<SaleItemForm>({
     name: this.fb.control(seed?.name ?? '', { nonNullable: true }),
     description: this.fb.control(seed?.description ?? null),

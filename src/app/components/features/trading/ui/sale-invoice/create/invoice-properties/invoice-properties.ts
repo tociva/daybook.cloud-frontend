@@ -26,6 +26,7 @@ export class InvoiceProperties {
   private readonly taxGroupModeStore = inject(TaxGroupModeStore);
 
   readonly form = input.required<FormGroup<SaleInvoicePropertiesForm>>();
+  readonly uiMode = input.required<string>();
 
   currencies = signal<Currency[]>([]);
   modes = this.taxGroupModeStore.items;
@@ -53,7 +54,9 @@ export class InvoiceProperties {
       this.form().controls.number.disable();
     }else{
       this.form().controls.number.enable();
-      this.form().patchValue({ number: '' });
+      if(this.uiMode() === 'create') {
+        this.form().patchValue({ number: '' });
+      }
     }
   });
 

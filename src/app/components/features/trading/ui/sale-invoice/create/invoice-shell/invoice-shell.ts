@@ -19,8 +19,9 @@ import { saleInvoiceActions } from '../../../../store/sale-invoice/sale-invoice.
 import { SaleInvoiceStore } from '../../../../store/sale-invoice/sale-invoice.store';
 import { SaleItemTax } from '../../../../store/sale-invoice/sale-item-tax.model';
 import { SaleInvoiceFormService } from '../../util/sale-invoice-form.service';
-import { SaleInvoiceCustomerForm, SaleInvoiceFormValue, SaleInvoicePropertiesForm, SaleInvoiceSummaryForm, SaleInvoiceTaxDisplayModeType, SaleItemForm } from '../../util/sale-invoice-form.type';
-import { findTaxColumnCount, mapSaleInvoiceFormValueToRequest } from '../../util/sale-invoice.util';
+import { SaleInvoiceCustomerForm, SaleInvoiceFormValue, SaleInvoicePropertiesForm, 
+  SaleInvoiceSummaryForm, SaleInvoiceTaxDisplayModeType, SaleItemForm } from '../../util/sale-invoice-form.type';
+import { findTaxColumnCount, mapSaleInvoiceFormValueToRequest, saleInvoiceModelToSaleInvoiceFormValue } from '../../util/sale-invoice.util';
 import { InvoiceCustomer } from '../invoice-customer/invoice-customer';
 import { InvoiceItems } from '../invoice-items/invoice-items';
 import { InvoiceProperties } from '../invoice-properties/invoice-properties';
@@ -35,58 +36,158 @@ import { InvoiceSummary } from '../invoice-summary/invoice-summary';
 })
 export class InvoiceShell {
 
-  protected readonly mode = signal<'create' | 'edit'>('create');
-
-  private itemId = signal<string | null>(null);
-
-  protected loading = true;
-
+  // ---------- Injected services ----------
   private readonly saleInvoiceFormService = inject(SaleInvoiceFormService);
-
   private readonly route = inject(ActivatedRoute);
-
   private readonly router = inject(Router);
-
   private readonly store = inject(Store);
-
   private readonly actions$ = inject(Actions);
-
   readonly saleInvoiceStore = inject(SaleInvoiceStore);
 
+  // ---------- UI mode & route ----------
+  protected readonly mode = signal<'create' | 'edit'>('create');
+  private readonly itemId = signal<string | null>(null);
+  protected loading = true;
+
+  // ---------- Form & typed accessors ----------
   readonly form = this.saleInvoiceFormService.createSaleInvoiceForm();
 
-  readonly selectedInvoice = this.saleInvoiceStore.selectedItem;
+  readonly customerGroup = computed(
+    () => this.form.get('customer') as FormGroup<SaleInvoiceCustomerForm>
+  );
 
-  readonly taxDisplayModes = computed(() => Object.values(SaleInvoiceTaxDisplayModeType) as SaleInvoiceTaxDisplayModeType[]);
+  readonly propertiesGroup = computed(
+    () => this.form.get('properties') as FormGroup<SaleInvoicePropertiesForm>
+  );
 
-  readonly findTaxDisplayModeDisplayValue = (taxDisplayMode: SaleInvoiceTaxDisplayModeType) => taxDisplayMode;
+  readonly itemsGroup = computed(
+    () => this.form.get('items') as FormArray<FormGroup<SaleItemForm>>
+  );
 
-  readonly customerGroup = computed(() => this.form.get('customer') as FormGroup<SaleInvoiceCustomerForm>);
+  readonly summaryGroup = computed(
+    () => this.form.get('summary') as FormGroup<SaleInvoiceSummaryForm>
+  );
 
-  readonly propertiesGroup = computed(() => this.form.get('properties') as FormGroup<SaleInvoicePropertiesForm>);
+  // ---------- Options & helpers ----------
+  readonly taxDisplayModes = computed(
+    () => Object.values(SaleInvoiceTaxDisplayModeType) as SaleInvoiceTaxDisplayModeType[]
+  );
+  readonly findTaxDisplayModeDisplayValue = (m: SaleInvoiceTaxDisplayModeType) => m;
 
-  readonly itemsGroup = computed(() => this.form.get('items') as FormArray<FormGroup<SaleItemForm>>);
-
-  readonly summaryGroup = computed(() => this.form.get('summary') as FormGroup<SaleInvoiceSummaryForm>);
-
+  // ---------- UI/runtime state ----------
   readonly fractions = signal<number>(2);
+  readonly submitting = signal<boolean>(false);
 
-  readonly submitting = signal(false);
-  // Individual signals (typed)
+  // Writable control signals (keeps form state & signals in sync)
   readonly taxDisplayMode = FormUtil.controlWritableSignal<SaleInvoiceTaxDisplayModeType>(
     this.form, 'taxDisplayMode', SaleInvoiceTaxDisplayModeType.NON_TAXABLE
   );
-
   readonly showDiscount = FormUtil.controlWritableSignal<boolean>(this.form, 'showDiscount', false);
   readonly showDescription = FormUtil.controlWritableSignal<boolean>(this.form, 'showDescription', false);
 
-  // 👇 Signal that reflects the current value of 'customer'
+  // ---------- Store selection ----------
+  readonly selectedInvoice = this.saleInvoiceStore.selectedItem; // assumed signal-like getter
+
+  // ---------- Signals from form controls ----------
   readonly customerSignal = toSignal(
     (this.customerGroup().get('customer') as FormControl).valueChanges.pipe(
       startWith(this.customerGroup().get('customer')?.value)
     ),
     { initialValue: this.customerGroup().get('customer')?.value }
   );
+
+  readonly taxModeSignal = toSignal(
+    (this.propertiesGroup().get('taxoption') as FormControl).valueChanges.pipe(
+      startWith(this.propertiesGroup().get('taxoption')?.value)
+    ),
+    { initialValue: this.propertiesGroup().get('taxoption')?.value }
+  );
+  readonly taxMode = computed(() => this.taxModeSignal());
+
+  readonly currencySignal = toSignal(
+    (this.propertiesGroup().get('currency') as FormControl).valueChanges.pipe(
+      startWith(this.propertiesGroup().get('currency')?.value)
+    ),
+    { initialValue: this.propertiesGroup().get('currency')?.value }
+  );
+  readonly currency = computed(() => this.currencySignal());
+
+  // ---------- Effects (keep references to destroy) ----------
+  private readonly customerEffectRef = effect(() => {
+    const customer = this.customerSignal();
+    if (!customer) return;
+
+    if (customer.currency) {
+      this.propertiesGroup().patchValue({ currency: customer.currency });
+      this.fractions.set(customer.currency.fractions ?? TWO);
+    }
+    if (customer.state) {
+      this.propertiesGroup().patchValue({ deliverystate: customer.state });
+    }
+  });
+
+
+  private readonly taxModeEffectRef = effect(() => {
+    const taxMode = this.taxMode();
+    if (taxMode === 'Inter State') {
+      this.taxDisplayMode.set(SaleInvoiceTaxDisplayModeType.IGST);
+    } else if (taxMode === 'Intra State') {
+      this.taxDisplayMode.set(SaleInvoiceTaxDisplayModeType.CGST_SGST);
+    } else {
+      this.taxDisplayMode.set(SaleInvoiceTaxDisplayModeType.NON_TAXABLE);
+    }
+  });
+
+  private readonly taxDisplayModeEffectRef = effect(() => {
+    // Reshape taxes array length per item whenever display mode changes
+    const mode = this.taxDisplayMode();
+    const needed = findTaxColumnCount(mode);
+
+    untracked(() => {
+      const itemsFa = this.itemsGroup();
+      const blanks: Partial<SaleItemTax>[] = Array.from({ length: needed }, () => ({}));
+
+      for (let i = 0; i < itemsFa.length; i++) {
+        const item = itemsFa.at(i);
+        const taxesFa = this.saleInvoiceFormService.buildSaleItemTaxesForm(blanks);
+        item.setControl('taxes', taxesFa, { emitEvent: false });
+      }
+    });
+  });
+
+  private readonly currencyEffectRef = effect(() => {
+    const curr = this.currencySignal();
+    if (curr) {
+      this.fractions.set(curr.minorunit ?? TWO);
+    }
+  });
+
+  private readonly createSuccessEffectRef = effect((onCleanup) => {
+    const sub = this.actions$.pipe(
+      ofType(saleInvoiceActions.createSaleInvoiceSuccess),
+      tap(() => {
+        this.submitting.set(false);
+        const burl = this.route.snapshot.queryParamMap.get('burl') ?? '/';
+        this.router.navigateByUrl(burl);
+      })
+    ).subscribe();
+    onCleanup(() => sub.unsubscribe());
+  });
+
+  private readonly createFailureEffectRef = effect((onCleanup) => {
+    const sub = this.actions$.pipe(
+      ofType(saleInvoiceActions.createSaleInvoiceFailure),
+      tap(() => this.submitting.set(false))
+    ).subscribe();
+    onCleanup(() => sub.unsubscribe());
+  });
+
+  private readonly loadErrorEffectRef = effect(() => {
+    const error = this.saleInvoiceStore.error();
+    if (error && this.mode() === 'edit') {
+      this.loading = false;
+    }
+  });
 
   private customerEffect = effect(() => {
     const customer = this.customerSignal();
@@ -99,14 +200,6 @@ export class InvoiceShell {
     }
   });
 
-  readonly taxModeSignal = toSignal(
-    (this.propertiesGroup().get('taxoption') as FormControl).valueChanges.pipe(
-      startWith(this.propertiesGroup().get('taxoption')?.value)
-    ),
-    { initialValue: this.propertiesGroup().get('taxoption')?.value }
-  );
-  readonly taxMode = computed(() => this.taxModeSignal());
-
   readonly taxModeEffect = effect(() => {
     const taxMode = this.taxMode();
     if(taxMode === 'Inter State') {
@@ -117,7 +210,6 @@ export class InvoiceShell {
       this.taxDisplayMode.set(SaleInvoiceTaxDisplayModeType.NON_TAXABLE);
     }
   });
-
 
   private readonly effectTaxDisplayMode = effect(() => {
     const mode = this.taxDisplayMode();
@@ -138,13 +230,6 @@ export class InvoiceShell {
     });
   });
   
-  readonly currencySignal = toSignal(
-    (this.propertiesGroup().get('currency') as FormControl).valueChanges.pipe(
-      startWith(this.propertiesGroup().get('currency')?.value)
-    ),
-    { initialValue: this.propertiesGroup().get('currency')?.value }
-  );
-  readonly currency = computed(() => this.currencySignal());
   private currencyEffect = effect(() => {
     const currency = this.currencySignal();
     if (currency) {
@@ -174,8 +259,17 @@ export class InvoiceShell {
     onCleanup(() => subscription.unsubscribe());
   });
 
-  private fillFormEffect = effect(() => {
+  private fillFormEffectRef = effect(() => {
     const invoice = this.selectedInvoice();
+    if(invoice) {
+      const formValue = saleInvoiceModelToSaleInvoiceFormValue(invoice);
+      const {items, ...rest} = formValue;
+      this.form.patchValue(rest);
+      this.itemsGroup().clear();
+      items.forEach(item => {
+        this.itemsGroup().push(this.saleInvoiceFormService.buildSaleItemForm(item, this.fractions()));
+      });
+    }
     this.loading = false;
   });
 
@@ -208,22 +302,22 @@ export class InvoiceShell {
       tax: formatAmountToFraction(tax, this.fractions()), roundoff: 
       formatAmountToFraction(roundoff, this.fractions()), 
       grandtotal: formatAmountToFraction(grandtotal, this.fractions()),
-      words: formatAmountToWords(grandtotal, this.currency()) });
+      words: formatAmountToWords(grandtotal, this.currency()) },
+    { emitEvent: false });
   }
 
 
   ngOnInit(): void {
     const lastSegment = this.route.snapshot.url[this.route.snapshot.url.length - 1]?.path;
-
     if (lastSegment === 'create') {
-      this.mode.set('create');
       this.loading = false;
     } else if (lastSegment === 'edit') {
-      this.itemId.set(this.route.snapshot.paramMap.get('id') || null);
-      if(this.itemId()) {
+      const itemId = this.route.snapshot.paramMap.get('id') || null;
+      if(itemId) {
+        this.itemId.set(itemId);
         this.mode.set('edit');
         this.loading = true;
-        this.store.dispatch(saleInvoiceActions.loadSaleInvoiceById({ id: this.itemId()! }));
+        this.store.dispatch(saleInvoiceActions.loadSaleInvoiceById({ id: this.itemId()! , query: { includes: ['currency', 'customer', 'items.item','items.taxes.tax'] } }));
       }else{
         this.loading = false;
       }
@@ -237,6 +331,7 @@ export class InvoiceShell {
     this.createActionFailureEffect.destroy();
     this.effectTaxDisplayMode.destroy();
     this.loadErrorEffect.destroy();
+    this.fillFormEffectRef.destroy();
   }
 
   onItemUpdate = () => this.reCalculateSummary();

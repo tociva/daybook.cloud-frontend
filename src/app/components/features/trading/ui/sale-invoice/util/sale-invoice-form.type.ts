@@ -13,30 +13,6 @@ export enum SaleInvoiceTaxDisplayModeType {
   IGST_CESS = 'IGST With Cess',
 }
 
-export interface SaleItemTaxFormValue {
-  rate: number;
-  appliedto: number;
-  amount: number;
-  name: string;
-  shortname: string;
-  tax: Tax;
-}
-export interface SaleItemFormValue {
-  name: string;
-  displayname?: string;
-  description?: string;
-  code: string;
-  price: number;
-  quantity: number;
-  itemtotal: number;
-  discpercent: number | null;
-  discamount: number | null;
-  subtotal: number;
-  taxes: SaleItemTaxFormValue[];
-  taxamount: number | null;
-  grandtotal: number;
-  item: Item;
-}
 export interface SaleItemTaxForm {
   rate: FormControl<string | null>;
   appliedto: FormControl<number>;
@@ -93,16 +69,6 @@ export type SaleInvoiceSummaryForm = {
   words: FormControl<string | null>;
 }
 
-export type SaleInvoiceSummaryFormValue = {
-  itemtotal: number;
-  discount: number;
-  subtotal: number;
-  tax: number;
-  roundoff: number;
-  grandtotal: number;
-  words: string;
-}
-
 export type AddressGroup = {
   name: FormControl<string>;
   line1: FormControl<string>;
@@ -123,13 +89,6 @@ export type SaleInvoiceCustomerForm = {
   useBillingForShipping: FormControl<boolean>;
 }
 
-export type SaleInvoiceCustomerFormValue = {
-  customer: Customer;
-  billingaddress: Address;
-  shippingaddress: Address;
-  useBillingForShipping: boolean;
-}
-
 export type SaleInvoiceForm = {
   taxDisplayMode: FormControl<SaleInvoiceTaxDisplayModeType>;
   showDiscount: FormControl<boolean>;
@@ -140,7 +99,50 @@ export type SaleInvoiceForm = {
   summary: FormGroup<SaleInvoiceSummaryForm>;
 }
 
+export type SaleInvoiceSummaryFormValue = {
+  itemtotal: string;
+  discount: string;
+  subtotal: string;
+  tax: string;
+  roundoff: string;
+  grandtotal: string;
+  words: string;
+}
+
+export type SaleInvoiceCustomerFormValue = {
+  customer: Customer;
+  billingaddress: Address;
+  shippingaddress: Address;
+  useBillingForShipping: boolean;
+}
+export interface SaleItemTaxFormValue {
+  rate: number;
+  appliedto: number;
+  amount: number;
+  name: string;
+  shortname: string;
+  tax: Tax;
+}
+export interface SaleItemFormValue {
+  name: string;
+  displayname?: string;
+  description?: string;
+  code: string;
+  price: string;
+  quantity: string;
+  itemtotal: string;
+  discpercent: string | null;
+  discamount: string | null;
+  subtotal: string;
+  taxes: SaleItemTaxFormValue[];
+  taxamount: string | null;
+  grandtotal: string;
+  item: Item;
+}
 export type SaleInvoiceFormValue = {
+  taxDisplayMode: SaleInvoiceTaxDisplayModeType;
+  showDiscount: boolean;
+  showDescription: boolean;
   customer: SaleInvoiceCustomerFormValue;
   properties: SaleInvoicePropertiesFormValue;
   items: SaleItemFormValue[];

@@ -10,6 +10,7 @@ export type SaleInvoiceSystemProperties = {
 } & Record<string, unknown>;
 
 export type SaleInvoiceCustomProperties = {
+  autoNumbering?: boolean;
   // Exchange rate
   fx?: number;
   // Amount in local currency
