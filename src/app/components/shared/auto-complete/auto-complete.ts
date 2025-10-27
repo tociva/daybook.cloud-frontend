@@ -97,10 +97,13 @@ export class AutoComplete<T> implements ControlValueAccessor {
 
   onInputFocus(event: Event): void {
     const input = event.target as HTMLInputElement;
-    const val = input.value ?? '';
-    this.inputValue.set(val);
+    input.select()
+    const val = input.value;
+    if(val) {
+      this.inputValue.set(val);
+    }
     // Emit search term to parent
-    this.onSearch.emit(val);
+    this.onSearch.emit('');
     this.openDropdown();
   }
 
@@ -237,6 +240,13 @@ export class AutoComplete<T> implements ControlValueAccessor {
     if (!next || !this.host.nativeElement.contains(next)) {
       this.closeDropdown();
     }
+  }
+
+  onClick(event: Event): void {
+    event.preventDefault();
+    this.openDropdown();
+    // Keep focus in the input for typing
+    queueMicrotask(() => this.inputElement?.nativeElement?.focus());
   }
 
 }

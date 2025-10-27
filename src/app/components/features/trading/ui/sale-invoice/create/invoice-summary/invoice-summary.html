@@ -7,18 +7,22 @@
       <label class="w-28 text-sm text-gray-700">Item Total:</label>
       <input formControlName="itemtotal" type="text" appNumberInput />
     </div>
+    @if(showDiscount()) {
+      <div class="flex items-center gap-2 mb-2">
+        <label class="w-28 text-sm text-gray-700">Discount:</label>
+        <input formControlName="discount" type="text" appNumberInput />
+      </div>
+      <div class="flex items-center gap-2 mb-2">
+        <label class="w-28 text-sm text-gray-700">Subtotal:</label>
+        <input formControlName="subtotal" type="text" appNumberInput />
+      </div>
+    }
+    @if(showTax()) {
     <div class="flex items-center gap-2 mb-2">
-      <label class="w-28 text-sm text-gray-700">Discount:</label>
-      <input formControlName="discount" type="text" appNumberInput />
-    </div>
-    <div class="flex items-center gap-2 mb-2">
-      <label class="w-28 text-sm text-gray-700">Subtotal:</label>
-      <input formControlName="subtotal" type="text" appNumberInput />
-    </div>
-    <div class="flex items-center gap-2 mb-2">
-      <label class="w-28 text-sm text-gray-700">Tax:</label>
-      <input formControlName="tax" type="text" appNumberInput />
-    </div>
+        <label class="w-28 text-sm text-gray-700">Tax:</label>
+        <input formControlName="tax" type="text" appNumberInput />
+      </div>
+    }
     <div class="flex items-center gap-2 mb-2">
       <label class="w-28 text-sm text-gray-700">Roundoff:</label>
       <input formControlName="roundoff" type="text" appNumberInput (change)="handleRoundoffChange()" />

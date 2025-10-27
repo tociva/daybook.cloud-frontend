@@ -1,9 +1,22 @@
-<h1 class="text-2xl font-semibold text-gray-800 mb-6 text-center">
-  Create New Sale Invoice
-</h1>
+@if(loading) {
+  <app-skelton-loader 
+  variant="text"
+  [lines]="10"
+  width="100%"
+  [shimmer]="true" />
+} @else if(!loading && mode() === 'edit' && saleInvoiceStore.error()?.statusCode === 404) {
+  <app-item-not-found
+  title="Sale invoice record not found"
+  description="It may have been deleted or the link is invalid."></app-item-not-found>
+} @else if(!loading && (mode() === 'create' || mode() === 'edit')) {
+
 <form [formGroup]="form">
+  <h1 class="text-2xl font-semibold text-gray-800 mb-6 text-center">
+    Create New Sale Invoice
+  </h1>
+  
 <!-- parent.component.html -->
-<div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-start mt-4">
   <!-- Left: first half -->
   <div class="md:col-span-2">
     <app-invoice-customer [form]="customerGroup()"></app-invoice-customer>
@@ -15,9 +28,34 @@
     <app-invoice-properties [form]="propertiesGroup()"></app-invoice-properties>
   </div>
 </div>
+<div class="flex flex-wrap items-center justify-center gap-8 p-4">
+  
+  <div class="flex items-center gap-2">
+    <label for="template" class="text-primary">Billing Mode:</label>
+    <app-auto-complete
+      formControlName="taxDisplayMode"
+      [options]="taxDisplayModes()"
+      [optionDisplayValue]="findTaxDisplayModeDisplayValue"
+      [inputDisplayValue]="findTaxDisplayModeDisplayValue"
+      [required]="true"
+      class="min-w-[200px]"
+    ></app-auto-complete>
+  </div>
 
-<app-invoice-items [formArray]="itemsGroup()" [taxMode]="taxMode()" [fractions]="fractions()" (onItemUpdate)="onItemUpdate()"></app-invoice-items>
-<app-invoice-summary [form]="summaryGroup()" (onRoundoffChange)="onRoundoffChange()"></app-invoice-summary>
+  <div class="flex items-center gap-2">
+    <label for="showDiscount" class="text-primary">Enable Discount:</label>
+    <dbc-switch formControlName="showDiscount"></dbc-switch>
+  </div>
+
+  <div class="flex items-center gap-2">
+    <label for="showDescription" class="text-primary">Enable Description:</label>
+    <dbc-switch formControlName="showDescription"></dbc-switch>
+  </div>
+</div>
+<app-invoice-items [formArray]="itemsGroup()" [taxMode]="taxMode()" [fractions]="fractions()" (onItemUpdate)="onItemUpdate()"
+[taxDisplayMode]="taxDisplayMode()" [showDiscount]="showDiscount()" [showDescription]="showDescription()"></app-invoice-items>
+<app-invoice-summary [form]="summaryGroup()" (onRoundoffChange)="onRoundoffChange()"
+[taxDisplayMode]="taxDisplayMode()" [showDiscount]="showDiscount()"></app-invoice-summary>
 <!-- ✅ Submit Button -->
 <div class="pt-2 mt-4 text-center">
   <app-cancel-button></app-cancel-button>
@@ -37,3 +75,5 @@
 
 </div>
 </form>
+
+}

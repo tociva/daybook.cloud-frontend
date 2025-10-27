@@ -1,5 +1,5 @@
 import { NgClass } from '@angular/common';
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -8,12 +8,19 @@ import { Store } from '@ngrx/store';
 import { startWith, tap } from 'rxjs';
 import { TWO } from '../../../../../../../util/constants';
 import { formatAmountToFraction, formatAmountToWords } from '../../../../../../../util/currency.util';
+import { FormUtil } from '../../../../../../../util/form/form.util';
+import { AutoComplete } from '../../../../../../shared/auto-complete/auto-complete';
 import { CancelButton } from '../../../../../../shared/cancel-button/cancel-button';
+import { DbcSwitch } from '../../../../../../shared/dbc-switch/dbc-switch';
+import { ItemNotFound } from '../../../../../../shared/item-not-found/item-not-found';
+import { SkeltonLoader } from '../../../../../../shared/skelton-loader/skelton-loader';
 import { SaleInvoiceRequest } from '../../../../store/sale-invoice/sale-invoice-request.type';
 import { saleInvoiceActions } from '../../../../store/sale-invoice/sale-invoice.actions';
+import { SaleInvoiceStore } from '../../../../store/sale-invoice/sale-invoice.store';
+import { SaleItemTax } from '../../../../store/sale-invoice/sale-item-tax.model';
 import { SaleInvoiceFormService } from '../../util/sale-invoice-form.service';
-import { SaleInvoiceCustomerForm, SaleInvoiceFormValue, SaleInvoicePropertiesForm, SaleInvoiceSummaryForm, SaleItemForm } from '../../util/sale-invoice-form.type';
-import { mapSaleInvoiceFormValueToRequest } from '../../util/sale-invoice.util';
+import { SaleInvoiceCustomerForm, SaleInvoiceFormValue, SaleInvoicePropertiesForm, SaleInvoiceSummaryForm, SaleInvoiceTaxDisplayModeType, SaleItemForm } from '../../util/sale-invoice-form.type';
+import { findTaxColumnCount, mapSaleInvoiceFormValueToRequest } from '../../util/sale-invoice.util';
 import { InvoiceCustomer } from '../invoice-customer/invoice-customer';
 import { InvoiceItems } from '../invoice-items/invoice-items';
 import { InvoiceProperties } from '../invoice-properties/invoice-properties';
@@ -21,11 +28,18 @@ import { InvoiceSummary } from '../invoice-summary/invoice-summary';
 
 @Component({
   selector: 'app-invoice-shell',
-  imports: [ReactiveFormsModule, InvoiceCustomer, InvoiceProperties, InvoiceItems, InvoiceSummary, CancelButton, NgClass],
+  imports: [ReactiveFormsModule, InvoiceCustomer, InvoiceProperties, InvoiceItems, InvoiceSummary, 
+    CancelButton, NgClass, AutoComplete, DbcSwitch, SkeltonLoader, ItemNotFound],
   templateUrl: './invoice-shell.html',
   styleUrl: './invoice-shell.css'
 })
 export class InvoiceShell {
+
+  protected readonly mode = signal<'create' | 'edit'>('create');
+
+  private itemId = signal<string | null>(null);
+
+  protected loading = true;
 
   private readonly saleInvoiceFormService = inject(SaleInvoiceFormService);
 
@@ -37,7 +51,15 @@ export class InvoiceShell {
 
   private readonly actions$ = inject(Actions);
 
+  readonly saleInvoiceStore = inject(SaleInvoiceStore);
+
   readonly form = this.saleInvoiceFormService.createSaleInvoiceForm();
+
+  readonly selectedInvoice = this.saleInvoiceStore.selectedItem;
+
+  readonly taxDisplayModes = computed(() => Object.values(SaleInvoiceTaxDisplayModeType) as SaleInvoiceTaxDisplayModeType[]);
+
+  readonly findTaxDisplayModeDisplayValue = (taxDisplayMode: SaleInvoiceTaxDisplayModeType) => taxDisplayMode;
 
   readonly customerGroup = computed(() => this.form.get('customer') as FormGroup<SaleInvoiceCustomerForm>);
 
@@ -50,6 +72,13 @@ export class InvoiceShell {
   readonly fractions = signal<number>(2);
 
   readonly submitting = signal(false);
+  // Individual signals (typed)
+  readonly taxDisplayMode = FormUtil.controlWritableSignal<SaleInvoiceTaxDisplayModeType>(
+    this.form, 'taxDisplayMode', SaleInvoiceTaxDisplayModeType.NON_TAXABLE
+  );
+
+  readonly showDiscount = FormUtil.controlWritableSignal<boolean>(this.form, 'showDiscount', false);
+  readonly showDescription = FormUtil.controlWritableSignal<boolean>(this.form, 'showDescription', false);
 
   // 👇 Signal that reflects the current value of 'customer'
   readonly customerSignal = toSignal(
@@ -78,6 +107,37 @@ export class InvoiceShell {
   );
   readonly taxMode = computed(() => this.taxModeSignal());
 
+  readonly taxModeEffect = effect(() => {
+    const taxMode = this.taxMode();
+    if(taxMode === 'Inter State') {
+      this.taxDisplayMode.set(SaleInvoiceTaxDisplayModeType.IGST);
+    }else if(taxMode === 'Intra State') {
+      this.taxDisplayMode.set(SaleInvoiceTaxDisplayModeType.CGST_SGST);
+    }else {
+      this.taxDisplayMode.set(SaleInvoiceTaxDisplayModeType.NON_TAXABLE);
+    }
+  });
+
+
+  private readonly effectTaxDisplayMode = effect(() => {
+    const mode = this.taxDisplayMode();
+    const needed = findTaxColumnCount(mode);
+    untracked(() => {
+      const itemsFa = this.itemsGroup();
+      const blanks: Partial<SaleItemTax>[] = Array.from({ length: needed }, () => ({}));
+  
+      for (let i = 0; i < itemsFa.length; i++) {
+        const item = itemsFa.at(i);
+  
+        // Build a brand-new FormArray with the exact length
+        const taxesFa = this.saleInvoiceFormService.buildSaleItemTaxesForm(blanks);
+  
+        // Replace the existing control atomically (no need to clear/remove first)
+        item.setControl('taxes', taxesFa, { emitEvent: false });
+      }
+    });
+  });
+  
   readonly currencySignal = toSignal(
     (this.propertiesGroup().get('currency') as FormControl).valueChanges.pipe(
       startWith(this.propertiesGroup().get('currency')?.value)
@@ -114,6 +174,18 @@ export class InvoiceShell {
     onCleanup(() => subscription.unsubscribe());
   });
 
+  private fillFormEffect = effect(() => {
+    const invoice = this.selectedInvoice();
+    this.loading = false;
+  });
+
+  private loadErrorEffect = effect(() => {
+    const error = this.saleInvoiceStore.error();
+    if (error && this.mode() === 'edit') {
+      this.loading = false;
+    }
+  });
+
   private reCalculateSummary = () => {
     let itemtotal = 0;
     let discount = 0;
@@ -139,11 +211,32 @@ export class InvoiceShell {
       words: formatAmountToWords(grandtotal, this.currency()) });
   }
 
+
+  ngOnInit(): void {
+    const lastSegment = this.route.snapshot.url[this.route.snapshot.url.length - 1]?.path;
+
+    if (lastSegment === 'create') {
+      this.mode.set('create');
+      this.loading = false;
+    } else if (lastSegment === 'edit') {
+      this.itemId.set(this.route.snapshot.paramMap.get('id') || null);
+      if(this.itemId()) {
+        this.mode.set('edit');
+        this.loading = true;
+        this.store.dispatch(saleInvoiceActions.loadSaleInvoiceById({ id: this.itemId()! }));
+      }else{
+        this.loading = false;
+      }
+    }
+  }
+
   onDestroy() {
     this.customerEffect.destroy();
     this.currencyEffect.destroy();
     this.createActionSuccessEffect.destroy();
     this.createActionFailureEffect.destroy();
+    this.effectTaxDisplayMode.destroy();
+    this.loadErrorEffect.destroy();
   }
 
   onItemUpdate = () => this.reCalculateSummary();

@@ -1,4 +1,4 @@
-import { SaleInvoiceFormValue, SaleItemFormValue, SaleItemTaxFormValue } from "./sale-invoice-form.type";
+import { SaleInvoiceFormValue, SaleInvoiceTaxDisplayModeType, SaleItemFormValue, SaleItemTaxFormValue } from "./sale-invoice-form.type";
 import { SaleInvoiceItemRequest, SaleInvoiceItemTaxRequest, SaleInvoiceRequest } from "../../../store/sale-invoice/sale-invoice-request.type";
 import { toNumber } from "../../../../../../util/currency.util";
 import { convertToNodeDateFormat } from "../../../../../../util/date.util";
@@ -87,3 +87,15 @@ export const mapSaleInvoiceFormValueToRequest = (formValue: SaleInvoiceFormValue
     items,
   };
 };
+
+
+export const findTaxColumnCount = (taxDisplayMode: SaleInvoiceTaxDisplayModeType): number => {
+  if([SaleInvoiceTaxDisplayModeType.IGST].includes(taxDisplayMode)) {
+    return 1;
+  }else if([SaleInvoiceTaxDisplayModeType.CGST_SGST, SaleInvoiceTaxDisplayModeType.IGST_CESS].includes(taxDisplayMode)) {
+    return 2;
+  }else if([SaleInvoiceTaxDisplayModeType.CGST_SGST_CESS].includes(taxDisplayMode)) {
+    return 3;
+  }
+  return 0;
+}

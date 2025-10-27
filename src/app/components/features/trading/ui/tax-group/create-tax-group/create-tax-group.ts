@@ -257,7 +257,6 @@ export class CreateTaxGroup extends WithFormDraftBinding implements OnInit {
       mode: group.mode,
       taxids: group.taxes.map(tax => tax.id ?? '')
     }));
-    console.log(nGroups);
     const newTaxGroup: TaxGroupCU = {
       name,
       rate: Number(rate),

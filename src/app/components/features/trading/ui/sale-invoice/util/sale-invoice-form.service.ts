@@ -1,17 +1,16 @@
 import { inject, Injectable } from "@angular/core";
-import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { FormArray, FormBuilder, FormGroup, Validators } from "@angular/forms";
+import dayjs from "dayjs";
+import { DEFAULT_NODE_DATE_FORMAT } from "../../../../../../util/constants";
+import { formatAmountToFraction } from "../../../../../../util/currency.util";
 import { Address } from "../../../../../../util/types/address";
-import { Customer } from "../../../store/customer/customer.model";
-import { AddressGroup, SaleInvoiceCustomerForm, SaleInvoiceForm, SaleInvoicePropertiesForm, SaleInvoiceSummaryForm, SaleItemForm, SaleItemTaxForm } from "./sale-invoice-form.type";
 import { Currency } from "../../../../../shared/store/currency/currency.model";
-import { SaleItem } from "../../../store/sale-invoice/sale-item.model";
+import { Customer } from "../../../store/customer/customer.model";
 import { Item } from "../../../store/item/item.model";
 import { SaleItemTax } from "../../../store/sale-invoice/sale-item-tax.model";
+import { SaleItem } from "../../../store/sale-invoice/sale-item.model";
 import { Tax } from "../../../store/tax";
-import { formatAmountToFraction } from "../../../../../../util/currency.util";
-import { convertToNodeDateFormat } from "../../../../../../util/date.util";
-import { DEFAULT_NODE_DATE_FORMAT } from "../../../../../../util/constants";
-import dayjs from "dayjs";
+import { AddressGroup, SaleInvoiceCustomerForm, SaleInvoiceForm, SaleInvoicePropertiesForm, SaleInvoiceSummaryForm, SaleInvoiceTaxDisplayModeType, SaleItemForm, SaleItemTaxForm } from "./sale-invoice-form.type";
 
 @Injectable({ providedIn: 'root' })
 export class SaleInvoiceFormService { 
@@ -44,12 +43,12 @@ private buildSaleItemTaxForm(seed?: Partial<SaleItemTax>, fractions = 2):FormGro
     tax: this.fb.control(seed?.tax ?? {} as Tax, { nonNullable: true }),
   });
 }
-
-private buildSaleItemTaxesForm(seed?: Partial<SaleItemTax>):Array<FormGroup<SaleItemTaxForm>> {
-  return [this.buildSaleItemTaxForm(seed), this.buildSaleItemTaxForm(seed)];
+public buildSaleItemTaxesForm(taxes?: Partial<SaleItemTax>[]):FormArray<FormGroup<SaleItemTaxForm>> {
+  const tagGroupArray = taxes?.map(tax => this.buildSaleItemTaxForm(tax)) ?? [];
+  return this.fb.nonNullable.array<FormGroup<SaleItemTaxForm>>(tagGroupArray, { validators: [Validators.required] });
 }
 
-public readonly buildSaleItemForm = (seed?: Partial<SaleItem>, fractions = 2):FormGroup<SaleItemForm> => {
+public readonly buildSaleItemForm = (seed?: SaleItem, fractions = 2):FormGroup<SaleItemForm> => {
   return this.fb.nonNullable.group<SaleItemForm>({
     name: this.fb.control(seed?.name ?? '', { nonNullable: true }),
     description: this.fb.control(seed?.description ?? null),
@@ -60,7 +59,7 @@ public readonly buildSaleItemForm = (seed?: Partial<SaleItem>, fractions = 2):Fo
     discpercent: this.fb.control(formatAmountToFraction(seed?.discpercent, fractions), { nonNullable: true }),
     discamount: this.fb.control({value: formatAmountToFraction(seed?.discamount, fractions), disabled: true}),
     subtotal: this.fb.control({value: formatAmountToFraction(seed?.subtotal, fractions), disabled: true}, { nonNullable: true }),
-    taxes: this.fb.nonNullable.array<FormGroup<SaleItemTaxForm>>(this.buildSaleItemTaxesForm(seed), { validators: [Validators.required] }),
+    taxes: this.buildSaleItemTaxesForm(seed?.taxes),
     taxamount: this.fb.control({value: formatAmountToFraction(seed?.taxamount, fractions), disabled: true}),
     grandtotal: this.fb.control({value: formatAmountToFraction(seed?.grandtotal, fractions), disabled: true}, { nonNullable: true }),
     item: this.fb.control(seed?.item ?? {} as Item, { nonNullable: true }),
@@ -73,6 +72,9 @@ public readonly buildSaleItemForm = (seed?: Partial<SaleItem>, fractions = 2):Fo
       const invDate = today.format(DEFAULT_NODE_DATE_FORMAT);
       const duedate = today.add(7, 'days').format(DEFAULT_NODE_DATE_FORMAT);
       return this.fb.nonNullable.group<SaleInvoiceForm>({
+        taxDisplayMode: this.fb.nonNullable.control(SaleInvoiceTaxDisplayModeType.CGST_SGST,{ validators: [Validators.required] }),
+        showDiscount: this.fb.nonNullable.control(false),
+        showDescription: this.fb.nonNullable.control(false),
         customer: this.fb.nonNullable.group<SaleInvoiceCustomerForm>({
           customer: this.fb.nonNullable.control({} as Customer, { validators: [Validators.required] }),
           billingaddress: this.buildAddressGroup(),
@@ -87,7 +89,7 @@ public readonly buildSaleItemForm = (seed?: Partial<SaleItem>, fractions = 2):Fo
           currency: this.fb.control({} as Currency, { nonNullable: true }),
           deliverystate: this.fb.control('', { nonNullable: true }),
           autoNumbering: this.fb.control(true, { nonNullable: true }),
-          taxoption: this.fb.control('', { nonNullable: true }),
+          taxoption: this.fb.control('Intra State', { nonNullable: true }),
         }),
         items: this.fb.nonNullable.array<FormGroup<SaleItemForm>>([this.buildSaleItemForm()], { validators: [Validators.required] }),
         summary: this.fb.nonNullable.group<SaleInvoiceSummaryForm>({

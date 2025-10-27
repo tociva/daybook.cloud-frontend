@@ -112,7 +112,7 @@ export class InputWithSuggestion<T extends string | number> implements ControlVa
     const val = input.value;
     this.inputValue.set(val);
     // Emit search term to parent
-    this.onSearch.emit(val);
+    this.onSearch.emit('');
     this.openDropdown();
   }
 
@@ -255,5 +255,14 @@ export class InputWithSuggestion<T extends string | number> implements ControlVa
       this.closeDropdown();
     }
   }
+
+  showOptions(event: Event): void {
+    event.preventDefault();
+    this.onSearch.emit('');
+    this.openDropdown();
+    // Keep focus in the input for typing
+    queueMicrotask(() => this.inputElement?.nativeElement?.focus());
+  }
+  
 
 }

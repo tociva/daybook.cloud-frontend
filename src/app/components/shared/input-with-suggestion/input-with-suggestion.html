@@ -5,6 +5,7 @@
       name="bootstrapChevronDown"
       class="absolute right-0 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"
       size="20"
+      (click)="showOptions($event)"
     ></ng-icon>
   }
 
@@ -18,6 +19,7 @@
     [attr.placeholder]="placeholder()"
     (input)="onInputChange($event)"
     (focus)="onInputFocus($event)"
+    (click)="showOptions($event)"
     (blur)="onInputBlur($event)"
     (keydown)="onKeyDown($event)"
     [ngClass]="inputClass()"

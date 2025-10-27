@@ -5,6 +5,14 @@ import { Item } from "../../../store/item/item.model";
 import { Tax } from "../../../store/tax";
 import { Address } from "../../../../../../util/types/address";
 
+export enum SaleInvoiceTaxDisplayModeType {
+  NON_TAXABLE = 'Non Taxable',
+  CGST_SGST = 'CGST SGST',
+  IGST = 'IGST',
+  CGST_SGST_CESS = 'CGST SGST With Cess',
+  IGST_CESS = 'IGST With Cess',
+}
+
 export interface SaleItemTaxFormValue {
   rate: number;
   appliedto: number;
@@ -123,6 +131,9 @@ export type SaleInvoiceCustomerFormValue = {
 }
 
 export type SaleInvoiceForm = {
+  taxDisplayMode: FormControl<SaleInvoiceTaxDisplayModeType>;
+  showDiscount: FormControl<boolean>;
+  showDescription: FormControl<boolean>;
   customer: FormGroup<SaleInvoiceCustomerForm>;
   properties: FormGroup<SaleInvoicePropertiesForm>;
   items: FormArray<FormGroup<SaleItemForm>>;
