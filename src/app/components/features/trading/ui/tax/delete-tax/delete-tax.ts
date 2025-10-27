@@ -38,7 +38,8 @@ export class DeleteTax {
   handleDelete = (): void => {
     this.store.dispatch(taxActions.deleteTax({ id: this.itemId()! }));
   };
-  onDestroy() {
+  
+  ngOnDestroy() {
     this.fetchTaxEffect.destroy();
   }
 }

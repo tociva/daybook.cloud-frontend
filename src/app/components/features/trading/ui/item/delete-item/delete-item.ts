@@ -38,7 +38,7 @@ export class DeleteItem {
   handleDelete = (): void => {
     this.store.dispatch(itemActions.deleteItem({ id: this.itemId()! }));
   };
-  onDestroy() {
+  ngOnDestroy() {
     this.fetchItemEffect.destroy();
   }
 }

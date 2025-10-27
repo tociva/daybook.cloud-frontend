@@ -38,7 +38,7 @@ export class DeleteBankCash {
   handleDelete = (): void => {
     this.store.dispatch(bankCashActions.deleteBankCash({ id: this.itemId()! }));
   };
-  onDestroy() {
+  ngOnDestroy() {
     this.fetchBankCashEffect.destroy();
   }
 }

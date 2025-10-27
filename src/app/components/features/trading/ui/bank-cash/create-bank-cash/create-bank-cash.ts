@@ -83,7 +83,7 @@ export class CreateBankCash implements OnInit {
     
   }
 
-  onDestroy() {
+  ngOnDestroy() {
     this.fillFormEffect.destroy();
     this.loadErrorEffect.destroy();
   }

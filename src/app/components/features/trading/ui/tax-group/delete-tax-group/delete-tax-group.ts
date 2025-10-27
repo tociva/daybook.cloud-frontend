@@ -38,7 +38,8 @@ export class DeleteTaxGroup {
   handleDelete = (): void => {
     this.store.dispatch(taxGroupActions.deleteTaxGroup({ id: this.taxGroupId()! }));
   };
-  onDestroy() {
+  
+  ngOnDestroy() {
     this.fetchTaxGroupEffect.destroy();
   }
 }

@@ -105,7 +105,7 @@ export class CreateTax implements OnInit {
     }
   }
 
-  onDestroy() {
+  ngOnDestroy() {
     this.fillFormEffect.destroy();
     this.loadErrorEffect.destroy();
   }

@@ -38,7 +38,8 @@ export class DeleteVendor {
   handleDelete = (): void => {
     this.store.dispatch(vendorActions.deleteVendor({ id: this.itemId()! }));
   };
-  onDestroy() {
+  
+  ngOnDestroy() {
     this.fetchVendorEffect.destroy();
   }
 }

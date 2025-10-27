@@ -38,7 +38,8 @@ export class DeleteCustomer {
   handleDelete = (): void => {
     this.store.dispatch(customerActions.deleteCustomer({ id: this.itemId()! }));
   };
-  onDestroy() {
+  
+  ngOnDestroy() {
     this.fetchCustomerEffect.destroy();
   }
 }

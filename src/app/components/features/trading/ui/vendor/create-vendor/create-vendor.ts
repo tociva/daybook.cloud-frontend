@@ -184,7 +184,7 @@ export class CreateVendor implements OnInit {
     }
   }
 
-  onDestroy() {
+  ngOnDestroy() {
     this.fillFormEffect.destroy();
     this.loadErrorEffect.destroy();
   }

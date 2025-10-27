@@ -43,7 +43,7 @@ export class DeleteLedgerCategory implements OnInit {
     this.store.dispatch(ledgerCategoryActions.deleteLedgerCategory({ id: this.ledgerCategoryId()! }));
   };
 
-  onDestroy() {
+  ngOnDestroy() {
     this.fetchLedgerCategoryEffect.destroy();
   }
 }

@@ -116,8 +116,7 @@ export class TwoColumnFormComponent<T> {
     }
   });
 
-
-  onDestroy() {
+  ngOnDestroy() {
     this.successActionEffect.destroy();
     this.uiEffect.destroy();
     this.validationErrorsEffect.destroy();

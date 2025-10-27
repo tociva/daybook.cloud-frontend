@@ -43,7 +43,7 @@ export class DeleteLedger implements OnInit {
     this.store.dispatch(ledgerActions.deleteLedger({ id: this.ledgerId()! }));
   };
 
-  onDestroy() {
+  ngOnDestroy() {
     this.fetchLedgerEffect.destroy();
   }
 }

@@ -230,7 +230,7 @@ export class InvoiceShell {
     }
   }
 
-  onDestroy() {
+  ngOnDestroy() {
     this.customerEffect.destroy();
     this.currencyEffect.destroy();
     this.createActionSuccessEffect.destroy();
