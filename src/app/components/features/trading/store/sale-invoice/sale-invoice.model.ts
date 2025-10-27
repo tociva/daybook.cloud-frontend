@@ -20,10 +20,10 @@ export type SaleInvoiceCustomProperties = {
     date: string;
     amount: number;
   }>;
-  showDiscount?: boolean;
-  showDescription?: boolean;
-  taxDisplayMode?: SaleInvoiceTaxDisplayModeType;
-  useBillingForShipping?: boolean;
+  showdiscount?: boolean;
+  showdescription?: boolean;
+  taxdisplaymode?: SaleInvoiceTaxDisplayModeType;
+  usebillingforshipping?: boolean;
   taxoption?: string;
   deliverystate?: string;
 } & Record<string, unknown>;

@@ -26,11 +26,12 @@ import { InvoiceCustomer } from '../invoice-customer/invoice-customer';
 import { InvoiceItems } from '../invoice-items/invoice-items';
 import { InvoiceProperties } from '../invoice-properties/invoice-properties';
 import { InvoiceSummary } from '../invoice-summary/invoice-summary';
+import { DeleteButton } from '../../../../../../shared/delete-button/delete-button';
 
 @Component({
   selector: 'app-invoice-shell',
   imports: [ReactiveFormsModule, InvoiceCustomer, InvoiceProperties, InvoiceItems, InvoiceSummary, 
-    CancelButton, NgClass, AutoComplete, DbcSwitch, SkeltonLoader, ItemNotFound],
+    CancelButton, NgClass, AutoComplete, DbcSwitch, SkeltonLoader, ItemNotFound, DeleteButton],
   templateUrl: './invoice-shell.html',
   styleUrl: './invoice-shell.css'
 })
@@ -43,12 +44,13 @@ export class InvoiceShell {
   private readonly store = inject(Store);
   private readonly actions$ = inject(Actions);
   readonly saleInvoiceStore = inject(SaleInvoiceStore);
+  readonly deleteSuccessAction = saleInvoiceActions.deleteSaleInvoiceSuccess;
 
   // ---------- UI mode & route ----------
-  protected readonly mode = signal<'create' | 'edit'>('create');
+  protected readonly mode = signal<'create' | 'edit' | 'delete'>('create');
   private readonly itemId = signal<string | null>(null);
   protected loading = true;
-
+  protected title = signal<string>('Create New Sale Invoice');
   // ---------- Form & typed accessors ----------
   readonly form = this.saleInvoiceFormService.createSaleInvoiceForm();
 
@@ -126,7 +128,6 @@ export class InvoiceShell {
     }
   });
 
-
   private readonly taxModeEffectRef = effect(() => {
     const taxMode = this.taxMode();
     if (taxMode === 'Inter State') {
@@ -182,21 +183,30 @@ export class InvoiceShell {
     onCleanup(() => sub.unsubscribe());
   });
 
+  private readonly updateSuccessEffectRef = effect((onCleanup) => {
+    const sub = this.actions$.pipe(
+      ofType(saleInvoiceActions.updateSaleInvoiceSuccess),
+      tap(() => {
+        this.submitting.set(false);
+        const burl = this.route.snapshot.queryParamMap.get('burl') ?? '/';
+        this.router.navigateByUrl(burl);
+      })
+    ).subscribe();
+    onCleanup(() => sub.unsubscribe());
+  });
+
+  private readonly updateFailureEffectRef = effect((onCleanup) => {
+    const sub = this.actions$.pipe(
+      ofType(saleInvoiceActions.updateSaleInvoiceFailure),
+      tap(() => this.submitting.set(false))
+    ).subscribe();
+    onCleanup(() => sub.unsubscribe());
+  });
+
   private readonly loadErrorEffectRef = effect(() => {
     const error = this.saleInvoiceStore.error();
     if (error && this.mode() === 'edit') {
       this.loading = false;
-    }
-  });
-
-  private customerEffect = effect(() => {
-    const customer = this.customerSignal();
-    if (customer?.currency) {
-      this.propertiesGroup().patchValue({ currency: customer.currency });
-      this.fractions.set(customer.currency.fractions ?? TWO);
-    }
-    if (customer?.state) {
-      this.propertiesGroup().patchValue({ deliverystate: customer.state });
     }
   });
 
@@ -228,13 +238,6 @@ export class InvoiceShell {
         item.setControl('taxes', taxesFa, { emitEvent: false });
       }
     });
-  });
-  
-  private currencyEffect = effect(() => {
-    const currency = this.currencySignal();
-    if (currency) {
-      this.fractions.set(currency.minorunit ?? TWO);
-    }
   });
 
   private readonly createActionSuccessEffect = effect((onCleanup) => {
@@ -273,13 +276,6 @@ export class InvoiceShell {
     this.loading = false;
   });
 
-  private loadErrorEffect = effect(() => {
-    const error = this.saleInvoiceStore.error();
-    if (error && this.mode() === 'edit') {
-      this.loading = false;
-    }
-  });
-
   private reCalculateSummary = () => {
     let itemtotal = 0;
     let discount = 0;
@@ -306,32 +302,47 @@ export class InvoiceShell {
     { emitEvent: false });
   }
 
-
-  ngOnInit(): void {
-    const lastSegment = this.route.snapshot.url[this.route.snapshot.url.length - 1]?.path;
-    if (lastSegment === 'create') {
-      this.loading = false;
-    } else if (lastSegment === 'edit') {
-      const itemId = this.route.snapshot.paramMap.get('id') || null;
+  private loadSaleInvoiceById() {
+    const itemId = this.route.snapshot.paramMap.get('id') || null;
       if(itemId) {
         this.itemId.set(itemId);
-        this.mode.set('edit');
         this.loading = true;
         this.store.dispatch(saleInvoiceActions.loadSaleInvoiceById({ id: this.itemId()! , query: { includes: ['currency', 'customer', 'items.item','items.taxes.tax'] } }));
       }else{
         this.loading = false;
       }
     }
+    ngOnInit(): void {
+      const lastSegment = this.route.snapshot.url[this.route.snapshot.url.length - 1]?.path;
+      if (lastSegment === 'create') {
+        this.title.set('Create New Sale Invoice');
+        this.loading = false;
+      } else if (lastSegment === 'edit') {
+      this.title.set('Edit Sale Invoice');
+      this.mode.set('edit');
+      this.loadSaleInvoiceById();
+    } else if(lastSegment === 'delete') {
+      this.title.set('Delete Sale Invoice');
+      this.mode.set('delete');
+      this.form.disable();
+      this.loadSaleInvoiceById();
+    }
   }
 
   ngOnDestroy() {
-    this.customerEffect.destroy();
-    this.currencyEffect.destroy();
+    this.customerEffectRef.destroy();
+    this.currencyEffectRef.destroy();
     this.createActionSuccessEffect.destroy();
     this.createActionFailureEffect.destroy();
     this.effectTaxDisplayMode.destroy();
-    this.loadErrorEffect.destroy();
     this.fillFormEffectRef.destroy();
+    this.createSuccessEffectRef.destroy();
+    this.createFailureEffectRef.destroy();
+    this.updateSuccessEffectRef.destroy();
+    this.updateFailureEffectRef.destroy();
+    this.loadErrorEffectRef.destroy();
+    this.taxModeEffect.destroy();
+    this.taxDisplayModeEffectRef.destroy();
   }
 
   onItemUpdate = () => this.reCalculateSummary();
@@ -342,6 +353,13 @@ export class InvoiceShell {
     this.submitting.set(true);
     const formValue = this.form.getRawValue() as unknown as SaleInvoiceFormValue;
     const saleInvoiceRequest: SaleInvoiceRequest =  mapSaleInvoiceFormValueToRequest(formValue);
-    this.store.dispatch(saleInvoiceActions.createSaleInvoice({ saleInvoice: saleInvoiceRequest }));
+    if(this.mode() === 'create') {
+      this.store.dispatch(saleInvoiceActions.createSaleInvoice({ saleInvoice: saleInvoiceRequest }));
+    } else if(this.mode() === 'edit') {
+      this.store.dispatch(saleInvoiceActions.updateSaleInvoice({ id: this.itemId()!, saleInvoice: saleInvoiceRequest }));
+    }
   }
+  handleDelete = (): void => {
+    this.store.dispatch(saleInvoiceActions.deleteSaleInvoice({ id: this.itemId()! }));
+  };
 }

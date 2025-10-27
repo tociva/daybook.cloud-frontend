@@ -73,6 +73,12 @@ export const mapSaleInvoiceFormValueToRequest = (formValue: SaleInvoiceFormValue
   const billingaddress = formValue.customer.billingaddress;
   const shippingaddress = formValue.customer.shippingaddress;
   const customerid = formValue.customer.customer.id!;
+  const taxoption = formValue.properties.taxoption;
+  const taxdisplaymode = formValue.taxDisplayMode;
+  const showdiscount = formValue.showDiscount;
+  const showdescription = formValue.showDescription;
+  const usebillingforshipping = formValue.customer.usebillingforshipping;
+  const deliverystate = formValue.properties.deliverystate;
   const items = formValue.items.map((item, index) => mapSaleItemFormValueToRequest(item, index + 1));
   return {
     ...(!isAutoNumbering ? { number } : {}),
@@ -89,6 +95,14 @@ export const mapSaleInvoiceFormValueToRequest = (formValue: SaleInvoiceFormValue
     shippingaddress,
     customerid,
     items,
+    cprops: {
+      taxdisplaymode,
+      showdiscount,
+      showdescription,
+      usebillingforshipping,
+      taxoption,
+      deliverystate,
+    },
   };
 };
 
@@ -143,14 +157,14 @@ const mapItem = (item: any, fractions: number): SaleItemFormValue => ({
 });
 
 const mapCustomerBlock = (inv: SaleInvoice): SaleInvoiceCustomerFormValue => {
-  const useBillingForShipping =
-    (inv?.cprops?.useBillingForShipping ?? eqAddress(inv?.billingaddress, inv?.shippingaddress)) || false;
+  const usebillingforshipping =
+    (inv?.cprops?.usebillingforshipping ?? eqAddress(inv?.billingaddress, inv?.shippingaddress)) || false;
 
   return {
     customer: inv.customer,
     billingaddress: inv.billingaddress,
-    shippingaddress: useBillingForShipping ? inv.billingaddress : inv.shippingaddress,
-    useBillingForShipping,
+    shippingaddress: usebillingforshipping ? inv.billingaddress : inv.shippingaddress,
+    usebillingforshipping: usebillingforshipping,
   };
 };
 
@@ -185,9 +199,9 @@ const mapProperties = (inv: SaleInvoice): SaleInvoicePropertiesFormValue => ({
 
 export function saleInvoiceModelToSaleInvoiceFormValue(inv: SaleInvoice): SaleInvoiceFormValue {
   return {
-    taxDisplayMode: inv?.cprops?.taxDisplayMode ?? SaleInvoiceTaxDisplayModeType.CGST_SGST, // fallback to your app’s default
-    showDiscount: inv?.cprops?.showDiscount ?? false,
-    showDescription: inv?.cprops?.showDescription ?? false,
+    taxDisplayMode: inv?.cprops?.taxdisplaymode ?? SaleInvoiceTaxDisplayModeType.CGST_SGST, // fallback to your app’s default
+    showDiscount: inv?.cprops?.showdiscount ?? false,
+    showDescription: inv?.cprops?.showdescription ?? false,
     customer: mapCustomerBlock(inv),
     properties: mapProperties(inv),
     items: Array.isArray(inv?.items) ? inv.items!.map(mapItem) : [],

@@ -19,6 +19,6 @@ export const saleInvoiceRoutes: Routes = [
   },
   {
     path: ':id/delete',
-    loadComponent: () => import('./delete-sale-invoice/delete-sale-invoice').then(m => m.DeleteSaleInvoice),
+    loadComponent: () => import('./create/invoice-shell/invoice-shell').then(m => m.InvoiceShell),
   },
 ];

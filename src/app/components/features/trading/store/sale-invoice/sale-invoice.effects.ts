@@ -279,21 +279,8 @@ export const saleInvoiceEffects = {
   updateSuccess: createEffect(
     () => {
       const actions$ = inject(Actions);
-      const store = inject(SaleInvoiceStore);
-
       return actions$.pipe(
-        ofType(saleInvoiceActions.updateSaleInvoiceSuccess),
-        tap(({ saleInvoice }) => {
-          const current = store.items();
-          const updated = current.map(inv => inv.id === saleInvoice.id ? saleInvoice : inv);
-          store.setItems(updated);
-
-          // if the updated invoice is currently selected, refresh it as well
-          const selected = store.selectedItem?.();
-          if (selected && selected.id === saleInvoice.id) {
-            store.setSelectedItem(saleInvoice);
-          }
-        })
+        ofType(saleInvoiceActions.updateSaleInvoiceSuccess)
       );
     },
     { functional: true, dispatch: false }

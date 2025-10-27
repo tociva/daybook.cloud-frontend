@@ -113,7 +113,7 @@ export type SaleInvoiceCustomerFormValue = {
   customer: Customer;
   billingaddress: Address;
   shippingaddress: Address;
-  useBillingForShipping: boolean;
+  usebillingforshipping: boolean;
 }
 export interface SaleItemTaxFormValue {
   rate: number;

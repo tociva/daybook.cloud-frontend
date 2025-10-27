@@ -8,14 +8,12 @@ import { Currency } from "../../../../../shared/store/currency/currency.model";
 import { Customer } from "../../../store/customer/customer.model";
 import { Item } from "../../../store/item/item.model";
 import { SaleItemTax } from "../../../store/sale-invoice/sale-item-tax.model";
-import { SaleItem } from "../../../store/sale-invoice/sale-item.model";
 import { Tax } from "../../../store/tax";
 import { AddressGroup, SaleInvoiceCustomerForm, SaleInvoiceForm, SaleInvoicePropertiesForm, SaleInvoiceSummaryForm, SaleInvoiceTaxDisplayModeType, SaleItemForm, SaleItemFormValue, SaleItemTaxForm } from "./sale-invoice-form.type";
 
 @Injectable({ providedIn: 'root' })
 export class SaleInvoiceFormService { 
   private fb = inject(FormBuilder);
-
 
 
  private buildAddressGroup(seed?: Partial<Address>) {
