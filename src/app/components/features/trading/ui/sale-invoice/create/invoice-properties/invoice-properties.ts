@@ -1,4 +1,4 @@
-import { Component, effect, inject, input, signal } from '@angular/core';
+import { Component, effect, EnvironmentInjector, inject, input, runInInjectionContext, signal, WritableSignal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { AutoComplete } from '../../../../../../shared/auto-complete/auto-complete';
 import { DbcSwitch } from '../../../../../../shared/dbc-switch/dbc-switch';
@@ -12,6 +12,7 @@ import { TextInputDirective } from '../../../../../../../util/directives/text-in
 import { distinctUntilChanged, of, startWith, switchMap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { taxGroupActions } from '../../../../store/tax-group/tax-group.actions';
+import { FormUtil } from '../../../../../../../util/form/form.util';
 
 @Component({
   selector: 'app-invoice-properties',
@@ -32,33 +33,50 @@ export class InvoiceProperties {
   modes = this.taxGroupModeStore.items;
   filteredModes = signal<string[]>([]);
 
-  readonly autoNumberingSig = toSignal(
-    toObservable(this.form).pipe(
-      switchMap(form => {
-        const ctrl = form?.get('autoNumbering') as FormControl<boolean> | null;
-        return ctrl
-          ? ctrl.valueChanges.pipe(
-              startWith(ctrl.value),
-              distinctUntilChanged()
-            )
-          : of<boolean>(true);
-      })
-    ),
-    { initialValue: true }
-  );
+
+  private readonly envInjector = inject(EnvironmentInjector);
+   // Will be created once the form input is available
+   private _autoNumberingSig!: WritableSignal<boolean>;
+   get autoNumberingSig() { return this._autoNumberingSig; }
+
+   private _taxoptionSig!: WritableSignal<string>;
+   get taxoptionSig() { return this._taxoptionSig; }
   
-  private changeFormEffect = effect(() => {
-    const autoNumbering = this.autoNumberingSig();
-    if(autoNumbering) {
-      this.form().patchValue({ number: 'Auto Number' });
-      this.form().controls.number.disable();
-    }else{
-      this.form().controls.number.enable();
-      if(this.uiMode() === 'create') {
-        this.form().patchValue({ number: '' });
+   private changeAutoNumberingEffect = effect(() => {
+    const form = this.form?.();            // input.required() returns a signal getter
+    const uiMode = this.uiMode?.();
+    const autoNumberingSig = this.autoNumberingSig;
+  
+    // Guard: skip until everything exists
+    if (!form || !autoNumberingSig || !uiMode) return;
+  
+    const autoNumbering = autoNumberingSig();
+    const numberCtrl = form.controls.number;
+  
+    if (autoNumbering) {
+      numberCtrl.disable({ emitEvent: false });
+      form.patchValue({ number: 'Auto Number' }, { emitEvent: false });
+    } else {
+      numberCtrl.enable({ emitEvent: false });
+      if (uiMode === 'create') {
+        form.patchValue({ number: '' }, { emitEvent: false });
       }
     }
-  });
+  }, { allowSignalWrites: true });
+
+  private changeTaxOptionEffect = effect(() => {
+    const form = this.form?.();
+    const uiMode = this.uiMode?.();
+    const taxoptionSig = this.taxoptionSig;
+    if(!form || !taxoptionSig) return;
+    const taxoption = taxoptionSig();
+    const taxoptionCtrl = form.controls.taxoption;
+    if(taxoption === 'Inter State') {
+      form.controls['deliverystate'].enable({ emitEvent: false });
+    }else{
+      form.controls['deliverystate'].disable({ emitEvent: false });
+    }
+  }, { allowSignalWrites: true });
 
   constructor() {
 
@@ -72,7 +90,28 @@ export class InvoiceProperties {
   }
 
   ngOnInit() {
+    const form = this.form();
+
+    runInInjectionContext(this.envInjector, () => {
+      this._autoNumberingSig = FormUtil.controlWritableSignal<boolean>(
+        form,
+        'autoNumbering',
+        true
+      );
+
+      this._taxoptionSig = FormUtil.controlWritableSignal<string>(
+        form,
+        'taxoption',
+        'Intra State'
+      );
+    });
+    
     this.store.dispatch(taxGroupActions.loadTaxGroupModes({}));
+  }
+
+  ngOnDestroy() {
+    this.changeAutoNumberingEffect.destroy();
+    this.changeTaxOptionEffect.destroy();
   }
 
   onCurrencySearch(value: string) {

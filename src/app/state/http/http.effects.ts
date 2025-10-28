@@ -1,14 +1,14 @@
-import { inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { switchMap, map, catchError, tap, mergeMap } from 'rxjs/operators';
-import { of, EMPTY } from 'rxjs';
-import { httpActions } from './http.actions';
-import { HttpStore } from './http.store';
-import { HttpRequestConfig } from './http.model';
+import { EMPTY, of } from 'rxjs';
+import { catchError, map, mergeMap, tap } from 'rxjs/operators';
 import { ToastStore } from '../../components/shared/store/toast/toast.store';
 import { DbcError } from '../../util/types/dbc-error.type';
+import { httpActions } from './http.actions';
+import { HttpRequestConfig } from './http.model';
+import { HttpStore } from './http.store';
 
 // Helper function to detect abort-like errors (same logic as in HttpStore)
 function isAbortLike(err: unknown): boolean {

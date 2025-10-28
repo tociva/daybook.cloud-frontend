@@ -239,7 +239,9 @@ export const saleInvoiceEffects = {
       return actions$.pipe(
         ofType(saleInvoiceActions.loadSaleInvoiceByIdSuccess),
         tap(({ saleInvoice }) => {
-          store.setSelectedItem(saleInvoice);
+          const {items, ...rest} = saleInvoice;
+          const nItems = [...(items ?? [])]?.sort((a, b) => a.order - b.order) ?? [];
+          store.setSelectedItem({...rest, items: nItems});
         })
       );
     },

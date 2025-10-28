@@ -27,6 +27,7 @@ import { InvoiceItems } from '../invoice-items/invoice-items';
 import { InvoiceProperties } from '../invoice-properties/invoice-properties';
 import { InvoiceSummary } from '../invoice-summary/invoice-summary';
 import { DeleteButton } from '../../../../../../shared/delete-button/delete-button';
+import { ToastStore } from '../../../../../../shared/store/toast/toast.store';
 
 @Component({
   selector: 'app-invoice-shell',
@@ -45,6 +46,7 @@ export class InvoiceShell {
   private readonly actions$ = inject(Actions);
   readonly saleInvoiceStore = inject(SaleInvoiceStore);
   readonly deleteSuccessAction = saleInvoiceActions.deleteSaleInvoiceSuccess;
+  private readonly toastStore = inject(ToastStore);
 
   // ---------- UI mode & route ----------
   protected readonly mode = signal<'create' | 'edit' | 'delete'>('create');
@@ -210,17 +212,6 @@ export class InvoiceShell {
     }
   });
 
-  readonly taxModeEffect = effect(() => {
-    const taxMode = this.taxMode();
-    if(taxMode === 'Inter State') {
-      this.taxDisplayMode.set(SaleInvoiceTaxDisplayModeType.IGST);
-    }else if(taxMode === 'Intra State') {
-      this.taxDisplayMode.set(SaleInvoiceTaxDisplayModeType.CGST_SGST);
-    }else {
-      this.taxDisplayMode.set(SaleInvoiceTaxDisplayModeType.NON_TAXABLE);
-    }
-  });
-
   private readonly effectTaxDisplayMode = effect(() => {
     const mode = this.taxDisplayMode();
     const needed = findTaxColumnCount(mode);
@@ -341,7 +332,7 @@ export class InvoiceShell {
     this.updateSuccessEffectRef.destroy();
     this.updateFailureEffectRef.destroy();
     this.loadErrorEffectRef.destroy();
-    this.taxModeEffect.destroy();
+    this.taxModeEffectRef.destroy();
     this.taxDisplayModeEffectRef.destroy();
   }
 
@@ -353,6 +344,13 @@ export class InvoiceShell {
     this.submitting.set(true);
     const formValue = this.form.getRawValue() as unknown as SaleInvoiceFormValue;
     const saleInvoiceRequest: SaleInvoiceRequest =  mapSaleInvoiceFormValueToRequest(formValue);
+    const {items} = saleInvoiceRequest;
+    const invalidItems = items.filter(item => !item.itemid || !item.itemtotal);
+    if(invalidItems.length){
+      this.submitting.set(false);
+      this.toastStore.show({ title: 'Error', message: 'Some items are missing required fields' }, 'error');
+      return;
+    }
     if(this.mode() === 'create') {
       this.store.dispatch(saleInvoiceActions.createSaleInvoice({ saleInvoice: saleInvoiceRequest }));
     } else if(this.mode() === 'edit') {
