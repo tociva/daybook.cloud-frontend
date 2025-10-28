@@ -24,7 +24,7 @@ export const menuList: MenuNode[] = [
           { path: 'sale-invoice',
             name: 'Sale Invoice',
             },
-          { path: 'receipts',
+          { path: 'customer-receipt',
             name: 'Receipts',
             },
           { path: 'vendor',

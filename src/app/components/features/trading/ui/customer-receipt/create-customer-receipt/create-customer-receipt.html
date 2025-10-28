@@ -1,0 +1,19 @@
+@if(loading) {
+  <app-skelton-loader 
+  variant="text"
+  [lines]="10"
+  width="100%"
+  [shimmer]="true" />
+} @else if(!loading && mode() === 'edit' && customerReceiptStore.error()) {
+  <app-item-not-found
+  title="Customer receipt record not found"
+  description="It may have been deleted or the link is invalid."></app-item-not-found>
+} @else if(!loading && (mode() === 'create' || mode() === 'edit') && !customerReceiptStore.error()) {
+  <app-two-column-form [form]="form"
+  [fields]="formFields()"
+  [title]="title()"
+  (formSubmit)="handleSubmit($event)"
+  [successAction]="successAction()"
+  />
+}
+

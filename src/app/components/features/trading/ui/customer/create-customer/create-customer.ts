@@ -16,7 +16,7 @@ import { CountryStore } from '../../../../../shared/store/country/country.store'
 import { currencyActions } from '../../../../../shared/store/currency/currency.action';
 import { Currency } from '../../../../../shared/store/currency/currency.model';
 import { CurrencyStore } from '../../../../../shared/store/currency/currency.store';
-import { Customer, customerActions, CustomerCU, CustomerStore } from '../../../store/customer';
+import { Customer, customerActions, CustomerStore } from '../../../store/customer';
 
 @Component({
   selector: 'app-create-customer',
