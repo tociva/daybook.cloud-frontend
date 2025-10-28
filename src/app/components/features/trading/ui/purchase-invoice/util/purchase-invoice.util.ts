@@ -60,7 +60,6 @@ export const mapPurchaseItemFormValueToRequest = (formValue: PurchaseItemFormVal
 
 export const mapPurchaseInvoiceFormValueToRequest = (formValue: PurchaseInvoiceFormValue): PurchaseInvoiceRequest => {
   const number = formValue.properties.number;
-  const isAutoNumbering = formValue.properties.autoNumbering;
   const date = convertToNodeDateFormat(formValue.properties.date);
   const duedate = convertToNodeDateFormat(formValue.properties.duedate);
   const itemtotal = toNumber(formValue.summary.itemtotal);
@@ -70,18 +69,14 @@ export const mapPurchaseInvoiceFormValueToRequest = (formValue: PurchaseInvoiceF
   const roundoff = toNumber(formValue.summary.roundoff);
   const grandtotal = toNumber(formValue.summary.grandtotal);
   const currencycode = formValue.properties.currency.code;
-  const billingaddress = formValue.vendor.billingaddress;
-  const shippingaddress = formValue.vendor.shippingaddress;
   const vendorid = formValue.vendor.vendor.id!;
   const taxoption = formValue.properties.taxoption;
   const taxdisplaymode = formValue.taxDisplayMode;
   const showdiscount = formValue.showDiscount;
   const showdescription = formValue.showDescription;
-  const usebillingforshipping = formValue.vendor.usebillingforshipping;
-  const deliverystate = formValue.properties.deliverystate;
   const items = formValue.items.map((item, index) => mapPurchaseItemFormValueToRequest(item, index + 1));
   return {
-    ...(!isAutoNumbering ? { number } : {}),
+    number,
     date,
     duedate,
     itemtotal,
@@ -91,17 +86,13 @@ export const mapPurchaseInvoiceFormValueToRequest = (formValue: PurchaseInvoiceF
     ...(roundoff ? { roundoff } : {}),
     grandtotal,
     currencycode,
-    billingaddress,
-    shippingaddress,
     vendorid,
     items,
     cprops: {
       taxdisplaymode,
       showdiscount,
       showdescription,
-      usebillingforshipping,
       taxoption,
-      deliverystate,
     },
   };
 };
@@ -155,14 +146,8 @@ const mapItem = (item: any, fractions: number): PurchaseItemFormValue => ({
 });
 
 const mapVendorBlock = (inv: PurchaseInvoice): PurchaseInvoiceVendorFormValue => {
-  const usebillingforshipping =
-    (inv?.cprops?.usebillingforshipping ?? eqAddress(inv?.billingaddress, inv?.shippingaddress)) || false;
-
   return {
     vendor: inv.vendor,
-    billingaddress: inv.billingaddress,
-    shippingaddress: usebillingforshipping ? inv.billingaddress : inv.shippingaddress,
-    usebillingforshipping: usebillingforshipping,
   };
 };
 
@@ -185,8 +170,6 @@ const mapProperties = (inv: PurchaseInvoice): PurchaseInvoicePropertiesFormValue
   duedate: dayjs(inv.duedate).format(DEFAULT_NODE_DATE_FORMAT),
   currency: inv.currency,
   taxoption: inv?.cprops?.taxoption ?? 'Intra State',
-  deliverystate: inv?.cprops?.deliverystate ?? '',
-  autoNumbering: inv?.cprops?.autoNumbering ?? false,
   journal: inv?.sprops?.journal ?? '',
 });
 

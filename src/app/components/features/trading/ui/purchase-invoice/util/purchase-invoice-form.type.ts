@@ -44,8 +44,6 @@ export type PurchaseInvoicePropertiesForm = {
   duedate: FormControl<string>;
   journal: FormControl<string>;
   currency: FormControl<Currency>;
-  deliverystate: FormControl<string>;
-  autoNumbering: FormControl<boolean>;
   taxoption: FormControl<string>;
 }
 
@@ -55,8 +53,6 @@ export type PurchaseInvoicePropertiesFormValue = {
   duedate: string;
   journal: string;
   currency: Currency;
-  deliverystate: string;
-  autoNumbering: boolean;
   taxoption: string;
 }
 
@@ -85,9 +81,7 @@ export type AddressGroup = {
 
 export type PurchaseInvoiceVendorForm = {
   vendor: FormControl<Vendor>;
-  billingaddress: FormGroup<AddressGroup>;
-  shippingaddress: FormGroup<AddressGroup>;
-  useBillingForShipping: FormControl<boolean>;
+  address: FormGroup<AddressGroup>;
 }
 
 export type PurchaseInvoiceForm = {
@@ -112,9 +106,6 @@ export type PurchaseInvoiceSummaryFormValue = {
 
 export type PurchaseInvoiceVendorFormValue = {
   vendor: Vendor;
-  billingaddress: Address;
-  shippingaddress: Address;
-  usebillingforshipping: boolean;
 }
 
 export interface PurchaseItemTaxFormValue {

@@ -4,7 +4,6 @@ import { Store } from '@ngrx/store';
 import { TextInputDirective } from '../../../../../../../util/directives/text-input.directive';
 import { FormUtil } from '../../../../../../../util/form/form.util';
 import { AutoComplete } from '../../../../../../shared/auto-complete/auto-complete';
-import { DbcSwitch } from '../../../../../../shared/dbc-switch/dbc-switch';
 import { currencyActions } from '../../../../../../shared/store/currency/currency.action';
 import { Currency } from '../../../../../../shared/store/currency/currency.model';
 import { CurrencyStore } from '../../../../../../shared/store/currency/currency.store';
@@ -14,7 +13,7 @@ import { PurchaseInvoicePropertiesForm } from '../../util/purchase-invoice-form.
 
 @Component({
   selector: 'app-purchase-invoice-properties',
-  imports: [ReactiveFormsModule, AutoComplete, DbcSwitch, TextInputDirective],
+  imports: [ReactiveFormsModule, AutoComplete, TextInputDirective],
   templateUrl: './purchase-invoice-properties.html',
   styleUrl: './purchase-invoice-properties.css'
 })
@@ -32,47 +31,9 @@ export class PurchaseInvoiceProperties {
   filteredModes = signal<string[]>([]);
 
   private readonly envInjector = inject(EnvironmentInjector);
-  private _autoNumberingSig!: WritableSignal<boolean>;
-  get autoNumberingSig() { return this._autoNumberingSig; }
-
   private _taxoptionSig!: WritableSignal<string>;
   get taxoptionSig() { return this._taxoptionSig; }
  
-  private changeAutoNumberingEffect = effect(() => {
-    const form = this.form?.();
-    const uiMode = this.uiMode?.();
-    const autoNumberingSig = this.autoNumberingSig;
-  
-    if (!form || !autoNumberingSig || !uiMode) return;
-  
-    const autoNumbering = autoNumberingSig();
-    const numberCtrl = form.controls.number;
-  
-    if (autoNumbering) {
-      numberCtrl.disable({ emitEvent: false });
-      form.patchValue({ number: 'Auto Number' }, { emitEvent: false });
-    } else {
-      numberCtrl.enable({ emitEvent: false });
-      if (uiMode === 'create') {
-        form.patchValue({ number: '' }, { emitEvent: false });
-      }
-    }
-  }, { allowSignalWrites: true });
-
-  private changeTaxOptionEffect = effect(() => {
-    const form = this.form?.();
-    const uiMode = this.uiMode?.();
-    const taxoptionSig = this.taxoptionSig;
-    if(!form || !taxoptionSig) return;
-    const taxoption = taxoptionSig();
-    const taxoptionCtrl = form.controls.taxoption;
-    if(taxoption === 'Inter State') {
-      form.controls['deliverystate'].enable({ emitEvent: false });
-    }else{
-      form.controls['deliverystate'].disable({ emitEvent: false });
-    }
-  }, { allowSignalWrites: true });
-
   constructor() {
     effect(() => {
       if(this.currencyStore.currenciesLoaded()) {
@@ -87,12 +48,6 @@ export class PurchaseInvoiceProperties {
     const form = this.form();
 
     runInInjectionContext(this.envInjector, () => {
-      this._autoNumberingSig = FormUtil.controlWritableSignal<boolean>(
-        form,
-        'autoNumbering',
-        true
-      );
-
       this._taxoptionSig = FormUtil.controlWritableSignal<string>(
         form,
         'taxoption',
@@ -101,11 +56,6 @@ export class PurchaseInvoiceProperties {
     });
     
     this.store.dispatch(taxGroupActions.loadTaxGroupModes({}));
-  }
-
-  ngOnDestroy() {
-    this.changeAutoNumberingEffect.destroy();
-    this.changeTaxOptionEffect.destroy();
   }
 
   onCurrencySearch(value: string) {

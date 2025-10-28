@@ -2,10 +2,6 @@
   <div class="flex-1 bg-alternate-background p-2">
     <div class="flex items-center justify-between mb-3">
       <h2 class="font-semibold text-base mb-4">Invoice Details</h2>
-      @if(uiMode() === 'create') {
-      <label class="flex items-center gap-2 text-xs text-gray-600"> Auto Numbering
-        <dbc-switch formControlName="autoNumbering"> </dbc-switch> </label>
-      }
     </div>
     <div class="space-y-3">
       <div class="flex items-center gap-2 mb-2">
@@ -36,10 +32,6 @@
           inputClass="flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 placeholder-gray-400 focus:outline-none focus:border-b-primary border-b-gray-300"
           (onSearch)="onTaxOptionSearch($event)">
         </app-auto-complete>
-      </div>
-      <div class="flex items-center gap-2 mb-2">
-        <label class="w-28 text-sm text-gray-700">Delivery State:</label>
-        <input formControlName="deliverystate" type="text" appTextInput />
       </div>
     </div>
   </div>

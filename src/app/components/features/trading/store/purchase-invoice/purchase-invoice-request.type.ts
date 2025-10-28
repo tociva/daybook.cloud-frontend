@@ -39,8 +39,6 @@ export interface PurchaseInvoiceRequest {
   roundoff?: number; // default: 0
   grandtotal: number;
   currencycode: string;
-  billingaddress: Address;
-  shippingaddress: Address;
   cprops?: PurchaseInvoiceCustomProperties; // default: {}
   description?: string; // default: ''
   vendorid: string; // format: uuid

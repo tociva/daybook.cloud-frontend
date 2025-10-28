@@ -90,9 +90,10 @@ export const vendorEffects = {
       return actions$.pipe(
         ofType(vendorActions.loadVendors),
         tap((action) => {
-          const { limit, offset, search, sort } = action.query ?? {};
+          const { limit, offset, search, sort, includes } = action.query ?? {};
           const filter = LB4QueryBuilder.create()
           .applySignalStoreFilters(limit ?? 10, offset ?? 0, search ?? {query: '', fields: []}, sort ?? [])
+          .applySignalStoreIncludes(includes ?? [])
           .build();
           const baseUrl = `${configStore.config().apiBaseUrl}/inventory/vendor`;
           const requestId = `${vendorActions.loadVendors.type}-${Date.now()}-${Math.random()}`;

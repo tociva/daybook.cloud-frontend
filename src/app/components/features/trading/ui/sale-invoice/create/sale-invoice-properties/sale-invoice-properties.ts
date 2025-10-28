@@ -64,11 +64,9 @@ export class SaleInvoiceProperties {
 
   private changeTaxOptionEffect = effect(() => {
     const form = this.form?.();
-    const uiMode = this.uiMode?.();
     const taxoptionSig = this.taxoptionSig;
     if(!form || !taxoptionSig) return;
     const taxoption = taxoptionSig();
-    const taxoptionCtrl = form.controls.taxoption;
     if(taxoption === 'Inter State') {
       form.controls['deliverystate'].enable({ emitEvent: false });
     }else{

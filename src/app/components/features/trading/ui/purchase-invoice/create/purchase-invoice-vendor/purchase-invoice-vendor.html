@@ -20,36 +20,11 @@
       <div class="w-1/2 p-4 border border-gray-200 rounded">
         <div class="flex items-center justify-between mb-3">
           <h3 class="font-semibold text-sm mb-3 flex items-center gap-1">
-            Billing Address
-            @if (billingReadonly()) {
-            <ng-icon name="bootstrapPencil" class="w-4 h-4 cursor-pointer" (click)="onEditBillingAddress()"></ng-icon>
-            } @else {
-            <ng-icon name="bootstrapCheckLg" class="w-4 h-4 cursor-pointer" size="16"
-              (click)="onEditBillingAddress()"></ng-icon>
-            }
+            Vendor Address
           </h3>
         </div>
-        <dbc-address-form [group]="form().controls['billingaddress']"
-          [readonly]="billingReadonly()">
-        </dbc-address-form>
-      </div>
-      <div class="w-1/2 p-4 border border-gray-200 rounded">
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="font-semibold text-sm mb-3 flex items-center gap-1">
-            Shipping Address
-            @if (shippingReadonly()) {
-            <ng-icon name="bootstrapPencil" class="w-4 h-4 cursor-pointer" (click)="onEditShippingAddress()"></ng-icon>
-            } @else {
-            <ng-icon name="bootstrapCheckLg" class="w-4 h-4 cursor-pointer" size="16"
-              (click)="onEditShippingAddress()"></ng-icon>
-            }
-          </h3>
-          <label class="flex items-center gap-2 text-xs text-gray-600"> Same as Billing
-            <dbc-switch formControlName="useBillingForShipping"> </dbc-switch>
-          </label>
-        </div>
-        <dbc-address-form [group]="form().controls['shippingaddress']"
-          [readonly]="shippingReadonly()">
+        <dbc-address-form [group]="form().controls['address']"
+          [readonly]="true">
         </dbc-address-form>
       </div>
       </div>

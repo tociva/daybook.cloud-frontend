@@ -126,9 +126,6 @@ export class PurchaseInvoiceShell {
       this.propertiesGroup().patchValue({ currency: vendor.currency });
       this.fractions.set(vendor.currency.fractions ?? TWO);
     }
-    if (vendor.state) {
-      this.propertiesGroup().patchValue({ deliverystate: vendor.state });
-    }
   });
 
   private readonly taxModeEffectRef = effect(() => {

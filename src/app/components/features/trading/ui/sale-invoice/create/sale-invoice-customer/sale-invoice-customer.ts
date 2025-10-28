@@ -71,6 +71,10 @@ export class SaleInvoiceCustomer {
     }
   });
 
+  ngOnDestroy() {
+    this.logFx.destroy();
+  }
+
   onEditBillingAddress()  { this.billingReadonly.update(v => !v); }
   onEditShippingAddress() { this.shippingReadonly.update(v => !v); }
 
@@ -85,9 +89,6 @@ export class SaleInvoiceCustomer {
     if(this.form().controls['useBillingForShipping'].value) {
       this.form().patchValue({ shippingaddress: customer.address });
     }
-    // this.form.patchValue({ customer: customer });
-    // this.form.patchValue({ deliveryState: customer.state });
-    // this.form.patchValue({ currency: customer.currency });
   }
 
   onNewCustomer() {

@@ -75,9 +75,7 @@ export class PurchaseInvoiceFormService {
         showDescription: this.fb.nonNullable.control(false),
         vendor: this.fb.nonNullable.group<PurchaseInvoiceVendorForm>({
           vendor: this.fb.nonNullable.control({} as Vendor, { validators: [Validators.required] }),
-          billingaddress: this.buildAddressGroup(),
-          shippingaddress: this.buildAddressGroup(),
-          useBillingForShipping: this.fb.control(true, { nonNullable: true }),
+          address: this.buildAddressGroup(),
         }),
         properties: this.fb.nonNullable.group<PurchaseInvoicePropertiesForm>({
           number: this.fb.control('', { nonNullable: true }),
@@ -85,8 +83,6 @@ export class PurchaseInvoiceFormService {
           duedate: this.fb.control(duedate, { nonNullable: true }),
           journal: this.fb.control('', { nonNullable: true }),
           currency: this.fb.control({} as Currency, { nonNullable: true }),
-          deliverystate: this.fb.control('', { nonNullable: true }),
-          autoNumbering: this.fb.control(true, { nonNullable: true }),
           taxoption: this.fb.control('Intra State', { nonNullable: true }),
         }),
         items: this.fb.nonNullable.array<FormGroup<PurchaseItemForm>>([this.buildPurchaseItemForm()], { validators: [Validators.required] }),

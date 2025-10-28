@@ -200,27 +200,28 @@ export class CreateVendor implements OnInit {
     const {country, currency, name, mobile, email, gstin, pan, address, state, description, status} = data;
 
     // Ensure address object is properly structured
-    const vendor = {
+    const vendor:VendorCU = {
       name,
-      mobile,
-      email,
-      gstin,
-      pan,
+      ...(mobile ? {mobile} : {}),
+      ...(email ? {email} : {}),
+      ...(gstin ? {gstin} : {}),
+      ...(pan ? {pan} : {}),
       countrycode: country?.code as string,
       currencycode: currency?.code as string,
-      state,
-      description,
+      ...(state ? {state} : {}),
+      ...(description ? {description} : {}),
       address: {
-        name: address?.name || '',
-        line1: address?.line1 || '',
-        line2: address?.line2 || '',
-        street: address?.street || '',
-        city: address?.city || '',
-        state: state || '',
-        zip: address?.zip || '',
-        country: country?.name || '',
+        name: address?.name ?? '',
+        line1: address?.line1 ?? '',
+        ...(address?.line2 ? {line2: address?.line2} : {}),
+        street: address?.street ?? '',
+        city: address?.city ?? '',
+        state: state ?? '',
+        zip: address?.zip ?? '',
+        country: country?.name ?? '',
+        ...(mobile ? {mobile} : {}),
+        ...(email ? {email} : {}),
       },
-      status: status !== undefined ? Number(status) : 1
     };
 
     if(this.mode === 'create') {
