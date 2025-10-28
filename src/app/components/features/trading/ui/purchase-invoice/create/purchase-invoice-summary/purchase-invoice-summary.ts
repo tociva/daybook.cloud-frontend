@@ -1,24 +1,25 @@
 import { Component, computed, input, output } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { SaleInvoiceSummaryForm, SaleInvoiceTaxDisplayModeType } from '../../util/sale-invoice-form.type';
+import { PurchaseInvoiceSummaryForm, PurchaseInvoiceTaxDisplayModeType } from '../../util/purchase-invoice-form.type';
 import { NumberInputDirective } from '../../../../../../../util/directives/number-input.directive';
 
 @Component({
-  selector: 'app-invoice-summary',
+  selector: 'app-purchase-invoice-summary',
   imports: [ReactiveFormsModule, NumberInputDirective],
-  templateUrl: './invoice-summary.html',
-  styleUrl: './invoice-summary.css'
+  templateUrl: './purchase-invoice-summary.html',
+  styleUrl: './purchase-invoice-summary.css'
 })
-export class InvoiceSummary {
+export class PurchaseInvoiceSummary {
 
-  readonly form = input.required<FormGroup<SaleInvoiceSummaryForm>>();
-  readonly taxDisplayMode = input.required<SaleInvoiceTaxDisplayModeType>();
+  readonly form = input.required<FormGroup<PurchaseInvoiceSummaryForm>>();
+  readonly taxDisplayMode = input.required<PurchaseInvoiceTaxDisplayModeType>();
   readonly showDiscount = input.required<boolean>();
   readonly onRoundoffChange = output<void>();
   readonly showTax = computed(() => {
     const mode = this.taxDisplayMode();
-    return ![SaleInvoiceTaxDisplayModeType.NON_TAXABLE].includes(mode);
+    return ![PurchaseInvoiceTaxDisplayModeType.NON_TAXABLE].includes(mode);
   });
 
   readonly handleRoundoffChange = () => this.onRoundoffChange.emit();
 }
+

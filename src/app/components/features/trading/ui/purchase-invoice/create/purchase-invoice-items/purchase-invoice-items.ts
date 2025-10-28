@@ -7,12 +7,12 @@ import { formatAmountToFraction } from '../../../../../../../util/currency.util'
 import { NumberInputDirective } from '../../../../../../../util/directives/number-input.directive';
 import { AutoComplete } from '../../../../../../shared/auto-complete/auto-complete';
 import { Item, itemActions, ItemStore } from '../../../../store/item';
-import { SaleItemTax } from '../../../../store/sale-invoice/sale-item-tax.model';
+import { PurchaseItemTax } from '../../../../store/purchase-invoice/purchase-item-tax.model';
 import { Tax, taxActions, TaxStore } from '../../../../store/tax';
 import { taxGroupActions, TaxGroupStore } from '../../../../store/tax-group';
-import { SaleInvoiceFormService } from '../../util/sale-invoice-form.service';
-import { SaleInvoiceTaxDisplayModeType, SaleItemForm, SaleItemTaxForm } from '../../util/sale-invoice-form.type';
-import { findTaxColumnCount } from '../../util/sale-invoice.util';
+import { PurchaseInvoiceFormService } from '../../util/purchase-invoice-form.service';
+import { PurchaseInvoiceTaxDisplayModeType, PurchaseItemForm, PurchaseItemTaxForm } from '../../util/purchase-invoice-form.type';
+import { findTaxColumnCount } from '../../util/purchase-invoice.util';
 
 type Column = { key: string; span: number, visible: boolean };
 const BASE_COLUMNS: ReadonlyArray<Column> = [
@@ -30,29 +30,26 @@ const BASE_COLUMNS: ReadonlyArray<Column> = [
   { key: 'grandtotal',    span: 2, visible: true  },
   { key: 'action',        span: 1, visible: true  },
 ];
+
 @Component({
-  selector: 'app-invoice-items',
+  selector: 'app-purchase-invoice-items',
   imports: [NgClass, AutoComplete, ReactiveFormsModule, NgIcon, NumberInputDirective],
-  templateUrl: './invoice-items.html',
-  styleUrl: './invoice-items.css'
+  templateUrl: './purchase-invoice-items.html',
+  styleUrl: './purchase-invoice-items.css'
 })
-export class InvoiceItems {
+export class PurchaseInvoiceItems {
 
   private readonly store = inject(Store);
   private readonly itemStore = inject(ItemStore);
   private readonly taxGroupStore = inject(TaxGroupStore);
   private readonly taxStore = inject(TaxStore);
-  private readonly saleInvoiceFormService = inject(SaleInvoiceFormService);
+  private readonly purchaseInvoiceFormService = inject(PurchaseInvoiceFormService);
 
-  readonly formArray = input.required<FormArray<FormGroup<SaleItemForm>>>();
-
+  readonly formArray = input.required<FormArray<FormGroup<PurchaseItemForm>>>();
   readonly fractions = input.required<number>();
-
   readonly onItemUpdate = output<void>();
-  
   readonly taxMode = input<string>();
-
-  readonly taxDisplayMode = input.required<SaleInvoiceTaxDisplayModeType>();
+  readonly taxDisplayMode = input.required<PurchaseInvoiceTaxDisplayModeType>();
   readonly showDiscount = input<boolean>(false);
   readonly showDescription = input<boolean>(false);
 
@@ -60,11 +57,10 @@ export class InvoiceItems {
   readonly taxGroups = this.taxGroupStore.items;
   readonly taxes = this.taxStore.items;
 
-
   readonly columns = computed<Column[]>(() => {
-    const isIgst = [SaleInvoiceTaxDisplayModeType.IGST, SaleInvoiceTaxDisplayModeType.IGST_CESS].includes(this.taxDisplayMode());
-    const hasCess = [SaleInvoiceTaxDisplayModeType.CGST_SGST_CESS, SaleInvoiceTaxDisplayModeType.IGST_CESS].includes(this.taxDisplayMode());
-    const isCGSTSGST = [SaleInvoiceTaxDisplayModeType.CGST_SGST, SaleInvoiceTaxDisplayModeType.CGST_SGST_CESS].includes(this.taxDisplayMode());
+    const isIgst = [PurchaseInvoiceTaxDisplayModeType.IGST, PurchaseInvoiceTaxDisplayModeType.IGST_CESS].includes(this.taxDisplayMode());
+    const hasCess = [PurchaseInvoiceTaxDisplayModeType.CGST_SGST_CESS, PurchaseInvoiceTaxDisplayModeType.IGST_CESS].includes(this.taxDisplayMode());
+    const isCGSTSGST = [PurchaseInvoiceTaxDisplayModeType.CGST_SGST, PurchaseInvoiceTaxDisplayModeType.CGST_SGST_CESS].includes(this.taxDisplayMode());
     const hasTax = isCGSTSGST || isIgst || hasCess;
     const hasDiscount = !!this.showDiscount();
     const hasDescription = !!this.showDescription();
@@ -91,12 +87,11 @@ export class InvoiceItems {
     });
     return cols;
   });
-  // dynamically computed total columns (sum of all spans)
+
   readonly totalCols = computed(() =>
     this.columns().reduce((sum, col) => sum + (col.visible ? col.span : 0), 0)
   );
 
-  // dynamic grid class
   readonly gridClass = computed(() => `grid grid-cols-${this.totalCols()}`);
 
   ngOnInit() {
@@ -109,25 +104,23 @@ export class InvoiceItems {
       const col = this.columns().find(c => c.key === key);
       const cssClass = `col-span-${col?.span ?? 1}`;
       return cssClass;
-    }
-  );
+    });
     
   colVisibleFor = (key: string) =>
     computed(() => this.columns().find(c => c.key === key)?.visible ?? false);
 
+  findItemDisplayValue = (item: Item) => {
+    const name = item?.displayname ?? item?.name ?? '';
+    return name;
+  }
 
-    findItemDisplayValue = (item: Item) => {
-      const name = item?.displayname ?? item?.name ?? '';
-      return name;
+  findItemOptionDisplayValue = (item: Item) => {
+    const name = item?.name ?? item?.displayname ?? '';
+    if(item.barcode) {
+      return `${name} (${item.barcode})`;
     }
-
-    findItemOptionDisplayValue = (item: Item) => {
-      const name = item?.name ?? item?.displayname ?? '';
-      if(item.barcode) {
-        return `${name} (${item.barcode})`;
-      }
-      return name;
-    }
+    return name;
+  }
 
   onItemSearch = (value: string) => {
     this.store.dispatch(itemActions.loadItems({ query: { search: { query: value, fields: ['name', 'code', 'description', 'displayname', 'barcode'] }, includes: ['category'] } }));
@@ -166,12 +159,12 @@ export class InvoiceItems {
   addItemRow() {
     const mode = this.taxDisplayMode();
     const taxColumnCount = findTaxColumnCount(mode);
-    const taxes:Partial<SaleItemTax>[] = [];
+    const taxes:Partial<PurchaseItemTax>[] = [];
     for(let idx = 0; idx < taxColumnCount; idx++) {
       taxes.push({});
     }
-    const newGroup = this.saleInvoiceFormService.buildSaleItemForm();
-    const taxesFormArray = this.saleInvoiceFormService.buildSaleItemTaxesForm(taxes);
+    const newGroup = this.purchaseInvoiceFormService.buildPurchaseItemForm();
+    const taxesFormArray = this.purchaseInvoiceFormService.buildPurchaseItemTaxesForm(taxes);
     newGroup.setControl('taxes', taxesFormArray);
     this.formArray().push(newGroup);
   }
@@ -209,5 +202,5 @@ export class InvoiceItems {
     });
     this.onItemUpdate.emit();
   }
-
 }
+

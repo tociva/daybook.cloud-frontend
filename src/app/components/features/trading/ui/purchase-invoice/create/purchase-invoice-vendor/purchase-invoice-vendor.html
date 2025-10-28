@@ -1,0 +1,74 @@
+<div id="vendor-details" class="flex-1" [formGroup]="form()">
+  <div class="flex items-center justify-between mb-4 gap-4">
+    <app-auto-complete formControlName="vendor" [options]="vendors()" class="flex-1"
+      placeholder="Search for a vendor" [required]="true" [optionDisplayValue]="findVendorDisplayValue"
+      [inputDisplayValue]="findVendorDisplayValue" (onSearch)="onVendorSearch($event)"
+      (onOptionSelected)="onVendorSelected($event)">
+    </app-auto-complete>
+
+    <button type="button"
+      class="flex items-center px-3 py-1.5 text-sm font-medium bg-primary text-white rounded hover:bg-primary-hover"
+      (click)="onNewVendor()">
+      <ng-icon name="bootstrapPlus" class="w-4 h-4 mr-1" size="24"></ng-icon>
+      New Vendor
+    </button>
+  </div>
+  @let vendor = form().controls['vendor'].value;
+
+  @if (vendor?.id) {
+    <div id="address-row" class="flex gap-4 items-start">
+      <div class="w-1/2 p-4 border border-gray-200 rounded">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-semibold text-sm mb-3 flex items-center gap-1">
+            Billing Address
+            @if (billingReadonly()) {
+            <ng-icon name="bootstrapPencil" class="w-4 h-4 cursor-pointer" (click)="onEditBillingAddress()"></ng-icon>
+            } @else {
+            <ng-icon name="bootstrapCheckLg" class="w-4 h-4 cursor-pointer" size="16"
+              (click)="onEditBillingAddress()"></ng-icon>
+            }
+          </h3>
+        </div>
+        <dbc-address-form [group]="form().controls['billingaddress']"
+          [readonly]="billingReadonly()">
+        </dbc-address-form>
+      </div>
+      <div class="w-1/2 p-4 border border-gray-200 rounded">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-semibold text-sm mb-3 flex items-center gap-1">
+            Shipping Address
+            @if (shippingReadonly()) {
+            <ng-icon name="bootstrapPencil" class="w-4 h-4 cursor-pointer" (click)="onEditShippingAddress()"></ng-icon>
+            } @else {
+            <ng-icon name="bootstrapCheckLg" class="w-4 h-4 cursor-pointer" size="16"
+              (click)="onEditShippingAddress()"></ng-icon>
+            }
+          </h3>
+          <label class="flex items-center gap-2 text-xs text-gray-600"> Same as Billing
+            <dbc-switch formControlName="useBillingForShipping"> </dbc-switch>
+          </label>
+        </div>
+        <dbc-address-form [group]="form().controls['shippingaddress']"
+          [readonly]="shippingReadonly()">
+        </dbc-address-form>
+      </div>
+      </div>
+  } @else {
+    <div class="p-4">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-semibold text-xl text-sm mb-3 flex items-center gap-1 text-gray-600">
+          Please select a vendor or
+          <button
+            type="button"
+            class="text-primary font-medium underline underline-offset-2 hover:text-primary-hover cursor-pointer focus:outline-none transition-colors"
+            (click)="onNewVendor()"
+          >
+            create a new vendor
+          </button>
+        </h3>
+      </div>
+    </div>
+  }
+
+</div>
+

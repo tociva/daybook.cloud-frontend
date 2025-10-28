@@ -7,18 +7,18 @@ export const saleInvoiceRoutes: Routes = [
   },
   {
     path: 'create',
-    loadComponent: () => import('./create/invoice-shell/invoice-shell').then(m => m.InvoiceShell),
+    loadComponent: () => import('./create/sale-invoice-shell/sale-invoice-shell').then(m => m.SaleInvoiceShell),
   },
   {
     path: ':id/edit',
-    loadComponent: () => import('./create/invoice-shell/invoice-shell').then(m => m.InvoiceShell),
+    loadComponent: () => import('./create/sale-invoice-shell/sale-invoice-shell').then(m => m.SaleInvoiceShell),
   },
   {
     path: ':id/view',
-    loadComponent: () => import('./create/invoice-shell/invoice-shell').then(m => m.InvoiceShell),
+    loadComponent: () => import('./create/sale-invoice-shell/sale-invoice-shell').then(m => m.SaleInvoiceShell),
   },
   {
     path: ':id/delete',
-    loadComponent: () => import('./create/invoice-shell/invoice-shell').then(m => m.InvoiceShell),
+    loadComponent: () => import('./create/sale-invoice-shell/sale-invoice-shell').then(m => m.SaleInvoiceShell),
   },
 ];

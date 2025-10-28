@@ -2,11 +2,11 @@ import dayjs from "dayjs";
 import { DEFAULT_NODE_DATE_FORMAT, TWO } from "../../../../../../util/constants";
 import { formatAmountToFraction, formatAmountToWords, toNumber } from "../../../../../../util/currency.util";
 import { convertToNodeDateFormat } from "../../../../../../util/date.util";
-import { SaleInvoiceItemRequest, SaleInvoiceItemTaxRequest, SaleInvoiceRequest } from "../../../store/sale-invoice/sale-invoice-request.type";
-import { SaleInvoice } from "../../../store/sale-invoice/sale-invoice.model";
-import { SaleInvoiceCustomerFormValue, SaleInvoiceFormValue, SaleInvoicePropertiesFormValue, SaleInvoiceSummaryFormValue, SaleInvoiceTaxDisplayModeType, SaleItemFormValue, SaleItemTaxFormValue } from "./sale-invoice-form.type";
+import { PurchaseInvoiceItemRequest, PurchaseInvoiceItemTaxRequest, PurchaseInvoiceRequest } from "../../../store/purchase-invoice/purchase-invoice-request.type";
+import { PurchaseInvoice } from "../../../store/purchase-invoice/purchase-invoice.model";
+import { PurchaseInvoiceVendorFormValue, PurchaseInvoiceFormValue, PurchaseInvoicePropertiesFormValue, PurchaseInvoiceSummaryFormValue, PurchaseInvoiceTaxDisplayModeType, PurchaseItemFormValue, PurchaseItemTaxFormValue } from "./purchase-invoice-form.type";
 
-export const mapSaleItemTaxFormValueToRequest = (formValue: SaleItemTaxFormValue): SaleInvoiceItemTaxRequest => {
+export const mapPurchaseItemTaxFormValueToRequest = (formValue: PurchaseItemTaxFormValue): PurchaseInvoiceItemTaxRequest => {
   const name = formValue.name;
   const shortname = formValue.shortname;
   const rate = toNumber(formValue.rate);
@@ -22,7 +22,8 @@ export const mapSaleItemTaxFormValueToRequest = (formValue: SaleItemTaxFormValue
     taxid,
   };
 };
-export const mapSaleItemFormValueToRequest = (formValue: SaleItemFormValue, order: number): SaleInvoiceItemRequest => {
+
+export const mapPurchaseItemFormValueToRequest = (formValue: PurchaseItemFormValue, order: number): PurchaseInvoiceItemRequest => {
   const item = formValue.item;
   const name = formValue.name ?? item.name;
   const displayname = formValue.displayname ?? item.displayname ?? item.name;
@@ -37,7 +38,7 @@ export const mapSaleItemFormValueToRequest = (formValue: SaleItemFormValue, orde
   const taxamount = toNumber(formValue.taxamount);
   const grandtotal = toNumber(formValue.grandtotal);
   const itemid = formValue.item.id!;
-  const taxes = formValue.taxes.map(tax => mapSaleItemTaxFormValueToRequest(tax));
+  const taxes = formValue.taxes.map(tax => mapPurchaseItemTaxFormValueToRequest(tax));
   return {
     name,
     ...(description ? { description } : {}),
@@ -57,7 +58,7 @@ export const mapSaleItemFormValueToRequest = (formValue: SaleItemFormValue, orde
   };
 };
 
-export const mapSaleInvoiceFormValueToRequest = (formValue: SaleInvoiceFormValue): SaleInvoiceRequest => {
+export const mapPurchaseInvoiceFormValueToRequest = (formValue: PurchaseInvoiceFormValue): PurchaseInvoiceRequest => {
   const number = formValue.properties.number;
   const isAutoNumbering = formValue.properties.autoNumbering;
   const date = convertToNodeDateFormat(formValue.properties.date);
@@ -69,16 +70,16 @@ export const mapSaleInvoiceFormValueToRequest = (formValue: SaleInvoiceFormValue
   const roundoff = toNumber(formValue.summary.roundoff);
   const grandtotal = toNumber(formValue.summary.grandtotal);
   const currencycode = formValue.properties.currency.code;
-  const billingaddress = formValue.customer.billingaddress;
-  const shippingaddress = formValue.customer.shippingaddress;
-  const customerid = formValue.customer.customer.id!;
+  const billingaddress = formValue.vendor.billingaddress;
+  const shippingaddress = formValue.vendor.shippingaddress;
+  const vendorid = formValue.vendor.vendor.id!;
   const taxoption = formValue.properties.taxoption;
   const taxdisplaymode = formValue.taxDisplayMode;
   const showdiscount = formValue.showDiscount;
   const showdescription = formValue.showDescription;
-  const usebillingforshipping = formValue.customer.usebillingforshipping;
+  const usebillingforshipping = formValue.vendor.usebillingforshipping;
   const deliverystate = formValue.properties.deliverystate;
-  const items = formValue.items.map((item, index) => mapSaleItemFormValueToRequest(item, index + 1));
+  const items = formValue.items.map((item, index) => mapPurchaseItemFormValueToRequest(item, index + 1));
   return {
     ...(!isAutoNumbering ? { number } : {}),
     date,
@@ -92,7 +93,7 @@ export const mapSaleInvoiceFormValueToRequest = (formValue: SaleInvoiceFormValue
     currencycode,
     billingaddress,
     shippingaddress,
-    customerid,
+    vendorid,
     items,
     cprops: {
       taxdisplaymode,
@@ -105,13 +106,12 @@ export const mapSaleInvoiceFormValueToRequest = (formValue: SaleInvoiceFormValue
   };
 };
 
-
-export const findTaxColumnCount = (taxDisplayMode: SaleInvoiceTaxDisplayModeType): number => {
-  if([SaleInvoiceTaxDisplayModeType.IGST].includes(taxDisplayMode)) {
+export const findTaxColumnCount = (taxDisplayMode: PurchaseInvoiceTaxDisplayModeType): number => {
+  if([PurchaseInvoiceTaxDisplayModeType.IGST].includes(taxDisplayMode)) {
     return 1;
-  }else if([SaleInvoiceTaxDisplayModeType.CGST_SGST, SaleInvoiceTaxDisplayModeType.IGST_CESS].includes(taxDisplayMode)) {
+  }else if([PurchaseInvoiceTaxDisplayModeType.CGST_SGST, PurchaseInvoiceTaxDisplayModeType.IGST_CESS].includes(taxDisplayMode)) {
     return 2;
-  }else if([SaleInvoiceTaxDisplayModeType.CGST_SGST_CESS].includes(taxDisplayMode)) {
+  }else if([PurchaseInvoiceTaxDisplayModeType.CGST_SGST_CESS].includes(taxDisplayMode)) {
     return 3;
   }
   return 0;
@@ -121,24 +121,23 @@ type Maybe<T> = T | null | undefined;
 
 const eqAddress = (a: any, b: any): boolean => {
   if (!a || !b) return false;
-  // shallow compare common address fields if present
   const keys = ['line1','line2','city','state','postalCode','country'];
   return keys.every(k => (a?.[k] ?? '') === (b?.[k] ?? ''));
 };
 
-const mapTaxes = (item: any): SaleItemTaxFormValue[] => {
+const mapTaxes = (item: any): PurchaseItemTaxFormValue[] => {
   const taxes = Array.isArray(item?.taxes) ? item.taxes : [];
-  return taxes.map((t: any): SaleItemTaxFormValue => ({
+  return taxes.map((t: any): PurchaseItemTaxFormValue => ({
     rate: toNumber(t?.rate),
     appliedto: toNumber(t?.appliedto),
     amount: toNumber(t?.amount),
     name: t?.name ?? '',
     shortname: t?.shortname ?? '',
-    tax: t?.tax, // keep original domain object
+    tax: t?.tax,
   }));
 };
 
-const mapItem = (item: any, fractions: number): SaleItemFormValue => ({
+const mapItem = (item: any, fractions: number): PurchaseItemFormValue => ({
   name: item?.name ?? item?.item?.name ?? '',
   displayname: item?.displayname ?? item?.item?.displayname ?? undefined,
   description: item?.description ?? undefined,
@@ -152,22 +151,22 @@ const mapItem = (item: any, fractions: number): SaleItemFormValue => ({
   taxes: mapTaxes(item),
   taxamount: item?.taxamount ?? null,
   grandtotal: formatAmountToFraction(item?.grandtotal, fractions),
-  item: item?.item, // keep original reference
+  item: item?.item,
 });
 
-const mapCustomerBlock = (inv: SaleInvoice): SaleInvoiceCustomerFormValue => {
+const mapVendorBlock = (inv: PurchaseInvoice): PurchaseInvoiceVendorFormValue => {
   const usebillingforshipping =
     (inv?.cprops?.usebillingforshipping ?? eqAddress(inv?.billingaddress, inv?.shippingaddress)) || false;
 
   return {
-    customer: inv.customer,
+    vendor: inv.vendor,
     billingaddress: inv.billingaddress,
     shippingaddress: usebillingforshipping ? inv.billingaddress : inv.shippingaddress,
     usebillingforshipping: usebillingforshipping,
   };
 };
 
-const mapSummary = (inv: SaleInvoice, fractions: number): SaleInvoiceSummaryFormValue => {
+const mapSummary = (inv: PurchaseInvoice, fractions: number): PurchaseInvoiceSummaryFormValue => {
   const grandtotal = toNumber(inv?.grandtotal);
   return {
     itemtotal: formatAmountToFraction(inv?.itemtotal, fractions),
@@ -180,11 +179,7 @@ const mapSummary = (inv: SaleInvoice, fractions: number): SaleInvoiceSummaryForm
   };
 };
 
-/**
- * NOTE: This assumes you already have a SaleInvoicePropertiesFormValue type defined elsewhere.
- * If its shape differs, adjust the object below to match your project’s definition.
- */
-const mapProperties = (inv: SaleInvoice): SaleInvoicePropertiesFormValue => ({
+const mapProperties = (inv: PurchaseInvoice): PurchaseInvoicePropertiesFormValue => ({
   number: inv.number,
   date: dayjs(inv.date).format(DEFAULT_NODE_DATE_FORMAT),
   duedate: dayjs(inv.duedate).format(DEFAULT_NODE_DATE_FORMAT),
@@ -195,15 +190,15 @@ const mapProperties = (inv: SaleInvoice): SaleInvoicePropertiesFormValue => ({
   journal: inv?.sprops?.journal ?? '',
 });
 
-
-export function saleInvoiceModelToSaleInvoiceFormValue(inv: SaleInvoice): SaleInvoiceFormValue {
+export function purchaseInvoiceModelToPurchaseInvoiceFormValue(inv: PurchaseInvoice): PurchaseInvoiceFormValue {
   return {
-    taxDisplayMode: inv?.cprops?.taxdisplaymode ?? SaleInvoiceTaxDisplayModeType.CGST_SGST, // fallback to your app’s default
+    taxDisplayMode: inv?.cprops?.taxdisplaymode ?? PurchaseInvoiceTaxDisplayModeType.CGST_SGST,
     showDiscount: inv?.cprops?.showdiscount ?? false,
     showDescription: inv?.cprops?.showdescription ?? false,
-    customer: mapCustomerBlock(inv),
+    vendor: mapVendorBlock(inv),
     properties: mapProperties(inv),
     items: Array.isArray(inv?.items) ? inv.items!.map(mapItem) : [],
     summary: mapSummary(inv, inv?.currency?.minorunit ?? TWO),
   };
 }
+

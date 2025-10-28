@@ -29,6 +29,7 @@ import { ledgerCategoryEffects } from './components/features/accounting/store/le
 import { branchEffects } from './components/features/management/store/branch/branch.effects';
 import { fiscalYearEffects } from './components/features/management/store/fiscal-year/fiscal-year.effects';
 import { saleInvoiceEffects } from './components/features/trading/store/sale-invoice/sale-invoice.effects';
+import { purchaseInvoiceEffects } from './components/features/trading/store/purchase-invoice/purchase-invoice.effects';
 import { taxGroupEffects } from './components/features/trading/store/tax-group/tax-group.effects';
 import { customerReceiptEffects } from './components/features/trading/store/customer-receipt/customer-receipt.effects';
 
@@ -60,6 +61,7 @@ export const appConfig: ApplicationConfig = {
       ledgerEffects,
       ledgerCategoryEffects,
       saleInvoiceEffects,
+      purchaseInvoiceEffects,
       customerReceiptEffects,
     ]),
     provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),

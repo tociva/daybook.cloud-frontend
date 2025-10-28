@@ -6,27 +6,27 @@ import { Store } from '@ngrx/store';
 import { AutoComplete } from '../../../../../../shared/auto-complete/auto-complete';
 import { DbcAddressForm } from '../../../../../../shared/dbc-address-form/dbc-address-form';
 import { DbcSwitch } from '../../../../../../shared/dbc-switch/dbc-switch';
-import { Customer, customerActions } from '../../../../store/customer';
-import { CustomerStore } from '../../../../store/customer/customer.store';
-import { AddressGroup, SaleInvoiceCustomerForm } from '../../util/sale-invoice-form.type';
+import { Vendor, vendorActions } from '../../../../store/vendor';
+import { VendorStore } from '../../../../store/vendor/vendor.store';
+import { AddressGroup, PurchaseInvoiceVendorForm } from '../../util/purchase-invoice-form.type';
 import { distinctUntilChanged, of, startWith, switchMap } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
-  selector: 'app-invoice-customer',
+  selector: 'app-purchase-invoice-vendor',
   imports: [ReactiveFormsModule, AutoComplete, DbcAddressForm, NgIcon, DbcSwitch],
-  templateUrl: './invoice-customer.html',
-  styleUrl: './invoice-customer.css'
+  templateUrl: './purchase-invoice-vendor.html',
+  styleUrl: './purchase-invoice-vendor.css'
 })
-export class InvoiceCustomer {
+export class PurchaseInvoiceVendor {
 
-  private readonly customerStore = inject(CustomerStore);
+  private readonly vendorStore = inject(VendorStore);
   private readonly router = inject(Router);
   private readonly store = inject(Store);
 
-  readonly form = input.required<FormGroup<SaleInvoiceCustomerForm>>();
+  readonly form = input.required<FormGroup<PurchaseInvoiceVendorForm>>();
 
-  readonly customers = this.customerStore.items;
+  readonly vendors = this.vendorStore.items;
 
   // UI-only state (not in form)
   readonly billingReadonly  = signal(true);
@@ -61,6 +61,7 @@ export class InvoiceCustomer {
     ),
     { initialValue: null }
   );
+
   private logFx = effect(() => {
     const useBillingForShipping = this.useBillingForShippingSig();
     const billingAddress = this.billingAddressSig();
@@ -74,24 +75,22 @@ export class InvoiceCustomer {
   onEditBillingAddress()  { this.billingReadonly.update(v => !v); }
   onEditShippingAddress() { this.shippingReadonly.update(v => !v); }
 
-  findCustomerDisplayValue = (customer: Customer) => customer?.name ?? '';
+  findVendorDisplayValue = (vendor: Vendor) => vendor?.name ?? '';
 
-  onCustomerSearch(value: string) {
-    this.store.dispatch(customerActions.loadCustomers({ query: { search: { query: value, fields: ['name', 'mobile', 'description','email'] }, includes: ['currency'] } }));
+  onVendorSearch(value: string) {
+    this.store.dispatch(vendorActions.loadVendors({ query: { search: { query: value, fields: ['name', 'mobile', 'description','email'] }, includes: ['currency'] } }));
   }
 
-  onCustomerSelected(customer: Customer) {
-    this.form().patchValue({ billingaddress: customer.address });
+  onVendorSelected(vendor: Vendor) {
+    this.form().patchValue({ billingaddress: vendor.address });
     if(this.form().controls['useBillingForShipping'].value) {
-      this.form().patchValue({ shippingaddress: customer.address });
+      this.form().patchValue({ shippingaddress: vendor.address });
     }
-    // this.form.patchValue({ customer: customer });
-    // this.form.patchValue({ deliveryState: customer.state });
-    // this.form.patchValue({ currency: customer.currency });
   }
 
-  onNewCustomer() {
+  onNewVendor() {
     const burl = this.router.url;
-    this.router.navigate(['/app/trading/customer/create'], { queryParams: { burl } });
+    this.router.navigate(['/app/trading/vendor/create'], { queryParams: { burl } });
   }
 }
+

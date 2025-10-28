@@ -34,6 +34,10 @@ export const tradingRoutes: Routes = [
     loadChildren: () => import('./ui/sale-invoice/sale-invoice.routes').then(m => m.saleInvoiceRoutes),
   },
   {
+    path: 'purchase-invoice',
+    loadChildren: () => import('./ui/purchase-invoice/purchase-invoice.routes').then(m => m.purchaseInvoiceRoutes),
+  },
+  {
     path: 'customer-receipt',
     loadChildren: () => import('./ui/customer-receipt/customer-receipt.routes').then(m => m.customerReceiptRoutes),
   },

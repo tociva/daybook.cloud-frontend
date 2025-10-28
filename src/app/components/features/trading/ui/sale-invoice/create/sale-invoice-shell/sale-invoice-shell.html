@@ -14,13 +14,13 @@
   <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-start mt-4">
     <!-- Left: first half -->
     <div class="md:col-span-2">
-      <app-invoice-customer [form]="customerGroup()"></app-invoice-customer>
+      <app-sale-invoice-customer [form]="customerGroup()"></app-sale-invoice-customer>
     </div>
 
     <div class="md:col-span-1"></div>
     <!-- Right: second half -->
     <div class="md:col-span-1">
-      <app-invoice-properties [form]="propertiesGroup()" [uiMode]="mode()"></app-invoice-properties>
+      <app-sale-invoice-properties [form]="propertiesGroup()" [uiMode]="mode()"></app-sale-invoice-properties>
     </div>
   </div>
   <div class="flex flex-wrap items-center justify-center gap-8 p-4">
@@ -42,11 +42,11 @@
       <dbc-switch formControlName="showDescription"></dbc-switch>
     </div>
   </div>
-  <app-invoice-items [formArray]="itemsGroup()" [taxMode]="taxMode()" [fractions]="fractions()"
+  <app-sale-invoice-items [formArray]="itemsGroup()" [taxMode]="taxMode()" [fractions]="fractions()"
     (onItemUpdate)="onItemUpdate()" [taxDisplayMode]="taxDisplayMode()" [showDiscount]="showDiscount()"
-    [showDescription]="showDescription()"></app-invoice-items>
-  <app-invoice-summary [form]="summaryGroup()" (onRoundoffChange)="onRoundoffChange()"
-    [taxDisplayMode]="taxDisplayMode()" [showDiscount]="showDiscount()"></app-invoice-summary>
+    [showDescription]="showDescription()"></app-sale-invoice-items>
+  <app-sale-invoice-summary [form]="summaryGroup()" (onRoundoffChange)="onRoundoffChange()"
+    [taxDisplayMode]="taxDisplayMode()" [showDiscount]="showDiscount()"></app-sale-invoice-summary>
   <!-- Confirmation -->
   @if(mode() === 'delete') {
   <div class="flex items-start gap-3 py-4">

@@ -1,0 +1,172 @@
+<div class="p-4 border border-gray-200 rounded mt-4">
+  <div class="grid text-xs font-semibold text-gray-700 bg-gray-50 border-b border-gray-200" [ngClass]="gridClass()">
+    @if(colVisibleFor('#')()) {
+      <div class="flex items-center justify-center border-r border-gray-200 py-2" [ngClass]="colSpanFor('#')()">#
+      </div>
+      }
+    @if(colVisibleFor('name')()) {
+    <div class="flex items-center justify-center border-r border-gray-200 py-2" [ngClass]="colSpanFor('name')()">Name
+    </div>
+    }
+    @if(colVisibleFor('description')()) {
+    <div class="flex items-center justify-center border-r border-gray-200 py-2" [ngClass]="colSpanFor('description')()">
+      Description</div>
+    }
+    @if(colVisibleFor('price')()) {
+    <div class="flex items-center justify-center border-r border-gray-200 py-2" [ngClass]="colSpanFor('price')()">Price
+    </div>
+    }
+    @if(colVisibleFor('quantity')()) {
+    <div class="border-r border-gray-200 text-center py-2" [ngClass]="colSpanFor('quantity')()">
+      <div>Quantity</div>
+      <div class="mt-1 border-gray-200 pt-1">Item Total</div>
+    </div>
+    }
+    @if(colVisibleFor('discount')()) {
+    <div class="border-r border-gray-200 grid grid-cols-4" [ngClass]="colSpanFor('discount')()">
+      <div class="flex items-center justify-center col-span-1">
+        <span class="writing-vertical rotate-270">Discount</span>
+      </div>
+      <div class="text-center py-2 col-span-3">
+        <div>%</div>
+        <div class="mt-1 border-gray-200 pt-1">Amount</div>
+      </div>
+    </div>
+    }
+    @if(colVisibleFor('taxableamount')()) {
+    <div class="flex items-center justify-center border-r border-gray-200 py-2"
+      [ngClass]="colSpanFor('taxableamount')()">Taxable Amount</div>
+    }
+    @if(colVisibleFor('sgst')()) {
+    <!-- SGST -->
+    <div class="border-r border-gray-200 grid grid-cols-4" [ngClass]="colSpanFor('sgst')()">
+      <div class="flex items-center justify-center col-span-1">
+        <span class="writing-vertical rotate-270">SGST</span>
+      </div>
+      <div class="text-center py-2 col-span-3">
+        <div>%</div>
+        <div class="mt-1 border-gray-200 pt-1">Amount</div>
+      </div>
+    </div>
+    }
+    @if(colVisibleFor('cgst')()) {
+    <!-- CGST -->
+    <div class="border-r border-gray-200 grid grid-cols-4" [ngClass]="colSpanFor('cgst')()">
+      <div class="flex items-center justify-center col-span-1">
+        <span class="writing-vertical rotate-270">CGST</span>
+      </div>
+      <div class="text-center py-2 col-span-3">
+        <div>%</div>
+        <div class="mt-1 border-gray-200 pt-1">Amount</div>
+      </div>
+    </div>
+    }
+    <!-- IGST -->
+    @if(colVisibleFor('igst')()) {
+    <div class="border-r border-gray-200 grid grid-cols-4" [ngClass]="colSpanFor('igst')()">
+      <div class="flex items-center justify-center col-span-1">
+        <span class="writing-vertical rotate-270">IGST</span>
+      </div>
+      <div class="text-center py-2 col-span-3">
+        <div>%</div>
+        <div class="mt-1 border-gray-200 pt-1">Amount</div>
+      </div>
+    </div>
+    }
+    <!-- CESS -->
+    @if(colVisibleFor('cess')()) {
+    <div class="border-r border-gray-200 grid grid-cols-4" [ngClass]="colSpanFor('cess')()">
+      <div class="flex items-center justify-center col-span-1">
+        <span class="writing-vertical rotate-270">CESS</span>
+      </div>
+      <div class="text-center py-2 col-span-3">
+        <div>%</div>
+        <div class="mt-1 border-gray-200 pt-1">Amount</div>
+      </div>
+    </div>
+    }
+    <!-- Grand Total -->
+    @if(colVisibleFor('grandtotal')()) {
+    <div class="flex items-center justify-center py-2" [ngClass]="colSpanFor('grandtotal')()">Grand Total</div>
+    }
+    @if(colVisibleFor('action')()) {
+    <div class="flex items-center justify-center py-2" [ngClass]="colSpanFor('action')()"></div>
+    }
+  </div>
+  @for (itemRow of formArray().controls; track itemIdx; let itemIdx = $index) {
+  <div class="grid text-xs font-medium text-gray-500 border-b border-gray-400" [ngClass]="gridClass()"
+  [formGroup]="itemRow">
+    @if(colVisibleFor('#')()) {
+      <div class="flex items-center justify-center border-r border-gray-200 py-2" [ngClass]="colSpanFor('#')()">
+        {{ itemIdx + 1 }}
+      </div>
+    }
+    @if(colVisibleFor('name')()) {
+    <app-auto-complete formControlName="item" [options]="items()" class="flex-1" [ngClass]="colSpanFor('name')()"
+      placeholder="Search for an item" [required]="true"
+      inputClass="flex-1 h-16 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 placeholder-gray-400 focus:outline-none focus:border-b-primary border-b-gray-300"
+      [optionDisplayValue]="findItemOptionDisplayValue" [inputDisplayValue]="findItemDisplayValue"
+      (onSearch)="onItemSearch($event)" (onOptionSelected)="onItemSelected(itemIdx)($event)">
+    </app-auto-complete>
+    }
+    @if(colVisibleFor('description')()) {
+    <input formControlName="description" type="textarea"
+      class="flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary border-b-gray-300"
+      [ngClass]="colSpanFor('description')()" rows="2" />
+    }
+    @if(colVisibleFor('price')()) {
+    <input class="border-r border-l border-gray-200 h-16 pr-2" [ngClass]="colSpanFor('price')()" type="text" appNumberInput
+    formControlName="price" (change)="onItemRowChange(itemIdx)()" />
+    }
+    @if(colVisibleFor('quantity')()) {
+      <div class="border-r border-gray-200 text-center py-2 h-16" [ngClass]="colSpanFor('quantity')()">
+        <input class="border-r border-gray-200 h-7 w-full" type="text" appNumberInput formControlName="quantity" (change)="onItemRowChange(itemIdx)()" />
+        <input class="border-r border-gray-200 h-7 w-full" type="text" appNumberInput formControlName="itemtotal" />
+      </div>
+    }
+    @if(colVisibleFor('discount')()) {
+      <div class="border-r border-gray-200 text-center py-2 h-16" [ngClass]="colSpanFor('discount')()">
+        <input class="border-r border-gray-200 h-7 w-full" type="text" appNumberInput
+          formControlName="discpercent" (change)="onItemRowChange(itemIdx)()" />
+        <input class="border-r border-gray-200 h-7 w-full" type="text" appNumberInput
+          formControlName="discamount" />
+      </div>
+    }
+    @if(colVisibleFor('taxableamount')()) {
+      <input class="border-r border-gray-200 h-16" type="text" appNumberInput [ngClass]="colSpanFor('taxableamount')()"
+      formControlName="subtotal" />
+    }
+    @for (taxeItem of itemRow.controls.taxes.controls; track taxIndex; let taxIndex = $index) {
+      <div class="border-r border-gray-200 text-center py-2 h-16" [ngClass]="colSpanFor('cgst')()">
+        <input class="border-r border-gray-200 h-7 w-full" type="text" appNumberInput [formControl]="taxeItem.controls.rate" (change)="onItemRowChange(itemIdx)()" />
+        <input class="border-r border-gray-200 h-7 w-full" type="text" appNumberInput [formControl]="taxeItem.controls.amount" />
+      </div>
+    }
+    @if(colVisibleFor('grandtotal')()) {
+      <input class="border-r border-l border-gray-200 h-16" type="text" appNumberInput [ngClass]="colSpanFor('grandtotal')()"
+      formControlName="grandtotal" />
+    }
+    @if(colVisibleFor('action')()) {
+      <div class="flex gap-2 items-center justify-center py-2 border-r border-b border-gray-200" [ngClass]="colSpanFor('action')()">
+        <button class="text-danger hover:text-danger-hover transition-colors duration-200 cursor-pointer"
+          title="Remove Item" (click)="removeItemRow(itemIdx)">
+          <ng-icon name="bootstrapTrash" size="16" />
+        </button>
+      </div>
+    }
+  </div>
+  }
+  <div class="flex justify-center py-3">
+    <button
+      type="button"
+      (click)="addItemRow()"
+      title="Click here to add another item"
+      class="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-3 text-sm font-medium text-on-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors duration-200 cursor-pointer"
+    >
+      <ng-icon name="bootstrapBagPlus" size="18" />
+      Add Another Item
+    </button>
+  </div>
+    
+</div>
+

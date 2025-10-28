@@ -1,53 +1,48 @@
 import { Component, effect, EnvironmentInjector, inject, input, runInInjectionContext, signal, WritableSignal } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { AutoComplete } from '../../../../../../shared/auto-complete/auto-complete';
-import { DbcSwitch } from '../../../../../../shared/dbc-switch/dbc-switch';
-import { SaleInvoicePropertiesForm } from '../../util/sale-invoice-form.type';
-import { CurrencyStore } from '../../../../../../shared/store/currency/currency.store';
-import { Currency } from '../../../../../../shared/store/currency/currency.model';
-import { TaxGroupModeStore } from '../../../../store/tax-group/tax-group.store';
-import { currencyActions } from '../../../../../../shared/store/currency/currency.action';
+import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { TextInputDirective } from '../../../../../../../util/directives/text-input.directive';
-import { distinctUntilChanged, of, startWith, switchMap } from 'rxjs';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { taxGroupActions } from '../../../../store/tax-group/tax-group.actions';
 import { FormUtil } from '../../../../../../../util/form/form.util';
+import { AutoComplete } from '../../../../../../shared/auto-complete/auto-complete';
+import { DbcSwitch } from '../../../../../../shared/dbc-switch/dbc-switch';
+import { currencyActions } from '../../../../../../shared/store/currency/currency.action';
+import { Currency } from '../../../../../../shared/store/currency/currency.model';
+import { CurrencyStore } from '../../../../../../shared/store/currency/currency.store';
+import { taxGroupActions } from '../../../../store/tax-group/tax-group.actions';
+import { TaxGroupModeStore } from '../../../../store/tax-group/tax-group.store';
+import { PurchaseInvoicePropertiesForm } from '../../util/purchase-invoice-form.type';
 
 @Component({
-  selector: 'app-invoice-properties',
+  selector: 'app-purchase-invoice-properties',
   imports: [ReactiveFormsModule, AutoComplete, DbcSwitch, TextInputDirective],
-  templateUrl: './invoice-properties.html',
-  styleUrl: './invoice-properties.css'
+  templateUrl: './purchase-invoice-properties.html',
+  styleUrl: './purchase-invoice-properties.css'
 })
-export class InvoiceProperties {
+export class PurchaseInvoiceProperties {
 
   private readonly store = inject(Store);
   private readonly currencyStore = inject(CurrencyStore);
   private readonly taxGroupModeStore = inject(TaxGroupModeStore);
 
-  readonly form = input.required<FormGroup<SaleInvoicePropertiesForm>>();
+  readonly form = input.required<FormGroup<PurchaseInvoicePropertiesForm>>();
   readonly uiMode = input.required<string>();
 
   currencies = signal<Currency[]>([]);
   modes = this.taxGroupModeStore.items;
   filteredModes = signal<string[]>([]);
 
-
   private readonly envInjector = inject(EnvironmentInjector);
-   // Will be created once the form input is available
-   private _autoNumberingSig!: WritableSignal<boolean>;
-   get autoNumberingSig() { return this._autoNumberingSig; }
+  private _autoNumberingSig!: WritableSignal<boolean>;
+  get autoNumberingSig() { return this._autoNumberingSig; }
 
-   private _taxoptionSig!: WritableSignal<string>;
-   get taxoptionSig() { return this._taxoptionSig; }
-  
-   private changeAutoNumberingEffect = effect(() => {
-    const form = this.form?.();            // input.required() returns a signal getter
+  private _taxoptionSig!: WritableSignal<string>;
+  get taxoptionSig() { return this._taxoptionSig; }
+ 
+  private changeAutoNumberingEffect = effect(() => {
+    const form = this.form?.();
     const uiMode = this.uiMode?.();
     const autoNumberingSig = this.autoNumberingSig;
   
-    // Guard: skip until everything exists
     if (!form || !autoNumberingSig || !uiMode) return;
   
     const autoNumbering = autoNumberingSig();
@@ -79,7 +74,6 @@ export class InvoiceProperties {
   }, { allowSignalWrites: true });
 
   constructor() {
-
     effect(() => {
       if(this.currencyStore.currenciesLoaded()) {
         this.currencies.set(this.currencyStore.filteredCurrencies());
@@ -126,6 +120,7 @@ export class InvoiceProperties {
     if(!currency?.name) return '';
     return `${currency.symbol} ${currency.name}`;
   }
+
   onTaxOptionSearch(value: string) {
     this.filteredModes.set(this.modes().filter(option => option.toLowerCase().includes(value.toLowerCase())));
   }
@@ -133,5 +128,5 @@ export class InvoiceProperties {
   onTaxOptionSelected(taxOption: string) {
     this.form().patchValue({ taxoption: taxOption });
   }
-
 }
+
