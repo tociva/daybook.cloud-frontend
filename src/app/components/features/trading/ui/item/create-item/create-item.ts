@@ -59,7 +59,7 @@ export class CreateItem extends WithFormDraftBinding implements OnInit {
         inputDisplayValue: (item: ItemCategory) => item.name,
         trackBy: (item: ItemCategory) => item.id!,
         onSearch: (value: string) => {
-          this.store.dispatch(itemCategoryActions.loadItemCategories({ query: { search: { query: value, fields: ['name', 'code', 'description'] } } }));
+          this.store.dispatch(itemCategoryActions.loadItemCategories({ query: { search: [{query: value, fields: ['name', 'code', 'description']}] } }));
         },
         onOptionSelected: (item: ItemCategory) => {
           if(item.id === 'Add New Category') {

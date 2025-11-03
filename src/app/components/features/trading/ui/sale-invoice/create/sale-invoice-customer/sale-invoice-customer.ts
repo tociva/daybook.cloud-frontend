@@ -81,7 +81,7 @@ export class SaleInvoiceCustomer {
   findCustomerDisplayValue = (customer: Customer) => customer?.name ?? '';
 
   onCustomerSearch(value: string) {
-    this.store.dispatch(customerActions.loadCustomers({ query: { search: { query: value, fields: ['name', 'mobile', 'description','email'] }, includes: ['currency'] } }));
+    this.store.dispatch(customerActions.loadCustomers({ query: { search: [{query: value, fields: ['name', 'mobile', 'description','email']}], includes: ['currency'] } }));
   }
 
   onCustomerSelected(customer: Customer) {

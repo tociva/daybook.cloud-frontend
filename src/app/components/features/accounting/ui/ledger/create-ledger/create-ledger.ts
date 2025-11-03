@@ -57,7 +57,7 @@ export class CreateLedger extends WithFormDraftBinding implements OnInit {
         inputDisplayValue: (item: LedgerCategory) => item.name,
         trackBy: (item: LedgerCategory) => item.id!,
         onSearch: (value: string) => {
-          this.store.dispatch(ledgerCategoryActions.loadLedgerCategories({ query: { search: { query: value, fields: ['name', 'description'] } } }));
+          this.store.dispatch(ledgerCategoryActions.loadLedgerCategories({ query: { search: [{query: value, fields: ['name', 'description']}] } }));
         },
         onOptionSelected: (item: LedgerCategory) => {
           if(item.id === 'Add New Category') {

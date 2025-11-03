@@ -79,7 +79,7 @@ export class ListCustomer implements OnInit, OnDestroy {
       if(this.pageSize() !== limit) {
         this.pageSize.set(limit ?? 10);
       }
-      const search = {query: params.search?.query ?? '', fields: ['description', 'name', 'mobile', 'email', 'gstin']};
+      const search = params.search?.length ? params.search : [{query: '', fields: ['description', 'name', 'mobile', 'email', 'gstin']}];
       this.store.dispatch(customerActions.loadCustomers({ 
         query: { limit: limit ?? 10, offset: offset ?? 0, search: search, sort: sort ?? [] } 
       }));

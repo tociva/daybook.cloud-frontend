@@ -28,7 +28,7 @@ export class PurchaseInvoiceVendor {
   findVendorDisplayValue = (vendor: Vendor) => vendor?.name ?? '';
 
   onVendorSearch(value: string) {
-    this.store.dispatch(vendorActions.loadVendors({ query: { search: { query: value, fields: ['name', 'mobile', 'description','email'] }, includes: ['currency'] } }));
+    this.store.dispatch(vendorActions.loadVendors({ query: { search: [{query: value, fields: ['name', 'mobile', 'description','email']}], includes: ['currency'] } }));
   }
 
   onVendorSelected(vendor: Vendor) {

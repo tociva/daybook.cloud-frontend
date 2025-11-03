@@ -231,7 +231,7 @@ export class LB4QueryBuilder {
   applySignalStoreFilters(
     limit: number,
     offset: number,
-    search: LB4Search,
+    search: LB4Search[],
     sort: [string, string][],
     includes?: Array<string | IncludeSpec>
   ): this {
@@ -239,8 +239,8 @@ export class LB4QueryBuilder {
     this.offset(offset).limit(limit);
 
     // Search
-    if (search) {
-      this.search(search.query, search.fields);
+    if (search?.length) {
+      search.forEach(s => this.search(s.query, s.fields));
     }
 
     // Sort (allow multi-field order)

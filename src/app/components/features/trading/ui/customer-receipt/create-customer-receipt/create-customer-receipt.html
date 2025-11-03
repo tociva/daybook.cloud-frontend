@@ -162,16 +162,42 @@
   </div>
 
   <div formArrayName="invoices" class="p-4 border border-gray-300 rounded bg-white mt-6">
-    <h2 class="font-semibold text-base mb-4">Invoices</h2>
-    @for (invoice of invoices.controls; track $index; let i = $index) {
-      <div class="flex flex-col mb-6">
-        <div class="flex items-center gap-2">
-          <label class="w-32 text-sm text-gray-700">
-            Invoice {{ i + 1 }}
-          </label>
-        </div>
-      </div>
-    }
+    <h2 class="font-semibold text-base mb-4">Related Invoices</h2>
+    <table class="w-full">
+      <thead>
+        <tr>
+          <th class="text-left text-sm text-gray-700">Invoice</th>
+          <th class="text-left text-sm text-gray-700">Amount</th>
+          <th class="text-left text-sm text-gray-700">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (invoice of invoices.controls; track $index; let i = $index) {
+          <tr>
+            <td class="text-left text-sm text-gray-700">
+              <app-auto-complete
+                formControlName="invoiceid"
+                [options]="saleInvoices()"
+                class="flex-1"
+                placeholder="Search for an invoice"
+                [required]="true"
+                inputClass="flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 placeholder-gray-400 focus:outline-none focus:border-b-primary border-b-gray-300"
+                [optionDisplayValue]="findInvoiceDisplayValue"
+                [inputDisplayValue]="findInvoiceInputDisplayValue"
+                (onSearch)="onInvoiceSearch($event)">
+              </app-auto-complete>
+            </td>
+            <td class="text-left text-sm text-gray-700">{{ invoice.get('amount')?.value }}</td>
+            <td class="text-left text-sm text-gray-700">
+              <button type="button" class="text-danger hover:text-primary transition cursor-pointer">
+                <ng-icon name="bootstrapTrash"></ng-icon>
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
   </div>
 
   <!-- ✅ Submit Button -->

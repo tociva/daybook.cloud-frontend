@@ -84,7 +84,7 @@ export class CreateItemCategory extends WithFormDraftBinding implements OnInit {
         inputDisplayValue: (item: ItemCategory) => item.name,
         trackBy: (item: ItemCategory) => item.id!,
         onSearch: (value: string) => {
-          this.store.dispatch(itemCategoryActions.loadItemCategories({ query: { search: { query: value, fields: ['name', 'code', 'description'] } } }));
+          this.store.dispatch(itemCategoryActions.loadItemCategories({ query: { search: [{query: value, fields: ['name', 'code', 'description']}] } }));
         },
       }
     },
@@ -97,7 +97,7 @@ export class CreateItemCategory extends WithFormDraftBinding implements OnInit {
         inputDisplayValue: (item: TaxGroup) => item.name,
         trackBy: (item: TaxGroup) => item.id!,
         onSearch: (value: string) => {
-          this.store.dispatch(taxGroupActions.loadTaxGroups({ query: { search: { query: value, fields: ['name', 'description'] } } }));
+          this.store.dispatch(taxGroupActions.loadTaxGroups({ query: { search: [{query: value, fields: ['name', 'description']}] } }));
         },
       }
     }

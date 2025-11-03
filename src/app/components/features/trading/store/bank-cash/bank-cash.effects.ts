@@ -91,7 +91,7 @@ export const bankCashEffects = {
         tap((action) => {
           const { limit, offset, search, sort } = action.query ?? {};
           const filter = LB4QueryBuilder.create()
-          .applySignalStoreFilters(limit ?? 10, offset ?? 0, search ?? {query: '', fields: []}, sort ?? [])
+          .applySignalStoreFilters(limit ?? 10, offset ?? 0, search ?? [{query: '', fields: []}], sort ?? [])
           .build();
           const baseUrl = `${configStore.config().apiBaseUrl}/inventory/bank-cash`;
           const requestId = `${bankCashActions.loadBankCashes.type}-${Date.now()}-${Math.random()}`;

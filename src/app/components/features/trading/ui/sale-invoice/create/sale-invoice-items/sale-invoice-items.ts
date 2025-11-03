@@ -130,7 +130,7 @@ export class SaleInvoiceItems {
     }
 
   onItemSearch = (value: string) => {
-    this.store.dispatch(itemActions.loadItems({ query: { search: { query: value, fields: ['name', 'code', 'description', 'displayname', 'barcode'] }, includes: ['category'] } }));
+    this.store.dispatch(itemActions.loadItems({ query: { search: [{query: value, fields: ['name', 'code', 'description', 'displayname', 'barcode']}], includes: ['category'] } }));
   }
 
   onItemSelected = (index: number) => (item: Item) => {

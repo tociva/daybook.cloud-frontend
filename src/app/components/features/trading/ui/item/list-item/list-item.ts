@@ -83,7 +83,7 @@ export class ListItem implements OnInit, OnDestroy {
       if(this.pageSize() !== limit) {
         this.pageSize.set(limit ?? 10);
       }
-      const search = {query: params.search?.query ?? '', fields: ['description', 'name', 'code', 'displayname', 'barcode']};
+      const search = params.search?.length ? params.search : [{query: '', fields: ['description', 'name', 'code', 'displayname', 'barcode']}];
       this.store.dispatch(itemActions.loadItems({ 
         query: { limit: limit ?? 10, offset: offset ?? 0, search: search, sort: sort ?? [], includes: ['category'] } 
       }));

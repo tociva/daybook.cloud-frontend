@@ -94,7 +94,7 @@ export const saleInvoiceEffects = {
         tap((action) => {
           const { limit, offset, search, sort, includes } = action.query ?? {};
           const filter = LB4QueryBuilder.create()
-            .applySignalStoreFilters(limit ?? 10, offset ?? 0, search ?? { query: '', fields: [] }, sort ?? [], includes)
+            .applySignalStoreFilters(limit ?? 10, offset ?? 0, search ?? [{query: '', fields: []}], sort ?? [], includes)
             .build();
           const baseUrl = `${configStore.config().apiBaseUrl}${resourcePath}`;
           const requestId = `${saleInvoiceActions.loadSaleInvoices.type}-${Date.now()}-${Math.random()}`;

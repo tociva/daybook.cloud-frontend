@@ -21,6 +21,11 @@ import { customerActions, CustomerStore } from '../../../store/customer';
 import { customerReceiptActions, CustomerReceiptStore } from '../../../store/customer-receipt';
 import { CustomerReceipt, CustomerReceiptCU } from '../../../store/customer-receipt/customer-receipt.model';
 import { Customer } from '../../../store/customer/customer.model';
+import { NgIcon } from '@ng-icons/core';
+import { SaleInvoiceStore } from '../../../store/sale-invoice/sale-invoice.store';
+import { SaleInvoice } from '../../../store/sale-invoice/sale-invoice.model';
+import { saleInvoiceActions } from '../../../store/sale-invoice/sale-invoice.actions';
+import { LB4Search } from '../../../../../../util/query-params-util';
 
 interface InvoiceFormValue {
   invoiceid: string | null;
@@ -50,7 +55,7 @@ interface CustomerReceiptForm {
 }
 @Component({
   selector: 'app-create-customer-receipt',
-  imports: [ReactiveFormsModule, NgClass, AutoComplete, CancelButton, SkeltonLoader, ItemNotFound],
+  imports: [ReactiveFormsModule, NgClass, AutoComplete, CancelButton, SkeltonLoader, ItemNotFound, NgIcon],
   templateUrl: './create-customer-receipt.html',
   styleUrl: './create-customer-receipt.css'
 })
@@ -68,6 +73,10 @@ export class CreateCustomerReceipt extends WithFormDraftBinding implements OnIni
   readonly bankCashStore = inject(BankCashStore);
   readonly currencyStore = inject(CurrencyStore);
   readonly selectedCustomerReceipt = this.customerReceiptStore.selectedItem;
+
+  private readonly saleInvoiceStore = inject(SaleInvoiceStore);
+  readonly saleInvoices = this.saleInvoiceStore.items;
+
   protected loading = true;
   protected readonly mode = signal<'create' | 'edit'>('create');
   private itemId = signal<string | null>(null);
@@ -267,6 +276,23 @@ export class CreateCustomerReceipt extends WithFormDraftBinding implements OnIni
     this.updateFailureEffect.destroy();
   }
 
+  findInvoiceDisplayValue(invoice: SaleInvoice): string {
+    return invoice.number;
+  }
+
+  findInvoiceInputDisplayValue(invoice: SaleInvoice): string {
+    return invoice.number;
+  }
+
+  onInvoiceSearch(value: string): void {
+    const customer = this.form.get('customer')?.value as Customer;
+    const search:LB4Search[] = [{query: value, fields: ['number']}];
+    if(customer.id) {
+      search.push({query: customer.id, fields: ['customerid']});
+    }
+    this.store.dispatch(saleInvoiceActions.loadSaleInvoices({ query: { search: search } }));
+  }
+
   handleSubmit(): void {
     if (this.submitting()) return;
     
@@ -303,7 +329,7 @@ export class CreateCustomerReceipt extends WithFormDraftBinding implements OnIni
 
   // Customer autocomplete methods
   onCustomerSearch(value: string): void {
-    this.store.dispatch(customerActions.loadCustomers({ query: { search: { query: value, fields: ['name', 'mobile', 'email'] } } }));
+    this.store.dispatch(customerActions.loadCustomers({ query: { search: [{query: value, fields: ['name', 'mobile', 'email']}] } }));
   }
 
   findCustomerDisplayValue(customer: Customer): string {
@@ -331,7 +357,7 @@ export class CreateCustomerReceipt extends WithFormDraftBinding implements OnIni
 
   // Bank/Cash autocomplete methods
   onBankCashSearch(value: string): void {
-    this.store.dispatch(bankCashActions.loadBankCashes({ query: { search: { query: value, fields: ['name', 'description'] } } }));
+    this.store.dispatch(bankCashActions.loadBankCashes({ query: { search: [{query: value, fields: ['name', 'description']}] } }));
   }
 
   findBankCashDisplayValue(bcash: BankCash): string {

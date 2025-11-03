@@ -170,7 +170,7 @@ export const organizationEffects = {
         tap((action) => {
           const { limit, offset, search, sort } = action.query ?? {};
           const filter = LB4QueryBuilder.create()
-          .applySignalStoreFilters(limit ?? 10, offset ?? 0, search ?? {query: '', fields: []}, sort ?? [])
+          .applySignalStoreFilters(limit ?? 10, offset ?? 0, search ?? [{query: '', fields: []}], sort ?? [])
           .build();
           const baseUrl = `${configStore.config().apiBaseUrl}/organization/organization`;
           const requestId = `${organizationActions.loadOrganizations.type}-${Date.now()}-${Math.random()}`;

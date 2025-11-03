@@ -77,7 +77,7 @@ export class ListCustomerReceipt implements OnInit, OnDestroy {
       if(this.pageSize() !== limit) {
         this.pageSize.set(limit ?? 10);
       }
-      const search = {query: params.search?.query ?? '', fields: ['description'],};
+      const search = params.search?.length ? params.search : [{query: '', fields: ['description']}];
       this.store.dispatch(customerReceiptActions.loadCustomerReceipts({ 
         query: { limit: limit ?? 10, offset: offset ?? 0, search: search, sort: sort ?? [], includes: ['customer', 'currency', 'bcash'] } 
       }));
