@@ -103,11 +103,6 @@
                 <span class="text-xs text-gray-500">Ex. Inter State, Intra State, EXPORT, NON-TAXABLE etc.</span>
                 <span class="text-danger">*</span>
               </p>
-              <!-- <input type="text" formControlName="mode" [ngClass]="{
-                    'flex-1 border-0 border-b bg-transparent text-sm pt-0.5 pb-1 focus:outline-none': true,
-                    'border-b-danger': modeCtrl?.invalid && (modeCtrl?.touched || modeCtrl?.dirty),
-                    'border-b-gray-300': !(modeCtrl?.invalid && (modeCtrl?.touched || modeCtrl?.dirty))
-                  }" /> -->
                   <app-input-with-suggestion
                 formControlName="mode"
                 [options]="filteredModes()"

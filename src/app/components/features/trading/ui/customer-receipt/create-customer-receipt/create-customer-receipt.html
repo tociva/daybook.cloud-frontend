@@ -9,11 +9,182 @@
   title="Customer receipt record not found"
   description="It may have been deleted or the link is invalid."></app-item-not-found>
 } @else if(!loading && (mode() === 'create' || mode() === 'edit') && !customerReceiptStore.error()) {
-  <app-two-column-form [form]="form"
-  [fields]="formFields()"
-  [title]="title()"
-  (formSubmit)="handleSubmit($event)"
-  [successAction]="successAction()"
-  />
-}
+<!-- 🔷 Form Title -->
+<h1 class="text-2xl font-semibold text-gray-800 mb-6 text-center">
+  {{ title() }}
+</h1>
+<form [formGroup]="form" (ngSubmit)="handleSubmit()"
+  class="grid grid-cols-1 gap-6 max-w-6xl mx-auto p-6 bg-white shadow rounded">
 
+  <div class="p-4 border border-gray-300 rounded bg-white">
+    <h2 class="font-semibold text-base mb-4">Basic Details</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-25 gap-y-4">
+
+      <!-- Date -->
+      <div class="flex flex-col gap-1">
+        @let date = form.get('date');
+        @let dateInvalid = date?.invalid && (date?.dirty || date?.touched);
+
+        <div class="flex items-center gap-2">
+          <label class="w-32 text-sm text-gray-700">
+            Receipt Date <span class="text-danger">*</span>
+          </label>
+
+          <input formControlName="date" type="date" [ngClass]="{
+              'flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none': true,
+              'focus:border-b-primary border-b-gray-300': !dateInvalid,
+              'border-b-danger': dateInvalid
+            }" />
+        </div>
+
+        @if (date?.hasError('required') && (date?.dirty || date?.touched)) {
+        <p class="text-danger text-xs mt-1">Receipt date is required.</p>
+        }
+      </div>
+
+      <!-- Customer -->
+      <div class="flex flex-col gap-1">
+        @let customer = form.get('customer');
+
+        <div class="flex items-center gap-2">
+          <label class="w-32 text-sm text-gray-700">
+            Customer <span class="text-danger">*</span>
+          </label>
+
+          <app-auto-complete
+            formControlName="customer"
+            [options]="filteredCustomers()"
+            class="flex-1"
+            placeholder="Search for a customer"
+            [required]="true"
+            inputClass="flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 placeholder-gray-400 focus:outline-none focus:border-b-primary border-b-gray-300"
+            [optionDisplayValue]="findCustomerDisplayValue"
+            [inputDisplayValue]="findCustomerInputDisplayValue"
+            (onSearch)="onCustomerSearch($event)">
+          </app-auto-complete>
+        </div>
+
+        @if (customer?.hasError('required') && (customer?.dirty || customer?.touched)) {
+        <p class="text-danger text-xs mt-1">Customer is required.</p>
+        }
+      </div>
+
+      <!-- Amount -->
+      <div class="flex flex-col gap-1">
+        @let amount = form.get('amount');
+        @let amountInvalid = amount?.invalid && (amount?.dirty || amount?.touched);
+
+        <div class="flex items-center gap-2">
+          <label class="w-32 text-sm text-gray-700">
+            Amount <span class="text-danger">*</span>
+          </label>
+
+          <input formControlName="amount" type="number" inputmode="decimal" step="0.01" [ngClass]="{
+              'flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none': true,
+              'focus:border-b-primary border-b-gray-300': !amountInvalid,
+              'border-b-danger': amountInvalid
+            }" />
+        </div>
+
+        @if (amount?.hasError('required') && (amount?.dirty || amount?.touched)) {
+        <p class="text-danger text-xs mt-1">Amount is required.</p>
+        }
+        @if (amount?.hasError('min') && (amount?.dirty || amount?.touched)) {
+        <p class="text-danger text-xs mt-1">Amount must be greater than 0.</p>
+        }
+      </div>
+
+      <!-- Currency -->
+      <div class="flex flex-col gap-1">
+        @let currency = form.get('currency');
+
+        <div class="flex items-center gap-2">
+          <label class="w-32 text-sm text-gray-700">
+            Currency <span class="text-danger">*</span>
+          </label>
+
+          <app-auto-complete
+            formControlName="currency"
+            [options]="filteredCurrencies()"
+            class="flex-1"
+            placeholder="Search for a currency"
+            [required]="true"
+            inputClass="flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 placeholder-gray-400 focus:outline-none focus:border-b-primary border-b-gray-300"
+            [optionDisplayValue]="findCurrencyDisplayValue"
+            [inputDisplayValue]="findCurrencyInputDisplayValue"
+            (onSearch)="onCurrencySearch($event)">
+          </app-auto-complete>
+        </div>
+
+        @if (currency?.hasError('required') && (currency?.dirty || currency?.touched)) {
+        <p class="text-danger text-xs mt-1">Currency is required.</p>
+        }
+      </div>
+
+      <!-- Bank/Cash -->
+      <div class="flex flex-col gap-1">
+        @let bcash = form.get('bcash');
+
+        <div class="flex items-center gap-2">
+          <label class="w-32 text-sm text-gray-700">
+            Bank/Cash <span class="text-danger">*</span>
+          </label>
+
+          <app-auto-complete
+            formControlName="bcash"
+            [options]="filteredBankCashes()"
+            class="flex-1"
+            placeholder="Search for a bank/cash account"
+            [required]="true"
+            inputClass="flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 placeholder-gray-400 focus:outline-none focus:border-b-primary border-b-gray-300"
+            [optionDisplayValue]="findBankCashDisplayValue"
+            [inputDisplayValue]="findBankCashInputDisplayValue"
+            (onSearch)="onBankCashSearch($event)">
+          </app-auto-complete>
+        </div>
+
+        @if (bcash?.hasError('required') && (bcash?.dirty || bcash?.touched)) {
+        <p class="text-danger text-xs mt-1">Bank/Cash account is required.</p>
+        }
+      </div>
+
+      <!-- Description -->
+      <div class="flex flex-col gap-1 md:col-span-2">
+        <div class="flex items-start gap-2">
+          <label class="w-32 text-sm text-gray-700 pt-1">Description</label>
+          <textarea formControlName="description" rows="2"
+            class="flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary border-b-gray-300"></textarea>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div formArrayName="invoices" class="p-4 border border-gray-300 rounded bg-white mt-6">
+    <h2 class="font-semibold text-base mb-4">Invoices</h2>
+    @for (invoice of invoices.controls; track $index; let i = $index) {
+      <div class="flex flex-col mb-6">
+        <div class="flex items-center gap-2">
+          <label class="w-32 text-sm text-gray-700">
+            Invoice {{ i + 1 }}
+          </label>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- ✅ Submit Button -->
+  <div class="pt-2 mt-4 text-center">
+    <app-cancel-button></app-cancel-button>
+
+    <button type="submit" class="bg-primary text-white px-6 py-2 rounded hover:opacity-90 cursor-pointer"
+      [disabled]="submitting()" [ngClass]="{
+      'cursor-not-allowed opacity-50': submitting(),
+      'cursor-pointer': !submitting()
+    }">
+      Submit
+    </button>
+  </div>
+</form>
+}

@@ -81,7 +81,7 @@ export type AddressGroup = {
 
 export type PurchaseInvoiceVendorForm = {
   vendor: FormControl<Vendor>;
-  address: FormGroup<AddressGroup>;
+  vendoraddress: FormGroup<AddressGroup>;
 }
 
 export type PurchaseInvoiceForm = {
@@ -106,6 +106,7 @@ export type PurchaseInvoiceSummaryFormValue = {
 
 export type PurchaseInvoiceVendorFormValue = {
   vendor: Vendor;
+  vendoraddress: Address;
 }
 
 export interface PurchaseItemTaxFormValue {

@@ -59,7 +59,6 @@ export class CreateTaxGroup extends WithFormDraftBinding implements OnInit {
   readonly formKey = computed(() => buildFormKey('tax-group', this.mode(), this.taxGroupId()));
   readonly submitting = signal(false);
 
-
   taxes = this.taxStore.items;
   filteredTaxes = signal<Tax[]>([]);
   modes = this.taxGroupModeStore.items;

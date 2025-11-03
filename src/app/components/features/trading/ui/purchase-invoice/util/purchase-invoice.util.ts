@@ -148,6 +148,7 @@ const mapItem = (item: any, fractions: number): PurchaseItemFormValue => ({
 const mapVendorBlock = (inv: PurchaseInvoice): PurchaseInvoiceVendorFormValue => {
   return {
     vendor: inv.vendor,
+    vendoraddress: inv.vendor.address,
   };
 };
 

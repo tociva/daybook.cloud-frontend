@@ -75,7 +75,7 @@ export class PurchaseInvoiceFormService {
         showDescription: this.fb.nonNullable.control(false),
         vendor: this.fb.nonNullable.group<PurchaseInvoiceVendorForm>({
           vendor: this.fb.nonNullable.control({} as Vendor, { validators: [Validators.required] }),
-          address: this.buildAddressGroup(),
+          vendoraddress: this.buildAddressGroup(),
         }),
         properties: this.fb.nonNullable.group<PurchaseInvoicePropertiesForm>({
           number: this.fb.control('', { nonNullable: true }),

@@ -32,7 +32,7 @@ export class PurchaseInvoiceVendor {
   }
 
   onVendorSelected(vendor: Vendor) {
-    this.form().patchValue({ address: vendor.address });
+    this.form().patchValue({ vendoraddress: vendor.address });
   }
 
   onNewVendor() {
