@@ -41,4 +41,8 @@ export const tradingRoutes: Routes = [
     path: 'customer-receipt',
     loadChildren: () => import('./ui/customer-receipt/customer-receipt.routes').then(m => m.customerReceiptRoutes),
   },
+  {
+    path: 'vendor-payment',
+    loadChildren: () => import('./ui/vendor-payment/vendor-payment.routes').then(m => m.vendorPaymentRoutes),
+  },
 ];

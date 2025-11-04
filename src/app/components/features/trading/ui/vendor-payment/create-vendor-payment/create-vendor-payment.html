@@ -4,11 +4,11 @@
   [lines]="10"
   width="100%"
   [shimmer]="true" />
-} @else if(!loading && mode() === 'edit' && customerReceiptStore.error()) {
+} @else if(!loading && mode() === 'edit' && vendorPaymentStore.error()) {
   <app-item-not-found
-  title="Customer receipt record not found"
+  title="Vendor payment record not found"
   description="It may have been deleted or the link is invalid."></app-item-not-found>
-} @else if(!loading && (mode() === 'create' || mode() === 'edit') && !customerReceiptStore.error()) {
+} @else if(!loading && (mode() === 'create' || mode() === 'edit') && !vendorPaymentStore.error()) {
 <!-- 🔷 Form Title -->
 <h1 class="text-2xl font-semibold text-gray-800 mb-6 text-center">
   {{ title() }}
@@ -23,50 +23,50 @@
 
       <!-- Date -->
       <div class="flex flex-col gap-1">
-        @let rcptdate = form.get('rcptdate');
-        @let rcptdateInvalid = rcptdate?.invalid && (rcptdate?.dirty || rcptdate?.touched);
+        @let pmtdate = form.get('pmtdate');
+        @let pmtdateInvalid = pmtdate?.invalid && (pmtdate?.dirty || pmtdate?.touched);
         <div class="flex items-center gap-2">
           <label class="w-32 text-sm text-gray-700">
-            Receipt Date <span class="text-danger">*</span>
+            Payment Date <span class="text-danger">*</span>
           </label>
 
-          <input formControlName="rcptdate" type="date" [ngClass]="{
+          <input formControlName="pmtdate" type="date" [ngClass]="{
               'flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none': true,
-              'focus:border-b-primary border-b-gray-300': !rcptdateInvalid,
-              'border-b-danger': rcptdateInvalid
+              'focus:border-b-primary border-b-gray-300': !pmtdateInvalid,
+              'border-b-danger': pmtdateInvalid
             }" />
         </div>
 
-        @if (rcptdate?.hasError('required') && (rcptdate?.dirty || rcptdate?.touched)) {
-        <p class="text-danger text-xs mt-1">Receipt date is required.</p>
+        @if (pmtdate?.hasError('required') && (pmtdate?.dirty || pmtdate?.touched)) {
+        <p class="text-danger text-xs mt-1">Payment date is required.</p>
         }
       </div>
 
-      <!-- Customer -->
+      <!-- Vendor -->
       <div class="flex flex-col gap-1">
-        @let customer = form.get('customer');
+        @let vendor = form.get('vendor');
 
         <div class="flex items-center gap-2">
           <label class="w-32 text-sm text-gray-700">
-            Customer <span class="text-danger">*</span>
+            Vendor <span class="text-danger">*</span>
           </label>
 
           <app-auto-complete
-            formControlName="customer"
-            [options]="filteredCustomers()"
+            formControlName="vendor"
+            [options]="filteredVendors()"
             class="flex-1"
-            placeholder="Search for a customer"
+            placeholder="Search for a vendor"
             [required]="true"
             inputClass="flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 placeholder-gray-400 focus:outline-none focus:border-b-primary border-b-gray-300"
-            [optionDisplayValue]="findCustomerDisplayValue"
-            [inputDisplayValue]="findCustomerInputDisplayValue"
-            (onOptionSelected)="onCustomerSelected($event)"
-            (onSearch)="onCustomerSearch($event)">
+            [optionDisplayValue]="findVendorDisplayValue"
+            [inputDisplayValue]="findVendorInputDisplayValue"
+            (onOptionSelected)="onVendorSelected($event)"
+            (onSearch)="onVendorSearch($event)">
           </app-auto-complete>
         </div>
 
-        @if (customer?.hasError('required') && (customer?.dirty || customer?.touched)) {
-        <p class="text-danger text-xs mt-1">Customer is required.</p>
+        @if (vendor?.hasError('required') && (vendor?.dirty || vendor?.touched)) {
+        <p class="text-danger text-xs mt-1">Vendor is required.</p>
         }
       </div>
 
@@ -178,7 +178,7 @@
             <td class="py-2.5 px-3 text-gray-800">
               <app-auto-complete
                 formControlName="invoice"
-                [options]="saleInvoices()"
+                [options]="purchaseInvoices()"
                 class="flex-1"
                 placeholder="Search for an invoice"
                 [required]="true"
@@ -237,3 +237,4 @@
   </div>
 </form>
 }
+

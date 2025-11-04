@@ -32,6 +32,7 @@ import { saleInvoiceEffects } from './components/features/trading/store/sale-inv
 import { purchaseInvoiceEffects } from './components/features/trading/store/purchase-invoice/purchase-invoice.effects';
 import { taxGroupEffects } from './components/features/trading/store/tax-group/tax-group.effects';
 import { customerReceiptEffects } from './components/features/trading/store/customer-receipt/customer-receipt.effects';
+import { vendorPaymentEffects } from './components/features/trading/store/vendor-payment/vendor-payment.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -63,6 +64,7 @@ export const appConfig: ApplicationConfig = {
       saleInvoiceEffects,
       purchaseInvoiceEffects,
       customerReceiptEffects,
+      vendorPaymentEffects,
     ]),
     provideStoreDevtools({ maxAge: 25, logOnly: !isDevMode() }),
     provideRouterStore(),

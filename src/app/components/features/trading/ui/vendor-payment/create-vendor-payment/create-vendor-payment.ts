@@ -23,35 +23,35 @@ import { Currency } from '../../../../../shared/store/currency/currency.model';
 import { CurrencyStore } from '../../../../../shared/store/currency/currency.store';
 import { bankCashActions, BankCashStore } from '../../../store/bank-cash';
 import { BankCash } from '../../../store/bank-cash/bank-cash.model';
-import { customerActions, CustomerStore } from '../../../store/customer';
-import { customerReceiptActions, CustomerReceiptStore } from '../../../store/customer-receipt';
-import { CustomerReceipt } from '../../../store/customer-receipt/customer-receipt.model';
-import { Customer } from '../../../store/customer/customer.model';
-import { saleInvoiceActions } from '../../../store/sale-invoice/sale-invoice.actions';
-import { SaleInvoice } from '../../../store/sale-invoice/sale-invoice.model';
-import { SaleInvoiceStore } from '../../../store/sale-invoice/sale-invoice.store';
-import { CustomerReceiptRequest } from '../customer-receipt.util';
+import { vendorActions, VendorStore } from '../../../store/vendor';
+import { vendorPaymentActions, VendorPaymentStore } from '../../../store/vendor-payment';
+import { VendorPayment } from '../../../store/vendor-payment/vendor-payment.model';
+import { Vendor } from '../../../store/vendor/vendor.model';
+import { purchaseInvoiceActions } from '../../../store/purchase-invoice/purchase-invoice.actions';
+import { PurchaseInvoice } from '../../../store/purchase-invoice/purchase-invoice.model';
+import { PurchaseInvoiceStore } from '../../../store/purchase-invoice/purchase-invoice.store';
+import { VendorPaymentRequest } from '../vendor-payment.util';
 
 interface InvoiceFormValue {
-  invoice: SaleInvoice | null;
+  invoice: PurchaseInvoice | null;
   amount: number | null;
 }
 interface InvoiceForm {
-  invoice: FormControl<SaleInvoice | null>;
+  invoice: FormControl<PurchaseInvoice | null>;
   amount: FormControl<number | null>;
 }
-interface CustomerReceiptFormValue { 
-  rcptdate: string | null;
-  customer: Customer | null;
+interface VendorPaymentFormValue { 
+  pmtdate: string | null;
+  vendor: Vendor | null;
   amount: number | null;
   currency: Currency | null;
   bcash: BankCash | null;
   description?: string | null;
   invoices?: Array<InvoiceFormValue>;
 }
-interface CustomerReceiptForm {
-  rcptdate: FormControl<string | null>;
-  customer: FormControl<Customer | null>;
+interface VendorPaymentForm {
+  pmtdate: FormControl<string | null>;
+  vendor: FormControl<Vendor | null>;
   amount: FormControl<number | null>;
   currency: FormControl<Currency | null>;
   bcash: FormControl<BankCash | null>;
@@ -59,49 +59,49 @@ interface CustomerReceiptForm {
   invoices: FormArray<FormGroup<InvoiceForm>>;
 }
 @Component({
-  selector: 'app-create-customer-receipt',
+  selector: 'app-create-vendor-payment',
   imports: [ReactiveFormsModule, NgClass, AutoComplete, CancelButton, SkeltonLoader, ItemNotFound, NgIcon, NumberInputDirective],
-  templateUrl: './create-customer-receipt.html',
-  styleUrl: './create-customer-receipt.css'
+  templateUrl: './create-vendor-payment.html',
+  styleUrl: './create-vendor-payment.css'
 })
-export class CreateCustomerReceipt extends WithFormDraftBinding implements OnInit {
+export class CreateVendorPayment extends WithFormDraftBinding implements OnInit {
 
-  public static readonly ONE_TIME_DRAFT_KEY = 'ONE_TIME_DRAFT_KEY_CUSTOMER_RECEIPT';
+  public static readonly ONE_TIME_DRAFT_KEY = 'ONE_TIME_DRAFT_KEY_VENDOR_PAYMENT';
 
   private readonly fb = inject(FormBuilder);
   private readonly store = inject(Store);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly actions$ = inject(Actions);
-  readonly customerReceiptStore = inject(CustomerReceiptStore);
-  readonly customerStore = inject(CustomerStore);
+  readonly vendorPaymentStore = inject(VendorPaymentStore);
+  readonly vendorStore = inject(VendorStore);
   readonly bankCashStore = inject(BankCashStore);
   readonly currencyStore = inject(CurrencyStore);
   readonly userSessionStore = inject(UserSessionStore);
-  readonly selectedCustomerReceipt = this.customerReceiptStore.selectedItem;
+  readonly selectedVendorPayment = this.vendorPaymentStore.selectedItem;
 
-  private readonly saleInvoiceStore = inject(SaleInvoiceStore);
-  readonly saleInvoices = this.saleInvoiceStore.items;
+  private readonly purchaseInvoiceStore = inject(PurchaseInvoiceStore);
+  readonly purchaseInvoices = this.purchaseInvoiceStore.items;
 
   protected loading = true;
   protected readonly mode = signal<'create' | 'edit'>('create');
   private itemId = signal<string | null>(null);
-  readonly formKey = computed(() => buildFormKey('customer-receipt', this.mode(), this.itemId()));
+  readonly formKey = computed(() => buildFormKey('vendor-payment', this.mode(), this.itemId()));
   readonly submitting = signal(false);
   
-  readonly customers = this.customerStore.items;
+  readonly vendors = this.vendorStore.items;
   readonly bankCashAccounts = this.bankCashStore.items;
   currencies = signal<Currency[]>([]);
-  filteredCustomers = signal<Customer[]>([]);
+  filteredVendors = signal<Vendor[]>([]);
   filteredCurrencies = signal<Currency[]>([]);
   filteredBankCashes = signal<BankCash[]>([]);
 
-  readonly form = this.fb.group<CustomerReceiptForm>({
-    rcptdate: new FormControl<string | null>(null, {
+  readonly form = this.fb.group<VendorPaymentForm>({
+    pmtdate: new FormControl<string | null>(null, {
       validators: [Validators.required],
       nonNullable: false,
     }),
-    customer: new FormControl<Customer | null>(null, {
+    vendor: new FormControl<Vendor | null>(null, {
       validators: [Validators.required],
       nonNullable: false,
     }),
@@ -121,15 +121,14 @@ export class CreateCustomerReceipt extends WithFormDraftBinding implements OnIni
     invoices: new FormArray<FormGroup<InvoiceForm>>([this.buildInvoiceForm()]),
   });
 
-  readonly title = signal('Customer Receipt Setup');
+  readonly title = signal('Vendor Payment Setup');
 
   private buildInvoiceForm(seed?: InvoiceFormValue): FormGroup<InvoiceForm> {
     return this.fb.group<InvoiceForm>({
-      invoice: new FormControl<SaleInvoice | null>(seed?.invoice ?? null, { nonNullable: false }),
+      invoice: new FormControl<PurchaseInvoice | null>(seed?.invoice ?? null, { nonNullable: false }),
       amount: new FormControl<number | null>(seed?.amount ?? null, { nonNullable: false }),
     });  
   }
-
 
   constructor() {
     super();
@@ -148,18 +147,18 @@ export class CreateCustomerReceipt extends WithFormDraftBinding implements OnIni
     });
 
     effect(() => {
-      this.filteredCustomers.set(this.customers());
+      this.filteredVendors.set(this.vendors());
     });
 
     effect(() => {
       this.filteredBankCashes.set(this.bankCashAccounts());
     });
 
-    this.binder = this.bindFormToDraft<CustomerReceipt>(
+    this.binder = this.bindFormToDraft<VendorPayment>(
       this.form,
       this.formKey,
       {
-        selected: this.selectedCustomerReceipt,
+        selected: this.selectedVendorPayment,
         persistIf: (form, v) => form.dirty && !!v,
       }
     );
@@ -168,21 +167,21 @@ export class CreateCustomerReceipt extends WithFormDraftBinding implements OnIni
   private binder: { clear: () => void };
 
   private fillFormEffect = effect(() => {
-    const customerReceipt = this.selectedCustomerReceipt();
-    if (customerReceipt) {
+    const vendorPayment = this.selectedVendorPayment();
+    if (vendorPayment) {
       // Format date for input
-      const dateValue = dayjs(customerReceipt.date).format(DEFAULT_NODE_DATE_FORMAT);
+      const dateValue = dayjs(vendorPayment.date).format(DEFAULT_NODE_DATE_FORMAT);
       this.form.patchValue({
-        ...customerReceipt,
-        rcptdate: dateValue,
+        ...vendorPayment,
+        pmtdate: dateValue,
       });
-      if(customerReceipt.invoices?.length) {
+      if(vendorPayment.invoices?.length) {
         this.invoices.clear();
-        customerReceipt.invoices.forEach(invoice => {
-          const saleInvoice = invoice.saleinvoice;
-          if(saleInvoice) {
+        vendorPayment.invoices.forEach(invoice => {
+          const purchaseInvoice = invoice.purchaseinvoice;
+          if(purchaseInvoice) {
             this.invoices.push(this.buildInvoiceForm({
-              invoice: saleInvoice,
+              invoice: purchaseInvoice,
               amount: invoice.amount,
             }));
           }
@@ -193,7 +192,7 @@ export class CreateCustomerReceipt extends WithFormDraftBinding implements OnIni
   });
 
   private loadErrorEffect = effect(() => {
-    const error = this.customerReceiptStore.error();
+    const error = this.vendorPaymentStore.error();
     if (error && this.mode() === 'edit') {
       this.loading = false;
     }
@@ -201,7 +200,7 @@ export class CreateCustomerReceipt extends WithFormDraftBinding implements OnIni
 
   readonly createSuccessEffect = effect((onCleanup) => {
     const subscription = this.actions$.pipe(
-      ofType(customerReceiptActions.createCustomerReceiptSuccess),
+      ofType(vendorPaymentActions.createVendorPaymentSuccess),
       tap(() => {
         this.submitting.set(false);
         this.goBack();
@@ -213,10 +212,10 @@ export class CreateCustomerReceipt extends WithFormDraftBinding implements OnIni
 
   readonly createFailureEffect = effect((onCleanup) => {
     const subscription = this.actions$.pipe(
-      ofType(customerReceiptActions.createCustomerReceiptFailure),
+      ofType(vendorPaymentActions.createVendorPaymentFailure),
       tap(() => {
         this.submitting.set(false);
-        this.customerReceiptStore.setError(null);
+        this.vendorPaymentStore.setError(null);
       })
     ).subscribe();
 
@@ -225,7 +224,7 @@ export class CreateCustomerReceipt extends WithFormDraftBinding implements OnIni
 
   readonly updateSuccessEffect = effect((onCleanup) => {
     const subscription = this.actions$.pipe(
-      ofType(customerReceiptActions.updateCustomerReceiptSuccess),
+      ofType(vendorPaymentActions.updateVendorPaymentSuccess),
       tap(() => {
         this.submitting.set(false);
         this.goBack();
@@ -237,10 +236,10 @@ export class CreateCustomerReceipt extends WithFormDraftBinding implements OnIni
 
   readonly updateFailureEffect = effect((onCleanup) => {
     const subscription = this.actions$.pipe(
-      ofType(customerReceiptActions.updateCustomerReceiptFailure),
+      ofType(vendorPaymentActions.updateVendorPaymentFailure),
       tap(() => {
         this.submitting.set(false);
-        this.customerReceiptStore.setError(null);
+        this.vendorPaymentStore.setError(null);
       })
     ).subscribe();
 
@@ -248,7 +247,7 @@ export class CreateCustomerReceipt extends WithFormDraftBinding implements OnIni
   });
 
   private goBack = () => {
-    const burl = this.route.snapshot.queryParamMap.get('burl') ?? '/app/trading/customer-receipt';
+    const burl = this.route.snapshot.queryParamMap.get('burl') ?? '/app/trading/vendor-payment';
     this.router.navigateByUrl(burl);
   }
 
@@ -267,15 +266,15 @@ export class CreateCustomerReceipt extends WithFormDraftBinding implements OnIni
       if(this.itemId()) {
         this.mode.set('edit');
         this.loading = true;
-        this.store.dispatch(customerReceiptActions.loadCustomerReceiptById({ id: this.itemId()!, query: { includes: 
-          ['customer', 'currency', 'bcash', 'invoices.saleinvoice'] } }));
+        this.store.dispatch(vendorPaymentActions.loadVendorPaymentById({ id: this.itemId()!, query: { includes: 
+          ['vendor', 'currency', 'bcash', 'invoices.purchaseinvoice'] } }));
       }else{
         this.loading = false;
       }
     }
     
     // Load initial data for autocomplete fields
-    this.store.dispatch(customerActions.loadCustomers({ query: { limit: 20 } }));
+    this.store.dispatch(vendorActions.loadVendors({ query: { limit: 20 } }));
     this.store.dispatch(bankCashActions.loadBankCashes({ query: { limit: 20 } }));
   }
 
@@ -288,11 +287,11 @@ export class CreateCustomerReceipt extends WithFormDraftBinding implements OnIni
     this.updateFailureEffect.destroy();
   }
 
-  findInvoiceDisplayValue = (invoice: SaleInvoice): string => {
+  findInvoiceDisplayValue = (invoice: PurchaseInvoice): string => {
     const branch = this.userSessionStore.branch();
-    const customer = this.form.get('customer')?.value as Customer;
+    const vendor = this.form.get('vendor')?.value as Vendor;
     const formCurrency = this.form.get('currency')?.value as Currency;
-    const currency = formCurrency ??invoice.currency ?? customer?.currency;
+    const currency = formCurrency ?? invoice.currency ?? vendor?.currency;
     const fraction = currency?.minorunit ?? 2;
     const dateFormat = branch?.dateformat ?? DEFAULT_DATE_FORMAT;
     const amount = `${currency?.symbol ?? ''} ${formatAmountToFraction(invoice.grandtotal ?? 0, fraction)}`;
@@ -300,12 +299,12 @@ export class CreateCustomerReceipt extends WithFormDraftBinding implements OnIni
   };
 
   onInvoiceSearch(value: string): void {
-    const customer = this.form.get('customer')?.value as Customer;
+    const vendor = this.form.get('vendor')?.value as Vendor;
     const search:LB4Search[] = [{query: value, fields: ['number']}];
-    if(customer?.id) {
-      search.push({query: customer.id, fields: ['customerid']});
+    if(vendor?.id) {
+      search.push({query: vendor.id, fields: ['vendorid']});
     }
-    this.store.dispatch(saleInvoiceActions.loadSaleInvoices({ query: { search: search } }));
+    this.store.dispatch(purchaseInvoiceActions.loadPurchaseInvoices({ query: { search: search } }));
   }
 
   onRemoveInvoice(index: number): void {
@@ -321,22 +320,22 @@ export class CreateCustomerReceipt extends WithFormDraftBinding implements OnIni
     this.invoices.push(invForm);
   }
 
-  // Customer autocomplete methods
-  onCustomerSearch(value: string): void {
-    this.store.dispatch(customerActions.loadCustomers({ query: { search: [{query: value, fields: ['name', 'mobile', 'email']}], includes: ['currency'] } }));
+  // Vendor autocomplete methods
+  onVendorSearch(value: string): void {
+    this.store.dispatch(vendorActions.loadVendors({ query: { search: [{query: value, fields: ['name', 'mobile', 'email']}], includes: ['currency'] } }));
   }
 
-  findCustomerDisplayValue(customer: Customer): string {
-    return customer.name;
+  findVendorDisplayValue(vendor: Vendor): string {
+    return vendor.name;
   }
 
-  findCustomerInputDisplayValue(customer: Customer): string {
-    return customer.name;
+  findVendorInputDisplayValue(vendor: Vendor): string {
+    return vendor.name;
   }
 
-  onCustomerSelected(customer: Customer): void {
-    if(customer?.currency) {
-      this.form.patchValue({ currency: customer.currency });
+  onVendorSelected(vendor: Vendor): void {
+    if(vendor?.currency) {
+      this.form.patchValue({ currency: vendor.currency });
       this.invoices.clear();
       this.onAddInvoice();
     }
@@ -378,34 +377,33 @@ export class CreateCustomerReceipt extends WithFormDraftBinding implements OnIni
       return;
     }
 
-    const formData = this.form.value as CustomerReceiptFormValue;
-    const { customer, currency, bcash, description, amount, rcptdate } = formData;
+    const formData = this.form.value as VendorPaymentFormValue;
+    const { vendor, currency, bcash, description, amount, pmtdate } = formData;
 
-    if (!rcptdate || !customer || !currency || !bcash || !amount) {
+    if (!pmtdate || !vendor || !currency || !bcash || !amount) {
       this.submitting.set(false);
       return;
     }
 
-    const customerReceipt: CustomerReceiptRequest = {
-      date: new Date(rcptdate as string),
+    const vendorPayment: VendorPaymentRequest = {
+      date: new Date(pmtdate as string),
       amount: toNumber(amount),
-      customerid: customer.id!,
+      vendorid: vendor.id!,
       currencycode: currency.code,
       bcashid: bcash.id!,
       ...(description && { description }),
     };
-
     if(this.invoices.length > 0) {
-      customerReceipt.invoices = this.invoices.value.map(invoice => ({
-        saleinvoiceid: invoice.invoice!.id!,
+      vendorPayment.invoices = this.invoices.value.map(invoice => ({
+        purchaseinvoiceid: invoice.invoice!.id!,
         amount: toNumber(invoice.amount!),
       }));
     }
     if(this.mode() === 'create') {
-      this.draftStore.setOneTimeDraft(CreateCustomerReceipt.ONE_TIME_DRAFT_KEY, customerReceipt);
-      this.store.dispatch(customerReceiptActions.createCustomerReceipt({ customerReceipt }));
+      this.draftStore.setOneTimeDraft(CreateVendorPayment.ONE_TIME_DRAFT_KEY, vendorPayment);
+      this.store.dispatch(vendorPaymentActions.createVendorPayment({ vendorPayment }));
     }else{
-      this.store.dispatch(customerReceiptActions.updateCustomerReceipt({ id: this.itemId()!, customerReceipt }));
+      this.store.dispatch(vendorPaymentActions.updateVendorPayment({ id: this.itemId()!, vendorPayment }));
     }
     this.binder.clear();
   }

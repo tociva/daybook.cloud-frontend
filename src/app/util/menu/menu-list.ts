@@ -36,6 +36,9 @@ export const menuList: MenuNode[] = [
           { path: 'purchase-return',
             name: 'Purchase Return',
             },
+          { path: 'vendor-payment',
+            name: 'Payments',
+            },
           { path: 'gst/gstr2b',
             name: 'GST Reconciliation',
             }
