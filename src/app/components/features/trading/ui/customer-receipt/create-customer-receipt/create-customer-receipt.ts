@@ -2,12 +2,18 @@ import { NgClass } from '@angular/common';
 import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { NgIcon } from '@ng-icons/core';
 import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
+import dayjs from 'dayjs';
 import { tap } from 'rxjs';
 import { buildFormKey, sanitizeQuery } from '../../../../../../util/common.util';
-import { toNumber } from '../../../../../../util/currency.util';
+import { DEFAULT_DATE_FORMAT, DEFAULT_NODE_DATE_FORMAT } from '../../../../../../util/constants';
+import { formatAmountToFraction, toNumber } from '../../../../../../util/currency.util';
+import { NumberInputDirective } from '../../../../../../util/directives/number-input.directive';
 import { WithFormDraftBinding } from '../../../../../../util/form/with-form-draft-binding';
+import { LB4Search } from '../../../../../../util/query-params-util';
+import { UserSessionStore } from '../../../../../core/auth/store/user-session/user-session.store';
 import { AutoComplete } from '../../../../../shared/auto-complete/auto-complete';
 import { CancelButton } from '../../../../../shared/cancel-button/cancel-button';
 import { ItemNotFound } from '../../../../../shared/item-not-found/item-not-found';
@@ -19,24 +25,23 @@ import { bankCashActions, BankCashStore } from '../../../store/bank-cash';
 import { BankCash } from '../../../store/bank-cash/bank-cash.model';
 import { customerActions, CustomerStore } from '../../../store/customer';
 import { customerReceiptActions, CustomerReceiptStore } from '../../../store/customer-receipt';
-import { CustomerReceipt, CustomerReceiptCU } from '../../../store/customer-receipt/customer-receipt.model';
+import { CustomerReceipt } from '../../../store/customer-receipt/customer-receipt.model';
 import { Customer } from '../../../store/customer/customer.model';
-import { NgIcon } from '@ng-icons/core';
-import { SaleInvoiceStore } from '../../../store/sale-invoice/sale-invoice.store';
-import { SaleInvoice } from '../../../store/sale-invoice/sale-invoice.model';
 import { saleInvoiceActions } from '../../../store/sale-invoice/sale-invoice.actions';
-import { LB4Search } from '../../../../../../util/query-params-util';
+import { SaleInvoice } from '../../../store/sale-invoice/sale-invoice.model';
+import { SaleInvoiceStore } from '../../../store/sale-invoice/sale-invoice.store';
+import { CustomerReceiptRequest } from '../customer-receipt.util';
 
 interface InvoiceFormValue {
-  invoiceid: string | null;
+  invoice: SaleInvoice | null;
   amount: number | null;
 }
 interface InvoiceForm {
-  invoiceid: FormControl<string | null>;
+  invoice: FormControl<SaleInvoice | null>;
   amount: FormControl<number | null>;
 }
 interface CustomerReceiptFormValue { 
-  date: string | null;
+  rcptdate: string | null;
   customer: Customer | null;
   amount: number | null;
   currency: Currency | null;
@@ -45,7 +50,7 @@ interface CustomerReceiptFormValue {
   invoices?: Array<InvoiceFormValue>;
 }
 interface CustomerReceiptForm {
-  date: FormControl<string | null>;
+  rcptdate: FormControl<string | null>;
   customer: FormControl<Customer | null>;
   amount: FormControl<number | null>;
   currency: FormControl<Currency | null>;
@@ -55,7 +60,7 @@ interface CustomerReceiptForm {
 }
 @Component({
   selector: 'app-create-customer-receipt',
-  imports: [ReactiveFormsModule, NgClass, AutoComplete, CancelButton, SkeltonLoader, ItemNotFound, NgIcon],
+  imports: [ReactiveFormsModule, NgClass, AutoComplete, CancelButton, SkeltonLoader, ItemNotFound, NgIcon, NumberInputDirective],
   templateUrl: './create-customer-receipt.html',
   styleUrl: './create-customer-receipt.css'
 })
@@ -72,6 +77,7 @@ export class CreateCustomerReceipt extends WithFormDraftBinding implements OnIni
   readonly customerStore = inject(CustomerStore);
   readonly bankCashStore = inject(BankCashStore);
   readonly currencyStore = inject(CurrencyStore);
+  readonly userSessionStore = inject(UserSessionStore);
   readonly selectedCustomerReceipt = this.customerReceiptStore.selectedItem;
 
   private readonly saleInvoiceStore = inject(SaleInvoiceStore);
@@ -90,47 +96,46 @@ export class CreateCustomerReceipt extends WithFormDraftBinding implements OnIni
   filteredCurrencies = signal<Currency[]>([]);
   filteredBankCashes = signal<BankCash[]>([]);
 
-  readonly form: FormGroup<CustomerReceiptForm>;
+  readonly form = this.fb.group<CustomerReceiptForm>({
+    rcptdate: new FormControl<string | null>(null, {
+      validators: [Validators.required],
+      nonNullable: false,
+    }),
+    customer: new FormControl<Customer | null>(null, {
+      validators: [Validators.required],
+      nonNullable: false,
+    }),
+    amount: new FormControl<number | null>(null, {
+      validators: [Validators.required, Validators.min(0.01)],
+      nonNullable: false,
+    }),
+    currency: new FormControl<Currency | null>(null, {
+      validators: [Validators.required],
+      nonNullable: false,
+    }),
+    bcash: new FormControl<BankCash | null>(null, {
+      validators: [Validators.required],
+      nonNullable: false,
+    }),
+    description: new FormControl<string | null>(null),
+    invoices: new FormArray<FormGroup<{
+      invoice: FormControl<SaleInvoice | null>;
+      amount: FormControl<number | null>;
+    }>>([this.buildInvoiceForm()]),
+  });
 
   readonly title = signal('Customer Receipt Setup');
 
   private buildInvoiceForm(seed?: InvoiceFormValue): FormGroup<InvoiceForm> {
     return this.fb.group<InvoiceForm>({
-      invoiceid: new FormControl<string | null>(seed?.invoiceid ?? null, { nonNullable: false }),
+      invoice: new FormControl<SaleInvoice | null>(seed?.invoice ?? null, { nonNullable: false }),
       amount: new FormControl<number | null>(seed?.amount ?? null, { nonNullable: false }),
     });  
   }
 
+
   constructor() {
     super();
-    this.form = this.fb.group<CustomerReceiptForm>({
-      date: new FormControl<string | null>(null, {
-        validators: [Validators.required],
-        nonNullable: false,
-      }),
-      customer: new FormControl<Customer | null>(null, {
-        validators: [Validators.required],
-        nonNullable: false,
-      }),
-      amount: new FormControl<number | null>(null, {
-        validators: [Validators.required, Validators.min(0.01)],
-        nonNullable: false,
-      }),
-      currency: new FormControl<Currency | null>(null, {
-        validators: [Validators.required],
-        nonNullable: false,
-      }),
-      bcash: new FormControl<BankCash | null>(null, {
-        validators: [Validators.required],
-        nonNullable: false,
-      }),
-      description: new FormControl<string | null>(null),
-      invoices: new FormArray<FormGroup<{
-        invoiceid: FormControl<string | null>;
-        amount: FormControl<number | null>;
-      }>>([this.buildInvoiceForm()]),
-    });
-
     effect(() => {
       if(this.currencyStore.currenciesLoaded()) {
         this.currencies.set(this.currencyStore.filteredCurrencies());
@@ -169,11 +174,23 @@ export class CreateCustomerReceipt extends WithFormDraftBinding implements OnIni
     const customerReceipt = this.selectedCustomerReceipt();
     if (customerReceipt) {
       // Format date for input
-      const dateValue = customerReceipt.date ? new Date(customerReceipt.date).toISOString().split('T')[0] : null;
+      const dateValue = dayjs(customerReceipt.date).format(DEFAULT_NODE_DATE_FORMAT);
       this.form.patchValue({
         ...customerReceipt,
-        date: dateValue,
+        rcptdate: dateValue,
       });
+      if(customerReceipt.invoices?.length) {
+        this.invoices.clear();
+        customerReceipt.invoices.forEach(invoice => {
+          const saleInvoice = invoice.saleinvoice;
+          if(saleInvoice) {
+            this.invoices.push(this.buildInvoiceForm({
+              invoice: saleInvoice,
+              amount: invoice.amount,
+            }));
+          }
+        });
+      }
       this.loading = false;
     }
   });
@@ -238,10 +255,7 @@ export class CreateCustomerReceipt extends WithFormDraftBinding implements OnIni
     this.router.navigateByUrl(burl);
   }
 
-  get invoices(): FormArray<FormGroup<{
-    invoiceid: FormControl<string | null>;
-    amount: FormControl<number | null>;
-  }>> {
+  get invoices(): FormArray<FormGroup<InvoiceForm>> {
     return this.form.controls.invoices;
   }
 
@@ -256,7 +270,8 @@ export class CreateCustomerReceipt extends WithFormDraftBinding implements OnIni
       if(this.itemId()) {
         this.mode.set('edit');
         this.loading = true;
-        this.store.dispatch(customerReceiptActions.loadCustomerReceiptById({ id: this.itemId()!, query: { includes: ['customer', 'currency', 'bcash'] } }));
+        this.store.dispatch(customerReceiptActions.loadCustomerReceiptById({ id: this.itemId()!, query: { includes: 
+          ['customer', 'currency', 'bcash', 'invoices.saleinvoice'] } }));
       }else{
         this.loading = false;
       }
@@ -276,60 +291,42 @@ export class CreateCustomerReceipt extends WithFormDraftBinding implements OnIni
     this.updateFailureEffect.destroy();
   }
 
-  findInvoiceDisplayValue(invoice: SaleInvoice): string {
-    return invoice.number;
-  }
-
-  findInvoiceInputDisplayValue(invoice: SaleInvoice): string {
-    return invoice.number;
-  }
+  findInvoiceDisplayValue = (invoice: SaleInvoice): string => {
+    const branch = this.userSessionStore.branch();
+    const customer = this.form.get('customer')?.value as Customer;
+    const formCurrency = this.form.get('currency')?.value as Currency;
+    const currency = formCurrency ??invoice.currency ?? customer?.currency;
+    const fraction = currency?.minorunit ?? 2;
+    const dateFormat = branch?.dateformat ?? DEFAULT_DATE_FORMAT;
+    const amount = `${currency?.symbol ?? ''} ${formatAmountToFraction(invoice.grandtotal ?? 0, fraction)}`;
+    return `${invoice.number} dated ${dayjs(invoice.date).format(dateFormat)} of amount ${amount}`;
+  };
 
   onInvoiceSearch(value: string): void {
     const customer = this.form.get('customer')?.value as Customer;
     const search:LB4Search[] = [{query: value, fields: ['number']}];
-    if(customer.id) {
+    if(customer?.id) {
       search.push({query: customer.id, fields: ['customerid']});
     }
     this.store.dispatch(saleInvoiceActions.loadSaleInvoices({ query: { search: search } }));
   }
 
-  handleSubmit(): void {
-    if (this.submitting()) return;
-    
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
+  onRemoveInvoice(index: number): void {
+    this.invoices.removeAt(index);
+    this.form.markAsDirty();
+    if(this.invoices.length === 0) {
+      this.onAddInvoice();
     }
+  }
 
-    const formData = this.form.value as CustomerReceiptFormValue;
-    const { customer, currency, bcash, description, amount, date } = formData;
-
-    if (!date || !customer || !currency || !bcash || !amount) {
-      this.submitting.set(false);
-      return;
-    }
-
-    const customerReceipt: CustomerReceiptCU = {
-      date: new Date(date),
-      amount: toNumber(amount),
-      customerid: customer.id!,
-      currencycode: currency.code,
-      bcashid: bcash.id!,
-      ...(description && { description }),
-    };
-    
-    if(this.mode() === 'create') {
-      this.draftStore.setOneTimeDraft(CreateCustomerReceipt.ONE_TIME_DRAFT_KEY, customerReceipt);
-      this.store.dispatch(customerReceiptActions.createCustomerReceipt({ customerReceipt }));
-    }else{
-      this.store.dispatch(customerReceiptActions.updateCustomerReceipt({ id: this.itemId()!, customerReceipt }));
-    }
-    this.binder.clear();
+  onAddInvoice(): void {
+    const invForm = this.buildInvoiceForm();
+    this.invoices.push(invForm);
   }
 
   // Customer autocomplete methods
   onCustomerSearch(value: string): void {
-    this.store.dispatch(customerActions.loadCustomers({ query: { search: [{query: value, fields: ['name', 'mobile', 'email']}] } }));
+    this.store.dispatch(customerActions.loadCustomers({ query: { search: [{query: value, fields: ['name', 'mobile', 'email']}], includes: ['currency'] } }));
   }
 
   findCustomerDisplayValue(customer: Customer): string {
@@ -338,6 +335,14 @@ export class CreateCustomerReceipt extends WithFormDraftBinding implements OnIni
 
   findCustomerInputDisplayValue(customer: Customer): string {
     return customer.name;
+  }
+
+  onCustomerSelected(customer: Customer): void {
+    if(customer?.currency) {
+      this.form.patchValue({ currency: customer.currency });
+      this.invoices.clear();
+      this.onAddInvoice();
+    }
   }
 
   // Currency autocomplete methods
@@ -366,6 +371,46 @@ export class CreateCustomerReceipt extends WithFormDraftBinding implements OnIni
 
   findBankCashInputDisplayValue(bcash: BankCash): string {
     return bcash.name;
+  }
+
+  handleSubmit(): void {
+    if (this.submitting()) return;
+    
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    const formData = this.form.value as CustomerReceiptFormValue;
+    const { customer, currency, bcash, description, amount, rcptdate } = formData;
+
+    if (!rcptdate || !customer || !currency || !bcash || !amount) {
+      this.submitting.set(false);
+      return;
+    }
+
+    const customerReceipt: CustomerReceiptRequest = {
+      date: new Date(rcptdate as string),
+      amount: toNumber(amount),
+      customerid: customer.id!,
+      currencycode: currency.code,
+      bcashid: bcash.id!,
+      ...(description && { description }),
+    };
+
+    if(this.invoices.length > 0) {
+      customerReceipt.invoices = this.invoices.value.map(invoice => ({
+        saleinvoiceid: invoice.invoice!.id!,
+        amount: toNumber(invoice.amount!),
+      }));
+    }
+    if(this.mode() === 'create') {
+      this.draftStore.setOneTimeDraft(CreateCustomerReceipt.ONE_TIME_DRAFT_KEY, customerReceipt);
+      this.store.dispatch(customerReceiptActions.createCustomerReceipt({ customerReceipt }));
+    }else{
+      this.store.dispatch(customerReceiptActions.updateCustomerReceipt({ id: this.itemId()!, customerReceipt }));
+    }
+    this.binder.clear();
   }
 }
 

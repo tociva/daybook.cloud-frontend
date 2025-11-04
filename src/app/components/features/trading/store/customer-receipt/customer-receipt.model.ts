@@ -2,11 +2,12 @@ import { Branch } from '../../../management/store/branch/branch.model';
 import { Currency } from '../../../../shared/store/currency/currency.model';
 import { Customer } from '../customer/customer.model';
 import { BankCash } from '../bank-cash/bank-cash.model';
+import { SaleInvoice } from '../sale-invoice/sale-invoice.model';
 
 export interface SaleInvoiceReceipt {
   id?: string;
   customerreceiptid: string;
-  saleinvoiceid: string;
+  saleinvoice?: SaleInvoice | null;
   amount: number;
 }
 

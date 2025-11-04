@@ -23,22 +23,21 @@
 
       <!-- Date -->
       <div class="flex flex-col gap-1">
-        @let date = form.get('date');
-        @let dateInvalid = date?.invalid && (date?.dirty || date?.touched);
-
+        @let rcptdate = form.get('rcptdate');
+        @let rcptdateInvalid = rcptdate?.invalid && (rcptdate?.dirty || rcptdate?.touched);
         <div class="flex items-center gap-2">
           <label class="w-32 text-sm text-gray-700">
             Receipt Date <span class="text-danger">*</span>
           </label>
 
-          <input formControlName="date" type="date" [ngClass]="{
+          <input formControlName="rcptdate" type="date" [ngClass]="{
               'flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none': true,
-              'focus:border-b-primary border-b-gray-300': !dateInvalid,
-              'border-b-danger': dateInvalid
+              'focus:border-b-primary border-b-gray-300': !rcptdateInvalid,
+              'border-b-danger': rcptdateInvalid
             }" />
         </div>
 
-        @if (date?.hasError('required') && (date?.dirty || date?.touched)) {
+        @if (rcptdate?.hasError('required') && (rcptdate?.dirty || rcptdate?.touched)) {
         <p class="text-danger text-xs mt-1">Receipt date is required.</p>
         }
       </div>
@@ -61,6 +60,7 @@
             inputClass="flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 placeholder-gray-400 focus:outline-none focus:border-b-primary border-b-gray-300"
             [optionDisplayValue]="findCustomerDisplayValue"
             [inputDisplayValue]="findCustomerInputDisplayValue"
+            (onOptionSelected)="onCustomerSelected($event)"
             (onSearch)="onCustomerSearch($event)">
           </app-auto-complete>
         </div>
@@ -161,43 +161,66 @@
     </div>
   </div>
 
-  <div formArrayName="invoices" class="p-4 border border-gray-300 rounded bg-white mt-6">
+  <div formArrayName="invoices" class="p-4 bg-white mt-6">
     <h2 class="font-semibold text-base mb-4">Related Invoices</h2>
-    <table class="w-full">
+    <table class="border-collapse text-sm">
       <thead>
-        <tr>
-          <th class="text-left text-sm text-gray-700">Invoice</th>
-          <th class="text-left text-sm text-gray-700">Amount</th>
-          <th class="text-left text-sm text-gray-700">Actions</th>
+        <tr class="bg-gray-50 border-b border-gray-200">
+          <th class="text-left font-semibold text-gray-700 py-2 px-3 text-center px-3 w-[60%]">Invoice</th>
+          <th class="text-left font-semibold text-gray-700 py-2 text-center w-[30%]">Amount</th>
+          <th class="text-left font-semibold text-gray-700 py-2 px-3 text-center w-[10%]">Actions</th>
         </tr>
       </thead>
+    
       <tbody>
-        @for (invoice of invoices.controls; track $index; let i = $index) {
-          <tr>
-            <td class="text-left text-sm text-gray-700">
+        @for (invoice of invoices.controls; track invoice.value.invoice?.number; let i = $index) {
+          <tr [formGroupName]="i"class="hover:bg-gray-50 transition-colors border-b border-gray-100">
+            <td class="py-2.5 px-3 text-gray-800">
               <app-auto-complete
-                formControlName="invoiceid"
+                formControlName="invoice"
                 [options]="saleInvoices()"
                 class="flex-1"
                 placeholder="Search for an invoice"
                 [required]="true"
                 inputClass="flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 placeholder-gray-400 focus:outline-none focus:border-b-primary border-b-gray-300"
                 [optionDisplayValue]="findInvoiceDisplayValue"
-                [inputDisplayValue]="findInvoiceInputDisplayValue"
+                [inputDisplayValue]="findInvoiceDisplayValue"
                 (onSearch)="onInvoiceSearch($event)">
               </app-auto-complete>
             </td>
-            <td class="text-left text-sm text-gray-700">{{ invoice.get('amount')?.value }}</td>
-            <td class="text-left text-sm text-gray-700">
-              <button type="button" class="text-danger hover:text-primary transition cursor-pointer">
-                <ng-icon name="bootstrapTrash"></ng-icon>
-              </button>
+            <td class="py-2.5 px-3 text-gray-800">
+              <input formControlName="amount" appNumberInput [ngClass]="{
+                'flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none': true,
+                'focus:border-b-primary border-b-gray-300': !amountInvalid,
+                'border-b-danger': amountInvalid
+              }" />
             </td>
+            <td class="py-2.5 px-3 text-center">
+              <div class="flex justify-center items-center gap-3">
+                <button
+                  type="button"
+                  class="text-primary hover:text-primary-hover transition cursor-pointer"
+                  (click)="onAddInvoice()"
+                  matTooltip="Add invoice"
+                >
+                  <ng-icon name="bootstrapPlusSquare" size="18"></ng-icon>
+                </button>
+            
+                <button
+                  type="button"
+                  class="text-danger hover:text-danger-hover transition cursor-pointer"
+                  (click)="onRemoveInvoice(i)"
+                  matTooltip="Remove invoice"
+                >
+                  <ng-icon name="bootstrapTrash" size="18"></ng-icon>
+                </button>
+              </div>
+            </td>
+            
           </tr>
         }
       </tbody>
     </table>
-
   </div>
 
   <!-- ✅ Submit Button -->

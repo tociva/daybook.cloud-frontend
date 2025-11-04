@@ -39,6 +39,7 @@ import {
   bootstrapPersonBadge,
   bootstrapPlus,
   bootstrapPlusLg,
+  bootstrapPlusSquare,
   bootstrapReceipt,
   bootstrapSearch,
   bootstrapSignpost2,
@@ -104,4 +105,5 @@ export const provideAppIcons = () =>
     bootstrapPencil,
     bootstrapBagPlus,
     bootstrapX,
+    bootstrapPlusSquare,
   });
