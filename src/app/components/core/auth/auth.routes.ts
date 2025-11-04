@@ -25,5 +25,9 @@ export const AUTH_ROUTES: Routes = [
     path: 'login',
     loadComponent: () => import('./ui/login/login').then(m => m.Login),
   },
+  {
+    path: 'validate',
+    loadComponent: () => import('./ui/validate/validate').then(m => m.Validate),
+  },
 
 ];

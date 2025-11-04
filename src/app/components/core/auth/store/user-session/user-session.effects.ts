@@ -8,6 +8,8 @@ import { userSessionActions } from './user-session.actions';
 import { UserSession } from './user-session.model';
 import { ConfigStore } from '../config/config.store';
 import { UserSessionStore } from './user-session.store';
+import { AuthStore } from '../auth/auth.store';
+import { AuthStatus } from '../auth/auth.model';
 
 export const userSessionEffects = {
 
@@ -120,13 +122,14 @@ export const userSessionEffects = {
       const actions$ = inject(Actions);
       const router = inject(Router);
       const userSessionStore = inject(UserSessionStore);
-
-
+      const authStore = inject(AuthStore);
+      
       return actions$.pipe(
         ofType(userSessionActions.createUserSessionSuccess),
         tap(({ session }) => {
           // 1) Update the SignalStore first so components see it immediately
-        userSessionStore.setSession(session);
+          userSessionStore.setSession(session);
+          authStore.setStatus(AuthStatus.AUTHENTICATED_VALID_USER);
           if (!session.ownorgs || session.ownorgs.length === 0) {
             router.navigate(['/app/management/organization/create']);
           }

@@ -17,8 +17,10 @@ export const AuthStore = signalStore(
 
   withComputed((state) => ({
     // Use this if you want to guard routes based on login + session restored
-    isLoggedInAndHydrated: () =>
-      state.status() === AuthStatus.AUTHENTICATED || state.status() === AuthStatus.HYDRATED_VALID_USER,
+    isLoggedInAndHydrated: () => {
+      const status = state.status();
+      return status === AuthStatus.AUTHENTICATED || status === AuthStatus.HYDRATED_VALID_USER || status === AuthStatus.AUTHENTICATED_VALID_USER;
+    },
 
     // Useful for error banners or fallback routes
     hasAuthError: () => state.status() === AuthStatus.ERROR && !!state.error(),

@@ -3,7 +3,12 @@ import { CanMatchFn, Router, UrlTree } from '@angular/router';
 import { AuthStore } from './store/auth/auth.store';
 
 export const authGuard: CanMatchFn = (): boolean | UrlTree => {
-  const isAuthed = inject(AuthStore).isLoggedInAndHydrated(); // signal/selector
-  // return isAuthed ? true : inject(Router).parseUrl('/auth/login-failure');
+  const authStore = inject(AuthStore);
+  const isAuthed = authStore.isLoggedInAndHydrated();
+  if(!isAuthed){
+    const url = window.location.pathname + window.location.search;
+    authStore.setReturnUri(url);
+    return inject(Router).parseUrl('/auth/validate');
+  }
   return true;
 };

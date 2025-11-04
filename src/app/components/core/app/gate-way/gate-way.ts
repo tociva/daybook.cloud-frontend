@@ -22,22 +22,22 @@ export class GateWay {
 
   readonly AuthStatus = AuthStatus;
 
-  readonly triggerConfigLoad = effect(() => {
-    const status = this.authStore.status();
-    switch(status) {
-      case AuthStatus.USER_MANAGER_INITIALIZED:
-        this.store.dispatch(authActions.hydration());
-        return;
-      case AuthStatus.HYDRATED_NO_USER:
-      case AuthStatus.HYDRATED_EXPIRED_USER:
-      case AuthStatus.HYDRATED_ERROR:
-        console.log('navigate to login', status);
-        this.router.navigate(['/auth/login']);
-        return;
-      case AuthStatus.AUTHENTICATED:
-      case AuthStatus.HYDRATED_VALID_USER:
-        this.store.dispatch(userSessionActions.createUserSession());
-        return;
-    }
-  });
+  // readonly triggerConfigLoad = effect(() => {
+  //   const status = this.authStore.status();
+  //   switch(status) {
+  //     case AuthStatus.USER_MANAGER_INITIALIZED:
+  //       this.store.dispatch(authActions.hydration());
+  //       return;
+  //     case AuthStatus.HYDRATED_NO_USER:
+  //     case AuthStatus.HYDRATED_EXPIRED_USER:
+  //     case AuthStatus.HYDRATED_ERROR:
+  //       console.log('navigate to login', status);
+  //       this.router.navigate(['/auth/login']);
+  //       return;
+  //     case AuthStatus.AUTHENTICATED:
+  //     case AuthStatus.HYDRATED_VALID_USER:
+  //       this.store.dispatch(userSessionActions.createUserSession());
+  //       return;
+  //   }
+  // });
 }

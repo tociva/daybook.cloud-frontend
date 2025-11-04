@@ -246,8 +246,8 @@ export const authEffects = {
       return actions$.pipe(
         ofType(authActions.performRedirect),
         tap(({ returnUri }) => {
+          console.log('performRedirect', returnUri);
           router.navigateByUrl(returnUri);
-          authStore.setReturnUri(null); // ✅ signal + localStorage handled
         })
       );
     },

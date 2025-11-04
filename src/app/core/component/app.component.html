@@ -1,12 +1,13 @@
 <app-progress-loader/>
 <app-toaster />
-@if (status() === AuthStatus.UN_INITIALIZED) {
+<!-- @if (status() === AuthStatus.UN_INITIALIZED) {
   <app-loading-screen message="App is not initialized, waiting for config"></app-loading-screen>
 } @else if (status() === AuthStatus.CONFIG_LOADING) {
   <app-loading-screen message="Config is loading, please wait"></app-loading-screen>
 } @else {
   <router-outlet></router-outlet>
-}
+} -->
+<router-outlet></router-outlet>
 
 <!-- @else if (status() === AuthStatus.CONFIG_LOAD_ERROR) {
   <app-loading-screen [message]="loadingMessage()"></app-loading-screen>
