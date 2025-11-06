@@ -27,7 +27,6 @@ private readonly statusSig = computed(
   private readonly authStatusChangeEffect = effect(() => {
     const status = this.statusSig(); // re-runs only when status actually changes
 
-    console.log('authStatusChangeEffect', status);
     switch(status) {
       case AuthStatus.UN_INITIALIZED:
         this.store.dispatch(configActions.load());
