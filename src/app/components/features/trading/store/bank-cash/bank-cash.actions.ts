@@ -35,6 +35,11 @@ export const bankCashActions = createActionGroup({
     // Delete
     deleteBankCash: props<{ id: string }>(),
     deleteBankCashSuccess: props<{ id: string }>(),
-    deleteBankCashFailure: props<{ error: DbcError }>()
+    deleteBankCashFailure: props<{ error: DbcError }>(),
+
+    // Bulk Upload
+    uploadBulkBankCashes: props<{ file: File }>(),
+    uploadBulkBankCashesSuccess: props<{ bankCashes: BankCash[] }>(),
+    uploadBulkBankCashesFailure: props<{ error: DbcError }>(),
   }
 });

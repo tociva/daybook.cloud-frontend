@@ -9,7 +9,7 @@ import { FormField } from '../../../../../../util/types/form-field.model';
 import { TwoColumnFormComponent } from '../../../../../shared/forms/two-column-form/two-column-form.component';
 import { ItemNotFound } from '../../../../../shared/item-not-found/item-not-found';
 import { SkeltonLoader } from '../../../../../shared/skelton-loader/skelton-loader';
-import { BankCash, bankCashActions, BankCashStore } from '../../../store/bank-cash';
+import { BankCash, bankCashActions, BankCashCU, BankCashStore } from '../../../store/bank-cash';
 
 @Component({
   selector: 'app-create-bank-cash',
@@ -96,10 +96,15 @@ export class CreateBankCash implements OnInit {
       this.formFields.set(validatedFields);
       return;
     }
+    const {name, description} = data;
+    const bankCash: BankCashCU = {
+      name,
+      ...(description && { description }),
+    };
     if(this.mode === 'create') {
-      this.store.dispatch(bankCashActions.createBankCash({ bankCash: data }));
+      this.store.dispatch(bankCashActions.createBankCash({ bankCash }));
     }else{
-      this.store.dispatch(bankCashActions.updateBankCash({ id: this.itemId()!, bankCash: data }));
+      this.store.dispatch(bankCashActions.updateBankCash({ id: this.itemId()!, bankCash }));
     }
   }
 }

@@ -1,0 +1,77 @@
+@if(loading) {
+<app-skelton-loader variant="text" [lines]="10" width="100%" [shimmer]="true" />
+} @else if(!loading && mode() === 'edit' && purchaseReturnStore.error()?.statusCode === 404) {
+<app-item-not-found title="Purchase return record not found"
+  description="It may have been deleted or the link is invalid."></app-item-not-found>
+} @else if(!loading && (mode() === 'create' || mode() === 'edit' || mode() === 'delete')) {
+
+<form [formGroup]="form">
+  <h1 class="text-2xl font-semibold text-gray-800 mb-6 text-center">
+    {{title()}}
+  </h1>
+
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-start mt-4">
+    <!-- Left: first half -->
+    <div class="md:col-span-2">
+      <app-purchase-return-purchase-invoice [form]="purchaseInvoiceGroup()"></app-purchase-return-purchase-invoice>
+    </div>
+
+    <div class="md:col-span-1"></div>
+    <!-- Right: second half -->
+    <div class="md:col-span-1">
+      <app-purchase-return-properties [form]="propertiesGroup()" [uiMode]="mode()"></app-purchase-return-properties>
+    </div>
+  </div>
+  <div class="flex flex-wrap items-center justify-center gap-8 p-4">
+
+    <div class="flex items-center gap-2">
+      <label for="template" class="text-primary">Billing Mode:</label>
+      <app-auto-complete formControlName="taxDisplayMode" [options]="taxDisplayModes()"
+        [optionDisplayValue]="findTaxDisplayModeDisplayValue" [inputDisplayValue]="findTaxDisplayModeDisplayValue"
+        [required]="true" class="min-w-[200px]"></app-auto-complete>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <label for="showDescription" class="text-primary">Enable Description:</label>
+      <dbc-switch formControlName="showDescription"></dbc-switch>
+    </div>
+  </div>
+  <app-purchase-return-items [formArray]="itemsGroup()" [taxMode]="taxMode()" [fractions]="fractions()"
+    (onItemUpdate)="onItemUpdate()" [taxDisplayMode]="taxDisplayMode()"
+    [showDescription]="showDescription()"></app-purchase-return-items>
+  <app-purchase-return-summary [form]="summaryGroup()" (onRoundoffChange)="onRoundoffChange()"
+    [taxDisplayMode]="taxDisplayMode()"></app-purchase-return-summary>
+  <!-- Confirmation -->
+  @if(mode() === 'delete') {
+  <div class="flex items-start gap-3 py-4">
+    <input id="confirm-delete" type="checkbox" #confirmDel class="mt-0.5 h-4 w-4 rounded border-gray-300"
+      aria-describedby="confirm-help" />
+    <label for="confirm-delete" class="text-sm text-gray-800">
+      I understand this will permanently delete this Purchase Return and cannot be undone.
+    </label>
+  </div>
+  <div class="pt-2 mt-4 text-center">
+    <app-cancel-button></app-cancel-button>
+    <app-delete-button [disabled]="!confirmDel.checked" [onDelete]="handleDelete"
+      [successAction]="deleteSuccessAction"></app-delete-button>
+
+  </div>
+  } @else {
+  <!-- ✅ Submit Button -->
+  <div class="pt-2 mt-4 text-center">
+    <app-cancel-button></app-cancel-button>
+
+    <button type="submit" (click)="onSubmit()"
+      class="bg-primary text-white px-6 py-2 rounded transition-opacity duration-200" [disabled]="submitting()"
+      [ngClass]="{
+    'cursor-not-allowed bg-gray-400 text-gray-200 opacity-60': submitting(),
+    'hover:opacity-90 cursor-pointer': !submitting()
+  }">
+      Submit
+    </button>
+  </div>
+  }
+</form>
+
+}
+

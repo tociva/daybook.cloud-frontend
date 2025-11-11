@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { DbcColumn } from '../../../util/types/dbc-column.type';
 import { DbcError } from '../../../util/types/dbc-error.type';
 import { EmptyListMessage } from '../../../util/types/empty-list-message.type';
@@ -44,4 +44,16 @@ export class ItemLanding<T> {
   readonly onButton2Click = input<() => void>(() => {
     return void 0;
   });
+
+  readonly bulkUploadLabel = input<string | null>(null);
+  readonly bulkUploadHint = input<string | null>(null);
+  readonly filesSelected = output<File[]>();
+
+  readonly bulkUploadAccept = input<string>('*');
+  readonly bulkUploadMultiple = input<boolean>(false);
+  readonly bulkUploadSizeClass = input<string>('w-full h-12');
+
+  handleOnFilesSelected(files: File[]) {
+    this.filesSelected.emit(files);
+  }
 }

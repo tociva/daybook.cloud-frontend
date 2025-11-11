@@ -1,0 +1,29 @@
+<div
+  appFileUpload
+  [fileUploadAccept]="accept()"
+  [fileUploadMultiple]="multiple()"
+  [fileUploadDisabled]="disabled()"
+  (fileUploadFiles)="handleFiles($event)"
+  class="
+    flex flex-col items-center justify-center gap-2
+    border-2 border-dashed border-gray-300 rounded-md
+    px-6 py-1 text-center cursor-pointer
+    transition-all duration-200 ease-in-out
+    hover:border-primary hover:shadow-md
+    [&.file-upload-dragover]:scale-105
+    [&.file-upload-dragover]:border-primary
+    [&.file-upload-dragover]:shadow-lg
+    [&.file-upload-dragover]:shadow-primary/40
+  "
+  [ngClass]="sizeClass()"
+>
+  <div class="font-medium text-gray-800">
+    {{ label() }}
+  </div>
+
+  @if (hint()) {
+    <div class="text-[10px] text-gray-400">
+      {{ hint() }}
+    </div>
+  }
+</div>

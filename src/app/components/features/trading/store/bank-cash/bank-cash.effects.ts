@@ -392,5 +392,86 @@ export const bankCashEffects = {
       );
     },
     { functional: true, dispatch: false }
-  )
+  ),
+  // Bulk upload BankCashes effect
+uploadBulkBankCashes: createEffect(
+  () => {
+    const actions$ = inject(Actions);
+    const configStore = inject(ConfigStore);
+    const store = inject(Store);
+
+    return actions$.pipe(
+      ofType(bankCashActions.uploadBulkBankCashes),
+      tap(({ file }) => {
+        const baseUrl = `${configStore.config().apiBaseUrl}/inventory/bank-cash/bulk-upload`; 
+        // ⬆️ adjust path to match your backend
+
+        const requestId = `${bankCashActions.uploadBulkBankCashes.type}-${Date.now()}-${Math.random()}`;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const config: HttpRequestConfig = {
+          url: baseUrl,
+          method: 'POST',
+          body: formData,
+          // Do NOT set Content-Type; browser will set multipart boundary
+        };
+
+        const metadata: HttpRequestMetadata<BankCash[]> = {
+          requestId,
+          actionName: 'uploadBulkBankCashes',
+          successMessage: 'Bank cashes uploaded successfully!',
+          errorMessage: 'Failed to upload bank cashes',
+          onSuccessAction: (bankCashes) =>
+            bankCashActions.uploadBulkBankCashesSuccess({ bankCashes }),
+          onErrorAction: (error) =>
+            bankCashActions.uploadBulkBankCashesFailure({ error }),
+        };
+
+        store.dispatch(
+          httpActions.executeRequest({
+            config,
+            metadata: metadata as HttpRequestMetadata<unknown>,
+          })
+        );
+      })
+    );
+  },
+  { functional: true, dispatch: false }
+),
+// Bulk upload success
+uploadBulkBankCashesSuccess: createEffect(
+  () => {
+    const actions$ = inject(Actions);
+    const store = inject(BankCashStore);
+
+    return actions$.pipe(
+      ofType(bankCashActions.uploadBulkBankCashesSuccess),
+      tap(({ bankCashes }) => {
+        const current = store.items();
+        // prepend newly uploaded or merge as per your preference
+        store.setItems([...bankCashes, ...current]);
+      })
+    );
+  },
+  { functional: true, dispatch: false }
+),
+
+// Bulk upload failure
+uploadBulkBankCashesFailure: createEffect(
+  () => {
+    const actions$ = inject(Actions);
+    const store = inject(BankCashStore);
+
+    return actions$.pipe(
+      ofType(bankCashActions.uploadBulkBankCashesFailure),
+      tap(({ error }) => {
+        store.setError(error);
+      })
+    );
+  },
+  { functional: true, dispatch: false }
+),
+
 };

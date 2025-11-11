@@ -1,0 +1,50 @@
+<div id="purchase-invoice-details" class="flex-1" [formGroup]="form()">
+  <div class="flex items-center justify-between mb-4 gap-4">
+    <app-auto-complete formControlName="purchaseinvoice" [options]="purchaseInvoices()" class="flex-1"
+      placeholder="Search for a purchase invoice" [required]="true" [optionDisplayValue]="findPurchaseInvoiceDisplayValue"
+      [inputDisplayValue]="findPurchaseInvoiceDisplayValue" (onSearch)="onPurchaseInvoiceSearch($event)">
+    </app-auto-complete>
+
+    <button type="button"
+      class="flex items-center px-3 py-1.5 text-sm font-medium bg-primary text-white rounded hover:bg-primary-hover"
+      (click)="onNewPurchaseInvoice()">
+      <ng-icon name="bootstrapPlus" class="w-4 h-4 mr-1" size="24"></ng-icon>
+      New Purchase Invoice
+    </button>
+  </div>
+  @let purchaseInvoice = form().controls['purchaseinvoice'].value;
+
+  @if (purchaseInvoice?.id) {
+    <div id="purchase-invoice-info" class="flex gap-4 items-start">
+      <div class="w-full p-4 border border-gray-200 rounded">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-semibold text-sm mb-3 flex items-center gap-1">
+            Purchase Invoice: {{ purchaseInvoice.number }}
+          </h3>
+        </div>
+        <div class="text-sm text-gray-600">
+          <p><strong>Vendor:</strong> {{ purchaseInvoice.vendor?.name }}</p>
+          <p><strong>Date:</strong> {{ purchaseInvoice.date }}</p>
+          <p><strong>Grand Total:</strong> {{ purchaseInvoice.grandtotal }}</p>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <div class="p-4">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-semibold text-xl text-sm mb-3 flex items-center gap-1 text-gray-600">
+          Please select a purchase invoice or
+          <button
+            type="button"
+            class="text-primary font-medium underline underline-offset-2 hover:text-primary-hover cursor-pointer focus:outline-none transition-colors"
+            (click)="onNewPurchaseInvoice()"
+          >
+            create a new purchase invoice
+          </button>
+        </h3>
+      </div>
+    </div>
+  }
+
+</div>
+

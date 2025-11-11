@@ -2,7 +2,6 @@ import { inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { Actions, createEffect, ofType, ROOT_EFFECTS_INIT } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
 import { User, UserManager, WebStorageStateStore } from 'oidc-client-ts';
 import { catchError, filter, from, map, of, switchMap, tap, withLatestFrom } from 'rxjs';
 import { getUserManager, isUserManagerInitialized, setUserManager } from '../../user-manager-singleton';
@@ -241,7 +240,6 @@ export const authEffects = {
     () => {
       const actions$ = inject(Actions);
       const router = inject(Router);
-      const authStore = inject(AuthStore);
 
       return actions$.pipe(
         ofType(authActions.performRedirect),

@@ -6,6 +6,7 @@ import { AuthStatus } from '../../store/auth/auth.model';
 import { AuthStore } from '../../store/auth/auth.store';
 import { configActions } from '../../store/config/config.actions';
 import { userSessionActions } from '../../store/user-session/user-session.actions';
+import { UserSessionStore } from '../../store/user-session/user-session.store';
 
 
 @Component({
@@ -18,6 +19,7 @@ export class Validate {
 
 private readonly store = inject(Store);
 private readonly authStore = inject(AuthStore);
+private readonly userSessionStore = inject(UserSessionStore);
 
 private readonly statusSig = computed(
   () => this.authStore.status(),
@@ -49,6 +51,11 @@ private readonly statusSig = computed(
         this.store.dispatch(authActions.logoutHydra());
         break;
       case AuthStatus.AUTHENTICATED_VALID_USER:
+        const session = this.userSessionStore.session();
+        if(!session || !session.ownorgs || session.ownorgs.length === 0) {
+          this.store.dispatch(authActions.performRedirect({ returnUri: '/app/management/organization/create' }));
+          return;
+        }
         this.store.dispatch(authActions.performRedirect({ returnUri: this.authStore.returnUri() ?? '/app/dashboard' }));
         break;
     }

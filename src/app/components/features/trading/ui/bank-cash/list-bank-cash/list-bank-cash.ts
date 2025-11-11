@@ -102,4 +102,9 @@ export class ListBankCash implements OnInit, OnDestroy {
     const currentUrl = this.router.url;
     this.router.navigate(['/app/trading/bank-cash/create'], { queryParams: { burl: currentUrl } });
   }
+
+  handleOnFilesSelected(files: File[]): void {
+    const [file] = files;
+    this.store.dispatch(bankCashActions.uploadBulkBankCashes({ file }));
+  }
 }

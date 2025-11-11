@@ -11,6 +11,16 @@
 
   <!-- Right: Buttons Row -->
   <div class="flex items-center gap-2">
+    @if (bulkUploadLabel()) {
+    <app-file-upload
+    [accept]="bulkUploadAccept()"
+    [sizeClass]="bulkUploadSizeClass()"
+    [multiple]="bulkUploadMultiple()"
+    [label]="bulkUploadLabel()"
+    [hint]="bulkUploadHint()"
+    (filesSelected)="handleFilesSelected($event)"
+  ></app-file-upload>
+   }
     @if (button2Caption()) {
       <div class="flex items-center gap-2">
         <button

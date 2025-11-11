@@ -11,4 +11,10 @@
   [columns]="columns()"
   [onEditItem]="handleOnEditItem()"
   [onDeleteItem]="handleOnDeleteItem()"
+  bulkUploadLabel="Upload Bank/Cash in Bulk"
+  bulkUploadHint="Drop your json file here, or click to choose"
+  bulkUploadAccept=".json"
+  [bulkUploadMultiple]="false"
+  bulkUploadSizeClass="w-full h-12"
+  (filesSelected)="handleOnFilesSelected($event)"
 ></app-item-landing>

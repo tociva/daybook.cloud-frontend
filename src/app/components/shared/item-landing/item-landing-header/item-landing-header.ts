@@ -1,10 +1,11 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { NgIcon } from '@ng-icons/core';
 import { DbcError } from '../../../../util/types/dbc-error.type';
+import { FileUploadComponent } from '../../file-upload/file-upload.component';
 
 @Component({
   selector: 'app-item-landing-header',
-  imports: [NgIcon],
+  imports: [NgIcon, FileUploadComponent],
   templateUrl: './item-landing-header.html',
   styleUrl: './item-landing-header.css'
 })
@@ -20,4 +21,15 @@ export class ItemLandingHeader {
   readonly onButton2Click = input<() => void>(() => {
     return void 0;
   });
+  readonly bulkUploadLabel = input<string | null>(null);
+  readonly bulkUploadHint = input<string | null>(null);
+  readonly bulkUploadAccept = input<string>('*');
+  readonly bulkUploadMultiple = input<boolean>(false);
+  readonly bulkUploadSizeClass = input<string>('w-full h-12');
+  // Output
+  readonly filesSelected = output<File[]>();
+
+  handleFilesSelected(files: File[]) {
+    this.filesSelected.emit(files);
+  }
 }

@@ -12,94 +12,92 @@ import { FormUtil } from '../../../../../../../util/form/form.util';
 import { AutoComplete } from '../../../../../../shared/auto-complete/auto-complete';
 import { CancelButton } from '../../../../../../shared/cancel-button/cancel-button';
 import { DbcSwitch } from '../../../../../../shared/dbc-switch/dbc-switch';
-import { DeleteButton } from '../../../../../../shared/delete-button/delete-button';
 import { ItemNotFound } from '../../../../../../shared/item-not-found/item-not-found';
 import { SkeltonLoader } from '../../../../../../shared/skelton-loader/skelton-loader';
+import { PurchaseReturnRequest } from '../../../../store/purchase-return/purchase-return-request.type';
+import { purchaseReturnActions } from '../../../../store/purchase-return/purchase-return.actions';
+import { PurchaseReturnStore } from '../../../../store/purchase-return/purchase-return.store';
+import { PurchaseReturnItemTax } from '../../../../store/purchase-return/purchase-return-item-tax.model';
+import { PurchaseReturnFormService } from '../../util/purchase-return-form.service';
+import { PurchaseReturnPurchaseInvoiceForm, PurchaseReturnFormValue, PurchaseReturnPropertiesForm, 
+  PurchaseReturnSummaryForm, PurchaseReturnTaxDisplayModeType, PurchaseReturnItemForm } from '../../util/purchase-return-form.type';
+import { findTaxColumnCount, mapPurchaseReturnFormValueToRequest, purchaseReturnModelToPurchaseReturnFormValue } from '../../util/purchase-return.util';
+import { PurchaseReturnPurchaseInvoice } from '../purchase-return-purchase-invoice/purchase-return-purchase-invoice';
+import { PurchaseReturnItems } from '../purchase-return-items/purchase-return-items';
+import { PurchaseReturnProperties } from '../purchase-return-properties/purchase-return-properties';
+import { DeleteButton } from '../../../../../../shared/delete-button/delete-button';
 import { ToastStore } from '../../../../../../shared/store/toast/toast.store';
-import { SaleInvoiceRequest } from '../../../../store/sale-invoice/sale-invoice-request.type';
-import { saleInvoiceActions } from '../../../../store/sale-invoice/sale-invoice.actions';
-import { SaleInvoiceStore } from '../../../../store/sale-invoice/sale-invoice.store';
-import { SaleItemTax } from '../../../../store/sale-invoice/sale-item-tax.model';
-import { SaleInvoiceFormService } from '../../util/sale-invoice-form.service';
-import {
-  SaleInvoiceCustomerForm, SaleInvoiceFormValue, SaleInvoicePropertiesForm,
-  SaleInvoiceSummaryForm, SaleInvoiceTaxDisplayModeType, SaleItemForm
-} from '../../util/sale-invoice-form.type';
-import { findTaxColumnCount, mapSaleInvoiceFormValueToRequest, saleInvoiceModelToSaleInvoiceFormValue } from '../../util/sale-invoice.util';
-import { SaleInvoiceCustomer } from '../sale-invoice-customer/sale-invoice-customer';
-import { SaleInvoiceProperties } from '../sale-invoice-properties/sale-invoice-properties';
-import { SaleInvoiceItems } from '../sale-invoice-items/sale-invoice-items';
-import { SaleInvoiceSummary } from '../sale-invoice-summary/sale-invoice-summary';
+import { PurchaseReturnSummary } from '../purchase-return-summary/purchase-return-summary';
 
 @Component({
-  selector: 'app-sale-invoice-shell',
-  imports: [ReactiveFormsModule, SaleInvoiceCustomer, SaleInvoiceProperties, SaleInvoiceItems, SaleInvoiceSummary, 
+  selector: 'app-purchase-return-shell',
+  imports: [ReactiveFormsModule, PurchaseReturnPurchaseInvoice, PurchaseReturnProperties, PurchaseReturnItems, PurchaseReturnSummary, 
     CancelButton, NgClass, AutoComplete, DbcSwitch, SkeltonLoader, ItemNotFound, DeleteButton],
-  templateUrl: './sale-invoice-shell.html',
-  styleUrl: './sale-invoice-shell.css'
+  templateUrl: './purchase-return-shell.html',
+  styleUrl: './purchase-return-shell.css'
 })
-export class SaleInvoiceShell {
+export class PurchaseReturnShell {
 
   // ---------- Injected services ----------
-  private readonly saleInvoiceFormService = inject(SaleInvoiceFormService);
+  private readonly purchaseReturnFormService = inject(PurchaseReturnFormService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly store = inject(Store);
   private readonly actions$ = inject(Actions);
-  readonly saleInvoiceStore = inject(SaleInvoiceStore);
-  readonly deleteSuccessAction = saleInvoiceActions.deleteSaleInvoiceSuccess;
+  readonly purchaseReturnStore = inject(PurchaseReturnStore);
+  readonly deleteSuccessAction = purchaseReturnActions.deletePurchaseReturnSuccess;
   private readonly toastStore = inject(ToastStore);
 
   // ---------- UI mode & route ----------
   protected readonly mode = signal<'create' | 'edit' | 'delete'>('create');
   private readonly itemId = signal<string | null>(null);
   protected loading = true;
-  protected title = signal<string>('Create New Sale Invoice');
+  protected title = signal<string>('Create New Purchase Return');
+  
   // ---------- Form & typed accessors ----------
-  readonly form = this.saleInvoiceFormService.createSaleInvoiceForm();
+  readonly form = this.purchaseReturnFormService.createPurchaseReturnForm();
 
-  readonly customerGroup = computed(
-    () => this.form.get('customer') as FormGroup<SaleInvoiceCustomerForm>
+  readonly purchaseInvoiceGroup = computed(
+    () => this.form.get('purchaseinvoice') as FormGroup<PurchaseReturnPurchaseInvoiceForm>
   );
 
   readonly propertiesGroup = computed(
-    () => this.form.get('properties') as FormGroup<SaleInvoicePropertiesForm>
+    () => this.form.get('properties') as FormGroup<PurchaseReturnPropertiesForm>
   );
 
   readonly itemsGroup = computed(
-    () => this.form.get('items') as FormArray<FormGroup<SaleItemForm>>
+    () => this.form.get('items') as FormArray<FormGroup<PurchaseReturnItemForm>>
   );
 
   readonly summaryGroup = computed(
-    () => this.form.get('summary') as FormGroup<SaleInvoiceSummaryForm>
+    () => this.form.get('summary') as FormGroup<PurchaseReturnSummaryForm>
   );
 
   // ---------- Options & helpers ----------
   readonly taxDisplayModes = computed(
-    () => Object.values(SaleInvoiceTaxDisplayModeType) as SaleInvoiceTaxDisplayModeType[]
+    () => Object.values(PurchaseReturnTaxDisplayModeType) as PurchaseReturnTaxDisplayModeType[]
   );
-  readonly findTaxDisplayModeDisplayValue = (m: SaleInvoiceTaxDisplayModeType) => m;
+  readonly findTaxDisplayModeDisplayValue = (m: PurchaseReturnTaxDisplayModeType) => m;
 
   // ---------- UI/runtime state ----------
   readonly fractions = signal<number>(2);
   readonly submitting = signal<boolean>(false);
 
   // Writable control signals (keeps form state & signals in sync)
-  readonly taxDisplayMode = FormUtil.controlWritableSignal<SaleInvoiceTaxDisplayModeType>(
-    this.form, 'taxDisplayMode', SaleInvoiceTaxDisplayModeType.NON_TAXABLE
+  readonly taxDisplayMode = FormUtil.controlWritableSignal<PurchaseReturnTaxDisplayModeType>(
+    this.form, 'taxDisplayMode', PurchaseReturnTaxDisplayModeType.NON_TAXABLE
   );
-  readonly showDiscount = FormUtil.controlWritableSignal<boolean>(this.form, 'showDiscount', false);
   readonly showDescription = FormUtil.controlWritableSignal<boolean>(this.form, 'showDescription', false);
 
   // ---------- Store selection ----------
-  readonly selectedInvoice = this.saleInvoiceStore.selectedItem; // assumed signal-like getter
+  readonly selectedPurchaseReturn = this.purchaseReturnStore.selectedItem;
 
   // ---------- Signals from form controls ----------
-  readonly customerSignal = toSignal(
-    (this.customerGroup().get('customer') as FormControl).valueChanges.pipe(
-      startWith(this.customerGroup().get('customer')?.value)
+  readonly purchaseInvoiceSignal = toSignal(
+    (this.purchaseInvoiceGroup().get('purchaseinvoice') as FormControl).valueChanges.pipe(
+      startWith(this.purchaseInvoiceGroup().get('purchaseinvoice')?.value)
     ),
-    { initialValue: this.customerGroup().get('customer')?.value }
+    { initialValue: this.purchaseInvoiceGroup().get('purchaseinvoice')?.value }
   );
 
   readonly taxModeSignal = toSignal(
@@ -110,38 +108,62 @@ export class SaleInvoiceShell {
   );
   readonly taxMode = computed(() => this.taxModeSignal());
 
+  readonly currencySignal = toSignal(
+    (this.propertiesGroup().get('currency') as FormControl).valueChanges.pipe(
+      startWith(this.propertiesGroup().get('currency')?.value)
+    ),
+    { initialValue: this.propertiesGroup().get('currency')?.value }
+  );
+  readonly currency = computed(() => this.currencySignal());
+
+  // ---------- Effects (keep references to destroy) ----------
+  private readonly purchaseInvoiceEffectRef = effect(() => {
+    const purchaseInvoice = this.purchaseInvoiceSignal();
+    if (!purchaseInvoice) return;
+
+    if (purchaseInvoice.currency) {
+      this.propertiesGroup().patchValue({ currency: purchaseInvoice.currency });
+      this.fractions.set(purchaseInvoice.currency.fractions ?? TWO);
+    }
+  });
 
   private readonly taxModeEffectRef = effect(() => {
     const taxMode = this.taxMode();
     if (taxMode === 'Inter State') {
-      this.taxDisplayMode.set(SaleInvoiceTaxDisplayModeType.IGST);
+      this.taxDisplayMode.set(PurchaseReturnTaxDisplayModeType.IGST);
     } else if (taxMode === 'Intra State') {
-      this.taxDisplayMode.set(SaleInvoiceTaxDisplayModeType.CGST_SGST);
+      this.taxDisplayMode.set(PurchaseReturnTaxDisplayModeType.CGST_SGST);
     } else {
-      this.taxDisplayMode.set(SaleInvoiceTaxDisplayModeType.NON_TAXABLE);
+      this.taxDisplayMode.set(PurchaseReturnTaxDisplayModeType.NON_TAXABLE);
     }
   });
 
   private readonly taxDisplayModeEffectRef = effect(() => {
-    // Reshape taxes array length per item whenever display mode changes
     const mode = this.taxDisplayMode();
     const needed = findTaxColumnCount(mode);
 
     untracked(() => {
       const itemsFa = this.itemsGroup();
-      const blanks: Partial<SaleItemTax>[] = Array.from({ length: needed }, () => ({}));
+      const blanks: Partial<PurchaseReturnItemTax>[] = Array.from({ length: needed }, () => ({}));
 
       for (let i = 0; i < itemsFa.length; i++) {
         const item = itemsFa.at(i);
-        const taxesFa = this.saleInvoiceFormService.buildSaleItemTaxesForm(blanks);
+        const taxesFa = this.purchaseReturnFormService.buildPurchaseReturnItemTaxesForm(blanks);
         item.setControl('taxes', taxesFa, { emitEvent: false });
       }
     });
   });
 
+  private readonly currencyEffectRef = effect(() => {
+    const curr = this.currencySignal();
+    if (curr) {
+      this.fractions.set(curr.minorunit ?? TWO);
+    }
+  });
+
   private readonly createSuccessEffectRef = effect((onCleanup) => {
     const sub = this.actions$.pipe(
-      ofType(saleInvoiceActions.createSaleInvoiceSuccess),
+      ofType(purchaseReturnActions.createPurchaseReturnSuccess),
       tap(() => {
         this.submitting.set(false);
         const burl = this.route.snapshot.queryParamMap.get('burl') ?? '/';
@@ -153,7 +175,7 @@ export class SaleInvoiceShell {
 
   private readonly createFailureEffectRef = effect((onCleanup) => {
     const sub = this.actions$.pipe(
-      ofType(saleInvoiceActions.createSaleInvoiceFailure),
+      ofType(purchaseReturnActions.createPurchaseReturnFailure),
       tap(() => this.submitting.set(false))
     ).subscribe();
     onCleanup(() => sub.unsubscribe());
@@ -161,7 +183,7 @@ export class SaleInvoiceShell {
 
   private readonly updateSuccessEffectRef = effect((onCleanup) => {
     const sub = this.actions$.pipe(
-      ofType(saleInvoiceActions.updateSaleInvoiceSuccess),
+      ofType(purchaseReturnActions.updatePurchaseReturnSuccess),
       tap(() => {
         this.submitting.set(false);
         const burl = this.route.snapshot.queryParamMap.get('burl') ?? '/';
@@ -173,14 +195,14 @@ export class SaleInvoiceShell {
 
   private readonly updateFailureEffectRef = effect((onCleanup) => {
     const sub = this.actions$.pipe(
-      ofType(saleInvoiceActions.updateSaleInvoiceFailure),
+      ofType(purchaseReturnActions.updatePurchaseReturnFailure),
       tap(() => this.submitting.set(false))
     ).subscribe();
     onCleanup(() => sub.unsubscribe());
   });
 
   private readonly loadErrorEffectRef = effect(() => {
-    const error = this.saleInvoiceStore.error();
+    const error = this.purchaseReturnStore.error();
     if (error && this.mode() === 'edit') {
       this.loading = false;
     }
@@ -191,51 +213,25 @@ export class SaleInvoiceShell {
     const needed = findTaxColumnCount(mode);
     untracked(() => {
       const itemsFa = this.itemsGroup();
-      const blanks: Partial<SaleItemTax>[] = Array.from({ length: needed }, () => ({}));
+      const blanks: Partial<PurchaseReturnItemTax>[] = Array.from({ length: needed }, () => ({}));
   
       for (let i = 0; i < itemsFa.length; i++) {
         const item = itemsFa.at(i);
-  
-        // Build a brand-new FormArray with the exact length
-        const taxesFa = this.saleInvoiceFormService.buildSaleItemTaxesForm(blanks);
-  
-        // Replace the existing control atomically (no need to clear/remove first)
+        const taxesFa = this.purchaseReturnFormService.buildPurchaseReturnItemTaxesForm(blanks);
         item.setControl('taxes', taxesFa, { emitEvent: false });
       }
     });
   });
 
-  private readonly createActionSuccessEffect = effect((onCleanup) => {
-    const subscription = this.actions$.pipe(
-      ofType(saleInvoiceActions.createSaleInvoiceSuccess),
-      tap(() => {
-        this.submitting.set(false);
-        const burl = this.route.snapshot.queryParamMap.get('burl') ?? '/';
-        this.router.navigateByUrl(burl);
-      })
-    ).subscribe();
-    onCleanup(() => subscription.unsubscribe());
-  });
-
-  private readonly createActionFailureEffect = effect((onCleanup) => {
-    const subscription = this.actions$.pipe(
-      ofType(saleInvoiceActions.createSaleInvoiceFailure),
-      tap(() => {
-        this.submitting.set(false);
-      })
-    ).subscribe();
-    onCleanup(() => subscription.unsubscribe());
-  });
-
   private fillFormEffectRef = effect(() => {
-    const invoice = this.selectedInvoice();
-    if(invoice) {
-      const formValue = saleInvoiceModelToSaleInvoiceFormValue(invoice);
+    const purchaseReturn = this.selectedPurchaseReturn();
+    if(purchaseReturn) {
+      const formValue = purchaseReturnModelToPurchaseReturnFormValue(purchaseReturn);
       const {items, ...rest} = formValue;
       this.form.patchValue(rest);
       this.itemsGroup().clear();
       items.forEach(item => {
-        this.itemsGroup().push(this.saleInvoiceFormService.buildSaleItemForm(item, this.fractions()));
+        this.itemsGroup().push(this.purchaseReturnFormService.buildPurchaseReturnItemForm(item, this.fractions()));
       });
     }
     this.loading = false;
@@ -243,14 +239,10 @@ export class SaleInvoiceShell {
 
   private reCalculateSummary = () => {
     let itemtotal = 0;
-    let discount = 0;
-    let subtotal = 0;
     let tax = 0;
     let grandtotal = 0;
     this.form.controls.items.controls.forEach(item => {
       itemtotal += Number(item.get('itemtotal')?.value ?? 0);
-      discount += Number(item.get('discamount')?.value ?? 0);
-      subtotal += Number(item.get('subtotal')?.value ?? 0);
       tax += Number(item.get('taxamount')?.value ?? 0);
       grandtotal += Number(item.get('grandtotal')?.value ?? 0); 
     });
@@ -258,45 +250,47 @@ export class SaleInvoiceShell {
     grandtotal += roundoff;
     this.summaryGroup().patchValue({ 
       itemtotal: formatAmountToFraction(itemtotal, this.fractions()), 
-      discount: formatAmountToFraction(discount, this.fractions()), 
-      subtotal: formatAmountToFraction(subtotal, this.fractions()), 
-      tax: formatAmountToFraction(tax, this.fractions()), roundoff: 
-      formatAmountToFraction(roundoff, this.fractions()), 
+      tax: formatAmountToFraction(tax, this.fractions()), 
+      roundoff: formatAmountToFraction(roundoff, this.fractions()), 
       grandtotal: formatAmountToFraction(grandtotal, this.fractions()),
-      words: formatAmountToWords(grandtotal, this.selectedInvoice()?.currency) },
-    { emitEvent: false });
+      words: formatAmountToWords(grandtotal, this.currency()) 
+    }, { emitEvent: false });
   }
 
-  private loadSaleInvoiceById() {
+  private loadPurchaseReturnById() {
     const itemId = this.route.snapshot.paramMap.get('id') || null;
-      if(itemId) {
-        this.itemId.set(itemId);
-        this.loading = true;
-        this.store.dispatch(saleInvoiceActions.loadSaleInvoiceById({ id: this.itemId()! , query: { includes: ['currency', 'customer', 'items.item','items.taxes.tax'] } }));
-      }else{
-        this.loading = false;
-      }
+    if(itemId) {
+      this.itemId.set(itemId);
+      this.loading = true;
+      this.store.dispatch(purchaseReturnActions.loadPurchaseReturnById({ 
+        id: this.itemId()!, 
+        query: { includes: ['currency', 'purchaseinvoice', 'items.item','items.taxes.tax'] } 
+      }));
+    } else {
+      this.loading = false;
     }
-    ngOnInit(): void {
-      const lastSegment = this.route.snapshot.url[this.route.snapshot.url.length - 1]?.path;
-      if (lastSegment === 'create') {
-        this.title.set('Create New Sale Invoice');
-        this.loading = false;
-      } else if (lastSegment === 'edit') {
-      this.title.set('Edit Sale Invoice');
+  }
+
+  ngOnInit(): void {
+    const lastSegment = this.route.snapshot.url[this.route.snapshot.url.length - 1]?.path;
+    if (lastSegment === 'create') {
+      this.title.set('Create New Purchase Return');
+      this.loading = false;
+    } else if (lastSegment === 'edit') {
+      this.title.set('Edit Purchase Return');
       this.mode.set('edit');
-      this.loadSaleInvoiceById();
+      this.loadPurchaseReturnById();
     } else if(lastSegment === 'delete') {
-      this.title.set('Delete Sale Invoice');
+      this.title.set('Delete Purchase Return');
       this.mode.set('delete');
       this.form.disable();
-      this.loadSaleInvoiceById();
+      this.loadPurchaseReturnById();
     }
   }
 
   ngOnDestroy() {
-    this.createActionSuccessEffect.destroy();
-    this.createActionFailureEffect.destroy();
+    this.purchaseInvoiceEffectRef.destroy();
+    this.currencyEffectRef.destroy();
     this.effectTaxDisplayMode.destroy();
     this.fillFormEffectRef.destroy();
     this.createSuccessEffectRef.destroy();
@@ -314,9 +308,9 @@ export class SaleInvoiceShell {
   
   onSubmit() {
     this.submitting.set(true);
-    const formValue = this.form.getRawValue() as unknown as SaleInvoiceFormValue;
-    const saleInvoiceRequest: SaleInvoiceRequest =  mapSaleInvoiceFormValueToRequest(formValue);
-    const {items} = saleInvoiceRequest;
+    const formValue = this.form.getRawValue() as unknown as PurchaseReturnFormValue;
+    const purchaseReturnRequest: PurchaseReturnRequest = mapPurchaseReturnFormValueToRequest(formValue);
+    const {items} = purchaseReturnRequest;
     const invalidItems = items.filter(item => !item.itemid || !item.itemtotal);
     if(invalidItems.length){
       this.submitting.set(false);
@@ -324,12 +318,14 @@ export class SaleInvoiceShell {
       return;
     }
     if(this.mode() === 'create') {
-      this.store.dispatch(saleInvoiceActions.createSaleInvoice({ saleInvoice: saleInvoiceRequest }));
+      this.store.dispatch(purchaseReturnActions.createPurchaseReturn({ purchaseReturn: purchaseReturnRequest }));
     } else if(this.mode() === 'edit') {
-      this.store.dispatch(saleInvoiceActions.updateSaleInvoice({ id: this.itemId()!, saleInvoice: saleInvoiceRequest }));
+      this.store.dispatch(purchaseReturnActions.updatePurchaseReturn({ id: this.itemId()!, purchaseReturn: purchaseReturnRequest }));
     }
   }
+
   handleDelete = (): void => {
-    this.store.dispatch(saleInvoiceActions.deleteSaleInvoice({ id: this.itemId()! }));
+    this.store.dispatch(purchaseReturnActions.deletePurchaseReturn({ id: this.itemId()! }));
   };
 }
+
