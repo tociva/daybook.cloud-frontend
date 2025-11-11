@@ -1,0 +1,19 @@
+{
+  "taxes": [
+    {
+      "name": "GST",
+      "shortname": "GST",
+      "rate": 18,
+      "appliedto": 100,
+      "description": "Goods and Services Tax"
+    },
+    {
+      "name": "VAT",
+      "shortname": "VAT",
+      "rate": 12,
+      "appliedto": 100,
+      "description": "Value Added Tax"
+    }
+  ]
+}
+

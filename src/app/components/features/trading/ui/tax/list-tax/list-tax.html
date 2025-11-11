@@ -13,4 +13,11 @@
   [onDeleteItem]="handleOnDeleteItem()"
   [button2Caption]="'Manage Tax Groups'"
   [onButton2Click]="handleOnButton2Click()"
+  bulkUploadLabel="Upload Tax in Bulk"
+  bulkUploadHint="Drop your json file here, or click to choose"
+  bulkUploadAccept=".json"
+  [bulkUploadMultiple]="false"
+  bulkUploadSizeClass="w-full h-12"
+  bulkUploadSampleFileUrl="/assets/bulk-upload-examples/tax.json"
+  (filesSelected)="handleOnFilesSelected($event)"
 />

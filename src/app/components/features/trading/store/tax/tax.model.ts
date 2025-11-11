@@ -15,3 +15,16 @@ export interface Tax extends TaxCU {
   branch: Branch;
   branchid: string;
 }
+
+export interface TaxBulkRequestItem {
+  name: string;
+  shortname: string;
+  rate: number;
+  appliedto: number;
+  description?: string;
+  status?: Status;
+}
+
+export interface TaxBulkRequest {
+  taxes: TaxBulkRequestItem[];
+}

@@ -461,4 +461,86 @@ export const taxGroupEffects = {
     },
     { functional: true, dispatch: false }
   ),
+
+  // Bulk upload TaxGroups effect
+  uploadBulkTaxGroups: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const configStore = inject(ConfigStore);
+      const store = inject(Store);
+
+      return actions$.pipe(
+        ofType(taxGroupActions.uploadBulkTaxGroups),
+        tap(({ file }) => {
+          const baseUrl = `${configStore.config().apiBaseUrl}/inventory/tax-group/bulk-upload`; 
+          // ⬆️ adjust path to match your backend
+
+          const requestId = `${taxGroupActions.uploadBulkTaxGroups.type}-${Date.now()}-${Math.random()}`;
+
+          const formData = new FormData();
+          formData.append('file', file);
+
+          const config: HttpRequestConfig = {
+            url: baseUrl,
+            method: 'POST',
+            body: formData,
+            // Do NOT set Content-Type; browser will set multipart boundary
+          };
+
+          const metadata: HttpRequestMetadata<TaxGroup[]> = {
+            requestId,
+            actionName: 'uploadBulkTaxGroups',
+            successMessage: 'Tax groups uploaded successfully!',
+            errorMessage: 'Failed to upload tax groups',
+            onSuccessAction: (taxGroups) =>
+              taxGroupActions.uploadBulkTaxGroupsSuccess({ taxGroups }),
+            onErrorAction: (error) =>
+              taxGroupActions.uploadBulkTaxGroupsFailure({ error }),
+          };
+
+          store.dispatch(
+            httpActions.executeRequest({
+              config,
+              metadata: metadata as HttpRequestMetadata<unknown>,
+            })
+          );
+        })
+      );
+    },
+    { functional: true, dispatch: false }
+  ),
+
+  // Bulk upload success
+  uploadBulkTaxGroupsSuccess: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const store = inject(TaxGroupStore);
+
+      return actions$.pipe(
+        ofType(taxGroupActions.uploadBulkTaxGroupsSuccess),
+        tap(({ taxGroups }) => {
+          const current = store.items();
+          // prepend newly uploaded or merge as per your preference
+          store.setItems([...taxGroups, ...current]);
+        })
+      );
+    },
+    { functional: true, dispatch: false }
+  ),
+
+  // Bulk upload failure
+  uploadBulkTaxGroupsFailure: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const store = inject(TaxGroupStore);
+
+      return actions$.pipe(
+        ofType(taxGroupActions.uploadBulkTaxGroupsFailure),
+        tap(({ error }) => {
+          store.setError(error);
+        })
+      );
+    },
+    { functional: true, dispatch: false }
+  )
 };

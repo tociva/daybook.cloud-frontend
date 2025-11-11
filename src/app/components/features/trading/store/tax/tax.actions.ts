@@ -35,6 +35,11 @@ export const taxActions = createActionGroup({
     // Delete
     deleteTax: props<{ id: string }>(),
     deleteTaxSuccess: props<{ id: string }>(),
-    deleteTaxFailure: props<{ error: DbcError }>()
+    deleteTaxFailure: props<{ error: DbcError }>(),
+
+    // Bulk Upload
+    uploadBulkTaxes: props<{ file: File }>(),
+    uploadBulkTaxesSuccess: props<{ taxes: Tax[] }>(),
+    uploadBulkTaxesFailure: props<{ error: DbcError }>()
   }
 });

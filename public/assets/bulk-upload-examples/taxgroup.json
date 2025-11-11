@@ -1,0 +1,43 @@
+{
+  "taxes": [
+    {
+      "name": "GST",
+      "shortname": "GST",
+      "rate": 18,
+      "appliedto": 100,
+      "description": "Goods and Services Tax"
+    },
+    {
+      "name": "VAT",
+      "shortname": "VAT",
+      "rate": 12,
+      "appliedto": 100,
+      "description": "Value Added Tax"
+    }
+  ],
+  "taxgroups": [
+    {
+      "name": "Standard Tax Group",
+      "rate": 18,
+      "description": "Standard tax group with GST",
+      "groups": [
+        {
+          "mode": "inclusive",
+          "taxes": ["GST"]
+        }
+      ]
+    },
+    {
+      "name": "Composite Tax Group",
+      "rate": 30,
+      "description": "Composite tax group with multiple taxes",
+      "groups": [
+        {
+          "mode": "exclusive",
+          "taxes": ["GST", "VAT"]
+        }
+      ]
+    }
+  ]
+}
+

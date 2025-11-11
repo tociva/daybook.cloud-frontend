@@ -67,6 +67,11 @@ export class ListTaxGroup implements OnInit, OnDestroy {
     this.router.navigate(['/app/trading/tax']);
   });
 
+  handleOnFilesSelected(files: File[]): void {
+    const [file] = files;
+    this.store.dispatch(taxGroupActions.uploadBulkTaxGroups({ file }));
+  }
+
   readonly countTaxGroupsSuccessEffect = effect((onCleanup) => {
 
     const subscription = this.actions$.pipe(

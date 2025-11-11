@@ -119,4 +119,9 @@ export class ListTax implements OnInit, OnDestroy {
   readonly handleOnButton2Click = signal<() => void>(() => {
     this.router.navigate(['/app/trading/tax-group']);
   });
+
+  handleOnFilesSelected(files: File[]): void {
+    const [file] = files;
+    this.store.dispatch(taxActions.uploadBulkTaxes({ file }));
+  }
 }

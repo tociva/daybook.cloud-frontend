@@ -2,7 +2,8 @@
 "bankCash": [
 
 {
-"name" : "ICICI Manacadu"
+"name" : "ICICI Manacadu",
+"description" : "ICICI Manacadu Branch for handlingn local transactions"
 }
 ]
 }

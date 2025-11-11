@@ -41,5 +41,10 @@ export const taxGroupActions = createActionGroup({
     loadTaxGroupModes: props<{ query?: QueryParamsRep }>(),
     loadTaxGroupModesSuccess: props<{ modes: string[] }>(),
     loadTaxGroupModesFailure: props<{ error: DbcError }>(),
+
+    // Bulk Upload
+    uploadBulkTaxGroups: props<{ file: File }>(),
+    uploadBulkTaxGroupsSuccess: props<{ taxGroups: TaxGroup[] }>(),
+    uploadBulkTaxGroupsFailure: props<{ error: DbcError }>()
   }
 });

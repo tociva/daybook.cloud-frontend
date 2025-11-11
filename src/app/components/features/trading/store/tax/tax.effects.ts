@@ -391,5 +391,87 @@ export const taxEffects = {
       );
     },
     { functional: true, dispatch: false }
+  ),
+
+  // Bulk upload Taxes effect
+  uploadBulkTaxes: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const configStore = inject(ConfigStore);
+      const store = inject(Store);
+
+      return actions$.pipe(
+        ofType(taxActions.uploadBulkTaxes),
+        tap(({ file }) => {
+          const baseUrl = `${configStore.config().apiBaseUrl}/inventory/tax/bulk-upload`; 
+          // ⬆️ adjust path to match your backend
+
+          const requestId = `${taxActions.uploadBulkTaxes.type}-${Date.now()}-${Math.random()}`;
+
+          const formData = new FormData();
+          formData.append('file', file);
+
+          const config: HttpRequestConfig = {
+            url: baseUrl,
+            method: 'POST',
+            body: formData,
+            // Do NOT set Content-Type; browser will set multipart boundary
+          };
+
+          const metadata: HttpRequestMetadata<Tax[]> = {
+            requestId,
+            actionName: 'uploadBulkTaxes',
+            successMessage: 'Taxes uploaded successfully!',
+            errorMessage: 'Failed to upload taxes',
+            onSuccessAction: (taxes) =>
+              taxActions.uploadBulkTaxesSuccess({ taxes }),
+            onErrorAction: (error) =>
+              taxActions.uploadBulkTaxesFailure({ error }),
+          };
+
+          store.dispatch(
+            httpActions.executeRequest({
+              config,
+              metadata: metadata as HttpRequestMetadata<unknown>,
+            })
+          );
+        })
+      );
+    },
+    { functional: true, dispatch: false }
+  ),
+
+  // Bulk upload success
+  uploadBulkTaxesSuccess: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const store = inject(TaxStore);
+
+      return actions$.pipe(
+        ofType(taxActions.uploadBulkTaxesSuccess),
+        tap(({ taxes }) => {
+          const current = store.items();
+          // prepend newly uploaded or merge as per your preference
+          store.setItems([...taxes, ...current]);
+        })
+      );
+    },
+    { functional: true, dispatch: false }
+  ),
+
+  // Bulk upload failure
+  uploadBulkTaxesFailure: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const store = inject(TaxStore);
+
+      return actions$.pipe(
+        ofType(taxActions.uploadBulkTaxesFailure),
+        tap(({ error }) => {
+          store.setError(error);
+        })
+      );
+    },
+    { functional: true, dispatch: false }
   )
 };
