@@ -395,5 +395,86 @@ export const itemEffects = {
       );
     },
     { functional: true, dispatch: false }
+  ),
+
+  // Bulk upload Items effect
+  uploadBulkItems: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const configStore = inject(ConfigStore);
+      const store = inject(Store);
+
+      return actions$.pipe(
+        ofType(itemActions.uploadBulkItems),
+        tap(({ file }) => {
+          const baseUrl = `${configStore.config().apiBaseUrl}/inventory/item/bulk-upload`; 
+          // ⬆️ adjust path to match your backend
+
+          const requestId = `${itemActions.uploadBulkItems.type}-${Date.now()}-${Math.random()}`;
+
+          const formData = new FormData();
+          formData.append('file', file);
+
+          const config: HttpRequestConfig = {
+            url: baseUrl,
+            method: 'POST',
+            body: formData,
+            // Do NOT set Content-Type; browser will set multipart boundary
+          };
+
+          const metadata: HttpRequestMetadata<Item[]> = {
+            requestId,
+            actionName: 'uploadBulkItems',
+            successMessage: 'Items uploaded successfully!',
+            errorMessage: 'Failed to upload items',
+            onSuccessAction: (items) =>
+              itemActions.uploadBulkItemsSuccess({ items }),
+            onErrorAction: (error) =>
+              itemActions.uploadBulkItemsFailure({ error }),
+          };
+
+          store.dispatch(
+            httpActions.executeRequest({
+              config,
+              metadata: metadata as HttpRequestMetadata<unknown>,
+            })
+          );
+        })
+      );
+    },
+    { functional: true, dispatch: false }
+  ),
+
+  // Bulk upload success
+  uploadBulkItemsSuccess: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const store = inject(ItemStore);
+
+      return actions$.pipe(
+        ofType(itemActions.uploadBulkItemsSuccess),
+        tap(({ items }) => {
+          const currentItems = store.items();
+          store.setItems([...items, ...currentItems]);
+        })
+      );
+    },
+    { functional: true, dispatch: false }
+  ),
+
+  // Bulk upload failure
+  uploadBulkItemsFailure: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const store = inject(ItemStore);
+
+      return actions$.pipe(
+        ofType(itemActions.uploadBulkItemsFailure),
+        tap(({ error }) => {
+          store.setError(error);
+        })
+      );
+    },
+    { functional: true, dispatch: false }
   )
 };

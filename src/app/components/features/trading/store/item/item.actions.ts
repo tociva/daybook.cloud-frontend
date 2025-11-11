@@ -35,6 +35,11 @@ export const itemActions = createActionGroup({
     // Delete
     deleteItem: props<{ id: string }>(),
     deleteItemSuccess: props<{ id: string }>(),
-    deleteItemFailure: props<{ error: DbcError }>()
+    deleteItemFailure: props<{ error: DbcError }>(),
+
+    // Bulk Upload
+    uploadBulkItems: props<{ file: File }>(),
+    uploadBulkItemsSuccess: props<{ items: Item[] }>(),
+    uploadBulkItemsFailure: props<{ error: DbcError }>()
   }
 });

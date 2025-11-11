@@ -395,5 +395,86 @@ export const itemCategoryEffects = {
       );
     },
     { functional: true, dispatch: false }
+  ),
+
+  // Bulk upload ItemCategories effect
+  uploadBulkItemCategories: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const configStore = inject(ConfigStore);
+      const store = inject(Store);
+
+      return actions$.pipe(
+        ofType(itemCategoryActions.uploadBulkItemCategories),
+        tap(({ file }) => {
+          const baseUrl = `${configStore.config().apiBaseUrl}/inventory/item-category/bulk-upload`; 
+          // ⬆️ adjust path to match your backend
+
+          const requestId = `${itemCategoryActions.uploadBulkItemCategories.type}-${Date.now()}-${Math.random()}`;
+
+          const formData = new FormData();
+          formData.append('file', file);
+
+          const config: HttpRequestConfig = {
+            url: baseUrl,
+            method: 'POST',
+            body: formData,
+            // Do NOT set Content-Type; browser will set multipart boundary
+          };
+
+          const metadata: HttpRequestMetadata<ItemCategory[]> = {
+            requestId,
+            actionName: 'uploadBulkItemCategories',
+            successMessage: 'Item categories uploaded successfully!',
+            errorMessage: 'Failed to upload item categories',
+            onSuccessAction: (itemCategories) =>
+              itemCategoryActions.uploadBulkItemCategoriesSuccess({ itemCategories }),
+            onErrorAction: (error) =>
+              itemCategoryActions.uploadBulkItemCategoriesFailure({ error }),
+          };
+
+          store.dispatch(
+            httpActions.executeRequest({
+              config,
+              metadata: metadata as HttpRequestMetadata<unknown>,
+            })
+          );
+        })
+      );
+    },
+    { functional: true, dispatch: false }
+  ),
+
+  // Bulk upload success
+  uploadBulkItemCategoriesSuccess: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const store = inject(ItemCategoryStore);
+
+      return actions$.pipe(
+        ofType(itemCategoryActions.uploadBulkItemCategoriesSuccess),
+        tap(({ itemCategories }) => {
+          const currentItems = store.items();
+          store.setItems([...itemCategories, ...currentItems]);
+        })
+      );
+    },
+    { functional: true, dispatch: false }
+  ),
+
+  // Bulk upload failure
+  uploadBulkItemCategoriesFailure: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const store = inject(ItemCategoryStore);
+
+      return actions$.pipe(
+        ofType(itemCategoryActions.uploadBulkItemCategoriesFailure),
+        tap(({ error }) => {
+          store.setError(error);
+        })
+      );
+    },
+    { functional: true, dispatch: false }
   )
 };

@@ -21,3 +21,18 @@ export interface Item extends ItemCU {
   branch: Branch;
   branchid: string;
 }
+
+export interface ItemBulkRequestItem {
+  name: string;
+  code: string;
+  displayname: string;
+  barcode?: string;
+  description?: string;
+  purchaseledger?: string;
+  salesledger?: string;
+  category: string;
+}
+
+export interface ItemBulkRequest {
+  items: ItemBulkRequestItem[];
+}

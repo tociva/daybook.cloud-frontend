@@ -20,3 +20,15 @@ export interface ItemCategory extends ItemCategoryCU {
   branchid: string;
   taxgroup?: TaxGroup;
 }
+
+export interface ItemCategoryBulkRequestItem {
+  name: string;
+  code: string;
+  description?: string;
+  type: 'Product' | 'Service';
+  parent?: string;
+}
+
+export interface ItemCategoryBulkRequest {
+  itemCategory: ItemCategoryBulkRequestItem[];
+}

@@ -67,6 +67,11 @@ export class ListItemCategory implements OnInit, OnDestroy {
     this.router.navigate(['/app/trading/item']);
   });
 
+  handleOnFilesSelected(files: File[]): void {
+    const [file] = files;
+    this.store.dispatch(itemCategoryActions.uploadBulkItemCategories({ file }));
+  }
+
   private destroy$ = new Subject<void>();
 
   private loadItemCategories(): void {

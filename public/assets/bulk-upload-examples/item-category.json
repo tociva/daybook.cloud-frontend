@@ -1,0 +1,24 @@
+{
+  "itemCategory": [
+    {
+      "name": "Electronics",
+      "code": "ELEC",
+      "description": "Electronic products and devices",
+      "type": "Product"
+    },
+    {
+      "name": "Software Services",
+      "code": "SOFT",
+      "description": "Software development and consulting services",
+      "type": "Service"
+    },
+    {
+      "name": "Mobile Phones",
+      "code": "MOBILE",
+      "description": "Mobile phones and accessories",
+      "type": "Product",
+      "parent": "Electronics"
+    }
+  ]
+}
+

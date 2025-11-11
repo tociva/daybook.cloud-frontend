@@ -13,4 +13,11 @@
   [onDeleteItem]="handleOnDeleteItem()"
   [button2Caption]="'Manage Item Categories'"
   [onButton2Click]="handleOnButton2Click()"
+  bulkUploadLabel="Upload Item in Bulk"
+  bulkUploadHint="Drop your json file here, or click to choose"
+  bulkUploadAccept=".json"
+  [bulkUploadMultiple]="false"
+  bulkUploadSizeClass="w-full h-12"
+  bulkUploadSampleFileUrl="/assets/bulk-upload-examples/item.json"
+  (filesSelected)="handleOnFilesSelected($event)"
 />
