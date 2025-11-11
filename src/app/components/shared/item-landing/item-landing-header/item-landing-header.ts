@@ -26,6 +26,7 @@ export class ItemLandingHeader {
   readonly bulkUploadAccept = input<string>('*');
   readonly bulkUploadMultiple = input<boolean>(false);
   readonly bulkUploadSizeClass = input<string>('w-full h-12');
+  readonly bulkUploadSampleFileUrl = input<string | null>(null);
   // Output
   readonly filesSelected = output<File[]>();
 

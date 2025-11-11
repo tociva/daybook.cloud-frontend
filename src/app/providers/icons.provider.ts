@@ -40,6 +40,7 @@ import {
   bootstrapPlus,
   bootstrapPlusLg,
   bootstrapPlusSquare,
+  bootstrapQuestionOctagonFill,
   bootstrapReceipt,
   bootstrapSearch,
   bootstrapSignpost2,
@@ -106,4 +107,5 @@ export const provideAppIcons = () =>
     bootstrapBagPlus,
     bootstrapX,
     bootstrapPlusSquare,
+    bootstrapQuestionOctagonFill,
   });

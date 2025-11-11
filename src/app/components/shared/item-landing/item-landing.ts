@@ -52,6 +52,7 @@ export class ItemLanding<T> {
   readonly bulkUploadAccept = input<string>('*');
   readonly bulkUploadMultiple = input<boolean>(false);
   readonly bulkUploadSizeClass = input<string>('w-full h-12');
+  readonly bulkUploadSampleFileUrl = input<string | null>(null);
 
   handleOnFilesSelected(files: File[]) {
     this.filesSelected.emit(files);

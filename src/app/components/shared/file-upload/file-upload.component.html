@@ -5,9 +5,10 @@
   [fileUploadDisabled]="disabled()"
   (fileUploadFiles)="handleFiles($event)"
   class="
+    relative
     flex flex-col items-center justify-center gap-2
     border-2 border-dashed border-gray-300 rounded-md
-    px-6 py-1 text-center cursor-pointer
+    px-12 py-1 text-center cursor-pointer
     transition-all duration-200 ease-in-out
     hover:border-primary hover:shadow-md
     [&.file-upload-dragover]:scale-105
@@ -17,6 +18,23 @@
   "
   [ngClass]="sizeClass()"
 >
+  <!-- Help icon (top-right corner) -->
+  @if (bulkUploadSampleFileUrl()) {
+  <button
+    type="button"
+    class="
+      absolute top-1 right-1
+      p-1 rounded-full
+      hover:bg-gray-100
+      focus:outline-none focus:ring-2 focus:ring-primary/60
+      cursor-pointer
+    "
+    (click)="downloadSample($event)"
+    aria-label="Download sample file"
+  >
+    <ng-icon name="bootstrapQuestionOctagonFill" class="w-4 h-4 text-gray-500 hover:text-primary"></ng-icon>
+  </button>
+  }
   <div class="font-medium text-gray-800">
     {{ label() }}
   </div>

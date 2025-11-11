@@ -19,6 +19,7 @@
     [label]="bulkUploadLabel()"
     [hint]="bulkUploadHint()"
     (filesSelected)="handleFilesSelected($event)"
+    [bulkUploadSampleFileUrl]="bulkUploadSampleFileUrl()"
   ></app-file-upload>
    }
     @if (button2Caption()) {
