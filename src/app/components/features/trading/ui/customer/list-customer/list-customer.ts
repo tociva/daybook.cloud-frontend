@@ -67,6 +67,11 @@ export class ListCustomer implements OnInit, OnDestroy {
     this.router.navigate(['/app/trading/customer', item.id, 'delete'], { queryParams: { burl: currentUrl } });
   });
 
+  handleOnFilesSelected(files: File[]): void {
+    const [file] = files;
+    this.store.dispatch(customerActions.uploadBulkCustomers({ file }));
+  }
+
   private destroy$ = new Subject<void>();
 
   private loadCustomers(): void {

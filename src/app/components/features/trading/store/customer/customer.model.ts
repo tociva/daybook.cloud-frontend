@@ -25,3 +25,19 @@ export interface Customer extends CustomerCU {
   currency?: Currency;
   branchid: string;
 }
+
+export interface CustomerBulkRequestItem {
+  name: string;
+  mobile?: string;
+  email?: string;
+  gstin?: string;
+  address: Address;
+  countrycode: string;
+  state?: string;
+  currencycode: string;
+  description?: string;
+}
+
+export interface CustomerBulkRequest {
+  customers: CustomerBulkRequestItem[];
+}

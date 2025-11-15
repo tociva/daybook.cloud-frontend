@@ -68,6 +68,11 @@ export class ListVendor implements OnInit, OnDestroy {
     this.router.navigate(['/app/trading/vendor', item.id, 'delete'], { queryParams: { burl: currentUrl } });
   });
 
+  handleOnFilesSelected(files: File[]): void {
+    const [file] = files;
+    this.store.dispatch(vendorActions.uploadBulkVendors({ file }));
+  }
+
   private destroy$ = new Subject<void>();
 
   private loadVendors(): void {

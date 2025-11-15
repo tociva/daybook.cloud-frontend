@@ -11,4 +11,11 @@
   [onCreateItem]="handleOnCreateItem()"
   [onEditItem]="handleOnEditItem()"
   [onDeleteItem]="handleOnDeleteItem()"
+  bulkUploadLabel="Upload Customer in Bulk"
+  bulkUploadHint="Drop your json file here, or click to choose"
+  bulkUploadAccept=".json"
+  [bulkUploadMultiple]="false"
+  bulkUploadSizeClass="w-full h-12"
+  bulkUploadSampleFileUrl="/assets/bulk-upload-examples/customer.json"
+  (filesSelected)="handleOnFilesSelected($event)"
 />

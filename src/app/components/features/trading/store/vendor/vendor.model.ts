@@ -26,3 +26,20 @@ export interface Vendor extends VendorCU {
   currency?: Currency;
   branchid: string;
 }
+
+export interface VendorBulkRequestItem {
+  name: string;
+  mobile?: string;
+  email?: string;
+  gstin?: string;
+  pan?: string;
+  address: Address;
+  countrycode: string;
+  state?: string;
+  currencycode: string;
+  description?: string;
+}
+
+export interface VendorBulkRequest {
+  vendors: VendorBulkRequestItem[];
+}

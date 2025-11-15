@@ -393,5 +393,86 @@ export const vendorEffects = {
       );
     },
     { functional: true, dispatch: false }
+  ),
+
+  // Bulk upload Vendors effect
+  uploadBulkVendors: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const configStore = inject(ConfigStore);
+      const store = inject(Store);
+
+      return actions$.pipe(
+        ofType(vendorActions.uploadBulkVendors),
+        tap(({ file }) => {
+          const baseUrl = `${configStore.config().apiBaseUrl}/inventory/vendor/bulk-upload`; 
+          // ⬆️ adjust path to match your backend
+
+          const requestId = `${vendorActions.uploadBulkVendors.type}-${Date.now()}-${Math.random()}`;
+
+          const formData = new FormData();
+          formData.append('file', file);
+
+          const config: HttpRequestConfig = {
+            url: baseUrl,
+            method: 'POST',
+            body: formData,
+            // Do NOT set Content-Type; browser will set multipart boundary
+          };
+
+          const metadata: HttpRequestMetadata<Vendor[]> = {
+            requestId,
+            actionName: 'uploadBulkVendors',
+            successMessage: 'Vendors uploaded successfully!',
+            errorMessage: 'Failed to upload vendors',
+            onSuccessAction: (vendors) =>
+              vendorActions.uploadBulkVendorsSuccess({ vendors }),
+            onErrorAction: (error) =>
+              vendorActions.uploadBulkVendorsFailure({ error }),
+          };
+
+          store.dispatch(
+            httpActions.executeRequest({
+              config,
+              metadata: metadata as HttpRequestMetadata<unknown>,
+            })
+          );
+        })
+      );
+    },
+    { functional: true, dispatch: false }
+  ),
+
+  // Bulk upload success
+  uploadBulkVendorsSuccess: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const store = inject(VendorStore);
+
+      return actions$.pipe(
+        ofType(vendorActions.uploadBulkVendorsSuccess),
+        tap(({ vendors }) => {
+          const currentItems = store.items();
+          store.setItems([...vendors, ...currentItems]);
+        })
+      );
+    },
+    { functional: true, dispatch: false }
+  ),
+
+  // Bulk upload failure
+  uploadBulkVendorsFailure: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const store = inject(VendorStore);
+
+      return actions$.pipe(
+        ofType(vendorActions.uploadBulkVendorsFailure),
+        tap(({ error }) => {
+          store.setError(error);
+        })
+      );
+    },
+    { functional: true, dispatch: false }
   )
 };

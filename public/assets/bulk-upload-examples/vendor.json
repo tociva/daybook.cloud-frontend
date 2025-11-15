@@ -1,0 +1,69 @@
+{
+  "vendors": [
+    {
+      "name": "Tech Supplies Inc",
+      "mobile": "+1987654321",
+      "email": "orders@techsupplies.com",
+      "gstin": "29AABCT9603R1ZX",
+      "pan": "AABCT9603R",
+      "address": {
+        "name": "Tech Supplies Inc",
+        "line1": "789 Supply Chain Road",
+        "line2": "Building A",
+        "street": "Supply Chain Road",
+        "city": "Chicago",
+        "state": "Illinois",
+        "zip": "60601",
+        "country": "United States",
+        "mobile": "+1987654321",
+        "email": "orders@techsupplies.com"
+      },
+      "countrycode": "US",
+      "state": "Illinois",
+      "currencycode": "USD",
+      "description": "Technology equipment supplier"
+    },
+    {
+      "name": "Manufacturing Solutions Ltd",
+      "mobile": "+1122334455",
+      "email": "contact@manusolutions.com",
+      "gstin": "27AABCM9603R1ZX",
+      "pan": "AABCM9603R",
+      "address": {
+        "name": "Manufacturing Solutions Ltd",
+        "line1": "321 Factory Street",
+        "street": "Factory Street",
+        "city": "Detroit",
+        "state": "Michigan",
+        "zip": "48201",
+        "country": "United States"
+      },
+      "countrycode": "US",
+      "state": "Michigan",
+      "currencycode": "USD",
+      "description": "Manufacturing equipment vendor"
+    },
+    {
+      "name": "Global Materials Co",
+      "email": "sales@globalmaterials.com",
+      "gstin": "27AABCG9603R1ZX",
+      "pan": "AABCG9603R",
+      "address": {
+        "name": "Global Materials Co",
+        "line1": "654 Material Avenue",
+        "line2": "Unit 10",
+        "street": "Material Avenue",
+        "city": "Bangalore",
+        "state": "Karnataka",
+        "zip": "560001",
+        "country": "India",
+        "email": "sales@globalmaterials.com"
+      },
+      "countrycode": "IN",
+      "state": "Karnataka",
+      "currencycode": "INR",
+      "description": "Raw materials supplier"
+    }
+  ]
+}
+

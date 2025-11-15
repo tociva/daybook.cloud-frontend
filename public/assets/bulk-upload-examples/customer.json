@@ -1,0 +1,65 @@
+{
+  "customers": [
+    {
+      "name": "ABC Corporation",
+      "mobile": "+1234567890",
+      "email": "contact@abccorp.com",
+      "gstin": "29AABCU9603R1ZX",
+      "address": {
+        "name": "ABC Corporation",
+        "line1": "123 Business Street",
+        "line2": "Suite 100",
+        "street": "Business Street",
+        "city": "New York",
+        "state": "New York",
+        "zip": "10001",
+        "country": "United States",
+        "mobile": "+1234567890",
+        "email": "contact@abccorp.com"
+      },
+      "countrycode": "US",
+      "state": "New York",
+      "currencycode": "USD",
+      "description": "Major corporate client"
+    },
+    {
+      "name": "XYZ Industries",
+      "mobile": "+9876543210",
+      "email": "info@xyzindustries.com",
+      "address": {
+        "name": "XYZ Industries",
+        "line1": "456 Industrial Avenue",
+        "street": "Industrial Avenue",
+        "city": "Los Angeles",
+        "state": "California",
+        "zip": "90001",
+        "country": "United States"
+      },
+      "countrycode": "US",
+      "state": "California",
+      "currencycode": "USD",
+      "description": "Industrial equipment supplier"
+    },
+    {
+      "name": "Global Trading Ltd",
+      "email": "sales@globaltrading.com",
+      "gstin": "27AABCU9603R1ZX",
+      "address": {
+        "name": "Global Trading Ltd",
+        "line1": "789 Trade Center",
+        "line2": "Floor 5",
+        "street": "Trade Center",
+        "city": "Mumbai",
+        "state": "Maharashtra",
+        "zip": "400001",
+        "country": "India",
+        "email": "sales@globaltrading.com"
+      },
+      "countrycode": "IN",
+      "state": "Maharashtra",
+      "currencycode": "INR",
+      "description": "International trading company"
+    }
+  ]
+}
+

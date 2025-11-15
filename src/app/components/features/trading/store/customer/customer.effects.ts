@@ -393,5 +393,86 @@ export const customerEffects = {
       );
     },
     { functional: true, dispatch: false }
+  ),
+
+  // Bulk upload Customers effect
+  uploadBulkCustomers: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const configStore = inject(ConfigStore);
+      const store = inject(Store);
+
+      return actions$.pipe(
+        ofType(customerActions.uploadBulkCustomers),
+        tap(({ file }) => {
+          const baseUrl = `${configStore.config().apiBaseUrl}/inventory/customer/bulk-upload`; 
+          // ⬆️ adjust path to match your backend
+
+          const requestId = `${customerActions.uploadBulkCustomers.type}-${Date.now()}-${Math.random()}`;
+
+          const formData = new FormData();
+          formData.append('file', file);
+
+          const config: HttpRequestConfig = {
+            url: baseUrl,
+            method: 'POST',
+            body: formData,
+            // Do NOT set Content-Type; browser will set multipart boundary
+          };
+
+          const metadata: HttpRequestMetadata<Customer[]> = {
+            requestId,
+            actionName: 'uploadBulkCustomers',
+            successMessage: 'Customers uploaded successfully!',
+            errorMessage: 'Failed to upload customers',
+            onSuccessAction: (customers) =>
+              customerActions.uploadBulkCustomersSuccess({ customers }),
+            onErrorAction: (error) =>
+              customerActions.uploadBulkCustomersFailure({ error }),
+          };
+
+          store.dispatch(
+            httpActions.executeRequest({
+              config,
+              metadata: metadata as HttpRequestMetadata<unknown>,
+            })
+          );
+        })
+      );
+    },
+    { functional: true, dispatch: false }
+  ),
+
+  // Bulk upload success
+  uploadBulkCustomersSuccess: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const store = inject(CustomerStore);
+
+      return actions$.pipe(
+        ofType(customerActions.uploadBulkCustomersSuccess),
+        tap(({ customers }) => {
+          const currentItems = store.items();
+          store.setItems([...customers, ...currentItems]);
+        })
+      );
+    },
+    { functional: true, dispatch: false }
+  ),
+
+  // Bulk upload failure
+  uploadBulkCustomersFailure: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const store = inject(CustomerStore);
+
+      return actions$.pipe(
+        ofType(customerActions.uploadBulkCustomersFailure),
+        tap(({ error }) => {
+          store.setError(error);
+        })
+      );
+    },
+    { functional: true, dispatch: false }
   )
 };

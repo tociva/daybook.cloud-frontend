@@ -35,6 +35,11 @@ export const vendorActions = createActionGroup({
     // Delete
     deleteVendor: props<{ id: string }>(),
     deleteVendorSuccess: props<{ id: string }>(),
-    deleteVendorFailure: props<{ error: DbcError }>()
+    deleteVendorFailure: props<{ error: DbcError }>(),
+
+    // Bulk Upload
+    uploadBulkVendors: props<{ file: File }>(),
+    uploadBulkVendorsSuccess: props<{ vendors: Vendor[] }>(),
+    uploadBulkVendorsFailure: props<{ error: DbcError }>()
   }
 });
