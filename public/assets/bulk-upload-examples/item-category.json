@@ -4,20 +4,23 @@
       "name": "Electronics",
       "code": "ELEC",
       "description": "Electronic products and devices",
-      "type": "Product"
+      "type": "Product",
+      "taxgroup": "GST 18%"
     },
     {
       "name": "Software Services",
       "code": "SOFT",
       "description": "Software development and consulting services",
-      "type": "Service"
+      "type": "Service",
+      "taxgroup": "GST 18%"
     },
     {
       "name": "Mobile Phones",
       "code": "MOBILE",
       "description": "Mobile phones and accessories",
       "type": "Product",
-      "parent": "Electronics"
+      "parent": "Electronics",
+      "taxgroup": "GST 18%"
     }
   ]
 }

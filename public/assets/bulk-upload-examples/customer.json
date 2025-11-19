@@ -59,7 +59,26 @@
       "state": "Maharashtra",
       "currencycode": "INR",
       "description": "International trading company"
+    },
+    {
+      "name": "TechPark Solutions",
+      "mobile": "+919876543200",
+      "email": "accounts@techpark.in",
+      "address": {
+        "name": "TechPark Solutions",
+        "line1": "Infopark Road",
+        "street": "Kakkanad",
+        "city": "Kochi",
+        "state": "Kerala",
+        "zip": "682030",
+        "country": "India",
+        "mobile": "+919876543200",
+        "email": "accounts@techpark.in"
+      },
+      "countrycode": "IN",
+      "state": "Kerala",
+      "currencycode": "INR",
+      "description": "IT services and AMC customer"
     }
   ]
 }
-

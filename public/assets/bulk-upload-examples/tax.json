@@ -1,18 +1,25 @@
 {
   "taxes": [
     {
-      "name": "GST",
-      "shortname": "GST",
+      "name": "IGST",
+      "shortname": "IGST",
       "rate": 18,
       "appliedto": 100,
       "description": "Goods and Services Tax"
     },
     {
-      "name": "VAT",
-      "shortname": "VAT",
-      "rate": 12,
+      "name": "CGST",
+      "shortname": "CGST",
+      "rate": 9,
       "appliedto": 100,
-      "description": "Value Added Tax"
+      "description": "Central Goods and Services Tax"
+    },
+    {
+      "name": "SGST",
+      "shortname": "SGST",
+      "rate": 9,
+      "appliedto": 100,
+      "description": "State Goods and Services Tax"
     }
   ]
 }

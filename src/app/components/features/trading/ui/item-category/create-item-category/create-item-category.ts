@@ -144,7 +144,7 @@ export class CreateItemCategory extends WithFormDraftBinding implements OnInit {
         this.successAction.set(itemCategoryActions.updateItemCategorySuccess);
         this.mode.set('edit');
         this.loading = true;
-        this.store.dispatch(itemCategoryActions.loadItemCategoryById({ id: this.itemId()!, query: { includes: ['parent'] } }));
+        this.store.dispatch(itemCategoryActions.loadItemCategoryById({ id: this.itemId()!, query: { includes: ['parent', 'taxgroup'] } }));
       }else{
         this.loading = false;
       }

@@ -1,34 +1,52 @@
 {
   "items": [
     {
-      "name": "Laptop Computer",
-      "code": "LAPTOP001",
-      "displayname": "Dell Laptop XPS 15",
-      "barcode": "1234567890123",
-      "description": "High-performance laptop for business use",
+      "name": "Professional Services",
+      "code": "PROSERV001",
+      "displayname": "Professional Services",
+      "description": "General professional service offerings",
+      "purchaseledger": "Service Purchase",
+      "salesledger": "Service Sales",
+      "category": "Services"
+    },
+    {
+      "name": "Industrial Equipment",
+      "code": "INDTEQ001",
+      "displayname": "Industrial Equipment",
+      "barcode": "8901234567001",
+      "description": "Heavy-duty industrial machinery and equipment",
+      "purchaseledger": "Purchase Account",
+      "salesledger": "Sales Account",
+      "category": "Product"
+    },
+    {
+      "name": "Installation Service",
+      "code": "INSTALL001",
+      "displayname": "Installation Service",
+      "description": "Equipment and product installation services",
+      "purchaseledger": "Service Purchase",
+      "salesledger": "Service Sales",
+      "category": "Services"
+    },
+    {
+      "name": "Premium Widget A",
+      "code": "WIDGETA001",
+      "displayname": "Premium Widget A",
+      "barcode": "8901234567002",
+      "description": "High-quality premium widget type A",
       "purchaseledger": "Purchase Account",
       "salesledger": "Sales Account",
       "category": "Electronics"
     },
     {
-      "name": "Office Chair",
-      "code": "CHAIR001",
-      "displayname": "Ergonomic Office Chair",
-      "barcode": "1234567890124",
-      "description": "Comfortable ergonomic office chair",
+      "name": "Standard Widget B",
+      "code": "WIDGETB001",
+      "displayname": "Standard Widget B",
+      "barcode": "8901234567003",
+      "description": "Standard quality widget type B",
       "purchaseledger": "Purchase Account",
       "salesledger": "Sales Account",
-      "category": "Furniture"
-    },
-    {
-      "name": "Consulting Service",
-      "code": "CONSULT001",
-      "displayname": "IT Consulting Service",
-      "description": "Professional IT consulting services",
-      "purchaseledger": "Service Purchase",
-      "salesledger": "Service Sales",
-      "category": "Software Services"
+      "category": "Electronics"
     }
   ]
 }
-

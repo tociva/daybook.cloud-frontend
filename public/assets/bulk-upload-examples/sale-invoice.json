@@ -1,0 +1,286 @@
+{
+  "invoices": [
+    {
+      "number": "INV-2025-001",
+      "date": "2025-01-15",
+      "duedate": "2025-02-14",
+      "currencycode": "USD",
+      "itemtotal": 5000.0,
+      "discount": 250.0,
+      "subtotal": 4750.0,
+      "tax": 0.0,
+      "roundoff": 0.0,
+      "grandtotal": 4750.0,
+      "deliverystate": "New York",
+      "taxoption": "EXPORT",
+      "billingaddress": {
+        "name": "ABC Corporation",
+        "line1": "123 Business Street",
+        "line2": "Suite 100",
+        "street": "Business Street",
+        "city": "New York",
+        "state": "New York",
+        "zip": "10001",
+        "country": "United States",
+        "mobile": "+1234567890",
+        "email": "billing@abccorp.com"
+      },
+      "shippingaddress": {
+        "name": "ABC Corporation - Warehouse",
+        "line1": "456 Storage Lane",
+        "street": "Storage Lane",
+        "city": "New York",
+        "state": "New York",
+        "zip": "10002",
+        "country": "United States",
+        "mobile": "+1234567891",
+        "email": "warehouse@abccorp.com"
+      },
+      "description": "Monthly service invoice",
+      "customername": "ABC Corporation",
+      "items": [
+        {
+          "name": "Professional Services",
+          "displayname": "Consulting Services - January 2025",
+          "description": "Monthly consulting and advisory services",
+          "order": 1,
+          "code": "CONS-001",
+          "price": 2500.0,
+          "quantity": 2,
+          "itemtotal": 5000.0,
+          "discpercent": 5,
+          "discamount": 250.0,
+          "subtotal": 4750.0,
+          "taxes": [],
+          "taxamount": 0.0,
+          "grandtotal": 4750.0
+        }
+      ]
+    },
+    {
+      "number": "INV-2025-002",
+      "date": "2025-01-16",
+      "duedate": "2025-02-15",
+      "currencycode": "USD",
+      "itemtotal": 8400.0,
+      "discount": 0.0,
+      "subtotal": 8400.0,
+      "tax": 0.0,
+      "roundoff": 0.0,
+      "grandtotal": 8400.0,
+      "deliverystate": "California",
+      "taxoption": "EXPORT",
+      "billingaddress": {
+        "name": "XYZ Industries",
+        "line1": "789 Industrial Park",
+        "street": "Industrial Park",
+        "city": "Los Angeles",
+        "state": "California",
+        "zip": "90001",
+        "country": "United States",
+        "mobile": "+9876543210",
+        "email": "accounts@xyzindustries.com"
+      },
+      "shippingaddress": {
+        "name": "XYZ Industries",
+        "line1": "789 Industrial Park",
+        "street": "Industrial Park",
+        "city": "Los Angeles",
+        "state": "California",
+        "zip": "90001",
+        "country": "United States",
+        "mobile": "+9876543210",
+        "email": "accounts@xyzindustries.com"
+      },
+      "description": "Equipment sale",
+      "customername": "XYZ Industries",
+      "items": [
+        {
+          "name": "Industrial Equipment",
+          "displayname": "Heavy Duty Machine Model X200",
+          "description": "High-performance industrial machine",
+          "order": 1,
+          "code": "EQUIP-X200",
+          "price": 3500.0,
+          "quantity": 2,
+          "itemtotal": 7000.0,
+          "subtotal": 7000.0,
+          "taxes": [],
+          "taxamount": 0.0,
+          "grandtotal": 7000.0
+        },
+        {
+          "name": "Installation Service",
+          "displayname": "Professional Installation",
+          "description": "On-site installation and setup",
+          "order": 2,
+          "code": "INST-001",
+          "price": 1400.0,
+          "quantity": 1,
+          "itemtotal": 1400.0,
+          "subtotal": 1400.0,
+          "taxes": [],
+          "taxamount": 0.0,
+          "grandtotal": 1400.0
+        }
+      ]
+    },
+    {
+      "number": "INV-2025-003",
+      "date": "2025-01-17",
+      "duedate": "2025-03-17",
+      "currencycode": "INR",
+      "itemtotal": 150000.0,
+      "discount": 7500.0,
+      "subtotal": 142500.0,
+      "tax": 7125.0,
+      "roundoff": -10.0,
+      "grandtotal": 149615.0,
+      "deliverystate": "Maharashtra",
+      "taxoption": "Inter State",
+      "billingaddress": {
+        "name": "Global Trading Ltd",
+        "line1": "321 Commerce Plaza",
+        "line2": "10th Floor",
+        "street": "Commerce Plaza",
+        "city": "Mumbai",
+        "state": "Maharashtra",
+        "zip": "400001",
+        "country": "India",
+        "mobile": "+919876543210",
+        "email": "finance@globaltrading.in"
+      },
+      "shippingaddress": {
+        "name": "Global Trading Ltd - Distribution Center",
+        "line1": "555 Logistics Hub",
+        "street": "Logistics Hub",
+        "city": "Navi Mumbai",
+        "state": "Maharashtra",
+        "zip": "400701",
+        "country": "India",
+        "mobile": "+919876543211"
+      },
+      "description": "Bulk product order - Q1 2025",
+      "customername": "Global Trading Ltd",
+      "items": [
+        {
+          "name": "Premium Widget A",
+          "displayname": "Widget Model A - Premium Grade",
+          "description": "High-quality widget for industrial use",
+          "order": 1,
+          "code": "WGT-A-PREM",
+          "price": 500.0,
+          "quantity": 200,
+          "itemtotal": 100000.0,
+          "discpercent": 5,
+          "discamount": 5000.0,
+          "subtotal": 95000.0,
+          "taxes": [
+            {
+              "name": "IGST 5%",
+              "shortname": "IGST",
+              "rate": 5.0,
+              "appliedto": 100.0,
+              "amount": 4750.0
+            }
+          ],
+          "taxamount": 4750.0,
+          "grandtotal": 99750.0
+        },
+        {
+          "name": "Standard Widget B",
+          "displayname": "Widget Model B - Standard",
+          "description": "Standard widget for general use",
+          "order": 2,
+          "code": "WGT-B-STD",
+          "price": 250.0,
+          "quantity": 200,
+          "itemtotal": 50000.0,
+          "discpercent": 5,
+          "discamount": 2500.0,
+          "subtotal": 47500.0,
+          "taxes": [
+            {
+              "name": "IGST 5%",
+              "shortname": "IGST",
+              "rate": 5.0,
+              "appliedto": 100.0,
+              "amount": 2375.0
+            }
+          ],
+          "taxamount": 2375.0,
+          "grandtotal": 49875.0
+        }
+      ]
+    },
+    {
+      "number": "INV-2025-004",
+      "date": "2025-01-20",
+      "duedate": "2025-02-19",
+      "currencycode": "INR",
+      "itemtotal": 20000.0,
+      "discount": 0.0,
+      "subtotal": 20000.0,
+      "tax": 1000.0,
+      "roundoff": 0.0,
+      "grandtotal": 21000.0,
+      "deliverystate": "Kerala",
+      "taxoption": "Intra State",
+      "billingaddress": {
+        "name": "TechPark Solutions",
+        "line1": "Infopark Road",
+        "street": "Kakkanad",
+        "city": "Kochi",
+        "state": "Kerala",
+        "zip": "682030",
+        "country": "India",
+        "mobile": "+919876543200",
+        "email": "accounts@techpark.in"
+      },
+      "shippingaddress": {
+        "name": "TechPark Solutions",
+        "line1": "Infopark Road",
+        "street": "Kakkanad",
+        "city": "Kochi",
+        "state": "Kerala",
+        "zip": "682030",
+        "country": "India",
+        "mobile": "+919876543200",
+        "email": "accounts@techpark.in"
+      },
+      "description": "IT Support Annual Plan",
+      "customername": "TechPark Solutions",
+      "items": [
+        {
+          "name": "Professional Services",
+          "displayname": "Annual IT AMC",
+          "description": "Maintenance + Support",
+          "order": 1,
+          "code": "AMC-IT-001",
+          "price": 20000.0,
+          "quantity": 1,
+          "itemtotal": 20000.0,
+          "subtotal": 20000.0,
+          "taxes": [
+            {
+              "name": "CGST 2.5%",
+              "shortname": "CGST",
+              "rate": 2.5,
+              "appliedto": 100.0,
+              "amount": 500.0
+            },
+            {
+              "name": "SGST 2.5%",
+              "shortname": "SGST",
+              "rate": 2.5,
+              "appliedto": 100.0,
+              "amount": 500.0
+            }
+          ],
+          "taxamount": 1000.0,
+          "grandtotal": 21000.0
+        }
+      ]
+    }
+  ]
+}

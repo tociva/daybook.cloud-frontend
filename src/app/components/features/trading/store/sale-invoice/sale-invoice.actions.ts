@@ -38,5 +38,10 @@ export const saleInvoiceActions = createActionGroup({
     deleteSaleInvoice: props<{ id: string }>() ,
     deleteSaleInvoiceSuccess: props<{ id: string }>() ,
     deleteSaleInvoiceFailure: props<{ error: DbcError }>() ,
+
+    // Bulk Upload
+    uploadBulkSaleInvoices: props<{ file: File }>(),
+    uploadBulkSaleInvoicesSuccess: props<{ saleInvoices: SaleInvoice[] }>(),
+    uploadBulkSaleInvoicesFailure: props<{ error: DbcError }>()
   }
 });

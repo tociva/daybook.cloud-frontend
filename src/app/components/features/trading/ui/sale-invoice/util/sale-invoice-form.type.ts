@@ -43,6 +43,8 @@ export type SaleInvoicePropertiesForm = {
   duedate: FormControl<string>;
   journal: FormControl<string>;
   taxoption: FormControl<string>;
+  deliverystate: FormControl<string>;
+  autoNumbering: FormControl<boolean>;
 }
 
 export type SaleInvoicePropertiesFormValue = {

@@ -6,7 +6,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { startWith, tap } from 'rxjs';
-import { TWO } from '../../../../../../../util/constants';
 import { formatAmountToFraction, formatAmountToWords } from '../../../../../../../util/currency.util';
 import { FormUtil } from '../../../../../../../util/form/form.util';
 import { AutoComplete } from '../../../../../../shared/auto-complete/auto-complete';
@@ -23,12 +22,13 @@ import { SaleItemTax } from '../../../../store/sale-invoice/sale-item-tax.model'
 import { SaleInvoiceFormService } from '../../util/sale-invoice-form.service';
 import {
   SaleInvoiceCustomerForm, SaleInvoiceFormValue, SaleInvoicePropertiesForm,
-  SaleInvoiceSummaryForm, SaleInvoiceTaxDisplayModeType, SaleItemForm
+  SaleInvoiceSummaryForm, SaleInvoiceTaxDisplayModeType, SaleItemForm,
+  SaleItemTaxForm
 } from '../../util/sale-invoice-form.type';
 import { findTaxColumnCount, mapSaleInvoiceFormValueToRequest, saleInvoiceModelToSaleInvoiceFormValue } from '../../util/sale-invoice.util';
 import { SaleInvoiceCustomer } from '../sale-invoice-customer/sale-invoice-customer';
-import { SaleInvoiceProperties } from '../sale-invoice-properties/sale-invoice-properties';
 import { SaleInvoiceItems } from '../sale-invoice-items/sale-invoice-items';
+import { SaleInvoiceProperties } from '../sale-invoice-properties/sale-invoice-properties';
 import { SaleInvoiceSummary } from '../sale-invoice-summary/sale-invoice-summary';
 
 @Component({
@@ -229,17 +229,35 @@ export class SaleInvoiceShell {
 
   private fillFormEffectRef = effect(() => {
     const invoice = this.selectedInvoice();
-    if(invoice) {
+  
+    if (invoice) {
       const formValue = saleInvoiceModelToSaleInvoiceFormValue(invoice);
-      const {items, ...rest} = formValue;
-      this.form.patchValue(rest);
-      this.itemsGroup().clear();
+      const { items, customer, ...restWithoutItemsAndCustomer } = formValue;
+
+      // 1) Rebuild items (including taxes) from seed
+      const itemsArray = this.itemsGroup(); // FormArray<FormGroup<SaleItemForm>>
+      itemsArray.clear();
+  
       items.forEach(item => {
-        this.itemsGroup().push(this.saleInvoiceFormService.buildSaleItemForm(item, this.fractions()));
+        const itemRowForm = this.saleInvoiceFormService.buildSaleItemForm(item, this.fractions());
+        itemsArray.push(itemRowForm);
       });
+
+      // 2) Patch everything else, mapping the customer boolean name correctly
+      this.form.patchValue({
+        ...restWithoutItemsAndCustomer,
+        customer: {
+          ...customer,
+          // form has useBillingForShipping, value has usebillingforshipping
+          useBillingForShipping: customer.usebillingforshipping,
+        },
+      });
+  
     }
+  
     this.loading = false;
   });
+  
 
   private reCalculateSummary = () => {
     let itemtotal = 0;
@@ -307,6 +325,7 @@ export class SaleInvoiceShell {
     this.taxModeEffectRef.destroy();
     this.taxDisplayModeEffectRef.destroy();
   }
+
 
   onItemUpdate = () => this.reCalculateSummary();
 

@@ -11,7 +11,7 @@ import { SaleItemTax } from '../../../../store/sale-invoice/sale-item-tax.model'
 import { taxActions, TaxStore } from '../../../../store/tax';
 import { taxGroupActions, TaxGroupStore } from '../../../../store/tax-group';
 import { SaleInvoiceFormService } from '../../util/sale-invoice-form.service';
-import { SaleInvoiceTaxDisplayModeType, SaleItemForm } from '../../util/sale-invoice-form.type';
+import { SaleInvoiceTaxDisplayModeType, SaleItemForm, SaleItemTaxForm } from '../../util/sale-invoice-form.type';
 import { findTaxColumnCount } from '../../util/sale-invoice.util';
 
 type Column = { key: string; span: number, visible: boolean };

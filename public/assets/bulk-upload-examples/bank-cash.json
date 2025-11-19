@@ -3,7 +3,11 @@
 
 {
 "name" : "ICICI Manacadu",
-"description" : "ICICI Manacadu Branch for handlingn local transactions"
+"description" : "ICICI Manacadu Branch for handling local transactions"
+},
+{
+"name" : "HDFC Pattom",
+"description" : "HDFC Pattom Branch for handling international transactions"
 }
 ]
 }

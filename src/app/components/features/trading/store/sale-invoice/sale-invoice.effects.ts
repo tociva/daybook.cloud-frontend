@@ -367,4 +367,84 @@ export const saleInvoiceEffects = {
     },
     { functional: true, dispatch: false }
   ),
+
+  // Bulk upload Sale Invoices effect
+  uploadBulkSaleInvoices: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const configStore = inject(ConfigStore);
+      const store = inject(Store);
+
+      return actions$.pipe(
+        ofType(saleInvoiceActions.uploadBulkSaleInvoices),
+        tap(({ file }) => {
+          const baseUrl = `${configStore.config().apiBaseUrl}${resourcePath}/bulk-upload`;
+
+          const requestId = `${saleInvoiceActions.uploadBulkSaleInvoices.type}-${Date.now()}-${Math.random()}`;
+
+          const formData = new FormData();
+          formData.append('file', file);
+
+          const config: HttpRequestConfig = {
+            url: baseUrl,
+            method: 'POST',
+            body: formData,
+            // Do NOT set Content-Type; browser will set multipart boundary
+          };
+
+          const metadata: HttpRequestMetadata<SaleInvoice[]> = {
+            requestId,
+            actionName: 'uploadBulkSaleInvoices',
+            successMessage: 'Sale Invoices uploaded successfully!',
+            errorMessage: 'Failed to upload sale invoices',
+            onSuccessAction: (saleInvoices) =>
+              saleInvoiceActions.uploadBulkSaleInvoicesSuccess({ saleInvoices }),
+            onErrorAction: (error) =>
+              saleInvoiceActions.uploadBulkSaleInvoicesFailure({ error }),
+          };
+
+          store.dispatch(
+            httpActions.executeRequest({
+              config,
+              metadata: metadata as HttpRequestMetadata<unknown>,
+            })
+          );
+        })
+      );
+    },
+    { functional: true, dispatch: false }
+  ),
+
+  // Bulk upload success
+  uploadBulkSaleInvoicesSuccess: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const store = inject(SaleInvoiceStore);
+
+      return actions$.pipe(
+        ofType(saleInvoiceActions.uploadBulkSaleInvoicesSuccess),
+        tap(({ saleInvoices }) => {
+          const currentItems = store.items();
+          store.setItems([...saleInvoices, ...currentItems]);
+        })
+      );
+    },
+    { functional: true, dispatch: false }
+  ),
+
+  // Bulk upload failure
+  uploadBulkSaleInvoicesFailure: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const store = inject(SaleInvoiceStore);
+
+      return actions$.pipe(
+        ofType(saleInvoiceActions.uploadBulkSaleInvoicesFailure),
+        tap(({ error }) => {
+          store.setError(error);
+        })
+      );
+    },
+    { functional: true, dispatch: false }
+  )
 };

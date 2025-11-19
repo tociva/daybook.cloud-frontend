@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { ItemLanding } from '../../../../../shared/item-landing/item-landing';
 import { SaleInvoiceStore } from '../../../store/sale-invoice/sale-invoice.store';
 import { Store } from '@ngrx/store';
@@ -22,7 +22,7 @@ import { saleInvoiceActions } from '../../../store/sale-invoice/sale-invoice.act
   templateUrl: './list-sale-invoice.html',
   styleUrl: './list-sale-invoice.css'
 })
-export class ListSaleInvoice {
+export class ListSaleInvoice implements OnInit, OnDestroy {
   private store = inject(Store);
   protected saleInvoieStore = inject(SaleInvoiceStore);
   private router = inject(Router);
@@ -54,9 +54,9 @@ export class ListSaleInvoice {
     { header: 'Number', key: 'number', type: 'text', sortable: true },
     { header: 'Customer', key: 'customer.name', type: 'text', sortable: false },
     { header: 'Date', key: 'date', type: 'date', sortable: true },
-    { header: 'Sub Total', key: 'subtotal', type: 'number', sortable: true },
-    { header: 'Tax', key: 'tax', type: 'number', sortable: true },
+    { header: 'Item Total', key: 'itemtotal', type: 'number', sortable: true },
     { header: 'Discount', key: 'discount', type: 'number', sortable: true },
+    { header: 'Tax', key: 'tax', type: 'number', sortable: true },
     { header: 'Grand Total', key: 'grandtotal', type: 'number', sortable: true },
     { header: 'Actions', key: 'actions', type: 'action' }
   ]);
@@ -70,6 +70,11 @@ export class ListSaleInvoice {
     const currentUrl = this.router.url;
     this.router.navigate(['/app/trading/sale-invoice', item.id, 'delete'], { queryParams: { burl: currentUrl } });
   });
+
+  handleOnFilesSelected(files: File[]): void {
+    const [file] = files;
+    this.store.dispatch(saleInvoiceActions.uploadBulkSaleInvoices({ file }));
+  }
 
   private destroy$ = new Subject<void>();
 
