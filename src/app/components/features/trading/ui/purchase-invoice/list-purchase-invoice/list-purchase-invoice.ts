@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { ItemLanding } from '../../../../../shared/item-landing/item-landing';
 import { PurchaseInvoiceStore } from '../../../store/purchase-invoice/purchase-invoice.store';
 import { Store } from '@ngrx/store';
@@ -22,7 +22,7 @@ import { purchaseInvoiceActions } from '../../../store/purchase-invoice/purchase
   templateUrl: './list-purchase-invoice.html',
   styleUrl: './list-purchase-invoice.css'
 })
-export class ListPurchaseInvoice {
+export class ListPurchaseInvoice implements OnInit, OnDestroy {
   private store = inject(Store);
   protected purchaseInvoiceStore = inject(PurchaseInvoiceStore);
   private router = inject(Router);
@@ -71,6 +71,11 @@ export class ListPurchaseInvoice {
     const currentUrl = this.router.url;
     this.router.navigate(['/app/trading/purchase-invoice', item.id, 'delete'], { queryParams: { burl: currentUrl } });
   });
+
+  handleOnFilesSelected(files: File[]): void {
+    const [file] = files;
+    this.store.dispatch(purchaseInvoiceActions.uploadBulkPurchaseInvoices({ file }));
+  }
 
   private destroy$ = new Subject<void>();
 

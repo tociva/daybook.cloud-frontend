@@ -367,5 +367,85 @@ export const purchaseInvoiceEffects = {
     },
     { functional: true, dispatch: false }
   ),
+
+  // Bulk upload Purchase Invoices effect
+  uploadBulkPurchaseInvoices: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const configStore = inject(ConfigStore);
+      const store = inject(Store);
+
+      return actions$.pipe(
+        ofType(purchaseInvoiceActions.uploadBulkPurchaseInvoices),
+        tap(({ file }) => {
+          const baseUrl = `${configStore.config().apiBaseUrl}${resourcePath}/bulk-upload`;
+
+          const requestId = `${purchaseInvoiceActions.uploadBulkPurchaseInvoices.type}-${Date.now()}-${Math.random()}`;
+
+          const formData = new FormData();
+          formData.append('file', file);
+
+          const config: HttpRequestConfig = {
+            url: baseUrl,
+            method: 'POST',
+            body: formData,
+            // Do NOT set Content-Type; browser will set multipart boundary
+          };
+
+          const metadata: HttpRequestMetadata<PurchaseInvoice[]> = {
+            requestId,
+            actionName: 'uploadBulkPurchaseInvoices',
+            successMessage: 'Purchase Invoices uploaded successfully!',
+            errorMessage: 'Failed to upload purchase invoices',
+            onSuccessAction: (purchaseInvoices) =>
+              purchaseInvoiceActions.uploadBulkPurchaseInvoicesSuccess({ purchaseInvoices }),
+            onErrorAction: (error) =>
+              purchaseInvoiceActions.uploadBulkPurchaseInvoicesFailure({ error }),
+          };
+
+          store.dispatch(
+            httpActions.executeRequest({
+              config,
+              metadata: metadata as HttpRequestMetadata<unknown>,
+            })
+          );
+        })
+      );
+    },
+    { functional: true, dispatch: false }
+  ),
+
+  // Bulk upload success
+  uploadBulkPurchaseInvoicesSuccess: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const store = inject(PurchaseInvoiceStore);
+
+      return actions$.pipe(
+        ofType(purchaseInvoiceActions.uploadBulkPurchaseInvoicesSuccess),
+        tap(({ purchaseInvoices }) => {
+          const currentItems = store.items();
+          store.setItems([...purchaseInvoices, ...currentItems]);
+        })
+      );
+    },
+    { functional: true, dispatch: false }
+  ),
+
+  // Bulk upload failure
+  uploadBulkPurchaseInvoicesFailure: createEffect(
+    () => {
+      const actions$ = inject(Actions);
+      const store = inject(PurchaseInvoiceStore);
+
+      return actions$.pipe(
+        ofType(purchaseInvoiceActions.uploadBulkPurchaseInvoicesFailure),
+        tap(({ error }) => {
+          store.setError(error);
+        })
+      );
+    },
+    { functional: true, dispatch: false }
+  )
 };
 

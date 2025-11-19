@@ -38,6 +38,11 @@ export const purchaseInvoiceActions = createActionGroup({
     deletePurchaseInvoice: props<{ id: string }>() ,
     deletePurchaseInvoiceSuccess: props<{ id: string }>() ,
     deletePurchaseInvoiceFailure: props<{ error: DbcError }>() ,
+
+    // Bulk Upload
+    uploadBulkPurchaseInvoices: props<{ file: File }>(),
+    uploadBulkPurchaseInvoicesSuccess: props<{ purchaseInvoices: PurchaseInvoice[] }>(),
+    uploadBulkPurchaseInvoicesFailure: props<{ error: DbcError }>()
   }
 });
 
