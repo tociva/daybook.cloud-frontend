@@ -17,7 +17,7 @@ import { distinctUntilChanged } from 'rxjs/operators';
 
 import { NgIcon } from '@ng-icons/core';
 import { Store } from '@ngrx/store';
-import { formatAmountToFraction } from '../../../../../../../util/currency.util';
+import { formatAmountToFraction, formatAmountToWords } from '../../../../../../../util/currency.util';
 import { NumberInputDirective } from '../../../../../../../util/directives/number-input.directive';
 import { AutoComplete } from '../../../../../../shared/auto-complete/auto-complete';
 import { DbcSwitch } from '../../../../../../shared/dbc-switch/dbc-switch';
@@ -152,6 +152,103 @@ export class SaleInvoiceItems implements OnInit, OnDestroy {
     }
   });
   
+  private reCalculateSummary = () => {
+    let itemtotal = 0;
+    let discount = 0;
+    let subtotal = 0;
+    let tax = 0;
+    let grandtotal = 0;
+    this.itemsArray.controls.forEach(item => {
+      itemtotal += Number(item.get('itemtotal')?.value ?? 0);
+      discount += Number(item.get('discamount')?.value ?? 0);
+      subtotal += Number(item.get('subtotal')?.value ?? 0);
+      tax += Number(item.get('taxamount')?.value ?? 0);
+      grandtotal += Number(item.get('grandtotal')?.value ?? 0); 
+    });
+    const summary = this.form().get('summary');
+    const roundoff = Number(summary?.get('roundoff')?.value ?? 0);
+    grandtotal += roundoff;
+    summary?.patchValue({ 
+      itemtotal: formatAmountToFraction(itemtotal, this.fractions()), 
+      discount: formatAmountToFraction(discount, this.fractions()), 
+      subtotal: formatAmountToFraction(subtotal, this.fractions()),
+      tax: formatAmountToFraction(tax, this.fractions()),
+      roundoff: formatAmountToFraction(roundoff, this.fractions()),
+      grandtotal: formatAmountToFraction(grandtotal, this.fractions()),
+      words: formatAmountToWords(grandtotal, this.form().get('currency')?.value),
+    }, { emitEvent: false });
+  };
+
+  private refreshItemRow = (itemRow: FormGroup<SaleItemForm>) => {
+    const fractions = this.fractions();
+    const price = Number(itemRow.get('price')?.value ?? 0);
+    const exQuantity = itemRow.get('quantity')?.value
+    const quantity = Number(exQuantity ? exQuantity : 1);
+    const itemtotal = price * quantity;
+    const discpercent = Number(itemRow.get('discpercent')?.value ?? 0);
+    const discamount = itemtotal * ((discpercent / 100));
+    const subtotal = itemtotal - discamount;
+    const taxControls = itemRow.controls.taxes.length;
+    for(let idx = 0; idx < taxControls; idx++) {
+      const taxControl = itemRow.controls.taxes.at(idx);
+      const tax = taxControl.get('tax')?.value;
+      const taxAmount = (Number(tax?.rate ?? 0)) * subtotal / 100;
+      taxControl.patchValue({
+        rate: `${String(tax?.rate ?? 0)} %`,
+        amount: formatAmountToFraction(taxAmount, fractions)
+      });
+    }
+    const taxamount = itemRow.controls.taxes.controls.reduce((acc, tax) => acc + (Number(tax.get('amount')?.value ?? 0)), 0);
+    const grandtotal = subtotal + taxamount;
+    itemRow.patchValue({
+      price: formatAmountToFraction(price, fractions),
+      quantity: String(quantity ? quantity : 1),
+      itemtotal: formatAmountToFraction(itemtotal, fractions),
+      discpercent: formatAmountToFraction(discpercent, fractions),
+      discamount: formatAmountToFraction(discamount, fractions),
+      subtotal: formatAmountToFraction(subtotal, fractions),
+      taxamount: formatAmountToFraction(taxamount, fractions),
+      grandtotal: formatAmountToFraction(grandtotal, fractions),
+    }, { emitEvent: false});
+    this.reCalculateSummary();
+  }
+
+  private updateItemRowTaxControls = (itemRow: FormGroup<SaleItemForm>, taxGroupId?: string) => {
+    if(taxGroupId) {
+      const fractions = this.fractions();
+      const taxGroup = this.taxGroups().find(taxGroup => taxGroup.id === taxGroupId);
+      const taxModeObject = taxGroup?.groups.find(group => group.mode === this.taxOption);
+      for(let idx = 0; idx < (taxModeObject?.taxids ?? []).length; idx++) {
+        const taxId = taxModeObject?.taxids?.[idx];
+        const tax = this.taxes().find(tax => tax.id === taxId);
+        if(tax) {
+          itemRow.controls.taxes.at(idx).patchValue({
+            rate: `${String(tax.rate)} %`,
+            appliedto: tax.appliedto,
+            amount: formatAmountToFraction(0, fractions),
+            name: tax.name,
+            shortname: tax.shortname,
+            tax: tax,
+           }, { emitEvent: false});
+        }
+      }
+    }else{
+      itemRow.controls.taxes.controls.forEach(tax => {
+        tax.patchValue({
+          rate: '0 %',
+          appliedto: 100,
+          amount: '0',
+          name: '',
+          shortname: '',
+          tax: null,
+        }, { emitEvent: false});
+      });
+    }
+    const quantity = Number(itemRow.get('quantity')?.value);
+    itemRow.patchValue({
+      quantity: String(quantity ? quantity : 1)
+    }, { emitEvent: true});
+  }
 
   ngOnInit(): void {
     
@@ -253,76 +350,6 @@ export class SaleInvoiceItems implements OnInit, OnDestroy {
 
   onItemSearch = (value: string) => {
     this.store.dispatch(itemActions.loadItems({ query: { search: [{query: value, fields: ['name', 'code', 'description', 'displayname', 'barcode']}], includes: ['category'] } }));
-  }
-
-  private refreshItemRow = (itemRow: FormGroup<SaleItemForm>) => {
-    const fractions = this.fractions();
-    const price = Number(itemRow.get('price')?.value ?? 0);
-    const exQuantity = itemRow.get('quantity')?.value
-    const quantity = Number(exQuantity ? exQuantity : 1);
-    const itemtotal = price * quantity;
-    const discpercent = Number(itemRow.get('discpercent')?.value ?? 0);
-    const discamount = itemtotal * ((discpercent / 100));
-    const subtotal = itemtotal - discamount;
-    const taxControls = itemRow.controls.taxes.length;
-    for(let idx = 0; idx < taxControls; idx++) {
-      const taxControl = itemRow.controls.taxes.at(idx);
-      const tax = taxControl.get('tax')?.value;
-      const taxAmount = (Number(tax?.rate ?? 0)) * subtotal / 100;
-      taxControl.patchValue({
-        rate: `${String(tax?.rate ?? 0)} %`,
-        amount: formatAmountToFraction(taxAmount, fractions)
-      });
-    }
-    const taxamount = itemRow.controls.taxes.controls.reduce((acc, tax) => acc + (Number(tax.get('amount')?.value ?? 0)), 0);
-    const grandtotal = subtotal + taxamount;
-    itemRow.patchValue({
-      price: formatAmountToFraction(price, fractions),
-      quantity: String(quantity ? quantity : 1),
-      itemtotal: formatAmountToFraction(itemtotal, fractions),
-      discpercent: formatAmountToFraction(discpercent, fractions),
-      discamount: formatAmountToFraction(discamount, fractions),
-      subtotal: formatAmountToFraction(subtotal, fractions),
-      taxamount: formatAmountToFraction(taxamount, fractions),
-      grandtotal: formatAmountToFraction(grandtotal, fractions),
-    }, { emitEvent: false});
-  }
-
-  private updateItemRowTaxControls = (itemRow: FormGroup<SaleItemForm>, taxGroupId?: string) => {
-    if(taxGroupId) {
-      const fractions = this.fractions();
-      const taxGroup = this.taxGroups().find(taxGroup => taxGroup.id === taxGroupId);
-      const taxModeObject = taxGroup?.groups.find(group => group.mode === this.taxOption);
-      for(let idx = 0; idx < (taxModeObject?.taxids ?? []).length; idx++) {
-        const taxId = taxModeObject?.taxids?.[idx];
-        const tax = this.taxes().find(tax => tax.id === taxId);
-        if(tax) {
-          itemRow.controls.taxes.at(idx).patchValue({
-            rate: `${String(tax.rate)} %`,
-            appliedto: tax.appliedto,
-            amount: formatAmountToFraction(0, fractions),
-            name: tax.name,
-            shortname: tax.shortname,
-            tax: tax,
-           }, { emitEvent: false});
-        }
-      }
-    }else{
-      itemRow.controls.taxes.controls.forEach(tax => {
-        tax.patchValue({
-          rate: '0 %',
-          appliedto: 100,
-          amount: '0',
-          name: '',
-          shortname: '',
-          tax: null,
-        }, { emitEvent: false});
-      });
-    }
-    const quantity = Number(itemRow.get('quantity')?.value);
-    itemRow.patchValue({
-      quantity: String(quantity ? quantity : 1)
-    }, { emitEvent: true});
   }
 
   onItemSelected = (index: number) => (item: Item) => {

@@ -187,34 +187,34 @@
     <div class="col-span-3 text-lg font-bold">
       {{ form().get('words')?.value }}
     </div>
-    <div class="col-span-1 bg-alternate-background p-2" [formGroup]="form()">
+    <div class="col-span-1 bg-alternate-background p-2" formGroupName="summary">
       <div class="flex items-center gap-2 mb-2">
         <label class="w-28 text-sm text-gray-700">Item Total:</label>
-        <input  type="text" appNumberInput />
+        <input  type="text" appNumberInput formControlName="itemtotal"/>
       </div>
       @if(colVisibleFor('discount')()) {
       <div class="flex items-center gap-2 mb-2">
         <label class="w-28 text-sm text-gray-700">Discount:</label>
-        <input  type="text" appNumberInput />
+        <input  type="text" appNumberInput formControlName="discount"/>
       </div>
       <div class="flex items-center gap-2 mb-2">
         <label class="w-28 text-sm text-gray-700">Subtotal:</label>
-        <input  type="text" appNumberInput />
+        <input  type="text" appNumberInput formControlName="subtotal"/>
       </div>
       }
       @if(taxStrategies().length > 0) {
       <div class="flex items-center gap-2 mb-2">
         <label class="w-28 text-sm text-gray-700">Tax:</label>
-        <input  type="text" appNumberInput />
+        <input  type="text" appNumberInput formControlName="tax"/>
       </div>
       }
       <div class="flex items-center gap-2 mb-2">
         <label class="w-28 text-sm text-gray-700">Roundoff:</label>
-        <input  type="text" appNumberInput />
+        <input  type="text" appNumberInput formControlName="roundoff"/>
       </div>
       <div class="flex items-center gap-2 mb-2">
         <label class="w-28 text-sm text-gray-700">Grand Total:</label>
-        <input  type="text" appNumberInput />
+        <input  type="text" appNumberInput formControlName="grandtotal"/>
       </div>
     </div>
   </div>

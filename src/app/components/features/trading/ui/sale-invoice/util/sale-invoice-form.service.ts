@@ -62,6 +62,35 @@ export class SaleInvoiceFormService {
     });
   }
   
+  private readonly buildSaleInvoiceSummaryForm = ():FormGroup<SaleInvoiceSummaryForm> => {
+    return this.fb.nonNullable.group<SaleInvoiceSummaryForm>({
+      itemtotal: this.fb.control(
+        { value: "", disabled: true },
+        { nonNullable: true },
+      ),
+      discount: this.fb.control(
+        { value: "", disabled: true },
+      ),
+      subtotal: this.fb.control(
+        { value: "", disabled: true },
+        { nonNullable: true },
+      ),
+      tax: this.fb.control(
+        { value: "", disabled: true },
+      ),
+      roundoff: this.fb.control(
+        { value: "", disabled: false },
+      ),
+      grandtotal: this.fb.control(
+        { value: "", disabled: true },
+        { nonNullable: true },
+      ),
+      words: this.fb.control(
+        { value: "", disabled: true },
+        { nonNullable: true },
+      ),
+    });
+  };
 
   createForm(): FormGroup<SaleInvoiceForm> {
     
@@ -95,33 +124,7 @@ export class SaleInvoiceFormService {
         [],
         { validators: [Validators.required] },
       ),
-      }),
-      summary: this.fb.nonNullable.group<SaleInvoiceSummaryForm>({
-        itemtotal: this.fb.control(
-          { value: "", disabled: true },
-          { nonNullable: true },
-        ),
-        discount: this.fb.control(
-          { value: "", disabled: true },
-        ),
-        subtotal: this.fb.control(
-          { value: "", disabled: true },
-          { nonNullable: true },
-        ),
-        tax: this.fb.control(
-          { value: "", disabled: true },
-        ),
-        roundoff: this.fb.control(
-          { value: "", disabled: false },
-        ),
-        grandtotal: this.fb.control(
-          { value: "", disabled: true },
-          { nonNullable: true },
-        ),
-        words: this.fb.control(
-          { value: "", disabled: true },
-          { nonNullable: true },
-        ),
+      summary: this.buildSaleInvoiceSummaryForm(),
       }),
     });
   }

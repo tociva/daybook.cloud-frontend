@@ -34,6 +34,7 @@ export interface SaleItemsDetailsForm {
   showDescription: FormControl<boolean>;
   taxoption: FormControl<string>;
   items: FormArray<FormGroup<SaleItemForm>>;
+  summary: FormGroup<SaleInvoiceSummaryForm>;
 }
 
 export type SaleInvoicePropertiesForm = {
@@ -92,7 +93,6 @@ export type SaleInvoiceForm = {
   customer: FormGroup<SaleInvoiceCustomerForm>;
   properties: FormGroup<SaleInvoicePropertiesForm>;
   itemsDetails: FormGroup<SaleItemsDetailsForm>;
-  summary: FormGroup<SaleInvoiceSummaryForm>;
 }
 
 export type SaleInvoiceSummaryFormValue = {
