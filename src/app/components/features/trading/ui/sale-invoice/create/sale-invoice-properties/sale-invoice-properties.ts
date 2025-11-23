@@ -1,116 +1,107 @@
-import { Component, effect, EnvironmentInjector, inject, input, runInInjectionContext, signal, WritableSignal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  effect,
+  inject,
+  input,
+  signal
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
+import { combineLatest, startWith } from 'rxjs';
 import { TextInputDirective } from '../../../../../../../util/directives/text-input.directive';
-import { FormUtil } from '../../../../../../../util/form/form.util';
 import { AutoComplete } from '../../../../../../shared/auto-complete/auto-complete';
 import { DbcSwitch } from '../../../../../../shared/dbc-switch/dbc-switch';
-import { currencyActions } from '../../../../../../shared/store/currency/currency.action';
-import { Currency } from '../../../../../../shared/store/currency/currency.model';
-import { CurrencyStore } from '../../../../../../shared/store/currency/currency.store';
 import { taxGroupActions } from '../../../../store/tax-group/tax-group.actions';
 import { TaxGroupModeStore } from '../../../../store/tax-group/tax-group.store';
 import { SaleInvoicePropertiesForm } from '../../util/sale-invoice-form.type';
+import { CurrencyStore } from '../../../../../../shared/store/currency/currency.store';
+import { currencyActions } from '../../../../../../shared/store/currency/currency.action';
+import { Currency } from '../../../../../../shared/store/currency/currency.model';
 
 @Component({
   selector: 'app-sale-invoice-properties',
-  imports: [ReactiveFormsModule, AutoComplete, DbcSwitch, TextInputDirective],
+  standalone: true,
+  imports: [ReactiveFormsModule, AutoComplete, TextInputDirective, DbcSwitch],
   templateUrl: './sale-invoice-properties.html',
   styleUrl: './sale-invoice-properties.css'
 })
 export class SaleInvoiceProperties {
 
+  private readonly destroyRef = inject(DestroyRef);
   private readonly store = inject(Store);
   private readonly currencyStore = inject(CurrencyStore);
   private readonly taxGroupModeStore = inject(TaxGroupModeStore);
 
   readonly form = input.required<FormGroup<SaleInvoicePropertiesForm>>();
-  readonly uiMode = input.required<string>();
+  readonly uiMode = input.required<'create' | 'edit' | 'delete'>();
 
-  currencies = signal<Currency[]>([]);
-  modes = this.taxGroupModeStore.items;
-  filteredModes = signal<string[]>([]);
+  protected readonly modes = this.taxGroupModeStore.items;
+  protected readonly filteredModes = signal<string[]>([]);
+  protected readonly currencies = signal<Currency[]>([]);
 
-
-  private readonly envInjector = inject(EnvironmentInjector);
-   // Will be created once the form input is available
-   private _autoNumberingSig!: WritableSignal<boolean>;
-   get autoNumberingSig() { return this._autoNumberingSig; }
-
-   private _taxoptionSig!: WritableSignal<string>;
-   get taxoptionSig() { return this._taxoptionSig; }
-  
-   private changeAutoNumberingEffect = effect(() => {
-    const form = this.form?.();            // input.required() returns a signal getter
-    const uiMode = this.uiMode?.();
-    const autoNumberingSig = this.autoNumberingSig;
-  
-    // Guard: skip until everything exists
-    if (!form || !autoNumberingSig || !uiMode) return;
-  
-    const autoNumbering = autoNumberingSig();
-    const numberCtrl = form.controls.number;
-  
-    if (autoNumbering) {
-      numberCtrl.disable({ emitEvent: false });
-      form.patchValue({ number: 'Auto Number' }, { emitEvent: false });
+  // 👇 effect is now created in a field initializer (valid injection context)
+  private readonly currenciesEffect = effect(() => {
+    if (this.currencyStore.currenciesLoaded()) {
+      this.currencies.set(this.currencyStore.filteredCurrencies());
     } else {
-      numberCtrl.enable({ emitEvent: false });
-      if (uiMode === 'create') {
-        form.patchValue({ number: '' }, { emitEvent: false });
-      }
+      this.store.dispatch(currencyActions.loadCurrencies({ query: {} }));
     }
-  }, { allowSignalWrites: true });
+  });
 
-  private changeTaxOptionEffect = effect(() => {
-    const form = this.form?.();
-    const taxoptionSig = this.taxoptionSig;
-    if(!form || !taxoptionSig) return;
-    const taxoption = taxoptionSig();
-  }, { allowSignalWrites: true });
-
-  constructor() {
-
-    effect(() => {
-      if(this.currencyStore.currenciesLoaded()) {
-        this.currencies.set(this.currencyStore.filteredCurrencies());
-      }else{
-        this.store.dispatch(currencyActions.loadCurrencies({query: {}}));
-      }
-    });
+  findCurrencyDisplayValue(currency: Currency) {
+    if(!currency?.name) return '';
+    return `${currency.symbol} ${currency.name}`;
   }
 
-  ngOnInit() {
+  onCurrencySearch(value: string) {
+    this.currencyStore.setSearch(value);
+  }
+
+  onCurrencySelected(currency: Currency) {
+    // this.form().patchValue({ currency: currency });
+  }
+
+  private initializeAutoNumbering(): void {
     const form = this.form();
+    const autoCtrl = form.controls.autoNumbering;
+    const numberCtrl = form.controls.number;
 
-    runInInjectionContext(this.envInjector, () => {
-      this._autoNumberingSig = FormUtil.controlWritableSignal<boolean>(
-        form,
-        'autoNumbering',
-        true
-      );
-
-      this._taxoptionSig = FormUtil.controlWritableSignal<string>(
-        form,
-        'taxoption',
-        'Intra State'
-      );
-    });
-    
-    this.store.dispatch(taxGroupActions.loadTaxGroupModes({}));
+    autoCtrl.valueChanges
+      .pipe(
+        startWith(autoCtrl.value),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(autoNumbering => {
+        if (autoNumbering) {
+          numberCtrl.disable({ emitEvent: false });
+          form.patchValue({ number: 'Auto Number' }, { emitEvent: false });
+        } else {
+          numberCtrl.enable({ emitEvent: false });
+          if (this.uiMode() === 'create') {
+            form.patchValue({ number: '' }, { emitEvent: false });
+          }
+        }
+      });
   }
 
-  ngOnDestroy() {
-    this.changeAutoNumberingEffect.destroy();
-    this.changeTaxOptionEffect.destroy();
+  ngOnInit(): void {
+    this.initializeAutoNumbering();
+    if(!this.taxGroupModeStore.itemsLoaded()) {
+      this.store.dispatch(taxGroupActions.loadTaxGroupModes({}));
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.currenciesEffect.destroy();
   }
 
   onTaxOptionSearch(value: string) {
-    this.filteredModes.set(this.modes().filter(option => option.toLowerCase().includes(value.toLowerCase())));
+    this.filteredModes.set(
+      this.modes().filter(option =>
+        option.toLowerCase().includes(value.toLowerCase())
+      )
+    );
   }
-
-  onTaxOptionSelected(taxOption: string) {
-    this.form().patchValue({ taxoption: taxOption });
-  }
-
 }

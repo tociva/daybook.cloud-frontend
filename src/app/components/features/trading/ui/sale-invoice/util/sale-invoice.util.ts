@@ -4,7 +4,7 @@ import { formatAmountToFraction, formatAmountToWords, toNumber } from "../../../
 import { convertToNodeDateFormat } from "../../../../../../util/date.util";
 import { SaleInvoiceItemRequest, SaleInvoiceItemTaxRequest, SaleInvoiceRequest } from "../../../store/sale-invoice/sale-invoice-request.type";
 import { SaleInvoice } from "../../../store/sale-invoice/sale-invoice.model";
-import { SaleInvoiceCustomerFormValue, SaleInvoiceFormValue, SaleInvoicePropertiesFormValue, SaleInvoiceSummaryFormValue, SaleInvoiceTaxDisplayModeType, SaleItemFormValue, SaleItemTaxFormValue } from "./sale-invoice-form.type";
+import { SaleInvoiceCustomerFormValue, SaleInvoiceFormValue, SaleInvoicePropertiesFormValue, SaleInvoiceSummaryFormValue, SaleItemFormValue, SaleItemTaxFormValue } from "./sale-invoice-form.type";
 
 export const mapSaleItemTaxFormValueToRequest = (formValue: SaleItemTaxFormValue): SaleInvoiceItemTaxRequest => {
   const name = formValue.name;
@@ -62,23 +62,22 @@ export const mapSaleInvoiceFormValueToRequest = (formValue: SaleInvoiceFormValue
   const isAutoNumbering = formValue.properties.autoNumbering;
   const date = convertToNodeDateFormat(formValue.properties.date);
   const duedate = convertToNodeDateFormat(formValue.properties.duedate);
-  const itemtotal = toNumber(formValue.summary.itemtotal);
-  const discount = toNumber(formValue.summary.discount);
-  const subtotal = toNumber(formValue.summary.subtotal);
-  const tax = toNumber(formValue.summary.tax);
-  const roundoff = toNumber(formValue.summary.roundoff);
-  const grandtotal = toNumber(formValue.summary.grandtotal);
+  const itemtotal = toNumber(formValue.itemsDetails.summary.itemtotal);
+  const discount = toNumber(formValue.itemsDetails.summary.discount);
+  const subtotal = toNumber(formValue.itemsDetails.summary.subtotal);
+  const tax = toNumber(formValue.itemsDetails.summary.tax);
+  const roundoff = toNumber(formValue.itemsDetails.summary.roundoff);
+  const grandtotal = toNumber(formValue.itemsDetails.summary.grandtotal);
   const currencycode = formValue.properties.currency.code;
   const billingaddress = formValue.customer.billingaddress;
   const shippingaddress = formValue.customer.shippingaddress;
   const customerid = formValue.customer.customer.id!;
   const taxoption = formValue.properties.taxoption;
-  const taxdisplaymode = formValue.taxDisplayMode;
-  const showdiscount = formValue.showDiscount;
-  const showdescription = formValue.showDescription;
-  const usebillingforshipping = formValue.customer.usebillingforshipping;
+  const showdiscount = formValue.itemsDetails.showDiscount;
+  const showdescription = formValue.itemsDetails.showDescription;
+  const usebillingforshipping = formValue.customer.useBillingForShipping;
   const deliverystate = formValue.properties.deliverystate;
-  const items = formValue.items.map((item, index) => mapSaleItemFormValueToRequest(item, index + 1));
+  const items = formValue.itemsDetails.items.map((item, index) => mapSaleItemFormValueToRequest(item, index + 1));
   return {
     ...(!isAutoNumbering ? { number } : {}),
     date,
@@ -95,7 +94,6 @@ export const mapSaleInvoiceFormValueToRequest = (formValue: SaleInvoiceFormValue
     customerid,
     items,
     cprops: {
-      taxdisplaymode,
       showdiscount,
       showdescription,
       usebillingforshipping,
@@ -104,20 +102,6 @@ export const mapSaleInvoiceFormValueToRequest = (formValue: SaleInvoiceFormValue
     },
   };
 };
-
-
-export const findTaxColumnCount = (taxDisplayMode: SaleInvoiceTaxDisplayModeType): number => {
-  if([SaleInvoiceTaxDisplayModeType.IGST].includes(taxDisplayMode)) {
-    return 1;
-  }else if([SaleInvoiceTaxDisplayModeType.CGST_SGST, SaleInvoiceTaxDisplayModeType.IGST_CESS].includes(taxDisplayMode)) {
-    return 2;
-  }else if([SaleInvoiceTaxDisplayModeType.CGST_SGST_CESS].includes(taxDisplayMode)) {
-    return 3;
-  }
-  return 0;
-}
-
-type Maybe<T> = T | null | undefined;
 
 const eqAddress = (a: any, b: any): boolean => {
   if (!a || !b) return false;
@@ -156,14 +140,15 @@ const mapItem = (item: any, fractions: number): SaleItemFormValue => ({
 });
 
 const mapCustomerBlock = (inv: SaleInvoice): SaleInvoiceCustomerFormValue => {
-  const usebillingforshipping =
-    (inv?.cprops?.usebillingforshipping ?? eqAddress(inv?.billingaddress, inv?.shippingaddress)) || false;
+  
+  const useBillingForShipping =
+    (inv?.cprops?.usebillingforshipping || eqAddress(inv?.billingaddress, inv?.shippingaddress)) || false;
 
   return {
     customer: inv.customer,
     billingaddress: inv.billingaddress,
-    shippingaddress: usebillingforshipping ? inv.billingaddress : inv.shippingaddress,
-    usebillingforshipping: usebillingforshipping,
+    shippingaddress: useBillingForShipping ? inv.billingaddress : inv.shippingaddress,
+    useBillingForShipping,
   };
 };
 
@@ -188,7 +173,7 @@ const mapProperties = (inv: SaleInvoice): SaleInvoicePropertiesFormValue => ({
   number: inv.number,
   date: dayjs(inv.date).format(DEFAULT_NODE_DATE_FORMAT),
   duedate: dayjs(inv.duedate).format(DEFAULT_NODE_DATE_FORMAT),
-  currency: inv.currency,
+  currency: inv.currency ?? inv.customer.currency,
   taxoption: inv?.cprops?.taxoption ?? 'Intra State',
   deliverystate: inv?.cprops?.deliverystate ?? '',
   autoNumbering: inv?.cprops?.autoNumbering ?? false,
@@ -198,12 +183,13 @@ const mapProperties = (inv: SaleInvoice): SaleInvoicePropertiesFormValue => ({
 
 export function saleInvoiceModelToSaleInvoiceFormValue(inv: SaleInvoice): SaleInvoiceFormValue {
   return {
-    taxDisplayMode: inv?.cprops?.taxdisplaymode ?? SaleInvoiceTaxDisplayModeType.CGST_SGST, // fallback to your app’s default
-    showDiscount: inv?.cprops?.showdiscount ?? false,
-    showDescription: inv?.cprops?.showdescription ?? false,
     customer: mapCustomerBlock(inv),
     properties: mapProperties(inv),
-    items: Array.isArray(inv?.items) ? inv.items!.map(mapItem) : [],
-    summary: mapSummary(inv, inv?.currency?.minorunit ?? TWO),
+    itemsDetails: {
+      showDiscount: inv?.cprops?.showdiscount ?? false,
+      showDescription: inv?.cprops?.showdescription ?? false,
+      items: Array.isArray(inv?.items) ? inv.items!.map(mapItem) : [],
+      summary: mapSummary(inv, inv?.currency?.minorunit ?? TWO),
+    },
   };
 }

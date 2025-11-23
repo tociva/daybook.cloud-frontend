@@ -1,7 +1,6 @@
 // sale-invoice.model.ts
 import { Address } from '../../../../../util/types/address';
 import { Currency } from '../../../../shared/store/currency/currency.model';
-import { SaleInvoiceTaxDisplayModeType } from '../../ui/sale-invoice/util/sale-invoice-form.type';
 import { Customer } from '../customer';
 import { SaleItem } from './sale-item.model';
 
@@ -22,7 +21,6 @@ export type SaleInvoiceCustomProperties = {
   }>;
   showdiscount?: boolean;
   showdescription?: boolean;
-  taxdisplaymode?: SaleInvoiceTaxDisplayModeType;
   usebillingforshipping?: boolean;
   taxoption?: string;
   deliverystate?: string;

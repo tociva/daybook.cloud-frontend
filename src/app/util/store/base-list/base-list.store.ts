@@ -1,5 +1,5 @@
 // base-list.store.ts
-import { signalStore, withState, withMethods, patchState } from '@ngrx/signals';
+import { signalStore, withState, withMethods, patchState, withComputed } from '@ngrx/signals';
 import { BaseListModel } from './base-list.model';
 import { createInitialBaseListState } from './base-list.initial';
 import { DbcError } from '../../types/dbc-error.type';
@@ -17,7 +17,12 @@ export function createBaseListStore<T>(
   return signalStore(
     { providedIn: 'root' },
     withState<BaseListModel<T>>(initialState),
-
+    withComputed((state) => ({
+      itemsLoaded: () => {
+        const items = state.items();
+        return items && items.length > 0;
+      },
+    })),
     withMethods((store) => ({
       setState(stateFn: (state: BaseListModel<T>) => Partial<BaseListModel<T>>) {
         const current: BaseListModel<T> = {

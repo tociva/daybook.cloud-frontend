@@ -5,21 +5,13 @@ import { Item } from "../../../store/item/item.model";
 import { Tax } from "../../../store/tax";
 import { Address } from "../../../../../../util/types/address";
 
-export enum SaleInvoiceTaxDisplayModeType {
-  NON_TAXABLE = 'Non Taxable',
-  CGST_SGST = 'CGST SGST',
-  IGST = 'IGST',
-  CGST_SGST_CESS = 'CGST SGST With Cess',
-  IGST_CESS = 'IGST With Cess',
-}
-
 export interface SaleItemTaxForm {
   rate: FormControl<string | null>;
   appliedto: FormControl<number>;
   amount: FormControl<string | null>;
   name: FormControl<string>;
   shortname: FormControl<string>;
-  tax: FormControl<Tax>;
+  tax: FormControl<Tax | null>;
 }
 export interface SaleItemForm {
   name: FormControl<string>;
@@ -34,7 +26,14 @@ export interface SaleItemForm {
   taxes: FormArray<FormGroup<SaleItemTaxForm>>;
   taxamount: FormControl<string | null>;
   grandtotal: FormControl<string | null>;
-  item: FormControl<Item>;
+  item: FormControl<Item | null>;
+}
+
+export interface SaleItemsDetailsForm {
+  showDiscount: FormControl<boolean>;
+  showDescription: FormControl<boolean>;
+  taxoption: FormControl<string>;
+  items: FormArray<FormGroup<SaleItemForm>>;
 }
 
 export type SaleInvoicePropertiesForm = {
@@ -45,6 +44,7 @@ export type SaleInvoicePropertiesForm = {
   taxoption: FormControl<string>;
   deliverystate: FormControl<string>;
   autoNumbering: FormControl<boolean>;
+  currency: FormControl<Currency | null>;
 }
 
 export type SaleInvoicePropertiesFormValue = {
@@ -82,19 +82,16 @@ export type AddressGroup = {
 };
 
 export type SaleInvoiceCustomerForm = {
-  customer: FormControl<Customer>;
+  customer: FormControl<Customer | null>;
   billingaddress: FormGroup<AddressGroup>;
   shippingaddress: FormGroup<AddressGroup>;
   useBillingForShipping: FormControl<boolean>;
 }
 
 export type SaleInvoiceForm = {
-  taxDisplayMode: FormControl<SaleInvoiceTaxDisplayModeType>;
-  showDiscount: FormControl<boolean>;
-  showDescription: FormControl<boolean>;
   customer: FormGroup<SaleInvoiceCustomerForm>;
   properties: FormGroup<SaleInvoicePropertiesForm>;
-  items: FormArray<FormGroup<SaleItemForm>>;
+  itemsDetails: FormGroup<SaleItemsDetailsForm>;
   summary: FormGroup<SaleInvoiceSummaryForm>;
 }
 
@@ -112,7 +109,7 @@ export type SaleInvoiceCustomerFormValue = {
   customer: Customer;
   billingaddress: Address;
   shippingaddress: Address;
-  usebillingforshipping: boolean;
+  useBillingForShipping: boolean;
 }
 export interface SaleItemTaxFormValue {
   rate: number;
@@ -138,12 +135,14 @@ export interface SaleItemFormValue {
   grandtotal: string;
   item: Item;
 }
-export type SaleInvoiceFormValue = {
-  taxDisplayMode: SaleInvoiceTaxDisplayModeType;
+export interface SaleItemsDetailsFormValue {
   showDiscount: boolean;
   showDescription: boolean;
-  customer: SaleInvoiceCustomerFormValue;
-  properties: SaleInvoicePropertiesFormValue;
   items: SaleItemFormValue[];
   summary: SaleInvoiceSummaryFormValue;
+}
+export type SaleInvoiceFormValue = {
+  customer: SaleInvoiceCustomerFormValue;
+  properties: SaleInvoicePropertiesFormValue;
+  itemsDetails: SaleItemsDetailsFormValue;
 }

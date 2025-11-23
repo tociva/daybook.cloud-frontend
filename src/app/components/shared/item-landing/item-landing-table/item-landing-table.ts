@@ -53,7 +53,7 @@ private readonly dateFormatEffect = effect(() => {
   if (branch?.dateformat) {
     this.dateFormat.set(branch.dateformat);
   }
-}, { allowSignalWrites: true });
+});
 
 private readonly fractionsEffect = effect(() => {
   const fiscalYear = this.userSessionStore.fiscalYear(); // registers dependency
@@ -64,7 +64,7 @@ private readonly fractionsEffect = effect(() => {
       this.fractions.set(currency.minorunit ?? 2);
     }
   }
-}, { allowSignalWrites: true });
+});
 
   // Sorting state
   private sortColumnDetails: Partial<Record<keyof T | string, SortDirection>> = {};

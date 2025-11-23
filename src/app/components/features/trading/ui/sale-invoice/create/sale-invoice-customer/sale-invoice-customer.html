@@ -38,7 +38,9 @@
           <h3 class="font-semibold text-sm mb-3 flex items-center gap-1">
             Shipping Address
             @if (shippingReadonly()) {
-            <ng-icon name="bootstrapPencil" class="w-4 h-4 cursor-pointer" (click)="onEditShippingAddress()"></ng-icon>
+              @if (!useBillingForShipping) {
+                <ng-icon name="bootstrapPencil" class="w-4 h-4 cursor-pointer" (click)="onEditShippingAddress()"></ng-icon>
+              }
             } @else {
             <ng-icon name="bootstrapCheckLg" class="w-4 h-4 cursor-pointer" size="16"
               (click)="onEditShippingAddress()"></ng-icon>
