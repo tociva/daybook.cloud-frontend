@@ -25,7 +25,7 @@ export class SaleInvoiceFormService {
     });
   }
   
-  private readonly buildSaleItemTaxForm = ():FormGroup<SaleItemTaxForm> => {
+  public readonly buildSaleItemTaxForm = ():FormGroup<SaleItemTaxForm> => {
     return this.fb.nonNullable.group<SaleItemTaxForm>({
       rate: this.fb.control({value: '', disabled: true}, { nonNullable: true }),
       appliedto: this.fb.control({value: 0, disabled: true}, { nonNullable: true }),

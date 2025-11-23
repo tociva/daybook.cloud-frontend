@@ -1,13 +1,6 @@
 <div id="items-details" class="flex-1" [formGroup]="form()">
   <div class="flex flex-wrap items-center justify-center gap-8 p-4">
-<!-- 
-    <div class="flex items-center gap-2">
-      <label for="template" class="text-primary">Billing Mode:</label>
-      <app-auto-complete formControlName="taxDisplayMode" [options]="taxDisplayModes()"
-        [optionDisplayValue]="findTaxDisplayModeDisplayValue" [inputDisplayValue]="findTaxDisplayModeDisplayValue"
-        [required]="true" class="min-w-[200px]"></app-auto-complete>
-    </div> -->
-
+    
     <div class="flex items-center gap-2">
       <label for="showDiscount" class="text-primary">Enable Discount:</label>
       <dbc-switch formControlName="showDiscount"></dbc-switch>
@@ -199,6 +192,7 @@
         <label class="w-28 text-sm text-gray-700">Item Total:</label>
         <input  type="text" appNumberInput />
       </div>
+      @if(colVisibleFor('discount')()) {
       <div class="flex items-center gap-2 mb-2">
         <label class="w-28 text-sm text-gray-700">Discount:</label>
         <input  type="text" appNumberInput />
@@ -207,10 +201,13 @@
         <label class="w-28 text-sm text-gray-700">Subtotal:</label>
         <input  type="text" appNumberInput />
       </div>
+      }
+      @if(taxStrategies().length > 0) {
       <div class="flex items-center gap-2 mb-2">
         <label class="w-28 text-sm text-gray-700">Tax:</label>
         <input  type="text" appNumberInput />
       </div>
+      }
       <div class="flex items-center gap-2 mb-2">
         <label class="w-28 text-sm text-gray-700">Roundoff:</label>
         <input  type="text" appNumberInput />

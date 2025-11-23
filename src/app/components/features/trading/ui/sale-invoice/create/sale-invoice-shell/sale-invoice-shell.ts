@@ -157,7 +157,7 @@ export class SaleInvoiceShell {
 
       this.itemsDetailsGroup().patchValue({
         taxoption: taxOption,
-      }, { emitEvent: false });
+      }, { emitEvent: true });
     },
   );
 
@@ -251,7 +251,7 @@ export class SaleInvoiceShell {
     });
     const itemsArray = this.form.controls.itemsDetails.controls.items;
     itemsArray.clear();
-    itemsArray.push(this.saleInvoiceFormService.buildSaleItemForm(2));
+    itemsArray.push(this.saleInvoiceFormService.buildSaleItemForm(0));
   }
 
   ngOnInit(): void {
