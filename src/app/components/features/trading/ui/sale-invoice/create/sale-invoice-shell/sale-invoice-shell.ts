@@ -23,14 +23,19 @@ import { SaleInvoiceFormService } from '../../util/sale-invoice-form.service';
 import {
   SaleInvoiceCustomerForm,
   SaleInvoiceForm,
+  SaleInvoiceFormValue,
   SaleInvoicePropertiesForm,
   SaleItemsDetailsForm
 } from '../../util/sale-invoice-form.type';
-import { saleInvoiceModelToSaleInvoiceFormValue } from '../../util/sale-invoice.util';
+import { mapSaleInvoiceFormValueToRequest, saleInvoiceModelToSaleInvoiceFormValue } from '../../util/sale-invoice.util';
 import { SaleInvoiceCustomer } from '../sale-invoice-customer/sale-invoice-customer';
 import { SaleInvoiceItems } from '../sale-invoice-items/sale-invoice-items';
 import { SaleInvoiceProperties } from '../sale-invoice-properties/sale-invoice-properties';
 import { Currency } from '../../../../../../shared/store/currency/currency.model';
+import { CancelButton } from '../../../../../../shared/cancel-button/cancel-button';
+import { NgClass } from '@angular/common';
+import { SaleInvoiceRequest } from '../../../../store/sale-invoice/sale-invoice-request.type';
+import { ToastStore } from '../../../../../../shared/store/toast/toast.store';
 
 @Component({
   selector: 'app-sale-invoice-shell',
@@ -42,6 +47,8 @@ import { Currency } from '../../../../../../shared/store/currency/currency.model
     SaleInvoiceCustomer,
     SaleInvoiceProperties,
     SaleInvoiceItems,
+    CancelButton,
+    NgClass,
   ],
   templateUrl: './sale-invoice-shell.html',
   styleUrl: './sale-invoice-shell.css',
@@ -53,6 +60,7 @@ export class SaleInvoiceShell {
   private readonly store = inject(Store);
   private readonly saleInvoiceFormService = inject(SaleInvoiceFormService);
   private readonly currencyStore = inject(CurrencyStore);
+  private readonly toastStore = inject(ToastStore);
   
   protected readonly saleInvoiceStore = inject(SaleInvoiceStore);
   protected readonly currency = signal<Currency>(DEFAULT_CURRENCY);
@@ -60,6 +68,8 @@ export class SaleInvoiceShell {
   protected readonly mode = signal<'create' | 'edit' | 'delete'>('create');
   protected readonly loading = signal<boolean>(true);
   protected form!: FormGroup<SaleInvoiceForm>;
+  protected submitting = signal<boolean>(false);
+  readonly deleteSuccessAction = saleInvoiceActions.deleteSaleInvoiceSuccess;
 
   // 👇 Signal that mirrors the customer FormControl (user changes only)
   private readonly customerSig = signal<Customer | null>(null);
@@ -289,5 +299,27 @@ export class SaleInvoiceShell {
 
   readonly itemsDetailsGroup = () =>
     this.form.get('itemsDetails') as FormGroup<SaleItemsDetailsForm>;
+
+  onSubmit() {
+    this.submitting.set(true);
+    const formValue = this.form.getRawValue() as unknown as SaleInvoiceFormValue;
+    const saleInvoiceRequest: SaleInvoiceRequest =  mapSaleInvoiceFormValueToRequest(formValue);
+    const {items} = saleInvoiceRequest;
+    const invalidItems = items.filter(item => !item.itemid || !item.itemtotal);
+    if(invalidItems.length){
+      this.submitting.set(false);
+      this.toastStore.show({ title: 'Error', message: 'Some items are missing required fields' }, 'error');
+      return;
+    }
+    if(this.mode() === 'create') {
+      this.store.dispatch(saleInvoiceActions.createSaleInvoice({ saleInvoice: saleInvoiceRequest }));
+    } else if(this.mode() === 'edit') {
+      this.store.dispatch(saleInvoiceActions.updateSaleInvoice({ id: this.itemId()!, saleInvoice: saleInvoiceRequest }));
+    }
+  }
+
+  handleDelete = (): void => {
+    this.store.dispatch(saleInvoiceActions.deleteSaleInvoice({ id: this.itemId()! }));
+  };
 
 }

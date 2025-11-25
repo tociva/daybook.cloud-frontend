@@ -1,15 +1,15 @@
 @if(loading()) {
-  <app-skelton-loader variant="text" [lines]="10" width="100%" [shimmer]="true" />
-  } @else if(!loading() && mode() === 'edit' && saleInvoiceStore.error()?.statusCode === 404) {
-  <app-item-not-found title="Sale invoice record not found"
-    description="It may have been deleted or the link is invalid."></app-item-not-found>
-  } @else if(!loading() && form && (mode() === 'create' || mode() === 'edit' || mode() === 'delete')) {
-  
-  <form [formGroup]="form">
-    <h1 class="text-2xl font-semibold text-gray-800 mb-6 text-center">
-      {{title()}}
-    </h1>
-    <!-- parent.component.html -->
+<app-skelton-loader variant="text" [lines]="10" width="100%" [shimmer]="true" />
+} @else if(!loading() && mode() === 'edit' && saleInvoiceStore.error()?.statusCode === 404) {
+<app-item-not-found title="Sale invoice record not found"
+  description="It may have been deleted or the link is invalid."></app-item-not-found>
+} @else if(!loading() && form && (mode() === 'create' || mode() === 'edit' || mode() === 'delete')) {
+
+<form [formGroup]="form">
+  <h1 class="text-2xl font-semibold text-gray-800 mb-6 text-center">
+    {{title()}}
+  </h1>
+  <!-- parent.component.html -->
   <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-start mt-4">
     <!-- Left: first half -->
     <div class="md:col-span-2">
@@ -21,7 +21,37 @@
       <app-sale-invoice-properties [form]="propertiesGroup()" [uiMode]="mode()"></app-sale-invoice-properties>
     </div>
   </div>
-  <app-sale-invoice-items [form]="itemsDetailsGroup()" [currency]="currency()" [taxOption]="taxOption()"></app-sale-invoice-items>
-  <!-- <app-sale-invoice-summary [form]="summaryGroup()"></app-sale-invoice-summary> -->
-  </form>
+  <app-sale-invoice-items [form]="itemsDetailsGroup()" [currency]="currency()"
+    [taxOption]="taxOption()"></app-sale-invoice-items>
+  <!-- Confirmation -->
+  @if(mode() === 'delete') {
+  <div class="flex items-start gap-3 py-4">
+    <input id="confirm-delete" type="checkbox" #confirmDel class="mt-0.5 h-4 w-4 rounded border-gray-300"
+      aria-describedby="confirm-help" />
+    <label for="confirm-delete" class="text-sm text-gray-800">
+      I understand this will permanently delete this Sale Invoice and cannot be undone.
+    </label>
+  </div>
+  <div class="pt-2 mt-4 text-center">
+    <app-cancel-button></app-cancel-button>
+    <app-delete-button [disabled]="!confirmDel.checked" [onDelete]="handleDelete"
+      [successAction]="deleteSuccessAction"></app-delete-button>
+
+  </div>
+  } @else {
+  <!-- ✅ Submit Button -->
+  <div class="pt-2 mt-4 text-center">
+    <app-cancel-button></app-cancel-button>
+
+    <button type="submit" (click)="onSubmit()"
+      class="bg-primary text-white px-6 py-2 rounded transition-opacity duration-200" [disabled]="submitting()"
+      [ngClass]="{
+      'cursor-not-allowed bg-gray-400 text-gray-200 opacity-60': submitting(),
+      'hover:opacity-90 cursor-pointer': !submitting()
+    }">
+      Submit
+    </button>
+  </div>
+  }
+</form>
 }

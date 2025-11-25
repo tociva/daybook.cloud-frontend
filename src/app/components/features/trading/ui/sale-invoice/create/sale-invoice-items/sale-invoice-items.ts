@@ -84,6 +84,7 @@ export class SaleInvoiceItems implements OnInit, OnDestroy {
   // signal-backed slices from form controls
   private readonly showDiscountSig   = signal<boolean | null | undefined>(false);
   private readonly showDescriptionSig = signal<boolean | null | undefined>(false);
+  private readonly roundOffSig = signal<number | null | undefined>(0);
 
 
   readonly items = this.itemStore.items;
@@ -156,6 +157,7 @@ export class SaleInvoiceItems implements OnInit, OnDestroy {
   });
   
   private reCalculateSummary = () => {
+
     let itemtotal = 0;
     let discount = 0;
     let subtotal = 0;
@@ -169,7 +171,7 @@ export class SaleInvoiceItems implements OnInit, OnDestroy {
       grandtotal += Number(item.get('grandtotal')?.value ?? 0); 
     });
     const summary = this.form().get('summary');
-    const roundoff = Number(summary?.get('roundoff')?.value ?? 0);
+    const roundoff = this.roundOffSig() ?? 0;
     grandtotal += roundoff;
     const currency = this.currency();
     const minorunit = currency?.minorunit ?? TWO;
@@ -178,7 +180,7 @@ export class SaleInvoiceItems implements OnInit, OnDestroy {
       discount: formatAmountToFraction(discount, minorunit), 
       subtotal: formatAmountToFraction(subtotal, minorunit),
       tax: formatAmountToFraction(tax, minorunit),
-      roundoff: formatAmountToFraction(roundoff, minorunit),
+      roundoff: String(roundoff),
       grandtotal: formatAmountToFraction(grandtotal, minorunit),
       words: formatAmountToWords(grandtotal, this.currency()),
     }, { emitEvent: false });
@@ -263,12 +265,13 @@ export class SaleInvoiceItems implements OnInit, OnDestroy {
     this.store.dispatch(taxActions.loadTaxes({query: {limit: Number.MAX_SAFE_INTEGER}}));
     
     const form = this.form();
-    const { showDiscount, showDescription } = form.controls;
+    const { showDiscount, showDescription, summary } = form.controls;
+    const { roundoff } = summary.controls;
 
     // initial values
     this.showDiscountSig.set(!!showDiscount.value);
     this.showDescriptionSig.set(!!showDescription.value);
-
+    this.roundOffSig.set(Number(roundoff.value ?? 0));
     // keep signals in sync with form controls
 
     showDiscount.valueChanges
@@ -278,6 +281,10 @@ export class SaleInvoiceItems implements OnInit, OnDestroy {
     showDescription.valueChanges
       .pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe(value => this.showDescriptionSig.set(!!value));
+
+    roundoff.valueChanges
+      .pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe(value => this.roundOffSig.set(Number(value ?? 0)));
 
   }
 
