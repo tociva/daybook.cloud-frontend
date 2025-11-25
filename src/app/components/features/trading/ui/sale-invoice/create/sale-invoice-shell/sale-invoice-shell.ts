@@ -9,7 +9,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Store } from '@ngrx/store';
 import dayjs from 'dayjs';
 import { Subscription } from 'rxjs';
-import { DEFAULT_NODE_DATE_FORMAT, TWO } from '../../../../../../../util/constants';
+import { DEFAULT_CURRENCY, DEFAULT_NODE_DATE_FORMAT, TWO } from '../../../../../../../util/constants';
 import { formatAmountToFraction } from '../../../../../../../util/currency.util';
 import { DeleteButton } from '../../../../../../shared/delete-button/delete-button';
 import { ItemNotFound } from '../../../../../../shared/item-not-found/item-not-found';
@@ -30,6 +30,7 @@ import { saleInvoiceModelToSaleInvoiceFormValue } from '../../util/sale-invoice.
 import { SaleInvoiceCustomer } from '../sale-invoice-customer/sale-invoice-customer';
 import { SaleInvoiceItems } from '../sale-invoice-items/sale-invoice-items';
 import { SaleInvoiceProperties } from '../sale-invoice-properties/sale-invoice-properties';
+import { Currency } from '../../../../../../shared/store/currency/currency.model';
 
 @Component({
   selector: 'app-sale-invoice-shell',
@@ -54,7 +55,7 @@ export class SaleInvoiceShell {
   private readonly currencyStore = inject(CurrencyStore);
   
   protected readonly saleInvoiceStore = inject(SaleInvoiceStore);
-  protected readonly fractions = signal<number>(2);
+  protected readonly currency = signal<Currency>(DEFAULT_CURRENCY);
   protected readonly title = signal<string>('Create New Sale Invoice');
   protected readonly mode = signal<'create' | 'edit' | 'delete'>('create');
   protected readonly loading = signal<boolean>(true);
@@ -62,7 +63,7 @@ export class SaleInvoiceShell {
 
   // 👇 Signal that mirrors the customer FormControl (user changes only)
   private readonly customerSig = signal<Customer | null>(null);
-  private readonly taxOptionSig = signal<string>('Intra State');
+  protected readonly taxOption = signal<string>('Intra State');
   private customerSub?: Subscription;
   private taxOptionSub?: Subscription;
 
@@ -116,9 +117,9 @@ export class SaleInvoiceShell {
     if (!control) return;
 
     this.taxOptionSub?.unsubscribe();
-    this.taxOptionSig.set(control.value as string);
+    this.taxOption.set(control.value as string);
     this.taxOptionSub = control.valueChanges.subscribe((value) => {
-      this.taxOptionSig.set(value);
+      this.taxOption.set(value);
     });
   };
 
@@ -133,7 +134,7 @@ export class SaleInvoiceShell {
       if (!this.form || !customer) return;
 
       if (customer.currency) {
-        this.fractions.set(customer.currency.minorunit ?? TWO);
+        this.currency.set(customer.currency);
       }
       this.form.patchValue(
         {
@@ -147,17 +148,6 @@ export class SaleInvoiceShell {
           emitEvent: false,
         },
       );
-    },
-  );
-
-  private changeTaxOptionEffect = effect(
-    () => {
-      const taxOption = this.taxOptionSig();
-      if (!this.itemsDetailsGroup() || !taxOption) return;
-
-      this.itemsDetailsGroup().patchValue({
-        taxoption: taxOption,
-      }, { emitEvent: true });
     },
   );
 
@@ -193,16 +183,16 @@ export class SaleInvoiceShell {
     this.customerGroup().patchValue(customer, { emitEvent: false });
     this.propertiesGroup().patchValue(properties, { emitEvent: false });
     this.itemsDetailsGroup().patchValue({
-      taxoption: properties.taxoption,
       showDiscount: itemsDetails.showDiscount,
       showDescription: itemsDetails.showDescription,
     });
     const itemsArray = this.form.controls.itemsDetails.controls.items;
     itemsArray.clear();
-    const fractions = this.fractions();
+    const currency = this.currency();
     itemsDetails.items.forEach((item) => {
       
       const itemRowForm = this.saleInvoiceFormService.buildSaleItemForm(item.taxes.length);
+      const minorunit = currency?.minorunit ?? TWO;
       itemRowForm.patchValue({
         name: item.name,
         description: item.description,
@@ -222,7 +212,7 @@ export class SaleInvoiceShell {
         itemRowForm.controls.taxes.at(idx).patchValue({
           tax: tax.tax,
           rate: `${tax.rate} %`,
-          amount: formatAmountToFraction(tax.amount, fractions),
+          amount: formatAmountToFraction(tax.amount, minorunit),
           name: tax.name,
           shortname: tax.shortname,
         }, { emitEvent: false });
@@ -246,7 +236,6 @@ export class SaleInvoiceShell {
       itemsDetails: {
         showDiscount: false,
         showDescription: false,
-        taxoption: "Intra State",
       },
     });
     const itemsArray = this.form.controls.itemsDetails.controls.items;
@@ -286,7 +275,6 @@ export class SaleInvoiceShell {
 
   ngOnDestroy(): void {
     this.changeCustomerEffect.destroy();
-    this.changeTaxOptionEffect.destroy();
     this.loadErrorEffectRef.destroy();
     this.loadSaleInvoiceSuccessEffect.destroy();
     this.customerSub?.unsubscribe();

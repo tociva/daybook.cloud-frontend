@@ -1,3 +1,5 @@
+import { Currency } from "../components/shared/store/currency/currency.model";
+
 export const COMMON_DATE_FORMATS = [
   { name: "MM/DD/YYYY", value: "01/31/2022" },
   { name: "DD-MM-YYYY", value: "31-01-2022" },
@@ -31,3 +33,12 @@ export const DEFAULT_NODE_DATE_FORMAT = 'YYYY-MM-DD';
 export const DEFAULT_DATE_FORMAT = 'DD-MMM-YYYY';
 
 export const TWO = 2;
+
+export const DEFAULT_CURRENCY: Currency =  {
+  code: 'INR',
+  name: 'Indian Rupee',
+  symbol: '₹',
+  numericcode: 356,
+  minorunit: 2,
+  fraction: 'Paisa',
+};

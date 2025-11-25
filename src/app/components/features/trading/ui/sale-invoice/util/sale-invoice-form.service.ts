@@ -117,7 +117,6 @@ export class SaleInvoiceFormService {
         currency: this.fb.control(null, { nonNullable: true }),
       }),
       itemsDetails: this.fb.nonNullable.group<SaleItemsDetailsForm>({
-        taxoption: this.fb.nonNullable.control("Intra State"),
         showDiscount: this.fb.nonNullable.control(false),
         showDescription: this.fb.nonNullable.control(false),
         items: this.fb.nonNullable.array<FormGroup<SaleItemForm>>(

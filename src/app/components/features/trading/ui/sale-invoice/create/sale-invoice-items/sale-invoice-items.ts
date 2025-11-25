@@ -32,6 +32,8 @@ import {
   SaleItemForm,
   SaleItemsDetailsForm,
 } from '../../util/sale-invoice-form.type';
+import { Currency } from '../../../../../../shared/store/currency/currency.model';
+import { TWO } from '../../../../../../../util/constants';
 
 type Column = { key: string; span: number; visible: boolean };
 enum TaxStrategyType {
@@ -68,7 +70,8 @@ export class SaleInvoiceItems implements OnInit, OnDestroy {
   }
   // required signal input from parent
   readonly form = input.required<FormGroup<SaleItemsDetailsForm>>();
-  readonly fractions = input.required<number>();
+  readonly currency = input.required<Currency>();
+  readonly taxOption = input.required<string>();
 
   // destroy ref for subscriptions
   private readonly destroyRef = inject(DestroyRef);
@@ -81,9 +84,7 @@ export class SaleInvoiceItems implements OnInit, OnDestroy {
   // signal-backed slices from form controls
   private readonly showDiscountSig   = signal<boolean | null | undefined>(false);
   private readonly showDescriptionSig = signal<boolean | null | undefined>(false);
-  private readonly taxOptionSig = signal<string | null | undefined>('Intra State');
 
-  private taxOption = 'Intra State';
 
   readonly items = this.itemStore.items;
   readonly taxGroups = this.taxGroupStore.items;
@@ -94,9 +95,11 @@ export class SaleInvoiceItems implements OnInit, OnDestroy {
   }
 
   get taxColumnCount() {
+    const taxOption = this.taxOption();
+    if(!taxOption) return 0;
     for(const taxGroup of this.taxGroups()) {
       for(const group of taxGroup.groups) {
-        if(group.mode === this.taxOption) {
+        if(group.mode === taxOption) {
           return group.taxids.length;
         }
       }
@@ -105,9 +108,8 @@ export class SaleInvoiceItems implements OnInit, OnDestroy {
   }
 
   private readonly onTaxOptionChangeEffect = effect(() => {
-    const taxOption = this.taxOptionSig();
+    const taxOption = this.taxOption();
     if (!taxOption) return;
-    this.taxOption = taxOption;
 
     for(const itemRow of this.itemsArray.controls) {
       const taxFormArray = itemRow.controls.taxes;
@@ -139,7 +141,8 @@ export class SaleInvoiceItems implements OnInit, OnDestroy {
 
   readonly taxStrategies = computed<TaxStrategyType[]>(() => {
   
-    const taxOption = this.taxOptionSig();
+    const taxOption = this.taxOption();
+    if(!taxOption) return [];
     switch (taxOption) {
       case 'Inter State':
         return [TaxStrategyType.IGST];
@@ -168,19 +171,22 @@ export class SaleInvoiceItems implements OnInit, OnDestroy {
     const summary = this.form().get('summary');
     const roundoff = Number(summary?.get('roundoff')?.value ?? 0);
     grandtotal += roundoff;
+    const currency = this.currency();
+    const minorunit = currency?.minorunit ?? TWO;
     summary?.patchValue({ 
-      itemtotal: formatAmountToFraction(itemtotal, this.fractions()), 
-      discount: formatAmountToFraction(discount, this.fractions()), 
-      subtotal: formatAmountToFraction(subtotal, this.fractions()),
-      tax: formatAmountToFraction(tax, this.fractions()),
-      roundoff: formatAmountToFraction(roundoff, this.fractions()),
-      grandtotal: formatAmountToFraction(grandtotal, this.fractions()),
-      words: formatAmountToWords(grandtotal, this.form().get('currency')?.value),
+      itemtotal: formatAmountToFraction(itemtotal, minorunit), 
+      discount: formatAmountToFraction(discount, minorunit), 
+      subtotal: formatAmountToFraction(subtotal, minorunit),
+      tax: formatAmountToFraction(tax, minorunit),
+      roundoff: formatAmountToFraction(roundoff, minorunit),
+      grandtotal: formatAmountToFraction(grandtotal, minorunit),
+      words: formatAmountToWords(grandtotal, this.currency()),
     }, { emitEvent: false });
   };
 
   private refreshItemRow = (itemRow: FormGroup<SaleItemForm>) => {
-    const fractions = this.fractions();
+    const currency = this.currency();
+    const minorunit = currency?.minorunit ?? TWO;
     const price = Number(itemRow.get('price')?.value ?? 0);
     const exQuantity = itemRow.get('quantity')?.value
     const quantity = Number(exQuantity ? exQuantity : 1);
@@ -195,29 +201,30 @@ export class SaleInvoiceItems implements OnInit, OnDestroy {
       const taxAmount = (Number(tax?.rate ?? 0)) * subtotal / 100;
       taxControl.patchValue({
         rate: `${String(tax?.rate ?? 0)} %`,
-        amount: formatAmountToFraction(taxAmount, fractions)
+        amount: formatAmountToFraction(taxAmount, minorunit)
       });
     }
     const taxamount = itemRow.controls.taxes.controls.reduce((acc, tax) => acc + (Number(tax.get('amount')?.value ?? 0)), 0);
     const grandtotal = subtotal + taxamount;
     itemRow.patchValue({
-      price: formatAmountToFraction(price, fractions),
+      price: formatAmountToFraction(price, minorunit),
       quantity: String(quantity ? quantity : 1),
-      itemtotal: formatAmountToFraction(itemtotal, fractions),
-      discpercent: formatAmountToFraction(discpercent, fractions),
-      discamount: formatAmountToFraction(discamount, fractions),
-      subtotal: formatAmountToFraction(subtotal, fractions),
-      taxamount: formatAmountToFraction(taxamount, fractions),
-      grandtotal: formatAmountToFraction(grandtotal, fractions),
+      itemtotal: formatAmountToFraction(itemtotal, minorunit),
+      discpercent: formatAmountToFraction(discpercent, minorunit),
+      discamount: formatAmountToFraction(discamount, minorunit),
+      subtotal: formatAmountToFraction(subtotal, minorunit),
+      taxamount: formatAmountToFraction(taxamount, minorunit),
+      grandtotal: formatAmountToFraction(grandtotal, minorunit),
     }, { emitEvent: false});
     this.reCalculateSummary();
   }
 
   private updateItemRowTaxControls = (itemRow: FormGroup<SaleItemForm>, taxGroupId?: string) => {
     if(taxGroupId) {
-      const fractions = this.fractions();
+      const currency = this.currency();
+      const minorunit = currency?.minorunit ?? TWO;
       const taxGroup = this.taxGroups().find(taxGroup => taxGroup.id === taxGroupId);
-      const taxModeObject = taxGroup?.groups.find(group => group.mode === this.taxOption);
+      const taxModeObject = taxGroup?.groups.find(group => group.mode === this.taxOption());
       for(let idx = 0; idx < (taxModeObject?.taxids ?? []).length; idx++) {
         const taxId = taxModeObject?.taxids?.[idx];
         const tax = this.taxes().find(tax => tax.id === taxId);
@@ -225,7 +232,7 @@ export class SaleInvoiceItems implements OnInit, OnDestroy {
           itemRow.controls.taxes.at(idx).patchValue({
             rate: `${String(tax.rate)} %`,
             appliedto: tax.appliedto,
-            amount: formatAmountToFraction(0, fractions),
+            amount: formatAmountToFraction(0, minorunit),
             name: tax.name,
             shortname: tax.shortname,
             tax: tax,
@@ -256,12 +263,11 @@ export class SaleInvoiceItems implements OnInit, OnDestroy {
     this.store.dispatch(taxActions.loadTaxes({query: {limit: Number.MAX_SAFE_INTEGER}}));
     
     const form = this.form();
-    const { showDiscount, showDescription, taxoption } = form.controls;
+    const { showDiscount, showDescription } = form.controls;
 
     // initial values
     this.showDiscountSig.set(!!showDiscount.value);
     this.showDescriptionSig.set(!!showDescription.value);
-    this.taxOptionSig.set(taxoption.value);
 
     // keep signals in sync with form controls
 
@@ -273,9 +279,6 @@ export class SaleInvoiceItems implements OnInit, OnDestroy {
       .pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe(value => this.showDescriptionSig.set(!!value));
 
-    taxoption.valueChanges
-      .pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
-      .subscribe(value => this.taxOptionSig.set(value));
   }
 
   onngDestroy() {

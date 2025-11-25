@@ -21,7 +21,7 @@
       <app-sale-invoice-properties [form]="propertiesGroup()" [uiMode]="mode()"></app-sale-invoice-properties>
     </div>
   </div>
-  <app-sale-invoice-items [form]="itemsDetailsGroup()" [fractions]="fractions()"></app-sale-invoice-items>
+  <app-sale-invoice-items [form]="itemsDetailsGroup()" [currency]="currency()" [taxOption]="taxOption()"></app-sale-invoice-items>
   <!-- <app-sale-invoice-summary [form]="summaryGroup()"></app-sale-invoice-summary> -->
   </form>
 }

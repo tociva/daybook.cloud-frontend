@@ -32,7 +32,6 @@ export interface SaleItemForm {
 export interface SaleItemsDetailsForm {
   showDiscount: FormControl<boolean>;
   showDescription: FormControl<boolean>;
-  taxoption: FormControl<string>;
   items: FormArray<FormGroup<SaleItemForm>>;
   summary: FormGroup<SaleInvoiceSummaryForm>;
 }
