@@ -7,7 +7,7 @@ export interface SaleInvoiceItemTaxRequest {
   rate: number;
   appliedto: number;
   amount: number;
-  taxid: string; // format: uuid
+  taxid?: string; // format: uuid
 }
 
 export interface SaleInvoiceItemRequest {

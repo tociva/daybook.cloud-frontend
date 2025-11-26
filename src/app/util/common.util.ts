@@ -34,3 +34,23 @@ export function multiDecode(input: string | null | undefined, max = 5): string |
   }
   return v;
 }
+
+export function extractErrorMessage(error: unknown): string | null {
+  const candidates = [
+    "error.error.message.message",
+    "error.error.message",
+    "error.message.detail",
+    "error.message",
+    "message"
+  ];
+
+  for (const path of candidates) {
+    const value = path.split(".").reduce((obj, key) => {
+      const obj2 = obj as Record<string, unknown>;
+      return obj2?.[key]
+    }, error);
+    if (typeof value === "string") return value;
+  }
+
+  return null;
+}

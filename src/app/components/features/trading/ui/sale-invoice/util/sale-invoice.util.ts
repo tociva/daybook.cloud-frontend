@@ -9,17 +9,17 @@ import { SaleInvoiceCustomerFormValue, SaleInvoiceFormValue, SaleInvoiceProperti
 export const mapSaleItemTaxFormValueToRequest = (formValue: SaleItemTaxFormValue): SaleInvoiceItemTaxRequest => {
   const name = formValue.name;
   const shortname = formValue.shortname;
-  const rate = toNumber(formValue.rate);
+  const rate = toNumber(formValue.rate?.replace('%', ''));
   const appliedto = toNumber(formValue.appliedto);
   const amount = toNumber(formValue.amount);
-  const taxid = formValue.tax.id!;
+  const taxid = formValue.tax?.id;
   return {
     name,
     shortname,
     rate,
     appliedto,
     amount,
-    taxid,
+    ...(taxid ? { taxid } : {}),
   };
 };
 export const mapSaleItemFormValueToRequest = (formValue: SaleItemFormValue, order: number): SaleInvoiceItemRequest => {
@@ -37,7 +37,7 @@ export const mapSaleItemFormValueToRequest = (formValue: SaleItemFormValue, orde
   const taxamount = toNumber(formValue.taxamount);
   const grandtotal = toNumber(formValue.grandtotal);
   const itemid = formValue.item.id!;
-  const taxes = formValue.taxes.map(tax => mapSaleItemTaxFormValueToRequest(tax));
+  const taxes = (formValue.taxes ?? []).map(tax => mapSaleItemTaxFormValueToRequest(tax));
   return {
     name,
     ...(description ? { description } : {}),
@@ -113,7 +113,7 @@ const eqAddress = (a: any, b: any): boolean => {
 const mapTaxes = (item: any): SaleItemTaxFormValue[] => {
   const taxes = Array.isArray(item?.taxes) ? item.taxes : [];
   return taxes.map((t: any): SaleItemTaxFormValue => ({
-    rate: toNumber(t?.rate),
+    rate: t?.rate ?? '',
     appliedto: toNumber(t?.appliedto),
     amount: toNumber(t?.amount),
     name: t?.name ?? '',

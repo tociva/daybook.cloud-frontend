@@ -5,10 +5,10 @@ import {
   signal,
 } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import dayjs from 'dayjs';
-import { Subscription } from 'rxjs';
+import { Subscription, tap } from 'rxjs';
 import { DEFAULT_CURRENCY, DEFAULT_NODE_DATE_FORMAT, TWO } from '../../../../../../../util/constants';
 import { formatAmountToFraction } from '../../../../../../../util/currency.util';
 import { DeleteButton } from '../../../../../../shared/delete-button/delete-button';
@@ -36,6 +36,7 @@ import { CancelButton } from '../../../../../../shared/cancel-button/cancel-butt
 import { NgClass } from '@angular/common';
 import { SaleInvoiceRequest } from '../../../../store/sale-invoice/sale-invoice-request.type';
 import { ToastStore } from '../../../../../../shared/store/toast/toast.store';
+import { Actions, ofType } from '@ngrx/effects';
 
 @Component({
   selector: 'app-sale-invoice-shell',
@@ -61,6 +62,8 @@ export class SaleInvoiceShell {
   private readonly saleInvoiceFormService = inject(SaleInvoiceFormService);
   private readonly currencyStore = inject(CurrencyStore);
   private readonly toastStore = inject(ToastStore);
+  private readonly actions$ = inject(Actions);
+  private readonly router = inject(Router);
   
   protected readonly saleInvoiceStore = inject(SaleInvoiceStore);
   protected readonly currency = signal<Currency>(DEFAULT_CURRENCY);
@@ -232,6 +235,47 @@ export class SaleInvoiceShell {
     this.loading.set(false);
   });
 
+
+  private readonly createSuccessEffectRef = effect((onCleanup) => {
+    const sub = this.actions$.pipe(
+      ofType(saleInvoiceActions.createSaleInvoiceSuccess),
+      tap(() => {
+        this.submitting.set(false);
+        const burl = this.route.snapshot.queryParamMap.get('burl') ?? '/';
+        this.router.navigateByUrl(burl);
+      })
+    ).subscribe();
+    onCleanup(() => sub.unsubscribe());
+  });
+
+  private readonly createFailureEffectRef = effect((onCleanup) => {
+    const sub = this.actions$.pipe(
+      ofType(saleInvoiceActions.createSaleInvoiceFailure),
+      tap(() => this.submitting.set(false))
+    ).subscribe();
+    onCleanup(() => sub.unsubscribe());
+  });
+
+  private readonly updateSuccessEffectRef = effect((onCleanup) => {
+    const sub = this.actions$.pipe(
+      ofType(saleInvoiceActions.updateSaleInvoiceSuccess),
+      tap(() => {
+        this.submitting.set(false);
+        const burl = this.route.snapshot.queryParamMap.get('burl') ?? '/';
+        this.router.navigateByUrl(burl);
+      })
+    ).subscribe();
+    onCleanup(() => sub.unsubscribe());
+  });
+
+  private readonly updateFailureEffectRef = effect((onCleanup) => {
+    const sub = this.actions$.pipe(
+      ofType(saleInvoiceActions.updateSaleInvoiceFailure),
+      tap(() => this.submitting.set(false))
+    ).subscribe();
+    onCleanup(() => sub.unsubscribe());
+  });
+
   private initializeForm() {
     const today = dayjs();
     const invDate = today.format(DEFAULT_NODE_DATE_FORMAT);
@@ -289,6 +333,10 @@ export class SaleInvoiceShell {
     this.loadSaleInvoiceSuccessEffect.destroy();
     this.customerSub?.unsubscribe();
     this.taxOptionSub?.unsubscribe();
+    this.createSuccessEffectRef.destroy();
+    this.createFailureEffectRef.destroy();
+    this.updateSuccessEffectRef.destroy();
+    this.updateFailureEffectRef.destroy();
   }
 
   readonly customerGroup = () =>

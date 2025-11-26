@@ -27,11 +27,11 @@ export class SaleInvoiceFormService {
   
   public readonly buildSaleItemTaxForm = ():FormGroup<SaleItemTaxForm> => {
     return this.fb.nonNullable.group<SaleItemTaxForm>({
-      rate: this.fb.control({value: '', disabled: true}, { nonNullable: true }),
-      appliedto: this.fb.control({value: 0, disabled: true}, { nonNullable: true }),
-      amount: this.fb.control({value: '', disabled: true}, { nonNullable: true }),
-      name: this.fb.control({value: '', disabled: true}, { nonNullable: true }),
-      shortname: this.fb.control({value: '', disabled: true}, { nonNullable: true }),
+      rate: this.fb.control({value: '0 %', disabled: true}, { nonNullable: true }),
+      appliedto: this.fb.control({value: 100, disabled: true}, { nonNullable: true }),
+      amount: this.fb.control({value: '0', disabled: true}, { nonNullable: true }),
+      name: this.fb.control({value: 'No Tax', disabled: true}, { nonNullable: true }),
+      shortname: this.fb.control({value: 'No Tax', disabled: true}, { nonNullable: true }),
       tax: this.fb.control<Tax | null>(null),
     });
   }

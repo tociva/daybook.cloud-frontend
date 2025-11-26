@@ -9,6 +9,7 @@ import { DbcError } from '../../util/types/dbc-error.type';
 import { httpActions } from './http.actions';
 import { HttpRequestConfig } from './http.model';
 import { HttpStore } from './http.store';
+import { extractErrorMessage } from '../../util/common.util';
 
 // Helper function to detect abort-like errors (same logic as in HttpStore)
 function isAbortLike(err: unknown): boolean {
@@ -78,9 +79,9 @@ export const httpEffects = {
           }),
           catchError((errorP) => {
             if (isAbortLike(errorP)) return EMPTY;
-            const errorMessage = errorP.error?.error?.message ?? errorP.error?.message ?? errorP.message;
+            const errorMessage = extractErrorMessage(errorP.error);
             if (metadata.errorMessage) {
-              toastStore.show({ title: metadata.errorMessage, message: errorMessage }, 'error');
+              toastStore.show({ title: metadata.errorMessage, message: errorMessage ?? JSON.stringify(errorP.error) }, 'error');
             }
             const error: DbcError = {
               statusCode: errorP.status,

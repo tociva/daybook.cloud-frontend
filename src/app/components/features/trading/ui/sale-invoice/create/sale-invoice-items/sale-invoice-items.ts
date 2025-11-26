@@ -64,10 +64,8 @@ const BASE_COLUMNS: ReadonlyArray<Column> = [
   templateUrl: './sale-invoice-items.html',
   styleUrl: './sale-invoice-items.css',
 })
-export class SaleInvoiceItems implements OnInit, OnDestroy {
-  ngOnDestroy(): void {
-    throw new Error('Method not implemented.');
-  }
+export class SaleInvoiceItems implements OnInit {
+  
   // required signal input from parent
   readonly form = input.required<FormGroup<SaleItemsDetailsForm>>();
   readonly currency = input.required<Currency>();
@@ -247,8 +245,8 @@ export class SaleInvoiceItems implements OnInit, OnDestroy {
           rate: '0 %',
           appliedto: 100,
           amount: '0',
-          name: '',
-          shortname: '',
+          name: 'No Tax',
+          shortname: 'No Tax',
           tax: null,
         }, { emitEvent: false});
       });
@@ -284,7 +282,16 @@ export class SaleInvoiceItems implements OnInit, OnDestroy {
 
     roundoff.valueChanges
       .pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
-      .subscribe(value => this.roundOffSig.set(Number(value ?? 0)));
+      .subscribe(value => {
+        const num = Number(value);
+    
+        // If not a valid number, just return
+        if (isNaN(num)) return;
+    
+        // Otherwise set the signal
+        this.roundOffSig.set(num);
+      });
+    
 
   }
 
@@ -365,6 +372,11 @@ export class SaleInvoiceItems implements OnInit, OnDestroy {
   onItemSelected = (index: number) => (item: Item) => {
     const itemRow = this.itemsArray.at(index);
     const taxGroupId = item.category?.taxgroupid;
+    itemRow.patchValue({
+      item: item,
+      code: item.code,
+      name: item.name,
+    }, { emitEvent: false});
     this.updateItemRowTaxControls(itemRow, taxGroupId);
     this.refreshItemRow(itemRow);
   }
