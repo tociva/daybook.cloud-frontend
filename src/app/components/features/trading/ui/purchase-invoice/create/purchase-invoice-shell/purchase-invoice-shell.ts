@@ -1,395 +1,90 @@
-import { NgClass } from '@angular/common';
 import {
   Component,
-  Signal,
-  WritableSignal,
-  EffectRef,
-  computed,
   effect,
   inject,
   signal,
-  untracked,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import {
-  FormArray,
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-} from '@angular/forms';
+import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { startWith, tap } from 'rxjs';
-import { TWO } from '../../../../../../../util/constants';
-import {
-  formatAmountToFraction,
-  formatAmountToWords,
-} from '../../../../../../../util/currency.util';
-import { FormUtil } from '../../../../../../../util/form/form.util';
-import { AutoComplete } from '../../../../../../shared/auto-complete/auto-complete';
-import { CancelButton } from '../../../../../../shared/cancel-button/cancel-button';
-import { DbcSwitch } from '../../../../../../shared/dbc-switch/dbc-switch';
+import dayjs from 'dayjs';
+import { Subscription, tap } from 'rxjs';
+import { DEFAULT_CURRENCY, DEFAULT_NODE_DATE_FORMAT, TWO } from '../../../../../../../util/constants';
+import { formatAmountToFraction } from '../../../../../../../util/currency.util';
+import { DeleteButton } from '../../../../../../shared/delete-button/delete-button';
 import { ItemNotFound } from '../../../../../../shared/item-not-found/item-not-found';
 import { SkeltonLoader } from '../../../../../../shared/skelton-loader/skelton-loader';
-import { PurchaseInvoiceRequest } from '../../../../store/purchase-invoice/purchase-invoice-request.type';
+import { currencyActions } from '../../../../../../shared/store/currency/currency.action';
+import { CurrencyStore } from '../../../../../../shared/store/currency/currency.store';
+import { Vendor } from '../../../../store/vendor';
 import { purchaseInvoiceActions } from '../../../../store/purchase-invoice/purchase-invoice.actions';
 import { PurchaseInvoiceStore } from '../../../../store/purchase-invoice/purchase-invoice.store';
-import { PurchaseItemTax } from '../../../../store/purchase-invoice/purchase-item-tax.model';
 import { PurchaseInvoiceFormService } from '../../util/purchase-invoice-form.service';
 import {
   PurchaseInvoiceVendorForm,
+  PurchaseInvoiceForm,
   PurchaseInvoiceFormValue,
   PurchaseInvoicePropertiesForm,
-  PurchaseInvoiceSummaryForm,
-  PurchaseInvoiceTaxDisplayModeType,
-  PurchaseItemForm,
+  PurchaseItemsDetailsForm
 } from '../../util/purchase-invoice-form.type';
-import {
-  findTaxColumnCount,
-  mapPurchaseInvoiceFormValueToRequest,
-  purchaseInvoiceModelToPurchaseInvoiceFormValue,
-} from '../../util/purchase-invoice.util';
+import { mapPurchaseInvoiceFormValueToRequest, purchaseInvoiceModelToPurchaseInvoiceFormValue } from '../../util/purchase-invoice.util';
 import { PurchaseInvoiceVendor } from '../purchase-invoice-vendor/purchase-invoice-vendor';
 import { PurchaseInvoiceItems } from '../purchase-invoice-items/purchase-invoice-items';
 import { PurchaseInvoiceProperties } from '../purchase-invoice-properties/purchase-invoice-properties';
-import { DeleteButton } from '../../../../../../shared/delete-button/delete-button';
+import { Currency } from '../../../../../../shared/store/currency/currency.model';
+import { CancelButton } from '../../../../../../shared/cancel-button/cancel-button';
+import { NgClass } from '@angular/common';
+import { PurchaseInvoiceRequest } from '../../../../store/purchase-invoice/purchase-invoice-request.type';
 import { ToastStore } from '../../../../../../shared/store/toast/toast.store';
-import { PurchaseInvoiceSummary } from '../purchase-invoice-summary/purchase-invoice-summary';
+import { Actions, ofType } from '@ngrx/effects';
 
 @Component({
   selector: 'app-purchase-invoice-shell',
   imports: [
     ReactiveFormsModule,
-    PurchaseInvoiceVendor,
-    PurchaseInvoiceProperties,
-    PurchaseInvoiceItems,
-    PurchaseInvoiceSummary,
-    CancelButton,
-    NgClass,
-    AutoComplete,
-    DbcSwitch,
     SkeltonLoader,
     ItemNotFound,
     DeleteButton,
+    PurchaseInvoiceVendor,
+    PurchaseInvoiceProperties,
+    PurchaseInvoiceItems,
+    CancelButton,
+    NgClass,
   ],
   templateUrl: './purchase-invoice-shell.html',
   styleUrl: './purchase-invoice-shell.css',
 })
 export class PurchaseInvoiceShell {
-  // ---------- Injected services ----------
-  private readonly purchaseInvoiceFormService = inject(PurchaseInvoiceFormService);
+
   private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
-  private readonly store = inject(Store);
-  private readonly actions$ = inject(Actions);
-  readonly purchaseInvoiceStore = inject(PurchaseInvoiceStore);
-  readonly deleteSuccessAction = purchaseInvoiceActions.deletePurchaseInvoiceSuccess;
-  private readonly toastStore = inject(ToastStore);
-
-  // ---------- UI mode & route ----------
-  protected readonly mode = signal<'create' | 'edit' | 'delete'>('create');
   private readonly itemId = signal<string | null>(null);
-  protected loading = true;
-  protected title = signal<string>('Create New Purchase Invoice');
+  private readonly store = inject(Store);
+  private readonly purchaseInvoiceFormService = inject(PurchaseInvoiceFormService);
+  private readonly currencyStore = inject(CurrencyStore);
+  private readonly toastStore = inject(ToastStore);
+  private readonly actions$ = inject(Actions);
+  private readonly router = inject(Router);
+  
+  protected readonly purchaseInvoiceStore = inject(PurchaseInvoiceStore);
+  protected readonly currency = signal<Currency>(DEFAULT_CURRENCY);
+  protected readonly title = signal<string>('Create New Purchase Invoice');
+  protected readonly mode = signal<'create' | 'edit' | 'delete'>('create');
+  protected readonly loading = signal<boolean>(true);
+  protected form!: FormGroup<PurchaseInvoiceForm>;
+  protected submitting = signal<boolean>(false);
+  readonly deleteSuccessAction = purchaseInvoiceActions.deletePurchaseInvoiceSuccess;
 
-  // ---------- Form & typed accessors ----------
-  readonly form!: FormGroup;
-
-  vendorGroup!: Signal<FormGroup<PurchaseInvoiceVendorForm>>;
-  propertiesGroup!: Signal<FormGroup<PurchaseInvoicePropertiesForm>>;
-  itemsGroup!: Signal<FormArray<FormGroup<PurchaseItemForm>>>;
-  summaryGroup!: Signal<FormGroup<PurchaseInvoiceSummaryForm>>;
-
-  // ---------- Options & helpers ----------
-  readonly taxDisplayModes = computed(
-    () =>
-      Object.values(
-        PurchaseInvoiceTaxDisplayModeType
-      ) as PurchaseInvoiceTaxDisplayModeType[]
-  );
-  readonly findTaxDisplayModeDisplayValue = (m: PurchaseInvoiceTaxDisplayModeType) => m;
-
-  // ---------- UI/runtime state ----------
-  readonly fractions = signal<number>(2);
-  readonly submitting = signal<boolean>(false);
-
-  // Writable control signals (keeps form state & signals in sync)
-  taxDisplayMode!: WritableSignal<PurchaseInvoiceTaxDisplayModeType>;
-  showDiscount!: WritableSignal<boolean>;
-  showDescription!: WritableSignal<boolean>;
-
-  // ---------- Store selection ----------
-  readonly selectedInvoice = this.purchaseInvoiceStore.selectedItem;
-
-  // ---------- Signals from form controls ----------
-  vendorSignal!: Signal<any>;
-  taxModeSignal!: Signal<any>;
-  taxMode!: Signal<any>;
-  currencySignal!: Signal<any>;
-  currency!: Signal<any>;
-
-  // ---------- Effect references ----------
-  private vendorEffectRef!: EffectRef;
-  private taxModeEffectRef!: EffectRef;
-  private taxDisplayModeEffectRef!: EffectRef;
-  private currencyEffectRef!: EffectRef;
-  private createSuccessEffectRef!: EffectRef;
-  private createFailureEffectRef!: EffectRef;
-  private updateSuccessEffectRef!: EffectRef;
-  private updateFailureEffectRef!: EffectRef;
-  private loadErrorEffectRef!: EffectRef;
-  private fillFormEffectRef!: EffectRef;
-
-  constructor() {
-    // ------ 1) Fresh form per component instance ------
-    this.form = this.purchaseInvoiceFormService.createPurchaseInvoiceForm();
-
-    // ------ 2) Groups computed over this form ------
-    this.vendorGroup = computed(
-      () => this.form.get('vendor') as FormGroup<PurchaseInvoiceVendorForm>
-    );
-
-    this.propertiesGroup = computed(
-      () => this.form.get('properties') as FormGroup<PurchaseInvoicePropertiesForm>
-    );
-
-    this.itemsGroup = computed(
-      () => this.form.get('items') as FormArray<FormGroup<PurchaseItemForm>>
-    );
-
-    this.summaryGroup = computed(
-      () => this.form.get('summary') as FormGroup<PurchaseInvoiceSummaryForm>
-    );
-
-    // ------ 3) Control-backed writable signals ------
-    this.taxDisplayMode =
-      FormUtil.controlWritableSignal<PurchaseInvoiceTaxDisplayModeType>(
-        this.form,
-        'taxDisplayMode',
-        PurchaseInvoiceTaxDisplayModeType.NON_TAXABLE
-      );
-    this.showDiscount = FormUtil.controlWritableSignal<boolean>(
-      this.form,
-      'showDiscount',
-      false
-    );
-    this.showDescription = FormUtil.controlWritableSignal<boolean>(
-      this.form,
-      'showDescription',
-      false
-    );
-
-    // ------ 4) toSignal bindings ------
-    this.vendorSignal = toSignal(
-      (this.vendorGroup().get('vendor') as FormControl).valueChanges.pipe(
-        startWith(this.vendorGroup().get('vendor')?.value)
-      ),
-      { initialValue: this.vendorGroup().get('vendor')?.value }
-    );
-
-    this.taxModeSignal = toSignal(
-      (this.propertiesGroup().get('taxoption') as FormControl).valueChanges.pipe(
-        startWith(this.propertiesGroup().get('taxoption')?.value)
-      ),
-      { initialValue: this.propertiesGroup().get('taxoption')?.value }
-    );
-    this.taxMode = computed(() => this.taxModeSignal());
-
-    this.currencySignal = toSignal(
-      (this.propertiesGroup().get('currency') as FormControl).valueChanges.pipe(
-        startWith(this.propertiesGroup().get('currency')?.value)
-      ),
-      { initialValue: this.propertiesGroup().get('currency')?.value }
-    );
-    this.currency = computed(() => this.currencySignal());
-
-    // ------ 5) Effects depending on these signals ------
-
-    // vendor -> set currency/fractions
-    this.vendorEffectRef = effect(() => {
-      const vendor = this.vendorSignal();
-      if (!vendor) return;
-
-      if (vendor.currency) {
-        this.propertiesGroup().patchValue({ currency: vendor.currency });
-        this.fractions.set(vendor.currency.fractions ?? TWO);
-      }
-    });
-
-    // tax mode -> taxDisplayMode mapping
-    this.taxModeEffectRef = effect(() => {
-      const taxMode = this.taxMode();
-      if (taxMode === 'Inter State') {
-        this.taxDisplayMode.set(PurchaseInvoiceTaxDisplayModeType.IGST);
-      } else if (taxMode === 'Intra State') {
-        this.taxDisplayMode.set(PurchaseInvoiceTaxDisplayModeType.CGST_SGST);
-      } else {
-        this.taxDisplayMode.set(PurchaseInvoiceTaxDisplayModeType.NON_TAXABLE);
-      }
-    });
-
-    // taxDisplayMode -> rebuild taxes FA per item
-    this.taxDisplayModeEffectRef = effect(() => {
-      const mode = this.taxDisplayMode();
-      const needed = findTaxColumnCount(mode);
-
-      untracked(() => {
-        const itemsFa = this.itemsGroup();
-        const blanks: Partial<PurchaseItemTax>[] = Array.from(
-          { length: needed },
-          () => ({})
-        );
-
-        for (let i = 0; i < itemsFa.length; i++) {
-          const item = itemsFa.at(i);
-          const taxesFa =
-            this.purchaseInvoiceFormService.buildPurchaseItemTaxesForm(blanks);
-          item.setControl('taxes', taxesFa, { emitEvent: false });
-        }
-      });
-    });
-
-    // currency -> fractions
-    this.currencyEffectRef = effect(() => {
-      const curr = this.currencySignal();
-      if (curr) {
-        this.fractions.set(curr.minorunit ?? TWO);
-      }
-    });
-
-    // create success
-    this.createSuccessEffectRef = effect((onCleanup) => {
-      const sub = this.actions$
-        .pipe(
-          ofType(purchaseInvoiceActions.createPurchaseInvoiceSuccess),
-          tap(() => {
-            this.submitting.set(false);
-            const burl = this.route.snapshot.queryParamMap.get('burl') ?? '/';
-            this.router.navigateByUrl(burl);
-          })
-        )
-        .subscribe();
-      onCleanup(() => sub.unsubscribe());
-    });
-
-    // create failure
-    this.createFailureEffectRef = effect((onCleanup) => {
-      const sub = this.actions$
-        .pipe(
-          ofType(purchaseInvoiceActions.createPurchaseInvoiceFailure),
-          tap(() => this.submitting.set(false))
-        )
-        .subscribe();
-      onCleanup(() => sub.unsubscribe());
-    });
-
-    // update success
-    this.updateSuccessEffectRef = effect((onCleanup) => {
-      const sub = this.actions$
-        .pipe(
-          ofType(purchaseInvoiceActions.updatePurchaseInvoiceSuccess),
-          tap(() => {
-            this.submitting.set(false);
-            const burl = this.route.snapshot.queryParamMap.get('burl') ?? '/';
-            this.router.navigateByUrl(burl);
-          })
-        )
-        .subscribe();
-      onCleanup(() => sub.unsubscribe());
-    });
-
-    // update failure
-    this.updateFailureEffectRef = effect((onCleanup) => {
-      const sub = this.actions$
-        .pipe(
-          ofType(purchaseInvoiceActions.updatePurchaseInvoiceFailure),
-          tap(() => this.submitting.set(false))
-        )
-        .subscribe();
-      onCleanup(() => sub.unsubscribe());
-    });
-
-    // load error when editing
-    this.loadErrorEffectRef = effect(() => {
-      const error = this.purchaseInvoiceStore.error();
-      if (error && this.mode() === 'edit') {
-        this.loading = false;
-      }
-    });
-
-    // fill form from selected invoice for edit/delete only
-    this.fillFormEffectRef = effect(() => {
-      const mode = this.mode();
-      if (mode === 'create') {
-        // In create mode, NEVER patch from selectedInvoice
-        return;
-      }
-
-      const invoice = this.selectedInvoice();
-      if (invoice) {
-        const formValue = purchaseInvoiceModelToPurchaseInvoiceFormValue(invoice);
-        const { items, ...rest } = formValue;
-
-        this.form.patchValue(rest);
-        const itemsFa = this.itemsGroup();
-        itemsFa.clear();
-
-        items.forEach((item) => {
-          itemsFa.push(
-            this.purchaseInvoiceFormService.buildPurchaseItemForm(
-              item,
-              this.fractions()
-            )
-          );
-        });
-
-        this.loading = false;
-      }
-    });
-  }
-
-  // ---------- Private helpers ----------
-  private reCalculateSummary = () => {
-    let itemtotal = 0;
-    let discount = 0;
-    let subtotal = 0;
-    let tax = 0;
-    let grandtotal = 0;
-
-    const itemsFa = this.itemsGroup();
-    itemsFa.controls.forEach((item) => {
-      itemtotal += Number(item.get('itemtotal')?.value ?? 0);
-      discount += Number(item.get('discamount')?.value ?? 0);
-      subtotal += Number(item.get('subtotal')?.value ?? 0);
-      tax += Number(item.get('taxamount')?.value ?? 0);
-      grandtotal += Number(item.get('grandtotal')?.value ?? 0);
-    });
-
-    const roundoff = Number(
-      this.summaryGroup().get('roundoff')?.value ?? 0
-    );
-    grandtotal += roundoff;
-
-    this.summaryGroup().patchValue(
-      {
-        itemtotal: formatAmountToFraction(itemtotal, this.fractions()),
-        discount: formatAmountToFraction(discount, this.fractions()),
-        subtotal: formatAmountToFraction(subtotal, this.fractions()),
-        tax: formatAmountToFraction(tax, this.fractions()),
-        roundoff: formatAmountToFraction(roundoff, this.fractions()),
-        grandtotal: formatAmountToFraction(grandtotal, this.fractions()),
-        words: formatAmountToWords(grandtotal, this.currency()),
-      },
-      { emitEvent: false }
-    );
-  };
+  // 👇 Signal that mirrors the vendor FormControl (user changes only)
+  private readonly vendorSig = signal<Vendor | null>(null);
+  protected readonly taxOption = signal<string>('Intra State');
+  private vendorSub?: Subscription;
+  private taxOptionSub?: Subscription;
 
   private loadPurchaseInvoiceById() {
     const itemId = this.route.snapshot.paramMap.get('id') || null;
     if (itemId) {
       this.itemId.set(itemId);
-      this.loading = true;
+      this.loading.set(true);
       this.store.dispatch(
         purchaseInvoiceActions.loadPurchaseInvoiceById({
           id: this.itemId()!,
@@ -401,98 +96,279 @@ export class PurchaseInvoiceShell {
               'items.taxes.tax',
             ],
           },
-        })
+        }),
       );
     } else {
-      this.loading = false;
+      this.loading.set(false);
     }
   }
 
-  // ---------- Lifecycle ----------
+  /**
+   * Wire up the vendor FormControl -> vendorSig.
+   * This uses valueChanges, so:
+   * - user changes emit
+   * - programmatic patches with { emitEvent: false } do NOT emit
+   */
+  private watchForVendorChange = () => {
+    const control = this.form.get('vendor.vendor');
+    if (!control) return;
+
+    // Clean up any previous subscription (defensive)
+    this.vendorSub?.unsubscribe();
+
+    // Set initial value (current control value)
+    this.vendorSig.set(control.value as Vendor | null);
+
+    // React only to user-driven changes
+    this.vendorSub = control.valueChanges.subscribe((value) => {
+      this.vendorSig.set(value as Vendor | null);
+    });
+  };
+
+  private watchForTaxOptionChange = () => {
+    const control = this.form.get('properties.taxoption');
+    if (!control) return;
+
+    this.taxOptionSub?.unsubscribe();
+    this.taxOption.set(control.value as string);
+    this.taxOptionSub = control.valueChanges.subscribe((value) => {
+      this.taxOption.set(value);
+    });
+  };
+
+  /**
+   * Effect: when user changes the vendor, sync properties
+   */
+  private changeVendorEffect = effect(
+    () => {
+      const vendor = this.vendorSig();
+
+      // Guard
+      if (!this.form || !vendor) return;
+
+      if (vendor.currency) {
+        this.currency.set(vendor.currency);
+      }
+      this.form.patchValue(
+        {
+          properties: {
+            currency: vendor.currency,
+            sourcestate: vendor.state,
+          },
+        },
+        {
+          // Avoid triggering valueChanges loops
+          emitEvent: false,
+        },
+      );
+    },
+  );
+
+  private readonly loadErrorEffectRef = effect(() => {
+    const error = this.purchaseInvoiceStore.error();
+    if (error && this.mode() === 'edit') {
+      this.loading.set(false);
+    }
+  });
+
+  private loadPurchaseInvoiceSuccessEffect = effect(() => {
+    const mode = this.mode();
+    if (mode !== 'edit' && mode !== 'delete') {
+      return; // ⬅️ don't touch the form in create mode
+    }
+
+    const invoice = this.purchaseInvoiceStore.selectedItem();
+    if (!invoice) return;
+
+    const formValue = purchaseInvoiceModelToPurchaseInvoiceFormValue(invoice);
+    const { itemsDetails, vendor, properties } = formValue;
+
+    if (this.currencyStore.currenciesLoaded()) {
+      const currency = this.currencyStore
+        .currencies()
+        .find((c) => c.code === properties.currency?.code);
+      if (currency) {
+        properties.currency = currency;
+      }
+    }
+
+    // ⬇️ Programmatic patches: do NOT emit valueChanges → vendorSig is NOT updated here
+    this.vendorGroup().patchValue(vendor, { emitEvent: false });
+    this.propertiesGroup().patchValue(properties, { emitEvent: false });
+    this.itemsDetailsGroup().patchValue({
+      showDiscount: itemsDetails.showDiscount,
+      showDescription: itemsDetails.showDescription,
+    });
+    const itemsArray = this.form.controls.itemsDetails.controls.items;
+    itemsArray.clear();
+    const currency = this.currency();
+    itemsDetails.items.forEach((item) => {
+      
+      const itemRowForm = this.purchaseInvoiceFormService.buildPurchaseItemForm(item.taxes.length);
+      const minorunit = currency?.minorunit ?? TWO;
+      itemRowForm.patchValue({
+        name: item.name,
+        description: item.description,
+        code: item.code,
+        price: item.price,
+        quantity: item.quantity,
+        itemtotal: item.itemtotal,
+        discpercent: item.discpercent,
+        discamount: item.discamount,
+        subtotal: item.subtotal,
+        taxamount: item.taxamount,
+        grandtotal: item.grandtotal,
+        item: item.item,
+      }, { emitEvent: false });
+      for(let idx = 0; idx < item.taxes.length; idx++) {
+        const tax = item.taxes[idx];
+        itemRowForm.controls.taxes.at(idx).patchValue({
+          tax: tax.tax,
+          rate: `${tax.rate} %`,
+          amount: formatAmountToFraction(tax.amount, minorunit),
+          name: tax.name,
+          shortname: tax.shortname,
+        }, { emitEvent: false });
+      }
+      itemsArray.push(itemRowForm);
+    });
+    this.loading.set(false);
+  });
+
+
+  private readonly createSuccessEffectRef = effect((onCleanup) => {
+    const sub = this.actions$.pipe(
+      ofType(purchaseInvoiceActions.createPurchaseInvoiceSuccess),
+      tap(() => {
+        this.submitting.set(false);
+        const burl = this.route.snapshot.queryParamMap.get('burl') ?? '/';
+        this.router.navigateByUrl(burl);
+      })
+    ).subscribe();
+    onCleanup(() => sub.unsubscribe());
+  });
+
+  private readonly createFailureEffectRef = effect((onCleanup) => {
+    const sub = this.actions$.pipe(
+      ofType(purchaseInvoiceActions.createPurchaseInvoiceFailure),
+      tap(() => this.submitting.set(false))
+    ).subscribe();
+    onCleanup(() => sub.unsubscribe());
+  });
+
+  private readonly updateSuccessEffectRef = effect((onCleanup) => {
+    const sub = this.actions$.pipe(
+      ofType(purchaseInvoiceActions.updatePurchaseInvoiceSuccess),
+      tap(() => {
+        this.submitting.set(false);
+        const burl = this.route.snapshot.queryParamMap.get('burl') ?? '/';
+        this.router.navigateByUrl(burl);
+      })
+    ).subscribe();
+    onCleanup(() => sub.unsubscribe());
+  });
+
+  private readonly updateFailureEffectRef = effect((onCleanup) => {
+    const sub = this.actions$.pipe(
+      ofType(purchaseInvoiceActions.updatePurchaseInvoiceFailure),
+      tap(() => this.submitting.set(false))
+    ).subscribe();
+    onCleanup(() => sub.unsubscribe());
+  });
+
+  private initializeForm() {
+    const today = dayjs();
+    const invDate = today.format(DEFAULT_NODE_DATE_FORMAT);
+    const duedate = today.add(7, "days").format(DEFAULT_NODE_DATE_FORMAT);
+
+    this.form.patchValue({
+      properties: {
+        number: '',
+        date: invDate,
+        duedate: duedate,
+      },
+      itemsDetails: {
+        showDiscount: false,
+        showDescription: false,
+      },
+    });
+    const itemsArray = this.form.controls.itemsDetails.controls.items;
+    itemsArray.clear();
+    itemsArray.push(this.purchaseInvoiceFormService.buildPurchaseItemForm(0));
+  }
+
   ngOnInit(): void {
+    if (!this.currencyStore.currenciesLoaded()) {
+      this.store.dispatch(currencyActions.loadCurrencies({ query: {} }));
+    }
+
+    this.form = this.purchaseInvoiceFormService.createForm();
+    this.watchForVendorChange();
+    this.watchForTaxOptionChange();
+
     const lastSegment =
       this.route.snapshot.url[this.route.snapshot.url.length - 1]?.path;
 
     if (lastSegment === 'create') {
       this.title.set('Create New Purchase Invoice');
-      this.mode.set('create');
-      this.loading = false;
+      this.initializeForm();
+      this.loading.set(false);
     } else if (lastSegment === 'edit') {
       this.title.set('Edit Purchase Invoice');
       this.mode.set('edit');
+      this.loading.set(false);
       this.loadPurchaseInvoiceById();
     } else if (lastSegment === 'delete') {
       this.title.set('Delete Purchase Invoice');
       this.mode.set('delete');
-      this.form.disable();
+      this.loading.set(false);
+      this.form.disable({ emitEvent: false });
       this.loadPurchaseInvoiceById();
     }
   }
 
-  ngOnDestroy() {
-    // destroy signal effects
-    this.vendorEffectRef.destroy();
-    this.currencyEffectRef.destroy();
+  ngOnDestroy(): void {
+    this.changeVendorEffect.destroy();
+    this.loadErrorEffectRef.destroy();
+    this.loadPurchaseInvoiceSuccessEffect.destroy();
+    this.vendorSub?.unsubscribe();
+    this.taxOptionSub?.unsubscribe();
     this.createSuccessEffectRef.destroy();
     this.createFailureEffectRef.destroy();
     this.updateSuccessEffectRef.destroy();
     this.updateFailureEffectRef.destroy();
-    this.loadErrorEffectRef.destroy();
-    this.taxModeEffectRef.destroy();
-    this.taxDisplayModeEffectRef.destroy();
-    this.fillFormEffectRef.destroy();
-
-    // release form state (extra safety)
-    this.form.reset();
-    this.itemsGroup().clear();
   }
 
-  // ---------- Event handlers ----------
-  onItemUpdate = () => this.reCalculateSummary();
+  readonly vendorGroup = () =>
+    this.form.get('vendor') as FormGroup<PurchaseInvoiceVendorForm>;
 
-  onRoundoffChange = () => this.reCalculateSummary();
+  readonly propertiesGroup = () =>
+    this.form.get('properties') as FormGroup<PurchaseInvoicePropertiesForm>;
+
+  readonly itemsDetailsGroup = () =>
+    this.form.get('itemsDetails') as FormGroup<PurchaseItemsDetailsForm>;
 
   onSubmit() {
     this.submitting.set(true);
     const formValue = this.form.getRawValue() as unknown as PurchaseInvoiceFormValue;
-    const purchaseInvoiceRequest: PurchaseInvoiceRequest =
-      mapPurchaseInvoiceFormValueToRequest(formValue);
-
-    const { items } = purchaseInvoiceRequest;
-    const invalidItems = items.filter(
-      (item) => !item.itemid || !item.itemtotal
-    );
-
-    if (invalidItems.length) {
+    const purchaseInvoiceRequest: PurchaseInvoiceRequest =  mapPurchaseInvoiceFormValueToRequest(formValue);
+    const {items} = purchaseInvoiceRequest;
+    const invalidItems = items.filter(item => !item.itemid || !item.itemtotal);
+    if(invalidItems.length){
       this.submitting.set(false);
-      this.toastStore.show(
-        { title: 'Error', message: 'Some items are missing required fields' },
-        'error'
-      );
+      this.toastStore.show({ title: 'Error', message: 'Some items are missing required fields' }, 'error');
       return;
     }
-
-    if (this.mode() === 'create') {
-      this.store.dispatch(
-        purchaseInvoiceActions.createPurchaseInvoice({
-          purchaseInvoice: purchaseInvoiceRequest,
-        })
-      );
-    } else if (this.mode() === 'edit') {
-      this.store.dispatch(
-        purchaseInvoiceActions.updatePurchaseInvoice({
-          id: this.itemId()!,
-          purchaseInvoice: purchaseInvoiceRequest,
-        })
-      );
+    if(this.mode() === 'create') {
+      this.store.dispatch(purchaseInvoiceActions.createPurchaseInvoice({ purchaseInvoice: purchaseInvoiceRequest }));
+    } else if(this.mode() === 'edit') {
+      this.store.dispatch(purchaseInvoiceActions.updatePurchaseInvoice({ id: this.itemId()!, purchaseInvoice: purchaseInvoiceRequest }));
     }
   }
 
   handleDelete = (): void => {
-    this.store.dispatch(
-      purchaseInvoiceActions.deletePurchaseInvoice({
-        id: this.itemId()!,
-      })
-    );
+    this.store.dispatch(purchaseInvoiceActions.deletePurchaseInvoice({ id: this.itemId()! }));
   };
+
 }
+

@@ -7,7 +7,7 @@ export interface PurchaseInvoiceItemTaxRequest {
   rate: number;
   appliedto: number;
   amount: number;
-  taxid: string; // format: uuid
+  taxid?: string; // format: uuid
 }
 
 export interface PurchaseInvoiceItemRequest {
@@ -39,6 +39,7 @@ export interface PurchaseInvoiceRequest {
   roundoff?: number; // default: 0
   grandtotal: number;
   currencycode: string;
+  vendoraddress: Address;
   cprops?: PurchaseInvoiceCustomProperties; // default: {}
   description?: string; // default: ''
   vendorid: string; // format: uuid

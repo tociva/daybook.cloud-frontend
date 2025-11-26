@@ -1,9 +1,15 @@
-import { Component, effect, EnvironmentInjector, inject, input, runInInjectionContext, signal, WritableSignal } from '@angular/core';
+import {
+  Component,
+  effect,
+  inject,
+  input,
+  signal
+} from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { TextInputDirective } from '../../../../../../../util/directives/text-input.directive';
-import { FormUtil } from '../../../../../../../util/form/form.util';
 import { AutoComplete } from '../../../../../../shared/auto-complete/auto-complete';
+import { DbcSwitch } from '../../../../../../shared/dbc-switch/dbc-switch';
 import { currencyActions } from '../../../../../../shared/store/currency/currency.action';
 import { Currency } from '../../../../../../shared/store/currency/currency.model';
 import { CurrencyStore } from '../../../../../../shared/store/currency/currency.store';
@@ -13,7 +19,8 @@ import { PurchaseInvoicePropertiesForm } from '../../util/purchase-invoice-form.
 
 @Component({
   selector: 'app-purchase-invoice-properties',
-  imports: [ReactiveFormsModule, AutoComplete, TextInputDirective],
+  standalone: true,
+  imports: [ReactiveFormsModule, AutoComplete, TextInputDirective, DbcSwitch],
   templateUrl: './purchase-invoice-properties.html',
   styleUrl: './purchase-invoice-properties.css'
 })
@@ -24,38 +31,24 @@ export class PurchaseInvoiceProperties {
   private readonly taxGroupModeStore = inject(TaxGroupModeStore);
 
   readonly form = input.required<FormGroup<PurchaseInvoicePropertiesForm>>();
-  readonly uiMode = input.required<string>();
+  readonly uiMode = input.required<'create' | 'edit' | 'delete'>();
 
-  currencies = signal<Currency[]>([]);
-  modes = this.taxGroupModeStore.items;
-  filteredModes = signal<string[]>([]);
+  protected readonly modes = this.taxGroupModeStore.items;
+  protected readonly filteredModes = signal<string[]>([]);
+  protected readonly currencies = signal<Currency[]>([]);
 
-  private readonly envInjector = inject(EnvironmentInjector);
-  private _taxoptionSig!: WritableSignal<string>;
-  get taxoptionSig() { return this._taxoptionSig; }
- 
-  constructor() {
-    effect(() => {
-      if(this.currencyStore.currenciesLoaded()) {
-        this.currencies.set(this.currencyStore.filteredCurrencies());
-      }else{
-        this.store.dispatch(currencyActions.loadCurrencies({query: {}}));
-      }
-    });
-  }
+  // 👇 effect is now created in a field initializer (valid injection context)
+  private readonly currenciesEffect = effect(() => {
+    if (this.currencyStore.currenciesLoaded()) {
+      this.currencies.set(this.currencyStore.filteredCurrencies());
+    } else {
+      this.store.dispatch(currencyActions.loadCurrencies({ query: {} }));
+    }
+  });
 
-  ngOnInit() {
-    const form = this.form();
-
-    runInInjectionContext(this.envInjector, () => {
-      this._taxoptionSig = FormUtil.controlWritableSignal<string>(
-        form,
-        'taxoption',
-        'Intra State'
-      );
-    });
-    
-    this.store.dispatch(taxGroupActions.loadTaxGroupModes({}));
+  findCurrencyDisplayValue(currency: Currency) {
+    if(!currency?.name) return '';
+    return `${currency.symbol} ${currency.name}`;
   }
 
   onCurrencySearch(value: string) {
@@ -66,17 +59,22 @@ export class PurchaseInvoiceProperties {
     this.form().patchValue({ currency: currency });
   }
 
-  findCurrencyDisplayValue(currency: Currency) {
-    if(!currency?.name) return '';
-    return `${currency.symbol} ${currency.name}`;
+  ngOnInit(): void {
+    if(!this.taxGroupModeStore.itemsLoaded()) {
+      this.store.dispatch(taxGroupActions.loadTaxGroupModes({}));
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.currenciesEffect.destroy();
   }
 
   onTaxOptionSearch(value: string) {
-    this.filteredModes.set(this.modes().filter(option => option.toLowerCase().includes(value.toLowerCase())));
-  }
-
-  onTaxOptionSelected(taxOption: string) {
-    this.form().patchValue({ taxoption: taxOption });
+    this.filteredModes.set(
+      this.modes().filter(option =>
+        option.toLowerCase().includes(value.toLowerCase())
+      )
+    );
   }
 }
 

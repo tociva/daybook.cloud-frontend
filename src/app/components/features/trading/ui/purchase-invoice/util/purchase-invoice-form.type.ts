@@ -5,13 +5,7 @@ import { Item } from "../../../store/item/item.model";
 import { Tax } from "../../../store/tax";
 import { Address } from "../../../../../../util/types/address";
 
-export enum PurchaseInvoiceTaxDisplayModeType {
-  NON_TAXABLE = 'Non Taxable',
-  CGST_SGST = 'CGST SGST',
-  IGST = 'IGST',
-  CGST_SGST_CESS = 'CGST SGST With Cess',
-  IGST_CESS = 'IGST With Cess',
-}
+export type PurchaseInvoiceTaxDisplayModeType = 'show' | 'hide' | 'summary';
 
 export interface PurchaseItemTaxForm {
   rate: FormControl<string | null>;
@@ -19,7 +13,7 @@ export interface PurchaseItemTaxForm {
   amount: FormControl<string | null>;
   name: FormControl<string>;
   shortname: FormControl<string>;
-  tax: FormControl<Tax>;
+  tax: FormControl<Tax | null>;
 }
 
 export interface PurchaseItemForm {
@@ -35,7 +29,14 @@ export interface PurchaseItemForm {
   taxes: FormArray<FormGroup<PurchaseItemTaxForm>>;
   taxamount: FormControl<string | null>;
   grandtotal: FormControl<string | null>;
-  item: FormControl<Item>;
+  item: FormControl<Item | null>;
+}
+
+export interface PurchaseItemsDetailsForm {
+  showDiscount: FormControl<boolean>;
+  showDescription: FormControl<boolean>;
+  items: FormArray<FormGroup<PurchaseItemForm>>;
+  summary: FormGroup<PurchaseInvoiceSummaryForm>;
 }
 
 export type PurchaseInvoicePropertiesForm = {
@@ -43,8 +44,9 @@ export type PurchaseInvoicePropertiesForm = {
   date: FormControl<string>;
   duedate: FormControl<string>;
   journal: FormControl<string>;
-  currency: FormControl<Currency>;
   taxoption: FormControl<string>;
+  sourcestate: FormControl<string>;
+  currency: FormControl<Currency | null>;
 }
 
 export type PurchaseInvoicePropertiesFormValue = {
@@ -53,6 +55,7 @@ export type PurchaseInvoicePropertiesFormValue = {
   duedate: string;
   journal: string;
   currency: Currency;
+  sourcestate: string;
   taxoption: string;
 }
 
@@ -80,18 +83,14 @@ export type AddressGroup = {
 };
 
 export type PurchaseInvoiceVendorForm = {
-  vendor: FormControl<Vendor>;
+  vendor: FormControl<Vendor | null>;
   vendoraddress: FormGroup<AddressGroup>;
 }
 
 export type PurchaseInvoiceForm = {
-  taxDisplayMode: FormControl<PurchaseInvoiceTaxDisplayModeType>;
-  showDiscount: FormControl<boolean>;
-  showDescription: FormControl<boolean>;
   vendor: FormGroup<PurchaseInvoiceVendorForm>;
   properties: FormGroup<PurchaseInvoicePropertiesForm>;
-  items: FormArray<FormGroup<PurchaseItemForm>>;
-  summary: FormGroup<PurchaseInvoiceSummaryForm>;
+  itemsDetails: FormGroup<PurchaseItemsDetailsForm>;
 }
 
 export type PurchaseInvoiceSummaryFormValue = {
@@ -110,7 +109,7 @@ export type PurchaseInvoiceVendorFormValue = {
 }
 
 export interface PurchaseItemTaxFormValue {
-  rate: number;
+  rate: string;
   appliedto: number;
   amount: number;
   name: string;
@@ -135,13 +134,16 @@ export interface PurchaseItemFormValue {
   item: Item;
 }
 
-export type PurchaseInvoiceFormValue = {
-  taxDisplayMode: PurchaseInvoiceTaxDisplayModeType;
+export interface PurchaseItemsDetailsFormValue {
   showDiscount: boolean;
   showDescription: boolean;
-  vendor: PurchaseInvoiceVendorFormValue;
-  properties: PurchaseInvoicePropertiesFormValue;
   items: PurchaseItemFormValue[];
   summary: PurchaseInvoiceSummaryFormValue;
+}
+
+export type PurchaseInvoiceFormValue = {
+  vendor: PurchaseInvoiceVendorFormValue;
+  properties: PurchaseInvoicePropertiesFormValue;
+  itemsDetails: PurchaseItemsDetailsFormValue;
 }
 

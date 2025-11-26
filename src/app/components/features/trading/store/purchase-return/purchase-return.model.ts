@@ -9,7 +9,6 @@ export type PurchaseReturnSystemProperties = {
 } & Record<string, unknown>;
 
 export type PurchaseReturnCustomProperties = {
-  autoNumbering?: boolean;
   // Exchange rate
   fx?: number;
   // Amount in local currency
@@ -17,7 +16,7 @@ export type PurchaseReturnCustomProperties = {
   showdescription?: boolean;
   taxdisplaymode?: PurchaseReturnTaxDisplayModeType;
   taxoption?: string;
-  deliverystate?: string;
+  sourcestate?: string;
 } & Record<string, unknown>;
 
 export interface PurchaseReturnCU {

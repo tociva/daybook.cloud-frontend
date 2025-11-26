@@ -23,24 +23,22 @@ export type PurchaseInvoiceCustomProperties = {
   showdiscount?: boolean;
   showdescription?: boolean;
   taxdisplaymode?: PurchaseInvoiceTaxDisplayModeType;
-  usebillingforshipping?: boolean;
   taxoption?: string;
-  deliverystate?: string;
+  sourcestate?: string;
 } & Record<string, unknown>;
 
 export interface PurchaseInvoiceCU {
   number: string;
   date: string;        // ISO date (YYYY-MM-DD)
   duedate: string;     // ISO date (YYYY-MM-DD)
+  currencycode: string;
   itemtotal: number;
   discount?: number;
   subtotal: number;
   tax?: number;
   roundoff?: number;
   grandtotal: number;
-  currencycode: string;
-  billingaddress: Address;
-  shippingaddress: Address;
+  vendoraddress: Address;
   cprops?: PurchaseInvoiceCustomProperties;
   sprops?: PurchaseInvoiceSystemProperties;
   description?: string;

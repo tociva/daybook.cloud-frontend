@@ -21,10 +21,16 @@
         <div class="flex items-center justify-between mb-3">
           <h3 class="font-semibold text-sm mb-3 flex items-center gap-1">
             Vendor Address
+            @if (vendoraddressReadonly()) {
+            <ng-icon name="bootstrapPencil" class="w-4 h-4 cursor-pointer" (click)="onEditVendorAddress()"></ng-icon>
+            } @else {
+            <ng-icon name="bootstrapCheckLg" class="w-4 h-4 cursor-pointer" size="16"
+              (click)="onEditVendorAddress()"></ng-icon>
+            }
           </h3>
         </div>
         <dbc-address-form [group]="form().controls['vendoraddress']"
-          [readonly]="true">
+          [readonly]="vendoraddressReadonly()">
         </dbc-address-form>
       </div>
       </div>

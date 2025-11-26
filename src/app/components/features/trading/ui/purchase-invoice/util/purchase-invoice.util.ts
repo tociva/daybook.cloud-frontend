@@ -4,22 +4,29 @@ import { formatAmountToFraction, formatAmountToWords, toNumber } from "../../../
 import { convertToNodeDateFormat } from "../../../../../../util/date.util";
 import { PurchaseInvoiceItemRequest, PurchaseInvoiceItemTaxRequest, PurchaseInvoiceRequest } from "../../../store/purchase-invoice/purchase-invoice-request.type";
 import { PurchaseInvoice } from "../../../store/purchase-invoice/purchase-invoice.model";
-import { PurchaseInvoiceVendorFormValue, PurchaseInvoiceFormValue, PurchaseInvoicePropertiesFormValue, PurchaseInvoiceSummaryFormValue, PurchaseInvoiceTaxDisplayModeType, PurchaseItemFormValue, PurchaseItemTaxFormValue } from "./purchase-invoice-form.type";
+import { 
+  PurchaseInvoiceVendorFormValue, 
+  PurchaseInvoiceFormValue, 
+  PurchaseInvoicePropertiesFormValue, 
+  PurchaseInvoiceSummaryFormValue, 
+  PurchaseItemFormValue, 
+  PurchaseItemTaxFormValue 
+} from "./purchase-invoice-form.type";
 
 export const mapPurchaseItemTaxFormValueToRequest = (formValue: PurchaseItemTaxFormValue): PurchaseInvoiceItemTaxRequest => {
   const name = formValue.name;
   const shortname = formValue.shortname;
-  const rate = toNumber(formValue.rate);
+  const rate = toNumber(formValue.rate?.replace('%', ''));
   const appliedto = toNumber(formValue.appliedto);
   const amount = toNumber(formValue.amount);
-  const taxid = formValue.tax.id!;
+  const taxid = formValue.tax?.id;
   return {
     name,
     shortname,
     rate,
     appliedto,
     amount,
-    taxid,
+    ...(taxid ? { taxid } : {}),
   };
 };
 
@@ -38,7 +45,7 @@ export const mapPurchaseItemFormValueToRequest = (formValue: PurchaseItemFormVal
   const taxamount = toNumber(formValue.taxamount);
   const grandtotal = toNumber(formValue.grandtotal);
   const itemid = formValue.item.id!;
-  const taxes = formValue.taxes.map(tax => mapPurchaseItemTaxFormValueToRequest(tax));
+  const taxes = (formValue.taxes ?? []).map(tax => mapPurchaseItemTaxFormValueToRequest(tax));
   return {
     name,
     ...(description ? { description } : {}),
@@ -62,19 +69,20 @@ export const mapPurchaseInvoiceFormValueToRequest = (formValue: PurchaseInvoiceF
   const number = formValue.properties.number;
   const date = convertToNodeDateFormat(formValue.properties.date);
   const duedate = convertToNodeDateFormat(formValue.properties.duedate);
-  const itemtotal = toNumber(formValue.summary.itemtotal);
-  const discount = toNumber(formValue.summary.discount);
-  const subtotal = toNumber(formValue.summary.subtotal);
-  const tax = toNumber(formValue.summary.tax);
-  const roundoff = toNumber(formValue.summary.roundoff);
-  const grandtotal = toNumber(formValue.summary.grandtotal);
+  const itemtotal = toNumber(formValue.itemsDetails.summary.itemtotal);
+  const discount = toNumber(formValue.itemsDetails.summary.discount);
+  const subtotal = toNumber(formValue.itemsDetails.summary.subtotal);
+  const tax = toNumber(formValue.itemsDetails.summary.tax);
+  const roundoff = toNumber(formValue.itemsDetails.summary.roundoff);
+  const grandtotal = toNumber(formValue.itemsDetails.summary.grandtotal);
   const currencycode = formValue.properties.currency.code;
+  const vendoraddress = formValue.vendor.vendoraddress;
   const vendorid = formValue.vendor.vendor.id!;
   const taxoption = formValue.properties.taxoption;
-  const taxdisplaymode = formValue.taxDisplayMode;
-  const showdiscount = formValue.showDiscount;
-  const showdescription = formValue.showDescription;
-  const items = formValue.items.map((item, index) => mapPurchaseItemFormValueToRequest(item, index + 1));
+  const showdiscount = formValue.itemsDetails.showDiscount;
+  const showdescription = formValue.itemsDetails.showDescription;
+  const sourcestate = formValue.properties.sourcestate;
+  const items = formValue.itemsDetails.items.map((item, index) => mapPurchaseItemFormValueToRequest(item, index + 1));
   return {
     number,
     date,
@@ -86,45 +94,27 @@ export const mapPurchaseInvoiceFormValueToRequest = (formValue: PurchaseInvoiceF
     ...(roundoff ? { roundoff } : {}),
     grandtotal,
     currencycode,
+    vendoraddress,
     vendorid,
     items,
     cprops: {
-      taxdisplaymode,
       showdiscount,
       showdescription,
       taxoption,
+      sourcestate,
     },
   };
-};
-
-export const findTaxColumnCount = (taxDisplayMode: PurchaseInvoiceTaxDisplayModeType): number => {
-  if([PurchaseInvoiceTaxDisplayModeType.IGST].includes(taxDisplayMode)) {
-    return 1;
-  }else if([PurchaseInvoiceTaxDisplayModeType.CGST_SGST, PurchaseInvoiceTaxDisplayModeType.IGST_CESS].includes(taxDisplayMode)) {
-    return 2;
-  }else if([PurchaseInvoiceTaxDisplayModeType.CGST_SGST_CESS].includes(taxDisplayMode)) {
-    return 3;
-  }
-  return 0;
-}
-
-type Maybe<T> = T | null | undefined;
-
-const eqAddress = (a: any, b: any): boolean => {
-  if (!a || !b) return false;
-  const keys = ['line1','line2','city','state','postalCode','country'];
-  return keys.every(k => (a?.[k] ?? '') === (b?.[k] ?? ''));
 };
 
 const mapTaxes = (item: any): PurchaseItemTaxFormValue[] => {
   const taxes = Array.isArray(item?.taxes) ? item.taxes : [];
   return taxes.map((t: any): PurchaseItemTaxFormValue => ({
-    rate: toNumber(t?.rate),
+    rate: t?.rate ?? '',
     appliedto: toNumber(t?.appliedto),
     amount: toNumber(t?.amount),
     name: t?.name ?? '',
     shortname: t?.shortname ?? '',
-    tax: t?.tax,
+    tax: t?.tax, // keep original domain object
   }));
 };
 
@@ -142,13 +132,13 @@ const mapItem = (item: any, fractions: number): PurchaseItemFormValue => ({
   taxes: mapTaxes(item),
   taxamount: item?.taxamount ?? null,
   grandtotal: formatAmountToFraction(item?.grandtotal, fractions),
-  item: item?.item,
+  item: item?.item, // keep original reference
 });
 
 const mapVendorBlock = (inv: PurchaseInvoice): PurchaseInvoiceVendorFormValue => {
   return {
     vendor: inv.vendor,
-    vendoraddress: inv.vendor.address,
+    vendoraddress: inv.vendoraddress,
   };
 };
 
@@ -169,20 +159,23 @@ const mapProperties = (inv: PurchaseInvoice): PurchaseInvoicePropertiesFormValue
   number: inv.number,
   date: dayjs(inv.date).format(DEFAULT_NODE_DATE_FORMAT),
   duedate: dayjs(inv.duedate).format(DEFAULT_NODE_DATE_FORMAT),
-  currency: inv.currency,
+  currency: inv.currency ?? inv.vendor.currency,
   taxoption: inv?.cprops?.taxoption ?? 'Intra State',
+  sourcestate: inv?.cprops?.sourcestate ?? '',
   journal: inv?.sprops?.journal ?? '',
 });
 
+
 export function purchaseInvoiceModelToPurchaseInvoiceFormValue(inv: PurchaseInvoice): PurchaseInvoiceFormValue {
   return {
-    taxDisplayMode: inv?.cprops?.taxdisplaymode ?? PurchaseInvoiceTaxDisplayModeType.CGST_SGST,
-    showDiscount: inv?.cprops?.showdiscount ?? false,
-    showDescription: inv?.cprops?.showdescription ?? false,
     vendor: mapVendorBlock(inv),
     properties: mapProperties(inv),
-    items: Array.isArray(inv?.items) ? inv.items!.map(mapItem) : [],
-    summary: mapSummary(inv, inv?.currency?.minorunit ?? TWO),
+    itemsDetails: {
+      showDiscount: inv?.cprops?.showdiscount ?? false,
+      showDescription: inv?.cprops?.showdescription ?? false,
+      items: Array.isArray(inv?.items) ? inv.items!.map(mapItem) : [],
+      summary: mapSummary(inv, inv?.currency?.minorunit ?? TWO),
+    },
   };
 }
 

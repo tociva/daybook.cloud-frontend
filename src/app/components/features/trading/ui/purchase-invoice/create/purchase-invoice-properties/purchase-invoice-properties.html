@@ -17,20 +17,24 @@
         <input formControlName="duedate" type="date" appTextInput />
       </div>
       <div class="flex items-center gap-2 mb-2">
+        <label class="w-28 text-sm text-gray-700">Tax Option:</label>
+        <app-auto-complete formControlName="taxoption" [options]="filteredModes()"
+          placeholder="Search for a tax option" [required]="true" class="flex-1"
+          inputClass="flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 placeholder-gray-400 focus:outline-none focus:border-b-primary border-b-gray-300"
+          (onSearch)="onTaxOptionSearch($event)">
+        </app-auto-complete>
+      </div>
+      <div class="flex items-center gap-2 mb-2">
+        <label class="w-28 text-sm text-gray-700">Source State:</label>
+        <input formControlName="sourcestate" type="text" appTextInput />
+      </div>
+      <div class="flex items-center gap-2 mb-2">
         <label class="w-28 text-sm text-gray-700">Currency:</label>
         <app-auto-complete formControlName="currency" [options]="currencies()"
           placeholder="Search for a currency" [required]="true" class="flex-1"
           inputClass="flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 placeholder-gray-400 focus:outline-none focus:border-b-primary border-b-gray-300"
           [optionDisplayValue]="findCurrencyDisplayValue" [inputDisplayValue]="findCurrencyDisplayValue"
           (onSearch)="onCurrencySearch($event)" (onOptionSelected)="onCurrencySelected($event)">
-        </app-auto-complete>
-      </div>
-      <div class="flex items-center gap-2 mb-2">
-        <label class="w-28 text-sm text-gray-700">Tax Option:</label>
-        <app-auto-complete formControlName="taxoption" [options]="filteredModes()"
-          placeholder="Search for a tax option" [required]="true" class="flex-1"
-          inputClass="flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 placeholder-gray-400 focus:outline-none focus:border-b-primary border-b-gray-300"
-          (onSearch)="onTaxOptionSearch($event)">
         </app-auto-complete>
       </div>
     </div>
