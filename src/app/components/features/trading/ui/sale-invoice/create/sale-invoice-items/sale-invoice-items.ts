@@ -64,7 +64,7 @@ const BASE_COLUMNS: ReadonlyArray<Column> = [
   templateUrl: './sale-invoice-items.html',
   styleUrl: './sale-invoice-items.css',
 })
-export class SaleInvoiceItems implements OnInit {
+export class SaleInvoiceItems implements OnInit, OnDestroy {
   
   // required signal input from parent
   readonly form = input.required<FormGroup<SaleItemsDetailsForm>>();
@@ -295,7 +295,7 @@ export class SaleInvoiceItems implements OnInit {
 
   }
 
-  onngDestroy() {
+  ngOnDestroy() {
     this.onTaxOptionChangeEffect.destroy();
     this.onShowDiscountChangeEffect.destroy();
   }

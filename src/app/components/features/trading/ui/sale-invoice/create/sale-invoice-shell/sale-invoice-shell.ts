@@ -1,3 +1,4 @@
+import { NgClass } from '@angular/common';
 import {
   Component,
   effect,
@@ -6,17 +7,22 @@ import {
 } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Actions, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import dayjs from 'dayjs';
 import { Subscription, tap } from 'rxjs';
 import { DEFAULT_CURRENCY, DEFAULT_NODE_DATE_FORMAT, TWO } from '../../../../../../../util/constants';
 import { formatAmountToFraction } from '../../../../../../../util/currency.util';
+import { CancelButton } from '../../../../../../shared/cancel-button/cancel-button';
 import { DeleteButton } from '../../../../../../shared/delete-button/delete-button';
 import { ItemNotFound } from '../../../../../../shared/item-not-found/item-not-found';
 import { SkeltonLoader } from '../../../../../../shared/skelton-loader/skelton-loader';
 import { currencyActions } from '../../../../../../shared/store/currency/currency.action';
+import { Currency } from '../../../../../../shared/store/currency/currency.model';
 import { CurrencyStore } from '../../../../../../shared/store/currency/currency.store';
+import { ToastStore } from '../../../../../../shared/store/toast/toast.store';
 import { Customer } from '../../../../store/customer/customer.model';
+import { SaleInvoiceRequest } from '../../../../store/sale-invoice/sale-invoice-request.type';
 import { saleInvoiceActions } from '../../../../store/sale-invoice/sale-invoice.actions';
 import { SaleInvoiceStore } from '../../../../store/sale-invoice/sale-invoice.store';
 import { SaleInvoiceFormService } from '../../util/sale-invoice-form.service';
@@ -31,12 +37,6 @@ import { mapSaleInvoiceFormValueToRequest, saleInvoiceModelToSaleInvoiceFormValu
 import { SaleInvoiceCustomer } from '../sale-invoice-customer/sale-invoice-customer';
 import { SaleInvoiceItems } from '../sale-invoice-items/sale-invoice-items';
 import { SaleInvoiceProperties } from '../sale-invoice-properties/sale-invoice-properties';
-import { Currency } from '../../../../../../shared/store/currency/currency.model';
-import { CancelButton } from '../../../../../../shared/cancel-button/cancel-button';
-import { NgClass } from '@angular/common';
-import { SaleInvoiceRequest } from '../../../../store/sale-invoice/sale-invoice-request.type';
-import { ToastStore } from '../../../../../../shared/store/toast/toast.store';
-import { Actions, ofType } from '@ngrx/effects';
 
 @Component({
   selector: 'app-sale-invoice-shell',
@@ -57,7 +57,6 @@ import { Actions, ofType } from '@ngrx/effects';
 export class SaleInvoiceShell {
 
   private readonly route = inject(ActivatedRoute);
-  private readonly itemId = signal<string | null>(null);
   private readonly store = inject(Store);
   private readonly saleInvoiceFormService = inject(SaleInvoiceFormService);
   private readonly currencyStore = inject(CurrencyStore);
@@ -65,11 +64,14 @@ export class SaleInvoiceShell {
   private readonly actions$ = inject(Actions);
   private readonly router = inject(Router);
   
+  private itemId: string | null = null;
+  
   protected readonly saleInvoiceStore = inject(SaleInvoiceStore);
   protected readonly currency = signal<Currency>(DEFAULT_CURRENCY);
   protected readonly title = signal<string>('Create New Sale Invoice');
-  protected readonly mode = signal<'create' | 'edit' | 'delete'>('create');
   protected readonly loading = signal<boolean>(true);
+  
+  protected mode: 'create' | 'edit' | 'delete' = 'create';
   protected form!: FormGroup<SaleInvoiceForm>;
   protected submitting = signal<boolean>(false);
   readonly deleteSuccessAction = saleInvoiceActions.deleteSaleInvoiceSuccess;
@@ -83,16 +85,16 @@ export class SaleInvoiceShell {
   private loadSaleInvoiceById() {
     const itemId = this.route.snapshot.paramMap.get('id') || null;
     if (itemId) {
-      this.itemId.set(itemId);
+      this.itemId = itemId;
       this.loading.set(true);
       this.store.dispatch(
         saleInvoiceActions.loadSaleInvoiceById({
-          id: this.itemId()!,
+          id: this.itemId!,
           query: {
             includes: [
               'currency',
               'customer',
-              'items.item',
+              'items.item.category.taxgroup',
               'items.taxes.tax',
             ],
           },
@@ -166,19 +168,19 @@ export class SaleInvoiceShell {
 
   private readonly loadErrorEffectRef = effect(() => {
     const error = this.saleInvoiceStore.error();
-    if (error && this.mode() === 'edit') {
+    if (error && this.mode === 'edit') {
       this.loading.set(false);
     }
   });
 
   private loadSaleInvoiceSuccessEffect = effect(() => {
-    const mode = this.mode();
-    if (mode !== 'edit' && mode !== 'delete') {
+    if (this.mode !== 'edit' && this.mode !== 'delete') {
       return; // ⬅️ don't touch the form in create mode
     }
 
     const invoice = this.saleInvoiceStore.selectedItem();
-    if (!invoice) return;
+    // If the invoice is not the same as the one we are editing, return
+    if (!invoice || invoice.id !== this.itemId) return;
 
     const formValue = saleInvoiceModelToSaleInvoiceFormValue(invoice);
     const { itemsDetails, customer, properties } = formValue;
@@ -198,11 +200,12 @@ export class SaleInvoiceShell {
     this.itemsDetailsGroup().patchValue({
       showDiscount: itemsDetails.showDiscount,
       showDescription: itemsDetails.showDescription,
-    });
-    const itemsArray = this.form.controls.itemsDetails.controls.items;
+    }, { emitEvent: false });
+    const itemsArray = this.itemsDetailsGroup().controls.items;
+    itemsArray.disable({ emitEvent: false });
     itemsArray.clear();
     const currency = this.currency();
-    itemsDetails.items.forEach((item) => {
+    for(const item of itemsDetails.items) {
       
       const itemRowForm = this.saleInvoiceFormService.buildSaleItemForm(item.taxes.length);
       const minorunit = currency?.minorunit ?? TWO;
@@ -231,7 +234,7 @@ export class SaleInvoiceShell {
         }, { emitEvent: false });
       }
       itemsArray.push(itemRowForm);
-    });
+    }
     this.loading.set(false);
   });
 
@@ -315,12 +318,12 @@ export class SaleInvoiceShell {
       this.loading.set(false);
     } else if (lastSegment === 'edit') {
       this.title.set('Edit Sale Invoice');
-      this.mode.set('edit');
+      this.mode = 'edit';
       this.loading.set(false);
       this.loadSaleInvoiceById();
     } else if (lastSegment === 'delete') {
       this.title.set('Delete Sale Invoice');
-      this.mode.set('delete');
+      this.mode = 'delete';
       this.loading.set(false);
       this.form.disable({ emitEvent: false });
       this.loadSaleInvoiceById();
@@ -359,15 +362,15 @@ export class SaleInvoiceShell {
       this.toastStore.show({ title: 'Error', message: 'Some items are missing required fields' }, 'error');
       return;
     }
-    if(this.mode() === 'create') {
+    if(this.mode === 'create') {
       this.store.dispatch(saleInvoiceActions.createSaleInvoice({ saleInvoice: saleInvoiceRequest }));
-    } else if(this.mode() === 'edit') {
-      this.store.dispatch(saleInvoiceActions.updateSaleInvoice({ id: this.itemId()!, saleInvoice: saleInvoiceRequest }));
+    } else if(this.mode === 'edit') {
+      this.store.dispatch(saleInvoiceActions.updateSaleInvoice({ id: this.itemId!, saleInvoice: saleInvoiceRequest }));
     }
   }
 
   handleDelete = (): void => {
-    this.store.dispatch(saleInvoiceActions.deleteSaleInvoice({ id: this.itemId()! }));
+    this.store.dispatch(saleInvoiceActions.deleteSaleInvoice({ id: this.itemId! }));
   };
 
 }

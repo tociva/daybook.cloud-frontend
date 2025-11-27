@@ -115,7 +115,7 @@ const mapTaxes = (item: any): SaleItemTaxFormValue[] => {
   return taxes.map((t: any): SaleItemTaxFormValue => ({
     rate: t?.rate ?? '',
     appliedto: toNumber(t?.appliedto),
-    amount: toNumber(t?.amount),
+    amount: t?.amount,
     name: t?.name ?? '',
     shortname: t?.shortname ?? '',
     tax: t?.tax, // keep original domain object

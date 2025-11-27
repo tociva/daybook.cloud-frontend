@@ -113,7 +113,7 @@ export type SaleInvoiceCustomerFormValue = {
 export interface SaleItemTaxFormValue {
   rate: string;
   appliedto: number;
-  amount: number;
+  amount: string;
   name: string;
   shortname: string;
   tax: Tax;
