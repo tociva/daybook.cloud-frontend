@@ -8,7 +8,9 @@ export const MAIN_LAYOUT_ROUTES: Routes = [
     children: [
       {
         path: '',
-        loadComponent: () => import('../features/home/home.component').then(m => m.HomeComponent),
+        // loadComponent: () => import('../features/home/home.component').then(m => m.HomeComponent),
+        redirectTo: 'dashboard',
+        pathMatch: 'full',
       },
       {
         path: 'dashboard',

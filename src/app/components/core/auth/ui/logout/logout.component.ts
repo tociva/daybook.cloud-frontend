@@ -18,7 +18,7 @@ export class LogoutComponent {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
-  readonly store = inject(Store);
+  private readonly store = inject(Store);
 
   // 1) Read the raw ?error=... param reactively
   readonly errorRaw = toSignal(
@@ -60,6 +60,7 @@ export class LogoutComponent {
   }
 
   loginAganin() {
-    this.store.dispatch(authActions.login({ returnUri: '/app' }));
+    // this.store.dispatch(authActions.login({ returnUri: '/app' }));
+    this.router.navigateByUrl('/app/dashboard');
   }
 }

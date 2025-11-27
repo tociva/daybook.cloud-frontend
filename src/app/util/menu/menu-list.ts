@@ -2,7 +2,7 @@ import { MenuNode } from "./menu-node";
 
 export const menuList: MenuNode[] = [
     {
-      path: '/dashboard',
+      path: '/app/dashboard',
       name: 'Dashboard',
     },
     {

@@ -1,11 +1,10 @@
-import { Component, computed, effect, inject } from '@angular/core';
+import { Component, computed, effect, inject, OnDestroy } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { LoadingScreenComponent } from '../../../../shared/loading-screen/loading-screen.component';
 import { authActions } from '../../store/auth/auth.actions';
-import { ConfigStore } from '../../store/config/config.store';
 import { AuthStatus } from '../../store/auth/auth.model';
-import { configActions } from '../../store/config/config.actions';
 import { AuthStore } from '../../store/auth/auth.store';
+import { configActions } from '../../store/config/config.actions';
 
 @Component({
   selector: 'app-callback',
@@ -13,17 +12,17 @@ import { AuthStore } from '../../store/auth/auth.store';
   templateUrl: './callback.component.html',
   styleUrl: './callback.component.css'
 })
-export class CallbackComponent {
-  private readonly configStore = inject(ConfigStore);
+export class CallbackComponent implements OnDestroy {
+
   private readonly store = inject(Store);
 
 
-private readonly authStore = inject(AuthStore);
+  private readonly authStore = inject(AuthStore);
 
-private readonly statusSig = computed(
-  () => this.authStore.status(),
-  { equal: Object.is }
-);
+  private readonly statusSig = computed(
+    () => this.authStore.status(),
+    { equal: Object.is }
+  );
   
   private readonly authStatusChangeEffect = effect(() => {
     const status = this.statusSig(); // re-runs only when status actually changes
@@ -44,5 +43,8 @@ private readonly statusSig = computed(
     }
   });
 
+  ngOnDestroy(): void {
+    this.authStatusChangeEffect.destroy();
+  }
 
 }
