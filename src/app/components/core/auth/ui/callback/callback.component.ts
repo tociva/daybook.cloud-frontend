@@ -34,12 +34,12 @@ export class CallbackComponent implements OnDestroy {
       case AuthStatus.CONFIG_LOADED:
         this.store.dispatch(authActions.initialize());
         break;
-        case AuthStatus.USER_MANAGER_INITIALIZED:
-        
-        queueMicrotask(() => {
-          this.store.dispatch(authActions.handleCallback());
-        });
-        break;
+      case AuthStatus.USER_MANAGER_INITIALIZED:
+      
+      queueMicrotask(() => {
+        this.store.dispatch(authActions.handleCallback());
+      });
+      break;
     }
   });
 

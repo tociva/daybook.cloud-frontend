@@ -7,6 +7,7 @@ import { AuthStore } from '../../store/auth/auth.store';
 import { configActions } from '../../store/config/config.actions';
 import { userSessionActions } from '../../store/user-session/user-session.actions';
 import { UserSessionStore } from '../../store/user-session/user-session.store';
+import { AuthValidateService } from '../../auth-validate.service';
 
 
 @Component({
@@ -20,6 +21,7 @@ export class Validate {
 private readonly store = inject(Store);
 private readonly authStore = inject(AuthStore);
 private readonly userSessionStore = inject(UserSessionStore);
+private readonly authValidateService = inject(AuthValidateService);
 
 private readonly statusSig = computed(
   () => this.authStore.status(),
@@ -28,37 +30,7 @@ private readonly statusSig = computed(
 
   private readonly authStatusChangeEffect = effect(() => {
     const status = this.statusSig(); // re-runs only when status actually changes
-
-    switch(status) {
-      case AuthStatus.UN_INITIALIZED:
-        this.store.dispatch(configActions.load());
-        break;
-      case AuthStatus.CONFIG_LOADED:
-        this.store.dispatch(authActions.initialize());
-        break;
-      case AuthStatus.USER_MANAGER_INITIALIZED:
-        this.store.dispatch(authActions.hydration());
-        break;
-      case AuthStatus.HYDRATED_VALID_USER:
-        this.store.dispatch(userSessionActions.createUserSession());
-        break;
-      case AuthStatus.HYDRATED_NO_USER:
-      case AuthStatus.HYDRATED_EXPIRED_USER:
-        case AuthStatus.HYDRATED_ERROR:
-        this.store.dispatch(authActions.performRedirect({ returnUri: '/auth/login' }));
-        break;
-      case AuthStatus.UNAUTHENTICATED:
-        this.store.dispatch(authActions.logoutHydra());
-        break;
-      case AuthStatus.AUTHENTICATED_VALID_USER:
-        const session = this.userSessionStore.session();
-        if(!session || !session.ownorgs || session.ownorgs.length === 0) {
-          this.store.dispatch(authActions.performRedirect({ returnUri: '/app/management/organization/create' }));
-          return;
-        }
-        this.store.dispatch(authActions.performRedirect({ returnUri: this.authStore.returnUri() ?? '/app/dashboard' }));
-        break;
-    }
+    this.authValidateService.doAuthValidation(status);
   });
 
   ngOnDestroy(): void {
