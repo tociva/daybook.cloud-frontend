@@ -57,7 +57,6 @@ import { Actions, ofType } from '@ngrx/effects';
 export class PurchaseInvoiceShell {
 
   private readonly route = inject(ActivatedRoute);
-  private readonly itemId = signal<string | null>(null);
   private readonly store = inject(Store);
   private readonly purchaseInvoiceFormService = inject(PurchaseInvoiceFormService);
   private readonly currencyStore = inject(CurrencyStore);
@@ -65,11 +64,14 @@ export class PurchaseInvoiceShell {
   private readonly actions$ = inject(Actions);
   private readonly router = inject(Router);
   
+  private itemId: string | null = null;
+  
   protected readonly purchaseInvoiceStore = inject(PurchaseInvoiceStore);
   protected readonly currency = signal<Currency>(DEFAULT_CURRENCY);
   protected readonly title = signal<string>('Create New Purchase Invoice');
-  protected readonly mode = signal<'create' | 'edit' | 'delete'>('create');
   protected readonly loading = signal<boolean>(true);
+  
+  protected mode: 'create' | 'edit' | 'delete' = 'create';
   protected form!: FormGroup<PurchaseInvoiceForm>;
   protected submitting = signal<boolean>(false);
   readonly deleteSuccessAction = purchaseInvoiceActions.deletePurchaseInvoiceSuccess;
@@ -83,16 +85,16 @@ export class PurchaseInvoiceShell {
   private loadPurchaseInvoiceById() {
     const itemId = this.route.snapshot.paramMap.get('id') || null;
     if (itemId) {
-      this.itemId.set(itemId);
+      this.itemId = itemId;
       this.loading.set(true);
       this.store.dispatch(
         purchaseInvoiceActions.loadPurchaseInvoiceById({
-          id: this.itemId()!,
+          id: this.itemId!,
           query: {
             includes: [
               'currency',
               'vendor',
-              'items.item',
+              'items.item.category.taxgroup',
               'items.taxes.tax',
             ],
           },
@@ -166,19 +168,19 @@ export class PurchaseInvoiceShell {
 
   private readonly loadErrorEffectRef = effect(() => {
     const error = this.purchaseInvoiceStore.error();
-    if (error && this.mode() === 'edit') {
+    if (error && this.mode === 'edit') {
       this.loading.set(false);
     }
   });
 
   private loadPurchaseInvoiceSuccessEffect = effect(() => {
-    const mode = this.mode();
-    if (mode !== 'edit' && mode !== 'delete') {
+    if (this.mode !== 'edit' && this.mode !== 'delete') {
       return; // ⬅️ don't touch the form in create mode
     }
 
     const invoice = this.purchaseInvoiceStore.selectedItem();
-    if (!invoice) return;
+    // If the invoice is not the same as the one we are editing, return
+    if (!invoice || invoice.id !== this.itemId) return;
 
     const formValue = purchaseInvoiceModelToPurchaseInvoiceFormValue(invoice);
     const { itemsDetails, vendor, properties } = formValue;
@@ -198,11 +200,12 @@ export class PurchaseInvoiceShell {
     this.itemsDetailsGroup().patchValue({
       showDiscount: itemsDetails.showDiscount,
       showDescription: itemsDetails.showDescription,
-    });
-    const itemsArray = this.form.controls.itemsDetails.controls.items;
+    }, { emitEvent: false });
+    const itemsArray = this.itemsDetailsGroup().controls.items;
+    itemsArray.disable({ emitEvent: false });
     itemsArray.clear();
     const currency = this.currency();
-    itemsDetails.items.forEach((item) => {
+    for(const item of itemsDetails.items) {
       
       const itemRowForm = this.purchaseInvoiceFormService.buildPurchaseItemForm(item.taxes.length);
       const minorunit = currency?.minorunit ?? TWO;
@@ -231,7 +234,7 @@ export class PurchaseInvoiceShell {
         }, { emitEvent: false });
       }
       itemsArray.push(itemRowForm);
-    });
+    }
     this.loading.set(false);
   });
 
@@ -315,12 +318,12 @@ export class PurchaseInvoiceShell {
       this.loading.set(false);
     } else if (lastSegment === 'edit') {
       this.title.set('Edit Purchase Invoice');
-      this.mode.set('edit');
+      this.mode = 'edit';
       this.loading.set(false);
       this.loadPurchaseInvoiceById();
     } else if (lastSegment === 'delete') {
       this.title.set('Delete Purchase Invoice');
-      this.mode.set('delete');
+      this.mode = 'delete';
       this.loading.set(false);
       this.form.disable({ emitEvent: false });
       this.loadPurchaseInvoiceById();
@@ -359,15 +362,15 @@ export class PurchaseInvoiceShell {
       this.toastStore.show({ title: 'Error', message: 'Some items are missing required fields' }, 'error');
       return;
     }
-    if(this.mode() === 'create') {
+    if(this.mode === 'create') {
       this.store.dispatch(purchaseInvoiceActions.createPurchaseInvoice({ purchaseInvoice: purchaseInvoiceRequest }));
-    } else if(this.mode() === 'edit') {
-      this.store.dispatch(purchaseInvoiceActions.updatePurchaseInvoice({ id: this.itemId()!, purchaseInvoice: purchaseInvoiceRequest }));
+    } else if(this.mode === 'edit') {
+      this.store.dispatch(purchaseInvoiceActions.updatePurchaseInvoice({ id: this.itemId!, purchaseInvoice: purchaseInvoiceRequest }));
     }
   }
 
   handleDelete = (): void => {
-    this.store.dispatch(purchaseInvoiceActions.deletePurchaseInvoice({ id: this.itemId()! }));
+    this.store.dispatch(purchaseInvoiceActions.deletePurchaseInvoice({ id: this.itemId! }));
   };
 
 }
