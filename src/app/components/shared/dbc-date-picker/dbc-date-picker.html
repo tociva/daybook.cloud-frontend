@@ -1,0 +1,119 @@
+
+<div class="relative w-full inline-block">
+  <div class="relative w-full">
+    <input type="text" maxlength="2" placeholder="dd"  [value]="inputDay()" (input)="inputDay.set($any($event.target).value)" class="w-10 text-center text-sm focus:outline-none"/>
+    <span class="text-gray-400">/</span>
+    <input type="text" maxlength="2" placeholder="mm" [value]="inputMonth()" (input)="inputMonth.set($any($event.target).value)" class="w-10 text-center text-sm focus:outline-none"/>
+    <span class="text-gray-400">/</span>
+    <input type="text" maxlength="4" placeholder="yyyy" [value]="inputYear()" (input)="inputYear.set($any($event.target).value)" class="w-10 text-center text-sm focus:outline-none"/>
+
+
+    <span
+      class="absolute right-1 top-1/2 -translate-y-1/2 cursor-pointer
+             text-gray-400 hover:text-blue-600"
+      (click)="toggleCalendar()"
+    >
+      📅
+    </span>
+  </div>
+
+
+@if (showCalendar()) {
+
+<!-- BACKDROP -->
+<div
+      class="absolute top-full mt-2 right-0 z-50"
+      (click)="cancel()"
+      
+    >
+  <!-- POPUP -->
+  <div
+    class="bg-background rounded-sm shadow-2xl overflow-hidden h-65 w-[23rem] flex z-1"
+    (click)="$event.stopPropagation()"
+  >
+
+    <!-- MONTH COLUMN -->
+    <div class="w-15 bg-primary text-white flex flex-col py-5 items-center">
+      <div class="flex flex-col gap-[1.5px] text-xs">
+        @for (m of months; let i = $index;track $index) {
+        <div
+          class="px-1 py-[0.5px] rounded cursor-pointer hover:bg-white/20"
+          [class.bg-white]="i === currentMonth()"
+          [class.text-blue-700]="i === currentMonth()"
+          (click)="pickMonth(i)"
+        >
+          {{ m }}
+        </div>
+        }
+      </div>
+    </div>
+
+    <!-- CENTER CALENDAR -->
+    <div class="flex-1 p-2">
+      <div class="text-center m-1">
+        <h2 class="text-base">
+          {{ draftDate() ? draftDate()!.toDateString() : 'Select Date' }}
+        </h2>
+      </div>
+
+      <!-- WEEK HEADER -->
+      <div class="grid grid-cols-7 text-[0.65rem] text-gray-500 text-center mb-1">
+        <div>Sun</div><div>Mon</div><div>Tue</div>
+        <div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+      </div>
+
+      <!-- DAYS -->
+      <div class="grid grid-cols-7 text-xs">
+        @for (d of calendarDays(); track $index) {
+        <div
+          class="h-7 w-10 flex items-center justify-center cursor-pointer transition"
+          [class.bg-primary]="isToday(d)"
+          [class.text-white]="isToday(d)"
+          [class.text-primary-color-hover]="isSelected(d)"
+          [class.font-bold]="isSelected(d)"
+          (click)="pickDay(d)"
+        >
+          {{ d }}
+        </div>
+        }
+      </div>
+
+      <!-- ACTIONS -->
+      <div class="flex items-center text-xs mt-3">
+        <span
+          class="text-info-hover cursor-pointer hover:underline"
+          (click)="selectToday()"
+        >
+          Today
+        </span>
+
+        <div class="ml-auto flex gap-3">
+          <span class="text-danger cursor-pointer" (click)="cancel()">Cancel</span>
+          <span class="text-success cursor-pointer" (click)="confirm()">Confirm</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- YEAR COLUMN -->
+    <div class="w-15 bg-primary flex flex-col items-center py-2 text-white">
+      <button (click)="scrollYearList(-50)" class="text-xs hover:bg-white/20 rounded">▲</button>
+
+      <div #yearList class="h-55 overflow-y-scroll no-scrollbar mt-1">
+        @for (y of yearOptions; track $index) {
+        <div
+          class="text-xs py-[2px] px-1 cursor-pointer hover:bg-white/20 rounded"
+          [class.bg-white]="y === currentYear()"
+          [class.text-blue-700]="y === currentYear()"
+          [class.font-bold]="y === currentYear()"
+          (click)="pickYear(y)"
+        >
+          {{ y }}
+        </div>
+        }
+      </div>
+
+      <button (click)="scrollYearList(50)" class="text-xs px-2 py-1 mt-1 hover:bg-white/20 rounded transition">▼</button>
+    </div>
+  </div>
+</div>
+}

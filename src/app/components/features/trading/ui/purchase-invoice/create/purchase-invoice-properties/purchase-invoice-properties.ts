@@ -16,11 +16,12 @@ import { CurrencyStore } from '../../../../../../shared/store/currency/currency.
 import { taxGroupActions } from '../../../../store/tax-group/tax-group.actions';
 import { TaxGroupModeStore } from '../../../../store/tax-group/tax-group.store';
 import { PurchaseInvoicePropertiesForm } from '../../util/purchase-invoice-form.type';
+import { DbcDatePicker } from '../../../../../../shared/dbc-date-picker/dbc-date-picker';
 
 @Component({
   selector: 'app-purchase-invoice-properties',
   standalone: true,
-  imports: [ReactiveFormsModule, AutoComplete, TextInputDirective, DbcSwitch],
+  imports: [ReactiveFormsModule, AutoComplete, TextInputDirective, DbcSwitch,DbcDatePicker],
   templateUrl: './purchase-invoice-properties.html',
   styleUrl: './purchase-invoice-properties.css'
 })

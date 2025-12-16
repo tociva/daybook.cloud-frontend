@@ -19,11 +19,12 @@ import { SaleInvoicePropertiesForm } from '../../util/sale-invoice-form.type';
 import { CurrencyStore } from '../../../../../../shared/store/currency/currency.store';
 import { currencyActions } from '../../../../../../shared/store/currency/currency.action';
 import { Currency } from '../../../../../../shared/store/currency/currency.model';
+import { DbcDatePicker } from '../../../../../../shared/dbc-date-picker/dbc-date-picker';
 
 @Component({
   selector: 'app-sale-invoice-properties',
   standalone: true,
-  imports: [ReactiveFormsModule, AutoComplete, TextInputDirective, DbcSwitch],
+  imports: [ReactiveFormsModule, AutoComplete, TextInputDirective, DbcSwitch,DbcDatePicker],
   templateUrl: './sale-invoice-properties.html',
   styleUrl: './sale-invoice-properties.css'
 })
