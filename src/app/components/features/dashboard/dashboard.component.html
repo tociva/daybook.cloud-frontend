@@ -1,1 +1,190 @@
-<p>dashboard works!</p>
+<div class="min-h-screen bg-white flex items-center justify-center px-4 py-8 text-slate-900">
+  <div class="w-full max-w-3xl rounded-xl border border-slate-200 shadow-sm bg-white px-8 py-8 md:px-12 md:py-10">
+<!-- Print Button -->
+<div class="w-full flex justify-end mb-4 print:hidden">
+  <button
+    (click)="printSection()"
+    class="px-4 py-1 text-sm rounded-md border border-slate-300 text-[#0b2344] hover:bg-slate-100 transition"
+  >
+    Print
+  </button>
+</div>
+<div id="print-area">
+
+    <!-- Header / Logo -->
+    <header class="flex flex-col items-center text-center mb-10">
+      <div class="mb-3">
+        <app-logo-block class="scale-50"></app-logo-block>
+      </div>
+
+      <h1 class="text-2xl md:text-3xl font-semibold tracking-tight text-[#0b2344]">
+        Finance Management Application
+      </h1>
+      <p class="mt-1 text-sm text-slate-500">
+        Built by Tociva Private Limited
+      </p>
+
+      <div class="mt-4 inline-flex items-center gap-2 text-xs md:text-sm text-slate-500">
+        <span class="px-3 py-1 rounded-full bg-slate-100 border border-slate-200">
+          Accountant-first finance platform
+        </span>
+        <span class="hidden md:inline text-slate-300">•</span>
+        <span class="hidden md:inline">Founder: Prince Francis</span>
+      </div>
+    </header>
+
+    <!-- Intro -->
+    <section class="mb-10">
+      <p class="text-sm md:text-base leading-relaxed">
+        Daybook.Cloud helps accountants and small businesses manage
+        <strong>GST data</strong>, <strong>bank statements</strong>, and
+        <strong>journals</strong> with a clean, workflow-driven interface that feels natural
+        for daily bookkeeping.
+      </p>
+    </section>
+
+    <!-- Problem -->
+    <section class="mb-10 border-t border-slate-100 pt-6">
+      <h2 class="text-sm font-semibold uppercase tracking-[0.12em] text-[#0b2344] mb-2">
+        The Problem
+      </h2>
+      <div class="h-1 w-10 rounded-full bg-[#0b2344] mb-4"></div>
+
+      <ul class="list-disc list-inside space-y-2 text-xs md:text-sm leading-relaxed">
+        <li>SMEs and accountants spend hours manually posting invoices, journals, and bank entries.</li>
+        <li>GST data must be downloaded from the portal and then manually converted into invoices.</li>
+        <li>Bank statements require manual categorisation into receipts and payments.</li>
+        <li>Trading and inventory data needs to be re-entered to generate journals.</li>
+        <li>Existing tools are powerful but complex, requiring significant training.</li>
+      </ul>
+    </section>
+
+    <!-- Solution -->
+    <section class="mb-10 border-t border-slate-100 pt-6">
+      <h2 class="text-sm font-semibold uppercase tracking-[0.12em] text-[#0b2344] mb-2">
+        Our Solution
+      </h2>
+      <div class="h-1 w-10 rounded-full bg-[#0b2344] mb-4"></div>
+
+      <p class="text-xs md:text-sm mb-2 leading-relaxed">
+        Daybook.Cloud is built around simplicity and accountant-friendly workflows.
+      </p>
+
+      <ul class="list-disc list-inside space-y-2 text-xs md:text-sm">
+        <li>Convert GST-portal downloads into clean, usable invoices.</li>
+        <li>Upload bank statements and instantly create receipts & payments.</li>
+        <li>Use trading and inventory data to auto-generate journals.</li>
+        <li>Zero onboarding — auditors could operate the app without any training.</li>
+      </ul>
+    </section>
+
+    <!-- Traction -->
+    <section class="mb-10 border-t border-slate-100 pt-6">
+      <h2 class="text-sm font-semibold uppercase tracking-[0.12em] text-[#0b2344] mb-2">
+        Traction
+      </h2>
+      <div class="h-1 w-10 rounded-full bg-[#0b2344] mb-4"></div>
+
+      <ul class="list-disc list-inside space-y-2 text-xs md:text-sm leading-relaxed">
+        <li>Actively used in real accounting workflows for <strong>two companies</strong>.</li>
+        <li>An external auditor operated the application without training — strong UX validation.</li>
+        <li>Real GST, bank, and journal data processed in daily use.</li>
+        <li>Early proof that the product is intuitive and ready for professional environments.</li>
+      </ul>
+    </section>
+
+    <!-- Current Feature Snapshot -->
+    <section class="mb-10 border-t border-slate-100 pt-6">
+      <h2 class="text-sm font-semibold uppercase tracking-[0.12em] text-[#0b2344] mb-2">
+        Current Feature Snapshot
+      </h2>
+      <div class="h-1 w-10 rounded-full bg-[#0b2344] mb-4"></div>
+
+      <ul class="list-disc list-inside space-y-2 text-xs md:text-sm leading-relaxed">
+        <li>Import data downloaded from the GST portal.</li>
+        <li>Monthly GST reconciliation: <strong>GSTR-2B vs GSTR-1</strong>.</li>
+        <li>Upload bank statements → create receipts & payments.</li>
+        <li>Create journals from trading and inventory data.</li>
+        <li>Generate invoices using custom invoice templates.</li>
+        <li><strong>Multi-currency support</strong> for invoices and accounting.</li>
+      </ul>
+    </section>
+
+    <!-- Technology -->
+    <section class="mb-10 border-t border-slate-100 pt-6">
+      <h2 class="text-sm font-semibold uppercase tracking-[0.12em] text-[#0b2344] mb-2">
+        Technology
+      </h2>
+      <div class="h-1 w-10 rounded-full bg-[#0b2344] mb-4"></div>
+
+      <ul class="list-disc list-inside space-y-2 text-xs md:text-sm leading-relaxed">
+        <li>Built using reliable <strong>open-source technologies</strong> to minimize development and infrastructure costs.</li>
+        <li>Architecture designed for scalability with minimal operational overhead.</li>
+        <li>Planned integration of our own <strong>open-source AI model</strong> for GST automation, bank categorization, and journal intelligence — ensuring zero token cost and full data privacy.</li>
+        <li>System supports offline-friendly and high-performance data workflows.</li>
+      </ul>
+    </section>
+
+    <!-- Business Model -->
+    <section class="mb-10 border-t border-slate-100 pt-6">
+      <h2 class="text-sm font-semibold uppercase tracking-[0.12em] text-[#0b2344] mb-2">
+        Business Model (Planned)
+      </h2>
+      <div class="h-1 w-10 rounded-full bg-[#0b2344] mb-4"></div>
+
+      <ul class="list-disc list-inside space-y-2 text-xs md:text-sm leading-relaxed">
+        <li>Simple subscription per company (flat monthly fee).</li>
+        <li>Accountant-friendly pricing for firms managing multiple companies.</li>
+        <li>Premium tiers once automation and AI-driven workflows are enabled.</li>
+      </ul>
+    </section>
+
+    <!-- Roadmap -->
+    <section class="mb-10 border-t border-slate-100 pt-6">
+      <h2 class="text-sm font-semibold uppercase tracking-[0.12em] text-[#0b2344] mb-2">
+        Product Roadmap
+      </h2>
+      <div class="h-1 w-10 rounded-full bg-[#0b2344] mb-4"></div>
+
+      <h3 class="text-xs font-semibold text-slate-700 mb-2">Available now</h3>
+      <ul class="list-disc list-inside space-y-1.5 text-xs md:text-sm mb-4 leading-relaxed">
+        <li>GST portal data import.</li>
+        <li>Monthly GST reconciliation (GSTR-2B <→> GSTR-1).</li>
+        <li>Bank statement uploads → receipts & payments.</li>
+        <li>Journal creation from trading & inventory data.</li>
+        <li>Custom invoice template support.</li>
+      </ul>
+
+      <h3 class="text-xs font-semibold text-slate-700 mb-2">Planned next</h3>
+      <ul class="list-disc list-inside space-y-1.5 text-xs md:text-sm leading-relaxed">
+        <li>AI-assisted GST, bank, and journal automation.</li>
+        <li>Smarter categorisation suggestions.</li>
+        <li>Improved dashboards & reports.</li>
+        <li>Mobile-friendly & print-friendly interface.</li>
+      </ul>
+    </section>
+
+    <!-- Feedback -->
+    <section class="mb-10 border-t border-slate-100 pt-6">
+      <h2 class="text-sm font-semibold uppercase tracking-[0.12em] text-[#0b2344] mb-2">
+        Feedback I’m Looking For
+      </h2>
+      <div class="h-1 w-10 rounded-full bg-[#0b2344] mb-4"></div>
+
+      <ul class="list-disc list-inside space-y-2 text-xs md:text-sm leading-relaxed">
+        <li>Is the current feature set strong enough to start charging customers?</li>
+        <li>Should I prioritize AI automation or user acquisition first?</li>
+        <li>What is the optimal initial pricing strategy?</li>
+      </ul>
+    </section>
+
+    <!-- Footer -->
+    <footer class="mt-6 pt-4 border-t border-slate-100 text-[11px] text-slate-500 flex flex-col items-center gap-1">
+      <div class="font-medium text-[#0b2344]">Daybook.Cloud — Dive into simplicity</div>
+      <div>Built for accountants, not just software users.</div>
+      <div class="mt-1">app.daybook.cloud • Mentor Presentation · 2025</div>
+    </footer>
+
+  </div>
+</div>
+</div>

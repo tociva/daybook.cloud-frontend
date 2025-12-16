@@ -42,7 +42,7 @@ export class AuthValidateService {
       case AuthStatus.AUTHENTICATED_VALID_USER:
         const session = this.userSessionStore.session();
         if(!session || !session.ownorgs || session.ownorgs.length === 0) {
-          this.store.dispatch(authActions.performRedirect({ returnUri: '/app/management/organization/create' }));
+          this.store.dispatch(authActions.performRedirect({ returnUri: '/bootstrap/bootstrap-organization' }));
           return;
         }
         this.store.dispatch(authActions.performRedirect({ returnUri: this.authStore.returnUri() ?? '/app/dashboard' }));

@@ -9,6 +9,10 @@ export const routes: Routes = [
     path: 'auth',
     loadChildren: () => import('../../components/core/auth/auth.routes').then(m => m.AUTH_ROUTES),
   },
+  {
+    path: 'bootstrap',
+    loadChildren: () => import('../../components/core/bootsrap/bootsrap.routes').then(m => m.BOOTSTRAP_ROUTES),
+  },
   { path: '', pathMatch: 'full', redirectTo: 'app' },
 
 ];
