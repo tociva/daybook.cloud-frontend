@@ -24,10 +24,11 @@ import { AutoComplete } from '../../auto-complete/auto-complete';
 import { CancelButton } from '../../cancel-button/cancel-button';
 import { MonthDatePicker } from '../../month-date-picker/month-date-picker';
 import { FiscalDateRangePicker } from '../../fiscal-date-range-picker/fiscal-date-range-picker';
+import { DbcDatePicker } from '../../dbc-date-picker/dbc-date-picker';
 @Component({
   selector: 'app-two-column-form',
   standalone: true,
-  imports: [ReactiveFormsModule, NgClass, AutoComplete, CancelButton, MonthDatePicker, FiscalDateRangePicker],
+  imports: [ReactiveFormsModule, NgClass, AutoComplete, CancelButton, DbcDatePicker, MonthDatePicker, FiscalDateRangePicker],
   templateUrl: './two-column-form.component.html',
   styleUrl: './two-column-form.component.css'
 })
