@@ -24,7 +24,6 @@ export class Login implements OnDestroy {
 
   private readonly authStatusChangeEffect = effect(() => {
     const status = this.statusSig(); 
-    console.log('status', status);
     this.authValidateService.doAuthValidation(status);
   });
   
