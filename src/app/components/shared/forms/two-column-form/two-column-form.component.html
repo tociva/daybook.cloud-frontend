@@ -40,7 +40,7 @@
                 />
               }
                <!-- Custom Date Picker Format  -->
-              @else if ( field.type === 'date-picker') {
+              @else if ( field.type === 'date') {
                 <app-dbc-date-picker
                   [formControl]="getControl(field.key)"
                   [required]="field.required ?? false"
