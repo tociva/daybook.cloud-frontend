@@ -10,10 +10,11 @@ import { CurrencyStore } from '../../../../../../shared/store/currency/currency.
 import { taxGroupActions } from '../../../../store/tax-group/tax-group.actions';
 import { TaxGroupModeStore } from '../../../../store/tax-group/tax-group.store';
 import { PurchaseReturnPropertiesForm } from '../../util/purchase-return-form.type';
+import { DbcDatePicker } from '../../../../../../shared/dbc-date-picker/dbc-date-picker';
 
 @Component({
   selector: 'app-purchase-return-properties',
-  imports: [ReactiveFormsModule, AutoComplete, TextInputDirective],
+  imports: [ReactiveFormsModule, AutoComplete, TextInputDirective,DbcDatePicker],
   templateUrl: './purchase-return-properties.html',
   styleUrl: './purchase-return-properties.css'
 })

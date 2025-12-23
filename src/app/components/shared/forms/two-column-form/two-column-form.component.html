@@ -27,7 +27,7 @@
               </label>
 
               <!-- 🔘 Input: text, email, date -->
-              @if (field.type === 'text' || field.type === 'email' || field.type === 'date' || field.type === 'number') {
+              @if (field.type === 'text' || field.type === 'email' || field.type === 'number') {
                 <input
                   [formControl]="getControl(field.key)"
                   [type]="field.type"
@@ -38,6 +38,20 @@
                     'border-b-danger': field.errors?.length
                   }"
                 />
+              }
+               <!-- Custom Date Picker Format  -->
+              @else if ( field.type === 'date') {
+                <app-dbc-date-picker
+                  [formControl]="getControl(field.key)"
+                  [required]="field.required ?? false"
+                  [ngClass]="{
+                    'flex-1 border-0 border-b bg-transparent text-sm leading-tight pt-0.5 pb-1 px-0 focus:outline-none focus:border-b-primary': true,
+                    'border-b-gray-300': !(field.errors?.length),
+                    'border-b-danger': field.errors?.length
+                  }"
+                >
+                </app-dbc-date-picker>
+
               }
 
               <!-- 📝 Textarea -->

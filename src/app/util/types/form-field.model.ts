@@ -1,6 +1,6 @@
 import { Signal } from "@angular/core";
 
-export type FormFieldType = 'text' | 'email' | 'select' | 'textarea' | 'date' | 'number' | 'checkbox' | 'auto-complete' | 'month-date' | 'fiscal-daterange';
+export type FormFieldType = 'text' | 'email' | 'select' | 'textarea' | 'date' | 'number' | 'date' |'checkbox' | 'auto-complete' | 'month-date' | 'fiscal-daterange';
 
 export interface FormField<T = unknown> {
   value?: T | null;
