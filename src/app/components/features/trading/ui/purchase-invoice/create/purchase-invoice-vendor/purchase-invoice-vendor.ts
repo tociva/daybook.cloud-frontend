@@ -5,7 +5,6 @@ import { NgIcon } from '@ng-icons/core';
 import { Store } from '@ngrx/store';
 import { AutoComplete } from '../../../../../../shared/auto-complete/auto-complete';
 import { DbcAddressForm } from '../../../../../../shared/dbc-address-form/dbc-address-form';
-import { DbcSwitch } from '../../../../../../shared/dbc-switch/dbc-switch';
 import { vendorActions } from '../../../../store/vendor';
 import { Vendor } from '../../../../store/vendor/vendor.model';
 import { VendorStore } from '../../../../store/vendor/vendor.store';
@@ -13,7 +12,7 @@ import { PurchaseInvoiceVendorForm } from '../../util/purchase-invoice-form.type
 
 @Component({
   selector: 'app-purchase-invoice-vendor',
-  imports: [ReactiveFormsModule, AutoComplete, DbcAddressForm, DbcSwitch, NgIcon],
+  imports: [ReactiveFormsModule, AutoComplete, DbcAddressForm, NgIcon],
   templateUrl: './purchase-invoice-vendor.html',
   styleUrl: './purchase-invoice-vendor.css'
 })

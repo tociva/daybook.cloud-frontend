@@ -26,6 +26,8 @@ import { itemCategoryEffects } from '../../components/features/trading/store/ite
 import { vendorEffects } from '../../components/features/trading/store/vendor/vendor.effects';
 import { ledgerEffects } from '../../components/features/accounting/store/ledger/ledger.effects';
 import { ledgerCategoryEffects } from '../../components/features/accounting/store/ledger-category/ledger-category.effects';
+import { bankTxnEffects } from '../../components/features/accounting/store/bank-txn/bank-txn.effects';
+import { bankLedgerMapEffects } from '../../components/features/accounting/store/bank-ledger-map/bank-ledger-map.effects';
 import { branchEffects } from '../../components/features/management/store/branch/branch.effects';
 import { fiscalYearEffects } from '../../components/features/management/store/fiscal-year/fiscal-year.effects';
 import { saleInvoiceEffects } from '../../components/features/trading/store/sale-invoice/sale-invoice.effects';
@@ -61,6 +63,8 @@ export const appConfig: ApplicationConfig = {
       vendorEffects,
       ledgerEffects,
       ledgerCategoryEffects,
+      bankTxnEffects,
+      bankLedgerMapEffects,
       saleInvoiceEffects,
       purchaseInvoiceEffects,
       customerReceiptEffects,

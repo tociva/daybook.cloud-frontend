@@ -68,6 +68,9 @@ export const menuList: MenuNode[] = [
             },
           { path: 'reports/balance-sheet',
             name: 'Balance sheet',
+            },
+          { path: 'banking',
+            name: 'Banking',
             }
         ]
       },

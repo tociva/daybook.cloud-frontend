@@ -1,0 +1,13 @@
+{
+  "bankLedgerMap": [
+    {
+      "bankcash": "HDFC Bank",
+      "ledger": "HDFC Bank"
+    },
+    {
+      "bankcash": "ICICI Bank",
+      "ledger": "ICICI Bank"
+    }
+  ]
+}
+

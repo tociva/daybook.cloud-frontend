@@ -5,6 +5,7 @@ import { authActions } from '../../store/auth/auth.actions';
 import { AuthStatus } from '../../store/auth/auth.model';
 import { AuthStore } from '../../store/auth/auth.store';
 import { configActions } from '../../store/config/config.actions';
+import { UserSessionStore } from '../../store/user-session/user-session.store';
 
 @Component({
   selector: 'app-callback',
@@ -18,6 +19,7 @@ export class CallbackComponent implements OnDestroy {
 
 
   private readonly authStore = inject(AuthStore);
+  private readonly userSessionStore = inject(UserSessionStore);
 
   private readonly statusSig = computed(
     () => this.authStore.status(),
@@ -40,6 +42,14 @@ export class CallbackComponent implements OnDestroy {
         this.store.dispatch(authActions.handleCallback());
       });
       break;
+      case AuthStatus.AUTHENTICATED_VALID_USER:
+        const session = this.userSessionStore.session();
+        if(!session || !session.ownorgs || session.ownorgs.length === 0) {
+          this.store.dispatch(authActions.performRedirect({ returnUri: '/bootstrap/bootstrap-organization' }));
+          return;
+        }
+        this.store.dispatch(authActions.performRedirect({ returnUri: this.authStore.returnUri() ?? '/app/dashboard' }));
+        break;
     }
   });
 

@@ -1,5 +1,4 @@
 import { inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { Actions, createEffect, ofType, ROOT_EFFECTS_INIT } from '@ngrx/effects';
 import { User, UserManager, WebStorageStateStore } from 'oidc-client-ts';
@@ -10,6 +9,8 @@ import { userSessionActions } from '../user-session/user-session.actions';
 import { authActions } from './auth.actions';
 import { AuthStatus } from './auth.model';
 import { AuthStore } from './auth.store';
+import { UserSessionStore } from '../user-session/user-session.store';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 export const authEffects = {
   hydrateReturnUri: createEffect(
@@ -170,15 +171,12 @@ export const authEffects = {
     () => {
       const actions$ = inject(Actions);
       const authStore = inject(AuthStore);
-
+  
       return actions$.pipe(
         ofType(authActions.loginSuccess),
-        withLatestFrom(toObservable(authStore.returnUri)),
-        filter(([, returnUri]) => Boolean(returnUri)),
-        map(([, returnUri]) => {
-          authStore.setStatus(AuthStatus.AUTHENTICATED);
-          return authActions.performRedirect({ returnUri: returnUri! })
-        })
+        tap(() => authStore.setStatus(AuthStatus.AUTHENTICATED)),
+        // Kick off session creation instead of redirecting immediately
+        map(() => userSessionActions.createUserSession())
       );
     },
     { functional: true }

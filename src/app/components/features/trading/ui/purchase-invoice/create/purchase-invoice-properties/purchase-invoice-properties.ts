@@ -9,19 +9,18 @@ import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { TextInputDirective } from '../../../../../../../util/directives/text-input.directive';
 import { AutoComplete } from '../../../../../../shared/auto-complete/auto-complete';
-import { DbcSwitch } from '../../../../../../shared/dbc-switch/dbc-switch';
+import { DbcDatePicker } from '../../../../../../shared/dbc-date-picker/dbc-date-picker';
 import { currencyActions } from '../../../../../../shared/store/currency/currency.action';
 import { Currency } from '../../../../../../shared/store/currency/currency.model';
 import { CurrencyStore } from '../../../../../../shared/store/currency/currency.store';
 import { taxGroupActions } from '../../../../store/tax-group/tax-group.actions';
 import { TaxGroupModeStore } from '../../../../store/tax-group/tax-group.store';
 import { PurchaseInvoicePropertiesForm } from '../../util/purchase-invoice-form.type';
-import { DbcDatePicker } from '../../../../../../shared/dbc-date-picker/dbc-date-picker';
 
 @Component({
   selector: 'app-purchase-invoice-properties',
   standalone: true,
-  imports: [ReactiveFormsModule, AutoComplete, TextInputDirective, DbcSwitch,DbcDatePicker],
+  imports: [ReactiveFormsModule, AutoComplete, TextInputDirective,DbcDatePicker],
   templateUrl: './purchase-invoice-properties.html',
   styleUrl: './purchase-invoice-properties.css'
 })
