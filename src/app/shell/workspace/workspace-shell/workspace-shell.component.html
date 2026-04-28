@@ -1,0 +1,15 @@
+<div class="workspace-shell">
+  <app-workspace-header
+    [activeOrganizationName]="activeOrganizationName()"
+    [currentPageTitle]="currentPageTitle()"
+    [organizations]="organizations()"
+    [userDisplayName]="userDisplayName()"
+    (logoutRequested)="logout()"
+  />
+
+  <div class="workspace-body">
+    <app-workspace-sidebar />
+    <app-workspace-content />
+  </div>
+</div>
+

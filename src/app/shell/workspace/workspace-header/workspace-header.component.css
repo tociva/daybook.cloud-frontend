@@ -1,0 +1,262 @@
+:host {
+  display: block;
+  min-width: 0;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.workspace-header {
+  isolation: isolate;
+  max-width: 100%;
+  min-height: 4.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 0.75rem;
+}
+
+.workspace-header::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: color-mix(in srgb, var(--tng-semantic-background-canvas) 82%, transparent);
+  backdrop-filter: blur(16px);
+  content: '';
+  pointer-events: none;
+}
+
+.workspace-header-leading {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: var(--drawer-width, 18rem) minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.header-logo {
+  align-items: center;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.7rem;
+  min-height: 3.75rem;
+}
+
+.header-logo-mark {
+  background: var(--tng-semantic-accent-brand);
+  border-radius: 0.9rem;
+  box-shadow: 0 18px 36px color-mix(in srgb, var(--tng-semantic-accent-brand) 28%, transparent);
+  color: var(--tng-semantic-foreground-inverse);
+  display: grid;
+  flex: 0 0 auto;
+  font-family: 'Lobster', cursive;
+  font-size: 1.65rem;
+  height: 2.75rem;
+  line-height: 1;
+  place-items: center;
+  width: 2.75rem;
+}
+
+.header-logo-copy {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.header-logo-title {
+  font-family: 'Lobster', cursive;
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.header-logo-caption {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.workspace-header-copy {
+  min-width: 0;
+  display: grid;
+  align-content: center;
+  gap: 0.25rem;
+}
+
+.workspace-title {
+  margin: 0;
+}
+
+.workspace-breadcrumb {
+  display: block;
+  min-width: 0;
+}
+
+.workspace-title {
+  font-size: clamp(1.35rem, 2vw, 2rem);
+  letter-spacing: -0.04em;
+}
+
+.workspace-header-actions {
+  flex: 0 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.workspace-org-pill {
+  background: transparent;
+  border: 0;
+  border-radius: 0.75rem;
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+  max-width: 18rem;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0.45rem 0.6rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workspace-org-pill:hover {
+  background: color-mix(in srgb, var(--tng-semantic-background-surface) 58%, transparent);
+}
+
+.mode-toggle {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 0.75rem;
+  color: var(--tng-semantic-foreground-primary);
+  cursor: pointer;
+  display: inline-flex;
+  flex: 0 0 auto;
+  font: inherit;
+  height: 2.75rem;
+  justify-content: center;
+  width: 2.75rem;
+}
+
+.mode-toggle:focus-visible {
+  outline: 2px solid var(--tng-semantic-focus-ring);
+  outline-offset: 2px;
+}
+
+.mode-toggle tng-icon {
+  font-size: 1.45rem;
+  height: 1.45rem;
+  width: 1.45rem;
+}
+
+.mode-toggle:hover {
+  background: color-mix(in srgb, var(--tng-semantic-background-surface) 64%, transparent);
+}
+
+.profile-menu {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  max-inline-size: 100%;
+  min-width: 0;
+  position: relative;
+}
+
+.profile-trigger {
+  align-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.9rem;
+  box-shadow: none;
+  color: var(--tng-semantic-foreground-primary);
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  gap: 0.65rem;
+  max-inline-size: 100%;
+  padding: 0.3rem 0.45rem 0.3rem 0.3rem;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+
+.profile-trigger tng-avatar {
+  --tng-avatar-border-radius: 0.5rem;
+  border-radius: 0.5rem;
+  display: inline-flex;
+  overflow: hidden;
+}
+
+:host ::ng-deep .profile-trigger tng-avatar .tng-avatar,
+:host ::ng-deep .profile-trigger tng-avatar [data-slot='avatar'],
+:host ::ng-deep .profile-trigger tng-avatar [data-slot='avatar-fallback'] {
+  border-radius: 0.5rem;
+}
+
+.profile-trigger:hover,
+.profile-trigger[aria-expanded='true'] {
+  background: color-mix(in srgb, var(--tng-semantic-background-surface) 72%, transparent);
+  border-color: color-mix(in srgb, var(--tng-semantic-border-subtle) 70%, transparent);
+  box-shadow: none;
+}
+
+.profile-trigger:focus-visible {
+  background: color-mix(in srgb, var(--tng-semantic-background-surface) 78%, transparent);
+  border-color: var(--tng-semantic-accent-brand);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--tng-semantic-accent-brand) 24%, transparent);
+  outline: none;
+}
+
+.profile-trigger-copy {
+  min-width: 0;
+  display: grid;
+  padding-right: 0.35rem;
+  text-align: left;
+}
+
+.profile-trigger-copy span {
+  overflow: hidden;
+  font-size: 0.86rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-trigger-copy small {
+  overflow: hidden;
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 840px) {
+  .workspace-header-leading {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .header-logo-copy,
+  .workspace-org-pill,
+  .profile-trigger-copy {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .workspace-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .workspace-header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

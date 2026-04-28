@@ -1,0 +1,42 @@
+:host {
+  display: contents;
+}
+
+.auth-notice {
+  width: min(100%, 34rem);
+  text-align: left;
+}
+
+.auth-notice tng-card {
+  display: block;
+}
+
+.auth-notice-context {
+  margin: 0;
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.auth-notice-action {
+  min-height: 2.4rem;
+  padding: 0 0.95rem;
+  border: 1px solid color-mix(in srgb, var(--tng-semantic-accent-brand) 55%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tng-semantic-accent-brand) 16%, transparent);
+  color: var(--tng-semantic-foreground-primary);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.auth-notice-action:hover {
+  background: color-mix(in srgb, var(--tng-semantic-accent-brand) 24%, transparent);
+}
+
+.auth-notice-action:focus-visible {
+  outline: 2px solid var(--tng-semantic-accent-brand);
+  outline-offset: 2px;
+}
+

@@ -1,0 +1,12 @@
+:host {
+  display: block;
+  min-width: 0;
+  /* Height comes from grid stretch (.workspace-body has fixed height) */
+  overflow-y: auto;
+}
+
+.workspace-main {
+  min-width: 0;
+  padding: clamp(1rem, 3vw, 2rem);
+}
+

@@ -1,0 +1,52 @@
+:host {
+  display: grid;
+  justify-items: center;
+  gap: 0.85rem;
+}
+
+.wordmark {
+  margin: 0;
+  font-family: 'Lobster', cursive;
+  font-size: clamp(2rem, 7vw, 5rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+
+.subcaption {
+  margin: 0;
+  font-size: clamp(0.95rem, 1.8vw, 1.2rem);
+  letter-spacing: 0.08em;
+  opacity: 0.85;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.subcaption .char {
+  display: inline-block;
+  animation: sine-wave 1.4s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 0.08s);
+  will-change: transform;
+}
+
+.subcaption .space {
+  display: inline-block;
+  width: 0.45em;
+}
+
+@keyframes sine-wave {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  25% {
+    transform: translateY(-4px);
+  }
+  50% {
+    transform: translateY(0);
+  }
+  75% {
+    transform: translateY(4px);
+  }
+}
+

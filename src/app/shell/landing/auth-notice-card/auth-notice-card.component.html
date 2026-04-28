@@ -1,0 +1,24 @@
+@if (notice(); as noticeValue) {
+  <div class="auth-notice" aria-live="polite" role="status">
+    <tng-card variant="outline" [tone]="noticeValue.tone" padding="md">
+      <tng-card-header>
+        <tng-card-title>{{ noticeValue.title }}</tng-card-title>
+        <tng-card-description>{{ noticeValue.message }}</tng-card-description>
+      </tng-card-header>
+      <tng-card-content>
+        <p class="auth-notice-context">{{ noticeValue.context }}</p>
+        @if (noticeValue.showProgress) {
+          <tng-progress-bar [indeterminate]="true" ariaLabel="Loading Daybook Cloud account details"></tng-progress-bar>
+        }
+      </tng-card-content>
+      <tng-card-footer>
+        <tng-card-actions>
+          <button class="auth-notice-action" type="button" (click)="noticeAction.emit(noticeValue.action)">
+            {{ noticeValue.buttonLabel }}
+          </button>
+        </tng-card-actions>
+      </tng-card-footer>
+    </tng-card>
+  </div>
+}
+

@@ -1,0 +1,72 @@
+<header class="workspace-header">
+  <div class="workspace-header-leading">
+    <div class="header-logo">
+      <div class="header-logo-mark" aria-hidden="true">D.C</div>
+      <div class="header-logo-copy">
+        <span class="header-logo-title">Daybook.Cloud</span>
+        <span class="header-logo-caption">Dive into simplicity</span>
+      </div>
+    </div>
+
+    <div class="workspace-header-copy">
+      <h1 class="workspace-title">{{ currentPageTitle() }}</h1>
+      <tng-breadcrumb class="workspace-breadcrumb" ariaLabel="Workspace path">
+        <tng-breadcrumb-item href="#">Home</tng-breadcrumb-item>
+        <tng-breadcrumb-item [current]="true">{{ currentPageTitle() }}</tng-breadcrumb-item>
+      </tng-breadcrumb>
+    </div>
+  </div>
+
+  <div class="workspace-header-actions">
+    <span class="workspace-org-pill">{{ activeOrganizationName() }}</span>
+
+    <button class="mode-toggle" type="button" [attr.aria-label]="'Switch to ' + (darkMode() ? 'light' : 'dark') + ' mode'" (click)="toggleMode()">
+      @if (darkMode()) {
+        <tng-icon icon="moon" class="h-4 w-4" />
+      } @else {
+        <tng-icon icon="sun" class="h-4 w-4" />
+      }
+    </button>
+
+    <div class="profile-menu">
+      <button
+        class="profile-trigger"
+        type="button"
+        id="workspace-profile-menu-trigger"
+        [tngMenuTriggerFor]="workspaceProfileMenu"
+      >
+        <tng-avatar [fallback]="userDisplayName()" size="md"></tng-avatar>
+        <span class="profile-trigger-copy">
+          <span>{{ userDisplayName() }}</span>
+          <small>Account</small>
+        </span>
+      </button>
+
+      <tng-menu
+        #workspaceProfileMenu="tngMenu"
+        ariaLabel="Account options"
+        (tngMenuSelect)="onProfileMenuSelect($event)"
+      >
+        <div tngMenuGroupLabel>Account</div>
+        <button type="button" tngMenuItem tngMenuItemValue="profile">Profile</button>
+
+        <div tngMenuGroupLabel>Organizations</div>
+        @if (organizations().length > 0) {
+          @for (
+            organization of organizations();
+            track organization.id ?? organization.organizationid ?? $index
+          ) {
+            <button type="button" tngMenuItem [tngMenuItemValue]="organization.id ?? organization.organizationid">
+              {{ organization.name ?? 'Unnamed organization' }}
+            </button>
+          }
+        } @else {
+          <button type="button" tngMenuItem tngMenuItemValue="no-org" disabled>No organizations yet</button>
+        }
+
+        <div tngMenuGroupLabel>Session</div>
+        <button type="button" tngMenuItem tngMenuItemValue="logout">Logout</button>
+      </tng-menu>
+    </div>
+  </div>
+</header>

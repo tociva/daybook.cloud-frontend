@@ -1,0 +1,16 @@
+.landing {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  background-color: var(--tng-semantic-background-canvas);
+  color: var(--tng-semantic-foreground-primary);
+}
+
+.hero {
+  display: grid;
+  justify-items: center;
+  gap: 0.85rem;
+  width: min(100%, 42rem);
+  padding: 1.5rem;
+}
+

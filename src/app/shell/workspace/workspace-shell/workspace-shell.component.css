@@ -1,0 +1,86 @@
+:host {
+  display: block;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.workspace-shell {
+  --workspace-header-height: 4.75rem;
+  --drawer-width: 18rem;
+
+  background: var(--tng-semantic-background-canvas);
+  box-sizing: border-box;
+  color: var(--tng-semantic-foreground-primary);
+  display: block;
+  height: 100dvh;
+  overflow: hidden;
+  padding-top: var(--workspace-header-height);
+}
+
+app-workspace-header {
+  display: block;
+  height: var(--workspace-header-height);
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 30;
+}
+
+.workspace-body {
+  background: var(--tng-semantic-background-canvas);
+  display: grid;
+  grid-template-columns: var(--drawer-width) minmax(0, 1fr);
+  height: calc(100dvh - var(--workspace-header-height));
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+app-workspace-sidebar,
+app-workspace-content {
+  display: block;
+  min-height: 0;
+  min-width: 0;
+}
+
+app-workspace-sidebar {
+  height: 100%;
+  overflow: hidden;
+}
+
+app-workspace-content {
+  height: 100%;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+@media (max-width: 840px) {
+  :host {
+    height: auto;
+    overflow: visible;
+  }
+
+  .workspace-shell,
+  .workspace-body {
+    --drawer-width: 100%;
+  }
+
+  .workspace-shell {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+
+  .workspace-body {
+    grid-template-columns: 1fr;
+    height: auto;
+    overflow: visible;
+  }
+
+  app-workspace-sidebar,
+  app-workspace-content {
+    height: auto;
+    overflow: visible;
+  }
+}

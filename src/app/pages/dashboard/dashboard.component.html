@@ -1,0 +1,15 @@
+<main class="page-shell">
+  <tng-card variant="outline" tone="success" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Dashboard</tng-card-title>
+      <tng-card-description> Your Daybook Cloud session is ready. </tng-card-description>
+    </tng-card-header>
+    <tng-card-content>
+      <p>
+        We found {{ organizationCount() }} organization{{ organizationCount() === 1 ? '' : 's' }} linked to this
+        account.
+      </p>
+    </tng-card-content>
+  </tng-card>
+</main>
+

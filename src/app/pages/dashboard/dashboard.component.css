@@ -1,0 +1,10 @@
+.page-shell {
+  min-height: 0;
+  display: grid;
+  align-items: start;
+}
+
+tng-card {
+  width: min(100%, 42rem);
+}
+

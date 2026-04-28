@@ -1,0 +1,33 @@
+:host {
+  position: fixed;
+  inset: auto 1rem 1rem 1rem;
+  display: grid;
+  justify-items: center;
+  pointer-events: none;
+}
+
+.callback-card {
+  width: min(100%, 28rem);
+  padding: 0.9rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--tng-semantic-accent-brand) 45%, transparent);
+  border-radius: 0.9rem;
+  background: var(--tng-semantic-background-surface);
+  box-shadow: 0 16px 32px color-mix(in srgb, var(--tng-semantic-foreground-primary) 14%, transparent);
+}
+
+.callback-eyebrow {
+  margin: 0 0 0.35rem;
+  color: var(--tng-semantic-accent-brand);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.callback-message {
+  margin: 0;
+  color: var(--tng-semantic-foreground-primary);
+  font-size: 0.93rem;
+  line-height: 1.5;
+}
+

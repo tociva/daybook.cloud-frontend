@@ -1,63 +1,42 @@
 {
-  "name": "daybook.cloud-frontend",
+  "name": "daybook-cloud-frontend",
   "version": "0.0.0",
-  "description": "Daybook.cloud frontend",
-  "author": "princekfrancis@gmail.com",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/tociva/daybook.cloud-frontend.git"
-  },
-  "homepage": "https://app.daybook.cloud",
   "engines": {
-    "node": "22.12.x",
-    "yarn": "1.x"
+    "node": ">=20.19.0 <25"
   },
   "scripts": {
     "ng": "ng",
-    "start": "ng serve --host 0.0.0.0",
+    "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
   "private": true,
+  "packageManager": "pnpm@10.30.1",
   "dependencies": {
-    "@angular/common": "^20.1.4",
-    "@angular/compiler": "^20.1.4",
-    "@angular/core": "^20.1.4",
-    "@angular/forms": "^20.1.4",
-    "@angular/platform-browser": "^20.1.4",
-    "@angular/platform-browser-dynamic": "^20.1.4",
-    "@angular/router": "^20.1.4",
-    "@ng-icons/bootstrap-icons": "^32.1.0",
-    "@ng-icons/core": "^32.1.0",
-    "@ngrx/effects": "^20.0.0",
-    "@ngrx/entity": "^20.0.0",
-    "@ngrx/router-store": "^20.0.0",
-    "@ngrx/signals": "^20.0.0",
-    "@ngrx/store": "^20.0.0",
-    "@ngrx/store-devtools": "^20.0.0",
-    "dayjs": "^1.11.18",
-    "oidc-client-ts": "^3.3.0",
+    "@angular/common": "^21.2.0",
+    "@angular/compiler": "^21.2.0",
+    "@angular/core": "^21.2.0",
+    "@angular/forms": "^21.2.0",
+    "@angular/platform-browser": "^21.2.0",
+    "@angular/router": "^21.2.0",
+    "@ngrx/signals": "^21.1.0",
+    "@tailng-ui/cdk": "^0.28.0",
+    "@tailng-ui/components": "^0.43.0",
+    "@tailng-ui/icons": "^0.13.0",
+    "@tailng-ui/primitives": "^0.41.0",
+    "@tailng-ui/theme": "^0.30.0",
+    "oidc-client-ts": "^3.5.0",
     "rxjs": "~7.8.0",
-    "tslib": "^2.3.0",
-    "zone.js": "~0.15.0"
+    "tslib": "^2.3.0"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^20.1.4",
-    "@angular/cli": "^20.1.4",
-    "@angular/compiler-cli": "^20.1.4",
-    "@tailwindcss/postcss": "^4.1.11",
-    "@types/jasmine": "~5.1.0",
-    "jasmine-core": "~5.6.0",
-    "karma": "~6.4.0",
-    "karma-chrome-launcher": "~3.2.0",
-    "karma-coverage": "~2.2.0",
-    "karma-jasmine": "~5.1.0",
-    "karma-jasmine-html-reporter": "~2.1.0",
-    "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.11",
-    "typescript": "~5.8.3"
-  },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+    "@angular/build": "^21.2.8",
+    "@angular/cli": "^21.2.8",
+    "@angular/compiler-cli": "^21.2.0",
+    "jsdom": "^28.0.0",
+    "prettier": "^3.8.1",
+    "typescript": "~5.9.2",
+    "vitest": "^4.0.8"
+  }
 }

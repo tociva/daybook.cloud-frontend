@@ -1,0 +1,348 @@
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.workspace-drawer {
+  display: block;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0.9rem 0.75rem;
+  width: clamp(14.5rem, 18vw, 16.5rem);
+}
+
+/* Dedicated left menu scroll area */
+
+.drawer-nav-scroll {
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+/* Navigation */
+
+.drawer-nav {
+  align-content: start;
+  display: grid;
+  gap: 0.4rem;
+  min-height: 0;
+  padding-right: 0;
+}
+
+/* Accordion */
+
+.drawer-accordion {
+  display: block;
+  min-width: 0;
+  width: 100%;
+}
+
+/* Full-width accordion separators */
+
+.drawer-accordion tng-accordion-item {
+  border-bottom: 1px solid var(--tng-semantic-border-subtle);
+  display: block;
+}
+
+.drawer-accordion tng-accordion-item:last-child {
+  border-bottom: 0;
+}
+
+/* Prevent duplicate internal item separator if TailNG adds one */
+
+.drawer-accordion tng-accordion-item > .tng-accordion__item {
+  border-bottom: 0;
+}
+
+/* Compact accordion trigger */
+
+.drawer-accordion tng-accordion-trigger {
+  min-height: 3.75rem;
+  padding: 0;
+}
+
+.drawer-accordion tng-accordion-trigger > .tng-accordion__trigger {
+  min-height: 3.75rem;
+  padding-block: 0.55rem;
+  padding-inline: 0 0.45rem;
+}
+
+.drawer-group-trigger {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  min-width: 0;
+  padding-inline: 1rem 0.85rem;
+  width: 100%;
+}
+
+.drawer-group-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 0;
+  text-align: left;
+}
+
+.drawer-group-label {
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.12;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.drawer-group-subtitle {
+  color: var(--tng-semantic-foreground-secondary);
+  font-size: 0.78rem;
+  font-weight: 400;
+  line-height: 1.15;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Accordion panel */
+
+tng-accordion-panel.drawer-group-panel > .tng-accordion__panel {
+  background: transparent;
+  border-top: 0;
+  padding: 0.25rem 0.55rem 0.45rem 0.85rem;
+}
+
+/* Listbox */
+
+tng-listbox.drawer-group-listbox {
+  --drawer-option-hover-bg: color-mix(
+    in srgb,
+    var(--tng-semantic-foreground-primary) 5%,
+    transparent
+  );
+  --drawer-option-active-bg: color-mix(
+    in srgb,
+    var(--tng-semantic-accent-brand) 9%,
+    var(--tng-semantic-background-base)
+  );
+  --drawer-option-selected-bg: color-mix(
+    in srgb,
+    var(--tng-semantic-accent-brand) 13%,
+    var(--tng-semantic-background-base)
+  );
+  --drawer-option-selected-active-bg: color-mix(
+    in srgb,
+    var(--tng-semantic-accent-brand) 20%,
+    var(--tng-semantic-background-base)
+  );
+
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  display: grid;
+  gap: 0.3rem;
+  max-width: none;
+  min-width: 0;
+  padding-block: 0.2rem;
+  width: 100%;
+}
+
+tng-listbox.drawer-group-listbox:focus,
+tng-listbox.drawer-group-listbox:focus-visible {
+  border: 0;
+  box-shadow: none;
+  outline: none;
+}
+
+tng-listbox.drawer-group-listbox .tng-listbox-option {
+  align-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.45rem;
+  box-shadow: none;
+  color: var(--tng-semantic-foreground-primary);
+  cursor: pointer;
+  display: grid;
+  font-size: 0.84rem;
+  gap: 0.5rem;
+  grid-template-columns: minmax(0, 1fr) 1rem;
+  line-height: 1.2;
+  min-height: 2rem;
+  padding: 0.42rem 0.6rem;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
+  width: 100%;
+}
+
+/* Hover only */
+
+tng-listbox.drawer-group-listbox
+  .tng-listbox-option:hover:not([data-selected]):not([data-active]):not([data-disabled]):not(:disabled) {
+  background: var(--drawer-option-hover-bg);
+}
+
+/* Active / focused only */
+
+tng-listbox.drawer-group-listbox
+  .tng-listbox-option[data-active]:not([data-selected]):not([data-disabled]):not(:disabled) {
+  background: var(--drawer-option-active-bg);
+  border-color: color-mix(
+    in srgb,
+    var(--tng-semantic-accent-brand) 28%,
+    transparent
+  );
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--tng-semantic-accent-brand) 24%, transparent);
+  color: var(--tng-semantic-foreground-primary);
+}
+
+/* Selected only */
+
+tng-listbox.drawer-group-listbox
+  .tng-listbox-option[data-selected]:not([data-active]) {
+  background: var(--drawer-option-selected-bg);
+  border-color: color-mix(
+    in srgb,
+    var(--tng-semantic-accent-brand) 42%,
+    transparent
+  );
+  color: var(--tng-semantic-accent-brand);
+  font-weight: 650;
+}
+
+/* Selected + active / focused */
+
+tng-listbox.drawer-group-listbox
+  .tng-listbox-option[data-selected][data-active]:not([data-disabled]):not(:disabled) {
+  background: var(--drawer-option-selected-active-bg);
+  border-color: var(--tng-semantic-accent-brand);
+  box-shadow:
+    inset 0 0 0 1px
+      color-mix(in srgb, var(--tng-semantic-accent-brand) 32%, transparent),
+    0 0 0 3px
+      color-mix(in srgb, var(--tng-semantic-accent-brand) 14%, transparent);
+  color: var(--tng-semantic-accent-brand);
+  font-weight: 700;
+}
+
+/* Disabled option */
+
+tng-listbox.drawer-group-listbox .tng-listbox-option[data-disabled],
+tng-listbox.drawer-group-listbox .tng-listbox-option:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+/* Option content */
+
+.drawer-option-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.drawer-option-icon {
+  flex: 0 0 1rem;
+  height: 1rem;
+  opacity: 1;
+  width: 1rem;
+}
+
+/* Root nav links */
+
+.drawer-nav-link {
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+  color: var(--tng-semantic-foreground-primary);
+  display: flex;
+  gap: 0.65rem;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.65rem;
+  text-decoration: none;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    transform 140ms ease;
+}
+
+.drawer-nav-link--root {
+  margin-top: 0.1rem;
+}
+
+.drawer-nav-link:hover {
+  background: color-mix(
+    in srgb,
+    var(--tng-semantic-accent-brand) 9%,
+    transparent
+  );
+  transform: translateX(2px);
+}
+
+.drawer-nav-link--active {
+  background: color-mix(
+    in srgb,
+    var(--tng-semantic-accent-brand) 18%,
+    transparent
+  );
+  border-color: color-mix(
+    in srgb,
+    var(--tng-semantic-accent-brand) 34%,
+    transparent
+  );
+  color: color-mix(in srgb, var(--tng-semantic-accent-brand) 84%, white);
+}
+
+.drawer-nav-copy {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.drawer-nav-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+/* Responsive */
+
+@media (max-width: 840px) {
+  :host {
+    height: auto;
+    overflow: visible;
+  }
+
+  .workspace-drawer {
+    display: block;
+    height: auto;
+    min-height: auto;
+    overflow: visible;
+    width: 100%;
+  }
+
+  .drawer-nav-scroll {
+    height: auto;
+    overflow: visible;
+  }
+
+  .drawer-nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .drawer-nav {
+    grid-template-columns: 1fr;
+  }
+}

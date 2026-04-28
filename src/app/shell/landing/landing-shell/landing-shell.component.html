@@ -1,0 +1,9 @@
+<main class="landing">
+  <div class="hero">
+    <app-landing-hero />
+    <app-auth-notice-card [notice]="authNotice()" (noticeAction)="handleAuthNoticeAction($event)" />
+  </div>
+</main>
+
+<router-outlet />
+

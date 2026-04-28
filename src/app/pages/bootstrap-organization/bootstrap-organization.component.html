@@ -1,0 +1,387 @@
+<main class="page-shell">
+  <section class="setup-layout" aria-labelledby="organization-setup-title">
+    <form class="organization-form" novalidate (submit)="submitForm($event)">
+      <tng-card variant="outline" tone="info" padding="lg">
+        <tng-card-header>
+          <tng-card-title>Basic Details</tng-card-title>
+          <tng-card-description>
+            Start with identity and contact information for the organization.
+          </tng-card-description>
+        </tng-card-header>
+
+        <tng-card-content>
+          <div class="field-grid">
+            <div class="field">
+              <tng-label forId="org-name" required>Name</tng-label>
+              <tng-input
+                id="org-name"
+                placeholder="Example Trading Co."
+                [formField]="organizationForm.name"
+                [ariaInvalid]="isInvalid('name')"
+                (valueChange)="markTouched('name')"
+              />
+              <p class="field-error" [class.field-error--empty]="!fieldError('name')">
+                {{ fieldError('name') || '\u00A0' }}
+              </p>
+            </div>
+
+            <div class="field">
+              <tng-label forId="org-email" required>Email</tng-label>
+              <tng-input
+                id="org-email"
+                type="email"
+                placeholder="accounts@example.com"
+                [formField]="organizationForm.email"
+                [ariaInvalid]="isInvalid('email')"
+                (valueChange)="markTouched('email')"
+              />
+              <p class="field-error" [class.field-error--empty]="!fieldError('email')">
+                {{ fieldError('email') || '\u00A0' }}
+              </p>
+            </div>
+
+            <div class="field">
+              <tng-label forId="org-country" required>Country</tng-label>
+              <tng-autocomplete
+                id="org-country"
+                placeholder="Search for a country"
+                ariaLabel="Country"
+                [options]="countries()"
+                [formField]="organizationForm.countryCode"
+                [getOptionValue]="countryOptionValue"
+                [getOptionLabel]="countryOptionLabel"
+                [trackBy]="countryTrackBy"
+                (valueChange)="selectCountry($event)"
+              >
+                <ng-template
+                  #tngAutocompleteOptionTpl
+                  let-option="option"
+                  let-label="label"
+                >
+                  <span class="country-option">
+                    <span
+                      [class]="getCountryFlagClass(option)"
+                      aria-hidden="true"
+                    ></span>
+
+                    <span class="country-option-label">{{ label }}</span>
+
+                    <span class="country-option-code">{{ option.code }}</span>
+                  </span>
+                </ng-template>
+
+                <ng-template #tngAutocompleteSelectedTpl let-option="option">
+                  <span
+                    [class]="getCountryFlagClass(option)"
+                    aria-hidden="true"
+                  ></span>
+                </ng-template>
+              </tng-autocomplete>
+              <p class="field-error" [class.field-error--empty]="!fieldError('country')">
+                {{ fieldError('country') || '\u00A0' }}
+              </p>
+            </div>
+
+            <div class="field">
+              <tng-label forId="org-mobile">Mobile</tng-label>
+              <tng-input
+                id="org-mobile"
+                type="tel"
+                placeholder="+91-"
+                [formField]="organizationForm.mobile"
+                (valueChange)="markTouched('mobile')"
+              />
+              <p class="field-error field-error--empty">
+                {{ '\u00A0' }}
+              </p>
+            </div>
+
+            <div class="field">
+              <tng-label forId="org-state">State</tng-label>
+              <tng-input
+                id="org-state"
+                placeholder="Kerala"
+                [formField]="organizationForm.state"
+                (valueChange)="markTouched('state')"
+              />
+              <p class="field-error field-error--empty">
+                {{ '\u00A0' }}
+              </p>
+            </div>
+
+            <div class="field field--wide">
+              <tng-label forId="org-description">Description</tng-label>
+              <tng-textarea
+                id="org-description"
+                placeholder="A short internal note about this organization"
+                rows="4"
+                [formField]="organizationForm.description"
+                (valueChange)="markTouched('description')"
+              />
+              <p class="field-error field-error--empty">
+                {{ '\u00A0' }}
+              </p>
+            </div>
+          </div>
+        </tng-card-content>
+      </tng-card>
+
+      <tng-card variant="outline" tone="neutral" padding="lg">
+        <tng-card-header>
+          <tng-card-title>Address Info</tng-card-title>
+          <tng-card-description>
+            Add the registered address and tax identifier where applicable.
+          </tng-card-description>
+        </tng-card-header>
+
+        <tng-card-content>
+          <div class="field-grid">
+            <div class="field">
+              <tng-label forId="org-address-line1" required>Line 1</tng-label>
+              <tng-input
+                id="org-address-line1"
+                placeholder="Building, street, area"
+                [formField]="organizationForm.address.line1"
+                [ariaInvalid]="isInvalid('address.line1')"
+                (valueChange)="markTouched('address.line1')"
+              />
+              <p class="field-error" [class.field-error--empty]="!fieldError('address.line1')">
+                {{ fieldError('address.line1') || '\u00A0' }}
+              </p>
+            </div>
+
+            <div class="field">
+              <tng-label forId="org-address-line2">Line 2</tng-label>
+              <tng-input
+                id="org-address-line2"
+                placeholder="Suite, floor, landmark"
+                [formField]="organizationForm.address.line2"
+                (valueChange)="markTouched('address.line2')"
+              />
+              <p class="field-error field-error--empty">
+                {{ '\u00A0' }}
+              </p>
+            </div>
+
+            <div class="field">
+              <tng-label forId="org-address-city">City</tng-label>
+              <tng-input
+                id="org-address-city"
+                placeholder="Kochi"
+                [formField]="organizationForm.address.city"
+                (valueChange)="markTouched('address.city')"
+              />
+              <p class="field-error field-error--empty">
+                {{ '\u00A0' }}
+              </p>
+            </div>
+
+            <div class="field">
+              <tng-label forId="org-address-pincode">Pincode</tng-label>
+              <tng-input
+                id="org-address-pincode"
+                placeholder="682001"
+                [formField]="organizationForm.address.pincode"
+                (valueChange)="markTouched('address.pincode')"
+              />
+              <p class="field-error field-error--empty">
+                {{ '\u00A0' }}
+              </p>
+            </div>
+
+            <div class="field">
+              <tng-label forId="org-gstin">GSTIN</tng-label>
+              <tng-input
+                id="org-gstin"
+                placeholder="22AAAAA0000A1Z5"
+                [formField]="organizationForm.gstin"
+                (valueChange)="markTouched('gstin')"
+              />
+              <p class="field-error field-error--empty">
+                {{ '\u00A0' }}
+              </p>
+            </div>
+          </div>
+        </tng-card-content>
+      </tng-card>
+
+      <tng-card variant="outline" tone="success" padding="lg">
+        <tng-card-header>
+          <tng-card-title>Financial Info</tng-card-title>
+          <tng-card-description>
+            Configure fiscal defaults and document numbering.
+          </tng-card-description>
+        </tng-card-header>
+
+        <tng-card-content>
+          <div class="field-grid">
+            <div class="field">
+              <tng-label forId="org-fiscal-start" required>Fiscal Start</tng-label>
+              <tng-input
+                id="org-fiscal-start"
+                placeholder="January-01"
+                [formField]="organizationForm.fiscalstart"
+                [ariaInvalid]="isInvalid('fiscalstart')"
+                (valueChange)="markTouched('fiscalstart')"
+              />
+              <p class="field-error" [class.field-error--empty]="!fieldError('fiscalstart')">
+                {{ fieldError('fiscalstart') || '\u00A0' }}
+              </p>
+            </div>
+
+            <div class="field">
+              <tng-label forId="org-fiscal-name" required>Fiscal Name</tng-label>
+              <tng-input
+                id="org-fiscal-name"
+                placeholder="2026 Financial Year"
+                [formField]="organizationForm.fiscalname"
+                [ariaInvalid]="isInvalid('fiscalname')"
+                (valueChange)="markTouched('fiscalname')"
+              />
+              <p class="field-error" [class.field-error--empty]="!fieldError('fiscalname')">
+                {{ fieldError('fiscalname') || '\u00A0' }}
+              </p>
+            </div>
+
+            <div class="field">
+              <tng-label forId="org-fiscal-range-start" required>Date Range Start</tng-label>
+              <tng-input
+                id="org-fiscal-range-start"
+                placeholder="2026-01-01"
+                [formField]="organizationForm.fiscalDateRange.start"
+                [ariaInvalid]="isInvalid('fiscalDateRange.start')"
+                (valueChange)="markTouched('fiscalDateRange.start')"
+              />
+              <p
+                class="field-error"
+                [class.field-error--empty]="!fieldError('fiscalDateRange.start')"
+              >
+                {{ fieldError('fiscalDateRange.start') || '\u00A0' }}
+              </p>
+            </div>
+
+            <div class="field">
+              <tng-label forId="org-fiscal-range-end" required>Date Range End</tng-label>
+              <tng-input
+                id="org-fiscal-range-end"
+                placeholder="2026-12-31"
+                [formField]="organizationForm.fiscalDateRange.end"
+                [ariaInvalid]="isInvalid('fiscalDateRange.end')"
+                (valueChange)="markTouched('fiscalDateRange.end')"
+              />
+              <p
+                class="field-error"
+                [class.field-error--empty]="!fieldError('fiscalDateRange.end')"
+              >
+                {{ fieldError('fiscalDateRange.end') || '\u00A0' }}
+              </p>
+            </div>
+          </div>
+        </tng-card-content>
+      </tng-card>
+
+      <tng-card variant="outline" tone="neutral" padding="lg">
+        <tng-card-header>
+          <tng-card-title>Other Info</tng-card-title>
+          <tng-card-description>
+            Choose the currency, date format, and default document number patterns.
+          </tng-card-description>
+        </tng-card-header>
+
+        <tng-card-content>
+          <div class="field-grid">
+            <div class="field">
+              <tng-label forId="org-invoice-number" required>Invoice number format</tng-label>
+              <tng-input
+                id="org-invoice-number"
+                [formField]="organizationForm.invnumber"
+                [ariaInvalid]="isInvalid('invnumber')"
+                (valueChange)="markTouched('invnumber')"
+              />
+              <p class="field-error" [class.field-error--empty]="!fieldError('invnumber')">
+                {{ fieldError('invnumber') || '\u00A0' }}
+              </p>
+            </div>
+
+            <div class="field">
+              <tng-label forId="org-journal-number" required>Journal number format</tng-label>
+              <tng-input
+                id="org-journal-number"
+                [formField]="organizationForm.jnumber"
+                [ariaInvalid]="isInvalid('jnumber')"
+                (valueChange)="markTouched('jnumber')"
+              />
+              <p class="field-error" [class.field-error--empty]="!fieldError('jnumber')">
+                {{ fieldError('jnumber') || '\u00A0' }}
+              </p>
+            </div>
+
+            <div class="field">
+              <tng-label forId="org-currency" required>Currency</tng-label>
+              <tng-autocomplete
+                id="org-currency"
+                placeholder="Search for a currency"
+                ariaLabel="Currency"
+                [options]="currencies()"
+                [formField]="organizationForm.currencyCode"
+                [getOptionValue]="currencyOptionValue"
+                [getOptionLabel]="currencyOptionLabel"
+                [trackBy]="currencyTrackBy"
+                (valueChange)="selectCurrency($event)"
+              />
+              <p class="field-error" [class.field-error--empty]="!fieldError('currency')">
+                {{ fieldError('currency') || '\u00A0' }}
+              </p>
+            </div>
+
+            <div class="field">
+              <tng-label forId="org-date-format" required>Date Format</tng-label>
+              <tng-autocomplete
+                id="org-date-format"
+                placeholder="Search for a date format"
+                ariaLabel="Date format"
+                [options]="dateFormats()"
+                [formField]="organizationForm.dateFormatName"
+                [getOptionValue]="dateFormatOptionValue"
+                [getOptionLabel]="dateFormatOptionLabel"
+                [trackBy]="dateFormatTrackBy"
+                (valueChange)="selectDateFormat($event)"
+              />
+              <p class="field-error" [class.field-error--empty]="!fieldError('dateformatForm')">
+                {{ fieldError('dateformatForm') || '\u00A0' }}
+              </p>
+            </div>
+          </div>
+        </tng-card-content>
+
+        <tng-card-footer>
+          <tng-card-actions align="end">
+            <tng-button appearance="outline" tone="neutral" type="button" (click)="resetForm()">
+              Reset
+            </tng-button>
+            <tng-button tone="primary" type="submit">Create organization</tng-button>
+          </tng-card-actions>
+        </tng-card-footer>
+      </tng-card>
+
+      @if (saveMessage(); as message) {
+        <tng-card variant="outline" tone="success" padding="md">
+          <tng-card-content>
+            <p class="save-message">{{ message }}</p>
+          </tng-card-content>
+        </tng-card>
+      }
+    </form>
+
+    <aside class="setup-overview" aria-labelledby="organization-setup-title">
+      <div class="setup-copy">
+        <p class="eyebrow">Workspace setup</p>
+        <h1 id="organization-setup-title">Create your organization</h1>
+        <p>
+          Add the core details we need to prepare fiscal years, numbering, currency, and regional defaults for
+          Daybook Cloud.
+        </p>
+      </div>
+    </aside>
+  </section>
+</main>

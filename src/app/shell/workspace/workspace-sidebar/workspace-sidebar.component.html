@@ -1,0 +1,64 @@
+<aside class="workspace-drawer" aria-label="Workspace navigation">
+  <div class="drawer-nav-scroll">
+    <nav class="drawer-nav" aria-label="Primary">
+      <tng-accordion
+        class="drawer-accordion"
+        tabindex="-1"
+        [type]="'multiple'"
+        [defaultValue]="defaultExpandedGroups()"
+        [collapsible]="true"
+        ariaLabel="Workspace navigation groups"
+      >
+        @for (node of menuList; track node.path) {
+          @if (node.children; as children) {
+            <tng-accordion-item [value]="node.path">
+              <tng-accordion-trigger>
+                <span class="drawer-group-trigger">
+                  <span class="drawer-group-copy">
+                    <span class="drawer-group-label">{{ node.name }}</span>
+                    <span class="drawer-group-subtitle">
+                      {{ getGroupSubtitle(node) }}
+                    </span>
+                  </span>
+                </span>
+              </tng-accordion-trigger>
+
+              <tng-accordion-panel class="drawer-group-panel">
+                <tng-listbox
+                  class="drawer-group-listbox"
+                  [ariaLabel]="node.name + ' links'"
+                  [options]="children"
+                  [getOptionValue]="getChildValue(node)"
+                  [getOptionLabel]="getMenuNodeLabel"
+                  [trackBy]="navItemTrackBy"
+                  [value]="activeGroupPaths().get(node.path) ?? null"
+                  [typeahead]="false"
+                  [loop]="true"
+                  (valueChange)="onGroupValueChange($event)"
+                >
+                  <ng-template #tngListboxOptionTpl let-ctx>
+                    <span class="drawer-option-label">{{ ctx.label }}</span>
+
+                    @if (ctx.selected) {
+                      <tng-icon icon="chevron-right" class="drawer-option-icon" />
+                    }
+                  </ng-template>
+                </tng-listbox>
+              </tng-accordion-panel>
+            </tng-accordion-item>
+          } @else {
+            <a
+              class="drawer-nav-link drawer-nav-link--root"
+              [class.drawer-nav-link--active]="isRouteActive(getNodePath(node))"
+              [routerLink]="getNodePath(node)"
+            >
+              <span class="drawer-nav-copy">
+                <span class="drawer-nav-label">{{ node.name }}</span>
+              </span>
+            </a>
+          }
+        }
+      </tng-accordion>
+    </nav>
+  </div>
+</aside>
