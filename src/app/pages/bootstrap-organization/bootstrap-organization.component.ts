@@ -19,6 +19,7 @@ import {
 } from '@tailng-ui/components';
 import { TngInput, TngInputGroup, TngSuffix } from '@tailng-ui/primitives';
 import { TngIcon } from '@tailng-ui/icons';
+import dayjs from 'dayjs';
 import { Country } from '../../core/country/country.model';
 import { CountryStore } from '../../core/country/country.store';
 import { Currency } from '../../core/currency/currency.model';
@@ -40,6 +41,7 @@ import { ToastStore } from '../../core/toast/toast.store';
 import { UserSessionService } from '../../core/user-session/user-session.service';
 import { UserSessionStore } from '../../core/user-session/user-session.store';
 import { AutoNumberingTemplateGeneratorComponent } from '../../shared/auto-numbering-template-generator/auto-numbering-template-generator.component';
+import { DEFAULT_NODE_DATE_FORMAT } from '../../util/constants';
 
 const DEFAULT_INVOICE_NUMBER_FORMAT = '<<YYYY>>/<<SERIAL3>>';
 const DEFAULT_JOURNAL_NUMBER_FORMAT =
@@ -561,7 +563,11 @@ export class BootstrapOrganizationComponent {
       return;
     }
 
-    const [startdate, enddate] = payload.fiscaldaterange;
+    const [startDateRaw, enddate] = payload.fiscaldaterange;
+    const parsedStartDate = dayjs(startDateRaw);
+    const startdate = parsedStartDate.isValid()
+      ? parsedStartDate.format(DEFAULT_NODE_DATE_FORMAT)
+      : startDateRaw;
     const request: BootstrapOrganizationPayload = {
       name: payload.name,
       email: payload.email,

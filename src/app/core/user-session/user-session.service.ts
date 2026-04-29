@@ -1,7 +1,9 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { UserSession, UserSessionSelectionId } from './user-session.model';
+import { UserSession } from './user-session.model';
+
+type UserSessionSelectionId = number | string;
 
 @Injectable({ providedIn: 'root' })
 export class UserSessionService {

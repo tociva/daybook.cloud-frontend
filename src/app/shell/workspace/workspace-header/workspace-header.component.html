@@ -54,10 +54,10 @@
         @if (organizations().length > 0) {
           @for (
             organization of organizations();
-            track organization.id ?? organization.organizationid ?? $index
+            track organization.id ?? $index
           ) {
-            <button type="button" tngMenuItem [tngMenuItemValue]="organization.id ?? organization.organizationid">
-              {{ organization.name ?? 'Unnamed organization' }}
+            <button type="button" tngMenuItem [tngMenuItemValue]="organization.id ?? $index">
+              {{ organization.name }}
             </button>
           }
         } @else {

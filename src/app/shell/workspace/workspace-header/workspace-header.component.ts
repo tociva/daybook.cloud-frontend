@@ -9,7 +9,7 @@ import {
 import { TngIcon } from '@tailng-ui/icons';
 import { TngMenuGroupLabel, TngMenuItem, type TngMenuSelectEvent } from '@tailng-ui/primitives';
 import { applyTailngTheme, defaultDarkThemePreset, defaultThemePreset } from '@tailng-ui/theme';
-import { UserSessionOrganization } from '../../../core/user-session/user-session.model';
+import { Organization } from '../../../core/organization/organization.model';
 
 @Component({
   selector: 'app-workspace-header',
@@ -29,7 +29,7 @@ import { UserSessionOrganization } from '../../../core/user-session/user-session
 export class WorkspaceHeaderComponent {
   readonly activeOrganizationName = input('No organization selected');
   readonly currentPageTitle = input('Workspace');
-  readonly organizations = input<readonly UserSessionOrganization[]>([]);
+  readonly organizations = input<readonly Organization[]>([]);
   readonly userDisplayName = input('Daybook User');
   readonly logoutRequested = output<void>();
   public readonly darkMode = signal(true);

@@ -28,17 +28,37 @@ export const authBearerTokenInterceptor: HttpInterceptorFn = (
   const appConfigStore = inject(AppConfigStore);
   const authService = inject(AuthService);
   const config = appConfigStore.config();
+  const normalizedBaseUrl = config ? normalizeBaseUrl(config.apiBaseUrl) : null;
+  const urlMatchesBase = normalizedBaseUrl ? request.url.startsWith(normalizedBaseUrl) : false;
+
+  console.log('[AuthInterceptor] request received', {
+    hasAuthorizationHeader: request.headers.has('Authorization'),
+    method: request.method,
+    normalizedApiBaseUrl: normalizedBaseUrl,
+    requestUrl: request.url,
+    urlMatchesBase,
+  });
 
   if (!config || !shouldAttachToken(request, config.apiBaseUrl)) {
+    console.log('[AuthInterceptor] skipping token attachment', {
+      hasConfig: Boolean(config),
+      reason: !config
+        ? 'missing-config'
+        : request.headers.has('Authorization')
+          ? 'authorization-already-present'
+          : 'url-does-not-match-api-base-url',
+    });
     return next(request);
   }
 
   return from(authService.getAccessToken(config.auth)).pipe(
     switchMap((token) => {
       if (!token) {
+        console.log('[AuthInterceptor] no access token available');
         return next(request);
       }
 
+      console.log('[AuthInterceptor] attaching bearer token');
       return next(
         request.clone({
           setHeaders: {

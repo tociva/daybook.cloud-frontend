@@ -38,16 +38,32 @@ export class WorkspaceShellComponent {
   protected readonly workspaceNavItems = workspaceNavItems;
   protected readonly organizations = computed(() => this.userSessionStore.session()?.ownorgs ?? []);
   protected readonly activeOrganizationName = computed(() => {
-    const organization = this.organizations()[0];
-    return organization?.name ?? 'No organization selected';
+    const session = this.userSessionStore.session();
+    const branchName = this.readString(session?.branch?.name);
+    const fiscalYearName = this.readString(session?.fiscalyear?.name);
+    const organizationName = this.readString(session?.organization?.name);
+
+    if (branchName && fiscalYearName) {
+      return `${branchName}@${fiscalYearName}`;
+    }
+
+    if (branchName) {
+      return branchName;
+    }
+
+    if (organizationName) {
+      return organizationName;
+    }
+
+    return 'No organization selected';
   });
   protected readonly userDisplayName = computed(() => {
     const session = this.userSessionStore.session();
     const name =
-      this.readString(session?.['displayname']) ??
-      this.readString(session?.['displayName']) ??
-      this.readString(session?.['name']) ??
-      this.readString(session?.['username']);
+      this.readString(session?.displayname) ??
+      this.readString(session?.displayName) ??
+      this.readString(session?.name) ??
+      this.readString(session?.username);
 
     return name ?? 'Daybook User';
   });
