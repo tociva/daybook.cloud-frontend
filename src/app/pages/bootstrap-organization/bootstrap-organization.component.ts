@@ -39,7 +39,7 @@ import {
 import { ToastStore } from '../../core/toast/toast.store';
 import { UserSessionService } from '../../core/user-session/user-session.service';
 import { UserSessionStore } from '../../core/user-session/user-session.store';
-import { AutoNumberingTemplateGeneratorComponent } from './auto-numbering-template-generator/auto-numbering-template-generator.component';
+import { AutoNumberingTemplateGeneratorComponent } from '../../shared/auto-numbering-template-generator/auto-numbering-template-generator.component';
 
 const DEFAULT_INVOICE_NUMBER_FORMAT = '<<YYYY>>/<<SERIAL3>>';
 const DEFAULT_JOURNAL_NUMBER_FORMAT =
