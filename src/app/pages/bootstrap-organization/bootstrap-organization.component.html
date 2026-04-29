@@ -216,20 +216,6 @@
         <tng-card-content>
           <div class="field-grid">
             <div class="field">
-              <tng-label forId="org-fiscal-start" required>Fiscal Start</tng-label>
-              <tng-input
-                id="org-fiscal-start"
-                placeholder="January-01"
-                [formField]="organizationForm.fiscalstart"
-                [ariaInvalid]="isInvalid('fiscalstart')"
-                (valueChange)="markTouched('fiscalstart')"
-              />
-              <p class="field-error" [class.field-error--empty]="!fieldError('fiscalstart')">
-                {{ fieldError('fiscalstart') || '\u00A0' }}
-              </p>
-            </div>
-
-            <div class="field">
               <tng-label forId="org-fiscal-name" required>Fiscal Name</tng-label>
               <tng-input
                 id="org-fiscal-name"
@@ -245,12 +231,12 @@
 
             <div class="field">
               <tng-label forId="org-fiscal-range-start" required>Date Range Start</tng-label>
-              <tng-input
+              <tng-datepicker
                 id="org-fiscal-range-start"
                 placeholder="2026-01-01"
                 [formField]="organizationForm.fiscalDateRange.start"
                 [ariaInvalid]="isInvalid('fiscalDateRange.start')"
-                (valueChange)="markTouched('fiscalDateRange.start')"
+                (valueChange)="onDateRangeStartChange($event)"
               />
               <p
                 class="field-error"
@@ -258,22 +244,8 @@
               >
                 {{ fieldError('fiscalDateRange.start') || '\u00A0' }}
               </p>
-            </div>
-
-            <div class="field">
-              <tng-label forId="org-fiscal-range-end" required>Date Range End</tng-label>
-              <tng-input
-                id="org-fiscal-range-end"
-                placeholder="2026-12-31"
-                [formField]="organizationForm.fiscalDateRange.end"
-                [ariaInvalid]="isInvalid('fiscalDateRange.end')"
-                (valueChange)="markTouched('fiscalDateRange.end')"
-              />
-              <p
-                class="field-error"
-                [class.field-error--empty]="!fieldError('fiscalDateRange.end')"
-              >
-                {{ fieldError('fiscalDateRange.end') || '\u00A0' }}
+              <p class="field-help">
+                Date Range End: {{ formattedFiscalDateRangeEnd() }}
               </p>
             </div>
           </div>
@@ -359,7 +331,9 @@
             <tng-button appearance="outline" tone="neutral" type="button" (click)="resetForm()">
               Reset
             </tng-button>
-            <tng-button tone="primary" type="submit">Create organization</tng-button>
+            <tng-button tone="primary" type="submit" [disabled]="isSubmitting()">
+              {{ isSubmitting() ? 'Creating...' : 'Create organization' }}
+            </tng-button>
           </tng-card-actions>
         </tng-card-footer>
       </tng-card>

@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
+import { Router } from '@angular/router';
 import {
   TngAutocompleteComponent,
   TngButtonComponent,
@@ -10,6 +11,7 @@ import {
   TngCardFooterComponent,
   TngCardHeaderComponent,
   TngCardTitleComponent,
+  TngDatepickerComponent,
   TngInputComponent,
   TngLabelComponent,
   TngTextareaComponent,
@@ -18,8 +20,22 @@ import { Country } from '../../core/country/country.model';
 import { CountryStore } from '../../core/country/country.store';
 import { Currency } from '../../core/currency/currency.model';
 import { CurrencyStore } from '../../core/currency/currency.store';
+import { AppConfigStore } from '../../core/config/app-config.store';
+import {
+  formatDisplayDate,
+  toDateRangeEnd,
+  toDateRangeStartFromFiscalStart,
+  toIsoDate,
+} from '../../core/date/dayjs-date.utils';
 import { DateFormat } from '../../core/date-format/date-format.model';
 import { DateFormatStore } from '../../core/date-format/date-format.store';
+import {
+  BootstrapOrganizationStore,
+  BootstrapOrganizationPayload,
+} from '../../core/organization/bootstrap-organization.store';
+import { ToastStore } from '../../core/toast/toast.store';
+import { UserSessionService } from '../../core/user-session/user-session.service';
+import { UserSessionStore } from '../../core/user-session/user-session.store';
 
 const DEFAULT_INVOICE_NUMBER_FORMAT = 'INV-{YYYY}-{0000}';
 const DEFAULT_JOURNAL_NUMBER_FORMAT = 'JV-{YYYY}-{0000}';
@@ -31,7 +47,6 @@ type OrgValidationFieldKey =
   | 'state'
   | 'description'
   | 'gstin'
-  | 'fiscalstart'
   | 'fiscalname'
   | 'invnumber'
   | 'jnumber'
@@ -100,6 +115,27 @@ const willPassRequiredStringValidation = (value: string | null | undefined): boo
 const willPassEmailValidation = (value: string): boolean =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 
+const willPassRequiredDateValidation = (value: unknown): boolean => {
+  if (typeof value === 'string') {
+    return value.trim().length > 0;
+  }
+
+  if (value instanceof Date) {
+    return !Number.isNaN(value.getTime());
+  }
+
+  if (
+    typeof value === 'object' &&
+    value !== null &&
+    'isValid' in value &&
+    typeof (value as { isValid: unknown }).isValid === 'function'
+  ) {
+    return Boolean((value as { isValid: () => boolean }).isValid());
+  }
+
+  return false;
+};
+
 const getCurrentFiscalDateRange = (): { start: string; end: string } => {
   const year = new Date().getFullYear();
 
@@ -108,11 +144,6 @@ const getCurrentFiscalDateRange = (): { start: string; end: string } => {
     end: `${year}-12-31`,
   };
 };
-
-const toFlagEmoji = (countryCode: string): string =>
-  countryCode
-    .toUpperCase()
-    .replace(/./g, (character) => String.fromCodePoint(127397 + character.charCodeAt(0)));
 
 const createInitialForm = (): OrganizationSignalFormModel => ({
   address: {
@@ -150,6 +181,7 @@ const createInitialForm = (): OrganizationSignalFormModel => ({
     TngCardFooterComponent,
     TngCardHeaderComponent,
     TngCardTitleComponent,
+    TngDatepickerComponent,
     TngInputComponent,
     TngLabelComponent,
     TngTextareaComponent,
@@ -162,6 +194,12 @@ export class BootstrapOrganizationComponent {
   private readonly countryStore = inject(CountryStore);
   private readonly currencyStore = inject(CurrencyStore);
   private readonly dateFormatStore = inject(DateFormatStore);
+  private readonly appConfigStore = inject(AppConfigStore);
+  private readonly bootstrapOrganizationStore = inject(BootstrapOrganizationStore);
+  private readonly userSessionService = inject(UserSessionService);
+  private readonly userSessionStore = inject(UserSessionStore);
+  private readonly toastStore = inject(ToastStore);
+  private readonly router = inject(Router);
   protected readonly countries = this.countryStore.countries;
   protected readonly currencies = this.currencyStore.currencies;
   protected readonly dateFormats = this.dateFormatStore.dateFormats;
@@ -171,6 +209,7 @@ export class BootstrapOrganizationComponent {
 
   protected readonly submitted = signal(false);
   protected readonly saved = signal(false);
+  protected readonly isSubmitting = signal(false);
   protected readonly touched = signal<Partial<Record<OrgValidationFieldKey, true>>>({});
 
   protected readonly countryOptionValue = (country: Country): string => country.code;
@@ -258,19 +297,15 @@ export class BootstrapOrganizationComponent {
       errors['address.line1'] = 'Address Line 1 is required';
     }
 
-    if (!willPassRequiredStringValidation(model.fiscalstart)) {
-      errors.fiscalstart = 'Fiscal Start is required';
-    }
-
     if (!willPassRequiredStringValidation(model.fiscalname)) {
       errors.fiscalname = 'Fiscal Name is required';
     }
 
-    if (!willPassRequiredStringValidation(model.fiscalDateRange.start)) {
+    if (!willPassRequiredDateValidation(model.fiscalDateRange.start)) {
       errors['fiscalDateRange.start'] = 'Start Date is required';
     }
 
-    if (!willPassRequiredStringValidation(model.fiscalDateRange.end)) {
+    if (!willPassRequiredDateValidation(model.fiscalDateRange.end)) {
       errors['fiscalDateRange.end'] = 'End Date is required';
     }
 
@@ -298,6 +333,9 @@ export class BootstrapOrganizationComponent {
       ? `Organization "${this.organizationModel().name.trim()}" is ready to be created.`
       : null,
   );
+  protected readonly formattedFiscalDateRangeEnd = computed(() =>
+    formatDisplayDate(this.organizationModel().fiscalDateRange.end),
+  );
 
   protected fieldError(field: OrgValidationFieldKey): string | null {
     if (!this.submitted() && !this.touched()[field]) {
@@ -317,32 +355,49 @@ export class BootstrapOrganizationComponent {
   }
 
   protected selectCountry(value: unknown): void {
+    const countryCode = typeof value === 'string' ? value : '';
+    if (!this.shouldProcessAutocompleteValue(countryCode, this.organizationModel().countryCode)) {
+      return;
+    }
+
     this.saved.set(false);
     this.markTouched('country');
 
-    const countryCode = typeof value === 'string' ? value : '';
     const country = this.countries().find((item) => item.code === countryCode) ?? null;
-    const currency = country
-      ? (this.currencies().find((item) => item.code === country.currencycode) ?? null)
-      : null;
-    const dateFormat = country
-      ? (this.dateFormats().find((item) => item.name === country.dateformat) ?? null)
-      : null;
-
+    const nextFiscalStart = country?.fiscalstart ?? '';
+    const nextDateRangeStart = toDateRangeStartFromFiscalStart(
+      nextFiscalStart,
+      this.organizationModel().fiscalDateRange.start,
+    );
+    const nextDateRangeEnd = toDateRangeEnd(
+      nextDateRangeStart,
+      this.organizationModel().fiscalDateRange.end,
+    );
+  
     this.organizationModel.update((current) => ({
       ...current,
       countryCode,
-      currencyCode: currency?.code ?? current.currencyCode,
-      dateFormatName: dateFormat?.name ?? current.dateFormatName,
-      fiscalstart: country?.fiscalstart ?? current.fiscalstart,
-      mobile: country ? `+${country.phone}-` : current.mobile,
+      currencyCode: country?.currencycode ?? '',
+      dateFormatName: country?.dateformat ?? '',
+      fiscalstart: nextFiscalStart,
+      fiscalDateRange: {
+        ...current.fiscalDateRange,
+        start: nextDateRangeStart,
+        end: nextDateRangeEnd,
+      },
+      mobile: country ? `+${country.phone}-` : '',
     }));
 
-    if (currency) {
+    if (nextFiscalStart.length > 0) {
+      this.markTouched('fiscalDateRange.start');
+      this.markTouched('fiscalDateRange.end');
+    }
+  
+    if (country?.currencycode) {
       this.markTouched('currency');
     }
-
-    if (dateFormat) {
+  
+    if (country?.dateformat) {
       this.markTouched('dateformatForm');
     }
   }
@@ -353,28 +408,61 @@ export class BootstrapOrganizationComponent {
     void this.dateFormatStore.load();
   }
 
+  protected onDateRangeStartChange(value: unknown): void {
+    this.saved.set(false);
+    this.markTouched('fiscalDateRange.start');
+
+    this.organizationModel.update((current) => {
+      const start = toIsoDate(value, current.fiscalDateRange.start);
+      return {
+        ...current,
+        fiscalDateRange: {
+          ...current.fiscalDateRange,
+          start,
+          end: toDateRangeEnd(start, current.fiscalDateRange.end),
+        },
+      };
+    });
+
+    this.markTouched('fiscalDateRange.end');
+  }
+
   protected selectCurrency(value: unknown): void {
+    const currencyCode = typeof value === 'string' ? value : '';
+    if (!this.shouldProcessAutocompleteValue(currencyCode, this.organizationModel().currencyCode)) {
+      return;
+    }
+
     this.saved.set(false);
     this.markTouched('currency');
 
     this.organizationModel.update((current) => ({
       ...current,
-      currencyCode: typeof value === 'string' ? value : '',
+      currencyCode,
     }));
   }
 
   protected selectDateFormat(value: unknown): void {
+    const dateFormatName = typeof value === 'string' ? value : '';
+    if (!this.shouldProcessAutocompleteValue(dateFormatName, this.organizationModel().dateFormatName)) {
+      return;
+    }
+
     this.saved.set(false);
     this.markTouched('dateformatForm');
 
     this.organizationModel.update((current) => ({
       ...current,
-      dateFormatName: typeof value === 'string' ? value : '',
+      dateFormatName,
     }));
   }
 
   protected submitForm(event: SubmitEvent): void {
     event.preventDefault();
+
+    if (this.isSubmitting()) {
+      return;
+    }
 
     this.submitted.set(true);
     this.markAllTouched();
@@ -384,7 +472,7 @@ export class BootstrapOrganizationComponent {
       return;
     }
 
-    this.saved.set(true);
+    void this.createOrganization();
   }
 
   protected resetForm(): void {
@@ -402,7 +490,6 @@ export class BootstrapOrganizationComponent {
       'state',
       'description',
       'gstin',
-      'fiscalstart',
       'fiscalname',
       'invnumber',
       'jnumber',
@@ -424,4 +511,71 @@ export class BootstrapOrganizationComponent {
       ),
     );
   }
+
+  private shouldProcessAutocompleteValue(nextValue: string, currentValue: string): boolean {
+    if (nextValue.trim().length > 0) {
+      return true;
+    }
+
+    return currentValue.trim().length > 0;
+  }
+
+  private async createOrganization(): Promise<void> {
+    const payload = this.formValue();
+    if (!payload.country || !payload.currency) {
+      this.saved.set(false);
+      return;
+    }
+
+    const appConfig = this.appConfigStore.config() ?? (await this.appConfigStore.load());
+    if (!appConfig) {
+      this.saved.set(false);
+      this.toastStore.danger('Unable to load app configuration.');
+      return;
+    }
+
+    const [startdate, enddate] = payload.fiscaldaterange;
+    const request: BootstrapOrganizationPayload = {
+      name: payload.name,
+      email: payload.email,
+      ...(payload.mobile && { mobile: payload.mobile }),
+      address: payload.address,
+      ...(payload.description && { description: payload.description }),
+      countrycode: payload.country.code,
+      ...(payload.state && { state: payload.state }),
+      currencycode: payload.currency.code,
+      fiscalstart: payload.fiscalstart,
+      fiscalname: payload.fiscalname,
+      ...(payload.gstin && { gstin: payload.gstin }),
+      invnumber: payload.invnumber,
+      jnumber: payload.jnumber,
+      dateformat: payload.dateformatForm?.name ?? '',
+      startdate,
+      enddate,
+    };
+
+    this.isSubmitting.set(true);
+
+    try {
+      await this.bootstrapOrganizationStore.bootstrapOrganization(
+        appConfig.apiBaseUrl,
+        request,
+      );
+      const session = await this.userSessionService.createUserSession(
+        appConfig.apiBaseUrl,
+      );
+      this.userSessionStore.setSession(session);
+      this.saved.set(true);
+      this.toastStore.success('Organization created successfully.');
+      await this.router.navigateByUrl('/app/dashboard');
+    } catch (error) {
+      this.saved.set(false);
+      const message =
+        error instanceof Error ? error.message : 'Failed to create organization. Please try again.';
+      this.toastStore.danger(message);
+    } finally {
+      this.isSubmitting.set(false);
+    }
+  }
+
 }

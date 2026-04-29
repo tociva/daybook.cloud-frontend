@@ -74,9 +74,9 @@ h1 {
 }
 
 .field {
+  align-content: start;
   display: grid;
   gap: 0.45rem;
-  grid-template-rows: auto auto auto;
   min-width: 0;
 }
 
@@ -112,6 +112,14 @@ tng-label {
 
 .field-error--empty {
   visibility: hidden;
+}
+
+.field-help {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0;
 }
 
 .save-message {

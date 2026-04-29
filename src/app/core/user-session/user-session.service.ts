@@ -1,87 +1,71 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { AuthService } from '../auth/auth.service';
-import { AuthConfig } from '../config/app-config.model';
 import { UserSession, UserSessionSelectionId } from './user-session.model';
 
 @Injectable({ providedIn: 'root' })
 export class UserSessionService {
-  private readonly authService = inject(AuthService);
   private readonly http = inject(HttpClient);
 
-  async createUserSession(apiBaseUrl: string, authConfig: AuthConfig): Promise<UserSession> {
+  async createUserSession(apiBaseUrl: string): Promise<UserSession> {
     return firstValueFrom(
       this.http.post<UserSession>(
         this.getUserSessionUrl(apiBaseUrl),
         {},
-        await this.buildRequestOptions(authConfig),
+        this.buildRequestOptions(),
       ),
     );
   }
 
   async selectBranch(
     apiBaseUrl: string,
-    authConfig: AuthConfig,
     branchid: UserSessionSelectionId,
   ): Promise<UserSession> {
     return firstValueFrom(
       this.http.post<UserSession>(
         `${this.getUserSessionUrl(apiBaseUrl)}/select-branch`,
         { branchid },
-        await this.buildRequestOptions(authConfig),
+        this.buildRequestOptions(),
       ),
     );
   }
 
   async selectFiscalYear(
     apiBaseUrl: string,
-    authConfig: AuthConfig,
     fiscalyearid: UserSessionSelectionId,
   ): Promise<UserSession> {
     return firstValueFrom(
       this.http.post<UserSession>(
         `${this.getUserSessionUrl(apiBaseUrl)}/select-fiscal-year`,
         { fiscalyearid },
-        await this.buildRequestOptions(authConfig),
+        this.buildRequestOptions(),
       ),
     );
   }
 
   async selectOrganization(
     apiBaseUrl: string,
-    authConfig: AuthConfig,
     organizationid: UserSessionSelectionId,
   ): Promise<UserSession> {
     return firstValueFrom(
       this.http.post<UserSession>(
         `${this.getUserSessionUrl(apiBaseUrl)}/select-organization`,
         { organizationid },
-        await this.buildRequestOptions(authConfig),
+        this.buildRequestOptions(),
       ),
     );
   }
 
-  async clearUserSession(apiBaseUrl: string, authConfig: AuthConfig): Promise<void> {
+  async clearUserSession(apiBaseUrl: string): Promise<void> {
     await firstValueFrom(
-      this.http.delete<void>(
-        this.getUserSessionUrl(apiBaseUrl),
-        await this.buildRequestOptions(authConfig),
-      ),
+      this.http.delete<void>(this.getUserSessionUrl(apiBaseUrl), this.buildRequestOptions()),
     );
   }
 
-  private async buildRequestOptions(authConfig: AuthConfig): Promise<{
+  private buildRequestOptions(): {
     headers: HttpHeaders;
-  }> {
-    const accessToken = await this.authService.getAccessToken(authConfig);
-    let headers = new HttpHeaders({ Accept: 'application/json' });
-
-    if (accessToken) {
-      headers = headers.set('Authorization', `Bearer ${accessToken}`);
-    }
-
-    return { headers };
+  } {
+    return { headers: new HttpHeaders({ Accept: 'application/json' }) };
   }
 
   private getUserSessionUrl(apiBaseUrl: string): string {

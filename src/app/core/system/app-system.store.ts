@@ -175,7 +175,6 @@ export const AppSystemStore = signalStore(
         try {
           const session = await userSessionService.createUserSession(
             config.apiBaseUrl,
-            config.auth,
           );
           userSessionStore.setSession(session);
 
@@ -339,7 +338,7 @@ export const AppSystemStore = signalStore(
           }
 
           try {
-            await userSessionService.clearUserSession(config.apiBaseUrl, config.auth);
+            await userSessionService.clearUserSession(config.apiBaseUrl);
           } catch {
             // Logout should continue even if the backend session is already gone.
           } finally {

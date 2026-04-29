@@ -1,13 +1,14 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { defaultDarkThemePreset, provideTailngTheme } from '@tailng-ui/theme';
+import { authBearerTokenInterceptor } from './core/auth/auth-bearer-token.interceptor';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideHttpClient(),
+    provideHttpClient(withInterceptors([authBearerTokenInterceptor])),
     provideRouter(routes),
     provideTailngTheme({ theme: defaultDarkThemePreset }),
   ],
