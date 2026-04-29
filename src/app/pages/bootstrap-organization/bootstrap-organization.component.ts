@@ -12,10 +12,13 @@ import {
   TngCardHeaderComponent,
   TngCardTitleComponent,
   TngDatepickerComponent,
+  TngDialogComponent,
   TngInputComponent,
   TngLabelComponent,
   TngTextareaComponent,
 } from '@tailng-ui/components';
+import { TngInput, TngInputGroup, TngSuffix } from '@tailng-ui/primitives';
+import { TngIcon } from '@tailng-ui/icons';
 import { Country } from '../../core/country/country.model';
 import { CountryStore } from '../../core/country/country.store';
 import { Currency } from '../../core/currency/currency.model';
@@ -36,9 +39,11 @@ import {
 import { ToastStore } from '../../core/toast/toast.store';
 import { UserSessionService } from '../../core/user-session/user-session.service';
 import { UserSessionStore } from '../../core/user-session/user-session.store';
+import { AutoNumberingTemplateGeneratorComponent } from './auto-numbering-template-generator/auto-numbering-template-generator.component';
 
-const DEFAULT_INVOICE_NUMBER_FORMAT = 'INV-{YYYY}-{0000}';
-const DEFAULT_JOURNAL_NUMBER_FORMAT = 'JV-{YYYY}-{0000}';
+const DEFAULT_INVOICE_NUMBER_FORMAT = '<<YYYY>>/<<SERIAL3>>';
+const DEFAULT_JOURNAL_NUMBER_FORMAT =
+  '<<FISCAL_START_YY>>-<<FISCAL_END_YY>>/<<SERIAL1>>';
 
 type OrgValidationFieldKey =
   | 'name'
@@ -182,9 +187,15 @@ const createInitialForm = (): OrganizationSignalFormModel => ({
     TngCardHeaderComponent,
     TngCardTitleComponent,
     TngDatepickerComponent,
+    TngDialogComponent,
     TngInputComponent,
+    TngInput,
+    TngInputGroup,
     TngLabelComponent,
+    TngSuffix,
+    TngIcon,
     TngTextareaComponent,
+    AutoNumberingTemplateGeneratorComponent,
   ],
   templateUrl: './bootstrap-organization.component.html',
   styleUrls: ['./bootstrap-organization.component.css', '../../../styles/flags.css'],
@@ -210,6 +221,8 @@ export class BootstrapOrganizationComponent {
   protected readonly submitted = signal(false);
   protected readonly saved = signal(false);
   protected readonly isSubmitting = signal(false);
+  protected readonly invoiceTemplateDialogOpen = signal(false);
+  protected readonly journalTemplateDialogOpen = signal(false);
   protected readonly touched = signal<Partial<Record<OrgValidationFieldKey, true>>>({});
 
   protected readonly countryOptionValue = (country: Country): string => country.code;
@@ -352,6 +365,20 @@ export class BootstrapOrganizationComponent {
   protected markTouched(field: OrgValidationFieldKey): void {
     this.saved.set(false);
     this.touched.update((fields) => ({ ...fields, [field]: true }));
+  }
+
+  protected applyJournalNumberTemplate(template: string): void {
+    this.saved.set(false);
+    this.organizationModel.update((current) => ({ ...current, jnumber: template }));
+    this.markTouched('jnumber');
+    this.journalTemplateDialogOpen.set(false);
+  }
+
+  protected applyInvoiceNumberTemplate(template: string): void {
+    this.saved.set(false);
+    this.organizationModel.update((current) => ({ ...current, invnumber: template }));
+    this.markTouched('invnumber');
+    this.invoiceTemplateDialogOpen.set(false);
   }
 
   protected selectCountry(value: unknown): void {

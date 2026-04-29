@@ -1,0 +1,40 @@
+<div class="jnt-generator">
+  @for (group of placeholderGroups; track group.label) {
+    <div class="jnt-help">
+      <p class="jnt-help-title">{{ group.label }}</p>
+      <p class="jnt-help-values">{{ group.values.join(', ') }}</p>
+    </div>
+  }
+
+  <div class="jnt-field">
+    <tng-label>Template</tng-label>
+    <input
+      tngInput
+      type="text"
+      [value]="template()"
+      (input)="onTemplateInput($event)"
+      placeholder="<<FISCAL_START_YY>>-<<FISCAL_END_YY>>/<<SERIAL1>>"
+    />
+  </div>
+
+  <div class="jnt-field">
+    <tng-label>Resolved preview</tng-label>
+    <input tngInput type="text" [value]="resolvedTemplatePreview()" readonly />
+  </div>
+
+  <div class="jnt-field">
+    <tng-label>Next 5 sequences</tng-label>
+    <ul class="jnt-sequences">
+      @for (item of nextSequences(); track item) {
+        <li>{{ item }}</li>
+      }
+    </ul>
+  </div>
+
+  <div class="jnt-actions">
+    <tng-button tone="primary" type="button" (click)="apply()">
+      Use template
+    </tng-button>
+  </div>
+</div>
+

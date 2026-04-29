@@ -88,9 +88,46 @@ h1 {
 
 tng-card,
 tng-input,
+tng-input-group,
 tng-autocomplete,
 tng-textarea {
   width: 100%;
+}
+
+.numbering-template-input-group {
+  min-width: 0;
+  max-width: 90%;
+}
+
+.numbering-template-input-group input {
+  min-width: 0;
+}
+
+.numbering-template-input-group-icon{
+  border-radius: 0.35rem;
+  color: var(--tng-semantic-foreground-secondary);
+  cursor: pointer;
+  outline: none;
+  padding: 0.1rem;
+  transition:
+    background-color 140ms ease,
+    color 140ms ease,
+    transform 140ms ease;
+}
+
+.numbering-template-input-group-icon:hover {
+  background: color-mix(in srgb, var(--tng-semantic-accent-brand) 14%, transparent);
+  color: var(--tng-semantic-accent-brand);
+}
+
+.numbering-template-input-group-icon:focus-visible {
+  background: color-mix(in srgb, var(--tng-semantic-accent-brand) 16%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--tng-semantic-accent-brand) 30%, transparent);
+  color: var(--tng-semantic-accent-brand);
+}
+
+.numbering-template-input-group-icon:active {
+  transform: scale(0.96);
 }
 
 tng-label {
