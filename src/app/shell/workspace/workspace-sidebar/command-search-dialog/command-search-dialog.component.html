@@ -1,0 +1,24 @@
+<tng-dialog
+  tabindex="-1"
+  title="Command Search"
+  description="Type a command, page, or action to jump quickly."
+  [open]="open"
+  (openChange)="onDialogOpenChange($event)"
+  (closed)="onDialogClosed()"
+>
+  <div class="command-search-dialog">
+    <tng-input-group class="command-search-input-shell">
+      <span tngPrefix aria-hidden="true" class="command-search-prefix">
+        <tng-icon icon="search" class="command-search-icon"></tng-icon>
+      </span>
+      <input
+        tngInput
+        type="search"
+        tabindex="0"
+        autofocus
+        placeholder="Search commands, pages, or settings..."
+        class="command-search-input"
+      />
+    </tng-input-group>
+  </div>
+</tng-dialog>

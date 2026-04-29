@@ -7,7 +7,8 @@
 }
 
 .workspace-drawer {
-  display: block;
+  display: flex;
+  flex-direction: column;
   height: 100%;
   min-height: 0;
   overflow: hidden;
@@ -18,7 +19,8 @@
 /* Dedicated left menu scroll area */
 
 .drawer-nav-scroll {
-  height: 100%;
+  flex: 1 1 auto;
+  height: auto;
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -33,6 +35,36 @@
   gap: 0.4rem;
   min-height: 0;
   padding-right: 0;
+}
+
+.drawer-search {
+  display: grid;
+  margin-bottom: 0.5rem;
+  min-width: 0;
+}
+
+.drawer-search-shell {
+  margin-inline: auto;
+  max-width: 89%;
+  min-width: 0;
+  overflow: hidden;
+  width: 100%;
+}
+
+.drawer-search-prefix,
+.drawer-search-meta {
+  color: var(--tng-semantic-foreground-secondary);
+  font-size: 0.78rem;
+}
+
+.drawer-search-icon {
+  height: 0.95rem;
+  width: 0.95rem;
+}
+
+.drawer-search-control {
+  min-width: 0;
+  width: 100%;
 }
 
 /* Accordion */

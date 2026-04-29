@@ -1,4 +1,25 @@
 <aside class="workspace-drawer" aria-label="Workspace navigation">
+  <div class="drawer-search">
+    <tng-input-group class="drawer-search-shell">
+      <span tngPrefix aria-hidden="true" class="drawer-search-prefix">
+        <tng-icon icon="search" class="drawer-search-icon"></tng-icon>
+      </span>
+      <input
+        tngInput
+        type="search"
+        placeholder="Type to search..."
+        class="drawer-search-control"
+      />
+      <span tngSuffix class="drawer-search-meta">{{ searchShortcutHint }}</span>
+    </tng-input-group>
+  </div>
+
+  <app-command-search-dialog
+    [open]="commandSearchOpen()"
+    (openChange)="onCommandSearchOpenChange($event)"
+    (closed)="onCommandSearchClosed()"
+  />
+
   <div class="drawer-nav-scroll">
     <nav class="drawer-nav" aria-label="Primary">
       <tng-accordion

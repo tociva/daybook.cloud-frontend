@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, ViewEncapsulation } from '@angular/core';
+import { Component, HostListener, computed, inject, signal, ViewEncapsulation } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import {
   TngAccordionComponent,
@@ -7,14 +7,16 @@ import {
   TngAccordionTriggerComponent,
   TngListboxComponent,
 } from '@tailng-ui/components';
+import { TngInput, TngInputGroup, TngPrefix, TngSuffix } from '@tailng-ui/primitives';
 import { TngIcon } from '@tailng-ui/icons';
+import { isMacPlatform } from '../../../core/system/platform.utils';
+import { CommandSearchDialogComponent } from './command-search-dialog/command-search-dialog.component';
 
 type MenuNode = Readonly<{
   path: string;
   name: string;
   children?: readonly MenuNode[];
 }>;
-
 const menuList: readonly MenuNode[] = [
   {
     path: 'trading',
@@ -73,7 +75,12 @@ const groupSubtitleByPath: Readonly<Record<string, string>> = {
     TngAccordionItemComponent,
     TngAccordionPanelComponent,
     TngAccordionTriggerComponent,
+    CommandSearchDialogComponent,
     TngListboxComponent,
+    TngInput,
+    TngInputGroup,
+    TngPrefix,
+    TngSuffix,
     TngIcon,
   ],
   encapsulation: ViewEncapsulation.None,
@@ -84,6 +91,8 @@ export class WorkspaceSidebarComponent {
   private readonly router = inject(Router);
 
   protected readonly menuList = menuList;
+  protected readonly searchShortcutHint = isMacPlatform() ? '⌘K' : 'Ctrl K';
+  protected readonly commandSearchOpen = signal(false);
   protected readonly defaultExpandedGroups = computed(() =>
     this.menuList.filter((node) => node.children?.length).map((node) => node.path),
   );
@@ -169,5 +178,21 @@ export class WorkspaceSidebarComponent {
     // Update the shared signal so all other panels lose their selection.
     this.selectedPath.set(value);
     this.router.navigateByUrl(value);
+  }
+
+  protected onCommandSearchClosed(): void {
+    this.commandSearchOpen.set(false);
+  }
+
+  protected onCommandSearchOpenChange(next: boolean): void {
+    this.commandSearchOpen.set(next);
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  protected onDocumentKeydown(event: KeyboardEvent): void {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+      event.preventDefault();
+      this.commandSearchOpen.set(true);
+    }
   }
 }
