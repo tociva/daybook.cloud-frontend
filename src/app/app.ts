@@ -4,6 +4,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { TngToastComponent } from '@tailng-ui/components';
 import { filter } from 'rxjs';
 import { AuthService } from './core/auth/auth.service';
+import { ProgressStore } from './core/progress/progress.store';
 import { AppSystemStore } from './core/system/app-system.store';
 import { AppToastTone } from './core/toast/toast.model';
 import { ToastStore } from './core/toast/toast.store';
@@ -21,10 +22,12 @@ export class App {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly toastStore = inject(ToastStore);
+  private readonly progressStore = inject(ProgressStore);
   private readonly currentUrl = signal(this.router.url);
   protected readonly toast = viewChild<TngToastComponent>('toast');
   private readonly startupStatus = computed(() => this.systemStore.startupStatus());
   private readonly toastEvents = computed(() => this.toastStore.events());
+  protected readonly showTopProgress = computed(() => this.progressStore.isVisible());
   protected readonly showLanding = computed(() => {
     const path = this.currentUrl().split('?')[0] ?? '/';
     return path === '/' || path === '/auth/callback';
