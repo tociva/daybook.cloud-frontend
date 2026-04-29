@@ -1,7 +1,6 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
-import { firstValueFrom } from 'rxjs';
+import { ApiClientService } from '../api/api-client.service';
 import { initialBootstrapOrganizationState } from './bootstrap-organization.state';
 
 export type BootstrapOrganizationPayload = Readonly<{
@@ -35,7 +34,7 @@ export const BootstrapOrganizationStore = signalStore(
     error: computed(() => error()),
     isLoading: computed(() => isLoading()),
   })),
-  withMethods((store, http = inject(HttpClient)) => ({
+  withMethods((store, api = inject(ApiClientService)) => ({
     async bootstrapOrganization(
       apiBaseUrl: string,
       payload: BootstrapOrganizationPayload,
@@ -47,17 +46,9 @@ export const BootstrapOrganizationStore = signalStore(
       patchState(store, { isLoading: true, error: null });
 
       try {
-        const headers = new HttpHeaders({
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        });
-
-        await firstValueFrom(
-          http.post<unknown>(
-            `${apiBaseUrl.replace(/\/$/, '')}/organization/organization/bootstrap-with-data`,
-            payload,
-            { headers },
-          ),
+        await api.post<unknown, BootstrapOrganizationPayload>(
+          `${apiBaseUrl.replace(/\/$/, '')}/organization/organization/bootstrap-with-data`,
+          payload,
         );
 
         patchState(store, { isLoading: false, error: null });
