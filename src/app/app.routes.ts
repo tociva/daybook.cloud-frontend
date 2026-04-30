@@ -3,10 +3,12 @@ import { CallbackComponent } from './auth/callback/callback.component';
 import { EmptyRouteComponent } from './empty-route.component';
 import { BootstrapOrganizationComponent } from './pages/bootstrap-organization/bootstrap-organization.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
+import { SubscriptionSelectionComponent } from './pages/subscription-selection/subscription-selection.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', component: EmptyRouteComponent },
   { path: 'auth/callback', component: CallbackComponent },
   { path: 'app/dashboard', component: DashboardComponent },
+  { path: 'app/management/subscription', component: SubscriptionSelectionComponent },
   { path: 'bootstrap/bootstrap-organization', component: BootstrapOrganizationComponent },
 ];

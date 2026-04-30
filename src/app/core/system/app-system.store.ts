@@ -14,6 +14,7 @@ import { AppStartupStatus, AppSystemModel } from './app-system.model';
 import { initialAppSystemState } from './app-system.state';
 
 const BOOTSTRAP_ORGANIZATION_ROUTE = '/bootstrap/bootstrap-organization';
+const SUBSCRIPTION_SELECTION_ROUTE = '/app/management/subscription';
 
 function isConfigLoadedStatus(status: AppStartupStatus): boolean {
   return (
@@ -29,6 +30,7 @@ function isConfigLoadedStatus(status: AppStartupStatus): boolean {
     status === 'session-missing' ||
     status === 'redirecting-to-login' ||
     status === 'redirecting-to-bootstrap' ||
+    status === 'redirecting-to-subscription' ||
     status === 'redirecting-to-dashboard' ||
     status === 'session-error' ||
     status === 'login-error'
@@ -69,6 +71,8 @@ function buildToast(
       return { tone: 'neutral', message: 'Redirecting to login...' };
     case 'redirecting-to-bootstrap':
       return { tone: 'neutral', message: 'Opening organization setup...' };
+    case 'redirecting-to-subscription':
+      return { tone: 'neutral', message: 'Opening subscription selection...' };
     case 'redirecting-to-dashboard':
       return { tone: 'neutral', message: 'Opening dashboard...' };
     case 'config-load-error':
@@ -110,6 +114,10 @@ function asErrorMessage(error: unknown, fallbackMessage: string): string {
 
 function hasOwnOrganizations(session: UserSession): boolean {
   return Boolean(session.ownorgs?.length);
+}
+
+function hasMemberOrganizations(session: UserSession): boolean {
+  return Boolean(session.memberorgs?.length);
 }
 
 export const AppSystemStore = signalStore(
@@ -179,13 +187,15 @@ export const AppSystemStore = signalStore(
           userSessionStore.setSession(session);
 
           const returnUri = authService.consumeReturnUri(config.auth);
-          const targetRoute = hasOwnOrganizations(session)
-            ? returnUri
-            : BOOTSTRAP_ORGANIZATION_ROUTE;
+          const hasOrganizationAccess =
+            hasOwnOrganizations(session) || hasMemberOrganizations(session);
+          const targetRoute = hasOrganizationAccess ? returnUri : SUBSCRIPTION_SELECTION_ROUTE;
           const redirectStatus: AppStartupStatus =
             targetRoute === BOOTSTRAP_ORGANIZATION_ROUTE
               ? 'redirecting-to-bootstrap'
-              : 'redirecting-to-dashboard';
+              : targetRoute === SUBSCRIPTION_SELECTION_ROUTE
+                ? 'redirecting-to-subscription'
+                : 'redirecting-to-dashboard';
 
           updateStartupStatus(redirectStatus);
           await router.navigateByUrl(targetRoute);

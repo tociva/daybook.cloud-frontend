@@ -56,6 +56,7 @@ const menuList: readonly MenuNode[] = [
       { path: 'organization', name: 'Organization' },
       { path: 'branch', name: 'Branch' },
       { path: 'fiscal-year', name: 'Fiscal Year' },
+      { path: 'app/management/subscription', name: 'Subscription' },
       { path: 'users', name: 'Users' },
     ],
   },

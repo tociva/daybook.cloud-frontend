@@ -13,6 +13,7 @@ export type AppStartupStatus =
   | 'session-missing'
   | 'redirecting-to-login'
   | 'redirecting-to-bootstrap'
+  | 'redirecting-to-subscription'
   | 'redirecting-to-dashboard'
   | 'config-load-error'
   | 'session-error'
