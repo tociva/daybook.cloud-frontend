@@ -1,7 +1,7 @@
 import type { Country } from '../country/country.model';
 import type { FiscalYear } from '../fiscal-year/fiscal-year.model';
 import type { Organization } from '../organization/organization.model';
-import type { Address } from '../../util/types/address';
+import type { Address } from '../../../../../util/types/address';
 
 export type Branch = Readonly<{
   id?: string;

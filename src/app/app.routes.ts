@@ -1,10 +1,10 @@
 import { Routes } from '@angular/router';
-import { CallbackComponent } from './auth/callback/callback.component';
-import { SilentRenewComponent } from './auth/silent-renew/silent-renew.component';
+import { CallbackComponent } from './components/features/auth/ui/callback/callback.component';
+import { SilentRenewComponent } from './components/features/auth/ui/silent-renew/silent-renew.component';
 import { EmptyRouteComponent } from './empty-route.component';
-import { BootstrapOrganizationComponent } from './pages/bootstrap-organization/bootstrap-organization.component';
-import { DashboardComponent } from './pages/dashboard/dashboard.component';
-import { SubscriptionSelectionComponent } from './pages/subscription-selection/subscription-selection.component';
+import { BootstrapOrganizationComponent } from './components/features/management/ui/bootstrap-organization/bootstrap-organization.component';
+import { DashboardComponent } from './components/features/dashboard/ui/dashboard/dashboard.component';
+import { SubscriptionSelectionComponent } from './components/features/management/ui/subscription-selection/subscription-selection.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', component: EmptyRouteComponent },

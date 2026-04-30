@@ -2,7 +2,7 @@ import type { Country } from '../country/country.model';
 import type { Currency } from '../currency/currency.model';
 import type { DateFormat } from '../date-format/date-format.model';
 import type { Branch } from '../branch/branch.model';
-import type { Address } from '../../util/types/address';
+import type { Address } from '../../../../../util/types/address';
 
 export type Organization = Readonly<{
   id?: string;

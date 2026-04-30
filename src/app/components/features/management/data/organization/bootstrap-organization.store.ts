@@ -1,6 +1,6 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
-import { ApiClientService } from '../api/api-client.service';
+import { ApiClientService } from '../../../../../core/api/api-client.service';
 import { initialBootstrapOrganizationState } from './bootstrap-organization.state';
 
 export type BootstrapOrganizationPayload = Readonly<{

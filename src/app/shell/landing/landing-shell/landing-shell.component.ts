@@ -1,6 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { AuthService } from '../../../core/auth/auth.service';
+import { AuthService } from '../../../components/features/auth/data/auth.service';
 import { AppConfigStore } from '../../../core/config/app-config.store';
 import { AppSystemStore } from '../../../core/system/app-system.store';
 import {

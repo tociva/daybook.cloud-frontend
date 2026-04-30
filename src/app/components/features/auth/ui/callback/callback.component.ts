@@ -1,6 +1,6 @@
 import { Component, OnDestroy, computed, effect, inject } from '@angular/core';
-import { AppStartupStatus } from '../../core/system/app-system.model';
-import { AppSystemStore } from '../../core/system/app-system.store';
+import { AppStartupStatus } from '../../../../../core/system/app-system.model';
+import { AppSystemStore } from '../../../../../core/system/app-system.store';
 
 @Component({
   selector: 'app-auth-callback',

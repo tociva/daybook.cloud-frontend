@@ -7,7 +7,7 @@ import {
 import { inject } from '@angular/core';
 import { Observable, from } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import { AppConfigStore } from '../config/app-config.store';
+import { AppConfigStore } from '../../../../core/config/app-config.store';
 import { AuthService } from './auth.service';
 
 const normalizeBaseUrl = (baseUrl: string): string => baseUrl.replace(/\/$/, '');

@@ -1,6 +1,6 @@
 import { Component, OnDestroy, effect, inject } from '@angular/core';
-import { AuthService } from '../../core/auth/auth.service';
-import { AppConfigStore } from '../../core/config/app-config.store';
+import { AuthService } from '../../data/auth.service';
+import { AppConfigStore } from '../../../../../core/config/app-config.store';
 
 @Component({
   selector: 'app-silent-renew',

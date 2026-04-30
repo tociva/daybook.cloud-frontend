@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import type { User } from 'oidc-client-ts';
-import { AuthConfig } from '../config/app-config.model';
+import { AuthConfig } from '../../../../core/config/app-config.model';
 import { OidcUserManagerFactory } from './oidc-user-manager.factory';
 
 const AUTH_PROVIDER_PAUSE_KEY_PREFIX = 'daybook.auth.provider-paused.';

@@ -6,7 +6,7 @@ import {
   TngCardHeaderComponent,
   TngCardTitleComponent,
 } from '@tailng-ui/components';
-import { UserSessionStore } from '../../core/user-session/user-session.store';
+import { UserSessionStore } from '../../../management/data/user-session/user-session.store';
 
 @Component({
   selector: 'app-dashboard',

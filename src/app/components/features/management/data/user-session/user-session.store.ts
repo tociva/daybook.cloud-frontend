@@ -1,7 +1,7 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
-import { ApiClientService } from '../api/api-client.service';
-import { AppConfigStore } from '../config/app-config.store';
+import { ApiClientService } from '../../../../../core/api/api-client.service';
+import { AppConfigStore } from '../../../../../core/config/app-config.store';
 import { UserSession } from './user-session.model';
 import { initialUserSessionState } from './user-session.state';
 

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { UserManager, WebStorageStateStore } from 'oidc-client-ts';
-import { AuthConfig } from '../config/app-config.model';
+import { AuthConfig } from '../../../../core/config/app-config.model';
 
 @Injectable({ providedIn: 'root' })
 export class OidcUserManagerFactory {

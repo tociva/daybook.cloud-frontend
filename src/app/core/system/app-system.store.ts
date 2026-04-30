@@ -1,15 +1,15 @@
 import { computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
-import { AuthService } from '../auth/auth.service';
-import { AuthStore } from '../auth/auth.store';
+import { AuthService } from '../../components/features/auth/data/auth.service';
+import { AuthStore } from '../../components/features/auth/data/auth.store';
 import { AppConfig } from '../config/app-config.model';
 import { AppConfigStore } from '../config/app-config.store';
 import { AppToastTone } from '../toast/toast.model';
 import { ToastStore } from '../toast/toast.store';
-import { UserSession } from '../user-session/user-session.model';
-import { UserSessionService } from '../user-session/user-session.service';
-import { UserSessionStore } from '../user-session/user-session.store';
+import { UserSession } from '../../components/features/management/data/user-session/user-session.model';
+import { UserSessionService } from '../../components/features/management/data/user-session/user-session.service';
+import { UserSessionStore } from '../../components/features/management/data/user-session/user-session.store';
 import { AppStartupStatus, AppSystemModel } from './app-system.model';
 import { initialAppSystemState } from './app-system.state';
 

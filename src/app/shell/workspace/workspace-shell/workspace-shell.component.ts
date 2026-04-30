@@ -3,7 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 import { AppSystemStore } from '../../../core/system/app-system.store';
-import { UserSessionStore } from '../../../core/user-session/user-session.store';
+import { UserSessionStore } from '../../../components/features/management/data/user-session/user-session.store';
 import { WorkspaceContentComponent } from '../workspace-content/workspace-content.component';
 import { WorkspaceHeaderComponent } from '../workspace-header/workspace-header.component';
 import { WorkspaceNavItem } from '../workspace-nav.model';

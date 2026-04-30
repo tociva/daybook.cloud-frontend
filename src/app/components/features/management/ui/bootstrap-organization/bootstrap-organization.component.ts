@@ -21,28 +21,28 @@ import {
 import { TngInput, TngInputGroup, TngSuffix } from '@tailng-ui/primitives';
 import { TngIcon } from '@tailng-ui/icons';
 import dayjs from 'dayjs';
-import { Country } from '../../core/country/country.model';
-import { CountryStore } from '../../core/country/country.store';
-import { Currency } from '../../core/currency/currency.model';
-import { CurrencyStore } from '../../core/currency/currency.store';
-import { AppConfigStore } from '../../core/config/app-config.store';
+import { Country } from '../../data/country/country.model';
+import { CountryStore } from '../../data/country/country.store';
+import { Currency } from '../../data/currency/currency.model';
+import { CurrencyStore } from '../../data/currency/currency.store';
+import { AppConfigStore } from '../../../../../core/config/app-config.store';
 import {
   formatDisplayDate,
   toDateRangeEnd,
   toDateRangeStartFromFiscalStart,
   toIsoDate,
-} from '../../core/date/dayjs-date.utils';
-import { DateFormat } from '../../core/date-format/date-format.model';
-import { DateFormatStore } from '../../core/date-format/date-format.store';
+} from '../../../../../core/date/dayjs-date.utils';
+import { DateFormat } from '../../data/date-format/date-format.model';
+import { DateFormatStore } from '../../data/date-format/date-format.store';
 import {
   BootstrapOrganizationStore,
   BootstrapOrganizationPayload,
-} from '../../core/organization/bootstrap-organization.store';
-import { ToastStore } from '../../core/toast/toast.store';
-import { UserSessionService } from '../../core/user-session/user-session.service';
-import { UserSessionStore } from '../../core/user-session/user-session.store';
-import { AutoNumberingTemplateGeneratorComponent } from '../../shared/auto-numbering-template-generator/auto-numbering-template-generator.component';
-import { DEFAULT_NODE_DATE_FORMAT } from '../../util/constants';
+} from '../../data/organization/bootstrap-organization.store';
+import { ToastStore } from '../../../../../core/toast/toast.store';
+import { UserSessionService } from '../../data/user-session/user-session.service';
+import { UserSessionStore } from '../../data/user-session/user-session.store';
+import { AutoNumberingTemplateGeneratorComponent } from '../../../../../shared/auto-numbering-template-generator/auto-numbering-template-generator.component';
+import { DEFAULT_NODE_DATE_FORMAT } from '../../../../../util/constants';
 
 const DEFAULT_INVOICE_NUMBER_FORMAT = '<<YYYY>>/<<SERIAL3>>';
 const DEFAULT_JOURNAL_NUMBER_FORMAT =
@@ -202,7 +202,7 @@ const createInitialForm = (): OrganizationSignalFormModel => ({
     AutoNumberingTemplateGeneratorComponent,
   ],
   templateUrl: './bootstrap-organization.component.html',
-  styleUrls: ['./bootstrap-organization.component.css', '../../../styles/flags.css'],
+  styleUrls: ['./bootstrap-organization.component.css', '../../../../../../styles/flags.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BootstrapOrganizationComponent {

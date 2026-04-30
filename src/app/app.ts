@@ -3,7 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { TngToastComponent } from '@tailng-ui/components';
 import { filter } from 'rxjs';
-import { AuthService } from './core/auth/auth.service';
+import { AuthService } from './components/features/auth/data/auth.service';
 import { ProgressStore } from './core/progress/progress.store';
 import { AppSystemStore } from './core/system/app-system.store';
 import { AppToastTone } from './core/toast/toast.model';

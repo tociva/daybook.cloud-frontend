@@ -9,7 +9,7 @@ import {
 import { TngIcon } from '@tailng-ui/icons';
 import { TngMenuGroupLabel, TngMenuItem, type TngMenuSelectEvent } from '@tailng-ui/primitives';
 import { applyTailngTheme, defaultDarkThemePreset, defaultThemePreset } from '@tailng-ui/theme';
-import { Organization } from '../../../core/organization/organization.model';
+import { Organization } from '../../../components/features/management/data/organization/organization.model';
 
 @Component({
   selector: 'app-workspace-header',
