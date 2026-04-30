@@ -413,6 +413,13 @@
           Add the core details we need to prepare fiscal years, numbering, currency, and regional defaults for
           Daybook Cloud.
         </p>
+        <tng-stepper
+          class="setup-stepper"
+          ariaLabel="Organization setup progress"
+          [ordered]="true"
+          [steps]="setupSteps()"
+          [value]="activeSetupStep()"
+        />
       </div>
     </aside>
   </section>

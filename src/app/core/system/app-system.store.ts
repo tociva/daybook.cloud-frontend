@@ -14,7 +14,6 @@ import { AppStartupStatus, AppSystemModel } from './app-system.model';
 import { initialAppSystemState } from './app-system.state';
 
 const BOOTSTRAP_ORGANIZATION_ROUTE = '/bootstrap/bootstrap-organization';
-const SUBSCRIPTION_SELECTION_ROUTE = '/app/management/subscription';
 
 function isConfigLoadedStatus(status: AppStartupStatus): boolean {
   return (
@@ -197,13 +196,11 @@ export const AppSystemStore = signalStore(
           const returnUri = authService.consumeReturnUri(config.auth);
           const hasOrganizationAccess =
             hasOwnOrganizations(session) || hasMemberOrganizations(session);
-          const targetRoute = hasOrganizationAccess ? returnUri : SUBSCRIPTION_SELECTION_ROUTE;
+          const targetRoute = hasOrganizationAccess ? returnUri : BOOTSTRAP_ORGANIZATION_ROUTE;
           const redirectStatus: AppStartupStatus =
             targetRoute === BOOTSTRAP_ORGANIZATION_ROUTE
               ? 'redirecting-to-bootstrap'
-              : targetRoute === SUBSCRIPTION_SELECTION_ROUTE
-                ? 'redirecting-to-subscription'
-                : 'redirecting-to-dashboard';
+              : 'redirecting-to-dashboard';
 
           updateStartupStatus(redirectStatus);
           await router.navigateByUrl(targetRoute);
@@ -218,13 +215,11 @@ export const AppSystemStore = signalStore(
               const returnUri = authService.consumeReturnUri(config.auth);
               const hasOrganizationAccess =
                 hasOwnOrganizations(renewedSession) || hasMemberOrganizations(renewedSession);
-              const targetRoute = hasOrganizationAccess ? returnUri : SUBSCRIPTION_SELECTION_ROUTE;
+              const targetRoute = hasOrganizationAccess ? returnUri : BOOTSTRAP_ORGANIZATION_ROUTE;
               const redirectStatus: AppStartupStatus =
                 targetRoute === BOOTSTRAP_ORGANIZATION_ROUTE
                   ? 'redirecting-to-bootstrap'
-                  : targetRoute === SUBSCRIPTION_SELECTION_ROUTE
-                    ? 'redirecting-to-subscription'
-                    : 'redirecting-to-dashboard';
+                  : 'redirecting-to-dashboard';
 
               updateStartupStatus(redirectStatus);
               await router.navigateByUrl(targetRoute);

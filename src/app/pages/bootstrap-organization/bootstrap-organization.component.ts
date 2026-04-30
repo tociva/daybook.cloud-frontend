@@ -15,6 +15,7 @@ import {
   TngDialogComponent,
   TngInputComponent,
   TngLabelComponent,
+  TngStepperComponent,
   TngTextareaComponent,
 } from '@tailng-ui/components';
 import { TngInput, TngInputGroup, TngSuffix } from '@tailng-ui/primitives';
@@ -195,6 +196,7 @@ const createInitialForm = (): OrganizationSignalFormModel => ({
     TngInputGroup,
     TngLabelComponent,
     TngSuffix,
+    TngStepperComponent,
     TngIcon,
     TngTextareaComponent,
     AutoNumberingTemplateGeneratorComponent,
@@ -348,6 +350,54 @@ export class BootstrapOrganizationComponent {
       ? `Organization "${this.organizationModel().name.trim()}" is ready to be created.`
       : null,
   );
+  protected readonly setupSteps = computed(() => {
+    const model = this.organizationModel();
+    const basicCompleted =
+      willPassRequiredStringValidation(model.name) &&
+      willPassRequiredStringValidation(model.email) &&
+      willPassEmailValidation(model.email) &&
+      willPassRequiredStringValidation(model.countryCode);
+    const addressCompleted = willPassRequiredStringValidation(model.address.line1);
+    const fiscalCompleted =
+      willPassRequiredStringValidation(model.fiscalname) &&
+      willPassRequiredDateValidation(model.fiscalDateRange.start);
+    const defaultsCompleted =
+      willPassRequiredStringValidation(model.currencyCode) &&
+      willPassRequiredStringValidation(model.dateFormatName) &&
+      willPassRequiredStringValidation(model.invnumber) &&
+      willPassRequiredStringValidation(model.jnumber);
+
+    return [
+      {
+        value: 'basic',
+        label: 'Basic details',
+        description: 'Name, email, and country',
+        completed: basicCompleted,
+      },
+      {
+        value: 'address',
+        label: 'Address',
+        description: 'Primary address line',
+        completed: addressCompleted,
+      },
+      {
+        value: 'finance',
+        label: 'Financial info',
+        description: 'Fiscal name and date range',
+        completed: fiscalCompleted,
+      },
+      {
+        value: 'defaults',
+        label: 'Financial setup',
+        description: 'Currency and numbering',
+        completed: defaultsCompleted,
+      },
+    ] as const;
+  });
+  protected readonly activeSetupStep = computed(() => {
+    const firstPending = this.setupSteps().find((step) => !step.completed);
+    return firstPending?.value ?? 'defaults';
+  });
   protected readonly formattedFiscalDateRangeEnd = computed(() =>
     formatDisplayDate(this.organizationModel().fiscalDateRange.end),
   );
@@ -546,7 +596,9 @@ export class BootstrapOrganizationComponent {
       return true;
     }
 
-    return currentValue.trim().length > 0;
+    // Ignore noisy empty emissions from autocomplete after selection/blur,
+    // otherwise previously selected values get cleared unexpectedly.
+    return false;
   }
 
   private async createOrganization(): Promise<void> {
