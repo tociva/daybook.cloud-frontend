@@ -1,5 +1,6 @@
 import type { Branch } from '../branch/branch.model';
 import type { FiscalYear } from '../fiscal-year/fiscal-year.model';
+import type { OrganizationMember } from '../organization-member/organization-member.model';
 import type { Organization } from '../organization/organization.model';
 import type { Subscription } from '../subscription/subscription.model';
 
@@ -16,6 +17,8 @@ export interface UserSession {
   organization?: Organization | null;
   branch?: Branch | null;
   fiscalyear?: FiscalYear | null;
+  member: OrganizationMember | null;
+  memberorgs: OrganizationMember[];
   ownorgs?: Organization[] | null;
 }
 
