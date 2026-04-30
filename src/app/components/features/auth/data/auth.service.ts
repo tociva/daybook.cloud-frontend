@@ -145,6 +145,10 @@ export class AuthService {
     return this.normalizeReturnUri(returnUri) ?? DEFAULT_POST_LOGIN_ROUTE;
   }
 
+  getCurrentReturnUri(): string | null {
+    return this.normalizeReturnUri(`${window.location.pathname}${window.location.search}`);
+  }
+
   rememberReturnUri(
     authConfig: AuthConfig,
     returnUri = `${window.location.pathname}${window.location.search}`,

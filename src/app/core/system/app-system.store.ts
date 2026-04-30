@@ -15,6 +15,8 @@ import { initialAppSystemState } from './app-system.state';
 
 const BOOTSTRAP_ORGANIZATION_ROUTE = '/bootstrap/bootstrap-organization';
 
+type SessionReturnRouteStrategy = 'consume-login-return-uri' | 'preserve-current-uri';
+
 function isConfigLoadedStatus(status: AppStartupStatus): boolean {
   return (
     status === 'config-loaded' ||
@@ -185,7 +187,21 @@ export const AppSystemStore = signalStore(
         return config;
       }
 
-      async function createAndRouteUserSession(config: AppConfig): Promise<void> {
+      function resolveSessionReturnUri(
+        config: AppConfig,
+        strategy: SessionReturnRouteStrategy,
+      ): string {
+        if (strategy === 'preserve-current-uri') {
+          return authService.getCurrentReturnUri() ?? '/app/dashboard';
+        }
+
+        return authService.consumeReturnUri(config.auth);
+      }
+
+      async function createAndRouteUserSession(
+        config: AppConfig,
+        strategy: SessionReturnRouteStrategy,
+      ): Promise<void> {
         userSessionStore.setLoading();
         updateStartupStatus('loading-user-session');
 
@@ -193,7 +209,7 @@ export const AppSystemStore = signalStore(
           const session = await userSessionService.createUserSession(config.apiBaseUrl);
           userSessionStore.setSession(session);
 
-          const returnUri = authService.consumeReturnUri(config.auth);
+          const returnUri = resolveSessionReturnUri(config, strategy);
           const hasOrganizationAccess =
             hasOwnOrganizations(session) || hasMemberOrganizations(session);
           const targetRoute = hasOrganizationAccess ? returnUri : BOOTSTRAP_ORGANIZATION_ROUTE;
@@ -212,7 +228,7 @@ export const AppSystemStore = signalStore(
               const renewedSession = await userSessionService.createUserSession(config.apiBaseUrl);
               userSessionStore.setSession(renewedSession);
 
-              const returnUri = authService.consumeReturnUri(config.auth);
+              const returnUri = resolveSessionReturnUri(config, strategy);
               const hasOrganizationAccess =
                 hasOwnOrganizations(renewedSession) || hasMemberOrganizations(renewedSession);
               const targetRoute = hasOrganizationAccess ? returnUri : BOOTSTRAP_ORGANIZATION_ROUTE;
@@ -270,7 +286,7 @@ export const AppSystemStore = signalStore(
           );
 
           if (isAuthenticated) {
-            await createAndRouteUserSession(config);
+            await createAndRouteUserSession(config, 'consume-login-return-uri');
           }
         } catch (error) {
           authStore.resetSessionState();
@@ -344,7 +360,7 @@ export const AppSystemStore = signalStore(
             updateStartupStatus(hasActiveSession ? 'session-active' : 'session-missing');
 
             if (hasActiveSession) {
-              await createAndRouteUserSession(config);
+              await createAndRouteUserSession(config, 'preserve-current-uri');
               return;
             }
 
