@@ -102,6 +102,9 @@ export class LandingShellComponent {
     if (authConfig) {
       this.authService.clearPausedProvider(authConfig);
       this.authService.clearLoginError(authConfig);
+      this.authService.clearLoginCallbackUrl();
+      void this.authService.startLogin(authConfig);
+      return;
     }
 
     this.authService.clearLoginCallbackUrl();
