@@ -1,0 +1,134 @@
+<main class="bank-cash-page">
+  <section class="page-heading">
+    <div>
+      <p class="eyebrow">Trading</p>
+      <h1>Bank & Cash</h1>
+      <p class="subtle">Manage cash counters, bank ledgers, and payment accounts.</p>
+    </div>
+
+    <tng-button type="button" appearance="solid" tone="primary" (click)="createBankCash()">
+      <tng-icon icon="plus" aria-hidden="true" />
+      New account
+    </tng-button>
+  </section>
+
+  <tng-card variant="outline" padding="lg">
+    <tng-card-header>
+      <div class="toolbar">
+        <div>
+          <tng-card-title>Accounts</tng-card-title>
+          <tng-card-description>{{ bankCashStore.count() }} account(s)</tng-card-description>
+        </div>
+
+        <tng-input
+          class="search-input"
+          placeholder="Search by name or description"
+          [value]="search()"
+          (valueChange)="onSearchChange($event)"
+        />
+      </div>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (bankCashStore.error()) {
+        <div class="notice notice--danger">{{ bankCashStore.error() }}</div>
+      }
+
+      @if (bankCashStore.isLoading()) {
+        <div class="notice">Loading bank and cash accounts...</div>
+      } @else if (bankCashStore.items().length === 0) {
+        <div class="empty-state">
+          <h2>No bank or cash accounts</h2>
+          <p>Create your first bank or cash account to start tracking trading payments.</p>
+          <tng-button type="button" appearance="solid" tone="primary" (click)="createBankCash()">
+            Create account
+          </tng-button>
+        </div>
+      } @else {
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th class="actions-column">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of bankCashStore.items(); track item.id ?? item.name) {
+                <tr>
+                  <td>
+                    <button type="button" class="link-button" (click)="viewBankCash(item)">
+                      {{ item.name }}
+                    </button>
+                  </td>
+                  <td>{{ item.description || 'No description' }}</td>
+                  <td>
+                    <tng-tag
+                      appearance="soft"
+                      size="sm"
+                      [tone]="getStatusTone(item.status)"
+                      [label]="getStatusLabel(item.status)"
+                    >
+                      <span tngTagIcon class="status-dot" aria-hidden="true"></span>
+                      {{ getStatusLabel(item.status) }}
+                    </tng-tag>
+                  </td>
+                  <td class="row-actions">
+                    <tng-icon
+                      icon="eye"
+                      class="action-icon"
+                      label="View bank/cash account"
+                      tabindex="0"
+                      (click)="viewBankCash(item)"
+                      (keydown)="handleActionKeydown($event, item, 'view')"
+                    />
+                    <tng-icon
+                      icon="pencil"
+                      class="action-icon"
+                      label="Edit bank/cash account"
+                      tabindex="0"
+                      (click)="editBankCash(item)"
+                      (keydown)="handleActionKeydown($event, item, 'edit')"
+                    />
+                    <tng-icon
+                      icon="trash2"
+                      class="action-icon action-icon--danger"
+                      label="Delete bank/cash account"
+                      tabindex="0"
+                      (click)="deleteBankCash(item)"
+                      (keydown)="handleActionKeydown($event, item, 'delete')"
+                    />
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination">
+          <tng-button
+            type="button"
+            appearance="outline"
+            size="sm"
+            [disabled]="currentPage() === 1"
+            (click)="goToPage(currentPage() - 1)"
+          >
+            Previous
+          </tng-button>
+          <span>Page {{ currentPage() }} of {{ totalPages() }}</span>
+          <tng-button
+            type="button"
+            appearance="outline"
+            size="sm"
+            [disabled]="currentPage() === totalPages()"
+            (click)="goToPage(currentPage() + 1)"
+          >
+            Next
+          </tng-button>
+        </div>
+      }
+    </tng-card-content>
+  </tng-card>
+</main>

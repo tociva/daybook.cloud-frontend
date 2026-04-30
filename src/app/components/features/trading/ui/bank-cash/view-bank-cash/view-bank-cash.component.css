@@ -1,0 +1,54 @@
+.bank-cash-page {
+  padding: 1.25rem;
+}
+
+tng-card {
+  max-width: 52rem;
+}
+
+.details-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+}
+
+.wide {
+  grid-column: 1 / -1;
+}
+
+dt {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+dd {
+  color: var(--tng-semantic-foreground-primary);
+  margin: 0.25rem 0 0;
+}
+
+.notice {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.notice--danger {
+  border-color: var(--tng-semantic-accent-danger);
+}
+
+.status-dot {
+  background: currentColor;
+  border-radius: 999px;
+  display: inline-block;
+  height: 0.45rem;
+  width: 0.45rem;
+}
+
+@media (max-width: 700px) {
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+}

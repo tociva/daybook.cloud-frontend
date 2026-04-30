@@ -12,5 +12,12 @@ export const routes: Routes = [
   { path: 'auth/silent-renew', component: SilentRenewComponent },
   { path: 'app/dashboard', component: DashboardComponent },
   { path: 'app/management/subscription', component: SubscriptionSelectionComponent },
+  {
+    path: 'app/trading/bank-cash',
+    loadChildren: () =>
+      import('./components/features/trading/ui/bank-cash/bank-cash.routes').then(
+        (m) => m.bankCashRoutes,
+      ),
+  },
   { path: 'bootstrap/bootstrap-organization', component: BootstrapOrganizationComponent },
 ];

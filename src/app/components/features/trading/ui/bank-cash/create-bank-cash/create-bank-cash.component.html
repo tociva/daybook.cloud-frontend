@@ -1,0 +1,60 @@
+<main class="bank-cash-page">
+  <form novalidate (submit)="submitForm($event)">
+    <tng-card variant="outline" padding="lg">
+      <tng-card-header>
+        <tng-card-title>{{ title() }}</tng-card-title>
+        <tng-card-description>
+          Add the name and description for a bank or cash account.
+        </tng-card-description>
+      </tng-card-header>
+
+      <tng-card-content>
+        @if (bankCashStore.error()) {
+          <div class="notice notice--danger">{{ bankCashStore.error() }}</div>
+        }
+
+        @if (bankCashStore.isLoading() && mode() === 'edit' && !bankCashStore.selectedItem()) {
+          <div class="notice">Loading account...</div>
+        } @else {
+          <div class="field-grid">
+            <div class="field">
+              <tng-label forId="bank-cash-name" required>Name</tng-label>
+              <tng-input
+                id="bank-cash-name"
+                placeholder="Cash counter"
+                [value]="name()"
+                [ariaInvalid]="nameError() !== null"
+                (valueChange)="name.set($event)"
+              />
+              <p class="field-error" [class.field-error--empty]="!nameError()">
+                {{ nameError() || '\u00A0' }}
+              </p>
+            </div>
+
+            <div class="field field--wide">
+              <tng-label forId="bank-cash-description">Description</tng-label>
+              <tng-textarea
+                id="bank-cash-description"
+                placeholder="Internal notes for this account"
+                rows="4"
+                [value]="description()"
+                (valueChange)="description.set($event)"
+              />
+              <p class="field-error field-error--empty">{{ '\u00A0' }}</p>
+            </div>
+          </div>
+        }
+      </tng-card-content>
+
+      <tng-card-footer>
+        <tng-card-actions align="end">
+          <app-burl-back-button label="Cancel" />
+          <tng-button type="submit" appearance="solid" tone="primary" [disabled]="bankCashStore.isLoading()">
+            <tng-icon icon="save" aria-hidden="true" />
+            Save
+          </tng-button>
+        </tng-card-actions>
+      </tng-card-footer>
+    </tng-card>
+  </form>
+</main>

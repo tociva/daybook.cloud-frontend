@@ -56,7 +56,7 @@ const menuList: readonly MenuNode[] = [
       { path: 'organization', name: 'Organization' },
       { path: 'branch', name: 'Branch' },
       { path: 'fiscal-year', name: 'Fiscal Year' },
-      { path: 'app/management/subscription', name: 'Subscription' },
+      { path: 'subscription', name: 'Subscription' },
       { path: 'users', name: 'Users' },
     ],
   },
@@ -132,12 +132,11 @@ export class WorkspaceSidebarComponent {
   });
 
   protected getNodePath(node: MenuNode): string {
-    // if (node.path.startsWith('/')) {
-    //   return node.path;
-    // }
+    if (node.path.startsWith('/')) {
+      return node.path;
+    }
 
-    // return `/app/${node.path}`;
-    return '/';
+    return `/app/${node.path}`;
   }
 
   protected getChildPath(group: MenuNode, child: MenuNode): string {

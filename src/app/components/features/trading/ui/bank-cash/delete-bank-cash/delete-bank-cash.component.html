@@ -1,0 +1,55 @@
+<main class="bank-cash-page">
+  <tng-card variant="outline" tone="danger" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Delete Bank/Cash</tng-card-title>
+      <tng-card-description>This action cannot be undone.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (bankCashStore.error()) {
+        <div class="notice notice--danger">{{ bankCashStore.error() }}</div>
+      }
+
+      @if (bankCashStore.isLoading() && !bankCashStore.selectedItem()) {
+        <div class="notice">Loading account...</div>
+      } @else if (bankCashStore.selectedItem(); as item) {
+        <dl class="details-grid">
+          <div>
+            <dt>Name</dt>
+            <dd>{{ item.name }}</dd>
+          </div>
+          <div>
+            <dt>Description</dt>
+            <dd>{{ item.description || 'No description' }}</dd>
+          </div>
+        </dl>
+
+        <label class="confirm-row">
+          <tng-checkbox
+            [checked]="confirmed()"
+            (checkedChange)="confirmed.set(!!$event)"
+          />
+          <span>I understand that {{ item.name }} will be permanently deleted.</span>
+        </label>
+      } @else {
+        <div class="notice">Bank/cash account not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button label="Cancel" />
+        <tng-button
+          type="button"
+          appearance="solid"
+          tone="danger"
+          [disabled]="!confirmed() || bankCashStore.isLoading()"
+          (click)="deleteBankCash()"
+        >
+          <tng-icon icon="trash-2" aria-hidden="true" />
+          Delete
+        </tng-button>
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>
