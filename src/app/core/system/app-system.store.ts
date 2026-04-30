@@ -112,6 +112,16 @@ function asErrorMessage(error: unknown, fallbackMessage: string): string {
   return error instanceof Error ? error.message : fallbackMessage;
 }
 
+function isUnauthorizedSessionError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
+  return (
+    message.includes('401') ||
+    message.includes('unauthorized') ||
+    message.includes('tokenexpirederror') ||
+    message.includes('jwt expired')
+  );
+}
+
 function hasOwnOrganizations(session: UserSession): boolean {
   return Boolean(session.ownorgs?.length);
 }
@@ -181,9 +191,7 @@ export const AppSystemStore = signalStore(
         updateStartupStatus('loading-user-session');
 
         try {
-          const session = await userSessionService.createUserSession(
-            config.apiBaseUrl,
-          );
+          const session = await userSessionService.createUserSession(config.apiBaseUrl);
           userSessionStore.setSession(session);
 
           const returnUri = authService.consumeReturnUri(config.auth);
@@ -201,6 +209,46 @@ export const AppSystemStore = signalStore(
           await router.navigateByUrl(targetRoute);
           updateStartupStatus('user-session-ready');
         } catch (error) {
+          if (isUnauthorizedSessionError(error)) {
+            try {
+              await authService.renewSessionSilently(config.auth);
+              const renewedSession = await userSessionService.createUserSession(config.apiBaseUrl);
+              userSessionStore.setSession(renewedSession);
+
+              const returnUri = authService.consumeReturnUri(config.auth);
+              const hasOrganizationAccess =
+                hasOwnOrganizations(renewedSession) || hasMemberOrganizations(renewedSession);
+              const targetRoute = hasOrganizationAccess ? returnUri : SUBSCRIPTION_SELECTION_ROUTE;
+              const redirectStatus: AppStartupStatus =
+                targetRoute === BOOTSTRAP_ORGANIZATION_ROUTE
+                  ? 'redirecting-to-bootstrap'
+                  : targetRoute === SUBSCRIPTION_SELECTION_ROUTE
+                    ? 'redirecting-to-subscription'
+                    : 'redirecting-to-dashboard';
+
+              updateStartupStatus(redirectStatus);
+              await router.navigateByUrl(targetRoute);
+              updateStartupStatus('user-session-ready');
+              return;
+            } catch (renewError) {
+              console.warn('[Auth] Silent renew failed. Restarting login flow.', renewError);
+              authStore.resetSessionState();
+              userSessionStore.resetSession();
+              updateStartupStatus('redirecting-to-login');
+              try {
+                await authService.startLogin(config.auth);
+                return;
+              } catch (loginRestartError) {
+                const loginErrorMessage = authService.rememberLoginError(
+                  config.auth,
+                  asErrorMessage(loginRestartError, 'Login redirect failed'),
+                );
+                updateStartupStatus('login-error', loginErrorMessage);
+                return;
+              }
+            }
+          }
+
           const errorMessage = asErrorMessage(error, 'Unable to load Daybook Cloud user session');
           userSessionStore.setError(errorMessage);
           updateStartupStatus('user-session-error', errorMessage);

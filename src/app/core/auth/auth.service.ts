@@ -84,6 +84,17 @@ export class AuthService {
     return user;
   }
 
+  async completeSilentRenew(authConfig: AuthConfig): Promise<void> {
+    const manager = this.oidcUserManagerFactory.create(authConfig);
+    await manager.signinSilentCallback();
+  }
+
+  async renewSessionSilently(authConfig: AuthConfig): Promise<User | null> {
+    const manager = this.oidcUserManagerFactory.create(authConfig);
+    const user = await manager.signinSilent();
+    return user ?? null;
+  }
+
   async startLogin(authConfig: AuthConfig): Promise<void> {
     const manager = this.oidcUserManagerFactory.create(authConfig);
     this.rememberReturnUri(authConfig);
