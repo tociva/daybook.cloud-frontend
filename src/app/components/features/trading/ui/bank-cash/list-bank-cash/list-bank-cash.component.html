@@ -6,129 +6,197 @@
       <p class="subtle">Manage cash counters, bank ledgers, and payment accounts.</p>
     </div>
 
-    <tng-button type="button" appearance="solid" tone="primary" (click)="createBankCash()">
-      <tng-icon icon="plus" aria-hidden="true" />
-      New account
-    </tng-button>
+    <div class="page-actions">
+      <div
+        class="filter-popover"
+        tngPopover
+        #filterPopover="tngPopover"
+        [align]="'end'"
+        [side]="'bottom'"
+        [ariaLabel]="'Bank and cash filters'"
+        [open]="filterPopoverOpen()"
+        (openChange)="onFilterPopoverOpenChange($event)"
+      >
+        <button
+          type="button"
+          class="filter-trigger"
+          [tngPopoverTrigger]="filterPopover"
+          aria-label="Filter accounts"
+        >
+          <tng-icon icon="filter" aria-hidden="true" />
+        </button>
+
+        <section tngPopoverPanel class="filter-panel">
+          <form class="filter-form" (submit)="submitFilter($event)">
+            <div class="filter-form__header">
+              <tng-icon icon="filter" aria-hidden="true" />
+              <strong>Filter accounts</strong>
+            </div>
+
+            <div class="filter-field">
+              <tng-label forId="bank-cash-filter-name">Name</tng-label>
+              <div class="filter-comparison">
+                <tng-select
+                  aria-label="Name filter operator"
+                  [options]="textOperatorOptions"
+                  [getOptionLabel]="getOperatorLabel"
+                  [getOptionValue]="getOperatorValue"
+                  [value]="filterNameOperator()"
+                  (valueChange)="onFilterNameOperatorChange($event)"
+                />
+                <tng-input
+                  id="bank-cash-filter-name"
+                  placeholder="Account name"
+                  [value]="filterName()"
+                  (valueChange)="filterName.set($event)"
+                />
+              </div>
+            </div>
+
+            <div class="filter-field">
+              <tng-label forId="bank-cash-filter-description">Description</tng-label>
+              <div class="filter-comparison">
+                <tng-select
+                  aria-label="Description filter operator"
+                  [options]="textOperatorOptions"
+                  [getOptionLabel]="getOperatorLabel"
+                  [getOptionValue]="getOperatorValue"
+                  [value]="filterDescriptionOperator()"
+                  (valueChange)="onFilterDescriptionOperatorChange($event)"
+                />
+                <tng-input
+                  id="bank-cash-filter-description"
+                  placeholder="Description"
+                  [value]="filterDescription()"
+                  (valueChange)="filterDescription.set($event)"
+                />
+              </div>
+            </div>
+
+            <div class="filter-field">
+              <tng-label forId="bank-cash-filter-status">Status</tng-label>
+              <div class="filter-comparison">
+                <tng-select
+                  aria-label="Status filter operator"
+                  [options]="statusOperatorOptions"
+                  [getOptionLabel]="getOperatorLabel"
+                  [getOptionValue]="getOperatorValue"
+                  [value]="filterStatusOperator()"
+                  (valueChange)="onFilterStatusOperatorChange($event)"
+                />
+                <tng-select
+                  id="bank-cash-filter-status"
+                  placeholder="Any status"
+                  [options]="statusFilterOptions"
+                  [getOptionLabel]="getStatusFilterLabel"
+                  [getOptionValue]="getStatusFilterValue"
+                  [value]="filterStatus()"
+                  (valueChange)="onFilterStatusChange($event)"
+                />
+              </div>
+            </div>
+
+            <div class="filter-actions">
+              <tng-button type="button" appearance="ghost" (click)="clearFilter()">Clear</tng-button>
+              <tng-button type="submit" appearance="solid" tone="primary">Apply</tng-button>
+            </div>
+          </form>
+        </section>
+      </div>
+
+      <tng-button type="button" appearance="solid" tone="primary" (click)="createBankCash()">
+        <tng-icon icon="plus" aria-hidden="true" />
+        New account
+      </tng-button>
+    </div>
   </section>
 
   <tng-card variant="outline" padding="lg">
-    <tng-card-header>
-      <div class="toolbar">
-        <div>
-          <tng-card-title>Accounts</tng-card-title>
-          <tng-card-description>{{ bankCashStore.count() }} account(s)</tng-card-description>
-        </div>
+    @if (bankCashStore.error()) {
+      <div class="notice notice--danger">{{ bankCashStore.error() }}</div>
+    }
 
-        <tng-input
-          class="search-input"
-          placeholder="Search by name or description"
-          [value]="search()"
-          (valueChange)="onSearchChange($event)"
+    <div class="table-stack">
+      <tng-table
+        ariaLabel="Bank and cash accounts"
+        density="comfortable"
+        [columns]="columns"
+        [items]="bankCashStore.items()"
+        [loading]="bankCashStore.isLoading()"
+        [error]="hasError()"
+        [sortActive]="sortActive()"
+        [sortDirection]="sortDirection()"
+        (sortChange)="onSortChange($event)"
+      >
+        <ng-template tngTableCellTemplate="name" let-row="row">
+          <button type="button" class="link-button" (click)="viewBankCash(row)">
+            {{ row.name }}
+          </button>
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="description" let-row="row">
+          {{ row.description || 'No description' }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="status" let-row="row">
+          <tng-tag
+            appearance="soft"
+            size="sm"
+            [tone]="getStatusTone(row.status)"
+            [label]="getStatusLabel(row.status)"
+          >
+            <span tngTagIcon class="status-dot" aria-hidden="true"></span>
+            {{ getStatusLabel(row.status) }}
+          </tng-tag>
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="actions" let-row="row">
+          <div class="row-actions">
+            <tng-icon
+              icon="eye"
+              class="action-icon"
+              label="View bank/cash account"
+              tabindex="0"
+              (click)="viewBankCash(row)"
+              (keydown)="handleActionKeydown($event, row, 'view')"
+            />
+            <tng-icon
+              icon="pencil"
+              class="action-icon"
+              label="Edit bank/cash account"
+              tabindex="0"
+              (click)="editBankCash(row)"
+              (keydown)="handleActionKeydown($event, row, 'edit')"
+            />
+            <tng-icon
+              icon="trash2"
+              class="action-icon action-icon--danger"
+              label="Delete bank/cash account"
+              tabindex="0"
+              (click)="deleteBankCash(row)"
+              (keydown)="handleActionKeydown($event, row, 'delete')"
+            />
+          </div>
+        </ng-template>
+      </tng-table>
+
+      <div class="table-footer">
+        <tng-paginator
+          class="compact-paginator"
+          ariaLabel="Bank and cash pagination"
+          size="sm"
+          [pageIndex]="pageIndex()"
+          [pageSize]="pageSize()"
+          [totalItems]="bankCashStore.count()"
+          [pageSizeOptions]="pageSizeOptions"
+          [showFirstLast]="false"
+          [showPageSize]="true"
+          [showRange]="true"
+          [maxPageButtons]="3"
+          (pageIndexChange)="onPageIndexChange($event)"
+          (pageSizeChange)="onPageSizeChange($event)"
         />
       </div>
-    </tng-card-header>
-
-    <tng-card-content>
-      @if (bankCashStore.error()) {
-        <div class="notice notice--danger">{{ bankCashStore.error() }}</div>
-      }
-
-      @if (bankCashStore.isLoading()) {
-        <div class="notice">Loading bank and cash accounts...</div>
-      } @else if (bankCashStore.items().length === 0) {
-        <div class="empty-state">
-          <h2>No bank or cash accounts</h2>
-          <p>Create your first bank or cash account to start tracking trading payments.</p>
-          <tng-button type="button" appearance="solid" tone="primary" (click)="createBankCash()">
-            Create account
-          </tng-button>
-        </div>
-      } @else {
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Status</th>
-                <th class="actions-column">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (item of bankCashStore.items(); track item.id ?? item.name) {
-                <tr>
-                  <td>
-                    <button type="button" class="link-button" (click)="viewBankCash(item)">
-                      {{ item.name }}
-                    </button>
-                  </td>
-                  <td>{{ item.description || 'No description' }}</td>
-                  <td>
-                    <tng-tag
-                      appearance="soft"
-                      size="sm"
-                      [tone]="getStatusTone(item.status)"
-                      [label]="getStatusLabel(item.status)"
-                    >
-                      <span tngTagIcon class="status-dot" aria-hidden="true"></span>
-                      {{ getStatusLabel(item.status) }}
-                    </tng-tag>
-                  </td>
-                  <td class="row-actions">
-                    <tng-icon
-                      icon="eye"
-                      class="action-icon"
-                      label="View bank/cash account"
-                      tabindex="0"
-                      (click)="viewBankCash(item)"
-                      (keydown)="handleActionKeydown($event, item, 'view')"
-                    />
-                    <tng-icon
-                      icon="pencil"
-                      class="action-icon"
-                      label="Edit bank/cash account"
-                      tabindex="0"
-                      (click)="editBankCash(item)"
-                      (keydown)="handleActionKeydown($event, item, 'edit')"
-                    />
-                    <tng-icon
-                      icon="trash2"
-                      class="action-icon action-icon--danger"
-                      label="Delete bank/cash account"
-                      tabindex="0"
-                      (click)="deleteBankCash(item)"
-                      (keydown)="handleActionKeydown($event, item, 'delete')"
-                    />
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-
-        <div class="pagination">
-          <tng-button
-            type="button"
-            appearance="outline"
-            size="sm"
-            [disabled]="currentPage() === 1"
-            (click)="goToPage(currentPage() - 1)"
-          >
-            Previous
-          </tng-button>
-          <span>Page {{ currentPage() }} of {{ totalPages() }}</span>
-          <tng-button
-            type="button"
-            appearance="outline"
-            size="sm"
-            [disabled]="currentPage() === totalPages()"
-            (click)="goToPage(currentPage() + 1)"
-          >
-            Next
-          </tng-button>
-        </div>
-      }
-    </tng-card-content>
+    </div>
   </tng-card>
 </main>

@@ -5,8 +5,8 @@
 }
 
 .page-heading,
-.toolbar,
 .pagination,
+.page-actions,
 .row-actions {
   align-items: center;
   display: flex;
@@ -14,7 +14,6 @@
 }
 
 .page-heading,
-.toolbar,
 .pagination {
   justify-content: space-between;
 }
@@ -43,12 +42,7 @@ h1 {
   text-transform: uppercase;
 }
 
-.search-input {
-  min-width: min(22rem, 100%);
-}
-
-.notice,
-.empty-state {
+.notice {
   border: 1px solid var(--tng-semantic-border-subtle);
   border-radius: 0.5rem;
   color: var(--tng-semantic-foreground-primary);
@@ -59,40 +53,107 @@ h1 {
   border-color: var(--tng-semantic-accent-danger);
 }
 
-.empty-state {
+.table-stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.filter-popover {
+  display: inline-flex;
+  position: relative;
+}
+
+.filter-trigger {
+  align-items: center;
+  appearance: none;
+  background: var(--tng-semantic-background-surface);
+  border: 1px solid var(--tng-semantic-border-strong);
+  border-radius: 0.6rem;
+  color: var(--tng-semantic-foreground-primary);
+  cursor: pointer;
+  display: inline-flex;
+  height: 2.35rem;
+  justify-content: center;
+  padding: 0;
+  width: 2.35rem;
+}
+
+.filter-trigger:focus-visible {
+  box-shadow: 0 0 0 3px var(--tng-semantic-focus-ring);
+  outline: none;
+}
+
+.filter-panel {
+  --bank-cash-filter-menu-z-index: 70;
+  --bank-cash-filter-popover-z-index: var(--tng-z-popover, 60);
+
+  background: var(--tng-semantic-background-surface);
+  border: 1px solid var(--tng-semantic-border-strong);
+  border-radius: 0.75rem;
+  box-shadow: 0 18px 28px color-mix(in srgb, var(--tng-semantic-foreground-primary) 18%, transparent);
+  color: var(--tng-semantic-foreground-primary);
   display: grid;
   gap: 0.75rem;
-  justify-items: start;
+  margin-top: 0.45rem;
+  min-width: 24rem;
+  padding: 0.85rem;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: var(--bank-cash-filter-popover-z-index);
 }
 
-.table-wrap {
-  overflow-x: auto;
+.filter-panel[hidden] {
+  display: none !important;
 }
 
-table {
-  border-collapse: collapse;
+.filter-form {
+  --tng-select-overlay-z-index: var(--bank-cash-filter-menu-z-index);
+  --tng-select-z-overlay: var(--bank-cash-filter-menu-z-index);
+
+  display: grid;
+  gap: 0.85rem;
+  min-width: 24rem;
+}
+
+.filter-form__header,
+.filter-actions {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.filter-form__header {
   color: var(--tng-semantic-foreground-primary);
-  min-width: 46rem;
-  width: 100%;
 }
 
-th,
-td {
-  border-bottom: 1px solid var(--tng-semantic-border-subtle);
-  padding: 0.75rem;
-  text-align: left;
-  vertical-align: middle;
+.filter-field {
+  display: grid;
+  gap: 0.4rem;
 }
 
-th {
-  color: var(--tng-semantic-foreground-muted);
-  font-size: 0.78rem;
-  font-weight: 700;
-  text-transform: uppercase;
+.filter-comparison {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: 7rem minmax(0, 1fr);
 }
 
-.actions-column {
-  width: 8rem;
+.filter-actions {
+  justify-content: flex-end;
+}
+
+.table-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.compact-paginator {
+  width: auto;
+}
+
+.compact-paginator ::ng-deep .tng-paginator {
+  justify-content: flex-end;
+  width: auto;
 }
 
 .action-icon {
@@ -143,6 +204,14 @@ th {
 
   .row-actions {
     align-items: flex-start;
-    flex-direction: column;
+  }
+
+  .filter-panel,
+  .filter-form {
+    min-width: min(24rem, calc(100vw - 2.5rem));
+  }
+
+  .filter-comparison {
+    grid-template-columns: 1fr;
   }
 }

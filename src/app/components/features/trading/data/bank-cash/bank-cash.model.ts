@@ -25,6 +25,13 @@ export type BankCash = BankCashPayload &
 export type BankCashListQuery = Readonly<{
   limit?: number;
   offset?: number;
+  order?: readonly string[];
+  where?: Record<string, unknown>;
+}>;
+
+export type BankCashSearchQuery = Readonly<{
+  limit?: number;
+  offset?: number;
   search?: string;
   sort?: string;
 }>;

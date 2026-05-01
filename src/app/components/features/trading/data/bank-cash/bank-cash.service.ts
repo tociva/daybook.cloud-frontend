@@ -9,13 +9,6 @@ import type {
   BankCashPayload,
 } from './bank-cash.model';
 
-type LoopbackFilter = Readonly<{
-  limit: number;
-  offset: number;
-  order?: readonly string[];
-  where?: Record<string, unknown>;
-}>;
-
 @Injectable({ providedIn: 'root' })
 export class BankCashService {
   private readonly api = inject(ApiClientService);
@@ -34,13 +27,18 @@ export class BankCashService {
   }
 
   async list(query: BankCashListQuery = {}): Promise<readonly BankCash[]> {
-    const params = new HttpParams().set('filter', JSON.stringify(this.buildFilter(query)));
+    const params = new HttpParams().set('filter', JSON.stringify(this.normalizeFilter(query)));
 
     return this.api.get<readonly BankCash[]>(await this.collectionUrl(), { params });
   }
 
-  async count(): Promise<number> {
-    const result = await this.api.get<BankCashCount>(`${await this.collectionUrl()}/count`);
+  async count(query: BankCashListQuery = {}): Promise<number> {
+    const where = query.where;
+    const params =
+      where === undefined ? undefined : new HttpParams().set('where', JSON.stringify(where));
+    const result = await this.api.get<BankCashCount>(`${await this.collectionUrl()}/count`, {
+      ...(params ? { params } : {}),
+    });
 
     return result.count;
   }
@@ -58,27 +56,12 @@ export class BankCashService {
     return `${config.apiBaseUrl.replace(/\/$/, '')}/inventory/bank-cash`;
   }
 
-  private buildFilter(query: BankCashListQuery): LoopbackFilter {
-    const limit = query.limit ?? 10;
-    const offset = query.offset ?? 0;
-    const search = query.search?.trim();
-    const filter: LoopbackFilter = {
-      limit,
-      offset,
-      ...(query.sort ? { order: [query.sort] } : {}),
-      ...(search
-        ? {
-            where: {
-              or: [
-                { name: { ilike: `%${search}%` } },
-                { description: { ilike: `%${search}%` } },
-              ],
-            },
-          }
-        : {}),
+  private normalizeFilter(query: BankCashListQuery): BankCashListQuery {
+    return {
+      limit: query.limit ?? 10,
+      offset: query.offset ?? 0,
+      ...(query.order?.length ? { order: query.order } : {}),
+      ...(query.where ? { where: query.where } : {}),
     };
-
-    return filter;
   }
 }
-

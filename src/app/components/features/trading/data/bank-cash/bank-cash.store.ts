@@ -116,7 +116,7 @@ export const BankCashStore = signalStore(
         setLoading();
 
         try {
-          const [items, count] = await Promise.all([service.list(query), service.count()]);
+          const [items, count] = await Promise.all([service.list(query), service.count(query)]);
           patchState(store, (state) => ({
             bankCash: {
               ...state.bankCash,
@@ -154,4 +154,3 @@ export const BankCashStore = signalStore(
     };
   }),
 );
-
