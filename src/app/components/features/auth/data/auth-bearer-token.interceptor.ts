@@ -7,6 +7,7 @@ import {
 import { inject } from '@angular/core';
 import { Observable, from } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
+import type { AppConfig } from '../../../../core/config/app-config.model';
 import { AppConfigStore } from '../../../../core/config/app-config.store';
 import { AuthService } from './auth.service';
 
@@ -28,37 +29,36 @@ export const authBearerTokenInterceptor: HttpInterceptorFn = (
   const appConfigStore = inject(AppConfigStore);
   const authService = inject(AuthService);
   const config = appConfigStore.config();
-  const normalizedBaseUrl = config ? normalizeBaseUrl(config.apiBaseUrl) : null;
-  const urlMatchesBase = normalizedBaseUrl ? request.url.startsWith(normalizedBaseUrl) : false;
 
-  console.log('[AuthInterceptor] request received', {
-    hasAuthorizationHeader: request.headers.has('Authorization'),
-    method: request.method,
-    normalizedApiBaseUrl: normalizedBaseUrl,
-    requestUrl: request.url,
-    urlMatchesBase,
-  });
+  if (config) {
+    return attachTokenIfNeeded(request, next, authService, config);
+  }
 
-  if (!config || !shouldAttachToken(request, config.apiBaseUrl)) {
-    console.log('[AuthInterceptor] skipping token attachment', {
-      hasConfig: Boolean(config),
-      reason: !config
-        ? 'missing-config'
-        : request.headers.has('Authorization')
-          ? 'authorization-already-present'
-          : 'url-does-not-match-api-base-url',
-    });
+  return from(appConfigStore.load()).pipe(
+    switchMap((loadedConfig) =>
+      loadedConfig
+        ? attachTokenIfNeeded(request, next, authService, loadedConfig)
+        : next(request),
+    ),
+  );
+};
+
+function attachTokenIfNeeded(
+  request: HttpRequest<unknown>,
+  next: HttpHandlerFn,
+  authService: AuthService,
+  config: AppConfig,
+): Observable<HttpEvent<unknown>> {
+  if (!shouldAttachToken(request, config.apiBaseUrl)) {
     return next(request);
   }
 
   return from(authService.getAccessToken(config.auth)).pipe(
     switchMap((token) => {
       if (!token) {
-        console.log('[AuthInterceptor] no access token available');
         return next(request);
       }
 
-      console.log('[AuthInterceptor] attaching bearer token');
       return next(
         request.clone({
           setHeaders: {
@@ -68,4 +68,4 @@ export const authBearerTokenInterceptor: HttpInterceptorFn = (
       );
     }),
   );
-};
+}
