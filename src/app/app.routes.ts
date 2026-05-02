@@ -19,5 +19,17 @@ export const routes: Routes = [
         (m) => m.bankCashRoutes,
       ),
   },
+  {
+    path: 'app/trading/tax',
+    loadChildren: () =>
+      import('./components/features/trading/ui/tax/tax.routes').then((m) => m.taxRoutes),
+  },
+  {
+    path: 'app/trading/tax-group',
+    loadChildren: () =>
+      import('./components/features/trading/ui/tax-group/tax-group.routes').then(
+        (m) => m.taxGroupRoutes,
+      ),
+  },
   { path: 'bootstrap/bootstrap-organization', component: BootstrapOrganizationComponent },
 ];

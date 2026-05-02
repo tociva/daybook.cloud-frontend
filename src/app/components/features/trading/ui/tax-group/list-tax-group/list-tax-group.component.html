@@ -1,0 +1,99 @@
+<main class="trading-page">
+  <section class="page-heading">
+    <div>
+      <p class="eyebrow">Trading</p>
+      <h1>Tax Groups</h1>
+      <p class="subtle">Manage grouped tax rates used by trading transactions.</p>
+    </div>
+
+    <div class="page-actions">
+      <app-crud-filter-popover
+        ariaLabel="Tax group filters"
+        title="Filter tax groups"
+        [fields]="filterFields"
+        [filter]="crudQuery.filter()"
+        syncUrl
+      />
+
+      <tng-button type="button" appearance="outline" tone="neutral" (click)="openTaxes()">
+        <tng-icon icon="percent" aria-hidden="true" />
+        Taxes
+      </tng-button>
+
+      <tng-button type="button" appearance="solid" tone="primary" (click)="createTaxGroup()">
+        <tng-icon icon="plus" aria-hidden="true" />
+        New tax group
+      </tng-button>
+    </div>
+  </section>
+
+  <tng-card variant="outline" padding="lg">
+    @if (taxGroupStore.error()) {
+      <div class="notice notice--danger">{{ taxGroupStore.error() }}</div>
+    }
+
+    <div class="table-stack">
+      <tng-table
+        ariaLabel="Tax groups"
+        density="comfortable"
+        [columns]="columns"
+        [items]="taxGroupStore.items()"
+        [loading]="taxGroupStore.isLoading()"
+        [error]="hasError()"
+        [sortActive]="crudQuery.sortActive()"
+        [sortDirection]="crudQuery.sortDirection()"
+        (sortChange)="crudQuery.applySort($event)"
+      >
+        <ng-template tngTableCellTemplate="name" let-row="row">
+          <button type="button" class="link-button" (click)="viewTaxGroup(row)">
+            {{ row.name }}
+          </button>
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="description" let-row="row">
+          {{ row.description || 'No description' }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="actions" let-row="row">
+          <div class="row-actions">
+            <button
+              type="button"
+              class="action-icon"
+              aria-label="View tax group"
+              (click)="viewTaxGroup(row)"
+            >
+              <tng-icon icon="eye" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              class="action-icon"
+              aria-label="Edit tax group"
+              (click)="editTaxGroup(row)"
+            >
+              <tng-icon icon="pencil" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              class="action-icon action-icon--danger"
+              aria-label="Delete tax group"
+              (click)="deleteTaxGroup(row)"
+            >
+              <tng-icon icon="trash2" aria-hidden="true" />
+            </button>
+          </div>
+        </ng-template>
+      </tng-table>
+
+      <div class="table-footer">
+        <app-crud-paginator
+          ariaLabel="Tax group pagination"
+          [filter]="crudQuery.filter()"
+          [totalItems]="taxGroupStore.count()"
+          [pageSizeOptions]="crudQuery.pageSizeOptions()"
+          syncUrl
+        />
+      </div>
+    </div>
+  </tng-card>
+</main>
+

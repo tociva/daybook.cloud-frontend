@@ -24,6 +24,7 @@ const menuList: readonly MenuNode[] = [
     children: [
       { path: 'bank-cash', name: 'Bank & Cash' },
       { path: 'tax', name: 'Tax' },
+      { path: 'tax-group', name: 'Tax Group' },
       { path: 'item', name: 'Item' },
       { path: 'customer', name: 'Customer' },
       { path: 'sale-invoice', name: 'Sale Invoice' },

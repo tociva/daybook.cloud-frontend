@@ -1,0 +1,101 @@
+<main class="trading-page">
+  <section class="page-heading">
+    <div>
+      <p class="eyebrow">Trading</p>
+      <h1>Tax</h1>
+      <p class="subtle">Manage tax rates, short names, and application rules.</p>
+    </div>
+
+    <div class="page-actions">
+      <app-crud-filter-popover
+        ariaLabel="Tax filters"
+        title="Filter taxes"
+        [fields]="filterFields"
+        [filter]="crudQuery.filter()"
+        syncUrl
+      />
+
+      <tng-button type="button" appearance="outline" tone="neutral" (click)="openTaxGroups()">
+        <tng-icon icon="layers" aria-hidden="true" />
+        Tax groups
+      </tng-button>
+
+      <tng-button type="button" appearance="solid" tone="primary" (click)="createTax()">
+        <tng-icon icon="plus" aria-hidden="true" />
+        New tax
+      </tng-button>
+    </div>
+  </section>
+
+  <tng-card variant="outline" padding="lg">
+    @if (taxStore.error()) {
+      <div class="notice notice--danger">{{ taxStore.error() }}</div>
+    }
+
+    <div class="table-stack">
+      <tng-table
+        ariaLabel="Taxes"
+        density="comfortable"
+        [columns]="columns"
+        [items]="taxStore.items()"
+        [loading]="taxStore.isLoading()"
+        [error]="hasError()"
+        [sortActive]="crudQuery.sortActive()"
+        [sortDirection]="crudQuery.sortDirection()"
+        (sortChange)="crudQuery.applySort($event)"
+      >
+        <ng-template tngTableCellTemplate="name" let-row="row">
+          <button type="button" class="link-button" (click)="viewTax(row)">
+            {{ row.name }}
+          </button>
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="description" let-row="row">
+          {{ row.description || 'No description' }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="status" let-row="row">
+          <tng-tag
+            appearance="soft"
+            size="sm"
+            [tone]="getStatusTone(row.status)"
+            [label]="getStatusLabel(row.status)"
+          >
+            <span tngTagIcon class="status-dot" aria-hidden="true"></span>
+            {{ getStatusLabel(row.status) }}
+          </tng-tag>
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="actions" let-row="row">
+          <div class="row-actions">
+            <button type="button" class="action-icon" aria-label="View tax" (click)="viewTax(row)">
+              <tng-icon icon="eye" aria-hidden="true" />
+            </button>
+            <button type="button" class="action-icon" aria-label="Edit tax" (click)="editTax(row)">
+              <tng-icon icon="pencil" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              class="action-icon action-icon--danger"
+              aria-label="Delete tax"
+              (click)="deleteTax(row)"
+            >
+              <tng-icon icon="trash2" aria-hidden="true" />
+            </button>
+          </div>
+        </ng-template>
+      </tng-table>
+
+      <div class="table-footer">
+        <app-crud-paginator
+          ariaLabel="Tax pagination"
+          [filter]="crudQuery.filter()"
+          [totalItems]="taxStore.count()"
+          [pageSizeOptions]="crudQuery.pageSizeOptions()"
+          syncUrl
+        />
+      </div>
+    </div>
+  </tng-card>
+</main>
+

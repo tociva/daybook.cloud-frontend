@@ -1,0 +1,61 @@
+<main class="trading-page">
+  <tng-card variant="outline" tone="danger" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Delete Tax</tng-card-title>
+      <tng-card-description>This action cannot be undone.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (taxStore.error()) {
+        <div class="notice notice--danger">{{ taxStore.error() }}</div>
+      }
+
+      @if (taxStore.isLoading() && !taxStore.selectedItem()) {
+        <div class="notice">Loading tax...</div>
+      } @else if (taxStore.selectedItem(); as item) {
+        <dl class="details-grid">
+          <div>
+            <dt>Name</dt>
+            <dd>{{ item.name }}</dd>
+          </div>
+          <div>
+            <dt>Short Name</dt>
+            <dd>{{ item.shortname }}</dd>
+          </div>
+          <div>
+            <dt>Rate (%)</dt>
+            <dd>{{ item.rate }}</dd>
+          </div>
+          <div>
+            <dt>Applied To</dt>
+            <dd>{{ item.appliedto }}</dd>
+          </div>
+        </dl>
+
+        <label class="confirm-row">
+          <tng-checkbox [checked]="confirmed()" (checkedChange)="confirmed.set(!!$event)" />
+          <span>I understand that {{ item.name }} will be permanently deleted.</span>
+        </label>
+      } @else {
+        <div class="notice">Tax not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button label="Cancel" />
+        <tng-button
+          type="button"
+          appearance="solid"
+          tone="danger"
+          [disabled]="!confirmed() || taxStore.isLoading()"
+          (click)="deleteTax()"
+        >
+          <tng-icon icon="trash2" aria-hidden="true" />
+          Delete
+        </tng-button>
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>
+

@@ -1,0 +1,57 @@
+<main class="trading-page">
+  <tng-card variant="outline" tone="danger" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Delete Tax Group</tng-card-title>
+      <tng-card-description>This action cannot be undone.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (taxGroupStore.error()) {
+        <div class="notice notice--danger">{{ taxGroupStore.error() }}</div>
+      }
+
+      @if (taxGroupStore.isLoading() && !taxGroupStore.selectedItem()) {
+        <div class="notice">Loading tax group...</div>
+      } @else if (taxGroupStore.selectedItem(); as item) {
+        <dl class="details-grid">
+          <div>
+            <dt>Name</dt>
+            <dd>{{ item.name }}</dd>
+          </div>
+          <div>
+            <dt>Rate (%)</dt>
+            <dd>{{ item.rate }}</dd>
+          </div>
+          <div class="wide">
+            <dt>Description</dt>
+            <dd>{{ item.description || 'No description' }}</dd>
+          </div>
+        </dl>
+
+        <label class="confirm-row">
+          <tng-checkbox [checked]="confirmed()" (checkedChange)="confirmed.set(!!$event)" />
+          <span>I understand that {{ item.name }} will be permanently deleted.</span>
+        </label>
+      } @else {
+        <div class="notice">Tax group not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button label="Cancel" />
+        <tng-button
+          type="button"
+          appearance="solid"
+          tone="danger"
+          [disabled]="!confirmed() || taxGroupStore.isLoading()"
+          (click)="deleteTaxGroup()"
+        >
+          <tng-icon icon="trash2" aria-hidden="true" />
+          Delete
+        </tng-button>
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>
+
