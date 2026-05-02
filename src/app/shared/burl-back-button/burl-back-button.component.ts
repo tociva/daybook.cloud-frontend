@@ -1,6 +1,6 @@
 import { Component, inject, input } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
 import { TngButtonComponent } from '@tailng-ui/components';
+import { BurlNavigationService } from './burl-navigation.service';
 
 type BurlBackButtonAppearance = 'ghost' | 'outline' | 'solid';
 type BurlBackButtonTone = 'danger' | 'neutral' | 'primary' | 'success';
@@ -11,8 +11,7 @@ type BurlBackButtonTone = 'danger' | 'neutral' | 'primary' | 'success';
   templateUrl: './burl-back-button.component.html',
 })
 export class BurlBackButtonComponent {
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
+  private readonly burlNavigation = inject(BurlNavigationService);
 
   readonly appearance = input<BurlBackButtonAppearance>('outline');
   readonly fallbackUrl = input('/');
@@ -20,8 +19,6 @@ export class BurlBackButtonComponent {
   readonly tone = input<BurlBackButtonTone>('neutral');
 
   protected navigateBack(): void {
-    const backUrl = this.route.snapshot.queryParamMap.get('burl') || this.fallbackUrl();
-    void this.router.navigateByUrl(backUrl);
+    void this.burlNavigation.navigateBack(this.fallbackUrl());
   }
 }
-

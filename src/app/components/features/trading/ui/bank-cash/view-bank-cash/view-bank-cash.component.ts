@@ -13,6 +13,7 @@ import {
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
+import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
 import { BankCashStore, Status } from '../../../data/bank-cash';
 import type { BankCash } from '../../../data/bank-cash';
 import { TngTagIcon } from '../tng-tag-icon.directive';
@@ -41,6 +42,7 @@ type StatusBadgeTone = 'danger' | 'success' | 'warning';
 export class ViewBankCashComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly burlNavigation = inject(BurlNavigationService);
   protected readonly bankCashStore = inject(BankCashStore);
 
   async ngOnInit(): Promise<void> {
@@ -54,13 +56,9 @@ export class ViewBankCashComponent implements OnInit {
     const id = this.bankCashStore.selectedItem()?.id;
     if (id) {
       void this.router.navigate(['/app/trading/bank-cash', id, 'edit'], {
-        queryParams: { burl: this.getBackUrl() },
+        queryParams: { burl: this.burlNavigation.getBackUrl() },
       });
     }
-  }
-
-  private getBackUrl(): string {
-    return this.route.snapshot.queryParamMap.get('burl') || '/';
   }
 
   protected getStatusLabel(status: BankCash['status']): string {

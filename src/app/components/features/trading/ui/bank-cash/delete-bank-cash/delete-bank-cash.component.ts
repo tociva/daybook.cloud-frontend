@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import {
   TngButtonComponent,
   TngCardActionsComponent,
@@ -13,6 +13,7 @@ import {
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
+import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
 import { BankCashStore } from '../../../data/bank-cash';
 
 @Component({
@@ -35,7 +36,7 @@ import { BankCashStore } from '../../../data/bank-cash';
 })
 export class DeleteBankCashComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
+  private readonly burlNavigation = inject(BurlNavigationService);
   protected readonly bankCashStore = inject(BankCashStore);
   protected readonly confirmed = signal(false);
 
@@ -54,15 +55,7 @@ export class DeleteBankCashComponent implements OnInit {
 
     const deleted = await this.bankCashStore.deleteBankCash(id);
     if (deleted) {
-      await this.navigateBack();
+      await this.burlNavigation.navigateBack();
     }
-  }
-
-  private async navigateBack(): Promise<void> {
-    await this.router.navigateByUrl(this.getBackUrl());
-  }
-
-  private getBackUrl(): string {
-    return this.route.snapshot.queryParamMap.get('burl') || '/';
   }
 }

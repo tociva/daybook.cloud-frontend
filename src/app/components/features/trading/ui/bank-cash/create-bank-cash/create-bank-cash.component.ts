@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { FormField, form } from '@angular/forms/signals';
+import { ActivatedRoute } from '@angular/router';
 import {
   TngButtonComponent,
   TngCardActionsComponent,
@@ -15,12 +16,19 @@ import {
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
+import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
 import { BankCashStore } from '../../../data/bank-cash';
 import type { BankCashPayload } from '../../../data/bank-cash';
+
+type BankCashFormModel = {
+  description: string;
+  name: string;
+};
 
 @Component({
   selector: 'app-create-bank-cash',
   imports: [
+    FormField,
     TngButtonComponent,
     TngCardActionsComponent,
     TngCardComponent,
@@ -40,18 +48,21 @@ import type { BankCashPayload } from '../../../data/bank-cash';
 })
 export class CreateBankCashComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
+  private readonly burlNavigation = inject(BurlNavigationService);
   protected readonly bankCashStore = inject(BankCashStore);
-  protected readonly description = signal('');
+  protected readonly bankCashModel = signal<BankCashFormModel>({
+    description: '',
+    name: '',
+  });
+  protected readonly bankCashForm = form(this.bankCashModel);
   protected readonly id = signal<string | null>(null);
-  protected readonly name = signal('');
   protected readonly submitted = signal(false);
   protected readonly mode = computed(() => (this.id() ? 'edit' : 'create'));
   protected readonly title = computed(() =>
     this.mode() === 'edit' ? 'Edit Bank/Cash' : 'Create Bank/Cash',
   );
   protected readonly nameError = computed(() =>
-    this.submitted() && this.name().trim().length === 0 ? 'Name is required' : null,
+    this.submitted() && this.bankCashModel().name.trim().length === 0 ? 'Name is required' : null,
   );
 
   async ngOnInit(): Promise<void> {
@@ -65,8 +76,10 @@ export class CreateBankCashComponent implements OnInit {
 
     const bankCash = await this.bankCashStore.loadBankCashById(id);
     if (bankCash) {
-      this.name.set(bankCash.name);
-      this.description.set(bankCash.description ?? '');
+      this.bankCashModel.set({
+        description: bankCash.description ?? '',
+        name: bankCash.name,
+      });
     }
   }
 
@@ -78,9 +91,10 @@ export class CreateBankCashComponent implements OnInit {
       return;
     }
 
+    const model = this.bankCashModel();
     const payload: BankCashPayload = {
-      name: this.name().trim(),
-      ...(this.description().trim() ? { description: this.description().trim() } : {}),
+      name: model.name.trim(),
+      ...(model.description.trim() ? { description: model.description.trim() } : {}),
     };
     const id = this.id();
     const saved = id
@@ -88,15 +102,7 @@ export class CreateBankCashComponent implements OnInit {
       : await this.bankCashStore.createBankCash(payload);
 
     if (saved) {
-      await this.navigateBack();
+      await this.burlNavigation.navigateBack();
     }
-  }
-
-  private async navigateBack(): Promise<void> {
-    await this.router.navigateByUrl(this.getBackUrl());
-  }
-
-  private getBackUrl(): string {
-    return this.route.snapshot.queryParamMap.get('burl') || '/';
   }
 }
