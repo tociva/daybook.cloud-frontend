@@ -4,7 +4,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import {
   TngButtonComponent,
   TngCardComponent,
-  TngPaginator,
   TngTag,
   TngTable,
   TngTableCellTpl,
@@ -14,6 +13,7 @@ import type { TngTableSortDirection } from '@tailng-ui/cdk';
 import { TngIcon } from '@tailng-ui/icons';
 import {
   CrudFilterPopoverComponent,
+  CrudPaginatorComponent,
   DEFAULT_LB4_PAGE_SIZE,
   parseLb4FilterParam,
   serializeLb4FilterForUrl,
@@ -33,8 +33,8 @@ const DEFAULT_PAGE_SIZE = DEFAULT_LB4_PAGE_SIZE;
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,
+    CrudPaginatorComponent,
     TngIcon,
-    TngPaginator,
     TngTag,
     TngTagIcon,
     TngTable,
@@ -48,10 +48,9 @@ export class ListBankCashComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   protected readonly bankCashStore = inject(BankCashStore);
+  protected readonly currentFilter = signal<BankCashListQuery>({});
   protected readonly currentWhere = signal<Lb4Where | undefined>(undefined);
   protected readonly hasError = computed(() => this.bankCashStore.error() !== null);
-  protected readonly pageIndex = signal(0);
-  protected readonly pageSize = signal(DEFAULT_PAGE_SIZE);
   protected readonly pageSizeOptions = [10, 25, 50] as const;
   protected readonly sortActive = signal<string | null>(null);
   protected readonly sortDirection = signal<TngTableSortDirection | null>(null);
@@ -111,21 +110,8 @@ export class ListBankCashComponent implements OnInit {
     });
   }
 
-  protected async onPageIndexChange(pageIndex: number): Promise<void> {
-    const limit = this.pageSize();
-    await this.updateFilterInUrl({
-      ...this.getCurrentFilter(),
-      limit,
-      offset: pageIndex * limit,
-    });
-  }
-
-  protected async onPageSizeChange(pageSize: number): Promise<void> {
-    await this.updateFilterInUrl({
-      ...this.getCurrentFilter(),
-      limit: pageSize,
-      offset: 0,
-    });
+  protected async onPaginationFilterChange(filter: BankCashListQuery): Promise<void> {
+    await this.updateFilterInUrl(filter);
   }
 
   protected async onSortChange(event: {
@@ -246,8 +232,7 @@ export class ListBankCashComponent implements OnInit {
     const offset = filter.offset ?? 0;
     const sort = this.parseSort(filter.order?.[0]);
 
-    this.pageSize.set(limit);
-    this.pageIndex.set(Math.floor(offset / limit));
+    this.currentFilter.set({ ...filter, limit, offset });
     this.currentWhere.set(filter.where);
     this.sortActive.set(sort.active);
     this.sortDirection.set(sort.direction);

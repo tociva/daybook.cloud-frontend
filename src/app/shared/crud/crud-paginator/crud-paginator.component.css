@@ -1,0 +1,13 @@
+:host {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.compact-paginator {
+  width: auto;
+}
+
+.compact-paginator ::ng-deep .tng-paginator {
+  justify-content: flex-end;
+  width: auto;
+}

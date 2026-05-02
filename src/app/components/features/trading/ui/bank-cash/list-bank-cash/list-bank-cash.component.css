@@ -63,15 +63,6 @@ h1 {
   justify-content: flex-end;
 }
 
-.compact-paginator {
-  width: auto;
-}
-
-.compact-paginator ::ng-deep .tng-paginator {
-  justify-content: flex-end;
-  width: auto;
-}
-
 .action-icon {
   border-radius: 0.4rem;
   color: var(--tng-semantic-foreground-muted);

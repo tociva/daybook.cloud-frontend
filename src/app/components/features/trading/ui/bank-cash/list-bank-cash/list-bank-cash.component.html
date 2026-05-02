@@ -93,20 +93,12 @@
       </tng-table>
 
       <div class="table-footer">
-        <tng-paginator
-          class="compact-paginator"
+        <app-crud-paginator
           ariaLabel="Bank and cash pagination"
-          size="sm"
-          [pageIndex]="pageIndex()"
-          [pageSize]="pageSize()"
+          [filter]="currentFilter()"
           [totalItems]="bankCashStore.count()"
           [pageSizeOptions]="pageSizeOptions"
-          [showFirstLast]="false"
-          [showPageSize]="true"
-          [showRange]="true"
-          [maxPageButtons]="3"
-          (pageIndexChange)="onPageIndexChange($event)"
-          (pageSizeChange)="onPageSizeChange($event)"
+          (filterChange)="onPaginationFilterChange($event)"
         />
       </div>
     </div>
