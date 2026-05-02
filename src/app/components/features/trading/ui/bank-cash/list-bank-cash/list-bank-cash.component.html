@@ -11,9 +11,8 @@
         ariaLabel="Bank and cash filters"
         title="Filter accounts"
         [fields]="filterFields"
-        [where]="currentWhere()"
-        (filterApply)="applyFilters($event)"
-        (clearFilters)="clearFilter()"
+        [filter]="crudQuery.filter()"
+        syncUrl
       />
 
       <tng-button type="button" appearance="solid" tone="primary" (click)="createBankCash()">
@@ -36,9 +35,9 @@
         [items]="bankCashStore.items()"
         [loading]="bankCashStore.isLoading()"
         [error]="hasError()"
-        [sortActive]="sortActive()"
-        [sortDirection]="sortDirection()"
-        (sortChange)="onSortChange($event)"
+        [sortActive]="crudQuery.sortActive()"
+        [sortDirection]="crudQuery.sortDirection()"
+        (sortChange)="crudQuery.applySort($event)"
       >
         <ng-template tngTableCellTemplate="name" let-row="row">
           <button type="button" class="link-button" (click)="viewBankCash(row)">
@@ -64,30 +63,30 @@
 
         <ng-template tngTableCellTemplate="actions" let-row="row">
           <div class="row-actions">
-            <tng-icon
-              icon="eye"
+            <button
+              type="button"
               class="action-icon"
-              label="View bank/cash account"
-              tabindex="0"
+              aria-label="View bank/cash account"
               (click)="viewBankCash(row)"
-              (keydown)="handleActionKeydown($event, row, 'view')"
-            />
-            <tng-icon
-              icon="pencil"
+            >
+              <tng-icon icon="eye" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
               class="action-icon"
-              label="Edit bank/cash account"
-              tabindex="0"
+              aria-label="Edit bank/cash account"
               (click)="editBankCash(row)"
-              (keydown)="handleActionKeydown($event, row, 'edit')"
-            />
-            <tng-icon
-              icon="trash2"
+            >
+              <tng-icon icon="pencil" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
               class="action-icon action-icon--danger"
-              label="Delete bank/cash account"
-              tabindex="0"
+              aria-label="Delete bank/cash account"
               (click)="deleteBankCash(row)"
-              (keydown)="handleActionKeydown($event, row, 'delete')"
-            />
+            >
+              <tng-icon icon="trash2" aria-hidden="true" />
+            </button>
           </div>
         </ng-template>
       </tng-table>
@@ -95,10 +94,10 @@
       <div class="table-footer">
         <app-crud-paginator
           ariaLabel="Bank and cash pagination"
-          [filter]="currentFilter()"
+          [filter]="crudQuery.filter()"
           [totalItems]="bankCashStore.count()"
-          [pageSizeOptions]="pageSizeOptions"
-          (filterChange)="onPaginationFilterChange($event)"
+          [pageSizeOptions]="crudQuery.pageSizeOptions()"
+          syncUrl
         />
       </div>
     </div>

@@ -64,10 +64,16 @@ h1 {
 }
 
 .action-icon {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
   border-radius: 0.4rem;
   color: var(--tng-semantic-foreground-muted);
   cursor: pointer;
+  display: inline-flex;
   height: 1.35rem;
+  justify-content: center;
   padding: 0.2rem;
   width: 1.35rem;
 }

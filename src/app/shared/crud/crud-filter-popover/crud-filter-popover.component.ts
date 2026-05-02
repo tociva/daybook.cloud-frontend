@@ -1,4 +1,13 @@
-import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  booleanAttribute,
+  inject,
+  signal,
+} from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import {
   TngButtonComponent,
   TngInputComponent,
@@ -7,12 +16,14 @@ import {
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { TngPopover, TngPopoverPanel, TngPopoverTrigger } from '@tailng-ui/primitives';
-import type { Lb4TextFilterOperator, Lb4Where } from '../lb4-query';
+import type { Lb4ListQuery, Lb4TextFilterOperator, Lb4Where } from '../lb4-query';
 import {
+  DEFAULT_LB4_PAGE_SIZE,
   buildLb4TextFilterValue,
   readLb4TextFilterOperator,
   readLb4TextFilterValue,
 } from '../lb4-query';
+import { CrudUrlService } from '../crud-url.service';
 
 export type CrudFilterOption<T = unknown> = Readonly<{
   label: string;
@@ -75,7 +86,11 @@ const OPERATOR_LABELS: Record<Lb4TextFilterOperator, string> = {
   styleUrl: './crud-filter-popover.component.css',
 })
 export class CrudFilterPopoverComponent {
+  private readonly route = inject(ActivatedRoute);
+  private readonly crudUrl = inject(CrudUrlService);
+
   @Input() ariaLabel = 'Filters';
+  @Input() defaultPageSize = DEFAULT_LB4_PAGE_SIZE;
   @Input()
   set fields(fields: readonly CrudFilterField[]) {
     this._fields = fields;
@@ -88,6 +103,15 @@ export class CrudFilterPopoverComponent {
   }
 
   @Input() title = 'Filter';
+  @Input({ transform: booleanAttribute }) replaceUrl = false;
+  @Input({ transform: booleanAttribute }) syncUrl = false;
+
+  @Input()
+  set filter(filter: Lb4ListQuery | undefined) {
+    this.currentFilter = filter ?? {};
+    this.currentWhere = this.currentFilter.where;
+    this.syncDraftFromWhere();
+  }
 
   @Input()
   set where(where: Lb4Where | undefined) {
@@ -96,6 +120,7 @@ export class CrudFilterPopoverComponent {
   }
 
   @Output() readonly clearFilters = new EventEmitter<void>();
+  @Output() readonly filterChange = new EventEmitter<Lb4ListQuery>();
   @Output() readonly filterApply = new EventEmitter<Lb4Where | undefined>();
 
   protected readonly open = signal(false);
@@ -110,6 +135,7 @@ export class CrudFilterPopoverComponent {
     option.value;
 
   private _fields: readonly CrudFilterField[] = [];
+  private currentFilter: Lb4ListQuery = {};
   private currentWhere: Lb4Where | undefined;
   private readonly operatorOptionsCache = new Map<CrudFilterField, readonly OperatorOption[]>();
 
@@ -192,14 +218,43 @@ export class CrudFilterPopoverComponent {
 
   protected submitFilter(event: SubmitEvent): void {
     event.preventDefault();
-    this.filterApply.emit(this.buildWhere());
+    const where = this.buildWhere();
+    const filter = {
+      ...this.currentFilter,
+      offset: 0,
+      where,
+    };
+
+    this.filterApply.emit(where);
+    void this.emitFilterChange(filter);
     this.open.set(false);
   }
 
   protected clearFilter(): void {
     this.draft.set(this.createEmptyDraft());
+    const filter = {
+      ...this.currentFilter,
+      offset: 0,
+      where: undefined,
+    };
+
     this.clearFilters.emit();
+    void this.emitFilterChange(filter);
     this.open.set(false);
+  }
+
+  private async emitFilterChange(filter: Lb4ListQuery): Promise<void> {
+    this.filterChange.emit(filter);
+
+    if (!this.syncUrl) {
+      return;
+    }
+
+    await this.crudUrl.updateFilterInUrl(filter, {
+      defaultPageSize: this.defaultPageSize,
+      replaceUrl: this.replaceUrl,
+      route: this.route,
+    });
   }
 
   private syncDraftFromWhere(): void {

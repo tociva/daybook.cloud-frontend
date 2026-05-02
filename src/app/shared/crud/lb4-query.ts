@@ -15,6 +15,18 @@ export type Lb4TextFilterOperator = '=' | '!=' | 'like';
 
 export type Lb4ComparisonFilterOperator = '!=' | '<' | '<=' | '=' | '>' | '>=';
 
+export type Lb4SortDirection = 'asc' | 'desc';
+
+export type Lb4SortChange = Readonly<{
+  activeColumnId: string | null;
+  direction: Lb4SortDirection | null;
+}>;
+
+export type Lb4SortState = Readonly<{
+  active: string | null;
+  direction: Lb4SortDirection | null;
+}>;
+
 export const DEFAULT_LB4_PAGE_SIZE = 10;
 
 export function normalizeLb4Filter(
@@ -67,12 +79,39 @@ export function serializeLb4FilterForUrl(
     : JSON.stringify(normalizedFilter);
 }
 
+export function applyLb4SortChange(filter: Lb4ListQuery, sort: Lb4SortChange): Lb4ListQuery {
+  return {
+    ...filter,
+    offset: 0,
+    order:
+      sort.activeColumnId && sort.direction
+        ? [`${sort.activeColumnId} ${sort.direction.toUpperCase()}`]
+        : undefined,
+  };
+}
+
+export function parseLb4SortState(order: readonly string[] | string | undefined): Lb4SortState {
+  const sort = Array.isArray(order) ? order[0] : order;
+  if (!sort) {
+    return { active: null, direction: null };
+  }
+
+  const [active, rawDirection] = sort.split(/\s+/);
+  const direction = rawDirection?.toLowerCase();
+
+  if (!active || (direction !== 'asc' && direction !== 'desc')) {
+    return { active: null, direction: null };
+  }
+
+  return { active, direction };
+}
+
 export function buildLb4TextFilterValue(value: string, operator: Lb4TextFilterOperator): unknown {
   switch (operator) {
     case '=':
       return { ilike: value };
     case '!=':
-      return { neq: value };
+      return { nilike: value };
     case 'like':
     default:
       return { ilike: `%${value}%` };
@@ -115,6 +154,18 @@ export function readLb4TextFilterValue(where: Lb4ListQuery['where'], field: stri
     return typeof value === 'string' ? trimWildcardPattern(value) : '';
   }
 
+  if (typeof fieldFilter === 'object' && fieldFilter !== null && 'nilike' in fieldFilter) {
+    const value = (fieldFilter as { nilike?: unknown }).nilike;
+
+    return typeof value === 'string' ? trimWildcardPattern(value) : '';
+  }
+
+  if (typeof fieldFilter === 'object' && fieldFilter !== null && 'nlike' in fieldFilter) {
+    const value = (fieldFilter as { nlike?: unknown }).nlike;
+
+    return typeof value === 'string' ? trimWildcardPattern(value) : '';
+  }
+
   if (typeof fieldFilter === 'object' && fieldFilter !== null && 'neq' in fieldFilter) {
     const value = (fieldFilter as { neq?: unknown }).neq;
 
@@ -153,7 +204,7 @@ export function readLb4TextFilterOperator(
   }
 
   if (typeof fieldFilter === 'object' && fieldFilter !== null) {
-    if ('neq' in fieldFilter) {
+    if ('nilike' in fieldFilter || 'nlike' in fieldFilter || 'neq' in fieldFilter) {
       return '!=';
     }
 
