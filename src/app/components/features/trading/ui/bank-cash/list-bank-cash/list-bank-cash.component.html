@@ -7,102 +7,14 @@
     </div>
 
     <div class="page-actions">
-      <div
-        class="filter-popover"
-        tngPopover
-        #filterPopover="tngPopover"
-        [align]="'end'"
-        [side]="'bottom'"
-        [ariaLabel]="'Bank and cash filters'"
-        [open]="filterPopoverOpen()"
-        (openChange)="onFilterPopoverOpenChange($event)"
-      >
-        <button
-          type="button"
-          class="filter-trigger"
-          [tngPopoverTrigger]="filterPopover"
-          aria-label="Filter accounts"
-        >
-          <tng-icon icon="filter" aria-hidden="true" />
-        </button>
-
-        <section tngPopoverPanel class="filter-panel">
-          <form class="filter-form" (submit)="submitFilter($event)">
-            <div class="filter-form__header">
-              <tng-icon icon="filter" aria-hidden="true" />
-              <strong>Filter accounts</strong>
-            </div>
-
-            <div class="filter-field">
-              <tng-label forId="bank-cash-filter-name">Name</tng-label>
-              <div class="filter-comparison">
-                <tng-select
-                  aria-label="Name filter operator"
-                  [options]="textOperatorOptions"
-                  [getOptionLabel]="getOperatorLabel"
-                  [getOptionValue]="getOperatorValue"
-                  [value]="filterNameOperator()"
-                  (valueChange)="onFilterNameOperatorChange($event)"
-                />
-                <tng-input
-                  id="bank-cash-filter-name"
-                  placeholder="Account name"
-                  [value]="filterName()"
-                  (valueChange)="filterName.set($event)"
-                />
-              </div>
-            </div>
-
-            <div class="filter-field">
-              <tng-label forId="bank-cash-filter-description">Description</tng-label>
-              <div class="filter-comparison">
-                <tng-select
-                  aria-label="Description filter operator"
-                  [options]="textOperatorOptions"
-                  [getOptionLabel]="getOperatorLabel"
-                  [getOptionValue]="getOperatorValue"
-                  [value]="filterDescriptionOperator()"
-                  (valueChange)="onFilterDescriptionOperatorChange($event)"
-                />
-                <tng-input
-                  id="bank-cash-filter-description"
-                  placeholder="Description"
-                  [value]="filterDescription()"
-                  (valueChange)="filterDescription.set($event)"
-                />
-              </div>
-            </div>
-
-            <div class="filter-field">
-              <tng-label forId="bank-cash-filter-status">Status</tng-label>
-              <div class="filter-comparison">
-                <tng-select
-                  aria-label="Status filter operator"
-                  [options]="statusOperatorOptions"
-                  [getOptionLabel]="getOperatorLabel"
-                  [getOptionValue]="getOperatorValue"
-                  [value]="filterStatusOperator()"
-                  (valueChange)="onFilterStatusOperatorChange($event)"
-                />
-                <tng-select
-                  id="bank-cash-filter-status"
-                  placeholder="Any status"
-                  [options]="statusFilterOptions"
-                  [getOptionLabel]="getStatusFilterLabel"
-                  [getOptionValue]="getStatusFilterValue"
-                  [value]="filterStatus()"
-                  (valueChange)="onFilterStatusChange($event)"
-                />
-              </div>
-            </div>
-
-            <div class="filter-actions">
-              <tng-button type="button" appearance="ghost" (click)="clearFilter()">Clear</tng-button>
-              <tng-button type="submit" appearance="solid" tone="primary">Apply</tng-button>
-            </div>
-          </form>
-        </section>
-      </div>
+      <app-crud-filter-popover
+        ariaLabel="Bank and cash filters"
+        title="Filter accounts"
+        [fields]="filterFields"
+        [where]="currentWhere()"
+        (filterApply)="applyFilters($event)"
+        (clearFilters)="clearFilter()"
+      />
 
       <tng-button type="button" appearance="solid" tone="primary" (click)="createBankCash()">
         <tng-icon icon="plus" aria-hidden="true" />

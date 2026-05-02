@@ -1,67 +1,34 @@
-import { HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { ApiClientService } from '../../../../../core/api/api-client.service';
-import { AppConfigStore } from '../../../../../core/config/app-config.store';
-import type {
-  BankCash,
-  BankCashCount,
-  BankCashListQuery,
-  BankCashPayload,
-} from './bank-cash.model';
+import { CrudApiService } from '../../../../../shared/crud';
+import type { BankCash, BankCashListQuery, BankCashPayload } from './bank-cash.model';
+
+const BANK_CASH_ENDPOINT = '/inventory/bank-cash';
 
 @Injectable({ providedIn: 'root' })
 export class BankCashService {
-  private readonly api = inject(ApiClientService);
-  private readonly appConfigStore = inject(AppConfigStore);
+  private readonly crudApi = inject(CrudApiService);
 
   async create(payload: BankCashPayload): Promise<BankCash> {
-    return this.api.post<BankCash, BankCashPayload>(await this.collectionUrl(), payload);
+    return this.crudApi.create<BankCash, BankCashPayload>(BANK_CASH_ENDPOINT, payload);
   }
 
   async delete(id: string): Promise<void> {
-    return this.api.delete<void>(`${await this.collectionUrl()}/${id}`);
+    return this.crudApi.delete(BANK_CASH_ENDPOINT, id);
   }
 
   async getById(id: string): Promise<BankCash> {
-    return this.api.get<BankCash>(`${await this.collectionUrl()}/${id}`);
+    return this.crudApi.getById<BankCash>(BANK_CASH_ENDPOINT, id);
   }
 
   async list(query: BankCashListQuery = {}): Promise<readonly BankCash[]> {
-    const params = new HttpParams().set('filter', JSON.stringify(this.normalizeFilter(query)));
-
-    return this.api.get<readonly BankCash[]>(await this.collectionUrl(), { params });
+    return this.crudApi.list<BankCash>(BANK_CASH_ENDPOINT, query);
   }
 
   async count(query: BankCashListQuery = {}): Promise<number> {
-    const where = query.where;
-    const params =
-      where === undefined ? undefined : new HttpParams().set('where', JSON.stringify(where));
-    const result = await this.api.get<BankCashCount>(`${await this.collectionUrl()}/count`, {
-      ...(params ? { params } : {}),
-    });
-
-    return result.count;
+    return this.crudApi.count(BANK_CASH_ENDPOINT, query);
   }
 
   async update(id: string, payload: BankCashPayload): Promise<BankCash> {
-    return this.api.patch<BankCash, BankCashPayload>(`${await this.collectionUrl()}/${id}`, payload);
-  }
-
-  private async collectionUrl(): Promise<string> {
-    const config = this.appConfigStore.config() ?? (await this.appConfigStore.load());
-    if (!config) {
-      throw new Error('Unable to load app configuration.');
-    }
-
-    return `${config.apiBaseUrl.replace(/\/$/, '')}/inventory/bank-cash`;
-  }
-
-  private normalizeFilter(query: BankCashListQuery): BankCashListQuery {
-    return {
-      limit: query.limit ?? 10,
-      offset: query.offset ?? 0,
-      ...(query.order?.length ? { order: query.order } : {}),
-      ...(query.where ? { where: query.where } : {}),
-    };
+    return this.crudApi.update<BankCash, BankCashPayload>(BANK_CASH_ENDPOINT, id, payload);
   }
 }

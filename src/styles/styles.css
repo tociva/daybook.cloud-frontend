@@ -8,5 +8,15 @@ body {
   border: 0;
   overflow-x: hidden;
   overflow-y: auto;
-  font-family: 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family:
+    'Roboto',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+}
+
+[data-slot='select-option']:hover:not([data-disabled]) {
+  background: var(--tng-select-option-bg-active, var(--tng-semantic-background-base));
+  border-color: var(--tng-select-option-border-active, var(--tng-semantic-border-subtle));
 }

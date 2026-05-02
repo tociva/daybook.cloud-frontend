@@ -1,0 +1,71 @@
+<div
+  class="filter-popover"
+  tngPopover
+  #filterPopover="tngPopover"
+  [align]="'end'"
+  [side]="'bottom'"
+  [ariaLabel]="ariaLabel"
+  [closeOnOutsidePointer]="false"
+  [open]="open()"
+  (openChange)="onOpenChange($event)"
+>
+  <button
+    type="button"
+    class="filter-trigger"
+    [tngPopoverTrigger]="filterPopover"
+    [attr.aria-label]="ariaLabel"
+  >
+    <tng-icon icon="filter" aria-hidden="true" />
+  </button>
+
+  <section tngPopoverPanel class="filter-panel">
+    <form class="filter-form" (submit)="submitFilter($event)">
+      <div class="filter-form__header">
+        <tng-icon icon="filter" aria-hidden="true" />
+        <strong>{{ title }}</strong>
+      </div>
+
+      @for (field of fields; track field.id) {
+        <div class="filter-field">
+          <tng-label [forId]="getFieldId(field)">{{ field.label }}</tng-label>
+          @if (field.type === 'text') {
+            <div class="filter-comparison">
+              <tng-select
+                [attr.aria-label]="field.label + ' filter operator'"
+                [options]="getOperatorOptions(field)"
+                [getOptionLabel]="getOperatorLabel"
+                [getOptionValue]="getOperatorValue"
+                [trackBy]="trackByOperatorValue"
+                [value]="getOperatorValueForField(field)"
+                (valueChange)="setOperator(field, $event)"
+              />
+
+              <tng-input
+                [id]="getFieldId(field)"
+                [placeholder]="field.placeholder ?? field.label"
+                [value]="getTextValue(field.id)"
+                (valueChange)="setTextValue(field, $event)"
+              />
+            </div>
+          } @else {
+            <tng-select
+              [id]="getFieldId(field)"
+              [placeholder]="field.placeholder ?? 'Any ' + field.label.toLowerCase()"
+              [options]="getEnumOptions(field)"
+              [getOptionLabel]="getOptionLabel"
+              [getOptionValue]="getOptionValue"
+              [trackBy]="trackByOptionValue"
+              [value]="getSelectValue(field.id)"
+              (valueChange)="setSelectValue(field, $event)"
+            />
+          }
+        </div>
+      }
+
+      <div class="filter-actions">
+        <tng-button type="button" appearance="ghost" (click)="clearFilter()">Clear</tng-button>
+        <tng-button type="submit" appearance="solid" tone="primary">Apply</tng-button>
+      </div>
+    </form>
+  </section>
+</div>

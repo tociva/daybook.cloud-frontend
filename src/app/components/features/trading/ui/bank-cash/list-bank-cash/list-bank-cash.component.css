@@ -58,90 +58,6 @@ h1 {
   gap: 1rem;
 }
 
-.filter-popover {
-  display: inline-flex;
-  position: relative;
-}
-
-.filter-trigger {
-  align-items: center;
-  appearance: none;
-  background: var(--tng-semantic-background-surface);
-  border: 1px solid var(--tng-semantic-border-strong);
-  border-radius: 0.6rem;
-  color: var(--tng-semantic-foreground-primary);
-  cursor: pointer;
-  display: inline-flex;
-  height: 2.35rem;
-  justify-content: center;
-  padding: 0;
-  width: 2.35rem;
-}
-
-.filter-trigger:focus-visible {
-  box-shadow: 0 0 0 3px var(--tng-semantic-focus-ring);
-  outline: none;
-}
-
-.filter-panel {
-  --bank-cash-filter-menu-z-index: 70;
-  --bank-cash-filter-popover-z-index: var(--tng-z-popover, 60);
-
-  background: var(--tng-semantic-background-surface);
-  border: 1px solid var(--tng-semantic-border-strong);
-  border-radius: 0.75rem;
-  box-shadow: 0 18px 28px color-mix(in srgb, var(--tng-semantic-foreground-primary) 18%, transparent);
-  color: var(--tng-semantic-foreground-primary);
-  display: grid;
-  gap: 0.75rem;
-  margin-top: 0.45rem;
-  min-width: 24rem;
-  padding: 0.85rem;
-  position: absolute;
-  right: 0;
-  top: 100%;
-  z-index: var(--bank-cash-filter-popover-z-index);
-}
-
-.filter-panel[hidden] {
-  display: none !important;
-}
-
-.filter-form {
-  --tng-select-overlay-z-index: var(--bank-cash-filter-menu-z-index);
-  --tng-select-z-overlay: var(--bank-cash-filter-menu-z-index);
-
-  display: grid;
-  gap: 0.85rem;
-  min-width: 24rem;
-}
-
-.filter-form__header,
-.filter-actions {
-  align-items: center;
-  display: flex;
-  gap: 0.5rem;
-}
-
-.filter-form__header {
-  color: var(--tng-semantic-foreground-primary);
-}
-
-.filter-field {
-  display: grid;
-  gap: 0.4rem;
-}
-
-.filter-comparison {
-  display: grid;
-  gap: 0.5rem;
-  grid-template-columns: 7rem minmax(0, 1fr);
-}
-
-.filter-actions {
-  justify-content: flex-end;
-}
-
 .table-footer {
   display: flex;
   justify-content: flex-end;
@@ -204,14 +120,5 @@ h1 {
 
   .row-actions {
     align-items: flex-start;
-  }
-
-  .filter-panel,
-  .filter-form {
-    min-width: min(24rem, calc(100vw - 2.5rem));
-  }
-
-  .filter-comparison {
-    grid-template-columns: 1fr;
   }
 }

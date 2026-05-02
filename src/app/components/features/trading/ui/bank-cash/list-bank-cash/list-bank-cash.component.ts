@@ -4,10 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import {
   TngButtonComponent,
   TngCardComponent,
-  TngInputComponent,
-  TngLabelComponent,
   TngPaginator,
-  TngSelectComponent,
   TngTag,
   TngTable,
   TngTableCellTpl,
@@ -15,39 +12,29 @@ import {
 import type { TngTableColumn } from '@tailng-ui/components';
 import type { TngTableSortDirection } from '@tailng-ui/cdk';
 import { TngIcon } from '@tailng-ui/icons';
-import { TngPopover, TngPopoverPanel, TngPopoverTrigger } from '@tailng-ui/primitives';
+import {
+  CrudFilterPopoverComponent,
+  DEFAULT_LB4_PAGE_SIZE,
+  parseLb4FilterParam,
+  serializeLb4FilterForUrl,
+} from '../../../../../../shared/crud';
+import type { CrudFilterField, Lb4Where } from '../../../../../../shared/crud';
 import { BankCashStore, Status } from '../../../data/bank-cash';
 import type { BankCash, BankCashListQuery } from '../../../data/bank-cash';
 import { TngTagIcon } from '../tng-tag-icon.directive';
 
 type StatusBadgeTone = 'danger' | 'success' | 'warning';
-type BankCashFilterWhere = Record<string, unknown>;
-type FilterOperatorOption<T extends string = string> = Readonly<{
-  label: string;
-  value: T;
-}>;
-type TextFilterOperator = '=' | '!=' | 'like';
-type StatusFilterOperator = '!=' | '<' | '<=' | '=' | '>' | '>=';
-type StatusFilterOption = Readonly<{
-  label: string;
-  value: Status;
-}>;
 
-const DEFAULT_PAGE_SIZE = 10;
+const DEFAULT_PAGE_SIZE = DEFAULT_LB4_PAGE_SIZE;
 
 @Component({
   selector: 'app-list-bank-cash',
   imports: [
     TngButtonComponent,
     TngCardComponent,
+    CrudFilterPopoverComponent,
     TngIcon,
-    TngInputComponent,
-    TngLabelComponent,
     TngPaginator,
-    TngSelectComponent,
-    TngPopover,
-    TngPopoverPanel,
-    TngPopoverTrigger,
     TngTag,
     TngTagIcon,
     TngTable,
@@ -61,19 +48,7 @@ export class ListBankCashComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   protected readonly bankCashStore = inject(BankCashStore);
-  protected readonly filterPopoverOpen = signal(false);
-  protected readonly filterName = signal('');
-  protected readonly filterNameOperator = signal<TextFilterOperator>('like');
-  protected readonly filterDescription = signal('');
-  protected readonly filterDescriptionOperator = signal<TextFilterOperator>('like');
-  protected readonly filterStatus = signal<Status | null>(null);
-  protected readonly filterStatusOperator = signal<StatusFilterOperator>('=');
-  protected readonly nameFilter = signal('');
-  protected readonly nameFilterOperator = signal<TextFilterOperator>('like');
-  protected readonly descriptionFilter = signal('');
-  protected readonly descriptionFilterOperator = signal<TextFilterOperator>('like');
-  protected readonly statusFilter = signal<Status | null>(null);
-  protected readonly statusFilterOperator = signal<StatusFilterOperator>('=');
+  protected readonly currentWhere = signal<Lb4Where | undefined>(undefined);
   protected readonly hasError = computed(() => this.bankCashStore.error() !== null);
   protected readonly pageIndex = signal(0);
   protected readonly pageSize = signal(DEFAULT_PAGE_SIZE);
@@ -86,30 +61,31 @@ export class ListBankCashComponent implements OnInit {
     { id: 'status', label: 'Status', sortable: true, width: '9rem' },
     { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '8rem' },
   ];
-  protected readonly statusFilterOptions: readonly StatusFilterOption[] = [
-    { label: 'Active', value: Status.ACTIVE },
-    { label: 'Inactive', value: Status.INACTIVE },
-    { label: 'Deleted', value: Status.DELETED },
+  protected readonly filterFields: readonly CrudFilterField[] = [
+    {
+      id: 'name',
+      label: 'Name',
+      placeholder: 'Account name',
+      type: 'text',
+    },
+    {
+      id: 'description',
+      label: 'Description',
+      placeholder: 'Description',
+      type: 'text',
+    },
+    {
+      id: 'status',
+      label: 'Status',
+      options: [
+        { label: 'Active', value: Status.ACTIVE },
+        { label: 'Inactive', value: Status.INACTIVE },
+        { label: 'Deleted', value: Status.DELETED },
+      ],
+      placeholder: 'Any status',
+      type: 'enum',
+    },
   ];
-  protected readonly textOperatorOptions: readonly FilterOperatorOption<TextFilterOperator>[] = [
-    { label: 'Like', value: 'like' },
-    { label: '=', value: '=' },
-    { label: '!=', value: '!=' },
-  ];
-  protected readonly statusOperatorOptions: readonly FilterOperatorOption<StatusFilterOperator>[] = [
-    { label: '=', value: '=' },
-    { label: '!=', value: '!=' },
-    { label: '<', value: '<' },
-    { label: '<=', value: '<=' },
-    { label: '>', value: '>' },
-    { label: '>=', value: '>=' },
-  ];
-  protected readonly getOperatorLabel = <T extends string>(option: FilterOperatorOption<T>): string =>
-    option.label;
-  protected readonly getOperatorValue = <T extends string>(option: FilterOperatorOption<T>): T =>
-    option.value;
-  protected readonly getStatusFilterLabel = (option: StatusFilterOption): string => option.label;
-  protected readonly getStatusFilterValue = (option: StatusFilterOption): Status => option.value;
 
   ngOnInit(): void {
     this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
@@ -119,58 +95,20 @@ export class ListBankCashComponent implements OnInit {
     });
   }
 
-  protected onFilterPopoverOpenChange(open: boolean): void {
-    this.filterPopoverOpen.set(open);
-
-    if (open) {
-      this.filterName.set(this.nameFilter());
-      this.filterNameOperator.set(this.nameFilterOperator());
-      this.filterDescription.set(this.descriptionFilter());
-      this.filterDescriptionOperator.set(this.descriptionFilterOperator());
-      this.filterStatus.set(this.statusFilter());
-      this.filterStatusOperator.set(this.statusFilterOperator());
-    }
-  }
-
-  protected async submitFilter(event: SubmitEvent): Promise<void> {
-    event.preventDefault();
+  protected async applyFilters(where: Lb4Where | undefined): Promise<void> {
     await this.updateFilterInUrl({
       ...this.getCurrentFilter(),
       offset: 0,
-      where: this.buildFilterWhere(),
+      where,
     });
-    this.filterPopoverOpen.set(false);
   }
 
   protected async clearFilter(): Promise<void> {
-    this.filterName.set('');
-    this.filterNameOperator.set('like');
-    this.filterDescription.set('');
-    this.filterDescriptionOperator.set('like');
-    this.filterStatus.set(null);
-    this.filterStatusOperator.set('=');
     await this.updateFilterInUrl({
       ...this.getCurrentFilter(),
       offset: 0,
       where: undefined,
     });
-    this.filterPopoverOpen.set(false);
-  }
-
-  protected onFilterNameOperatorChange(operator: TextFilterOperator | null): void {
-    this.filterNameOperator.set(operator ?? 'like');
-  }
-
-  protected onFilterDescriptionOperatorChange(operator: TextFilterOperator | null): void {
-    this.filterDescriptionOperator.set(operator ?? 'like');
-  }
-
-  protected onFilterStatusChange(status: Status | null): void {
-    this.filterStatus.set(status);
-  }
-
-  protected onFilterStatusOperatorChange(operator: StatusFilterOperator | null): void {
-    this.filterStatusOperator.set(operator ?? '=');
   }
 
   protected async onPageIndexChange(pageIndex: number): Promise<void> {
@@ -284,73 +222,14 @@ export class ListBankCashComponent implements OnInit {
     }
   }
 
-  private buildFilterWhere(): BankCashFilterWhere | undefined {
-    const name = this.filterName().trim();
-    const description = this.filterDescription().trim();
-    const status = this.filterStatus();
-    const where: BankCashFilterWhere = {};
-
-    if (name) {
-      where['name'] = this.buildTextFilterValue(name, this.filterNameOperator());
-    }
-
-    if (description) {
-      where['description'] = this.buildTextFilterValue(
-        description,
-        this.filterDescriptionOperator(),
-      );
-    }
-
-    if (status !== null) {
-      where['status'] = this.buildStatusFilterValue(status, this.filterStatusOperator());
-    }
-
-    if (Object.keys(where).length === 0) {
-      return undefined;
-    }
-
-    return where;
-  }
-
-  private buildTextFilterValue(value: string, operator: TextFilterOperator): unknown {
-    switch (operator) {
-      case '=':
-        return { ilike: value };
-      case '!=':
-        return { neq: value };
-      case 'like':
-      default:
-        return { ilike: `%${value}%` };
-    }
-  }
-
-  private buildStatusFilterValue(value: Status, operator: StatusFilterOperator): unknown {
-    switch (operator) {
-      case '!=':
-        return { neq: value };
-      case '<':
-        return { lt: value };
-      case '<=':
-        return { lte: value };
-      case '>':
-        return { gt: value };
-      case '>=':
-        return { gte: value };
-      case '=':
-      default:
-        return value;
-    }
-  }
-
   private getCurrentFilter(): BankCashListQuery {
-    return this.parseFilter(this.route.snapshot.queryParamMap.get('filter'));
+    return parseLb4FilterParam(this.route.snapshot.queryParamMap.get('filter'), DEFAULT_PAGE_SIZE);
   }
 
   private async updateFilterInUrl(filter: BankCashListQuery, replaceUrl = false): Promise<void> {
-    const normalizedFilter = this.normalizeFilter(filter);
     await this.router.navigate([], {
       queryParams: {
-        filter: this.isDefaultFilter(normalizedFilter) ? null : JSON.stringify(normalizedFilter),
+        filter: serializeLb4FilterForUrl(filter, DEFAULT_PAGE_SIZE),
       },
       queryParamsHandling: 'merge',
       relativeTo: this.route,
@@ -358,36 +237,8 @@ export class ListBankCashComponent implements OnInit {
     });
   }
 
-  private normalizeFilter(filter: BankCashListQuery): BankCashListQuery {
-    return {
-      limit: filter.limit ?? DEFAULT_PAGE_SIZE,
-      offset: filter.offset ?? 0,
-      ...(filter.order?.length ? { order: filter.order } : {}),
-      ...(filter.where ? { where: filter.where } : {}),
-    };
-  }
-
-  private isDefaultFilter(filter: BankCashListQuery): boolean {
-    return (
-      (filter.limit ?? DEFAULT_PAGE_SIZE) === DEFAULT_PAGE_SIZE &&
-      (filter.offset ?? 0) === 0 &&
-      !filter.order?.length &&
-      filter.where === undefined
-    );
-  }
-
   private parseFilter(filterParam: string | null): BankCashListQuery {
-    if (!filterParam) {
-      return this.normalizeFilter({});
-    }
-
-    try {
-      const parsedFilter = JSON.parse(filterParam) as BankCashListQuery;
-
-      return this.normalizeFilter(parsedFilter);
-    } catch {
-      return this.normalizeFilter({});
-    }
+    return parseLb4FilterParam(filterParam, DEFAULT_PAGE_SIZE);
   }
 
   private syncStateFromFilter(filter: BankCashListQuery): void {
@@ -397,20 +248,7 @@ export class ListBankCashComponent implements OnInit {
 
     this.pageSize.set(limit);
     this.pageIndex.set(Math.floor(offset / limit));
-    this.nameFilter.set(this.readTextFilterFromWhere(filter.where, 'name'));
-    this.nameFilterOperator.set(this.readTextOperatorFromWhere(filter.where, 'name'));
-    this.descriptionFilter.set(this.readTextFilterFromWhere(filter.where, 'description'));
-    this.descriptionFilterOperator.set(
-      this.readTextOperatorFromWhere(filter.where, 'description'),
-    );
-    this.statusFilter.set(this.readStatusFilterFromWhere(filter.where));
-    this.statusFilterOperator.set(this.readStatusOperatorFromWhere(filter.where));
-    this.filterName.set(this.nameFilter());
-    this.filterNameOperator.set(this.nameFilterOperator());
-    this.filterDescription.set(this.descriptionFilter());
-    this.filterDescriptionOperator.set(this.descriptionFilterOperator());
-    this.filterStatus.set(this.statusFilter());
-    this.filterStatusOperator.set(this.statusFilterOperator());
+    this.currentWhere.set(filter.where);
     this.sortActive.set(sort.active);
     this.sortDirection.set(sort.direction);
   }
@@ -431,123 +269,5 @@ export class ListBankCashComponent implements OnInit {
     }
 
     return { active, direction };
-  }
-
-  private readTextFilterFromWhere(where: BankCashListQuery['where'], field: 'description' | 'name'): string {
-    const fieldFilter = where?.[field];
-
-    if (typeof fieldFilter === 'object' && fieldFilter !== null && 'ilike' in fieldFilter) {
-      const value = (fieldFilter as { ilike?: unknown }).ilike;
-
-      return typeof value === 'string' ? value.replace(/^%|%$/g, '') : '';
-    }
-
-    if (typeof fieldFilter === 'object' && fieldFilter !== null && 'like' in fieldFilter) {
-      const value = (fieldFilter as { like?: unknown }).like;
-
-      return typeof value === 'string' ? value.replace(/^%|%$/g, '') : '';
-    }
-
-    if (typeof fieldFilter === 'object' && fieldFilter !== null && 'neq' in fieldFilter) {
-      const value = (fieldFilter as { neq?: unknown }).neq;
-
-      return typeof value === 'string' ? value : '';
-    }
-
-    if (typeof fieldFilter === 'string') {
-      return fieldFilter;
-    }
-
-    const orFilters = where?.['or'];
-
-    if (!Array.isArray(orFilters)) {
-      return '';
-    }
-
-    for (const filter of orFilters) {
-      const value = this.readTextFilterFromWhere(filter as BankCashListQuery['where'], field);
-
-      if (value) {
-        return value.replace(/^%|%$/g, '');
-      }
-    }
-
-    return '';
-  }
-
-  private readTextOperatorFromWhere(
-    where: BankCashListQuery['where'],
-    field: 'description' | 'name',
-  ): TextFilterOperator {
-    const fieldFilter = where?.[field];
-
-    if (typeof fieldFilter === 'string') {
-      return '=';
-    }
-
-    if (typeof fieldFilter === 'object' && fieldFilter !== null) {
-      if ('neq' in fieldFilter) {
-        return '!=';
-      }
-
-      if ('ilike' in fieldFilter || 'like' in fieldFilter) {
-        const value = (fieldFilter as { ilike?: unknown; like?: unknown }).ilike
-          ?? (fieldFilter as { ilike?: unknown; like?: unknown }).like;
-
-        return typeof value === 'string' && !value.includes('%') ? '=' : 'like';
-      }
-    }
-
-    return 'like';
-  }
-
-  private readStatusFilterFromWhere(where: BankCashListQuery['where']): Status | null {
-    const status = where?.['status'];
-
-    if (status === Status.ACTIVE || status === Status.INACTIVE || status === Status.DELETED) {
-      return status;
-    }
-
-    if (typeof status === 'object' && status !== null) {
-      for (const operator of ['neq', 'lt', 'lte', 'gt', 'gte'] as const) {
-        const value = (status as Record<string, unknown>)[operator];
-
-        if (value === Status.ACTIVE || value === Status.INACTIVE || value === Status.DELETED) {
-          return value;
-        }
-      }
-    }
-
-    return null;
-  }
-
-  private readStatusOperatorFromWhere(where: BankCashListQuery['where']): StatusFilterOperator {
-    const status = where?.['status'];
-
-    if (typeof status !== 'object' || status === null) {
-      return '=';
-    }
-
-    if ('neq' in status) {
-      return '!=';
-    }
-
-    if ('lt' in status) {
-      return '<';
-    }
-
-    if ('lte' in status) {
-      return '<=';
-    }
-
-    if ('gt' in status) {
-      return '>';
-    }
-
-    if ('gte' in status) {
-      return '>=';
-    }
-
-    return '=';
   }
 }

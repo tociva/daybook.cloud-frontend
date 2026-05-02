@@ -1,4 +1,5 @@
 import type { Branch } from '../../../management/data/branch/branch.model';
+import type { Lb4ListQuery } from '../../../../../shared/crud';
 
 export enum Status {
   INACTIVE = 0,
@@ -22,12 +23,7 @@ export type BankCash = BankCashPayload &
     id?: string;
   }>;
 
-export type BankCashListQuery = Readonly<{
-  limit?: number;
-  offset?: number;
-  order?: readonly string[];
-  where?: Record<string, unknown>;
-}>;
+export type BankCashListQuery = Lb4ListQuery;
 
 export type BankCashSearchQuery = Readonly<{
   limit?: number;
