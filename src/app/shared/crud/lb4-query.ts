@@ -1,6 +1,8 @@
 export type Lb4Where = Record<string, unknown>;
 
 export type Lb4ListQuery = Readonly<{
+  /** Relation names to embed; serialized to LoopBack `include` on list requests. */
+  includes?: readonly string[];
   limit?: number;
   offset?: number;
   order?: readonly string[];
@@ -33,11 +35,25 @@ export function normalizeLb4Filter(
   filter: Lb4ListQuery,
   defaultLimit = DEFAULT_LB4_PAGE_SIZE,
 ): Lb4ListQuery {
+  const includes = filter.includes?.filter((name) => name.length > 0);
   return {
     limit: filter.limit ?? defaultLimit,
     offset: filter.offset ?? 0,
     ...(filter.order?.length ? { order: filter.order } : {}),
     ...(filter.where ? { where: filter.where } : {}),
+    ...(includes?.length ? { includes } : {}),
+  };
+}
+
+/** LoopBack list `filter` JSON uses `include`, not `includes`. */
+export function toLb4ListRequestFilterBody(normalized: Lb4ListQuery): Record<string, unknown> {
+  const includeNames = normalized.includes?.filter((n) => n.length > 0);
+  return {
+    limit: normalized.limit,
+    offset: normalized.offset,
+    ...(normalized.order?.length ? { order: normalized.order } : {}),
+    ...(normalized.where !== undefined ? { where: normalized.where } : {}),
+    ...(includeNames?.length ? { include: [...includeNames] } : {}),
   };
 }
 
@@ -49,7 +65,8 @@ export function isDefaultLb4Filter(
     (filter.limit ?? defaultLimit) === defaultLimit &&
     (filter.offset ?? 0) === 0 &&
     !filter.order?.length &&
-    filter.where === undefined
+    filter.where === undefined &&
+    !filter.includes?.length
   );
 }
 
@@ -62,7 +79,23 @@ export function parseLb4FilterParam(
   }
 
   try {
-    return normalizeLb4Filter(JSON.parse(filterParam) as Lb4ListQuery, defaultLimit);
+    const raw = JSON.parse(filterParam) as Lb4ListQuery & { include?: readonly string[] };
+    const includes =
+      raw.includes && raw.includes.length > 0
+        ? raw.includes
+        : raw.include && raw.include.length > 0
+          ? raw.include
+          : undefined;
+    return normalizeLb4Filter(
+      {
+        limit: raw.limit,
+        offset: raw.offset,
+        order: raw.order,
+        where: raw.where,
+        ...(includes?.length ? { includes } : {}),
+      },
+      defaultLimit,
+    );
   } catch {
     return normalizeLb4Filter({}, defaultLimit);
   }

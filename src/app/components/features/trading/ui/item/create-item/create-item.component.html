@@ -1,0 +1,172 @@
+<main class="trading-page">
+  <section class="setup-layout" aria-labelledby="item-setup-title">
+    <form class="item-form" novalidate (submit)="submitForm($event)">
+
+      <tng-card variant="outline" tone="info" padding="lg">
+        <tng-card-header>
+          <tng-card-title>{{ title() }}</tng-card-title>
+          <tng-card-description>Set the item identity and assign it to a category.</tng-card-description>
+        </tng-card-header>
+
+        <tng-card-content>
+          @if (itemStore.error()) {
+            <div class="notice notice--danger">{{ itemStore.error() }}</div>
+          }
+
+          @if (itemStore.isLoading() && mode() === 'edit' && !itemStore.selectedItem()) {
+            <div class="notice">Loading item...</div>
+          } @else {
+            <div class="field-grid">
+              <div class="field">
+                <tng-label forId="item-name" required>Name</tng-label>
+                <tng-input
+                  id="item-name"
+                  placeholder="Jasmine Rice 5kg"
+                  [formField]="itemForm.name"
+                  [ariaInvalid]="nameError() !== null"
+                />
+                <p class="field-error" [class.field-error--empty]="!nameError()">
+                  {{ nameError() || ' ' }}
+                </p>
+              </div>
+
+              <div class="field">
+                <tng-label forId="item-displayname" required>Display Name</tng-label>
+                <tng-input
+                  id="item-displayname"
+                  placeholder="Rice 5kg"
+                  [formField]="itemForm.displayname"
+                  [ariaInvalid]="displaynameError() !== null"
+                />
+                <p class="field-error" [class.field-error--empty]="!displaynameError()">
+                  {{ displaynameError() || ' ' }}
+                </p>
+              </div>
+
+              <div class="field">
+                <tng-label forId="item-category" required>Category</tng-label>
+                <tng-autocomplete
+                  id="item-category"
+                  placeholder="Search for a category"
+                  ariaLabel="Category"
+                  [options]="itemCategoryStore.items()"
+                  [formField]="itemForm.categoryId"
+                  [getOptionValue]="categoryOptionValue"
+                  [getOptionLabel]="categoryOptionLabel"
+                  [trackBy]="categoryTrackBy"
+                  (valueChange)="onCategoryChange($event)"
+                />
+                <p class="field-error" [class.field-error--empty]="!categoryError()">
+                  {{ categoryError() || ' ' }}
+                </p>
+              </div>
+
+              <div class="field">
+                <tng-label forId="item-code" required>Code</tng-label>
+                <tng-input
+                  id="item-code"
+                  placeholder="RICE-5KG"
+                  [formField]="itemForm.code"
+                  [ariaInvalid]="codeError() !== null"
+                />
+                <p class="field-error" [class.field-error--empty]="!codeError()">
+                  {{ codeError() || ' ' }}
+                </p>
+              </div>
+            </div>
+          }
+        </tng-card-content>
+      </tng-card>
+
+      <tng-card variant="outline" tone="neutral" padding="lg">
+        <tng-card-header>
+          <tng-card-title>Additional Details</tng-card-title>
+          <tng-card-description>Barcode, ledger mappings, and optional notes.</tng-card-description>
+        </tng-card-header>
+
+        <tng-card-content>
+          <div class="field-grid">
+            <div class="field">
+              <tng-label forId="item-barcode">Barcode</tng-label>
+              <tng-input
+                id="item-barcode"
+                placeholder="1234567890123"
+                [formField]="itemForm.barcode"
+              />
+              <p class="field-error field-error--empty">{{ ' ' }}</p>
+            </div>
+
+            <div class="field">
+              <!-- spacer -->
+            </div>
+
+            <div class="field">
+              <tng-label forId="item-purchase-ledger">Purchase Ledger</tng-label>
+              <tng-input
+                id="item-purchase-ledger"
+                placeholder="Purchases A/c"
+                [formField]="itemForm.purchaseledger"
+              />
+              <p class="field-error field-error--empty">{{ ' ' }}</p>
+            </div>
+
+            <div class="field">
+              <tng-label forId="item-sales-ledger">Sales Ledger</tng-label>
+              <tng-input
+                id="item-sales-ledger"
+                placeholder="Sales A/c"
+                [formField]="itemForm.salesledger"
+              />
+              <p class="field-error field-error--empty">{{ ' ' }}</p>
+            </div>
+
+            <div class="field field--wide">
+              <tng-label forId="item-description">Description</tng-label>
+              <tng-textarea
+                id="item-description"
+                placeholder="Internal notes for this item"
+                rows="4"
+                [formField]="itemForm.description"
+              />
+              <p class="field-error field-error--empty">{{ ' ' }}</p>
+            </div>
+          </div>
+        </tng-card-content>
+
+        <tng-card-footer>
+          <tng-card-actions align="end">
+            <app-burl-back-button label="Cancel" />
+            <tng-button
+              type="submit"
+              appearance="solid"
+              tone="primary"
+              [disabled]="itemStore.isLoading()"
+            >
+              <tng-icon icon="save" aria-hidden="true" />
+              Save
+            </tng-button>
+          </tng-card-actions>
+        </tng-card-footer>
+      </tng-card>
+
+    </form>
+
+    <aside class="setup-overview" aria-labelledby="item-setup-title">
+      <div class="setup-copy">
+        <p class="eyebrow">Item setup</p>
+        <h1 id="item-setup-title">{{ title() }}</h1>
+        <p>
+          Define the item name, code, and display name, then link it to a category so it can
+          be used across invoices and transactions in Daybook Cloud.
+        </p>
+        <tng-stepper
+          class="setup-stepper"
+          ariaLabel="Item setup progress"
+          [ordered]="true"
+          [steps]="setupSteps()"
+          [value]="activeSetupStep()"
+        />
+      </div>
+    </aside>
+  </section>
+</main>

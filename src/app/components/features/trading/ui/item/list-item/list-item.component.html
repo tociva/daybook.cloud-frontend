@@ -1,0 +1,92 @@
+<main class="trading-page">
+  <section class="page-heading">
+    <div>
+      <p class="eyebrow">Trading</p>
+      <h1>Items</h1>
+      <p class="subtle">Manage products and services used across invoices and transactions.</p>
+    </div>
+
+    <div class="page-actions">
+      <app-crud-filter-popover
+        ariaLabel="Item filters"
+        title="Filter items"
+        [fields]="filterFields"
+        [filter]="crudQuery.filter()"
+        syncUrl
+      />
+
+      <tng-button type="button" appearance="outline" tone="neutral" (click)="openItemCategories()">
+        <tng-icon icon="layers" aria-hidden="true" />
+        Categories
+      </tng-button>
+
+      <tng-button type="button" appearance="solid" tone="primary" (click)="createItem()">
+        <tng-icon icon="plus" aria-hidden="true" />
+        New item
+      </tng-button>
+    </div>
+  </section>
+
+  <tng-card variant="outline" padding="lg">
+    @if (itemStore.error()) {
+      <div class="notice notice--danger">{{ itemStore.error() }}</div>
+    }
+
+    <div class="table-stack">
+      <tng-table
+        ariaLabel="Items"
+        density="comfortable"
+        [columns]="columns"
+        [items]="itemStore.items()"
+        [loading]="itemStore.isLoading()"
+        [error]="hasError()"
+        [sortActive]="crudQuery.sortActive()"
+        [sortDirection]="crudQuery.sortDirection()"
+        (sortChange)="crudQuery.applySort($event)"
+      >
+        <ng-template tngTableCellTemplate="name" let-row="row">
+          <button type="button" class="link-button" (click)="viewItem(row)">
+            {{ row.name }}
+          </button>
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="category" let-row="row">
+          {{ row.category?.name || '—' }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="description" let-row="row">
+          {{ row.description || 'No description' }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="actions" let-row="row">
+          <div class="row-actions">
+            <button type="button" class="action-icon" aria-label="View item" (click)="viewItem(row)">
+              <tng-icon icon="eye" aria-hidden="true" />
+            </button>
+            <button type="button" class="action-icon" aria-label="Edit item" (click)="editItem(row)">
+              <tng-icon icon="pencil" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              class="action-icon action-icon--danger"
+              aria-label="Delete item"
+              (click)="deleteItem(row)"
+            >
+              <tng-icon icon="trash2" aria-hidden="true" />
+            </button>
+          </div>
+        </ng-template>
+      </tng-table>
+
+      <div class="table-footer">
+        <app-crud-paginator
+          ariaLabel="Item pagination"
+          [filter]="crudQuery.filter()"
+          [totalItems]="itemStore.count()"
+          [pageSizeOptions]="crudQuery.pageSizeOptions()"
+          syncUrl
+        />
+      </div>
+    </div>
+  </tng-card>
+</main>

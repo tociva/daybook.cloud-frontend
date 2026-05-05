@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { ApiClientService } from '../../core/api/api-client.service';
 import { AppConfigStore } from '../../core/config/app-config.store';
 import type { Lb4Count, Lb4ListQuery } from './lb4-query';
-import { normalizeLb4Filter } from './lb4-query';
+import { normalizeLb4Filter, toLb4ListRequestFilterBody } from './lb4-query';
 
 @Injectable({ providedIn: 'root' })
 export class CrudApiService {
@@ -18,12 +18,31 @@ export class CrudApiService {
     return this.api.delete<void>(`${await this.collectionUrl(endpointPath)}/${id}`);
   }
 
-  async getById<TEntity>(endpointPath: string, id: string): Promise<TEntity> {
-    return this.api.get<TEntity>(`${await this.collectionUrl(endpointPath)}/${id}`);
+  /**
+   * Optional query matches common LoopBack-style `GET …/:id?filter=` payloads,
+   * e.g. `{ includes: ['category'] }` → `filter={"include":["category"]}`.
+   */
+  async getById<TEntity>(
+    endpointPath: string,
+    id: string,
+    query?: Readonly<{ includes?: readonly string[] }>,
+  ): Promise<TEntity> {
+    const url = `${await this.collectionUrl(endpointPath)}/${id}`;
+    const include = query?.includes?.filter((name) => name.length > 0);
+    if (!include?.length) {
+      return this.api.get<TEntity>(url);
+    }
+
+    const params = new HttpParams().set('filter', JSON.stringify({ include }));
+    return this.api.get<TEntity>(url, { params });
   }
 
   async list<TEntity>(endpointPath: string, query: Lb4ListQuery = {}): Promise<readonly TEntity[]> {
-    const params = new HttpParams().set('filter', JSON.stringify(normalizeLb4Filter(query)));
+    const normalized = normalizeLb4Filter(query);
+    const params = new HttpParams().set(
+      'filter',
+      JSON.stringify(toLb4ListRequestFilterBody(normalized)),
+    );
 
     return this.api.get<readonly TEntity[]>(await this.collectionUrl(endpointPath), { params });
   }

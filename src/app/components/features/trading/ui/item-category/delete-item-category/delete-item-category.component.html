@@ -1,0 +1,60 @@
+<main class="trading-page">
+  <tng-card variant="outline" tone="danger" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Delete Item Category</tng-card-title>
+      <tng-card-description>This action cannot be undone.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (itemCategoryStore.error()) {
+        <div class="notice notice--danger">{{ itemCategoryStore.error() }}</div>
+      }
+
+      @if (itemCategoryStore.isLoading() && !itemCategoryStore.selectedItem()) {
+        <div class="notice">Loading item category...</div>
+      } @else if (itemCategoryStore.selectedItem(); as cat) {
+        <dl class="details-grid">
+          <div>
+            <dt>Name</dt>
+            <dd>{{ cat.name }}</dd>
+          </div>
+          <div>
+            <dt>Code</dt>
+            <dd>{{ cat.code }}</dd>
+          </div>
+          <div>
+            <dt>Type</dt>
+            <dd>{{ cat.type }}</dd>
+          </div>
+          <div>
+            <dt>Parent Category</dt>
+            <dd>{{ cat.parent?.name || '—' }}</dd>
+          </div>
+        </dl>
+
+        <label class="confirm-row">
+          <tng-checkbox [checked]="confirmed()" (checkedChange)="confirmed.set(!!$event)" />
+          <span>I understand that {{ cat.name }} will be permanently deleted.</span>
+        </label>
+      } @else {
+        <div class="notice">Item category not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button label="Cancel" />
+        <tng-button
+          type="button"
+          appearance="solid"
+          tone="danger"
+          [disabled]="!confirmed() || itemCategoryStore.isLoading()"
+          (click)="deleteItemCategory()"
+        >
+          <tng-icon icon="trash2" aria-hidden="true" />
+          Delete
+        </tng-button>
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>

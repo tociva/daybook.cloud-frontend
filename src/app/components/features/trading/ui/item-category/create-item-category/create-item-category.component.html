@@ -1,0 +1,157 @@
+<main class="trading-page">
+  <section class="setup-layout" aria-labelledby="item-category-setup-title">
+    <form class="category-form" novalidate (submit)="submitForm($event)">
+
+      <tng-card variant="outline" tone="info" padding="lg">
+        <tng-card-header>
+          <tng-card-title>{{ title() }}</tng-card-title>
+          <tng-card-description>Set the category identity, type, and optional parent.</tng-card-description>
+        </tng-card-header>
+
+        <tng-card-content>
+          @if (itemCategoryStore.error()) {
+            <div class="notice notice--danger">{{ itemCategoryStore.error() }}</div>
+          }
+
+          @if (itemCategoryStore.isLoading() && mode() === 'edit' && !itemCategoryStore.selectedItem()) {
+            <div class="notice">Loading category...</div>
+          } @else {
+            <div class="field-grid">
+              <div class="field">
+                <tng-label forId="cat-name" required>Name</tng-label>
+                <tng-input
+                  id="cat-name"
+                  placeholder="Groceries"
+                  [formField]="categoryForm.name"
+                  [ariaInvalid]="nameError() !== null"
+                />
+                <p class="field-error" [class.field-error--empty]="!nameError()">
+                  {{ nameError() || ' ' }}
+                </p>
+              </div>
+
+              <div class="field">
+                <tng-label forId="cat-code" required>Code</tng-label>
+                <tng-input
+                  id="cat-code"
+                  placeholder="GROC"
+                  [formField]="categoryForm.code"
+                  [ariaInvalid]="codeError() !== null"
+                />
+                <p class="field-error" [class.field-error--empty]="!codeError()">
+                  {{ codeError() || ' ' }}
+                </p>
+              </div>
+
+              <div class="field">
+                <tng-label forId="cat-type" required>Type</tng-label>
+                <tng-autocomplete
+                  id="cat-type"
+                  placeholder="Select a type"
+                  ariaLabel="Type"
+                  [options]="typeOptions()"
+                  [formField]="categoryForm.type"
+                  [getOptionValue]="typeOptionValue"
+                  [getOptionLabel]="typeOptionLabel"
+                  [trackBy]="typeTrackBy"
+                  (valueChange)="onTypeChange($event)"
+                />
+                <p class="field-error" [class.field-error--empty]="!typeError()">
+                  {{ typeError() || ' ' }}
+                </p>
+              </div>
+
+              <div class="field">
+                <tng-label forId="cat-parent">Parent Category</tng-label>
+                <tng-autocomplete
+                  id="cat-parent"
+                  placeholder="Search for a parent category"
+                  ariaLabel="Parent category"
+                  [options]="parentOptions()"
+                  [formField]="categoryForm.parentId"
+                  [getOptionValue]="parentOptionValue"
+                  [getOptionLabel]="parentOptionLabel"
+                  [trackBy]="parentTrackBy"
+                  (valueChange)="onParentChange($event)"
+                />
+                <p class="field-error field-error--empty">{{ ' ' }}</p>
+              </div>
+            </div>
+          }
+        </tng-card-content>
+      </tng-card>
+
+      <tng-card variant="outline" tone="neutral" padding="lg">
+        <tng-card-header>
+          <tng-card-title>Tax &amp; Notes</tng-card-title>
+          <tng-card-description>Assign a default tax group and add an optional description.</tng-card-description>
+        </tng-card-header>
+
+        <tng-card-content>
+          <div class="field-grid">
+            <div class="field field--wide">
+              <tng-label forId="cat-taxgroup">Tax Group</tng-label>
+              <tng-autocomplete
+                id="cat-taxgroup"
+                placeholder="Search for a tax group"
+                ariaLabel="Tax group"
+                [options]="taxGroupStore.items()"
+                [formField]="categoryForm.taxgroupId"
+                [getOptionValue]="taxGroupOptionValue"
+                [getOptionLabel]="taxGroupOptionLabel"
+                [trackBy]="taxGroupTrackBy"
+                (valueChange)="onTaxGroupChange($event)"
+              />
+              <p class="field-error field-error--empty">{{ ' ' }}</p>
+            </div>
+
+            <div class="field field--wide">
+              <tng-label forId="cat-description">Description</tng-label>
+              <tng-textarea
+                id="cat-description"
+                placeholder="Internal notes for this category"
+                rows="4"
+                [formField]="categoryForm.description"
+              />
+              <p class="field-error field-error--empty">{{ ' ' }}</p>
+            </div>
+          </div>
+        </tng-card-content>
+
+        <tng-card-footer>
+          <tng-card-actions align="end">
+            <app-burl-back-button label="Cancel" />
+            <tng-button
+              type="submit"
+              appearance="solid"
+              tone="primary"
+              [disabled]="itemCategoryStore.isLoading()"
+            >
+              <tng-icon icon="save" aria-hidden="true" />
+              Save
+            </tng-button>
+          </tng-card-actions>
+        </tng-card-footer>
+      </tng-card>
+
+    </form>
+
+    <aside class="setup-overview" aria-labelledby="item-category-setup-title">
+      <div class="setup-copy">
+        <p class="eyebrow">Category setup</p>
+        <h1 id="item-category-setup-title">{{ title() }}</h1>
+        <p>
+          Organise items by defining a category with a type (Product or Service), an optional
+          parent for hierarchy, and a default tax group.
+        </p>
+        <tng-stepper
+          class="setup-stepper"
+          ariaLabel="Item category setup progress"
+          [ordered]="true"
+          [steps]="setupSteps()"
+          [value]="activeSetupStep()"
+        />
+      </div>
+    </aside>
+  </section>
+</main>

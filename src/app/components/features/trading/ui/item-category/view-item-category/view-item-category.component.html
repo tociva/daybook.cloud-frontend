@@ -1,0 +1,57 @@
+<main class="trading-page">
+  <tng-card variant="outline" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Item Category Details</tng-card-title>
+      <tng-card-description>Review item category information.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (itemCategoryStore.error()) {
+        <div class="notice notice--danger">{{ itemCategoryStore.error() }}</div>
+      }
+
+      @if (itemCategoryStore.isLoading() && !itemCategoryStore.selectedItem()) {
+        <div class="notice">Loading item category...</div>
+      } @else if (itemCategoryStore.selectedItem(); as cat) {
+        <dl class="details-grid">
+          <div>
+            <dt>Name</dt>
+            <dd>{{ cat.name }}</dd>
+          </div>
+          <div>
+            <dt>Code</dt>
+            <dd>{{ cat.code }}</dd>
+          </div>
+          <div>
+            <dt>Type</dt>
+            <dd>{{ cat.type }}</dd>
+          </div>
+          <div>
+            <dt>Parent Category</dt>
+            <dd>{{ cat.parent?.name || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Tax Group</dt>
+            <dd>{{ cat.taxgroup?.name || '—' }}</dd>
+          </div>
+          <div class="wide">
+            <dt>Description</dt>
+            <dd>{{ cat.description || 'No description' }}</dd>
+          </div>
+        </dl>
+      } @else {
+        <div class="notice">Item category not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button />
+        <tng-button type="button" appearance="solid" tone="primary" (click)="edit()">
+          <tng-icon icon="pencil" aria-hidden="true" />
+          Edit
+        </tng-button>
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>

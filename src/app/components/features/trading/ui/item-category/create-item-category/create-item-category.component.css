@@ -1,0 +1,136 @@
+:host {
+  display: block;
+  color: var(--tng-semantic-foreground-primary);
+}
+
+.trading-page {
+  padding: 1.25rem;
+  min-height: 0;
+  overflow: visible;
+}
+
+.setup-layout {
+  display: grid;
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+  grid-template-columns: minmax(0, 1.4fr) minmax(18rem, 0.6fr);
+  margin: 0 auto;
+  max-width: 76rem;
+  overflow: visible;
+}
+
+.category-form {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+  align-content: start;
+}
+
+.setup-overview {
+  align-self: start;
+  min-width: 0;
+  overflow: visible;
+  position: sticky;
+  top: 1rem;
+  z-index: 1;
+}
+
+.setup-copy {
+  min-width: 0;
+  padding: 1rem 0;
+}
+
+.eyebrow {
+  color: var(--tng-semantic-accent-brand);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  margin: 0 0 0.75rem;
+  text-transform: uppercase;
+}
+
+.setup-copy h1 {
+  font-size: clamp(2rem, 3.5vw, 3.25rem);
+  letter-spacing: -0.06em;
+  line-height: 0.95;
+  margin: 0;
+  max-width: 12ch;
+}
+
+.setup-copy p:last-of-type {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-top: 0.75rem;
+  max-width: 28rem;
+}
+
+.setup-stepper {
+  margin-top: 1rem;
+}
+
+.field-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.field,
+.field--wide {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.field--wide {
+  grid-column: 1 / -1;
+}
+
+tng-card,
+tng-input,
+tng-autocomplete,
+tng-textarea {
+  width: 100%;
+}
+
+.field-error {
+  color: var(--tng-semantic-accent-danger);
+  font-size: 0.8rem;
+  margin: 0;
+  min-height: 1.1rem;
+}
+
+.field-error--empty {
+  color: transparent;
+}
+
+.notice {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+}
+
+.notice--danger {
+  border-color: var(--tng-semantic-accent-danger);
+}
+
+@media (max-width: 900px) {
+  .setup-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .setup-overview {
+    order: -1;
+    position: static;
+  }
+
+  .setup-copy h1 {
+    max-width: 16ch;
+  }
+}
+
+@media (max-width: 700px) {
+  .field-grid {
+    grid-template-columns: 1fr;
+  }
+}

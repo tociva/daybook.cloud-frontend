@@ -1,0 +1,65 @@
+<main class="trading-page">
+  <tng-card variant="outline" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Item Details</tng-card-title>
+      <tng-card-description>Review item information.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (itemStore.error()) {
+        <div class="notice notice--danger">{{ itemStore.error() }}</div>
+      }
+
+      @if (itemStore.isLoading() && !itemStore.selectedItem()) {
+        <div class="notice">Loading item...</div>
+      } @else if (itemStore.selectedItem(); as item) {
+        <dl class="details-grid">
+          <div>
+            <dt>Name</dt>
+            <dd>{{ item.name }}</dd>
+          </div>
+          <div>
+            <dt>Code</dt>
+            <dd>{{ item.code }}</dd>
+          </div>
+          <div>
+            <dt>Display Name</dt>
+            <dd>{{ item.displayname }}</dd>
+          </div>
+          <div>
+            <dt>Category</dt>
+            <dd>{{ item.category?.name || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Barcode</dt>
+            <dd>{{ item.barcode || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Purchase Ledger</dt>
+            <dd>{{ item.purchaseledger || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Sales Ledger</dt>
+            <dd>{{ item.salesledger || '—' }}</dd>
+          </div>
+          <div class="wide">
+            <dt>Description</dt>
+            <dd>{{ item.description || 'No description' }}</dd>
+          </div>
+        </dl>
+      } @else {
+        <div class="notice">Item not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button />
+        <tng-button type="button" appearance="solid" tone="primary" (click)="edit()">
+          <tng-icon icon="pencil" aria-hidden="true" />
+          Edit
+        </tng-button>
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>
