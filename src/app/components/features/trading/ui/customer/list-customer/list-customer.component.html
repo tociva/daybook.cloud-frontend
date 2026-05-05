@@ -1,0 +1,97 @@
+<main class="trading-page">
+  <section class="page-heading">
+    <div>
+      <p class="eyebrow">Trading</p>
+      <h1>Customers</h1>
+      <p class="subtle">Manage your customers with contact and address details.</p>
+    </div>
+
+    <div class="page-actions">
+      <app-crud-filter-popover
+        ariaLabel="Customer filters"
+        title="Filter customers"
+        [fields]="filterFields"
+        [filter]="crudQuery.filter()"
+        syncUrl
+      />
+
+      <tng-button type="button" appearance="solid" tone="primary" (click)="createCustomer()">
+        <tng-icon icon="plus" aria-hidden="true" />
+        New customer
+      </tng-button>
+    </div>
+  </section>
+
+  <tng-card variant="outline" padding="lg">
+    @if (customerStore.error()) {
+      <div class="notice notice--danger">{{ customerStore.error() }}</div>
+    }
+
+    <div class="table-stack">
+      <tng-table
+        ariaLabel="Customers"
+        density="comfortable"
+        [columns]="columns"
+        [items]="customerStore.items()"
+        [loading]="customerStore.isLoading()"
+        [error]="hasError()"
+        [sortActive]="crudQuery.sortActive()"
+        [sortDirection]="crudQuery.sortDirection()"
+        (sortChange)="crudQuery.applySort($event)"
+      >
+        <ng-template tngTableCellTemplate="name" let-row="row">
+          <button type="button" class="link-button" (click)="viewCustomer(row)">
+            {{ row.name }}
+          </button>
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="city" let-row="row">
+          {{ row.address.city || '—' }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="description" let-row="row">
+          {{ row.description || 'No description' }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="actions" let-row="row">
+          <div class="row-actions">
+            <button
+              type="button"
+              class="action-icon"
+              aria-label="View customer"
+              (click)="viewCustomer(row)"
+            >
+              <tng-icon icon="eye" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              class="action-icon"
+              aria-label="Edit customer"
+              (click)="editCustomer(row)"
+            >
+              <tng-icon icon="pencil" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              class="action-icon action-icon--danger"
+              aria-label="Delete customer"
+              (click)="deleteCustomer(row)"
+            >
+              <tng-icon icon="trash2" aria-hidden="true" />
+            </button>
+          </div>
+        </ng-template>
+      </tng-table>
+
+      <div class="table-footer">
+        <app-crud-paginator
+          ariaLabel="Customer pagination"
+          [filter]="crudQuery.filter()"
+          [totalItems]="customerStore.count()"
+          [pageSizeOptions]="crudQuery.pageSizeOptions()"
+          syncUrl
+        />
+      </div>
+    </div>
+  </tng-card>
+</main>

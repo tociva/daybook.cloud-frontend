@@ -1,0 +1,101 @@
+<main class="trading-page">
+  <tng-card variant="outline" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Customer Details</tng-card-title>
+      <tng-card-description>Review customer information.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (customerStore.error()) {
+        <div class="notice notice--danger">{{ customerStore.error() }}</div>
+      }
+
+      @if (customerStore.isLoading() && !customerStore.selectedItem()) {
+        <div class="notice">Loading customer...</div>
+      } @else if (customerStore.selectedItem(); as customer) {
+
+        <!-- Basic details -->
+        <dl class="details-grid">
+          <div>
+            <dt>Name</dt>
+            <dd>{{ customer.name }}</dd>
+          </div>
+          <div>
+            <dt>Country Code</dt>
+            <dd>{{ customer.countrycode || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Currency Code</dt>
+            <dd>{{ customer.currencycode || '—' }}</dd>
+          </div>
+          <div>
+            <dt>State</dt>
+            <dd>{{ customer.state || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Mobile</dt>
+            <dd>{{ customer.mobile || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Email</dt>
+            <dd>{{ customer.email || '—' }}</dd>
+          </div>
+          <div>
+            <dt>GSTIN</dt>
+            <dd>{{ customer.gstin || '—' }}</dd>
+          </div>
+          <div class="wide">
+            <dt>Description</dt>
+            <dd>{{ customer.description || 'No description' }}</dd>
+          </div>
+        </dl>
+
+        <!-- Address -->
+        @if (customer.address) {
+          <div class="section-title">Address</div>
+          <dl class="details-grid">
+            <div>
+              <dt>House / Building</dt>
+              <dd>{{ customer.address.name || '—' }}</dd>
+            </div>
+            <div>
+              <dt>Line 1</dt>
+              <dd>{{ customer.address.line1 || '—' }}</dd>
+            </div>
+            @if (customer.address.line2) {
+              <div>
+                <dt>Line 2</dt>
+                <dd>{{ customer.address.line2 }}</dd>
+              </div>
+            }
+            <div>
+              <dt>Street</dt>
+              <dd>{{ customer.address.street || '—' }}</dd>
+            </div>
+            <div>
+              <dt>City</dt>
+              <dd>{{ customer.address.city || '—' }}</dd>
+            </div>
+            <div>
+              <dt>ZIP Code</dt>
+              <dd>{{ customer.address.zip || '—' }}</dd>
+            </div>
+          </dl>
+        }
+
+      } @else {
+        <div class="notice">Customer not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button />
+        <tng-button type="button" appearance="solid" tone="primary" (click)="edit()">
+          <tng-icon icon="pencil" aria-hidden="true" />
+          Edit
+        </tng-button>
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>

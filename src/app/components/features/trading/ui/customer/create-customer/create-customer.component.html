@@ -1,0 +1,222 @@
+<main class="trading-page">
+  <section class="setup-layout" aria-labelledby="customer-setup-title">
+    <form class="customer-form" novalidate (submit)="submitForm($event)">
+
+      <!-- Basic details -->
+      <tng-card variant="outline" tone="info" padding="lg">
+        <tng-card-header>
+          <tng-card-title>{{ title() }}</tng-card-title>
+          <tng-card-description>Set the customer name, country, currency, and contact details.</tng-card-description>
+        </tng-card-header>
+
+        <tng-card-content>
+          @if (customerStore.error()) {
+            <div class="notice notice--danger">{{ customerStore.error() }}</div>
+          }
+
+          @if (customerStore.isLoading() && mode() === 'edit' && !customerStore.selectedItem()) {
+            <div class="notice">Loading customer...</div>
+          } @else {
+            <div class="field-grid">
+              <div class="field field--wide">
+                <tng-label forId="cust-name" required>Name</tng-label>
+                <tng-input
+                  id="cust-name"
+                  placeholder="Acme Corp"
+                  [formField]="customerForm.name"
+                  [ariaInvalid]="nameError() !== null"
+                />
+                <p class="field-error" [class.field-error--empty]="!nameError()">
+                  {{ nameError() || ' ' }}
+                </p>
+              </div>
+
+              <div class="field">
+                <tng-label forId="cust-countrycode" required>Country Code</tng-label>
+                <tng-input
+                  id="cust-countrycode"
+                  placeholder="IN"
+                  [formField]="customerForm.countrycode"
+                  [ariaInvalid]="countrycodeError() !== null"
+                />
+                <p class="field-error" [class.field-error--empty]="!countrycodeError()">
+                  {{ countrycodeError() || ' ' }}
+                </p>
+              </div>
+
+              <div class="field">
+                <tng-label forId="cust-currencycode" required>Currency Code</tng-label>
+                <tng-input
+                  id="cust-currencycode"
+                  placeholder="INR"
+                  [formField]="customerForm.currencycode"
+                  [ariaInvalid]="currencycodeError() !== null"
+                />
+                <p class="field-error" [class.field-error--empty]="!currencycodeError()">
+                  {{ currencycodeError() || ' ' }}
+                </p>
+              </div>
+
+              <div class="field">
+                <tng-label forId="cust-mobile">Mobile</tng-label>
+                <tng-input
+                  id="cust-mobile"
+                  placeholder="+91 98765 43210"
+                  [formField]="customerForm.mobile"
+                />
+                <p class="field-error field-error--empty">{{ ' ' }}</p>
+              </div>
+
+              <div class="field">
+                <tng-label forId="cust-email">Email</tng-label>
+                <tng-input
+                  id="cust-email"
+                  type="email"
+                  placeholder="contact@acme.com"
+                  [formField]="customerForm.email"
+                />
+                <p class="field-error field-error--empty">{{ ' ' }}</p>
+              </div>
+
+              <div class="field">
+                <tng-label forId="cust-gstin">GSTIN</tng-label>
+                <tng-input
+                  id="cust-gstin"
+                  placeholder="22AAAAA0000A1Z5"
+                  [formField]="customerForm.gstin"
+                />
+                <p class="field-error field-error--empty">{{ ' ' }}</p>
+              </div>
+
+              <div class="field">
+                <tng-label forId="cust-state">State</tng-label>
+                <tng-input
+                  id="cust-state"
+                  placeholder="Kerala"
+                  [formField]="customerForm.state"
+                />
+                <p class="field-error field-error--empty">{{ ' ' }}</p>
+              </div>
+
+              <div class="field field--wide">
+                <tng-label forId="cust-description">Description</tng-label>
+                <tng-textarea
+                  id="cust-description"
+                  placeholder="Internal notes about this customer"
+                  rows="3"
+                  [formField]="customerForm.description"
+                />
+                <p class="field-error field-error--empty">{{ ' ' }}</p>
+              </div>
+            </div>
+          }
+        </tng-card-content>
+      </tng-card>
+
+      <!-- Address details -->
+      <tng-card variant="outline" tone="neutral" padding="lg">
+        <tng-card-header>
+          <tng-card-title>Address</tng-card-title>
+          <tng-card-description>Billing or delivery address for this customer.</tng-card-description>
+        </tng-card-header>
+
+        <tng-card-content>
+          <div class="field-grid">
+            <div class="field field--wide">
+              <tng-label forId="cust-addr-name">House / Building Name</tng-label>
+              <tng-input
+                id="cust-addr-name"
+                placeholder="Sunrise Towers"
+                [formField]="customerForm.addressName"
+              />
+              <p class="field-error field-error--empty">{{ ' ' }}</p>
+            </div>
+
+            <div class="field field--wide">
+              <tng-label forId="cust-addr-line1">Address Line 1</tng-label>
+              <tng-input
+                id="cust-addr-line1"
+                placeholder="12, MG Road"
+                [formField]="customerForm.addressLine1"
+              />
+              <p class="field-error field-error--empty">{{ ' ' }}</p>
+            </div>
+
+            <div class="field field--wide">
+              <tng-label forId="cust-addr-line2">Address Line 2</tng-label>
+              <tng-input
+                id="cust-addr-line2"
+                placeholder="Near Central Park"
+                [formField]="customerForm.addressLine2"
+              />
+              <p class="field-error field-error--empty">{{ ' ' }}</p>
+            </div>
+
+            <div class="field">
+              <tng-label forId="cust-addr-street">Street</tng-label>
+              <tng-input
+                id="cust-addr-street"
+                placeholder="Brigade Road"
+                [formField]="customerForm.addressStreet"
+              />
+              <p class="field-error field-error--empty">{{ ' ' }}</p>
+            </div>
+
+            <div class="field">
+              <tng-label forId="cust-addr-city">City</tng-label>
+              <tng-input
+                id="cust-addr-city"
+                placeholder="Bengaluru"
+                [formField]="customerForm.addressCity"
+              />
+              <p class="field-error field-error--empty">{{ ' ' }}</p>
+            </div>
+
+            <div class="field">
+              <tng-label forId="cust-addr-zip">ZIP Code</tng-label>
+              <tng-input
+                id="cust-addr-zip"
+                placeholder="560001"
+                [formField]="customerForm.addressZip"
+              />
+              <p class="field-error field-error--empty">{{ ' ' }}</p>
+            </div>
+          </div>
+        </tng-card-content>
+
+        <tng-card-footer>
+          <tng-card-actions align="end">
+            <app-burl-back-button label="Cancel" />
+            <tng-button
+              type="submit"
+              appearance="solid"
+              tone="primary"
+              [disabled]="customerStore.isLoading()"
+            >
+              <tng-icon icon="save" aria-hidden="true" />
+              Save
+            </tng-button>
+          </tng-card-actions>
+        </tng-card-footer>
+      </tng-card>
+
+    </form>
+
+    <aside class="setup-overview" aria-labelledby="customer-setup-title">
+      <div class="setup-copy">
+        <p class="eyebrow">Customer setup</p>
+        <h1 id="customer-setup-title">{{ title() }}</h1>
+        <p>
+          Create a customer record with contact information, country and currency, and a billing address.
+        </p>
+        <tng-stepper
+          class="setup-stepper"
+          ariaLabel="Customer setup progress"
+          [ordered]="true"
+          [steps]="setupSteps()"
+          [value]="activeSetupStep()"
+        />
+      </div>
+    </aside>
+  </section>
+</main>

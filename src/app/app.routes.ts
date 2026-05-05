@@ -43,5 +43,12 @@ export const routes: Routes = [
         (m) => m.itemCategoryRoutes,
       ),
   },
+  {
+    path: 'app/trading/customer',
+    loadChildren: () =>
+      import('./components/features/trading/ui/customer/customer.routes').then(
+        (m) => m.customerRoutes,
+      ),
+  },
   { path: 'bootstrap/bootstrap-organization', component: BootstrapOrganizationComponent },
 ];

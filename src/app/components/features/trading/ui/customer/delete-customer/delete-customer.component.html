@@ -1,0 +1,68 @@
+<main class="trading-page">
+  <tng-card variant="outline" tone="danger" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Delete Customer</tng-card-title>
+      <tng-card-description>This action cannot be undone.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (customerStore.error()) {
+        <div class="notice notice--danger">{{ customerStore.error() }}</div>
+      }
+
+      @if (customerStore.isLoading() && !customerStore.selectedItem()) {
+        <div class="notice">Loading customer...</div>
+      } @else if (customerStore.selectedItem(); as customer) {
+        <dl class="details-grid">
+          <div>
+            <dt>Name</dt>
+            <dd>{{ customer.name }}</dd>
+          </div>
+          <div>
+            <dt>Mobile</dt>
+            <dd>{{ customer.mobile || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Email</dt>
+            <dd>{{ customer.email || '—' }}</dd>
+          </div>
+          <div>
+            <dt>GSTIN</dt>
+            <dd>{{ customer.gstin || '—' }}</dd>
+          </div>
+          <div>
+            <dt>City</dt>
+            <dd>{{ customer.address.city || '—' }}</dd>
+          </div>
+          <div>
+            <dt>State</dt>
+            <dd>{{ customer.state || '—' }}</dd>
+          </div>
+        </dl>
+
+        <label class="confirm-row">
+          <tng-checkbox [checked]="confirmed()" (checkedChange)="confirmed.set(!!$event)" />
+          <span>I understand that <strong>{{ customer.name }}</strong> will be permanently deleted.</span>
+        </label>
+      } @else {
+        <div class="notice">Customer not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button label="Cancel" />
+        <tng-button
+          type="button"
+          appearance="solid"
+          tone="danger"
+          [disabled]="!confirmed() || customerStore.isLoading()"
+          (click)="deleteCustomer()"
+        >
+          <tng-icon icon="trash2" aria-hidden="true" />
+          Delete
+        </tng-button>
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>
