@@ -1,0 +1,97 @@
+import { Component, OnInit, computed, inject } from '@angular/core';
+import { Router } from '@angular/router';
+import {
+  TngButtonComponent,
+  TngCardComponent,
+  TngTable,
+  TngTableCellTpl,
+} from '@tailng-ui/components';
+import type { TngTableColumn } from '@tailng-ui/components';
+import { TngIcon } from '@tailng-ui/icons';
+import {
+  CrudFilterPopoverComponent,
+  CrudListQueryService,
+  CrudPaginatorComponent,
+} from '../../../../../../shared/crud';
+import type { CrudFilterField } from '../../../../../../shared/crud';
+import { formatDisplayDate } from '../../../../../../core/date/dayjs-date.utils';
+import { CustomerReceiptStore } from '../../../data/customer-receipt';
+import type { CustomerReceipt } from '../../../data/customer-receipt';
+
+@Component({
+  selector: 'app-list-customer-receipt',
+  standalone: true,
+  imports: [
+    TngButtonComponent,
+    TngCardComponent,
+    CrudFilterPopoverComponent,
+    CrudPaginatorComponent,
+    TngIcon,
+    TngTable,
+    TngTableCellTpl,
+  ],
+  templateUrl: './list-customer-receipt.component.html',
+  styleUrl: './list-customer-receipt.component.css',
+  providers: [CrudListQueryService],
+})
+export class ListCustomerReceiptComponent implements OnInit {
+  private readonly router = inject(Router);
+  protected readonly crudQuery = inject(CrudListQueryService);
+  protected readonly customerReceiptStore = inject(CustomerReceiptStore);
+  protected readonly hasError = computed(() => this.customerReceiptStore.error() !== null);
+
+  protected readonly columns: readonly TngTableColumn<CustomerReceipt>[] = [
+    { id: 'date', label: 'Date', sortable: true, width: '10rem' },
+    { id: 'customer', label: 'Customer', width: '14rem' },
+    { id: 'amount', label: 'Amount', sortable: true, align: 'end', headerAlign: 'end', width: '10rem' },
+    { id: 'currencycode', label: 'Currency', width: '8rem' },
+    { id: 'bcash', label: 'Bank/Cash', width: '12rem' },
+    { id: 'description', label: 'Description', width: '16rem' },
+    { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '8rem' },
+  ];
+
+  protected readonly filterFields: readonly CrudFilterField[] = [
+    { id: 'description', label: 'Description', placeholder: 'Search description', type: 'text' },
+  ];
+
+  protected formatDate(value: string | undefined): string {
+    if (!value) return '—';
+    return formatDisplayDate(value, '—');
+  }
+
+  protected formatAmount(value: number | undefined): string {
+    if (value === undefined || value === null) return '—';
+    return value.toFixed(2);
+  }
+
+  ngOnInit(): void {
+    this.crudQuery.init((filter) =>
+      void this.customerReceiptStore.loadCustomerReceipts({
+        ...filter,
+        includes: ['customer', 'bcash'],
+      }),
+    );
+  }
+
+  protected createReceipt(): void {
+    void this.router.navigate(['/app/trading/customer-receipt/create'], {
+      queryParams: { burl: this.router.url },
+    });
+  }
+
+  protected editReceipt(item: CustomerReceipt): void {
+    if (item.id) {
+      void this.router.navigate(['/app/trading/customer-receipt', item.id, 'edit'], {
+        queryParams: { burl: this.router.url },
+      });
+    }
+  }
+
+  protected deleteReceipt(item: CustomerReceipt): void {
+    if (item.id) {
+      void this.router.navigate(['/app/trading/customer-receipt', item.id, 'delete'], {
+        queryParams: { burl: this.router.url },
+      });
+    }
+  }
+}

@@ -1,0 +1,242 @@
+<main class="receipt-page">
+  <header class="receipt-header">
+    <h1>{{ title() }}</h1>
+  </header>
+
+  @if (customerReceiptStore.error()) {
+    <div class="notice notice--danger">{{ customerReceiptStore.error() }}</div>
+  }
+
+  <div class="receipt-layout">
+    <!-- ══ LEFT — Main fields ════════════════════════════════════════════════ -->
+    <div class="receipt-main">
+
+      <!-- ── Basic Details ─────────────────────────────────────────────────── -->
+      <tng-card variant="outline" tone="info" padding="lg">
+        <tng-card-header>
+          <tng-card-title>Basic Details</tng-card-title>
+        </tng-card-header>
+
+        <tng-card-content>
+          <div class="fields-grid">
+
+            <!-- Date -->
+            <div class="field">
+              <tng-label forId="rcpt-date" required>Receipt Date</tng-label>
+              <tng-datepicker id="rcpt-date" [value]="rcptdate()"
+                (valueChange)="onDateChange($event)" />
+              @if (dateError()) {
+                <p class="field-error">{{ dateError() }}</p>
+              }
+            </div>
+
+            <!-- Customer -->
+            <div class="field">
+              <tng-label forId="rcpt-customer" required>Customer</tng-label>
+              <div class="autocomplete-wrap">
+                <tng-input
+                  id="rcpt-customer"
+                  placeholder="Search by name, mobile or email…"
+                  [value]="customerSearch()"
+                  (valueChange)="onCustomerSearchInput($any($event))"
+                  (focus)="showCustomerDropdown.set(true)"
+                  (blur)="closeCustomerDropdown()"
+                  autocomplete="off"
+                />
+                @if (showCustomerDropdown() && filteredCustomers().length) {
+                  <ul class="dropdown">
+                    @for (c of filteredCustomers(); track c.id) {
+                      <li class="dropdown-item" (mousedown)="selectCustomer(c)">
+                        <strong>{{ c.name }}</strong>
+                        @if (c.mobile) { <span class="muted"> · {{ c.mobile }}</span> }
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
+              @if (customerError()) {
+                <p class="field-error">{{ customerError() }}</p>
+              }
+            </div>
+
+            <!-- Amount -->
+            <div class="field">
+              <tng-label forId="rcpt-amount" required>Amount</tng-label>
+              <tng-input
+                id="rcpt-amount"
+                type="number"
+                min="0.01"
+                step="0.01"
+                placeholder="0.00"
+                [value]="amount()"
+                (valueChange)="amount.set($any($event) ?? '')"
+              />
+              @if (amountError()) {
+                <p class="field-error">{{ amountError() }}</p>
+              }
+            </div>
+
+            <!-- Currency -->
+            <div class="field">
+              <tng-label forId="rcpt-currency" required>Currency</tng-label>
+              <tng-input
+                id="rcpt-currency"
+                placeholder="e.g. INR"
+                [value]="currencycode()"
+                (valueChange)="currencycode.set($any($event) ?? '')"
+              />
+              @if (currencyError()) {
+                <p class="field-error">{{ currencyError() }}</p>
+              }
+            </div>
+
+            <!-- Bank/Cash -->
+            <div class="field">
+              <tng-label forId="rcpt-bcash" required>Bank/Cash Account</tng-label>
+              <div class="autocomplete-wrap">
+                <tng-input
+                  id="rcpt-bcash"
+                  placeholder="Search bank or cash account…"
+                  [value]="bankCashSearch()"
+                  (valueChange)="onBankCashSearchInput($any($event))"
+                  (focus)="showBankCashDropdown.set(true)"
+                  (blur)="closeBankCashDropdown()"
+                  autocomplete="off"
+                />
+                @if (showBankCashDropdown() && filteredBankCashes().length) {
+                  <ul class="dropdown">
+                    @for (b of filteredBankCashes(); track b.id) {
+                      <li class="dropdown-item" (mousedown)="selectBankCash(b)">
+                        {{ b.name }}
+                        @if (b.description) { <span class="muted"> — {{ b.description }}</span> }
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
+              @if (bankCashError()) {
+                <p class="field-error">{{ bankCashError() }}</p>
+              }
+            </div>
+
+            <!-- Description -->
+            <div class="field field--span2">
+              <tng-label forId="rcpt-desc">Description</tng-label>
+              <tng-textarea
+                id="rcpt-desc"
+                rows="2"
+                placeholder="Optional notes…"
+                [value]="description()"
+                (valueChange)="description.set($any($event) ?? '')"
+              />
+            </div>
+
+          </div>
+        </tng-card-content>
+      </tng-card>
+
+      <!-- ── Related Invoices ───────────────────────────────────────────────── -->
+      <tng-card variant="outline" padding="lg">
+        <tng-card-header>
+          <tng-card-title>Related Invoices</tng-card-title>
+        </tng-card-header>
+
+        <tng-card-content>
+          <div class="invoices-table">
+            <!-- Header -->
+            <div class="inv-head">
+              <span class="col-num">#</span>
+              <span class="col-invoice">Invoice</span>
+              <span class="col-amount align-right">Amount</span>
+              <span class="col-action"></span>
+            </div>
+
+            <!-- Rows -->
+            @for (row of invoiceRows(); track rowIndex; let rowIndex = $index) {
+              <div class="inv-row">
+                <span class="col-num muted">{{ rowIndex + 1 }}</span>
+
+                <!-- Invoice search -->
+                <div class="col-invoice autocomplete-wrap">
+                  <tng-input
+                    placeholder="Search invoice by number…"
+                    [value]="getInvoiceRowDisplayName(row)"
+                    (valueChange)="onInvoiceSearchInput($any($event), rowIndex)"
+                    (focus)="activeInvoiceRowIndex.set(rowIndex)"
+                    (blur)="closeInvoiceDropdown()"
+                    autocomplete="off"
+                  />
+                  @if (activeInvoiceRowIndex() === rowIndex && filteredInvoices().length) {
+                    <ul class="dropdown">
+                      @for (inv of filteredInvoices(); track inv.id) {
+                        <li class="dropdown-item" (mousedown)="selectInvoice(inv, rowIndex)">
+                          {{ invoiceDisplayName(inv) }}
+                        </li>
+                      }
+                    </ul>
+                  }
+                </div>
+
+                <!-- Amount -->
+                <tng-input
+                  type="number"
+                  class="col-amount"
+                  min="0"
+                  step="0.01"
+                  [value]="row.amount.toString()"
+                  (valueChange)="updateInvoiceAmount(rowIndex, $any($event))"
+                />
+
+                <!-- Actions -->
+                <div class="col-action inv-actions">
+                  <tng-button
+                    type="button"
+                    appearance="ghost"
+                    tone="primary"
+                    title="Add row"
+                    (click)="addInvoiceRow()"
+                  >
+                    <tng-icon icon="plus" aria-hidden="true" />
+                  </tng-button>
+                  <tng-button
+                    type="button"
+                    appearance="ghost"
+                    tone="danger"
+                    title="Remove row"
+                    (click)="removeInvoiceRow(rowIndex)"
+                  >
+                    <tng-icon icon="trash2" aria-hidden="true" />
+                  </tng-button>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Invoice total -->
+          <div class="inv-footer">
+            <div class="inv-total">
+              <span>Invoices Total</span>
+              <strong>{{ currencycode() }} {{ invoicesTotal() }}</strong>
+            </div>
+          </div>
+        </tng-card-content>
+      </tng-card>
+
+    </div>
+  </div>
+
+  <!-- ── Footer ─────────────────────────────────────────────────────────── -->
+  <div class="receipt-actions">
+    <app-burl-back-button label="Cancel" />
+    <tng-button
+      type="button"
+      appearance="solid"
+      tone="primary"
+      [disabled]="customerReceiptStore.isLoading()"
+      (click)="submitForm($event)"
+    >
+      <tng-icon icon="save" aria-hidden="true" />
+      {{ mode() === 'edit' ? 'Update Receipt' : 'Create Receipt' }}
+    </tng-button>
+  </div>
+</main>

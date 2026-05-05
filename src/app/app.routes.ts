@@ -64,5 +64,12 @@ export const routes: Routes = [
         (m) => m.saleInvoiceRoutes,
       ),
   },
+  {
+    path: 'app/trading/customer-receipt',
+    loadChildren: () =>
+      import('./components/features/trading/ui/customer-receipt/customer-receipt.routes').then(
+        (m) => m.customerReceiptRoutes,
+      ),
+  },
   { path: 'bootstrap/bootstrap-organization', component: BootstrapOrganizationComponent },
 ];
