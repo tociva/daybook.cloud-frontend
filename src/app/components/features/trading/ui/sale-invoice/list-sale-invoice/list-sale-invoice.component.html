@@ -1,0 +1,113 @@
+<main class="trading-page">
+  <section class="page-heading">
+    <div>
+      <p class="eyebrow">Trading</p>
+      <h1>Sale Invoices</h1>
+      <p class="subtle">Manage your sale invoices and billing records.</p>
+    </div>
+
+    <div class="page-actions">
+      <app-crud-filter-popover
+        ariaLabel="Sale invoice filters"
+        title="Filter sale invoices"
+        [fields]="filterFields"
+        [filter]="crudQuery.filter()"
+        syncUrl
+      />
+
+      <tng-button type="button" appearance="solid" tone="primary" (click)="createSaleInvoice()">
+        <tng-icon icon="plus" aria-hidden="true" />
+        New Invoice
+      </tng-button>
+    </div>
+  </section>
+
+  <tng-card variant="outline" padding="lg">
+    @if (saleInvoiceStore.error()) {
+      <div class="notice notice--danger">{{ saleInvoiceStore.error() }}</div>
+    }
+
+    <div class="table-stack">
+      <tng-table
+        ariaLabel="Sale invoices"
+        density="comfortable"
+        [columns]="columns"
+        [items]="saleInvoiceStore.items()"
+        [loading]="saleInvoiceStore.isLoading()"
+        [error]="hasError()"
+        [sortActive]="crudQuery.sortActive()"
+        [sortDirection]="crudQuery.sortDirection()"
+        (sortChange)="crudQuery.applySort($event)"
+      >
+        <ng-template tngTableCellTemplate="number" let-row="row">
+          <button type="button" class="link-button" (click)="viewSaleInvoice(row)">
+            {{ row.number || '—' }}
+          </button>
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="customer" let-row="row">
+          {{ row.customer?.name || '—' }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="date" let-row="row">
+          {{ formatDate(row.date) }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="itemtotal" let-row="row">
+          {{ formatAmount(row.itemtotal) }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="discount" let-row="row">
+          {{ formatAmount(row.discount) }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="tax" let-row="row">
+          {{ formatAmount(row.tax) }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="grandtotal" let-row="row">
+          {{ formatAmount(row.grandtotal) }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="actions" let-row="row">
+          <div class="row-actions">
+            <button
+              type="button"
+              class="action-icon"
+              aria-label="View sale invoice"
+              (click)="viewSaleInvoice(row)"
+            >
+              <tng-icon icon="eye" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              class="action-icon"
+              aria-label="Edit sale invoice"
+              (click)="editSaleInvoice(row)"
+            >
+              <tng-icon icon="pencil" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              class="action-icon action-icon--danger"
+              aria-label="Delete sale invoice"
+              (click)="deleteSaleInvoice(row)"
+            >
+              <tng-icon icon="trash2" aria-hidden="true" />
+            </button>
+          </div>
+        </ng-template>
+      </tng-table>
+
+      <div class="table-footer">
+        <app-crud-paginator
+          ariaLabel="Sale invoice pagination"
+          [filter]="crudQuery.filter()"
+          [totalItems]="saleInvoiceStore.count()"
+          [pageSizeOptions]="crudQuery.pageSizeOptions()"
+          syncUrl
+        />
+      </div>
+    </div>
+  </tng-card>
+</main>

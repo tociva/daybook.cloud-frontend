@@ -1,0 +1,392 @@
+<main class="invoice-page">
+  <header class="invoice-header">
+    <h1>{{ title() }}</h1>
+  </header>
+
+  @if (saleInvoiceStore.error()) {
+    <div class="notice notice--danger">{{ saleInvoiceStore.error() }}</div>
+  }
+
+  <div class="invoice-layout">
+    <!-- ══ LEFT COLUMN ══════════════════════════════════════════════════════ -->
+    <div class="invoice-main">
+
+      <!-- ── Customer card ──────────────────────────────────────────────── -->
+      <tng-card variant="outline" tone="info" padding="lg">
+        <tng-card-header>
+          <tng-card-title>Customer</tng-card-title>
+          <tng-card-description>Select the customer for this invoice.</tng-card-description>
+        </tng-card-header>
+        <tng-card-content>
+
+          <div class="field field--full">
+            <tng-label forId="cust-search" required>Customer</tng-label>
+            <div class="autocomplete-wrap">
+              <tng-input
+                id="cust-search"
+                placeholder="Search by name, mobile or email…"
+                [value]="customerSearch()"
+                (valueChange)="onCustomerSearchInput($any($event))"
+                (focus)="showCustomerDropdown.set(true)"
+                (blur)="closeCustomerDropdown()"
+                autocomplete="off"
+              />
+              @if (showCustomerDropdown() && filteredCustomers().length) {
+                <ul class="dropdown">
+                  @for (c of filteredCustomers(); track c.id) {
+                    <li class="dropdown-item" (mousedown)="selectCustomer(c)">
+                      <strong>{{ c.name }}</strong>
+                      @if (c.mobile) { <span class="muted"> · {{ c.mobile }}</span> }
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+            @if (customerError()) {
+              <p class="field-error">{{ customerError() }}</p>
+            }
+          </div>
+
+          @if (selectedCustomer()) {
+            <div class="address-row">
+              <!-- Billing address -->
+              <fieldset class="address-box">
+                <legend>Billing Address</legend>
+                <div class="field">
+                  <tng-label forId="bill-name">Name</tng-label>
+                  <tng-input id="bill-name" [value]="billingName()"
+                    (valueChange)="billingName.set($any($event)); onBillingChange()" />
+                </div>
+                <div class="field">
+                  <tng-label forId="bill-line1">Address Line 1</tng-label>
+                  <tng-input id="bill-line1" [value]="billingLine1()"
+                    (valueChange)="billingLine1.set($any($event)); onBillingChange()" />
+                </div>
+                <div class="field">
+                  <tng-label forId="bill-line2">Line 2</tng-label>
+                  <tng-input id="bill-line2" [value]="billingLine2()"
+                    (valueChange)="billingLine2.set($any($event)); onBillingChange()" />
+                </div>
+                <div class="field-row">
+                  <div class="field">
+                    <tng-label forId="bill-city">City</tng-label>
+                    <tng-input id="bill-city" [value]="billingCity()"
+                      (valueChange)="billingCity.set($any($event)); onBillingChange()" />
+                  </div>
+                  <div class="field">
+                    <tng-label forId="bill-state">State</tng-label>
+                    <tng-input id="bill-state" [value]="billingState()"
+                      (valueChange)="billingState.set($any($event)); onBillingChange()" />
+                  </div>
+                  <div class="field">
+                    <tng-label forId="bill-zip">ZIP</tng-label>
+                    <tng-input id="bill-zip" [value]="billingZip()"
+                      (valueChange)="billingZip.set($any($event)); onBillingChange()" />
+                  </div>
+                </div>
+              </fieldset>
+
+              <!-- Shipping address -->
+              <fieldset class="address-box">
+                <legend>
+                  Shipping Address
+                  <label class="same-as-billing">
+                    <tng-switch [checked]="useBillingForShipping()"
+                      (checkedChange)="toggleUseBillingForShipping(!!$event)" />
+                    Same as billing
+                  </label>
+                </legend>
+                @if (!useBillingForShipping()) {
+                  <div class="field">
+                    <tng-label forId="ship-name">Name</tng-label>
+                    <tng-input id="ship-name" [value]="shippingName()"
+                      (valueChange)="shippingName.set($any($event))" />
+                  </div>
+                  <div class="field">
+                    <tng-label forId="ship-line1">Address Line 1</tng-label>
+                    <tng-input id="ship-line1" [value]="shippingLine1()"
+                      (valueChange)="shippingLine1.set($any($event))" />
+                  </div>
+                  <div class="field">
+                    <tng-label forId="ship-line2">Line 2</tng-label>
+                    <tng-input id="ship-line2" [value]="shippingLine2()"
+                      (valueChange)="shippingLine2.set($any($event))" />
+                  </div>
+                  <div class="field-row">
+                    <div class="field">
+                      <tng-label forId="ship-city">City</tng-label>
+                      <tng-input id="ship-city" [value]="shippingCity()"
+                        (valueChange)="shippingCity.set($any($event))" />
+                    </div>
+                    <div class="field">
+                      <tng-label forId="ship-state">State</tng-label>
+                      <tng-input id="ship-state" [value]="shippingState()"
+                        (valueChange)="shippingState.set($any($event))" />
+                    </div>
+                    <div class="field">
+                      <tng-label forId="ship-zip">ZIP</tng-label>
+                      <tng-input id="ship-zip" [value]="shippingZip()"
+                        (valueChange)="shippingZip.set($any($event))" />
+                    </div>
+                  </div>
+                }
+              </fieldset>
+            </div>
+          }
+
+        </tng-card-content>
+      </tng-card>
+
+      <!-- ── Line items card ────────────────────────────────────────────── -->
+      <tng-card variant="outline" padding="lg">
+        <tng-card-header>
+          <tng-card-title>Line Items</tng-card-title>
+          <tng-card-description>
+            Add items to the invoice.
+            <label class="discount-toggle">
+              <tng-switch [checked]="showDiscount()" (checkedChange)="showDiscount.set(!!$event)" />
+              Show discount
+            </label>
+          </tng-card-description>
+        </tng-card-header>
+
+        <tng-card-content>
+          <div class="items-table">
+            <!-- Header -->
+            <div class="items-head">
+              <span class="col-num">#</span>
+              <span class="col-item">Item</span>
+              <span class="col-price align-right">Price</span>
+              <span class="col-qty align-right">Qty</span>
+              @if (showDiscount()) {
+                <span class="col-disc align-right">Disc %</span>
+              }
+              @if (taxColumnCount() > 0) {
+                <span class="col-tax">Tax</span>
+              }
+              <span class="col-total align-right">Total</span>
+              <span class="col-action"></span>
+            </div>
+
+            <!-- Rows -->
+            @for (row of items(); track rowIndex; let rowIndex = $index) {
+              <div class="items-row">
+                <span class="col-num muted">{{ rowIndex + 1 }}</span>
+
+                <!-- Item search -->
+                <div class="col-item autocomplete-wrap">
+                  <tng-input
+                    placeholder="Search item…"
+                    [value]="getItemDisplayName(row)"
+                    (valueChange)="onItemSearchInput($any($event), rowIndex)"
+                    (focus)="activeItemRowIndex.set(rowIndex)"
+                    (blur)="closeItemDropdown()"
+                    autocomplete="off"
+                  />
+                  @if (activeItemRowIndex() === rowIndex && filteredItems().length) {
+                    <ul class="dropdown">
+                      @for (it of filteredItems(); track it.id) {
+                        <li class="dropdown-item" (mousedown)="selectItem(it, rowIndex)">
+                          {{ it.displayname || it.name }}
+                          @if (it.code) { <span class="muted"> ({{ it.code }})</span> }
+                        </li>
+                      }
+                    </ul>
+                  }
+                </div>
+
+                <!-- Price -->
+                <tng-input
+                  type="number"
+                  class="col-price"
+                  [value]="row.price.toString()"
+                  min="0"
+                  step="0.01"
+                  (valueChange)="updateItemField(rowIndex, 'price', $any($event)); recalcRow(rowIndex)"
+                />
+
+                <!-- Quantity -->
+                <tng-input
+                  type="number"
+                  class="col-qty"
+                  [value]="row.quantity.toString()"
+                  min="1"
+                  (valueChange)="updateItemField(rowIndex, 'quantity', $any($event)); recalcRow(rowIndex)"
+                />
+
+                <!-- Discount % -->
+                @if (showDiscount()) {
+                  <tng-input
+                    type="number"
+                    class="col-disc"
+                    [value]="row.discpercent.toString()"
+                    min="0" max="100" step="0.01"
+                    (valueChange)="updateItemField(rowIndex, 'discpercent', $any($event)); recalcRow(rowIndex)"
+                  />
+                }
+
+                <!-- Tax badges -->
+                @if (taxColumnCount() > 0) {
+                  <div class="col-tax tax-badges">
+                    @for (t of row.taxes; track ti; let ti = $index) {
+                      <span class="tax-badge">{{ t.shortname }} {{ t.rate }}%</span>
+                    }
+                  </div>
+                }
+
+                <!-- Grand total (read-only) -->
+                <tng-input
+                  type="text"
+                  class="col-total"
+                  [value]="row.grandtotal.toFixed(2)"
+                  [disabled]="true"
+                />
+
+                <!-- Remove row -->
+                <tng-button
+                  type="button"
+                  appearance="ghost"
+                  tone="danger"
+                  class="col-action"
+                  title="Remove item"
+                  (click)="removeItemRow(rowIndex)"
+                >
+                  <tng-icon icon="trash2" aria-hidden="true" />
+                </tng-button>
+              </div>
+            }
+          </div>
+
+          <!-- Add row + Summary -->
+          <div class="items-footer">
+            <tng-button type="button" appearance="outline" tone="primary" (click)="addItemRow()">
+              <tng-icon icon="plus" aria-hidden="true" />
+              Add Item
+            </tng-button>
+
+            <div class="summary-box">
+              <div class="summary-row">
+                <span>Item Total</span>
+                <span>{{ itemtotal() }}</span>
+              </div>
+              @if (showDiscount()) {
+                <div class="summary-row">
+                  <span>Discount</span>
+                  <span>{{ discount() }}</span>
+                </div>
+                <div class="summary-row">
+                  <span>Subtotal</span>
+                  <span>{{ subtotal() }}</span>
+                </div>
+              }
+              @if (taxColumnCount() > 0) {
+                <div class="summary-row">
+                  <span>Tax</span>
+                  <span>{{ tax() }}</span>
+                </div>
+              }
+              <div class="summary-row">
+                <span>Round off</span>
+                <tng-input
+                  type="number"
+                  class="summary-roundoff"
+                  [value]="roundoff()"
+                  step="0.01"
+                  (valueChange)="roundoff.set($any($event) ?? '0')"
+                />
+              </div>
+              <div class="summary-row summary-row--total">
+                <span>Grand Total</span>
+                <strong>{{ grandtotal() }}</strong>
+              </div>
+            </div>
+          </div>
+
+        </tng-card-content>
+      </tng-card>
+    </div>
+
+    <!-- ══ RIGHT COLUMN — Invoice properties ════════════════════════════════ -->
+    <aside class="invoice-aside">
+      <tng-card variant="outline" padding="lg">
+        <tng-card-header>
+          <tng-card-title>Invoice Details</tng-card-title>
+        </tng-card-header>
+        <tng-card-content>
+          <div class="aside-fields">
+
+            <label class="toggle-row">
+              <tng-switch [checked]="autoNumbering()"
+                (checkedChange)="toggleAutoNumbering(!!$event)" />
+              Auto numbering
+            </label>
+
+            <div class="field">
+              <tng-label forId="inv-number">Number</tng-label>
+              <tng-input id="inv-number" [value]="number()"
+                [disabled]="!numberEnabled()"
+                (valueChange)="number.set($any($event))" />
+            </div>
+
+            <div class="field">
+              <tng-label forId="inv-date" required>Date</tng-label>
+              <tng-datepicker id="inv-date" [value]="date()"
+                (valueChange)="onDateChange($event)" />
+              @if (dateError()) {
+                <p class="field-error">{{ dateError() }}</p>
+              }
+            </div>
+
+            <div class="field">
+              <tng-label forId="inv-duedate">Due Date</tng-label>
+              <tng-datepicker id="inv-duedate" [value]="duedate()"
+                (valueChange)="onDueDateChange($event)" />
+            </div>
+
+            <div class="field">
+              <tng-label forId="inv-taxoption">Tax Option</tng-label>
+              <tng-select
+                id="inv-taxoption"
+                [options]="taxModeOptions()"
+                [getOptionLabel]="getOptionLabel"
+                [getOptionValue]="getOptionValue"
+                [trackBy]="trackByValue"
+                [value]="taxoption()"
+                (valueChange)="onTaxOptionChange($any($event))"
+              />
+            </div>
+
+            <div class="field">
+              <tng-label forId="inv-deliverystate">Delivery State</tng-label>
+              <tng-input id="inv-deliverystate" [value]="deliverystate()"
+                (valueChange)="deliverystate.set($any($event))" />
+            </div>
+
+            <div class="field">
+              <tng-label forId="inv-currency" required>Currency</tng-label>
+              <tng-input id="inv-currency" placeholder="e.g. INR"
+                [value]="currencycode()"
+                (valueChange)="currencycode.set($any($event))" />
+            </div>
+
+          </div>
+        </tng-card-content>
+      </tng-card>
+    </aside>
+  </div>
+
+  <!-- ── Footer ─────────────────────────────────────────────────────────── -->
+  <div class="invoice-actions">
+    <app-burl-back-button label="Cancel" />
+    <tng-button
+      type="button"
+      appearance="solid"
+      tone="primary"
+      [disabled]="saleInvoiceStore.isLoading()"
+      (click)="submitForm($event)"
+    >
+      <tng-icon icon="save" aria-hidden="true" />
+      {{ mode() === 'edit' ? 'Update Invoice' : 'Create Invoice' }}
+    </tng-button>
+  </div>
+</main>

@@ -1,0 +1,175 @@
+<main class="trading-page">
+  <tng-card variant="outline" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Sale Invoice</tng-card-title>
+      <tng-card-description>Invoice details and line items.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (saleInvoiceStore.error()) {
+        <div class="notice notice--danger">{{ saleInvoiceStore.error() }}</div>
+      }
+
+      @if (saleInvoiceStore.isLoading() && !saleInvoiceStore.selectedItem()) {
+        <div class="notice">Loading invoice…</div>
+      } @else if (saleInvoiceStore.selectedItem(); as inv) {
+
+        <!-- ── Invoice properties ──────────────────────────────────────── -->
+        <p class="section-title">Invoice Details</p>
+        <dl class="details-grid">
+          <div>
+            <dt>Number</dt>
+            <dd>{{ inv.number || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Date</dt>
+            <dd>{{ formatDate(inv.date) }}</dd>
+          </div>
+          <div>
+            <dt>Due Date</dt>
+            <dd>{{ formatDate(inv.duedate) }}</dd>
+          </div>
+          <div>
+            <dt>Customer</dt>
+            <dd>{{ inv.customer?.name || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Currency</dt>
+            <dd>{{ inv.currencycode || inv.currency?.code || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Tax Option</dt>
+            <dd>{{ inv.cprops?.taxoption || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Delivery State</dt>
+            <dd>{{ inv.cprops?.deliverystate || '—' }}</dd>
+          </div>
+        </dl>
+
+        <!-- ── Addresses ──────────────────────────────────────────────── -->
+        @if (inv.billingaddress) {
+          <div class="address-row">
+            <div class="address-box">
+              <p class="section-title">Billing Address</p>
+              <p>{{ inv.billingaddress.name }}</p>
+              <p>{{ inv.billingaddress.line1 }}</p>
+              @if (inv.billingaddress.line2) { <p>{{ inv.billingaddress.line2 }}</p> }
+              <p>
+                {{ inv.billingaddress.city }}{{ inv.billingaddress.city && inv.billingaddress.state ? ', ' : '' }}{{ inv.billingaddress.state }}
+                {{ inv.billingaddress.zip }}
+              </p>
+              @if (inv.billingaddress.country) { <p>{{ inv.billingaddress.country }}</p> }
+            </div>
+            @if (inv.shippingaddress) {
+              <div class="address-box">
+                <p class="section-title">Shipping Address</p>
+                <p>{{ inv.shippingaddress.name }}</p>
+                <p>{{ inv.shippingaddress.line1 }}</p>
+                @if (inv.shippingaddress.line2) { <p>{{ inv.shippingaddress.line2 }}</p> }
+                <p>
+                  {{ inv.shippingaddress.city }}{{ inv.shippingaddress.city && inv.shippingaddress.state ? ', ' : '' }}{{ inv.shippingaddress.state }}
+                  {{ inv.shippingaddress.zip }}
+                </p>
+                @if (inv.shippingaddress.country) { <p>{{ inv.shippingaddress.country }}</p> }
+              </div>
+            }
+          </div>
+        }
+
+        <!-- ── Line items ─────────────────────────────────────────────── -->
+        @if (inv.items && inv.items.length > 0) {
+          <p class="section-title" style="margin-top: 1.25rem;">Items</p>
+          <div class="items-table">
+            <div class="items-head">
+              <span>#</span>
+              <span>Item</span>
+              <span class="align-right">Price</span>
+              <span class="align-right">Qty</span>
+              <span class="align-right">Subtotal</span>
+              <span class="align-right">Tax</span>
+              <span class="align-right">Total</span>
+            </div>
+            @for (item of inv.items; track item.id; let i = $index) {
+              <div class="items-row">
+                <span class="muted">{{ i + 1 }}</span>
+                <div>
+                  <strong>{{ item.displayname || item.name }}</strong>
+                  @if (item.description) { <p class="muted">{{ item.description }}</p> }
+                </div>
+                <span class="align-right">{{ formatAmount(item.price) }}</span>
+                <span class="align-right">{{ formatAmount(item.quantity) }}</span>
+                <span class="align-right">{{ formatAmount(item.subtotal) }}</span>
+                <span class="align-right">{{ formatAmount(item.taxamount) }}</span>
+                <span class="align-right">{{ formatAmount(item.grandtotal) }}</span>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- ── Summary ────────────────────────────────────────────────── -->
+        <div class="summary-section">
+          <div class="summary-box">
+            <div class="summary-row">
+              <span>Item Total</span>
+              <span>{{ formatAmount(inv.itemtotal) }}</span>
+            </div>
+            @if (inv.discount) {
+              <div class="summary-row">
+                <span>Discount</span>
+                <span>{{ formatAmount(inv.discount) }}</span>
+              </div>
+              <div class="summary-row">
+                <span>Subtotal</span>
+                <span>{{ formatAmount(inv.subtotal) }}</span>
+              </div>
+            }
+            @if (inv.tax) {
+              <div class="summary-row">
+                <span>Tax</span>
+                <span>{{ formatAmount(inv.tax) }}</span>
+              </div>
+            }
+            @if (inv.roundoff) {
+              <div class="summary-row">
+                <span>Round off</span>
+                <span>{{ formatAmount(inv.roundoff) }}</span>
+              </div>
+            }
+            <div class="summary-row summary-row--total">
+              <span>Grand Total</span>
+              <strong>{{ formatAmount(inv.grandtotal) }}</strong>
+            </div>
+          </div>
+        </div>
+
+      } @else {
+        <div class="notice">Invoice not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button label="Back" />
+        <tng-button
+          type="button"
+          appearance="outline"
+          tone="primary"
+          (click)="editInvoice()"
+        >
+          <tng-icon icon="pencil" aria-hidden="true" />
+          Edit
+        </tng-button>
+        <tng-button
+          type="button"
+          appearance="outline"
+          tone="danger"
+          (click)="deleteInvoice()"
+        >
+          <tng-icon icon="trash2" aria-hidden="true" />
+          Delete
+        </tng-button>
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>
