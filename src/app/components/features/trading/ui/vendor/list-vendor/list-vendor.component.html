@@ -1,0 +1,97 @@
+<main class="trading-page">
+  <section class="page-heading">
+    <div>
+      <p class="eyebrow">Trading</p>
+      <h1>Vendors</h1>
+      <p class="subtle">Manage your vendors with contact and address details.</p>
+    </div>
+
+    <div class="page-actions">
+      <app-crud-filter-popover
+        ariaLabel="Vendor filters"
+        title="Filter vendors"
+        [fields]="filterFields"
+        [filter]="crudQuery.filter()"
+        syncUrl
+      />
+
+      <tng-button type="button" appearance="solid" tone="primary" (click)="createVendor()">
+        <tng-icon icon="plus" aria-hidden="true" />
+        New vendor
+      </tng-button>
+    </div>
+  </section>
+
+  <tng-card variant="outline" padding="lg">
+    @if (vendorStore.error()) {
+      <div class="notice notice--danger">{{ vendorStore.error() }}</div>
+    }
+
+    <div class="table-stack">
+      <tng-table
+        ariaLabel="Vendors"
+        density="comfortable"
+        [columns]="columns"
+        [items]="vendorStore.items()"
+        [loading]="vendorStore.isLoading()"
+        [error]="hasError()"
+        [sortActive]="crudQuery.sortActive()"
+        [sortDirection]="crudQuery.sortDirection()"
+        (sortChange)="crudQuery.applySort($event)"
+      >
+        <ng-template tngTableCellTemplate="name" let-row="row">
+          <button type="button" class="link-button" (click)="viewVendor(row)">
+            {{ row.name }}
+          </button>
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="city" let-row="row">
+          {{ row.address.city || '—' }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="description" let-row="row">
+          {{ row.description || 'No description' }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="actions" let-row="row">
+          <div class="row-actions">
+            <button
+              type="button"
+              class="action-icon"
+              aria-label="View vendor"
+              (click)="viewVendor(row)"
+            >
+              <tng-icon icon="eye" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              class="action-icon"
+              aria-label="Edit vendor"
+              (click)="editVendor(row)"
+            >
+              <tng-icon icon="pencil" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              class="action-icon action-icon--danger"
+              aria-label="Delete vendor"
+              (click)="deleteVendor(row)"
+            >
+              <tng-icon icon="trash2" aria-hidden="true" />
+            </button>
+          </div>
+        </ng-template>
+      </tng-table>
+
+      <div class="table-footer">
+        <app-crud-paginator
+          ariaLabel="Vendor pagination"
+          [filter]="crudQuery.filter()"
+          [totalItems]="vendorStore.count()"
+          [pageSizeOptions]="crudQuery.pageSizeOptions()"
+          syncUrl
+        />
+      </div>
+    </div>
+  </tng-card>
+</main>

@@ -1,0 +1,105 @@
+<main class="trading-page">
+  <tng-card variant="outline" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Vendor Details</tng-card-title>
+      <tng-card-description>Review vendor information.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (vendorStore.error()) {
+        <div class="notice notice--danger">{{ vendorStore.error() }}</div>
+      }
+
+      @if (vendorStore.isLoading() && !vendorStore.selectedItem()) {
+        <div class="notice">Loading vendor...</div>
+      } @else if (vendorStore.selectedItem(); as vendor) {
+
+        <!-- Basic details -->
+        <dl class="details-grid">
+          <div>
+            <dt>Name</dt>
+            <dd>{{ vendor.name }}</dd>
+          </div>
+          <div>
+            <dt>Country Code</dt>
+            <dd>{{ vendor.countrycode || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Currency Code</dt>
+            <dd>{{ vendor.currencycode || '—' }}</dd>
+          </div>
+          <div>
+            <dt>State</dt>
+            <dd>{{ vendor.state || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Mobile</dt>
+            <dd>{{ vendor.mobile || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Email</dt>
+            <dd>{{ vendor.email || '—' }}</dd>
+          </div>
+          <div>
+            <dt>GSTIN</dt>
+            <dd>{{ vendor.gstin || '—' }}</dd>
+          </div>
+          <div>
+            <dt>PAN</dt>
+            <dd>{{ vendor.pan || '—' }}</dd>
+          </div>
+          <div class="wide">
+            <dt>Description</dt>
+            <dd>{{ vendor.description || 'No description' }}</dd>
+          </div>
+        </dl>
+
+        <!-- Address -->
+        @if (vendor.address) {
+          <div class="section-title">Address</div>
+          <dl class="details-grid">
+            <div>
+              <dt>House / Building</dt>
+              <dd>{{ vendor.address.name || '—' }}</dd>
+            </div>
+            <div>
+              <dt>Line 1</dt>
+              <dd>{{ vendor.address.line1 || '—' }}</dd>
+            </div>
+            @if (vendor.address.line2) {
+              <div>
+                <dt>Line 2</dt>
+                <dd>{{ vendor.address.line2 }}</dd>
+              </div>
+            }
+            <div>
+              <dt>Street</dt>
+              <dd>{{ vendor.address.street || '—' }}</dd>
+            </div>
+            <div>
+              <dt>City</dt>
+              <dd>{{ vendor.address.city || '—' }}</dd>
+            </div>
+            <div>
+              <dt>ZIP Code</dt>
+              <dd>{{ vendor.address.zip || '—' }}</dd>
+            </div>
+          </dl>
+        }
+
+      } @else {
+        <div class="notice">Vendor not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button />
+        <tng-button type="button" appearance="solid" tone="primary" (click)="edit()">
+          <tng-icon icon="pencil" aria-hidden="true" />
+          Edit
+        </tng-button>
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>
