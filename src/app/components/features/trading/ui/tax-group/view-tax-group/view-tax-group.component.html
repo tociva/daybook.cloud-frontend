@@ -13,6 +13,8 @@
       @if (taxGroupStore.isLoading() && !taxGroupStore.selectedItem()) {
         <div class="notice">Loading tax group...</div>
       } @else if (taxGroupStore.selectedItem(); as item) {
+
+        <!-- Top-level fields -->
         <dl class="details-grid">
           <div>
             <dt>Name</dt>
@@ -22,15 +24,61 @@
             <dt>Rate (%)</dt>
             <dd>{{ item.rate }}</dd>
           </div>
-          <div>
-            <dt>Group Count</dt>
-            <dd>{{ item.groups?.length || 0 }}</dd>
-          </div>
           <div class="wide">
             <dt>Description</dt>
             <dd>{{ item.description || 'No description' }}</dd>
           </div>
         </dl>
+
+        <!-- Per-group breakdown -->
+        <div class="groups-section">
+          <p class="groups-title">
+            Tax Groups
+            <span class="groups-count">{{ item.groups?.length || 0 }}</span>
+          </p>
+
+          @if (!item.groups?.length) {
+            <p class="groups-empty">No tax groups defined.</p>
+          } @else {
+            @for (group of item.groups; track $index) {
+              <div class="group-card">
+                <div class="group-header">
+                  <span class="mode-badge">{{ group.mode }}</span>
+                  <span class="tax-count">
+                    {{ group.taxids?.length || 0 }}
+                    {{ (group.taxids?.length || 0) === 1 ? 'tax' : 'taxes' }}
+                  </span>
+                </div>
+
+                @if (group.taxids?.length) {
+                  <div class="tax-table">
+                    <div class="tax-table-head">
+                      <span>Name</span>
+                      <span>Short Name</span>
+                      <span>Rate (%)</span>
+                    </div>
+                    @for (taxId of group.taxids; track taxId) {
+                      @if (getTaxById(taxId); as tax) {
+                        <div class="tax-table-row">
+                          <span class="tax-name">{{ tax.name }}</span>
+                          <span class="tax-shortname">{{ tax.shortname }}</span>
+                          <span class="tax-rate">{{ tax.rate }}%</span>
+                        </div>
+                      } @else {
+                        <div class="tax-table-row tax-table-row--missing">
+                          <span>{{ taxId }}</span>
+                          <span>—</span>
+                          <span>—</span>
+                        </div>
+                      }
+                    }
+                  </div>
+                }
+              </div>
+            }
+          }
+        </div>
+
       } @else {
         <div class="notice">Tax group not found.</div>
       }

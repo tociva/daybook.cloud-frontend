@@ -47,6 +47,126 @@ dd {
   border-color: var(--tng-semantic-accent-danger);
 }
 
+/* ── Groups section ───────────────────────────────────────────────────────── */
+
+.groups-section {
+  margin-top: 1.5rem;
+}
+
+.groups-title {
+  align-items: center;
+  color: var(--tng-semantic-foreground-primary);
+  display: flex;
+  font-size: 0.85rem;
+  font-weight: 700;
+  gap: 0.5rem;
+  letter-spacing: 0.06em;
+  margin: 0 0 0.75rem;
+  text-transform: uppercase;
+}
+
+.groups-count {
+  align-items: center;
+  background: var(--tng-semantic-surface-raised);
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 99px;
+  color: var(--tng-semantic-foreground-muted);
+  display: inline-flex;
+  font-size: 0.75rem;
+  font-weight: 700;
+  height: 1.35rem;
+  justify-content: center;
+  min-width: 1.35rem;
+  padding: 0 0.4rem;
+}
+
+.groups-empty {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.group-card {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  margin-bottom: 0.65rem;
+  padding: 0.85rem 1rem;
+}
+
+.group-card:last-child {
+  margin-bottom: 0;
+}
+
+.group-header {
+  align-items: center;
+  display: flex;
+  gap: 0.65rem;
+  margin-bottom: 0.65rem;
+}
+
+.mode-badge {
+  background: var(--tng-semantic-accent-brand);
+  border-radius: 0.3rem;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 0.15rem 0.5rem;
+  text-transform: uppercase;
+}
+
+.tax-count {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.8rem;
+}
+
+.tax-table {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.4rem;
+  overflow: hidden;
+}
+
+.tax-table-head,
+.tax-table-row {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr 10rem 6rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.tax-table-head {
+  background: var(--tng-semantic-surface-raised);
+  border-bottom: 1px solid var(--tng-semantic-border-subtle);
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.tax-table-row {
+  border-bottom: 1px solid var(--tng-semantic-border-subtle);
+  color: var(--tng-semantic-foreground-primary);
+  font-size: 0.875rem;
+}
+
+.tax-table-row:last-child {
+  border-bottom: none;
+}
+
+.tax-table-row--missing {
+  color: var(--tng-semantic-foreground-muted);
+  font-style: italic;
+}
+
+.tax-shortname {
+  color: var(--tng-semantic-foreground-muted);
+}
+
+.tax-rate {
+  font-variant-numeric: tabular-nums;
+}
+
 @media (max-width: 700px) {
   .details-grid {
     grid-template-columns: 1fr;

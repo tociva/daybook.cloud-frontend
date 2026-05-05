@@ -14,6 +14,8 @@ import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
 import { TaxGroupStore } from '../../../data/tax-group';
+import { TaxStore } from '../../../data/tax';
+import type { Tax } from '../../../data/tax';
 
 @Component({
   selector: 'app-view-tax-group',
@@ -37,12 +39,18 @@ export class ViewTaxGroupComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly burlNavigation = inject(BurlNavigationService);
   protected readonly taxGroupStore = inject(TaxGroupStore);
+  protected readonly taxStore = inject(TaxStore);
 
   async ngOnInit(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      await this.taxGroupStore.loadTaxGroupById(id);
-    }
+    await Promise.all([
+      id ? this.taxGroupStore.loadTaxGroupById(id) : Promise.resolve(null),
+      this.taxStore.loadTaxes({}),
+    ]);
+  }
+
+  protected getTaxById(id: string): Tax | undefined {
+    return this.taxStore.items().find((t) => t.id === id);
   }
 
   protected edit(): void {
