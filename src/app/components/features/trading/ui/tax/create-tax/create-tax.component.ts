@@ -12,6 +12,7 @@ import {
   TngCardTitleComponent,
   TngInputComponent,
   TngLabelComponent,
+  TngStepperComponent,
   TngTextareaComponent,
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
@@ -43,6 +44,7 @@ type TaxFormModel = {
     TngIcon,
     TngInputComponent,
     TngLabelComponent,
+    TngStepperComponent,
     TngTextareaComponent,
     BurlBackButtonComponent,
   ],
@@ -79,6 +81,42 @@ export class CreateTaxComponent implements OnInit {
   protected readonly appliedToError = computed(() =>
     this.submitted() ? this.getNumberError(this.taxModel().appliedto, 'Applied to') : null,
   );
+
+  protected readonly setupSteps = computed(() => {
+    const model = this.taxModel();
+    const identityCompleted =
+      model.name.trim().length > 0 && model.shortname.trim().length > 0;
+    const rateCompleted =
+      this.isValidNonNegativeNumber(model.rate) &&
+      this.isValidNonNegativeNumber(model.appliedto);
+    const notesCompleted = model.description.trim().length > 0;
+
+    return [
+      {
+        value: 'identity',
+        label: 'Tax identity',
+        description: 'Name and short name',
+        completed: identityCompleted,
+      },
+      {
+        value: 'rate',
+        label: 'Rate setup',
+        description: 'Rate and applied-to value',
+        completed: rateCompleted,
+      },
+      {
+        value: 'notes',
+        label: 'Notes',
+        description: 'Optional description',
+        completed: notesCompleted,
+      },
+    ] as const;
+  });
+
+  protected readonly activeSetupStep = computed(() => {
+    const firstPending = this.setupSteps().find((step) => !step.completed);
+    return firstPending?.value ?? 'notes';
+  });
 
   async ngOnInit(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
@@ -139,6 +177,15 @@ export class CreateTaxComponent implements OnInit {
     }
 
     return null;
+  }
+
+  private isValidNonNegativeNumber(value: string): boolean {
+    if (value.trim().length === 0) {
+      return false;
+    }
+
+    const numberValue = Number(value);
+    return Number.isFinite(numberValue) && numberValue >= 0;
   }
 }
 

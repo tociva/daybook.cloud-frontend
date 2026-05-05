@@ -1,20 +1,29 @@
-<main class="trading-page">
-  <form novalidate (submit)="submitForm($event)">
+<main class="page-shell">
+  <section class="setup-layout" aria-labelledby="tax-group-setup-title">
+  <form class="tax-group-form" novalidate (submit)="submitForm($event)">
     <tng-card variant="outline" padding="lg">
       <tng-card-header>
         <tng-card-title>{{ title() }}</tng-card-title>
-        <tng-card-description>Add the tax group name and combined rate.</tng-card-description>
+        <tng-card-description>
+          Set the combined rate and map modes to one or more taxes.
+        </tng-card-description>
       </tng-card-header>
 
       <tng-card-content>
         @if (taxGroupStore.error()) {
-          <div class="notice notice--danger">{{ taxGroupStore.error() }}</div>
+          <div>{{ taxGroupStore.error() }}</div>
         }
 
         @if (taxGroupStore.isLoading() && mode() === 'edit' && !taxGroupStore.selectedItem()) {
-          <div class="notice">Loading tax group...</div>
+          <div>Loading tax group...</div>
         } @else {
-          <div class="field-grid">
+          <datalist id="tax-group-mode-suggestions">
+            @for (m of filteredModes(); track m) {
+              <option [value]="m"></option>
+            }
+          </datalist>
+
+          <div>
             <div class="field">
               <tng-label forId="tax-group-name" required>Name</tng-label>
               <tng-input
@@ -53,6 +62,72 @@
               <p class="field-error field-error--empty">{{ '\u00A0' }}</p>
             </div>
           </div>
+
+          <div class="subsection-head">
+            <h2 class="subsection-title">Tax Groups</h2>
+            <p class="subsection-description">
+              Each row is a mode (e.g. inter-state) with one or more taxes applied.
+            </p>
+          </div>
+
+          @for (groupField of taxGroupForm.groups; track groupField; let i = $index) {
+            <div class="group-block">
+              <div class="group-toolbar">
+                <tng-button type="button" appearance="ghost" tone="danger" (click)="removeGroup(i)">
+                  <tng-icon icon="trash2" aria-hidden="true" />
+                  Remove row
+                </tng-button>
+              </div>
+
+              <div class="group-shell">
+                <div class="field-grid group-grid">
+                  <div class="field field--wide">
+                    <tng-label [forId]="'tax-group-mode-' + i" required>Mode / name</tng-label>
+                    <p class="mode-hint">
+                      Example: Inter State, Intra State, EXPORT, NON-TAXABLE.
+                    </p>
+                    <tng-input
+                      [id]="'tax-group-mode-' + i"
+                      placeholder="Search or type a mode…"
+                      [attr.list]="'tax-group-mode-suggestions'"
+                      [formField]="groupField.mode"
+                      [ariaInvalid]="!!groupRowErrors()[i]?.mode"
+                      (valueChange)="onModeSearch($event)"
+                    />
+                    <p class="field-error" [class.field-error--empty]="!groupRowErrors()[i]?.mode">
+                      {{ groupRowErrors()[i]?.mode || '\u00A0' }}
+                    </p>
+                  </div>
+
+                  <div class="field field--wide">
+                    <tng-label [forId]="'tax-group-taxes-' + i">Taxes</tng-label>
+                    <tng-multi-autocomplete
+                      [id]="'tax-group-taxes-' + i"
+                      placeholder="Search for a tax\u2026"
+                      ariaLabel="Taxes"
+                      [options]="taxStore.items()"
+                      [value]="taxGroupModel().groups[i].taxids"
+                      [getOptionValue]="taxOptionValue"
+                      [getOptionLabel]="taxOptionLabel"
+                      [trackBy]="taxTrackBy"
+                      [invalid]="!!groupRowErrors()[i]?.taxids"
+                      (valueChange)="onTaxIdsChange(i, $event)"
+                    />
+                    <p class="field-error" [class.field-error--empty]="!groupRowErrors()[i]?.taxids">
+                      {{ groupRowErrors()[i]?.taxids || '\u00A0' }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+
+          <div class="add-group-action">
+            <tng-button type="button" appearance="outline" tone="primary" (click)="addGroup()">
+              <tng-icon icon="plus" aria-hidden="true" />
+              Add group
+            </tng-button>
+          </div>
         }
       </tng-card-content>
 
@@ -63,7 +138,7 @@
             type="submit"
             appearance="solid"
             tone="primary"
-            [disabled]="taxGroupStore.isLoading()"
+            [disabled]="submitting() || taxGroupStore.isLoading()"
           >
             <tng-icon icon="save" aria-hidden="true" />
             Save
@@ -72,5 +147,23 @@
       </tng-card-footer>
     </tng-card>
   </form>
-</main>
 
+  <aside class="setup-overview" aria-labelledby="tax-group-setup-title">
+    <div class="setup-copy">
+      <p class="eyebrow">Tax configuration</p>
+      <h1 id="tax-group-setup-title">{{ title() }}</h1>
+      <p>
+        Define the combined rate and map each taxation mode to one or more
+        individual taxes for use across invoices and journals.
+      </p>
+      <tng-stepper
+        class="setup-stepper"
+        ariaLabel="Tax group setup progress"
+        [ordered]="true"
+        [steps]="setupSteps()"
+        [value]="activeSetupStep()"
+      />
+    </div>
+  </aside>
+  </section>
+</main>

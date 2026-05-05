@@ -1,6 +1,7 @@
 <main class="trading-page">
-  <form novalidate (submit)="submitForm($event)">
-    <tng-card variant="outline" padding="lg">
+  <section class="setup-layout" aria-labelledby="tax-setup-title">
+    <form class="tax-form" novalidate (submit)="submitForm($event)">
+      <tng-card variant="outline" padding="lg">
       <tng-card-header>
         <tng-card-title>{{ title() }}</tng-card-title>
         <tng-card-description>Add the tax identity, rate, and applied-to value.</tng-card-description>
@@ -93,6 +94,25 @@
         </tng-card-actions>
       </tng-card-footer>
     </tng-card>
-  </form>
+    </form>
+
+    <aside class="setup-overview" aria-labelledby="tax-setup-title">
+      <div class="setup-copy">
+        <p class="eyebrow">Tax setup</p>
+        <h1 id="tax-setup-title">Tax details.</h1>
+        <p>
+          Add the tax identity, rate, and applied-to value so it can be reused across
+          invoices and documents in Daybook Cloud.
+        </p>
+        <tng-stepper
+          class="setup-stepper"
+          ariaLabel="Tax setup progress"
+          [ordered]="true"
+          [steps]="setupSteps()"
+          [value]="activeSetupStep()"
+        />
+      </div>
+    </aside>
+  </section>
 </main>
 
