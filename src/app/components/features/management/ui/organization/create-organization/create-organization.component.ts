@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import {
+  TngAutocompleteComponent,
   TngButtonComponent,
   TngCardActionsComponent,
   TngCardComponent,
@@ -17,6 +19,8 @@ import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 import { CountryStore } from '../../../data/country/country.store';
 import type { Country } from '../../../data/country/country.model';
+import { CurrencyStore } from '../../../data/currency/currency.store';
+import type { Currency } from '../../../data/currency/currency.model';
 import { OrganizationFacade, OrganizationStore } from '../../../data/organization';
 import type { OrganizationPayload } from '../../../data/organization';
 
@@ -24,6 +28,8 @@ import type { OrganizationPayload } from '../../../data/organization';
   selector: 'app-create-organization',
   standalone: true,
   imports: [
+    FormField,
+    TngAutocompleteComponent,
     TngButtonComponent,
     TngCardActionsComponent,
     TngCardComponent,
@@ -39,7 +45,7 @@ import type { OrganizationPayload } from '../../../data/organization';
     BurlBackButtonComponent,
   ],
   templateUrl: './create-organization.component.html',
-  styleUrl: './create-organization.component.css',
+  styleUrls: ['./create-organization.component.css', '../../../../../../../styles/flags.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CreateOrganizationComponent implements OnInit {
@@ -47,6 +53,7 @@ export class CreateOrganizationComponent implements OnInit {
   private readonly facade = inject(OrganizationFacade);
   protected readonly organizationStore = inject(OrganizationStore);
   protected readonly countryStore = inject(CountryStore);
+  protected readonly currencyStore = inject(CurrencyStore);
 
   protected readonly id = signal<string | null>(null);
   protected readonly submitted = signal(false);
@@ -64,17 +71,21 @@ export class CreateOrganizationComponent implements OnInit {
   protected readonly addressCity = signal('');
   protected readonly addressPincode = signal('');
 
-  // ── Country autocomplete ──────────────────────────────────────────────────
-  protected readonly selectedCountry = signal<Country | null>(null);
-  protected readonly countrySearch = signal('');
-  protected readonly showCountryDropdown = signal(false);
+  // ── Country/Currency autocomplete ─────────────────────────────────────────
+  protected readonly countries = this.countryStore.countries;
+  protected readonly currencies = this.currencyStore.currencies;
+  protected readonly countryCurrencyModel = signal({ countrycode: '', currencycode: '' });
+  protected readonly countryCurrencyForm = form(this.countryCurrencyModel);
 
-  protected readonly filteredCountries = computed(() => {
-    const q = this.countrySearch().toLowerCase().trim();
-    const all = this.countryStore.countries();
-    if (!q) return all.slice(0, 20);
-    return all.filter((c) => c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q)).slice(0, 20);
-  });
+  protected readonly countryOptionValue = (country: Country): string => country.code;
+  protected readonly countryOptionLabel = (country: Country): string => country.name;
+  protected readonly countryTrackBy = (_index: number, country: Country): string => country.code;
+  protected readonly getCountryFlagClass = (country: Country): string =>
+    `country-flag country-flag--${country.code.toLowerCase()}`;
+  protected readonly currencyOptionValue = (currency: Currency): string => currency.code;
+  protected readonly currencyOptionLabel = (currency: Currency): string =>
+    `${currency.name} (${currency.symbol})`;
+  protected readonly currencyTrackBy = (_index: number, currency: Currency): string => currency.code;
 
   // ── Derived ───────────────────────────────────────────────────────────────
   protected readonly mode = computed(() => (this.id() ? 'edit' : 'create'));
@@ -110,6 +121,7 @@ export class CreateOrganizationComponent implements OnInit {
 
   constructor() {
     void this.countryStore.load();
+    void this.currencyStore.load();
   }
 
   async ngOnInit(): Promise<void> {
@@ -126,31 +138,44 @@ export class CreateOrganizationComponent implements OnInit {
         this.addressLine2.set((org.address as { line2?: string } | undefined)?.line2 ?? '');
         this.addressCity.set((org.address as { city?: string } | undefined)?.city ?? '');
         this.addressPincode.set((org.address as { pincode?: string } | undefined)?.pincode ?? '');
+        const orgWithCodes = org as { countrycode?: string; currencycode?: string };
+        this.countryCurrencyModel.set({
+          countrycode: orgWithCodes.countrycode ?? '',
+          currencycode: orgWithCodes.currencycode ?? '',
+        });
       }
     }
   }
 
-  // ── Country autocomplete handlers ─────────────────────────────────────────
-  protected onCountryInput(event: Event): void {
-    const v = (event.target as HTMLInputElement).value;
-    this.countrySearch.set(v);
-    this.showCountryDropdown.set(true);
-    if (!v.trim()) {
-      this.selectedCountry.set(null);
+  // ── Country/Currency autocomplete handlers ────────────────────────────────
+  protected selectCountry(value: unknown): void {
+    const countryCode = typeof value === 'string' ? value : '';
+    if (!countryCode.trim()) {
+      return;
     }
-  }
 
-  protected selectCountry(country: Country): void {
-    this.selectedCountry.set(country);
-    this.countrySearch.set(country.name);
-    this.showCountryDropdown.set(false);
+    const country = this.countries().find((item) => item.code === countryCode) ?? null;
+    this.countryCurrencyModel.update((current) => ({
+      ...current,
+      countrycode: countryCode,
+      currencycode: country?.currencycode ?? current.currencycode,
+    }));
+
     if (!this.mobile() || this.mobile() === '') {
-      this.mobile.set(`+${country.phone}-`);
+      this.mobile.set(country ? `+${country.phone}-` : '');
     }
   }
 
-  protected onCountryBlur(): void {
-    setTimeout(() => this.showCountryDropdown.set(false), 200);
+  protected selectCurrency(value: unknown): void {
+    const currencyCode = typeof value === 'string' ? value : '';
+    if (!currencyCode.trim()) {
+      return;
+    }
+
+    this.countryCurrencyModel.update((current) => ({
+      ...current,
+      currencycode: currencyCode,
+    }));
   }
 
   // ── Submit ────────────────────────────────────────────────────────────────
@@ -169,7 +194,9 @@ export class CreateOrganizationComponent implements OnInit {
       ...(this.description().trim() && { description: this.description().trim() }),
       ...(this.state().trim() && { state: this.state().trim() }),
       ...(this.gstin().trim() && { gstin: this.gstin().trim() }),
-      ...(this.selectedCountry() && { countrycode: this.selectedCountry()!.code }),
+      ...(this.countryCurrencyModel().countrycode && {
+        countrycode: this.countryCurrencyModel().countrycode,
+      }),
       address: {
         line1: this.addressLine1().trim(),
         ...(this.addressLine2().trim() && { line2: this.addressLine2().trim() }),

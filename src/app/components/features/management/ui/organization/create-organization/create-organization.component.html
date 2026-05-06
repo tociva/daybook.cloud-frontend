@@ -52,32 +52,45 @@
             />
           </div>
 
-          <!-- Country autocomplete -->
           <div class="field">
             <tng-label>Country</tng-label>
-            <div class="autocomplete-wrap">
-              <input
-                class="field-input"
-                type="text"
-                placeholder="Search country..."
-                autocomplete="off"
-                [value]="countrySearch()"
-                (input)="onCountryInput($event)"
-                (focus)="showCountryDropdown.set(true)"
-                (blur)="onCountryBlur()"
-              />
-              @if (showCountryDropdown() && filteredCountries().length > 0) {
-                <ul class="dropdown" role="listbox">
-                  @for (c of filteredCountries(); track c.code) {
-                    <li
-                      class="dropdown-item"
-                      role="option"
-                      (mousedown)="selectCountry(c)"
-                    >{{ c.name }}</li>
-                  }
-                </ul>
-              }
-            </div>
+            <tng-autocomplete
+              id="org-country"
+              placeholder="Search for a country"
+              ariaLabel="Country"
+              [options]="countries()"
+              [formField]="countryCurrencyForm.countrycode"
+              [getOptionValue]="countryOptionValue"
+              [getOptionLabel]="countryOptionLabel"
+              [trackBy]="countryTrackBy"
+              (valueChange)="selectCountry($event)"
+            >
+              <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
+                <span class="country-option">
+                  <span [class]="getCountryFlagClass(option)" aria-hidden="true"></span>
+                  <span class="country-option-label">{{ label }}</span>
+                </span>
+              </ng-template>
+
+              <ng-template #tngAutocompleteSelectedTpl let-option="option">
+                <span [class]="getCountryFlagClass(option)" aria-hidden="true"></span>
+              </ng-template>
+            </tng-autocomplete>
+          </div>
+
+          <div class="field">
+            <tng-label>Currency</tng-label>
+            <tng-autocomplete
+              id="org-currency"
+              placeholder="Search for a currency"
+              ariaLabel="Currency"
+              [options]="currencies()"
+              [formField]="countryCurrencyForm.currencycode"
+              [getOptionValue]="currencyOptionValue"
+              [getOptionLabel]="currencyOptionLabel"
+              [trackBy]="currencyTrackBy"
+              (valueChange)="selectCurrency($event)"
+            />
           </div>
 
           <div class="field">
