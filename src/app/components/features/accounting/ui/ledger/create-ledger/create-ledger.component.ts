@@ -59,6 +59,7 @@ export class CreateLedgerComponent implements OnInit {
   private readonly facade = inject(LedgerFacade);
   protected readonly ledgerStore = inject(LedgerStore);
   protected readonly ledgerCategoryStore = inject(LedgerCategoryStore);
+  protected readonly categoryQuery = signal('');
 
   protected readonly id = signal<string | null>(null);
   protected readonly submitted = signal(false);
@@ -81,6 +82,13 @@ export class CreateLedgerComponent implements OnInit {
   protected readonly categoryOptionValue = (cat: LedgerCategory): string => cat.id ?? '';
   protected readonly categoryOptionLabel = (cat: LedgerCategory): string => cat.name ?? '';
   protected readonly categoryTrackBy = (_i: number, cat: LedgerCategory): string => cat.id ?? '';
+  protected readonly filteredCategories = computed(() =>
+    this.filterAutocompleteOptions(
+      this.ledgerCategoryStore.items(),
+      this.categoryOptionLabel,
+      this.categoryQuery(),
+    ),
+  );
 
   // ── Validation ────────────────────────────────────────────────────────────
   protected readonly nameError = computed(() =>
@@ -120,6 +128,10 @@ export class CreateLedgerComponent implements OnInit {
     this.ledgerModel.update((m) => ({ ...m, categoryId }));
   }
 
+  protected onCategoryQueryChnage(event: unknown): void {
+    this.categoryQuery.set(this.normalizeAutocompleteQuery(event));
+  }
+
   protected async submitForm(event: SubmitEvent): Promise<void> {
     event.preventDefault();
     this.submitted.set(true);
@@ -143,5 +155,21 @@ export class CreateLedgerComponent implements OnInit {
     } else {
       await this.facade.create(payload);
     }
+  }
+
+  private normalizeAutocompleteQuery(event: unknown): string {
+    return typeof event === 'string' ? event.trim().toLowerCase() : '';
+  }
+
+  private filterAutocompleteOptions<T>(
+    options: readonly T[],
+    getLabel: (option: T) => string,
+    query: string,
+  ): T[] {
+    if (!query) {
+      return [...options];
+    }
+
+    return options.filter((option) => getLabel(option).toLowerCase().includes(query));
   }
 }

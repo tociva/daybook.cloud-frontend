@@ -63,6 +63,7 @@ export class CreateItemComponent implements OnInit {
   private readonly facade = inject(ItemFacade);
   protected readonly itemStore = inject(ItemStore);
   protected readonly itemCategoryStore = inject(ItemCategoryStore);
+  protected readonly categoryQuery = signal('');
 
   protected readonly itemModel = signal<ItemFormModel>({
     name: '',
@@ -150,6 +151,13 @@ export class CreateItemComponent implements OnInit {
   protected readonly categoryOptionLabel = (cat: ItemCategory): string => cat.name ?? '';
   protected readonly categoryTrackBy = (_index: number, cat: ItemCategory): string =>
     cat.id ?? '';
+  protected readonly filteredCategories = computed(() =>
+    this.filterAutocompleteOptions(
+      this.itemCategoryStore.items(),
+      this.categoryOptionLabel,
+      this.categoryQuery(),
+    ),
+  );
 
   // ──────────────────────────────────────────────────────────────────────────
 
@@ -193,6 +201,10 @@ export class CreateItemComponent implements OnInit {
     }));
   }
 
+  protected onCategoryQueryChnage(event: unknown): void {
+    this.categoryQuery.set(this.normalizeAutocompleteQuery(event));
+  }
+
   protected async submitForm(event: SubmitEvent): Promise<void> {
     event.preventDefault();
     this.submitted.set(true);
@@ -219,5 +231,21 @@ export class CreateItemComponent implements OnInit {
     } else {
       await this.facade.create(payload);
     }
+  }
+
+  private normalizeAutocompleteQuery(event: unknown): string {
+    return typeof event === 'string' ? event.trim().toLowerCase() : '';
+  }
+
+  private filterAutocompleteOptions<T>(
+    options: readonly T[],
+    getLabel: (option: T) => string,
+    query: string,
+  ): T[] {
+    if (!query) {
+      return [...options];
+    }
+
+    return options.filter((option) => getLabel(option).toLowerCase().includes(query));
   }
 }

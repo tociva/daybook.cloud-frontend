@@ -187,6 +187,24 @@ export class CreateTaxGroupComponent implements OnInit {
     }));
   }
 
+  protected onTaxSearch(value: unknown): void {
+    const q =
+      typeof value === 'string'
+        ? value.trim()
+        : value instanceof Event
+          ? ((value.target as HTMLInputElement | null)?.value ?? '').trim()
+          : '';
+    void this.taxStore.loadTaxes(
+      q
+        ? {
+            where: {
+              name: { ilike: `%${q}%` },
+            },
+          }
+        : {},
+    );
+  }
+
   protected addGroup(): void {
     this.taxGroupModel.update((m) => ({
       ...m,

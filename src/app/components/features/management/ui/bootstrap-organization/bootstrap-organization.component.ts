@@ -218,6 +218,9 @@ export class BootstrapOrganizationComponent {
   protected readonly countries = this.countryStore.countries;
   protected readonly currencies = this.currencyStore.currencies;
   protected readonly dateFormats = this.dateFormatStore.dateFormats;
+  protected readonly countryQuery = signal('');
+  protected readonly currencyQuery = signal('');
+  protected readonly dateFormatQuery = signal('');
 
   protected readonly organizationModel = signal<OrganizationSignalFormModel>(createInitialForm());
   protected readonly organizationForm = form(this.organizationModel);
@@ -246,6 +249,19 @@ export class BootstrapOrganizationComponent {
     `${dateFormat.name} (${dateFormat.example})`;
   protected readonly dateFormatTrackBy = (_index: number, dateFormat: DateFormat): string =>
     dateFormat.name;
+  protected readonly filteredCountries = computed(() =>
+    this.filterAutocompleteOptions(this.countries(), this.countryOptionLabel, this.countryQuery()),
+  );
+  protected readonly filteredCurrencies = computed(() =>
+    this.filterAutocompleteOptions(this.currencies(), this.currencyOptionLabel, this.currencyQuery()),
+  );
+  protected readonly filteredDateFormats = computed(() =>
+    this.filterAutocompleteOptions(
+      this.dateFormats(),
+      this.dateFormatOptionLabel,
+      this.dateFormatQuery(),
+    ),
+  );
 
   protected readonly selectedCountry = computed(() => {
     const countryCode = this.organizationModel().countryCode;
@@ -536,6 +552,18 @@ export class BootstrapOrganizationComponent {
     }));
   }
 
+  protected onCountryQueryChnage(event: unknown): void {
+    this.countryQuery.set(this.normalizeAutocompleteQuery(event));
+  }
+
+  protected onCurrencyQueryChnage(event: unknown): void {
+    this.currencyQuery.set(this.normalizeAutocompleteQuery(event));
+  }
+
+  protected onDateFormatQueryChnage(event: unknown): void {
+    this.dateFormatQuery.set(this.normalizeAutocompleteQuery(event));
+  }
+
   protected submitForm(event: SubmitEvent): void {
     event.preventDefault();
 
@@ -599,6 +627,22 @@ export class BootstrapOrganizationComponent {
     // Ignore noisy empty emissions from autocomplete after selection/blur,
     // otherwise previously selected values get cleared unexpectedly.
     return false;
+  }
+
+  private normalizeAutocompleteQuery(event: unknown): string {
+    return typeof event === 'string' ? event.trim().toLowerCase() : '';
+  }
+
+  private filterAutocompleteOptions<T>(
+    options: readonly T[],
+    getLabel: (option: T) => string,
+    query: string,
+  ): T[] {
+    if (!query) {
+      return [...options];
+    }
+
+    return options.filter((option) => getLabel(option).toLowerCase().includes(query));
   }
 
   private async createOrganization(): Promise<void> {

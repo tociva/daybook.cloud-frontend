@@ -103,7 +103,7 @@
                     <tng-label [forId]="'tax-group-taxes-' + i">Taxes</tng-label>
                     <tng-multi-autocomplete
                       [id]="'tax-group-taxes-' + i"
-                      placeholder="Search for a tax\u2026"
+                      placeholder="Search for a tax..."
                       ariaLabel="Taxes"
                       [options]="taxStore.items()"
                       [value]="taxGroupModel().groups[i].taxids"
@@ -111,6 +111,7 @@
                       [getOptionLabel]="taxOptionLabel"
                       [trackBy]="taxTrackBy"
                       [invalid]="!!groupRowErrors()[i]?.taxids"
+                      (queryChange)="onTaxSearch($event)"
                       (valueChange)="onTaxIdsChange(i, $event)"
                     />
                     <p class="field-error" [class.field-error--empty]="!groupRowErrors()[i]?.taxids">

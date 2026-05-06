@@ -35,12 +35,13 @@
                 id="lc-type"
                 placeholder="Select a type"
                 ariaLabel="Category type"
-                [options]="typeOptions()"
+                [options]="filteredTypeOptions()"
                 [formField]="categoryForm.type"
                 [getOptionValue]="typeOptionValue"
                 [getOptionLabel]="typeOptionLabel"
                 [trackBy]="typeTrackBy"
                 (valueChange)="onTypeChange($event)"
+                (queryChnage)="onTypeQueryChnage($event)"
               />
               <p class="field-error field-error--empty">{{ ' ' }}</p>
             </div>
@@ -51,12 +52,13 @@
                 id="lc-parent"
                 placeholder="Search parent category..."
                 ariaLabel="Parent category"
-                [options]="parentOptions()"
+                [options]="filteredParentOptions()"
                 [formField]="categoryForm.parentId"
                 [getOptionValue]="parentOptionValue"
                 [getOptionLabel]="parentOptionLabel"
                 [trackBy]="parentTrackBy"
                 (valueChange)="onParentChange($event)"
+                (queryChnage)="onParentQueryChnage($event)"
               />
               <p class="field-error field-error--empty">{{ ' ' }}</p>
             </div>

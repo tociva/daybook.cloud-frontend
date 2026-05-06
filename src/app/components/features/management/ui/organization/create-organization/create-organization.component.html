@@ -58,12 +58,13 @@
               id="org-country"
               placeholder="Search for a country"
               ariaLabel="Country"
-              [options]="countries()"
+              [options]="filteredCountries()"
               [formField]="countryCurrencyForm.countrycode"
               [getOptionValue]="countryOptionValue"
               [getOptionLabel]="countryOptionLabel"
               [trackBy]="countryTrackBy"
               (valueChange)="selectCountry($event)"
+              (queryChnage)="onCountryQueryChnage($event)"
             >
               <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
                 <span class="country-option">
@@ -84,12 +85,13 @@
               id="org-currency"
               placeholder="Search for a currency"
               ariaLabel="Currency"
-              [options]="currencies()"
+              [options]="filteredCurrencies()"
               [formField]="countryCurrencyForm.currencycode"
               [getOptionValue]="currencyOptionValue"
               [getOptionLabel]="currencyOptionLabel"
               [trackBy]="currencyTrackBy"
               (valueChange)="selectCurrency($event)"
+              (queryChnage)="onCurrencyQueryChnage($event)"
             />
           </div>
 

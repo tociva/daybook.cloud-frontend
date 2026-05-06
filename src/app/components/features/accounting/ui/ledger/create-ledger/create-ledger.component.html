@@ -36,12 +36,13 @@
                 id="l-category"
                 placeholder="Search ledger category..."
                 ariaLabel="Ledger category"
-                [options]="ledgerCategoryStore.items()"
+                [options]="filteredCategories()"
                 [formField]="ledgerForm.categoryId"
                 [getOptionValue]="categoryOptionValue"
                 [getOptionLabel]="categoryOptionLabel"
                 [trackBy]="categoryTrackBy"
                 (valueChange)="onCategoryChange($event)"
+                (queryChnage)="onCategoryQueryChnage($event)"
               />
               <p class="field-error" [class.field-error--empty]="!categoryError()">
                 {{ categoryError() || ' ' }}

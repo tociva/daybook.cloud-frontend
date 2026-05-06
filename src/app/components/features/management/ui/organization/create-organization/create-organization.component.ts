@@ -74,6 +74,8 @@ export class CreateOrganizationComponent implements OnInit {
   // ── Country/Currency autocomplete ─────────────────────────────────────────
   protected readonly countries = this.countryStore.countries;
   protected readonly currencies = this.currencyStore.currencies;
+  protected readonly countryQuery = signal('');
+  protected readonly currencyQuery = signal('');
   protected readonly countryCurrencyModel = signal({ countrycode: '', currencycode: '' });
   protected readonly countryCurrencyForm = form(this.countryCurrencyModel);
 
@@ -86,6 +88,12 @@ export class CreateOrganizationComponent implements OnInit {
   protected readonly currencyOptionLabel = (currency: Currency): string =>
     `${currency.name} (${currency.symbol})`;
   protected readonly currencyTrackBy = (_index: number, currency: Currency): string => currency.code;
+  protected readonly filteredCountries = computed(() =>
+    this.filterAutocompleteOptions(this.countries(), this.countryOptionLabel, this.countryQuery()),
+  );
+  protected readonly filteredCurrencies = computed(() =>
+    this.filterAutocompleteOptions(this.currencies(), this.currencyOptionLabel, this.currencyQuery()),
+  );
 
   // ── Derived ───────────────────────────────────────────────────────────────
   protected readonly mode = computed(() => (this.id() ? 'edit' : 'create'));
@@ -178,6 +186,14 @@ export class CreateOrganizationComponent implements OnInit {
     }));
   }
 
+  protected onCountryQueryChnage(event: unknown): void {
+    this.countryQuery.set(this.normalizeAutocompleteQuery(event));
+  }
+
+  protected onCurrencyQueryChnage(event: unknown): void {
+    this.currencyQuery.set(this.normalizeAutocompleteQuery(event));
+  }
+
   // ── Submit ────────────────────────────────────────────────────────────────
   protected async submitForm(event: SubmitEvent): Promise<void> {
     event.preventDefault();
@@ -215,5 +231,21 @@ export class CreateOrganizationComponent implements OnInit {
     } finally {
       this.isSubmitting.set(false);
     }
+  }
+
+  private normalizeAutocompleteQuery(event: unknown): string {
+    return typeof event === 'string' ? event.trim().toLowerCase() : '';
+  }
+
+  private filterAutocompleteOptions<T>(
+    options: readonly T[],
+    getLabel: (option: T) => string,
+    query: string,
+  ): T[] {
+    if (!query) {
+      return [...options];
+    }
+
+    return options.filter((option) => getLabel(option).toLowerCase().includes(query));
   }
 }

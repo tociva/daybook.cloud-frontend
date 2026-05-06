@@ -46,12 +46,13 @@
                 id="org-country"
                 placeholder="Search for a country"
                 ariaLabel="Country"
-                [options]="countries()"
+                [options]="filteredCountries()"
                 [formField]="organizationForm.countryCode"
                 [getOptionValue]="countryOptionValue"
                 [getOptionLabel]="countryOptionLabel"
                 [trackBy]="countryTrackBy"
                 (valueChange)="selectCountry($event)"
+                (queryChnage)="onCountryQueryChnage($event)"
               >
                 <ng-template
                   #tngAutocompleteOptionTpl
@@ -337,12 +338,13 @@
                 id="org-currency"
                 placeholder="Search for a currency"
                 ariaLabel="Currency"
-                [options]="currencies()"
+                [options]="filteredCurrencies()"
                 [formField]="organizationForm.currencyCode"
                 [getOptionValue]="currencyOptionValue"
                 [getOptionLabel]="currencyOptionLabel"
                 [trackBy]="currencyTrackBy"
                 (valueChange)="selectCurrency($event)"
+                (queryChnage)="onCurrencyQueryChnage($event)"
               />
               <p class="field-error" [class.field-error--empty]="!fieldError('currency')">
                 {{ fieldError('currency') || '\u00A0' }}
@@ -355,12 +357,13 @@
                 id="org-date-format"
                 placeholder="Search for a date format"
                 ariaLabel="Date format"
-                [options]="dateFormats()"
+                [options]="filteredDateFormats()"
                 [formField]="organizationForm.dateFormatName"
                 [getOptionValue]="dateFormatOptionValue"
                 [getOptionLabel]="dateFormatOptionLabel"
                 [trackBy]="dateFormatTrackBy"
                 (valueChange)="selectDateFormat($event)"
+                (queryChnage)="onDateFormatQueryChnage($event)"
               />
               <p class="field-error" [class.field-error--empty]="!fieldError('dateformatForm')">
                 {{ fieldError('dateformatForm') || '\u00A0' }}

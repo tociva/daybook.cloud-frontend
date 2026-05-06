@@ -63,6 +63,8 @@ export class CreateLedgerCategoryComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(LedgerCategoryFacade);
   protected readonly ledgerCategoryStore = inject(LedgerCategoryStore);
+  protected readonly typeQuery = signal('');
+  protected readonly parentQuery = signal('');
 
   protected readonly id = signal<string | null>(null);
   protected readonly submitted = signal(false);
@@ -85,10 +87,16 @@ export class CreateLedgerCategoryComponent implements OnInit {
   protected readonly typeOptionValue = (t: string): string => t;
   protected readonly typeOptionLabel = (t: string): string => t;
   protected readonly typeTrackBy = (_i: number, t: string): string => t;
+  protected readonly filteredTypeOptions = computed(() =>
+    this.filterAutocompleteOptions(this.typeOptions(), this.typeOptionLabel, this.typeQuery()),
+  );
 
   // ── Parent category autocomplete ──────────────────────────────────────────
   protected readonly parentOptions = computed(() =>
     this.ledgerCategoryStore.items().filter((c) => c.id !== this.id()),
+  );
+  protected readonly filteredParentOptions = computed(() =>
+    this.filterAutocompleteOptions(this.parentOptions(), this.parentOptionLabel, this.parentQuery()),
   );
   protected readonly parentOptionValue = (cat: LedgerCategory): string => cat.id ?? '';
   protected readonly parentOptionLabel = (cat: LedgerCategory): string => cat.name ?? '';
@@ -133,6 +141,14 @@ export class CreateLedgerCategoryComponent implements OnInit {
     this.categoryModel.update((m) => ({ ...m, parentId }));
   }
 
+  protected onTypeQueryChnage(event: unknown): void {
+    this.typeQuery.set(this.normalizeAutocompleteQuery(event));
+  }
+
+  protected onParentQueryChnage(event: unknown): void {
+    this.parentQuery.set(this.normalizeAutocompleteQuery(event));
+  }
+
   protected async submitForm(event: SubmitEvent): Promise<void> {
     event.preventDefault();
     this.submitted.set(true);
@@ -154,5 +170,21 @@ export class CreateLedgerCategoryComponent implements OnInit {
     } else {
       await this.facade.create(payload);
     }
+  }
+
+  private normalizeAutocompleteQuery(event: unknown): string {
+    return typeof event === 'string' ? event.trim().toLowerCase() : '';
+  }
+
+  private filterAutocompleteOptions<T>(
+    options: readonly T[],
+    getLabel: (option: T) => string,
+    query: string,
+  ): T[] {
+    if (!query) {
+      return [...options];
+    }
+
+    return options.filter((option) => getLabel(option).toLowerCase().includes(query));
   }
 }

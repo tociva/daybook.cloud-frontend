@@ -63,6 +63,9 @@ export class CreateItemCategoryComponent implements OnInit {
   private readonly facade = inject(ItemCategoryFacade);
   protected readonly itemCategoryStore = inject(ItemCategoryStore);
   protected readonly taxGroupStore = inject(TaxGroupStore);
+  protected readonly typeQuery = signal('');
+  protected readonly parentQuery = signal('');
+  protected readonly taxGroupQuery = signal('');
 
   protected readonly categoryModel = signal<ItemCategoryFormModel>({
     name: '',
@@ -87,6 +90,9 @@ export class CreateItemCategoryComponent implements OnInit {
   protected readonly typeOptionValue = (t: string): string => t;
   protected readonly typeOptionLabel = (t: string): string => t;
   protected readonly typeTrackBy = (_index: number, t: string): string => t;
+  protected readonly filteredTypeOptions = computed(() =>
+    this.filterAutocompleteOptions(this.typeOptions(), this.typeOptionLabel, this.typeQuery()),
+  );
 
   // ── Parent category autocomplete helpers ──────────────────────────────────
 
@@ -98,12 +104,22 @@ export class CreateItemCategoryComponent implements OnInit {
   protected readonly parentOptions = computed(() =>
     this.itemCategoryStore.items().filter((c) => c.id !== this.id()),
   );
+  protected readonly filteredParentOptions = computed(() =>
+    this.filterAutocompleteOptions(this.parentOptions(), this.parentOptionLabel, this.parentQuery()),
+  );
 
   // ── Tax group autocomplete helpers ────────────────────────────────────────
 
   protected readonly taxGroupOptionValue = (tg: TaxGroup): string => tg.id ?? '';
   protected readonly taxGroupOptionLabel = (tg: TaxGroup): string => tg.name ?? '';
   protected readonly taxGroupTrackBy = (_index: number, tg: TaxGroup): string => tg.id ?? '';
+  protected readonly filteredTaxGroupOptions = computed(() =>
+    this.filterAutocompleteOptions(
+      this.taxGroupStore.items(),
+      this.taxGroupOptionLabel,
+      this.taxGroupQuery(),
+    ),
+  );
 
   // ── Validation ────────────────────────────────────────────────────────────
 
@@ -201,6 +217,18 @@ export class CreateItemCategoryComponent implements OnInit {
     this.categoryModel.update((m) => ({ ...m, taxgroupId }));
   }
 
+  protected onTypeQueryChnage(event: unknown): void {
+    this.typeQuery.set(this.normalizeAutocompleteQuery(event));
+  }
+
+  protected onParentQueryChnage(event: unknown): void {
+    this.parentQuery.set(this.normalizeAutocompleteQuery(event));
+  }
+
+  protected onTaxGroupQueryChnage(event: unknown): void {
+    this.taxGroupQuery.set(this.normalizeAutocompleteQuery(event));
+  }
+
   protected async submitForm(event: SubmitEvent): Promise<void> {
     event.preventDefault();
     this.submitted.set(true);
@@ -225,5 +253,21 @@ export class CreateItemCategoryComponent implements OnInit {
     } else {
       await this.facade.create(payload);
     }
+  }
+
+  private normalizeAutocompleteQuery(event: unknown): string {
+    return typeof event === 'string' ? event.trim().toLowerCase() : '';
+  }
+
+  private filterAutocompleteOptions<T>(
+    options: readonly T[],
+    getLabel: (option: T) => string,
+    query: string,
+  ): T[] {
+    if (!query) {
+      return [...options];
+    }
+
+    return options.filter((option) => getLabel(option).toLowerCase().includes(query));
   }
 }

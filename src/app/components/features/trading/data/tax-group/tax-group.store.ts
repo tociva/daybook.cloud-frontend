@@ -39,6 +39,17 @@ export const TaxGroupStore = signalStore(
     };
 
     return {
+      getAvailableModes(): string[] {
+        return Array.from(
+          new Set(
+            store
+              .items()
+              .flatMap((item) => item.groups ?? [])
+              .map((group) => group.mode?.trim())
+              .filter((mode): mode is string => Boolean(mode)),
+          ),
+        );
+      },
       clearSelectedItem(): void {
         patchState(store, (state) => ({
           taxGroup: {

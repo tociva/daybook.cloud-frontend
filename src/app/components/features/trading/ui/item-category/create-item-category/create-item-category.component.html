@@ -49,12 +49,13 @@
                   id="cat-type"
                   placeholder="Select a type"
                   ariaLabel="Type"
-                  [options]="typeOptions()"
+                  [options]="filteredTypeOptions()"
                   [formField]="categoryForm.type"
                   [getOptionValue]="typeOptionValue"
                   [getOptionLabel]="typeOptionLabel"
                   [trackBy]="typeTrackBy"
                   (valueChange)="onTypeChange($event)"
+                  (queryChnage)="onTypeQueryChnage($event)"
                 />
                 <p class="field-error" [class.field-error--empty]="!typeError()">
                   {{ typeError() || ' ' }}
@@ -67,12 +68,13 @@
                   id="cat-parent"
                   placeholder="Search for a parent category"
                   ariaLabel="Parent category"
-                  [options]="parentOptions()"
+                  [options]="filteredParentOptions()"
                   [formField]="categoryForm.parentId"
                   [getOptionValue]="parentOptionValue"
                   [getOptionLabel]="parentOptionLabel"
                   [trackBy]="parentTrackBy"
                   (valueChange)="onParentChange($event)"
+                  (queryChnage)="onParentQueryChnage($event)"
                 />
                 <p class="field-error field-error--empty">{{ ' ' }}</p>
               </div>
@@ -95,12 +97,13 @@
                 id="cat-taxgroup"
                 placeholder="Search for a tax group"
                 ariaLabel="Tax group"
-                [options]="taxGroupStore.items()"
+                [options]="filteredTaxGroupOptions()"
                 [formField]="categoryForm.taxgroupId"
                 [getOptionValue]="taxGroupOptionValue"
                 [getOptionLabel]="taxGroupOptionLabel"
                 [trackBy]="taxGroupTrackBy"
                 (valueChange)="onTaxGroupChange($event)"
+                (queryChnage)="onTaxGroupQueryChnage($event)"
               />
               <p class="field-error field-error--empty">{{ ' ' }}</p>
             </div>

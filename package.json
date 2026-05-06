@@ -22,7 +22,7 @@
     "@angular/router": "^21.2.0",
     "@ngrx/signals": "^21.1.0",
     "@tailng-ui/cdk": "^0.33.0",
-    "@tailng-ui/components": "^0.50.0",
+    "@tailng-ui/components": "^0.51.0",
     "@tailng-ui/icons": "^0.14.0",
     "@tailng-ui/primitives": "^0.47.0",
     "@tailng-ui/theme": "^0.33.0",

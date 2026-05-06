@@ -74,6 +74,8 @@ export class CreateCustomerComponent implements OnInit {
   protected readonly customerStore = inject(CustomerStore);
   protected readonly countries = this.countryStore.countries;
   protected readonly currencies = this.currencyStore.currencies;
+  protected readonly countryQuery = signal('');
+  protected readonly currencyQuery = signal('');
 
   protected readonly countryOptionValue = (country: Country): string => country.code;
   protected readonly countryOptionLabel = (country: Country): string => country.name;
@@ -84,6 +86,12 @@ export class CreateCustomerComponent implements OnInit {
   protected readonly currencyOptionLabel = (currency: Currency): string =>
     `${currency.name} (${currency.symbol})`;
   protected readonly currencyTrackBy = (_index: number, currency: Currency): string => currency.code;
+  protected readonly filteredCountries = computed(() =>
+    this.filterAutocompleteOptions(this.countries(), this.countryOptionLabel, this.countryQuery()),
+  );
+  protected readonly filteredCurrencies = computed(() =>
+    this.filterAutocompleteOptions(this.currencies(), this.currencyOptionLabel, this.currencyQuery()),
+  );
 
   protected readonly customerModel = signal<CustomerFormModel>({
     name: '',
@@ -267,5 +275,29 @@ export class CreateCustomerComponent implements OnInit {
       ...current,
       currencycode: currencyCode,
     }));
+  }
+
+  protected onCountryQueryChnage(event: unknown): void {
+    this.countryQuery.set(this.normalizeAutocompleteQuery(event));
+  }
+
+  protected onCurrencyQueryChnage(event: unknown): void {
+    this.currencyQuery.set(this.normalizeAutocompleteQuery(event));
+  }
+
+  private normalizeAutocompleteQuery(event: unknown): string {
+    return typeof event === 'string' ? event.trim().toLowerCase() : '';
+  }
+
+  private filterAutocompleteOptions<T>(
+    options: readonly T[],
+    getLabel: (option: T) => string,
+    query: string,
+  ): T[] {
+    if (!query) {
+      return [...options];
+    }
+
+    return options.filter((option) => getLabel(option).toLowerCase().includes(query));
   }
 }
