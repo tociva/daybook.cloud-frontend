@@ -85,5 +85,12 @@ export const routes: Routes = [
         (m) => m.branchRoutes,
       ),
   },
+  {
+    path: 'app/management/fiscal-year',
+    loadChildren: () =>
+      import('./components/features/management/ui/fiscal-year/fiscal-year.routes').then(
+        (m) => m.fiscalYearRoutes,
+      ),
+  },
   { path: 'bootstrap/bootstrap-organization', component: BootstrapOrganizationComponent },
 ];

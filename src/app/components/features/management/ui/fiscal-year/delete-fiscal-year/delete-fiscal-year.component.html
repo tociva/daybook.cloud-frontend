@@ -1,0 +1,78 @@
+<main class="management-page">
+  <tng-card variant="outline" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Delete Fiscal Year</tng-card-title>
+      <tng-card-description>This action cannot be undone.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (fiscalYearStore.error()) {
+        <div class="notice notice--danger">{{ fiscalYearStore.error() }}</div>
+      }
+
+      @if (fiscalYearStore.isLoading() && !fiscalYearStore.selectedItem()) {
+        <div class="notice">Loading fiscal year...</div>
+      } @else if (fiscalYearStore.selectedItem(); as fy) {
+
+        <dl class="details-grid">
+          <div class="wide">
+            <dt>Name</dt>
+            <dd>{{ fy.name || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Branch</dt>
+            <dd>{{ fy.branch?.name || fy.branchid || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Currency</dt>
+            <dd>{{ fy.currencycode || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Start Date</dt>
+            <dd>{{ formatDate(fy.startdate) }}</dd>
+          </div>
+          <div>
+            <dt>End Date</dt>
+            <dd>{{ formatDate(fy.enddate) }}</dd>
+          </div>
+          <div>
+            <dt>Freeze Till</dt>
+            <dd>{{ fy.freezetill ? formatDate(fy.freezetill) : '—' }}</dd>
+          </div>
+        </dl>
+
+        <div class="notice notice--danger">
+          You are about to permanently delete the fiscal year
+          <strong>{{ fy.name }}</strong>. All associated journal entries and data will be lost.
+        </div>
+
+        <label class="confirm-row">
+          <tng-checkbox
+            [checked]="confirmed()"
+            (checkedChange)="confirmed.set($event)"
+          />
+          I understand this action is irreversible.
+        </label>
+
+      } @else {
+        <div class="notice">Fiscal year not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button />
+        <tng-button
+          type="button"
+          appearance="solid"
+          tone="danger"
+          [disabled]="!confirmed() || fiscalYearStore.isLoading()"
+          (click)="deleteFiscalYear()"
+        >
+          <tng-icon icon="trash2" aria-hidden="true" />
+          {{ fiscalYearStore.isLoading() ? 'Deleting…' : 'Delete fiscal year' }}
+        </tng-button>
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>

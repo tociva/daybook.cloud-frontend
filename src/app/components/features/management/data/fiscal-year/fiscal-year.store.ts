@@ -1,58 +1,148 @@
-import { computed } from '@angular/core';
+import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
-import type { FiscalYear } from './fiscal-year.model';
+import type {
+  FiscalYear,
+  FiscalYearGetQuery,
+  FiscalYearListQuery,
+  FiscalYearPayload,
+} from './fiscal-year.model';
+import { FiscalYearService } from './fiscal-year.service';
 import { initialFiscalYearState } from './fiscal-year.state';
+
+const getErrorMessage = (error: unknown, fallback: string): string =>
+  error instanceof Error ? error.message : fallback;
 
 export const FiscalYearStore = signalStore(
   { providedIn: 'root' },
   withState(initialFiscalYearState),
-  withComputed(({ fiscalYears, selectedFiscalYearId, branchId, isLoading, error, search }) => ({
-    fiscalYears: computed(() => fiscalYears()),
-    selectedFiscalYearId: computed(() => selectedFiscalYearId()),
-    selectedFiscalYear: computed(
-      () => fiscalYears().find((item) => item.id === selectedFiscalYearId()) ?? null,
-    ),
+  withComputed(({
+    fiscalYears,
+    selectedFiscalYear,
+    selectedFiscalYearId,
+    branchId,
+    count,
+    isLoading,
+    error,
+    search,
+  }) => ({
     branchId: computed(() => branchId()),
-    isLoading: computed(() => isLoading()),
+    count: computed(() => count()),
     error: computed(() => error()),
+    fiscalYears: computed(() => fiscalYears()),
+    isLoading: computed(() => isLoading()),
+    items: computed(() => fiscalYears()),
     search: computed(() => search()),
+    selectedFiscalYear: computed(() => selectedFiscalYear()),
+    selectedFiscalYearId: computed(() => selectedFiscalYearId()),
+    selectedItem: computed(() => selectedFiscalYear()),
   })),
-  withMethods((store) => ({
-    clear(): void {
-      patchState(store, initialFiscalYearState);
-    },
-    setBranchId(branchId: string | null): void {
-      patchState(store, { branchId });
-    },
-    setError(error: string | null): void {
+  withMethods((store, service = inject(FiscalYearService)) => {
+    const setLoading = (): void => {
+      patchState(store, { error: null, isLoading: true });
+    };
+    const setError = (error: string): void => {
       patchState(store, { error, isLoading: false });
-    },
-    setFiscalYears(fiscalYears: readonly FiscalYear[]): void {
-      patchState(store, { fiscalYears, error: null, isLoading: false });
-    },
-    setLoading(isLoading: boolean): void {
-      patchState(store, { isLoading });
-    },
-    setSearch(search: string): void {
-      patchState(store, { search });
-    },
-    setSelectedFiscalYearId(selectedFiscalYearId: string | null): void {
-      patchState(store, { selectedFiscalYearId });
-    },
-    upsertFiscalYear(fiscalYear: FiscalYear): void {
-      patchState(store, (state) => {
-        const idx = state.fiscalYears.findIndex((item) => item.id === fiscalYear.id);
-        if (idx === -1) {
-          return { fiscalYears: [...state.fiscalYears, fiscalYear] };
+    };
+
+    return {
+      clear(): void {
+        patchState(store, initialFiscalYearState);
+      },
+
+      setBranchId(branchId: string | null): void {
+        patchState(store, { branchId });
+      },
+
+      setSearch(search: string): void {
+        patchState(store, { search });
+      },
+
+      async loadFiscalYears(query: FiscalYearListQuery = {}): Promise<void> {
+        setLoading();
+        try {
+          const [fiscalYears, count] = await Promise.all([
+            service.list(query),
+            service.count(query),
+          ]);
+          patchState(store, { fiscalYears, count, error: null, isLoading: false });
+        } catch (error) {
+          setError(getErrorMessage(error, 'Failed to load fiscal years.'));
         }
+      },
 
-        return {
-          fiscalYears: state.fiscalYears.map((item, index) =>
-            index === idx ? fiscalYear : item,
-          ),
-        };
-      });
-    },
-  })),
+      async loadFiscalYearById(id: string, query?: FiscalYearGetQuery): Promise<FiscalYear | null> {
+        setLoading();
+        try {
+          const fiscalYear = await service.getById(id, query);
+          patchState(store, {
+            selectedFiscalYear: fiscalYear,
+            selectedFiscalYearId: fiscalYear.id ?? null,
+            error: null,
+            isLoading: false,
+          });
+          return fiscalYear;
+        } catch (error) {
+          setError(getErrorMessage(error, 'Failed to load fiscal year.'));
+          return null;
+        }
+      },
+
+      async createFiscalYear(payload: FiscalYearPayload): Promise<FiscalYear | null> {
+        setLoading();
+        try {
+          const fiscalYear = await service.create(payload);
+          patchState(store, (state) => ({
+            fiscalYears: [fiscalYear, ...state.fiscalYears],
+            count: state.count + 1,
+            selectedFiscalYear: fiscalYear,
+            selectedFiscalYearId: fiscalYear.id ?? null,
+            error: null,
+            isLoading: false,
+          }));
+          return fiscalYear;
+        } catch (error) {
+          setError(getErrorMessage(error, 'Failed to create fiscal year.'));
+          return null;
+        }
+      },
+
+      async updateFiscalYear(id: string, payload: FiscalYearPayload): Promise<FiscalYear | null> {
+        setLoading();
+        try {
+          const fiscalYear = await service.update(id, payload);
+          patchState(store, (state) => ({
+            fiscalYears: state.fiscalYears.map((fy) => (fy.id === id ? fiscalYear : fy)),
+            selectedFiscalYear: fiscalYear,
+            error: null,
+            isLoading: false,
+          }));
+          return fiscalYear;
+        } catch (error) {
+          setError(getErrorMessage(error, 'Failed to update fiscal year.'));
+          return null;
+        }
+      },
+
+      async deleteFiscalYear(id: string): Promise<boolean> {
+        setLoading();
+        try {
+          await service.delete(id);
+          patchState(store, (state) => ({
+            fiscalYears: state.fiscalYears.filter((fy) => fy.id !== id),
+            count: Math.max(state.count - 1, 0),
+            selectedFiscalYear:
+              state.selectedFiscalYear?.id === id ? null : state.selectedFiscalYear,
+            selectedFiscalYearId:
+              state.selectedFiscalYearId === id ? null : state.selectedFiscalYearId,
+            error: null,
+            isLoading: false,
+          }));
+          return true;
+        } catch (error) {
+          setError(getErrorMessage(error, 'Failed to delete fiscal year.'));
+          return false;
+        }
+      },
+    };
+  }),
 );
-

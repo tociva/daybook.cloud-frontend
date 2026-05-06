@@ -1,0 +1,77 @@
+<main class="management-page">
+  <tng-card variant="outline" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Fiscal Year Details</tng-card-title>
+      <tng-card-description>Review fiscal year information and settings.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (fiscalYearStore.error()) {
+        <div class="notice notice--danger">{{ fiscalYearStore.error() }}</div>
+      }
+
+      @if (fiscalYearStore.isLoading() && !fiscalYearStore.selectedItem()) {
+        <div class="notice">Loading fiscal year...</div>
+      } @else if (fiscalYearStore.selectedItem(); as fy) {
+
+        <dl class="details-grid">
+          <div class="wide">
+            <dt>Name</dt>
+            <dd>{{ fy.name || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Start Date</dt>
+            <dd>{{ formatDate(fy.startdate) }}</dd>
+          </div>
+          <div>
+            <dt>End Date</dt>
+            <dd>{{ formatDate(fy.enddate) }}</dd>
+          </div>
+          <div>
+            <dt>Freeze Till</dt>
+            <dd>{{ fy.freezetill ? formatDate(fy.freezetill) : '—' }}</dd>
+          </div>
+        </dl>
+
+        <div class="section-title">Branch & Currency</div>
+        <dl class="details-grid">
+          <div>
+            <dt>Branch</dt>
+            <dd>{{ fy.branch?.name || fy.branchid || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Currency</dt>
+            <dd>
+              @if (fy.currency) {
+                {{ fy.currency.name }} ({{ fy.currency.symbol }})
+              } @else {
+                {{ fy.currencycode || '—' }}
+              }
+            </dd>
+          </div>
+          <div>
+            <dt>Journal Number Format</dt>
+            <dd>{{ fy.jnumber || '—' }}</dd>
+          </div>
+        </dl>
+
+      } @else {
+        <div class="notice">Fiscal year not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button />
+        <tng-button type="button" appearance="outline" tone="danger" (click)="delete()">
+          <tng-icon icon="trash2" aria-hidden="true" />
+          Delete
+        </tng-button>
+        <tng-button type="button" appearance="solid" tone="primary" (click)="edit()">
+          <tng-icon icon="pencil" aria-hidden="true" />
+          Edit
+        </tng-button>
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>

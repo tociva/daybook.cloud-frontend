@@ -1,0 +1,154 @@
+<main class="management-page">
+  <tng-card variant="outline" padding="lg">
+    <tng-card-header>
+      <tng-card-title>{{ title() }}</tng-card-title>
+      <tng-card-description>{{ subtitle() }}</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (fiscalYearStore.error()) {
+        <div class="notice notice--danger">{{ fiscalYearStore.error() }}</div>
+      }
+
+      <form (submit)="submitForm($event)" novalidate>
+
+        <!-- ── Details ──────────────────────────────────── -->
+        <p class="section-label">Fiscal Year Details</p>
+        <div class="fields-grid">
+
+          <div class="field field--full">
+            <tng-label required>Name</tng-label>
+            <tng-input
+              placeholder="e.g. FY 2025-26"
+              [value]="name()"
+              [ariaInvalid]="nameError() !== null"
+              (input)="name.set($any($event.target).value)"
+            />
+            @if (nameError()) { <p class="field-error">{{ nameError() }}</p> }
+          </div>
+
+          <div class="field">
+            <tng-label required>Start Date</tng-label>
+            <tng-datepicker
+              [value]="startdate()"
+              [invalid]="startdateError() !== null"
+              (valueChange)="onStartdateChange($event)"
+            />
+            @if (startdateError()) { <p class="field-error">{{ startdateError() }}</p> }
+          </div>
+
+          <div class="field">
+            <tng-label required>End Date</tng-label>
+            <tng-datepicker
+              [value]="enddate()"
+              [invalid]="enddateError() !== null"
+              (valueChange)="onEnddateChange($event)"
+            />
+            @if (enddateError()) { <p class="field-error">{{ enddateError() }}</p> }
+          </div>
+
+          <div class="field">
+            <tng-label>Freeze Till</tng-label>
+            <tng-datepicker
+              [value]="freezetill()"
+              (valueChange)="onFreezetillChange($event)"
+            />
+          </div>
+
+          <div class="field">
+            <tng-label required>Journal Number Format</tng-label>
+            <tng-input
+              placeholder="e.g. <<YYYY>>/<<SERIAL5>>"
+              [value]="jnumber()"
+              [ariaInvalid]="jnumberError() !== null"
+              (input)="jnumber.set($any($event.target).value)"
+            />
+            @if (jnumberError()) { <p class="field-error">{{ jnumberError() }}</p> }
+          </div>
+
+        </div>
+
+        <!-- ── Associations ────────────────────────────── -->
+        <p class="section-label">Branch & Currency</p>
+        <div class="fields-grid">
+
+          <!-- Branch autocomplete -->
+          <div class="field">
+            <tng-label required>Branch</tng-label>
+            <div class="autocomplete-wrap">
+              <input
+                class="field-input"
+                [class.field-input--invalid]="!!branchError()"
+                type="text"
+                placeholder="Search branch..."
+                autocomplete="off"
+                [value]="branchSearch()"
+                (input)="onBranchInput($event)"
+                (focus)="showBranchDropdown.set(true)"
+                (blur)="onBranchBlur()"
+              />
+              @if (showBranchDropdown() && filteredBranches().length > 0) {
+                <ul class="dropdown" role="listbox">
+                  @for (b of filteredBranches(); track b.id) {
+                    <li class="dropdown-item" role="option" (mousedown)="selectBranch(b)">
+                      {{ b.name }}
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+            @if (branchError()) { <p class="field-error">{{ branchError() }}</p> }
+          </div>
+
+          <!-- Currency autocomplete -->
+          <div class="field">
+            <tng-label required>Currency</tng-label>
+            <div class="autocomplete-wrap">
+              <input
+                class="field-input"
+                [class.field-input--invalid]="!!currencyError()"
+                type="text"
+                placeholder="Search currency..."
+                autocomplete="off"
+                [value]="currencySearch()"
+                (input)="onCurrencyInput($event)"
+                (focus)="showCurrencyDropdown.set(true)"
+                (blur)="onCurrencyBlur()"
+              />
+              @if (showCurrencyDropdown() && filteredCurrencies().length > 0) {
+                <ul class="dropdown" role="listbox">
+                  @for (c of filteredCurrencies(); track c.code) {
+                    <li class="dropdown-item" role="option" (mousedown)="selectCurrency(c)">
+                      {{ c.name }} ({{ c.symbol }})
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+            @if (currencyError()) { <p class="field-error">{{ currencyError() }}</p> }
+          </div>
+
+        </div>
+
+        <tng-card-footer>
+          <tng-card-actions align="end">
+            <app-burl-back-button />
+            <tng-button
+              type="submit"
+              appearance="solid"
+              tone="primary"
+              [disabled]="isSubmitting()"
+            >
+              <tng-icon
+                [icon]="isSubmitting() ? 'loader' : (mode() === 'edit' ? 'save' : 'plus')"
+                aria-hidden="true"
+              />
+              {{ isSubmitting() ? 'Saving…' : (mode() === 'edit' ? 'Save changes' : 'Create fiscal year') }}
+            </tng-button>
+          </tng-card-actions>
+        </tng-card-footer>
+
+      </form>
+    </tng-card-content>
+  </tng-card>
+</main>
