@@ -1,0 +1,70 @@
+<main class="management-page">
+  <tng-card variant="outline" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Delete Organization</tng-card-title>
+      <tng-card-description>This action cannot be undone.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (organizationStore.error()) {
+        <div class="notice notice--danger">{{ organizationStore.error() }}</div>
+      }
+
+      @if (organizationStore.isLoading() && !organizationStore.selectedItem()) {
+        <div class="notice">Loading organization...</div>
+      } @else if (organizationStore.selectedItem(); as org) {
+
+        <dl class="details-grid">
+          <div>
+            <dt>Name</dt>
+            <dd>{{ org.name }}</dd>
+          </div>
+          <div>
+            <dt>Email</dt>
+            <dd>{{ org.email || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Mobile</dt>
+            <dd>{{ org.mobile || '—' }}</dd>
+          </div>
+          <div class="wide">
+            <dt>Description</dt>
+            <dd>{{ org.description || 'No description' }}</dd>
+          </div>
+        </dl>
+
+        <div class="notice notice--danger">
+          You are about to permanently delete the organization
+          <strong>{{ org.name }}</strong>. All associated data will be lost.
+        </div>
+
+        <label class="confirm-row">
+          <tng-checkbox
+            [checked]="confirmed()"
+            (checkedChange)="confirmed.set($event)"
+          />
+          I understand this action is irreversible.
+        </label>
+
+      } @else {
+        <div class="notice">Organization not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button />
+        <tng-button
+          type="button"
+          appearance="solid"
+          tone="danger"
+          [disabled]="!confirmed() || organizationStore.isLoading()"
+          (click)="deleteOrganization()"
+        >
+          <tng-icon icon="trash2" aria-hidden="true" />
+          {{ organizationStore.isLoading() ? 'Deleting…' : 'Delete organization' }}
+        </tng-button>
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>

@@ -75,6 +75,7 @@ interface ItemRow {
   taxamount: number;
   grandtotal: number;
   taxes: TaxRow[];
+  description: string;
 }
 
 // ── Select option shape for TngSelectComponent ────────────────────────────────
@@ -128,6 +129,7 @@ export class CreateSaleInvoiceComponent implements OnInit {
   protected readonly customerSearch = signal('');
   protected readonly showCustomerDropdown = signal(false);
   protected readonly showDiscount = signal(false);
+  protected readonly showDescription = signal(false);
   protected readonly selectedCustomer = signal<Customer | null>(null);
   protected readonly activeItemRowIndex = signal(-1);
   protected readonly itemSearch = signal('');
@@ -244,6 +246,21 @@ export class CreateSaleInvoiceComponent implements OnInit {
     return 0;
   });
 
+  protected readonly taxColumns = computed<{ name: string; shortname: string }[]>(() => {
+    const opt = this.taxoption();
+    for (const tg of this.taxGroupStore.items()) {
+      for (const g of tg.groups ?? []) {
+        if (g.mode === opt && (g.taxids ?? []).length > 0) {
+          return (g.taxids ?? []).map((taxId) => {
+            const tax = this.taxStore.items().find((t) => t.id === taxId);
+            return { name: tax?.name ?? '', shortname: tax?.shortname ?? taxId.slice(0, 4) };
+          });
+        }
+      }
+    }
+    return [];
+  });
+
   // ── Auto-numbering toggle effect ──────────────────────────────────────────
 
   private readonly _autoNumberingEffect = effect(() => {
@@ -324,6 +341,7 @@ export class CreateSaleInvoiceComponent implements OnInit {
         itemid: si.itemid ?? si.item?.id ?? '',
         name: si.name,
         code: si.code,
+        description: si.description ?? '',
         price: si.price,
         quantity: si.quantity,
         itemtotal: si.itemtotal,
@@ -459,6 +477,12 @@ export class CreateSaleInvoiceComponent implements OnInit {
     );
   }
 
+  protected updateItemDescription(rowIndex: number, value: string | null): void {
+    this.items.update((rows) =>
+      rows.map((row, i) => (i === rowIndex ? { ...row, description: value ?? '' } : row)),
+    );
+  }
+
   private calcRow(row: ItemRow): ItemRow {
     const price = toNum(row.price);
     const quantity = toNum(row.quantity) || 1;
@@ -547,7 +571,7 @@ export class CreateSaleInvoiceComponent implements OnInit {
 
   private emptyItemRow(taxCount = 0): ItemRow {
     return {
-      item: null, itemid: '', name: '', code: '',
+      item: null, itemid: '', name: '', code: '', description: '',
       price: 0, quantity: 1,
       itemtotal: 0, discpercent: 0, discamount: 0,
       subtotal: 0, taxamount: 0, grandtotal: 0,
@@ -602,6 +626,7 @@ export class CreateSaleInvoiceComponent implements OnInit {
       }));
       return {
         name: row.name, code: row.code, order: i + 1,
+        ...(row.description ? { description: row.description } : {}),
         price: toNum(row.price), quantity: toNum(row.quantity),
         itemtotal: toNum(row.itemtotal),
         ...(row.discpercent ? { discpercent: toNum(row.discpercent) } : {}),

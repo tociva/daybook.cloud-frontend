@@ -1,0 +1,179 @@
+<main class="management-page">
+  <tng-card variant="outline" padding="lg">
+    <tng-card-header>
+      <tng-card-title>{{ title() }}</tng-card-title>
+      <tng-card-description>{{ description_() }}</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (organizationStore.error()) {
+        <div class="notice notice--danger">{{ organizationStore.error() }}</div>
+      }
+
+      <form (submit)="submitForm($event)" novalidate>
+
+        <!-- ── Basic Details ──────────────────────────────── -->
+        <p class="section-label">Basic Details</p>
+        <div class="fields-grid">
+
+          <div class="field field--full">
+            <tng-label required>Name</tng-label>
+            <tng-input
+              placeholder="Organization name"
+              [value]="name()"
+              [ariaInvalid]="nameError() !== null"
+              (input)="name.set($any($event.target).value)"
+            />
+            @if (nameError()) {
+              <p class="field-error">{{ nameError() }}</p>
+            }
+          </div>
+
+          <div class="field">
+            <tng-label required>Email</tng-label>
+            <tng-input
+              type="email"
+              placeholder="contact@example.com"
+              [value]="email()"
+              [ariaInvalid]="emailError() !== null"
+              (input)="email.set($any($event.target).value)"
+            />
+            @if (emailError()) {
+              <p class="field-error">{{ emailError() }}</p>
+            }
+          </div>
+
+          <div class="field">
+            <tng-label>Mobile</tng-label>
+            <tng-input
+              placeholder="+91-"
+              [value]="mobile()"
+              (input)="mobile.set($any($event.target).value)"
+            />
+          </div>
+
+          <!-- Country autocomplete -->
+          <div class="field">
+            <tng-label>Country</tng-label>
+            <div class="autocomplete-wrap">
+              <input
+                class="field-input"
+                type="text"
+                placeholder="Search country..."
+                autocomplete="off"
+                [value]="countrySearch()"
+                (input)="onCountryInput($event)"
+                (focus)="showCountryDropdown.set(true)"
+                (blur)="onCountryBlur()"
+              />
+              @if (showCountryDropdown() && filteredCountries().length > 0) {
+                <ul class="dropdown" role="listbox">
+                  @for (c of filteredCountries(); track c.code) {
+                    <li
+                      class="dropdown-item"
+                      role="option"
+                      (mousedown)="selectCountry(c)"
+                    >{{ c.name }}</li>
+                  }
+                </ul>
+              }
+            </div>
+          </div>
+
+          <div class="field">
+            <tng-label>State / Province</tng-label>
+            <tng-input
+              placeholder="State"
+              [value]="state()"
+              (input)="state.set($any($event.target).value)"
+            />
+          </div>
+
+          <div class="field field--full">
+            <tng-label>Description</tng-label>
+            <tng-textarea
+              placeholder="Brief description of the organization"
+              [value]="description()"
+              (input)="description.set($any($event.target).value)"
+            />
+          </div>
+
+        </div>
+
+        <!-- ── Address ───────────────────────────────────── -->
+        <p class="section-label">Address</p>
+        <div class="fields-grid">
+
+          <div class="field field--full">
+            <tng-label required>Address Line 1</tng-label>
+            <tng-input
+              placeholder="Building / Street"
+              [value]="addressLine1()"
+              [ariaInvalid]="addressLine1Error() !== null"
+              (input)="addressLine1.set($any($event.target).value)"
+            />
+            @if (addressLine1Error()) {
+              <p class="field-error">{{ addressLine1Error() }}</p>
+            }
+          </div>
+
+          <div class="field field--full">
+            <tng-label>Address Line 2</tng-label>
+            <tng-input
+              placeholder="Apartment, suite, etc."
+              [value]="addressLine2()"
+              (input)="addressLine2.set($any($event.target).value)"
+            />
+          </div>
+
+          <div class="field">
+            <tng-label>City</tng-label>
+            <tng-input
+              placeholder="City"
+              [value]="addressCity()"
+              (input)="addressCity.set($any($event.target).value)"
+            />
+          </div>
+
+          <div class="field">
+            <tng-label>Pincode / ZIP</tng-label>
+            <tng-input
+              placeholder="Pincode"
+              [value]="addressPincode()"
+              (input)="addressPincode.set($any($event.target).value)"
+            />
+          </div>
+
+          <div class="field">
+            <tng-label>GSTIN</tng-label>
+            <tng-input
+              placeholder="GST Identification Number"
+              [value]="gstin()"
+              (input)="gstin.set($any($event.target).value)"
+            />
+          </div>
+
+        </div>
+
+        <tng-card-footer>
+          <tng-card-actions align="end">
+            <app-burl-back-button />
+            <tng-button
+              type="submit"
+              appearance="solid"
+              tone="primary"
+              [disabled]="isSubmitting()"
+            >
+              <tng-icon
+                [icon]="isSubmitting() ? 'loader' : (mode() === 'edit' ? 'save' : 'plus')"
+                aria-hidden="true"
+              />
+              {{ isSubmitting() ? 'Saving…' : (mode() === 'edit' ? 'Save changes' : 'Create organization') }}
+            </tng-button>
+          </tng-card-actions>
+        </tng-card-footer>
+
+      </form>
+    </tng-card-content>
+  </tng-card>
+</main>

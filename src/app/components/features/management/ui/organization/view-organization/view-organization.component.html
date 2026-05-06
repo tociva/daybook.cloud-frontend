@@ -1,0 +1,86 @@
+<main class="management-page">
+  <tng-card variant="outline" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Organization Details</tng-card-title>
+      <tng-card-description>Review organization information.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (organizationStore.error()) {
+        <div class="notice notice--danger">{{ organizationStore.error() }}</div>
+      }
+
+      @if (organizationStore.isLoading() && !organizationStore.selectedItem()) {
+        <div class="notice">Loading organization...</div>
+      } @else if (organizationStore.selectedItem(); as org) {
+
+        <!-- Basic details -->
+        <dl class="details-grid">
+          <div>
+            <dt>Name</dt>
+            <dd>{{ org.name }}</dd>
+          </div>
+          <div>
+            <dt>Email</dt>
+            <dd>{{ org.email || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Mobile</dt>
+            <dd>{{ org.mobile || '—' }}</dd>
+          </div>
+          <div class="wide">
+            <dt>Description</dt>
+            <dd>{{ org.description || 'No description' }}</dd>
+          </div>
+        </dl>
+
+        <!-- Address -->
+        @if (org.address) {
+          <div class="section-title">Address</div>
+          <dl class="details-grid">
+            <div>
+              <dt>Line 1</dt>
+              <dd>{{ $any(org.address).line1 || '—' }}</dd>
+            </div>
+            @if ($any(org.address).line2) {
+              <div>
+                <dt>Line 2</dt>
+                <dd>{{ $any(org.address).line2 }}</dd>
+              </div>
+            }
+            <div>
+              <dt>City</dt>
+              <dd>{{ $any(org.address).city || '—' }}</dd>
+            </div>
+            <div>
+              <dt>Pincode</dt>
+              <dd>{{ $any(org.address).pincode || '—' }}</dd>
+            </div>
+          </dl>
+        }
+
+      } @else {
+        <div class="notice">Organization not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button />
+        <tng-button
+          type="button"
+          appearance="outline"
+          tone="danger"
+          (click)="delete()"
+        >
+          <tng-icon icon="trash2" aria-hidden="true" />
+          Delete
+        </tng-button>
+        <tng-button type="button" appearance="solid" tone="primary" (click)="edit()">
+          <tng-icon icon="pencil" aria-hidden="true" />
+          Edit
+        </tng-button>
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>

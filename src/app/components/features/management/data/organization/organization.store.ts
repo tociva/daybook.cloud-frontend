@@ -1,56 +1,130 @@
-import { computed } from '@angular/core';
+import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
-import type { Organization } from './organization.model';
+import type { Organization, OrganizationListQuery, OrganizationPayload } from './organization.model';
+import { OrganizationService } from './organization.service';
 import { initialOrganizationState } from './organization.state';
+
+const getErrorMessage = (error: unknown, fallback: string): string =>
+  error instanceof Error ? error.message : fallback;
 
 export const OrganizationStore = signalStore(
   { providedIn: 'root' },
   withState(initialOrganizationState),
-  withComputed(({ organizations, selectedOrganizationId, isLoading, error, search }) => ({
-    organizations: computed(() => organizations()),
-    selectedOrganizationId: computed(() => selectedOrganizationId()),
-    selectedOrganization: computed(
-      () => organizations().find((org) => org.id === selectedOrganizationId()) ?? null,
-    ),
-    isLoading: computed(() => isLoading()),
+  withComputed(({ organizations, selectedOrganization, selectedOrganizationId, count, isLoading, error, search }) => ({
+    count: computed(() => count()),
     error: computed(() => error()),
+    isLoading: computed(() => isLoading()),
+    items: computed(() => organizations()),
+    organizations: computed(() => organizations()),
     search: computed(() => search()),
+    selectedItem: computed(() => selectedOrganization()),
+    selectedOrganization: computed(() => selectedOrganization()),
+    selectedOrganizationId: computed(() => selectedOrganizationId()),
   })),
-  withMethods((store) => ({
-    clear(): void {
-      patchState(store, initialOrganizationState);
-    },
-    setError(error: string | null): void {
+  withMethods((store, service = inject(OrganizationService)) => {
+    const setLoading = (): void => {
+      patchState(store, { error: null, isLoading: true });
+    };
+
+    const setError = (error: string): void => {
       patchState(store, { error, isLoading: false });
-    },
-    setLoading(isLoading: boolean): void {
-      patchState(store, { isLoading });
-    },
-    setOrganizations(organizations: readonly Organization[]): void {
-      patchState(store, { organizations, error: null, isLoading: false });
-    },
-    setSearch(search: string): void {
-      patchState(store, { search });
-    },
-    setSelectedOrganizationId(selectedOrganizationId: string | null): void {
-      patchState(store, { selectedOrganizationId });
-    },
-    upsertOrganization(organization: Organization): void {
-      patchState(store, (state) => {
-        const idx = state.organizations.findIndex((org) => org.id === organization.id);
-        if (idx === -1) {
-          return {
-            organizations: [...state.organizations, organization],
-          };
+    };
+
+    return {
+      clear(): void {
+        patchState(store, initialOrganizationState);
+      },
+
+      setSearch(search: string): void {
+        patchState(store, { search });
+      },
+
+      async loadOrganizations(query: OrganizationListQuery = {}): Promise<void> {
+        setLoading();
+        try {
+          const [organizations, count] = await Promise.all([
+            service.list(query),
+            service.count(query),
+          ]);
+          patchState(store, { organizations, count, error: null, isLoading: false });
+        } catch (error) {
+          setError(getErrorMessage(error, 'Failed to load organizations.'));
         }
+      },
 
-        return {
-          organizations: state.organizations.map((org, index) =>
-            index === idx ? organization : org,
-          ),
-        };
-      });
-    },
-  })),
+      async loadOrganizationById(id: string): Promise<Organization | null> {
+        setLoading();
+        try {
+          const org = await service.getById(id);
+          patchState(store, {
+            selectedOrganization: org,
+            selectedOrganizationId: org.id ?? null,
+            error: null,
+            isLoading: false,
+          });
+          return org;
+        } catch (error) {
+          setError(getErrorMessage(error, 'Failed to load organization.'));
+          return null;
+        }
+      },
+
+      async createOrganization(payload: OrganizationPayload): Promise<Organization | null> {
+        setLoading();
+        try {
+          const org = await service.create(payload);
+          patchState(store, (state) => ({
+            organizations: [org, ...state.organizations],
+            count: state.count + 1,
+            selectedOrganization: org,
+            selectedOrganizationId: org.id ?? null,
+            error: null,
+            isLoading: false,
+          }));
+          return org;
+        } catch (error) {
+          setError(getErrorMessage(error, 'Failed to create organization.'));
+          return null;
+        }
+      },
+
+      async updateOrganization(id: string, payload: OrganizationPayload): Promise<Organization | null> {
+        setLoading();
+        try {
+          const org = await service.update(id, payload);
+          patchState(store, (state) => ({
+            organizations: state.organizations.map((o) => (o.id === id ? org : o)),
+            selectedOrganization: org,
+            error: null,
+            isLoading: false,
+          }));
+          return org;
+        } catch (error) {
+          setError(getErrorMessage(error, 'Failed to update organization.'));
+          return null;
+        }
+      },
+
+      async deleteOrganization(id: string): Promise<boolean> {
+        setLoading();
+        try {
+          await service.delete(id);
+          patchState(store, (state) => ({
+            organizations: state.organizations.filter((o) => o.id !== id),
+            count: Math.max(state.count - 1, 0),
+            selectedOrganization:
+              state.selectedOrganization?.id === id ? null : state.selectedOrganization,
+            selectedOrganizationId:
+              state.selectedOrganizationId === id ? null : state.selectedOrganizationId,
+            error: null,
+            isLoading: false,
+          }));
+          return true;
+        } catch (error) {
+          setError(getErrorMessage(error, 'Failed to delete organization.'));
+          return false;
+        }
+      },
+    };
+  }),
 );
-

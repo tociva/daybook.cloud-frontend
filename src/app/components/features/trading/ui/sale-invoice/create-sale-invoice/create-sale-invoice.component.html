@@ -141,127 +141,177 @@
       <tng-card variant="outline" padding="lg">
         <tng-card-header>
           <tng-card-title>Line Items</tng-card-title>
-          <tng-card-description>
-            Add items to the invoice.
-            <label class="discount-toggle">
-              <tng-switch [checked]="showDiscount()" (checkedChange)="showDiscount.set(!!$event)" />
-              Show discount
-            </label>
-          </tng-card-description>
         </tng-card-header>
 
         <tng-card-content>
-          <div class="items-table">
-            <!-- Header -->
-            <div class="items-head">
-              <span class="col-num">#</span>
-              <span class="col-item">Item</span>
-              <span class="col-price align-right">Price</span>
-              <span class="col-qty align-right">Qty</span>
-              @if (showDiscount()) {
-                <span class="col-disc align-right">Disc %</span>
-              }
-              @if (taxColumnCount() > 0) {
-                <span class="col-tax">Tax</span>
-              }
-              <span class="col-total align-right">Total</span>
-              <span class="col-action"></span>
-            </div>
 
-            <!-- Rows -->
-            @for (row of items(); track rowIndex; let rowIndex = $index) {
-              <div class="items-row">
-                <span class="col-num muted">{{ rowIndex + 1 }}</span>
+          <!-- Feature toggles -->
+          <div class="items-toggles">
+            <label class="toggle-label">
+              Enable Discount:
+              <tng-switch [checked]="showDiscount()" (checkedChange)="showDiscount.set(!!$event)" />
+            </label>
+            <label class="toggle-label">
+              Enable Description:
+              <tng-switch [checked]="showDescription()" (checkedChange)="showDescription.set(!!$event)" />
+            </label>
+          </div>
 
-                <!-- Item search -->
-                <div class="col-item autocomplete-wrap">
-                  <tng-input
-                    placeholder="Search item…"
-                    [value]="getItemDisplayName(row)"
-                    (valueChange)="onItemSearchInput($any($event), rowIndex)"
-                    (focus)="activeItemRowIndex.set(rowIndex)"
-                    (blur)="closeItemDropdown()"
-                    autocomplete="off"
-                  />
-                  @if (activeItemRowIndex() === rowIndex && filteredItems().length) {
-                    <ul class="dropdown">
-                      @for (it of filteredItems(); track it.id) {
-                        <li class="dropdown-item" (mousedown)="selectItem(it, rowIndex)">
-                          {{ it.displayname || it.name }}
-                          @if (it.code) { <span class="muted"> ({{ it.code }})</span> }
-                        </li>
-                      }
-                    </ul>
+          <!-- Scrollable table wrapper -->
+          <div class="items-scroll">
+            <table class="items-table">
+
+              <!-- ── Two-row header ─────────────────────────────────────── -->
+              <thead>
+                <tr class="items-head">
+                  <th class="th-num" rowspan="2">#</th>
+                  <th class="th-name" rowspan="2">Name</th>
+                  <th class="th-price th-right" rowspan="2">Price</th>
+                  <th class="th-qty th-right">Quantity</th>
+                  @if (showDiscount()) {
+                    <th class="th-disc th-right" rowspan="2">Disc %</th>
                   }
-                </div>
+                  @if (taxColumns().length > 0) {
+                    <th class="th-taxable th-right" rowspan="2">Taxable Amount</th>
+                  }
+                  @for (tc of taxColumns(); track tc.shortname) {
+                    <th class="th-taxgroup th-center" colspan="2">{{ tc.shortname }}</th>
+                  }
+                  <th class="th-total th-right" rowspan="2">Grand Total</th>
+                  <th class="th-action" rowspan="2"></th>
+                </tr>
+                <tr class="items-head-sub">
+                  <th class="th-itemtotal th-right">Item Total</th>
+                  @for (tc of taxColumns(); track tc.shortname) {
+                    <th class="th-tax-sub th-right">%</th>
+                    <th class="th-tax-sub th-right">Amount</th>
+                  }
+                </tr>
+              </thead>
 
-                <!-- Price -->
-                <tng-input
-                  type="number"
-                  class="col-price"
-                  [value]="row.price.toString()"
-                  min="0"
-                  step="0.01"
-                  (valueChange)="updateItemField(rowIndex, 'price', $any($event)); recalcRow(rowIndex)"
-                />
+              <!-- ── Rows ───────────────────────────────────────────────── -->
+              <tbody>
+                @for (row of items(); track rowIndex; let rowIndex = $index) {
 
-                <!-- Quantity -->
-                <tng-input
-                  type="number"
-                  class="col-qty"
-                  [value]="row.quantity.toString()"
-                  min="1"
-                  (valueChange)="updateItemField(rowIndex, 'quantity', $any($event)); recalcRow(rowIndex)"
-                />
+                  <!-- Top sub-row: inputs & rates -->
+                  <tr class="items-row-top">
+                    <td class="td-num" rowspan="2">{{ rowIndex + 1 }}</td>
 
-                <!-- Discount % -->
-                @if (showDiscount()) {
-                  <tng-input
-                    type="number"
-                    class="col-disc"
-                    [value]="row.discpercent.toString()"
-                    min="0" max="100" step="0.01"
-                    (valueChange)="updateItemField(rowIndex, 'discpercent', $any($event)); recalcRow(rowIndex)"
-                  />
-                }
+                    <!-- Item name / search (spans both sub-rows) -->
+                    <td class="td-name" rowspan="2">
+                      <div class="autocomplete-wrap">
+                        <tng-input
+                          placeholder="Search for an item"
+                          [value]="getItemDisplayName(row)"
+                          (valueChange)="onItemSearchInput($any($event), rowIndex)"
+                          (focus)="activeItemRowIndex.set(rowIndex)"
+                          (blur)="closeItemDropdown()"
+                          autocomplete="off"
+                        />
+                        @if (activeItemRowIndex() === rowIndex && filteredItems().length) {
+                          <ul class="dropdown">
+                            @for (it of filteredItems(); track it.id) {
+                              <li class="dropdown-item" (mousedown)="selectItem(it, rowIndex)">
+                                {{ it.displayname || it.name }}
+                                @if (it.code) { <span class="muted"> ({{ it.code }})</span> }
+                              </li>
+                            }
+                          </ul>
+                        }
+                      </div>
+                      @if (showDescription()) {
+                        <tng-input
+                          class="item-desc-input"
+                          placeholder="Description…"
+                          [value]="row.description"
+                          (valueChange)="updateItemDescription(rowIndex, $any($event))"
+                        />
+                      }
+                    </td>
 
-                <!-- Tax badges -->
-                @if (taxColumnCount() > 0) {
-                  <div class="col-tax tax-badges">
-                    @for (t of row.taxes; track ti; let ti = $index) {
-                      <span class="tax-badge">{{ t.shortname }} {{ t.rate }}%</span>
+                    <!-- Price (spans both sub-rows) -->
+                    <td class="td-price" rowspan="2">
+                      <tng-input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        [value]="row.price.toString()"
+                        (valueChange)="updateItemField(rowIndex, 'price', $any($event)); recalcRow(rowIndex)"
+                      />
+                    </td>
+
+                    <!-- Quantity (top sub-row only) -->
+                    <td class="td-qty">
+                      <tng-input
+                        type="number"
+                        min="1"
+                        [value]="row.quantity.toString()"
+                        (valueChange)="updateItemField(rowIndex, 'quantity', $any($event)); recalcRow(rowIndex)"
+                      />
+                    </td>
+
+                    <!-- Discount % (spans both sub-rows) -->
+                    @if (showDiscount()) {
+                      <td class="td-disc" rowspan="2">
+                        <tng-input
+                          type="number"
+                          min="0" max="100" step="0.01"
+                          [value]="row.discpercent.toString()"
+                          (valueChange)="updateItemField(rowIndex, 'discpercent', $any($event)); recalcRow(rowIndex)"
+                        />
+                      </td>
                     }
-                  </div>
+
+                    <!-- Taxable amount (spans both sub-rows) -->
+                    @if (taxColumns().length > 0) {
+                      <td class="td-taxable td-right" rowspan="2">{{ row.subtotal.toFixed(2) }}</td>
+                    }
+
+                    <!-- Tax rate per column (top sub-row) -->
+                    @for (tc of taxColumns(); track tc.shortname; let ti = $index) {
+                      <td class="td-right td-tax-rate">{{ row.taxes[ti]?.rate ?? 0 }} %</td>
+                      <td></td>
+                    }
+
+                    <!-- Grand total (spans both sub-rows) -->
+                    <td class="td-total td-right" rowspan="2">{{ row.grandtotal.toFixed(2) }}</td>
+
+                    <!-- Delete (spans both sub-rows) -->
+                    <td class="td-action" rowspan="2">
+                      <tng-button
+                        type="button"
+                        appearance="ghost"
+                        tone="danger"
+                        title="Remove item"
+                        (click)="removeItemRow(rowIndex)"
+                      >
+                        <tng-icon icon="trash2" aria-hidden="true" />
+                      </tng-button>
+                    </td>
+                  </tr>
+
+                  <!-- Bottom sub-row: computed values -->
+                  <tr class="items-row-bottom">
+                    <!-- Item total -->
+                    <td class="td-right">{{ row.itemtotal.toFixed(2) }}</td>
+
+                    <!-- Tax amounts -->
+                    @for (tc of taxColumns(); track tc.shortname; let ti = $index) {
+                      <td></td>
+                      <td class="td-right">{{ (row.taxes[ti]?.amount ?? 0).toFixed(2) }}</td>
+                    }
+                  </tr>
+
                 }
-
-                <!-- Grand total (read-only) -->
-                <tng-input
-                  type="text"
-                  class="col-total"
-                  [value]="row.grandtotal.toFixed(2)"
-                  [disabled]="true"
-                />
-
-                <!-- Remove row -->
-                <tng-button
-                  type="button"
-                  appearance="ghost"
-                  tone="danger"
-                  class="col-action"
-                  title="Remove item"
-                  (click)="removeItemRow(rowIndex)"
-                >
-                  <tng-icon icon="trash2" aria-hidden="true" />
-                </tng-button>
-              </div>
-            }
+              </tbody>
+            </table>
           </div>
 
           <!-- Add row + Summary -->
           <div class="items-footer">
             <tng-button type="button" appearance="outline" tone="primary" (click)="addItemRow()">
               <tng-icon icon="plus" aria-hidden="true" />
-              Add Item
+              Add Another Item
             </tng-button>
 
             <div class="summary-box">

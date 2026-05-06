@@ -3,6 +3,7 @@ import type { Currency } from '../currency/currency.model';
 import type { DateFormat } from '../date-format/date-format.model';
 import type { Branch } from '../branch/branch.model';
 import type { Address } from '../../../../../util/types/address';
+import type { Lb4ListQuery } from '../../../../../shared/crud';
 
 export type Organization = Readonly<{
   id?: string;
@@ -53,4 +54,24 @@ export type OrganizationBootstrapFormData = Readonly<{
   jnumber: string;
   dateformatForm?: DateFormat;
 }>;
+
+export type OrgAddress = Readonly<{
+  line1: string;
+  line2?: string;
+  city?: string;
+  pincode?: string;
+}>;
+
+export type OrganizationPayload = Readonly<{
+  name: string;
+  email: string;
+  mobile?: string;
+  description?: string;
+  countrycode?: string;
+  state?: string;
+  gstin?: string;
+  address?: OrgAddress;
+}>;
+
+export type OrganizationListQuery = Lb4ListQuery;
 
