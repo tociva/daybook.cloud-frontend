@@ -1,26 +1,22 @@
 <main class="management-page">
-  <section class="page-heading">
-    <div>
-      <p class="eyebrow">Management</p>
-      <h1>Fiscal Years</h1>
-      <p class="subtle">Manage fiscal years across your branches.</p>
-    </div>
+  <app-page-heading
+    eyebrow="Management"
+    title="Fiscal Years"
+    description="Manage fiscal years across your branches."
+  >
+    <app-crud-filter-popover
+      ariaLabel="Fiscal year filters"
+      title="Filter fiscal years"
+      [fields]="filterFields"
+      [filter]="crudQuery.filter()"
+      syncUrl
+    />
 
-    <div class="page-actions">
-      <app-crud-filter-popover
-        ariaLabel="Fiscal year filters"
-        title="Filter fiscal years"
-        [fields]="filterFields"
-        [filter]="crudQuery.filter()"
-        syncUrl
-      />
-
-      <tng-button type="button" appearance="solid" tone="primary" (click)="createFiscalYear()">
-        <tng-icon icon="plus" aria-hidden="true" />
-        New fiscal year
-      </tng-button>
-    </div>
-  </section>
+    <tng-button type="button" appearance="solid" tone="primary" (click)="createFiscalYear()">
+      <tng-icon icon="plus" aria-hidden="true" />
+      New fiscal year
+    </tng-button>
+  </app-page-heading>
 
   <tng-card variant="outline" padding="lg">
     @if (fiscalYearStore.error()) {

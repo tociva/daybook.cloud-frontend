@@ -24,6 +24,11 @@ const workspaceNavItems: readonly WorkspaceNavItem[] = [
   },
 ];
 
+const hiddenBreadcrumbRoutes: readonly { path: string; groupName: string; label: string }[] = [
+  { path: '/app/trading/item-category', groupName: 'Trading', label: 'Item Category' },
+  { path: '/app/trading/tax-group', groupName: 'Trading', label: 'Tax Group' },
+];
+
 @Component({
   selector: 'app-workspace-shell',
   imports: [WorkspaceContentComponent, WorkspaceHeaderComponent, WorkspaceSidebarComponent],
@@ -77,6 +82,27 @@ export class WorkspaceShellComponent {
         { label: 'Home', routerLink: '/app/dashboard' },
         { label: topLevelMatch.label, current: true },
       ];
+    }
+
+    for (const hiddenRoute of hiddenBreadcrumbRoutes) {
+      if (path === hiddenRoute.path) {
+        return [
+          { label: 'Home', routerLink: '/app/dashboard' },
+          { label: hiddenRoute.groupName, routerLink: '/app/trading/sale-invoice' },
+          { label: hiddenRoute.label, current: true },
+        ];
+      }
+
+      if (path.startsWith(`${hiddenRoute.path}/`)) {
+        const subPath = path.slice(hiddenRoute.path.length + 1);
+        const actionLabel = this.resolveActionLabel(subPath);
+        return [
+          { label: 'Home', routerLink: '/app/dashboard' },
+          { label: hiddenRoute.groupName, routerLink: '/app/trading/sale-invoice' },
+          { label: hiddenRoute.label, routerLink: hiddenRoute.path },
+          { label: actionLabel, current: true },
+        ];
+      }
     }
 
     // Check sidebar menu groups (e.g. /app/trading/bank-cash)

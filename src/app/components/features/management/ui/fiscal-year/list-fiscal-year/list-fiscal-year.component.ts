@@ -14,6 +14,7 @@ import {
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
+import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { FiscalYearStore } from '../../../data/fiscal-year';
 import type { FiscalYear } from '../../../data/fiscal-year';
 import { formatDisplayDate } from '../../../../../../core/date/dayjs-date.utils';
@@ -22,6 +23,7 @@ import { formatDisplayDate } from '../../../../../../core/date/dayjs-date.utils'
   selector: 'app-list-fiscal-year',
   standalone: true,
   imports: [
+    PageHeadingComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,

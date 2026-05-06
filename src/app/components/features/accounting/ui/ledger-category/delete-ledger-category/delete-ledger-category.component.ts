@@ -13,8 +13,7 @@ import {
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
-import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
-import { LedgerCategoryStore } from '../../../data/ledger-category';
+import { LedgerCategoryFacade, LedgerCategoryStore } from '../../../data/ledger-category';
 
 @Component({
   selector: 'app-delete-ledger-category',
@@ -38,7 +37,7 @@ import { LedgerCategoryStore } from '../../../data/ledger-category';
 })
 export class DeleteLedgerCategoryComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly burlNavigation = inject(BurlNavigationService);
+  private readonly facade = inject(LedgerCategoryFacade);
   protected readonly ledgerCategoryStore = inject(LedgerCategoryStore);
   protected readonly confirmed = signal(false);
 
@@ -53,9 +52,6 @@ export class DeleteLedgerCategoryComponent implements OnInit {
     const id = this.ledgerCategoryStore.selectedItem()?.id;
     if (!id || !this.confirmed()) return;
 
-    const deleted = await this.ledgerCategoryStore.deleteLedgerCategory(id);
-    if (deleted) {
-      await this.burlNavigation.navigateBack();
-    }
+    await this.facade.delete(id);
   }
 }

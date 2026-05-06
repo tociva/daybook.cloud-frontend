@@ -1,31 +1,27 @@
 <main class="management-page">
-  <section class="page-heading">
-    <div>
-      <p class="eyebrow">Accounting</p>
-      <h1>Ledgers</h1>
-      <p class="subtle">Manage your chart of accounts ledger entries.</p>
-    </div>
+  <app-page-heading
+    eyebrow="Accounting"
+    title="Ledgers"
+    description="Manage your chart of accounts ledger entries."
+  >
+    <app-crud-filter-popover
+      ariaLabel="Ledger filters"
+      title="Filter ledgers"
+      [fields]="filterFields"
+      [filter]="crudQuery.filter()"
+      syncUrl
+    />
 
-    <div class="page-actions">
-      <app-crud-filter-popover
-        ariaLabel="Ledger filters"
-        title="Filter ledgers"
-        [fields]="filterFields"
-        [filter]="crudQuery.filter()"
-        syncUrl
-      />
+    <tng-button type="button" appearance="outline" tone="neutral" (click)="openLedgerCategories()">
+      <tng-icon icon="layers" aria-hidden="true" />
+      Ledger Categories
+    </tng-button>
 
-      <tng-button type="button" appearance="outline" tone="neutral" (click)="openLedgerCategories()">
-        <tng-icon icon="layers" aria-hidden="true" />
-        Ledger Categories
-      </tng-button>
-
-      <tng-button type="button" appearance="solid" tone="primary" (click)="createLedger()">
-        <tng-icon icon="plus" aria-hidden="true" />
-        New ledger
-      </tng-button>
-    </div>
-  </section>
+    <tng-button type="button" appearance="solid" tone="primary" (click)="createLedger()">
+      <tng-icon icon="plus" aria-hidden="true" />
+      New ledger
+    </tng-button>
+  </app-page-heading>
 
   <tng-card variant="outline" padding="lg">
     @if (ledgerStore.error()) {

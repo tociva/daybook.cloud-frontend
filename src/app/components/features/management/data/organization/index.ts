@@ -1,3 +1,4 @@
+export { OrganizationFacade } from './organization.facade';
 export { OrganizationStore } from './organization.store';
 export type {
   OrgAddress,

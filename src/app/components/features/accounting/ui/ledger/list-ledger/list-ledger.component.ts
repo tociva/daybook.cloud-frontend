@@ -14,6 +14,7 @@ import {
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
+import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { LedgerStore } from '../../../data/ledger';
 import type { Ledger } from '../../../data/ledger';
 
@@ -21,6 +22,7 @@ import type { Ledger } from '../../../data/ledger';
   selector: 'app-list-ledger',
   standalone: true,
   imports: [
+    PageHeadingComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,
@@ -91,6 +93,8 @@ export class ListLedgerComponent implements OnInit {
   }
 
   protected openLedgerCategories(): void {
-    void this.router.navigate(['/app/accounting/ledger-category']);
+    void this.router.navigate(['/app/accounting/ledger-category'], {
+      queryParams: { burl: this.router.url },
+    });
   }
 }

@@ -15,8 +15,6 @@ import {
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
-import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
-import { ToastStore } from '../../../../../../core/toast/toast.store';
 import { CountryStore } from '../../../data/country/country.store';
 import type { Country } from '../../../data/country/country.model';
 import { CurrencyStore } from '../../../data/currency/currency.store';
@@ -25,7 +23,7 @@ import { DateFormatStore } from '../../../data/date-format/date-format.store';
 import type { DateFormat } from '../../../data/date-format/date-format.model';
 import { OrganizationStore } from '../../../data/organization/organization.store';
 import type { Organization } from '../../../data/organization/organization.model';
-import { BranchStore } from '../../../data/branch';
+import { BranchFacade, BranchStore } from '../../../data/branch';
 import type { BranchPayload } from '../../../data/branch';
 
 const DEFAULT_INVOICE_NUMBER_FORMAT = '<<YYYY>>/<<SERIAL3>>';
@@ -54,8 +52,7 @@ const DEFAULT_INVOICE_NUMBER_FORMAT = '<<YYYY>>/<<SERIAL3>>';
 })
 export class CreateBranchComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly burlNavigation = inject(BurlNavigationService);
-  private readonly toastStore = inject(ToastStore);
+  private readonly facade = inject(BranchFacade);
   protected readonly branchStore = inject(BranchStore);
   protected readonly countryStore = inject(CountryStore);
   protected readonly currencyStore = inject(CurrencyStore);
@@ -376,17 +373,9 @@ export class CreateBranchComponent implements OnInit {
     try {
       const branchId = this.id();
       if (branchId) {
-        const result = await this.branchStore.updateBranch(branchId, payload);
-        if (result) {
-          this.toastStore.success('Branch updated successfully.');
-          await this.burlNavigation.navigateBack();
-        }
+        await this.facade.update(branchId, payload);
       } else {
-        const result = await this.branchStore.createBranch(payload);
-        if (result) {
-          this.toastStore.success('Branch created successfully.');
-          await this.burlNavigation.navigateBack();
-        }
+        await this.facade.create(payload);
       }
     } finally {
       this.isSubmitting.set(false);

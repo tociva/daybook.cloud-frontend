@@ -88,20 +88,15 @@ export const OrganizationStore = signalStore(
         }
       },
 
-      async updateOrganization(id: string, payload: OrganizationPayload): Promise<Organization | null> {
+      async updateOrganization(id: string, payload: OrganizationPayload): Promise<boolean> {
         setLoading();
         try {
-          const org = await service.update(id, payload);
-          patchState(store, (state) => ({
-            organizations: state.organizations.map((o) => (o.id === id ? org : o)),
-            selectedOrganization: org,
-            error: null,
-            isLoading: false,
-          }));
-          return org;
+          await service.update(id, payload);
+          patchState(store, { error: null, isLoading: false });
+          return true;
         } catch (error) {
           setError(getErrorMessage(error, 'Failed to update organization.'));
-          return null;
+          return false;
         }
       },
 

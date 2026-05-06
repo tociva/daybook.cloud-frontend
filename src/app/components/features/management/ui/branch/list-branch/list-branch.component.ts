@@ -14,6 +14,7 @@ import {
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
+import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { BranchStore } from '../../../data/branch';
 import type { Branch } from '../../../data/branch';
 
@@ -21,6 +22,7 @@ import type { Branch } from '../../../data/branch';
   selector: 'app-list-branch',
   standalone: true,
   imports: [
+    PageHeadingComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,

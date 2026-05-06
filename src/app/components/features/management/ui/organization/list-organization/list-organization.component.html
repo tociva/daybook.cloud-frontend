@@ -1,26 +1,22 @@
 <main class="management-page">
-  <section class="page-heading">
-    <div>
-      <p class="eyebrow">Management</p>
-      <h1>Organizations</h1>
-      <p class="subtle">Manage your organizations and their settings.</p>
-    </div>
+  <app-page-heading
+    eyebrow="Management"
+    title="Organizations"
+    description="Manage your organizations and their settings."
+  >
+    <app-crud-filter-popover
+      ariaLabel="Organization filters"
+      title="Filter organizations"
+      [fields]="filterFields"
+      [filter]="crudQuery.filter()"
+      syncUrl
+    />
 
-    <div class="page-actions">
-      <app-crud-filter-popover
-        ariaLabel="Organization filters"
-        title="Filter organizations"
-        [fields]="filterFields"
-        [filter]="crudQuery.filter()"
-        syncUrl
-      />
-
-      <tng-button type="button" appearance="solid" tone="primary" (click)="createOrganization()">
-        <tng-icon icon="plus" aria-hidden="true" />
-        New organization
-      </tng-button>
-    </div>
-  </section>
+    <tng-button type="button" appearance="solid" tone="primary" (click)="createOrganization()">
+      <tng-icon icon="plus" aria-hidden="true" />
+      New organization
+    </tng-button>
+  </app-page-heading>
 
   <tng-card variant="outline" padding="lg">
     @if (organizationStore.error()) {

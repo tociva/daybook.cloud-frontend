@@ -16,13 +16,11 @@ import {
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
-import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
-import { ToastStore } from '../../../../../../core/toast/toast.store';
 import { CurrencyStore } from '../../../data/currency/currency.store';
 import type { Currency } from '../../../data/currency/currency.model';
 import { BranchStore } from '../../../data/branch';
 import type { Branch } from '../../../data/branch';
-import { FiscalYearStore } from '../../../data/fiscal-year';
+import { FiscalYearFacade, FiscalYearStore } from '../../../data/fiscal-year';
 import type { FiscalYearPayload } from '../../../data/fiscal-year';
 
 @Component({
@@ -49,8 +47,7 @@ import type { FiscalYearPayload } from '../../../data/fiscal-year';
 })
 export class CreateFiscalYearComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly burlNavigation = inject(BurlNavigationService);
-  private readonly toastStore = inject(ToastStore);
+  private readonly facade = inject(FiscalYearFacade);
   protected readonly fiscalYearStore = inject(FiscalYearStore);
   protected readonly currencyStore = inject(CurrencyStore);
   protected readonly branchStore = inject(BranchStore);
@@ -270,17 +267,9 @@ export class CreateFiscalYearComponent implements OnInit {
     try {
       const fyId = this.id();
       if (fyId) {
-        const result = await this.fiscalYearStore.updateFiscalYear(fyId, payload);
-        if (result) {
-          this.toastStore.success('Fiscal year updated successfully.');
-          await this.burlNavigation.navigateBack();
-        }
+        await this.facade.update(fyId, payload);
       } else {
-        const result = await this.fiscalYearStore.createFiscalYear(payload);
-        if (result) {
-          this.toastStore.success('Fiscal year created successfully.');
-          await this.burlNavigation.navigateBack();
-        }
+        await this.facade.create(payload);
       }
     } finally {
       this.isSubmitting.set(false);

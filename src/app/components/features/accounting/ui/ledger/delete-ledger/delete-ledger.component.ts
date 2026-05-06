@@ -13,8 +13,7 @@ import {
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
-import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
-import { LedgerStore } from '../../../data/ledger';
+import { LedgerFacade, LedgerStore } from '../../../data/ledger';
 
 @Component({
   selector: 'app-delete-ledger',
@@ -38,7 +37,7 @@ import { LedgerStore } from '../../../data/ledger';
 })
 export class DeleteLedgerComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly burlNavigation = inject(BurlNavigationService);
+  private readonly facade = inject(LedgerFacade);
   protected readonly ledgerStore = inject(LedgerStore);
   protected readonly confirmed = signal(false);
 
@@ -53,9 +52,6 @@ export class DeleteLedgerComponent implements OnInit {
     const id = this.ledgerStore.selectedItem()?.id;
     if (!id || !this.confirmed()) return;
 
-    const deleted = await this.ledgerStore.deleteLedger(id);
-    if (deleted) {
-      await this.burlNavigation.navigateBack();
-    }
+    await this.facade.delete(id);
   }
 }

@@ -14,6 +14,7 @@ import {
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
+import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { OrganizationStore } from '../../../data/organization';
 import type { Organization } from '../../../data/organization';
 
@@ -21,6 +22,7 @@ import type { Organization } from '../../../data/organization';
   selector: 'app-list-organization',
   standalone: true,
   imports: [
+    PageHeadingComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,

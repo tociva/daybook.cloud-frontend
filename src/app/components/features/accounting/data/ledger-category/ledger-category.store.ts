@@ -124,23 +124,21 @@ export const LedgerCategoryStore = signalStore(
       async updateLedgerCategory(
         id: string,
         payload: LedgerCategoryPayload,
-      ): Promise<LedgerCategory | null> {
+      ): Promise<boolean> {
         setLoading();
         try {
-          const item = await service.update(id, payload);
+          await service.update(id, payload);
           patchState(store, (state) => ({
             ledgerCategory: {
               ...state.ledgerCategory,
               error: null,
               isLoading: false,
-              items: state.ledgerCategory.items.map((i) => (i.id === id ? item : i)),
-              selectedItem: item,
             },
           }));
-          return item;
+          return true;
         } catch (error) {
           setError(getErrorMessage(error, 'Failed to update ledger category.'));
-          return null;
+          return false;
         }
       },
     };

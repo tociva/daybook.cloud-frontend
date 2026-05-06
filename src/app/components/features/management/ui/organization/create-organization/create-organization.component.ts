@@ -15,11 +15,9 @@ import {
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
-import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
-import { ToastStore } from '../../../../../../core/toast/toast.store';
 import { CountryStore } from '../../../data/country/country.store';
 import type { Country } from '../../../data/country/country.model';
-import { OrganizationStore } from '../../../data/organization';
+import { OrganizationFacade, OrganizationStore } from '../../../data/organization';
 import type { OrganizationPayload } from '../../../data/organization';
 
 @Component({
@@ -46,8 +44,7 @@ import type { OrganizationPayload } from '../../../data/organization';
 })
 export class CreateOrganizationComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly burlNavigation = inject(BurlNavigationService);
-  private readonly toastStore = inject(ToastStore);
+  private readonly facade = inject(OrganizationFacade);
   protected readonly organizationStore = inject(OrganizationStore);
   protected readonly countryStore = inject(CountryStore);
 
@@ -184,17 +181,9 @@ export class CreateOrganizationComponent implements OnInit {
     try {
       const id = this.id();
       if (id) {
-        const result = await this.organizationStore.updateOrganization(id, payload);
-        if (result) {
-          this.toastStore.success('Organization updated successfully.');
-          await this.burlNavigation.navigateBack();
-        }
+        await this.facade.update(id, payload);
       } else {
-        const result = await this.organizationStore.createOrganization(payload);
-        if (result) {
-          this.toastStore.success('Organization created successfully.');
-          await this.burlNavigation.navigateBack();
-        }
+        await this.facade.create(payload);
       }
     } finally {
       this.isSubmitting.set(false);

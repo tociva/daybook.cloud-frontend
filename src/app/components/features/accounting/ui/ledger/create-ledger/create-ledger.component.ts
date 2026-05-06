@@ -17,10 +17,9 @@ import {
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
-import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
 import { LedgerCategoryStore } from '../../../data/ledger-category';
 import type { LedgerCategory } from '../../../data/ledger-category';
-import { LedgerStore } from '../../../data/ledger';
+import { LedgerFacade, LedgerStore } from '../../../data/ledger';
 import type { LedgerPayload } from '../../../data/ledger';
 
 type LedgerFormModel = {
@@ -57,7 +56,7 @@ type LedgerFormModel = {
 })
 export class CreateLedgerComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly burlNavigation = inject(BurlNavigationService);
+  private readonly facade = inject(LedgerFacade);
   protected readonly ledgerStore = inject(LedgerStore);
   protected readonly ledgerCategoryStore = inject(LedgerCategoryStore);
 
@@ -139,12 +138,10 @@ export class CreateLedgerComponent implements OnInit {
     };
 
     const currentId = this.id();
-    const saved = currentId
-      ? await this.ledgerStore.updateLedger(currentId, payload)
-      : await this.ledgerStore.createLedger(payload);
-
-    if (saved) {
-      await this.burlNavigation.navigateBack();
+    if (currentId) {
+      await this.facade.update(currentId, payload);
+    } else {
+      await this.facade.create(payload);
     }
   }
 }

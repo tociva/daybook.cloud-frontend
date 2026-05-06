@@ -106,20 +106,15 @@ export const FiscalYearStore = signalStore(
         }
       },
 
-      async updateFiscalYear(id: string, payload: FiscalYearPayload): Promise<FiscalYear | null> {
+      async updateFiscalYear(id: string, payload: FiscalYearPayload): Promise<boolean> {
         setLoading();
         try {
-          const fiscalYear = await service.update(id, payload);
-          patchState(store, (state) => ({
-            fiscalYears: state.fiscalYears.map((fy) => (fy.id === id ? fiscalYear : fy)),
-            selectedFiscalYear: fiscalYear,
-            error: null,
-            isLoading: false,
-          }));
-          return fiscalYear;
+          await service.update(id, payload);
+          patchState(store, { error: null, isLoading: false });
+          return true;
         } catch (error) {
           setError(getErrorMessage(error, 'Failed to update fiscal year.'));
-          return null;
+          return false;
         }
       },
 

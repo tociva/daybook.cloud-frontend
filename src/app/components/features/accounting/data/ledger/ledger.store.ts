@@ -116,23 +116,21 @@ export const LedgerStore = signalStore(
         }
       },
 
-      async updateLedger(id: string, payload: LedgerPayload): Promise<Ledger | null> {
+      async updateLedger(id: string, payload: LedgerPayload): Promise<boolean> {
         setLoading();
         try {
-          const item = await service.update(id, payload);
+          await service.update(id, payload);
           patchState(store, (state) => ({
             ledger: {
               ...state.ledger,
               error: null,
               isLoading: false,
-              items: state.ledger.items.map((i) => (i.id === id ? item : i)),
-              selectedItem: item,
             },
           }));
-          return item;
+          return true;
         } catch (error) {
           setError(getErrorMessage(error, 'Failed to update ledger.'));
-          return null;
+          return false;
         }
       },
     };

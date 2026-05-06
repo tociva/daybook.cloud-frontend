@@ -93,20 +93,15 @@ export const BranchStore = signalStore(
         }
       },
 
-      async updateBranch(id: string, payload: BranchPayload): Promise<Branch | null> {
+      async updateBranch(id: string, payload: BranchPayload): Promise<boolean> {
         setLoading();
         try {
-          const branch = await service.update(id, payload);
-          patchState(store, (state) => ({
-            branches: state.branches.map((b) => (b.id === id ? branch : b)),
-            selectedBranch: branch,
-            error: null,
-            isLoading: false,
-          }));
-          return branch;
+          await service.update(id, payload);
+          patchState(store, { error: null, isLoading: false });
+          return true;
         } catch (error) {
           setError(getErrorMessage(error, 'Failed to update branch.'));
-          return null;
+          return false;
         }
       },
 

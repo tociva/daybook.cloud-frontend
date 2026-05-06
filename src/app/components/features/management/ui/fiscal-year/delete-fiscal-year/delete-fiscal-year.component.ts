@@ -13,8 +13,7 @@ import {
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
-import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
-import { FiscalYearStore } from '../../../data/fiscal-year';
+import { FiscalYearFacade, FiscalYearStore } from '../../../data/fiscal-year';
 import { formatDisplayDate } from '../../../../../../core/date/dayjs-date.utils';
 
 @Component({
@@ -39,7 +38,7 @@ import { formatDisplayDate } from '../../../../../../core/date/dayjs-date.utils'
 })
 export class DeleteFiscalYearComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly burlNavigation = inject(BurlNavigationService);
+  private readonly facade = inject(FiscalYearFacade);
   protected readonly fiscalYearStore = inject(FiscalYearStore);
   protected readonly confirmed = signal(false);
   protected readonly formatDate = formatDisplayDate;
@@ -55,9 +54,6 @@ export class DeleteFiscalYearComponent implements OnInit {
     const id = this.fiscalYearStore.selectedItem()?.id;
     if (!id || !this.confirmed()) return;
 
-    const deleted = await this.fiscalYearStore.deleteFiscalYear(id);
-    if (deleted) {
-      await this.burlNavigation.navigateBack();
-    }
+    await this.facade.delete(id);
   }
 }

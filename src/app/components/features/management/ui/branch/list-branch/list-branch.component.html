@@ -1,26 +1,22 @@
 <main class="management-page">
-  <section class="page-heading">
-    <div>
-      <p class="eyebrow">Management</p>
-      <h1>Branches</h1>
-      <p class="subtle">Manage your branches and their financial settings.</p>
-    </div>
+  <app-page-heading
+    eyebrow="Management"
+    title="Branches"
+    description="Manage your branches and their financial settings."
+  >
+    <app-crud-filter-popover
+      ariaLabel="Branch filters"
+      title="Filter branches"
+      [fields]="filterFields"
+      [filter]="crudQuery.filter()"
+      syncUrl
+    />
 
-    <div class="page-actions">
-      <app-crud-filter-popover
-        ariaLabel="Branch filters"
-        title="Filter branches"
-        [fields]="filterFields"
-        [filter]="crudQuery.filter()"
-        syncUrl
-      />
-
-      <tng-button type="button" appearance="solid" tone="primary" (click)="createBranch()">
-        <tng-icon icon="plus" aria-hidden="true" />
-        New branch
-      </tng-button>
-    </div>
-  </section>
+    <tng-button type="button" appearance="solid" tone="primary" (click)="createBranch()">
+      <tng-icon icon="plus" aria-hidden="true" />
+      New branch
+    </tng-button>
+  </app-page-heading>
 
   <tng-card variant="outline" padding="lg">
     @if (branchStore.error()) {
