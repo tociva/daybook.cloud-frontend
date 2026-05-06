@@ -1,0 +1,64 @@
+<tng-card variant="outline" padding="lg">
+  <tng-card-header>
+    <tng-card-title>Invoice Details</tng-card-title>
+  </tng-card-header>
+  <tng-card-content>
+    <div class="aside-fields">
+
+      <label class="toggle-row">
+        <tng-switch [checked]="draft.autoNumbering()"
+          (checkedChange)="draft.toggleAutoNumbering(!!$event)" />
+        Auto numbering
+      </label>
+
+      <div class="field">
+        <tng-label forId="inv-number">Number</tng-label>
+        <tng-input id="inv-number" [value]="draft.number()"
+          [disabled]="!draft.numberEnabled()"
+          (valueChange)="draft.number.set($any($event))" />
+      </div>
+
+      <div class="field">
+        <tng-label forId="inv-date" required>Date</tng-label>
+        <tng-datepicker id="inv-date" [value]="draft.date()"
+          (valueChange)="draft.onDateChange($event)" />
+        @if (draft.dateError()) {
+          <p class="field-error">{{ draft.dateError() }}</p>
+        }
+      </div>
+
+      <div class="field">
+        <tng-label forId="inv-duedate">Due Date</tng-label>
+        <tng-datepicker id="inv-duedate" [value]="draft.duedate()"
+          (valueChange)="draft.onDueDateChange($event)" />
+      </div>
+
+      <div class="field">
+        <tng-label forId="inv-taxoption">Tax Option</tng-label>
+        <tng-select
+          id="inv-taxoption"
+          [options]="draft.taxModeOptions()"
+          [getOptionLabel]="getOptionLabel"
+          [getOptionValue]="getOptionValue"
+          [trackBy]="trackByValue"
+          [value]="draft.taxoption()"
+          (valueChange)="draft.onTaxOptionChange($any($event))"
+        />
+      </div>
+
+      <div class="field">
+        <tng-label forId="inv-deliverystate">Delivery State</tng-label>
+        <tng-input id="inv-deliverystate" [value]="draft.deliverystate()"
+          (valueChange)="draft.deliverystate.set($any($event))" />
+      </div>
+
+      <div class="field">
+        <tng-label forId="inv-currency" required>Currency</tng-label>
+        <tng-input id="inv-currency" placeholder="e.g. INR"
+          [value]="draft.currencycode()"
+          (valueChange)="draft.currencycode.set($any($event))" />
+      </div>
+
+    </div>
+  </tng-card-content>
+</tng-card>

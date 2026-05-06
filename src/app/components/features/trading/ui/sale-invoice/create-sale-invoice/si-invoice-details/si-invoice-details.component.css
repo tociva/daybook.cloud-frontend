@@ -1,0 +1,25 @@
+/* ── Fields ────────────────────────────────────────────────────────────── */
+.field {
+  display: grid;
+  gap: 0.3rem;
+  margin-bottom: 0.75rem;
+}
+.field-error {
+  color: var(--tng-semantic-accent-danger);
+  font-size: 0.75rem;
+  margin: 0;
+}
+
+/* ── Aside fields ──────────────────────────────────────────────────────── */
+.aside-fields {
+  display: grid;
+  gap: 0;
+}
+.toggle-row {
+  align-items: center;
+  cursor: pointer;
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+}

@@ -1,0 +1,128 @@
+<tng-card variant="outline" tone="info" padding="lg">
+  <tng-card-header>
+    <tng-card-title>Customer</tng-card-title>
+    <tng-card-description>Select the customer for this invoice.</tng-card-description>
+  </tng-card-header>
+  <tng-card-content>
+
+    <!-- Customer search -->
+    <div class="field field--full">
+      <tng-label forId="cust-search" required>Customer</tng-label>
+      <div class="autocomplete-wrap">
+        <tng-input
+          id="cust-search"
+          placeholder="Search by name, mobile or email…"
+          [value]="draft.customerSearch()"
+          (valueChange)="draft.onCustomerSearchInput($any($event))"
+          (focus)="draft.showCustomerDropdown.set(true)"
+          (blur)="draft.closeCustomerDropdown()"
+          autocomplete="off"
+        />
+        @if (draft.showCustomerDropdown() && draft.filteredCustomers().length) {
+          <ul class="dropdown">
+            @for (c of draft.filteredCustomers(); track c.id) {
+              <li class="dropdown-item" (mousedown)="draft.selectCustomer(c)">
+                <strong>{{ c.name }}</strong>
+                @if (c.mobile) { <span class="muted"> · {{ c.mobile }}</span> }
+              </li>
+            }
+          </ul>
+        }
+      </div>
+      @if (draft.customerError()) {
+        <p class="field-error">{{ draft.customerError() }}</p>
+      }
+    </div>
+
+    <!-- Billing + Shipping addresses (shown once a customer is selected) -->
+    @if (draft.selectedCustomer()) {
+      <div class="address-row">
+
+        <!-- Billing address -->
+        <fieldset class="address-box">
+          <legend>Billing Address</legend>
+          <div class="field">
+            <tng-label forId="bill-name">Name</tng-label>
+            <tng-input id="bill-name" [value]="draft.billingName()"
+              (valueChange)="draft.billingName.set($any($event)); draft.onBillingChange()" />
+          </div>
+          <div class="field">
+            <tng-label forId="bill-line1">Address Line 1</tng-label>
+            <tng-input id="bill-line1" [value]="draft.billingLine1()"
+              (valueChange)="draft.billingLine1.set($any($event)); draft.onBillingChange()" />
+          </div>
+          <div class="field">
+            <tng-label forId="bill-line2">Line 2</tng-label>
+            <tng-input id="bill-line2" [value]="draft.billingLine2()"
+              (valueChange)="draft.billingLine2.set($any($event)); draft.onBillingChange()" />
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <tng-label forId="bill-city">City</tng-label>
+              <tng-input id="bill-city" [value]="draft.billingCity()"
+                (valueChange)="draft.billingCity.set($any($event)); draft.onBillingChange()" />
+            </div>
+            <div class="field">
+              <tng-label forId="bill-state">State</tng-label>
+              <tng-input id="bill-state" [value]="draft.billingState()"
+                (valueChange)="draft.billingState.set($any($event)); draft.onBillingChange()" />
+            </div>
+            <div class="field">
+              <tng-label forId="bill-zip">ZIP</tng-label>
+              <tng-input id="bill-zip" [value]="draft.billingZip()"
+                (valueChange)="draft.billingZip.set($any($event)); draft.onBillingChange()" />
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Shipping address -->
+        <fieldset class="address-box">
+          <legend>
+            Shipping Address
+            <label class="same-as-billing">
+              <tng-switch [checked]="draft.useBillingForShipping()"
+                (checkedChange)="draft.toggleUseBillingForShipping(!!$event)" />
+              Same as billing
+            </label>
+          </legend>
+          @if (!draft.useBillingForShipping()) {
+            <div class="field">
+              <tng-label forId="ship-name">Name</tng-label>
+              <tng-input id="ship-name" [value]="draft.shippingName()"
+                (valueChange)="draft.shippingName.set($any($event))" />
+            </div>
+            <div class="field">
+              <tng-label forId="ship-line1">Address Line 1</tng-label>
+              <tng-input id="ship-line1" [value]="draft.shippingLine1()"
+                (valueChange)="draft.shippingLine1.set($any($event))" />
+            </div>
+            <div class="field">
+              <tng-label forId="ship-line2">Line 2</tng-label>
+              <tng-input id="ship-line2" [value]="draft.shippingLine2()"
+                (valueChange)="draft.shippingLine2.set($any($event))" />
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <tng-label forId="ship-city">City</tng-label>
+                <tng-input id="ship-city" [value]="draft.shippingCity()"
+                  (valueChange)="draft.shippingCity.set($any($event))" />
+              </div>
+              <div class="field">
+                <tng-label forId="ship-state">State</tng-label>
+                <tng-input id="ship-state" [value]="draft.shippingState()"
+                  (valueChange)="draft.shippingState.set($any($event))" />
+              </div>
+              <div class="field">
+                <tng-label forId="ship-zip">ZIP</tng-label>
+                <tng-input id="ship-zip" [value]="draft.shippingZip()"
+                  (valueChange)="draft.shippingZip.set($any($event))" />
+              </div>
+            </div>
+          }
+        </fieldset>
+
+      </div>
+    }
+
+  </tng-card-content>
+</tng-card>
