@@ -78,5 +78,12 @@ export const routes: Routes = [
         (m) => m.organizationRoutes,
       ),
   },
+  {
+    path: 'app/management/branch',
+    loadChildren: () =>
+      import('./components/features/management/ui/branch/branch.routes').then(
+        (m) => m.branchRoutes,
+      ),
+  },
   { path: 'bootstrap/bootstrap-organization', component: BootstrapOrganizationComponent },
 ];

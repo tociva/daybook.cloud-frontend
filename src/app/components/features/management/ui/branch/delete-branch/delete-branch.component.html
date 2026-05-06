@@ -1,0 +1,78 @@
+<main class="management-page">
+  <tng-card variant="outline" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Delete Branch</tng-card-title>
+      <tng-card-description>This action cannot be undone.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (branchStore.error()) {
+        <div class="notice notice--danger">{{ branchStore.error() }}</div>
+      }
+
+      @if (branchStore.isLoading() && !branchStore.selectedItem()) {
+        <div class="notice">Loading branch...</div>
+      } @else if (branchStore.selectedItem(); as branch) {
+
+        <dl class="details-grid">
+          <div>
+            <dt>Name</dt>
+            <dd>{{ branch.name }}</dd>
+          </div>
+          <div>
+            <dt>Email</dt>
+            <dd>{{ branch.email || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Organization</dt>
+            <dd>{{ branch.organization.name || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Country</dt>
+            <dd>{{ branch.countrycode || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Currency</dt>
+            <dd>{{ branch.currencycode || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Mobile</dt>
+            <dd>{{ branch.mobile || '—' }}</dd>
+          </div>
+        </dl>
+
+        <div class="notice notice--danger">
+          You are about to permanently delete the branch
+          <strong>{{ branch.name }}</strong>. All associated fiscal years and data will be lost.
+        </div>
+
+        <label class="confirm-row">
+          <tng-checkbox
+            [checked]="confirmed()"
+            (checkedChange)="confirmed.set($event)"
+          />
+          I understand this action is irreversible.
+        </label>
+
+      } @else {
+        <div class="notice">Branch not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button />
+        <tng-button
+          type="button"
+          appearance="solid"
+          tone="danger"
+          [disabled]="!confirmed() || branchStore.isLoading()"
+          (click)="deleteBranch()"
+        >
+          <tng-icon icon="trash2" aria-hidden="true" />
+          {{ branchStore.isLoading() ? 'Deleting…' : 'Delete branch' }}
+        </tng-button>
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>

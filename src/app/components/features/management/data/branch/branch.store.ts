@@ -1,54 +1,133 @@
-import { computed } from '@angular/core';
+import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
-import type { Branch } from './branch.model';
+import type { Branch, BranchGetQuery, BranchListQuery, BranchPayload } from './branch.model';
+import { BranchService } from './branch.service';
 import { initialBranchState } from './branch.state';
+
+const getErrorMessage = (error: unknown, fallback: string): string =>
+  error instanceof Error ? error.message : fallback;
 
 export const BranchStore = signalStore(
   { providedIn: 'root' },
   withState(initialBranchState),
-  withComputed(({ branches, selectedBranchId, organizationId, isLoading, error, search }) => ({
+  withComputed(({ branches, selectedBranch, selectedBranchId, organizationId, count, isLoading, error, search }) => ({
     branches: computed(() => branches()),
-    selectedBranchId: computed(() => selectedBranchId()),
-    selectedBranch: computed(() => branches().find((branch) => branch.id === selectedBranchId()) ?? null),
-    organizationId: computed(() => organizationId()),
-    isLoading: computed(() => isLoading()),
+    count: computed(() => count()),
     error: computed(() => error()),
+    isLoading: computed(() => isLoading()),
+    items: computed(() => branches()),
+    organizationId: computed(() => organizationId()),
     search: computed(() => search()),
+    selectedBranch: computed(() => selectedBranch()),
+    selectedBranchId: computed(() => selectedBranchId()),
+    selectedItem: computed(() => selectedBranch()),
   })),
-  withMethods((store) => ({
-    clear(): void {
-      patchState(store, initialBranchState);
-    },
-    setBranches(branches: readonly Branch[]): void {
-      patchState(store, { branches, error: null, isLoading: false });
-    },
-    setError(error: string | null): void {
+  withMethods((store, service = inject(BranchService)) => {
+    const setLoading = (): void => {
+      patchState(store, { error: null, isLoading: true });
+    };
+
+    const setError = (error: string): void => {
       patchState(store, { error, isLoading: false });
-    },
-    setLoading(isLoading: boolean): void {
-      patchState(store, { isLoading });
-    },
-    setOrganizationId(organizationId: string | null): void {
-      patchState(store, { organizationId });
-    },
-    setSearch(search: string): void {
-      patchState(store, { search });
-    },
-    setSelectedBranchId(selectedBranchId: string | null): void {
-      patchState(store, { selectedBranchId });
-    },
-    upsertBranch(branch: Branch): void {
-      patchState(store, (state) => {
-        const idx = state.branches.findIndex((item) => item.id === branch.id);
-        if (idx === -1) {
-          return { branches: [...state.branches, branch] };
+    };
+
+    return {
+      clear(): void {
+        patchState(store, initialBranchState);
+      },
+
+      setOrganizationId(organizationId: string | null): void {
+        patchState(store, { organizationId });
+      },
+
+      setSearch(search: string): void {
+        patchState(store, { search });
+      },
+
+      async loadBranches(query: BranchListQuery = {}): Promise<void> {
+        setLoading();
+        try {
+          const [branches, count] = await Promise.all([
+            service.list(query),
+            service.count(query),
+          ]);
+          patchState(store, { branches, count, error: null, isLoading: false });
+        } catch (error) {
+          setError(getErrorMessage(error, 'Failed to load branches.'));
         }
+      },
 
-        return {
-          branches: state.branches.map((item, index) => (index === idx ? branch : item)),
-        };
-      });
-    },
-  })),
+      async loadBranchById(id: string, query?: BranchGetQuery): Promise<Branch | null> {
+        setLoading();
+        try {
+          const branch = await service.getById(id, query);
+          patchState(store, {
+            selectedBranch: branch,
+            selectedBranchId: branch.id ?? null,
+            error: null,
+            isLoading: false,
+          });
+          return branch;
+        } catch (error) {
+          setError(getErrorMessage(error, 'Failed to load branch.'));
+          return null;
+        }
+      },
+
+      async createBranch(payload: BranchPayload): Promise<Branch | null> {
+        setLoading();
+        try {
+          const branch = await service.create(payload);
+          patchState(store, (state) => ({
+            branches: [branch, ...state.branches],
+            count: state.count + 1,
+            selectedBranch: branch,
+            selectedBranchId: branch.id ?? null,
+            error: null,
+            isLoading: false,
+          }));
+          return branch;
+        } catch (error) {
+          setError(getErrorMessage(error, 'Failed to create branch.'));
+          return null;
+        }
+      },
+
+      async updateBranch(id: string, payload: BranchPayload): Promise<Branch | null> {
+        setLoading();
+        try {
+          const branch = await service.update(id, payload);
+          patchState(store, (state) => ({
+            branches: state.branches.map((b) => (b.id === id ? branch : b)),
+            selectedBranch: branch,
+            error: null,
+            isLoading: false,
+          }));
+          return branch;
+        } catch (error) {
+          setError(getErrorMessage(error, 'Failed to update branch.'));
+          return null;
+        }
+      },
+
+      async deleteBranch(id: string): Promise<boolean> {
+        setLoading();
+        try {
+          await service.delete(id);
+          patchState(store, (state) => ({
+            branches: state.branches.filter((b) => b.id !== id),
+            count: Math.max(state.count - 1, 0),
+            selectedBranch: state.selectedBranch?.id === id ? null : state.selectedBranch,
+            selectedBranchId: state.selectedBranchId === id ? null : state.selectedBranchId,
+            error: null,
+            isLoading: false,
+          }));
+          return true;
+        } catch (error) {
+          setError(getErrorMessage(error, 'Failed to delete branch.'));
+          return false;
+        }
+      },
+    };
+  }),
 );
-

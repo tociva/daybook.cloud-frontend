@@ -1,0 +1,126 @@
+<main class="management-page">
+  <tng-card variant="outline" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Branch Details</tng-card-title>
+      <tng-card-description>Review branch information and financial settings.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (branchStore.error()) {
+        <div class="notice notice--danger">{{ branchStore.error() }}</div>
+      }
+
+      @if (branchStore.isLoading() && !branchStore.selectedItem()) {
+        <div class="notice">Loading branch...</div>
+      } @else if (branchStore.selectedItem(); as branch) {
+
+        <!-- Basic details -->
+        <dl class="details-grid">
+          <div>
+            <dt>Name</dt>
+            <dd>{{ branch.name }}</dd>
+          </div>
+          <div>
+            <dt>Email</dt>
+            <dd>{{ branch.email || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Mobile</dt>
+            <dd>{{ branch.mobile || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Organization</dt>
+            <dd>{{ branch.organization.name || '—' }}</dd>
+          </div>
+          <div class="wide">
+            <dt>Description</dt>
+            <dd>{{ branch.description || 'No description' }}</dd>
+          </div>
+        </dl>
+
+        <!-- Financial settings -->
+        <div class="section-title">Financial Settings</div>
+        <dl class="details-grid">
+          <div>
+            <dt>Country</dt>
+            <dd>{{ branch.countrycode || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Currency</dt>
+            <dd>{{ branch.currencycode || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Date Format</dt>
+            <dd>{{ branch.dateformat || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Fiscal Start</dt>
+            <dd>{{ branch.fiscalstart || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Timezone</dt>
+            <dd>{{ branch.timezone || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Invoice Number Format</dt>
+            <dd>{{ branch.invnumber || '—' }}</dd>
+          </div>
+          @if (branch.gstin) {
+            <div>
+              <dt>GSTIN</dt>
+              <dd>{{ branch.gstin }}</dd>
+            </div>
+          }
+          @if (branch.state) {
+            <div>
+              <dt>State</dt>
+              <dd>{{ branch.state }}</dd>
+            </div>
+          }
+        </dl>
+
+        <!-- Address -->
+        @if (branch.address) {
+          <div class="section-title">Address</div>
+          <dl class="details-grid">
+            <div>
+              <dt>Line 1</dt>
+              <dd>{{ $any(branch.address).line1 || '—' }}</dd>
+            </div>
+            @if ($any(branch.address).line2) {
+              <div>
+                <dt>Line 2</dt>
+                <dd>{{ $any(branch.address).line2 }}</dd>
+              </div>
+            }
+            <div>
+              <dt>City</dt>
+              <dd>{{ $any(branch.address).city || '—' }}</dd>
+            </div>
+            <div>
+              <dt>Pincode</dt>
+              <dd>{{ $any(branch.address).pincode || '—' }}</dd>
+            </div>
+          </dl>
+        }
+
+      } @else {
+        <div class="notice">Branch not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button />
+        <tng-button type="button" appearance="outline" tone="danger" (click)="delete()">
+          <tng-icon icon="trash2" aria-hidden="true" />
+          Delete
+        </tng-button>
+        <tng-button type="button" appearance="solid" tone="primary" (click)="edit()">
+          <tng-icon icon="pencil" aria-hidden="true" />
+          Edit
+        </tng-button>
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>
