@@ -130,25 +130,31 @@ export const BankCashStore = signalStore(
           setError(getErrorMessage(error, 'Failed to load bank/cash accounts.'));
         }
       },
-      async updateBankCash(id: string, payload: BankCashPayload): Promise<BankCash | null> {
+      async updateBankCash(id: string, payload: BankCashPayload): Promise<boolean> {
         setLoading();
 
         try {
-          const bankCash = await service.update(id, payload);
-          patchState(store, (state) => ({
-            bankCash: {
-              ...state.bankCash,
-              error: null,
-              isLoading: false,
-              items: state.bankCash.items.map((item) => (item.id === id ? bankCash : item)),
-              selectedItem: bankCash,
-            },
-          }));
+          await service.update(id, payload);
+          patchState(store, (state) => {
+            const updated = state.bankCash.items.find((item) => item.id === id);
+            const mergedItem = updated ? { ...updated, ...payload } : state.bankCash.selectedItem;
+            return {
+              bankCash: {
+                ...state.bankCash,
+                error: null,
+                isLoading: false,
+                items: state.bankCash.items.map((item) =>
+                  item.id === id ? { ...item, ...payload } : item,
+                ),
+                selectedItem: mergedItem,
+              },
+            };
+          });
 
-          return bankCash;
+          return true;
         } catch (error) {
           setError(getErrorMessage(error, 'Failed to update bank/cash account.'));
-          return null;
+          return false;
         }
       },
     };

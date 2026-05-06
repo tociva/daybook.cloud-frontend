@@ -1,13 +1,13 @@
 import { Injectable, inject } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
 export class BurlNavigationService {
-  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
   getBackUrl(fallbackUrl = '/'): string {
-    return this.route.snapshot.queryParamMap.get('burl') || fallbackUrl;
+    const urlTree = this.router.parseUrl(this.router.url);
+    return urlTree.queryParamMap.get('burl') ?? fallbackUrl;
   }
 
   async navigateBack(fallbackUrl = '/'): Promise<void> {

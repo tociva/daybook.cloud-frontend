@@ -13,8 +13,7 @@ import {
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
-import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
-import { BankCashStore } from '../../../data/bank-cash';
+import { BankCashFacade, BankCashStore } from '../../../data/bank-cash';
 
 @Component({
   selector: 'app-delete-bank-cash',
@@ -36,7 +35,7 @@ import { BankCashStore } from '../../../data/bank-cash';
 })
 export class DeleteBankCashComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly burlNavigation = inject(BurlNavigationService);
+  private readonly facade = inject(BankCashFacade);
   protected readonly bankCashStore = inject(BankCashStore);
   protected readonly confirmed = signal(false);
 
@@ -53,9 +52,6 @@ export class DeleteBankCashComponent implements OnInit {
       return;
     }
 
-    const deleted = await this.bankCashStore.deleteBankCash(id);
-    if (deleted) {
-      await this.burlNavigation.navigateBack();
-    }
+    await this.facade.delete(id);
   }
 }

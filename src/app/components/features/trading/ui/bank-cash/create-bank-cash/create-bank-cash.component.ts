@@ -16,8 +16,7 @@ import {
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
-import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
-import { BankCashStore } from '../../../data/bank-cash';
+import { BankCashFacade, BankCashStore } from '../../../data/bank-cash';
 import type { BankCashPayload } from '../../../data/bank-cash';
 
 type BankCashFormModel = {
@@ -48,7 +47,7 @@ type BankCashFormModel = {
 })
 export class CreateBankCashComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly burlNavigation = inject(BurlNavigationService);
+  private readonly facade = inject(BankCashFacade);
   protected readonly bankCashStore = inject(BankCashStore);
   protected readonly bankCashModel = signal<BankCashFormModel>({
     description: '',
@@ -97,12 +96,10 @@ export class CreateBankCashComponent implements OnInit {
       ...(model.description.trim() ? { description: model.description.trim() } : {}),
     };
     const id = this.id();
-    const saved = id
-      ? await this.bankCashStore.updateBankCash(id, payload)
-      : await this.bankCashStore.createBankCash(payload);
-
-    if (saved) {
-      await this.burlNavigation.navigateBack();
+    if (id) {
+      await this.facade.update(id, payload);
+    } else {
+      await this.facade.create(payload);
     }
   }
 }
