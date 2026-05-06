@@ -32,25 +32,56 @@
               </div>
 
               <div class="field">
-                <tng-label forId="cust-countrycode" required>Country Code</tng-label>
-                <tng-input
+                <tng-label forId="cust-countrycode" required>Country</tng-label>
+                <tng-autocomplete
                   id="cust-countrycode"
-                  placeholder="IN"
+                  placeholder="Search for a country"
+                  ariaLabel="Country"
+                  [options]="countries()"
                   [formField]="customerForm.countrycode"
-                  [ariaInvalid]="countrycodeError() !== null"
-                />
+                  [getOptionValue]="countryOptionValue"
+                  [getOptionLabel]="countryOptionLabel"
+                  [trackBy]="countryTrackBy"
+                  (valueChange)="selectCountry($event)"
+                >
+                  <ng-template
+                    #tngAutocompleteOptionTpl
+                    let-option="option"
+                    let-label="label"
+                  >
+                    <span class="country-option">
+                      <span
+                        [class]="getCountryFlagClass(option)"
+                        aria-hidden="true"
+                      ></span>
+                      <span class="country-option-label">{{ label }}</span>
+                    </span>
+                  </ng-template>
+
+                  <ng-template #tngAutocompleteSelectedTpl let-option="option">
+                    <span
+                      [class]="getCountryFlagClass(option)"
+                      aria-hidden="true"
+                    ></span>
+                  </ng-template>
+                </tng-autocomplete>
                 <p class="field-error" [class.field-error--empty]="!countrycodeError()">
                   {{ countrycodeError() || ' ' }}
                 </p>
               </div>
 
               <div class="field">
-                <tng-label forId="cust-currencycode" required>Currency Code</tng-label>
-                <tng-input
+                <tng-label forId="cust-currencycode" required>Currency</tng-label>
+                <tng-autocomplete
                   id="cust-currencycode"
-                  placeholder="INR"
+                  placeholder="Search for a currency"
+                  ariaLabel="Currency"
+                  [options]="currencies()"
                   [formField]="customerForm.currencycode"
-                  [ariaInvalid]="currencycodeError() !== null"
+                  [getOptionValue]="currencyOptionValue"
+                  [getOptionLabel]="currencyOptionLabel"
+                  [trackBy]="currencyTrackBy"
+                  (valueChange)="selectCurrency($event)"
                 />
                 <p class="field-error" [class.field-error--empty]="!currencycodeError()">
                   {{ currencycodeError() || ' ' }}

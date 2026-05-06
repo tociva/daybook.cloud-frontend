@@ -2,6 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import {
+  TngAutocompleteComponent,
   TngButtonComponent,
   TngCardActionsComponent,
   TngCardComponent,
@@ -19,6 +20,10 @@ import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 import { CustomerFacade, CustomerStore } from '../../../data/customer';
 import type { CustomerPayload } from '../../../data/customer';
+import type { Country } from '../../../../management/data/country/country.model';
+import { CountryStore } from '../../../../management/data/country/country.store';
+import type { Currency } from '../../../../management/data/currency/currency.model';
+import { CurrencyStore } from '../../../../management/data/currency/currency.store';
 
 type CustomerFormModel = {
   name: string;
@@ -42,6 +47,7 @@ type CustomerFormModel = {
   standalone: true,
   imports: [
     FormField,
+    TngAutocompleteComponent,
     TngButtonComponent,
     TngCardActionsComponent,
     TngCardComponent,
@@ -58,12 +64,26 @@ type CustomerFormModel = {
     BurlBackButtonComponent,
   ],
   templateUrl: './create-customer.component.html',
-  styleUrl: './create-customer.component.css',
+  styleUrls: ['./create-customer.component.css', '../../../../../../../styles/flags.css'],
 })
 export class CreateCustomerComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(CustomerFacade);
+  private readonly countryStore = inject(CountryStore);
+  private readonly currencyStore = inject(CurrencyStore);
   protected readonly customerStore = inject(CustomerStore);
+  protected readonly countries = this.countryStore.countries;
+  protected readonly currencies = this.currencyStore.currencies;
+
+  protected readonly countryOptionValue = (country: Country): string => country.code;
+  protected readonly countryOptionLabel = (country: Country): string => country.name;
+  protected readonly countryTrackBy = (_index: number, country: Country): string => country.code;
+  protected readonly getCountryFlagClass = (country: Country): string =>
+    `country-flag country-flag--${country.code.toLowerCase()}`;
+  protected readonly currencyOptionValue = (currency: Currency): string => currency.code;
+  protected readonly currencyOptionLabel = (currency: Currency): string =>
+    `${currency.name} (${currency.symbol})`;
+  protected readonly currencyTrackBy = (_index: number, currency: Currency): string => currency.code;
 
   protected readonly customerModel = signal<CustomerFormModel>({
     name: '',
@@ -147,6 +167,11 @@ export class CreateCustomerComponent implements OnInit {
 
   // ──────────────────────────────────────────────────────────────────────────
 
+  constructor() {
+    void this.countryStore.load();
+    void this.currencyStore.load();
+  }
+
   async ngOnInit(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     this.id.set(id);
@@ -214,5 +239,32 @@ export class CreateCustomerComponent implements OnInit {
     } else {
       await this.facade.create(payload);
     }
+  }
+
+  protected selectCountry(value: unknown): void {
+    const countryCode = typeof value === 'string' ? value : '';
+    if (!countryCode.trim()) {
+      return;
+    }
+
+    const country = this.countries().find((item) => item.code === countryCode) ?? null;
+
+    this.customerModel.update((current) => ({
+      ...current,
+      countrycode: countryCode,
+      currencycode: country?.currencycode ?? current.currencycode,
+    }));
+  }
+
+  protected selectCurrency(value: unknown): void {
+    const currencyCode = typeof value === 'string' ? value : '';
+    if (!currencyCode.trim()) {
+      return;
+    }
+
+    this.customerModel.update((current) => ({
+      ...current,
+      currencycode: currencyCode,
+    }));
   }
 }
