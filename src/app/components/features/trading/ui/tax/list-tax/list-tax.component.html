@@ -1,31 +1,27 @@
 <main class="trading-page">
-  <section class="page-heading">
-    <div>
-      <p class="eyebrow">Trading</p>
-      <h1>Tax</h1>
-      <p class="subtle">Manage tax rates, short names, and application rules.</p>
-    </div>
+  <app-page-heading
+    eyebrow="Trading"
+    title="Tax"
+    description="Manage tax rates, short names, and application rules."
+  >
+    <app-crud-filter-popover
+      ariaLabel="Tax filters"
+      title="Filter taxes"
+      [fields]="filterFields"
+      [filter]="crudQuery.filter()"
+      syncUrl
+    />
 
-    <div class="page-actions">
-      <app-crud-filter-popover
-        ariaLabel="Tax filters"
-        title="Filter taxes"
-        [fields]="filterFields"
-        [filter]="crudQuery.filter()"
-        syncUrl
-      />
+    <tng-button type="button" appearance="outline" tone="neutral" (click)="openTaxGroups()">
+      <tng-icon icon="layers" aria-hidden="true" />
+      Tax groups
+    </tng-button>
 
-      <tng-button type="button" appearance="outline" tone="neutral" (click)="openTaxGroups()">
-        <tng-icon icon="layers" aria-hidden="true" />
-        Tax groups
-      </tng-button>
-
-      <tng-button type="button" appearance="solid" tone="primary" (click)="createTax()">
-        <tng-icon icon="plus" aria-hidden="true" />
-        New tax
-      </tng-button>
-    </div>
-  </section>
+    <tng-button type="button" appearance="solid" tone="primary" (click)="createTax()">
+      <tng-icon icon="plus" aria-hidden="true" />
+      New tax
+    </tng-button>
+  </app-page-heading>
 
   <tng-card variant="outline" padding="lg">
     @if (taxStore.error()) {

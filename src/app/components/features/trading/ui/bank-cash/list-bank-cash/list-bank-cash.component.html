@@ -1,26 +1,22 @@
 <main class="bank-cash-page">
-  <section class="page-heading">
-    <div>
-      <p class="eyebrow">Trading</p>
-      <h1>Bank & Cash</h1>
-      <p class="subtle">Manage cash counters, bank ledgers, and payment accounts.</p>
-    </div>
+  <app-page-heading
+    eyebrow="Trading"
+    title="Bank & Cash"
+    description="Manage cash counters, bank ledgers, and payment accounts."
+  >
+    <app-crud-filter-popover
+      ariaLabel="Bank and cash filters"
+      title="Filter accounts"
+      [fields]="filterFields"
+      [filter]="crudQuery.filter()"
+      syncUrl
+    />
 
-    <div class="page-actions">
-      <app-crud-filter-popover
-        ariaLabel="Bank and cash filters"
-        title="Filter accounts"
-        [fields]="filterFields"
-        [filter]="crudQuery.filter()"
-        syncUrl
-      />
-
-      <tng-button type="button" appearance="solid" tone="primary" (click)="createBankCash()">
-        <tng-icon icon="plus" aria-hidden="true" />
-        New account
-      </tng-button>
-    </div>
-  </section>
+    <tng-button type="button" appearance="solid" tone="primary" (click)="createBankCash()">
+      <tng-icon icon="plus" aria-hidden="true" />
+      New account
+    </tng-button>
+  </app-page-heading>
 
   <tng-card variant="outline" padding="lg">
     @if (bankCashStore.error()) {

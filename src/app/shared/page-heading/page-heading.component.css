@@ -1,0 +1,49 @@
+.page-heading {
+  align-items: center;
+  display: flex;
+  gap: 0.35rem;
+  justify-content: space-between;
+}
+
+.page-heading-copy h1,
+.page-heading-copy p {
+  margin: 0;
+}
+
+.page-heading-copy h1 {
+  align-items: baseline;
+  color: var(--tng-semantic-foreground-primary);
+  display: flex;
+  font-size: 1.5rem;
+  gap: 0.4rem;
+  line-height: 1.2;
+}
+
+.eyebrow {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.subtle {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.875rem;
+}
+
+.page-actions {
+  align-items: center;
+  display: flex;
+  gap: 0.35rem;
+}
+
+@media (max-width: 700px) {
+  .page-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .page-actions {
+    flex-wrap: wrap;
+  }
+}

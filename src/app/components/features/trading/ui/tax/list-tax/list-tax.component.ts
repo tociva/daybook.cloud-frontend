@@ -15,6 +15,7 @@ import {
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
+import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { Status, TaxStore } from '../../../data/tax';
 import type { Tax } from '../../../data/tax';
 import { TngTagIcon } from '../../bank-cash/tng-tag-icon.directive';
@@ -24,6 +25,7 @@ type StatusTagTone = 'danger' | 'success' | 'warning';
 @Component({
   selector: 'app-list-tax',
   imports: [
+    PageHeadingComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,

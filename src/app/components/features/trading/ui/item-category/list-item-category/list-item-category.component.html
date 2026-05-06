@@ -1,31 +1,27 @@
 <main class="trading-page">
-  <section class="page-heading">
-    <div>
-      <p class="eyebrow">Trading</p>
-      <h1>Item Categories</h1>
-      <p class="subtle">Organise items into categories with type and tax group assignments.</p>
-    </div>
+  <app-page-heading
+    eyebrow="Trading"
+    title="Item Categories"
+    description="Organise items into categories with type and tax group assignments."
+  >
+    <app-crud-filter-popover
+      ariaLabel="Item category filters"
+      title="Filter item categories"
+      [fields]="filterFields"
+      [filter]="crudQuery.filter()"
+      syncUrl
+    />
 
-    <div class="page-actions">
-      <app-crud-filter-popover
-        ariaLabel="Item category filters"
-        title="Filter item categories"
-        [fields]="filterFields"
-        [filter]="crudQuery.filter()"
-        syncUrl
-      />
+    <tng-button type="button" appearance="outline" tone="neutral" (click)="openItems()">
+      <tng-icon icon="package" aria-hidden="true" />
+      Items
+    </tng-button>
 
-      <tng-button type="button" appearance="outline" tone="neutral" (click)="openItems()">
-        <tng-icon icon="package" aria-hidden="true" />
-        Items
-      </tng-button>
-
-      <tng-button type="button" appearance="solid" tone="primary" (click)="createItemCategory()">
-        <tng-icon icon="plus" aria-hidden="true" />
-        New category
-      </tng-button>
-    </div>
-  </section>
+    <tng-button type="button" appearance="solid" tone="primary" (click)="createItemCategory()">
+      <tng-icon icon="plus" aria-hidden="true" />
+      New category
+    </tng-button>
+  </app-page-heading>
 
   <tng-card variant="outline" padding="lg">
     @if (itemCategoryStore.error()) {

@@ -1,26 +1,22 @@
 <main class="trading-page">
-  <section class="page-heading">
-    <div>
-      <p class="eyebrow">Trading</p>
-      <h1>Customer Receipts</h1>
-      <p class="subtle">Manage payments received from customers.</p>
-    </div>
+  <app-page-heading
+    eyebrow="Trading"
+    title="Customer Receipts"
+    description="Manage payments received from customers."
+  >
+    <app-crud-filter-popover
+      ariaLabel="Customer receipt filters"
+      title="Filter receipts"
+      [fields]="filterFields"
+      [filter]="crudQuery.filter()"
+      syncUrl
+    />
 
-    <div class="page-actions">
-      <app-crud-filter-popover
-        ariaLabel="Customer receipt filters"
-        title="Filter receipts"
-        [fields]="filterFields"
-        [filter]="crudQuery.filter()"
-        syncUrl
-      />
-
-      <tng-button type="button" appearance="solid" tone="primary" (click)="createReceipt()">
-        <tng-icon icon="plus" aria-hidden="true" />
-        New Receipt
-      </tng-button>
-    </div>
-  </section>
+    <tng-button type="button" appearance="solid" tone="primary" (click)="createReceipt()">
+      <tng-icon icon="plus" aria-hidden="true" />
+      New Receipt
+    </tng-button>
+  </app-page-heading>
 
   <tng-card variant="outline" padding="lg">
     @if (customerReceiptStore.error()) {

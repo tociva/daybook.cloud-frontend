@@ -98,11 +98,23 @@ export class WorkspaceShellComponent {
 
       for (const child of group.children) {
         const childPath = `${groupBase}/${child.path}`;
-        if (path === childPath || path.startsWith(`${childPath}/`)) {
+
+        if (path === childPath) {
           return [
             { label: 'Home', routerLink: '/app/dashboard' },
             { label: group.name, routerLink: groupHref },
             { label: child.name, current: true },
+          ];
+        }
+
+        if (path.startsWith(`${childPath}/`)) {
+          const subPath = path.slice(childPath.length + 1);
+          const actionLabel = this.resolveActionLabel(subPath);
+          return [
+            { label: 'Home', routerLink: '/app/dashboard' },
+            { label: group.name, routerLink: groupHref },
+            { label: child.name, routerLink: childPath },
+            { label: actionLabel, current: true },
           ];
         }
       }
@@ -131,6 +143,19 @@ export class WorkspaceShellComponent {
 
   protected logout(): void {
     void this.systemStore.logout();
+  }
+
+  /**
+   * Maps the sub-path after a list route to a human-readable breadcrumb label.
+   * Patterns: "create", ":id", ":id/edit", ":id/delete"
+   */
+  private resolveActionLabel(subPath: string): string {
+    const parts = subPath.split('/');
+    if (parts[0] === 'create') return 'New';
+    if (parts[1] === 'edit') return 'Edit';
+    if (parts[1] === 'delete') return 'Delete';
+    if (parts.length === 1 && parts[0]) return 'View';
+    return 'Details';
   }
 
   private readString(value: unknown): string | null {

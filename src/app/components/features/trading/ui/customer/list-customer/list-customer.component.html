@@ -1,26 +1,22 @@
 <main class="trading-page">
-  <section class="page-heading">
-    <div>
-      <p class="eyebrow">Trading</p>
-      <h1>Customers</h1>
-      <p class="subtle">Manage your customers with contact and address details.</p>
-    </div>
+  <app-page-heading
+    eyebrow="Trading"
+    title="Customers"
+    description="Manage your customers with contact and address details."
+  >
+    <app-crud-filter-popover
+      ariaLabel="Customer filters"
+      title="Filter customers"
+      [fields]="filterFields"
+      [filter]="crudQuery.filter()"
+      syncUrl
+    />
 
-    <div class="page-actions">
-      <app-crud-filter-popover
-        ariaLabel="Customer filters"
-        title="Filter customers"
-        [fields]="filterFields"
-        [filter]="crudQuery.filter()"
-        syncUrl
-      />
-
-      <tng-button type="button" appearance="solid" tone="primary" (click)="createCustomer()">
-        <tng-icon icon="plus" aria-hidden="true" />
-        New customer
-      </tng-button>
-    </div>
-  </section>
+    <tng-button type="button" appearance="solid" tone="primary" (click)="createCustomer()">
+      <tng-icon icon="plus" aria-hidden="true" />
+      New customer
+    </tng-button>
+  </app-page-heading>
 
   <tng-card variant="outline" padding="lg">
     @if (customerStore.error()) {

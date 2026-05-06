@@ -14,6 +14,7 @@ import {
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
+import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { ItemCategoryStore } from '../../../data/item-category';
 import type { ItemCategory } from '../../../data/item-category';
 
@@ -21,6 +22,7 @@ import type { ItemCategory } from '../../../data/item-category';
   selector: 'app-list-item-category',
   standalone: true,
   imports: [
+    PageHeadingComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,

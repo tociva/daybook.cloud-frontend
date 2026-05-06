@@ -4,38 +4,10 @@
   padding: 1.25rem;
 }
 
-.page-heading,
-.page-actions,
 .row-actions {
   align-items: center;
   display: flex;
   gap: 0.35rem;
-}
-
-.page-heading {
-  justify-content: space-between;
-}
-
-h1,
-p {
-  margin: 0;
-}
-
-h1 {
-  color: var(--tng-semantic-foreground-primary);
-  font-size: 1.5rem;
-  line-height: 1.2;
-}
-
-.eyebrow,
-.subtle {
-  color: var(--tng-semantic-foreground-muted);
-  font-size: 0.875rem;
-}
-
-.eyebrow {
-  font-weight: 700;
-  text-transform: uppercase;
 }
 
 .notice {
@@ -104,12 +76,6 @@ h1 {
 }
 
 @media (max-width: 700px) {
-  .page-heading,
-  .page-actions {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
   .row-actions {
     align-items: flex-start;
   }

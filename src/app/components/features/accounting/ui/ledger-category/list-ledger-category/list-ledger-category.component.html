@@ -1,31 +1,27 @@
 <main class="management-page">
-  <section class="page-heading">
-    <div>
-      <p class="eyebrow">Accounting</p>
-      <h1>Ledger Categories</h1>
-      <p class="subtle">Manage ledger categories for your chart of accounts.</p>
-    </div>
+  <app-page-heading
+    eyebrow="Accounting"
+    title="Ledger Categories"
+    description="Manage ledger categories for your chart of accounts."
+  >
+    <app-crud-filter-popover
+      ariaLabel="Ledger category filters"
+      title="Filter ledger categories"
+      [fields]="filterFields"
+      [filter]="crudQuery.filter()"
+      syncUrl
+    />
 
-    <div class="page-actions">
-      <app-crud-filter-popover
-        ariaLabel="Ledger category filters"
-        title="Filter ledger categories"
-        [fields]="filterFields"
-        [filter]="crudQuery.filter()"
-        syncUrl
-      />
+    <tng-button type="button" appearance="outline" tone="neutral" (click)="openLedgers()">
+      <tng-icon icon="book-open" aria-hidden="true" />
+      Ledgers
+    </tng-button>
 
-      <tng-button type="button" appearance="outline" tone="neutral" (click)="openLedgers()">
-        <tng-icon icon="book-open" aria-hidden="true" />
-        Ledgers
-      </tng-button>
-
-      <tng-button type="button" appearance="solid" tone="primary" (click)="createLedgerCategory()">
-        <tng-icon icon="plus" aria-hidden="true" />
-        New category
-      </tng-button>
-    </div>
-  </section>
+    <tng-button type="button" appearance="solid" tone="primary" (click)="createLedgerCategory()">
+      <tng-icon icon="plus" aria-hidden="true" />
+      New category
+    </tng-button>
+  </app-page-heading>
 
   <tng-card variant="outline" padding="lg">
     @if (ledgerCategoryStore.error()) {

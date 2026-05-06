@@ -1,0 +1,18 @@
+<section class="page-heading">
+  <div class="page-heading-copy">
+    <h1>
+      @if (eyebrow()) {
+        <span class="eyebrow">{{ eyebrow() }}</span>
+        <tng-separator orientation="vertical" />
+      }
+      {{ title() }}
+    </h1>
+    @if (description()) {
+      <p class="subtle">{{ description() }}</p>
+    }
+  </div>
+
+  <div class="page-actions">
+    <ng-content />
+  </div>
+</section>

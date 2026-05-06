@@ -14,6 +14,7 @@ import {
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
+import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { formatDisplayDate } from '../../../../../../core/date/dayjs-date.utils';
 import { CustomerReceiptStore } from '../../../data/customer-receipt';
 import type { CustomerReceipt } from '../../../data/customer-receipt';
@@ -22,6 +23,7 @@ import type { CustomerReceipt } from '../../../data/customer-receipt';
   selector: 'app-list-customer-receipt',
   standalone: true,
   imports: [
+    PageHeadingComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,

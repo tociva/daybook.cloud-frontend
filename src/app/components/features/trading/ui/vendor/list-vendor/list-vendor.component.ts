@@ -14,6 +14,7 @@ import {
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
+import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { VendorStore } from '../../../data/vendor';
 import type { Vendor } from '../../../data/vendor';
 
@@ -21,6 +22,7 @@ import type { Vendor } from '../../../data/vendor';
   selector: 'app-list-vendor',
   standalone: true,
   imports: [
+    PageHeadingComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,

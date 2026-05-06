@@ -4,42 +4,17 @@
   padding: 1.25rem;
 }
 
-.page-heading,
 .pagination,
-.page-actions,
 .row-actions {
   align-items: center;
   display: flex;
   gap: 0.35rem;
 }
 
-.page-heading,
-.pagination {
-  justify-content: space-between;
-}
-
-h1,
-h2,
-p {
-  margin: 0;
-}
-
-h1 {
-  color: var(--tng-semantic-foreground-primary);
-  font-size: 1.5rem;
-  line-height: 1.2;
-}
-
-.eyebrow,
-.subtle,
 .pagination {
   color: var(--tng-semantic-foreground-muted);
   font-size: 0.875rem;
-}
-
-.eyebrow {
-  font-weight: 700;
-  text-transform: uppercase;
+  justify-content: space-between;
 }
 
 .notice {
@@ -108,13 +83,6 @@ h1 {
 }
 
 @media (max-width: 700px) {
-  .page-heading,
-  .toolbar,
-  .pagination {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
   .row-actions {
     align-items: flex-start;
   }

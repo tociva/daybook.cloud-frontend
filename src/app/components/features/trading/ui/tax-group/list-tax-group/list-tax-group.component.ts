@@ -14,12 +14,14 @@ import {
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
+import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { TaxGroupStore } from '../../../data/tax-group';
 import type { TaxGroup } from '../../../data/tax-group';
 
 @Component({
   selector: 'app-list-tax-group',
   imports: [
+    PageHeadingComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,

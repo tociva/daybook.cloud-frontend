@@ -1,26 +1,22 @@
 <main class="trading-page">
-  <section class="page-heading">
-    <div>
-      <p class="eyebrow">Trading</p>
-      <h1>Vendors</h1>
-      <p class="subtle">Manage your vendors with contact and address details.</p>
-    </div>
+  <app-page-heading
+    eyebrow="Trading"
+    title="Vendors"
+    description="Manage your vendors with contact and address details."
+  >
+    <app-crud-filter-popover
+      ariaLabel="Vendor filters"
+      title="Filter vendors"
+      [fields]="filterFields"
+      [filter]="crudQuery.filter()"
+      syncUrl
+    />
 
-    <div class="page-actions">
-      <app-crud-filter-popover
-        ariaLabel="Vendor filters"
-        title="Filter vendors"
-        [fields]="filterFields"
-        [filter]="crudQuery.filter()"
-        syncUrl
-      />
-
-      <tng-button type="button" appearance="solid" tone="primary" (click)="createVendor()">
-        <tng-icon icon="plus" aria-hidden="true" />
-        New vendor
-      </tng-button>
-    </div>
-  </section>
+    <tng-button type="button" appearance="solid" tone="primary" (click)="createVendor()">
+      <tng-icon icon="plus" aria-hidden="true" />
+      New vendor
+    </tng-button>
+  </app-page-heading>
 
   <tng-card variant="outline" padding="lg">
     @if (vendorStore.error()) {

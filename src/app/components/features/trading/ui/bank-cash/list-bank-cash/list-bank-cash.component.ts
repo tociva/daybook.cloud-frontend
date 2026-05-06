@@ -15,6 +15,7 @@ import {
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
+import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { BankCashStore, Status } from '../../../data/bank-cash';
 import type { BankCash } from '../../../data/bank-cash';
 import { TngTagIcon } from '../tng-tag-icon.directive';
@@ -24,6 +25,7 @@ type StatusBadgeTone = 'danger' | 'success' | 'warning';
 @Component({
   selector: 'app-list-bank-cash',
   imports: [
+    PageHeadingComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,

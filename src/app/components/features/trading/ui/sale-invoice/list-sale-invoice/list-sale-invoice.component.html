@@ -1,26 +1,22 @@
 <main class="trading-page">
-  <section class="page-heading">
-    <div>
-      <p class="eyebrow">Trading</p>
-      <h1>Sale Invoices</h1>
-      <p class="subtle">Manage your sale invoices and billing records.</p>
-    </div>
+  <app-page-heading
+    eyebrow="Trading"
+    title="Sale Invoices"
+    description="Manage your sale invoices and billing records."
+  >
+    <app-crud-filter-popover
+      ariaLabel="Sale invoice filters"
+      title="Filter sale invoices"
+      [fields]="filterFields"
+      [filter]="crudQuery.filter()"
+      syncUrl
+    />
 
-    <div class="page-actions">
-      <app-crud-filter-popover
-        ariaLabel="Sale invoice filters"
-        title="Filter sale invoices"
-        [fields]="filterFields"
-        [filter]="crudQuery.filter()"
-        syncUrl
-      />
-
-      <tng-button type="button" appearance="solid" tone="primary" (click)="createSaleInvoice()">
-        <tng-icon icon="plus" aria-hidden="true" />
-        New Invoice
-      </tng-button>
-    </div>
-  </section>
+    <tng-button type="button" appearance="solid" tone="primary" (click)="createSaleInvoice()">
+      <tng-icon icon="plus" aria-hidden="true" />
+      New Invoice
+    </tng-button>
+  </app-page-heading>
 
   <tng-card variant="outline" padding="lg">
     @if (saleInvoiceStore.error()) {

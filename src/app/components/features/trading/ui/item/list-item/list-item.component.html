@@ -1,31 +1,27 @@
 <main class="trading-page">
-  <section class="page-heading">
-    <div>
-      <p class="eyebrow">Trading</p>
-      <h1>Items</h1>
-      <p class="subtle">Manage products and services used across invoices and transactions.</p>
-    </div>
+  <app-page-heading
+    eyebrow="Trading"
+    title="Items"
+    description="Manage products and services used across invoices and transactions."
+  >
+    <app-crud-filter-popover
+      ariaLabel="Item filters"
+      title="Filter items"
+      [fields]="filterFields"
+      [filter]="crudQuery.filter()"
+      syncUrl
+    />
 
-    <div class="page-actions">
-      <app-crud-filter-popover
-        ariaLabel="Item filters"
-        title="Filter items"
-        [fields]="filterFields"
-        [filter]="crudQuery.filter()"
-        syncUrl
-      />
+    <tng-button type="button" appearance="outline" tone="neutral" (click)="openItemCategories()">
+      <tng-icon icon="layers" aria-hidden="true" />
+      Categories
+    </tng-button>
 
-      <tng-button type="button" appearance="outline" tone="neutral" (click)="openItemCategories()">
-        <tng-icon icon="layers" aria-hidden="true" />
-        Categories
-      </tng-button>
-
-      <tng-button type="button" appearance="solid" tone="primary" (click)="createItem()">
-        <tng-icon icon="plus" aria-hidden="true" />
-        New item
-      </tng-button>
-    </div>
-  </section>
+    <tng-button type="button" appearance="solid" tone="primary" (click)="createItem()">
+      <tng-icon icon="plus" aria-hidden="true" />
+      New item
+    </tng-button>
+  </app-page-heading>
 
   <tng-card variant="outline" padding="lg">
     @if (itemStore.error()) {
