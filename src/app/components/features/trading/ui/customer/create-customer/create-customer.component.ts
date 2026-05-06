@@ -253,6 +253,7 @@ export class CreateCustomerComponent implements OnInit {
       ...current,
       countrycode: countryCode,
       currencycode: country?.currencycode ?? current.currencycode,
+      mobile: country ? `+${country.phone}-` : current.mobile,
     }));
   }
 
