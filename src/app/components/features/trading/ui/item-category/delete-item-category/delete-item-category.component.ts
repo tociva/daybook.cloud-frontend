@@ -13,8 +13,7 @@ import {
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
-import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
-import { ItemCategoryStore } from '../../../data/item-category';
+import { ItemCategoryFacade, ItemCategoryStore } from '../../../data/item-category';
 
 @Component({
   selector: 'app-delete-item-category',
@@ -37,7 +36,7 @@ import { ItemCategoryStore } from '../../../data/item-category';
 })
 export class DeleteItemCategoryComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly burlNavigation = inject(BurlNavigationService);
+  private readonly facade = inject(ItemCategoryFacade);
   protected readonly itemCategoryStore = inject(ItemCategoryStore);
   protected readonly confirmed = signal(false);
 
@@ -52,9 +51,6 @@ export class DeleteItemCategoryComponent implements OnInit {
     const id = this.itemCategoryStore.selectedItem()?.id;
     if (!id || !this.confirmed()) return;
 
-    const deleted = await this.itemCategoryStore.deleteItemCategory(id);
-    if (deleted) {
-      await this.burlNavigation.navigateBack();
-    }
+    await this.facade.delete(id);
   }
 }

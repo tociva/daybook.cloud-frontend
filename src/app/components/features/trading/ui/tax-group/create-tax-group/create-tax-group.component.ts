@@ -18,10 +18,9 @@ import {
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
-import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
 import { TaxStore } from '../../../data/tax';
 import type { Tax } from '../../../data/tax';
-import { TaxGroupStore } from '../../../data/tax-group';
+import { TaxGroupFacade, TaxGroupStore } from '../../../data/tax-group';
 import type { TaxGroup, TaxGroupCU } from '../../../data/tax-group';
 
 const TAX_GROUP_MODE_SUGGESTIONS = [
@@ -70,7 +69,7 @@ type TaxGroupFormModel = {
 })
 export class CreateTaxGroupComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly burlNavigation = inject(BurlNavigationService);
+  private readonly facade = inject(TaxGroupFacade);
   protected readonly taxGroupStore = inject(TaxGroupStore);
   protected readonly taxStore = inject(TaxStore);
 
@@ -229,15 +228,13 @@ export class CreateTaxGroupComponent implements OnInit {
     };
 
     const currentId = this.id();
-    const saved = currentId
-      ? await this.taxGroupStore.updateTaxGroup(currentId, payload)
-      : await this.taxGroupStore.createTaxGroup(payload);
+    if (currentId) {
+      await this.facade.update(currentId, payload);
+    } else {
+      await this.facade.create(payload);
+    }
 
     this.submitting.set(false);
-
-    if (saved) {
-      await this.burlNavigation.navigateBack();
-    }
   }
 
   private patchModelFromTaxGroup(tg: TaxGroup): void {

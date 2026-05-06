@@ -130,25 +130,31 @@ export const TaxGroupStore = signalStore(
           setError(getErrorMessage(error, 'Failed to load tax groups.'));
         }
       },
-      async updateTaxGroup(id: string, payload: TaxGroupPayload): Promise<TaxGroup | null> {
+      async updateTaxGroup(id: string, payload: TaxGroupPayload): Promise<boolean> {
         setLoading();
 
         try {
-          const taxGroup = await service.update(id, payload);
-          patchState(store, (state) => ({
-            taxGroup: {
-              ...state.taxGroup,
-              error: null,
-              isLoading: false,
-              items: state.taxGroup.items.map((item) => (item.id === id ? taxGroup : item)),
-              selectedItem: taxGroup,
-            },
-          }));
+          await service.update(id, payload);
+          patchState(store, (state) => {
+            const existing = state.taxGroup.items.find((item) => item.id === id);
+            const mergedItem = existing ? { ...existing, ...payload } : state.taxGroup.selectedItem;
+            return {
+              taxGroup: {
+                ...state.taxGroup,
+                error: null,
+                isLoading: false,
+                items: state.taxGroup.items.map((item) =>
+                  item.id === id ? { ...item, ...payload } : item,
+                ),
+                selectedItem: mergedItem,
+              },
+            };
+          });
 
-          return taxGroup;
+          return true;
         } catch (error) {
           setError(getErrorMessage(error, 'Failed to update tax group.'));
-          return null;
+          return false;
         }
       },
     };

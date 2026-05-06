@@ -3,7 +3,6 @@ import { ActivatedRoute } from '@angular/router';
 import { TngButtonComponent } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
-import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
 import { CustomerStore } from '../../../data/customer';
 import { ItemStore } from '../../../data/item';
 import type {
@@ -12,7 +11,7 @@ import type {
   SaleInvoiceItemTaxRequest,
   SaleInvoicePayload,
 } from '../../../data/sale-invoice';
-import { SaleInvoiceStore } from '../../../data/sale-invoice';
+import { SaleInvoiceFacade, SaleInvoiceStore } from '../../../data/sale-invoice';
 import { TaxStore } from '../../../data/tax';
 import { TaxGroupStore } from '../../../data/tax-group';
 import { SaleInvoiceDraftStore, toNum } from './sale-invoice-draft.store';
@@ -37,7 +36,7 @@ import { SiLineItemsComponent } from './si-line-items/si-line-items.component';
 })
 export class CreateSaleInvoiceComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly burlNavigation = inject(BurlNavigationService);
+  private readonly facade = inject(SaleInvoiceFacade);
 
   protected readonly saleInvoiceStore = inject(SaleInvoiceStore);
   private readonly customerStore = inject(CustomerStore);
@@ -151,10 +150,10 @@ export class CreateSaleInvoiceComponent implements OnInit {
     };
 
     const id = this.id();
-    const saved = id
-      ? await this.saleInvoiceStore.updateSaleInvoice(id, payload)
-      : await this.saleInvoiceStore.createSaleInvoice(payload);
-
-    if (saved) await this.burlNavigation.navigateBack();
+    if (id) {
+      await this.facade.update(id, payload);
+    } else {
+      await this.facade.create(payload);
+    }
   }
 }

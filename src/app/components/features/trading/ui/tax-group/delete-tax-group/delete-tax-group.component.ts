@@ -13,8 +13,7 @@ import {
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
-import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
-import { TaxGroupStore } from '../../../data/tax-group';
+import { TaxGroupFacade, TaxGroupStore } from '../../../data/tax-group';
 
 @Component({
   selector: 'app-delete-tax-group',
@@ -36,7 +35,7 @@ import { TaxGroupStore } from '../../../data/tax-group';
 })
 export class DeleteTaxGroupComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly burlNavigation = inject(BurlNavigationService);
+  private readonly facade = inject(TaxGroupFacade);
   protected readonly taxGroupStore = inject(TaxGroupStore);
   protected readonly confirmed = signal(false);
 
@@ -53,10 +52,7 @@ export class DeleteTaxGroupComponent implements OnInit {
       return;
     }
 
-    const deleted = await this.taxGroupStore.deleteTaxGroup(id);
-    if (deleted) {
-      await this.burlNavigation.navigateBack();
-    }
+    await this.facade.delete(id);
   }
 }
 

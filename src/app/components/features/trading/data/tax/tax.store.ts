@@ -129,25 +129,31 @@ export const TaxStore = signalStore(
           setError(getErrorMessage(error, 'Failed to load taxes.'));
         }
       },
-      async updateTax(id: string, payload: TaxPayload): Promise<Tax | null> {
+      async updateTax(id: string, payload: TaxPayload): Promise<boolean> {
         setLoading();
 
         try {
-          const tax = await service.update(id, payload);
-          patchState(store, (state) => ({
-            tax: {
-              ...state.tax,
-              error: null,
-              isLoading: false,
-              items: state.tax.items.map((item) => (item.id === id ? tax : item)),
-              selectedItem: tax,
-            },
-          }));
+          await service.update(id, payload);
+          patchState(store, (state) => {
+            const existing = state.tax.items.find((item) => item.id === id);
+            const mergedItem = existing ? { ...existing, ...payload } : state.tax.selectedItem;
+            return {
+              tax: {
+                ...state.tax,
+                error: null,
+                isLoading: false,
+                items: state.tax.items.map((item) =>
+                  item.id === id ? { ...item, ...payload } : item,
+                ),
+                selectedItem: mergedItem,
+              },
+            };
+          });
 
-          return tax;
+          return true;
         } catch (error) {
           setError(getErrorMessage(error, 'Failed to update tax.'));
-          return null;
+          return false;
         }
       },
     };

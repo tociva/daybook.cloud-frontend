@@ -17,8 +17,7 @@ import {
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
-import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
-import { CustomerStore } from '../../../data/customer';
+import { CustomerFacade, CustomerStore } from '../../../data/customer';
 import type { CustomerPayload } from '../../../data/customer';
 
 type CustomerFormModel = {
@@ -63,7 +62,7 @@ type CustomerFormModel = {
 })
 export class CreateCustomerComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly burlNavigation = inject(BurlNavigationService);
+  private readonly facade = inject(CustomerFacade);
   protected readonly customerStore = inject(CustomerStore);
 
   protected readonly customerModel = signal<CustomerFormModel>({
@@ -210,12 +209,10 @@ export class CreateCustomerComponent implements OnInit {
     };
 
     const id = this.id();
-    const saved = id
-      ? await this.customerStore.updateCustomer(id, payload)
-      : await this.customerStore.createCustomer(payload);
-
-    if (saved) {
-      await this.burlNavigation.navigateBack();
+    if (id) {
+      await this.facade.update(id, payload);
+    } else {
+      await this.facade.create(payload);
     }
   }
 }

@@ -125,23 +125,21 @@ export const SaleInvoiceStore = signalStore(
       async updateSaleInvoice(
         id: string,
         payload: SaleInvoicePayload,
-      ): Promise<SaleInvoice | null> {
+      ): Promise<boolean> {
         setLoading();
         try {
-          const invoice = await service.update(id, payload);
+          await service.update(id, payload);
           patchState(store, (state) => ({
             saleInvoice: {
               ...state.saleInvoice,
               error: null,
               isLoading: false,
-              items: state.saleInvoice.items.map((inv) => (inv.id === id ? invoice : inv)),
-              selectedItem: invoice,
             },
           }));
-          return invoice;
+          return true;
         } catch (error) {
           setError(getErrorMessage(error, 'Failed to update sale invoice.'));
-          return null;
+          return false;
         }
       },
     };

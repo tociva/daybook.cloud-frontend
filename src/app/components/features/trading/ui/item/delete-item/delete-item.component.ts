@@ -13,8 +13,7 @@ import {
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
-import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
-import { ItemStore } from '../../../data/item';
+import { ItemFacade, ItemStore } from '../../../data/item';
 
 @Component({
   selector: 'app-delete-item',
@@ -37,7 +36,7 @@ import { ItemStore } from '../../../data/item';
 })
 export class DeleteItemComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly burlNavigation = inject(BurlNavigationService);
+  private readonly facade = inject(ItemFacade);
   protected readonly itemStore = inject(ItemStore);
   protected readonly confirmed = signal(false);
 
@@ -52,9 +51,6 @@ export class DeleteItemComponent implements OnInit {
     const id = this.itemStore.selectedItem()?.id;
     if (!id || !this.confirmed()) return;
 
-    const deleted = await this.itemStore.deleteItem(id);
-    if (deleted) {
-      await this.burlNavigation.navigateBack();
-    }
+    await this.facade.delete(id);
   }
 }

@@ -105,23 +105,29 @@ export const ItemStore = signalStore(
         }
       },
 
-      async updateItem(id: string, payload: ItemPayload): Promise<Item | null> {
+      async updateItem(id: string, payload: ItemPayload): Promise<boolean> {
         setLoading();
         try {
-          const item = await service.update(id, payload);
-          patchState(store, (state) => ({
-            item: {
-              ...state.item,
-              error: null,
-              isLoading: false,
-              items: state.item.items.map((i) => (i.id === id ? item : i)),
-              selectedItem: item,
-            },
-          }));
-          return item;
+          await service.update(id, payload);
+          patchState(store, (state) => {
+            const existing = state.item.items.find((currentItem) => currentItem.id === id);
+            const mergedItem = existing ? { ...existing, ...payload } : state.item.selectedItem;
+            return {
+              item: {
+                ...state.item,
+                error: null,
+                isLoading: false,
+                items: state.item.items.map((currentItem) =>
+                  currentItem.id === id ? { ...currentItem, ...payload } : currentItem,
+                ),
+                selectedItem: mergedItem,
+              },
+            };
+          });
+          return true;
         } catch (error) {
           setError(getErrorMessage(error, 'Failed to update item.'));
-          return null;
+          return false;
         }
       },
     };

@@ -1,3 +1,4 @@
+export * from './sale-invoice.facade';
 export * from './sale-invoice.model';
 export * from './sale-invoice.service';
 export * from './sale-invoice.state';

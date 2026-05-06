@@ -124,23 +124,29 @@ export const ItemCategoryStore = signalStore(
       async updateItemCategory(
         id: string,
         payload: ItemCategoryPayload,
-      ): Promise<ItemCategory | null> {
+      ): Promise<boolean> {
         setLoading();
         try {
-          const itemCategory = await service.update(id, payload);
-          patchState(store, (state) => ({
-            itemCategory: {
-              ...state.itemCategory,
-              error: null,
-              isLoading: false,
-              items: state.itemCategory.items.map((i) => (i.id === id ? itemCategory : i)),
-              selectedItem: itemCategory,
-            },
-          }));
-          return itemCategory;
+          await service.update(id, payload);
+          patchState(store, (state) => {
+            const existing = state.itemCategory.items.find((item) => item.id === id);
+            const mergedItem = existing ? { ...existing, ...payload } : state.itemCategory.selectedItem;
+            return {
+              itemCategory: {
+                ...state.itemCategory,
+                error: null,
+                isLoading: false,
+                items: state.itemCategory.items.map((item) =>
+                  item.id === id ? { ...item, ...payload } : item,
+                ),
+                selectedItem: mergedItem,
+              },
+            };
+          });
+          return true;
         } catch (error) {
           setError(getErrorMessage(error, 'Failed to update item category.'));
-          return null;
+          return false;
         }
       },
     };

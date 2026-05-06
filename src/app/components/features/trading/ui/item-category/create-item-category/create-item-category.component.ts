@@ -18,8 +18,7 @@ import {
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
-import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
-import { ItemCategoryStore } from '../../../data/item-category';
+import { ItemCategoryFacade, ItemCategoryStore } from '../../../data/item-category';
 import type { ItemCategory, ItemCategoryPayload, ItemType } from '../../../data/item-category';
 import { TaxGroupStore } from '../../../data/tax-group';
 import type { TaxGroup } from '../../../data/tax-group';
@@ -61,7 +60,7 @@ type ItemCategoryFormModel = {
 })
 export class CreateItemCategoryComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly burlNavigation = inject(BurlNavigationService);
+  private readonly facade = inject(ItemCategoryFacade);
   protected readonly itemCategoryStore = inject(ItemCategoryStore);
   protected readonly taxGroupStore = inject(TaxGroupStore);
 
@@ -221,12 +220,10 @@ export class CreateItemCategoryComponent implements OnInit {
     };
 
     const id = this.id();
-    const saved = id
-      ? await this.itemCategoryStore.updateItemCategory(id, payload)
-      : await this.itemCategoryStore.createItemCategory(payload);
-
-    if (saved) {
-      await this.burlNavigation.navigateBack();
+    if (id) {
+      await this.facade.update(id, payload);
+    } else {
+      await this.facade.create(payload);
     }
   }
 }

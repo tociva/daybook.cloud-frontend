@@ -132,23 +132,31 @@ export const CustomerReceiptStore = signalStore(
       async updateCustomerReceipt(
         id: string,
         payload: CustomerReceiptPayload,
-      ): Promise<CustomerReceipt | null> {
+      ): Promise<boolean> {
         setLoading();
         try {
-          const receipt = await service.update(id, payload);
-          patchState(store, (state) => ({
-            customerReceipt: {
-              ...state.customerReceipt,
-              error: null,
-              isLoading: false,
-              items: state.customerReceipt.items.map((r) => (r.id === id ? receipt : r)),
-              selectedItem: receipt,
-            },
-          }));
-          return receipt;
+          await service.update(id, payload);
+          patchState(store, (state) => {
+            const existing = state.customerReceipt.items.find((item) => item.id === id);
+            const mergedItem = existing
+              ? { ...existing, ...payload }
+              : state.customerReceipt.selectedItem;
+            return {
+              customerReceipt: {
+                ...state.customerReceipt,
+                error: null,
+                isLoading: false,
+                items: state.customerReceipt.items.map((item) =>
+                  item.id === id ? { ...item, ...payload } : item,
+                ),
+                selectedItem: mergedItem,
+              },
+            };
+          });
+          return true;
         } catch (error) {
           setError(getErrorMessage(error, 'Failed to update customer receipt.'));
-          return null;
+          return false;
         }
       },
     };

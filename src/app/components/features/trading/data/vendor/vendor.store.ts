@@ -106,23 +106,29 @@ export const VendorStore = signalStore(
         }
       },
 
-      async updateVendor(id: string, payload: VendorPayload): Promise<Vendor | null> {
+      async updateVendor(id: string, payload: VendorPayload): Promise<boolean> {
         setLoading();
         try {
-          const vendor = await service.update(id, payload);
-          patchState(store, (state) => ({
-            vendor: {
-              ...state.vendor,
-              error: null,
-              isLoading: false,
-              items: state.vendor.items.map((v) => (v.id === id ? vendor : v)),
-              selectedItem: vendor,
-            },
-          }));
-          return vendor;
+          await service.update(id, payload);
+          patchState(store, (state) => {
+            const existing = state.vendor.items.find((item) => item.id === id);
+            const mergedItem = existing ? { ...existing, ...payload } : state.vendor.selectedItem;
+            return {
+              vendor: {
+                ...state.vendor,
+                error: null,
+                isLoading: false,
+                items: state.vendor.items.map((item) =>
+                  item.id === id ? { ...item, ...payload } : item,
+                ),
+                selectedItem: mergedItem,
+              },
+            };
+          });
+          return true;
         } catch (error) {
           setError(getErrorMessage(error, 'Failed to update vendor.'));
-          return null;
+          return false;
         }
       },
     };

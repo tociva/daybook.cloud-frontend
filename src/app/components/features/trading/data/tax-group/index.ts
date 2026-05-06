@@ -1,3 +1,4 @@
+export * from './tax-group.facade';
 export * from './tax-group.model';
 export * from './tax-group.service';
 export * from './tax-group.state';

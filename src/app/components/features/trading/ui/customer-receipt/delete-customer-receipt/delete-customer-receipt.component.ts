@@ -13,9 +13,8 @@ import {
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
-import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
 import { formatDisplayDate } from '../../../../../../core/date/dayjs-date.utils';
-import { CustomerReceiptStore } from '../../../data/customer-receipt';
+import { CustomerReceiptFacade, CustomerReceiptStore } from '../../../data/customer-receipt';
 
 @Component({
   selector: 'app-delete-customer-receipt',
@@ -38,7 +37,7 @@ import { CustomerReceiptStore } from '../../../data/customer-receipt';
 })
 export class DeleteCustomerReceiptComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly burlNavigation = inject(BurlNavigationService);
+  private readonly facade = inject(CustomerReceiptFacade);
   protected readonly customerReceiptStore = inject(CustomerReceiptStore);
   protected readonly confirmed = signal(false);
 
@@ -65,7 +64,6 @@ export class DeleteCustomerReceiptComponent implements OnInit {
     const id = this.customerReceiptStore.selectedItem()?.id;
     if (!id || !this.confirmed()) return;
 
-    const deleted = await this.customerReceiptStore.deleteCustomerReceipt(id);
-    if (deleted) await this.burlNavigation.navigateBack();
+    await this.facade.delete(id);
   }
 }

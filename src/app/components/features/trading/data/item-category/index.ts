@@ -1,3 +1,4 @@
+export * from './item-category.facade';
 export * from './item-category.model';
 export * from './item-category.service';
 export * from './item-category.state';

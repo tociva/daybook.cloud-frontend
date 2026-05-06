@@ -20,7 +20,6 @@ import {
 import { TngIcon } from '@tailng-ui/icons';
 import dayjs from 'dayjs';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
-import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
 import type { BankCash } from '../../../data/bank-cash/bank-cash.model';
 import { BankCashStore } from '../../../data/bank-cash';
 import type { Customer } from '../../../data/customer/customer.model';
@@ -30,7 +29,7 @@ import type {
   CustomerReceiptInvoiceRequest,
   CustomerReceiptPayload,
 } from '../../../data/customer-receipt';
-import { CustomerReceiptStore } from '../../../data/customer-receipt';
+import { CustomerReceiptFacade, CustomerReceiptStore } from '../../../data/customer-receipt';
 import type { SaleInvoice } from '../../../data/sale-invoice/sale-invoice.model';
 import { SaleInvoiceStore } from '../../../data/sale-invoice';
 
@@ -66,7 +65,7 @@ interface InvoiceRow {
 })
 export class CreateCustomerReceiptComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly burlNavigation = inject(BurlNavigationService);
+  private readonly facade = inject(CustomerReceiptFacade);
 
   protected readonly customerReceiptStore = inject(CustomerReceiptStore);
   protected readonly customerStore = inject(CustomerStore);
@@ -404,10 +403,10 @@ export class CreateCustomerReceiptComponent implements OnInit {
     };
 
     const id = this.id();
-    const saved = id
-      ? await this.customerReceiptStore.updateCustomerReceipt(id, payload)
-      : await this.customerReceiptStore.createCustomerReceipt(payload);
-
-    if (saved) await this.burlNavigation.navigateBack();
+    if (id) {
+      await this.facade.update(id, payload);
+    } else {
+      await this.facade.create(payload);
+    }
   }
 }

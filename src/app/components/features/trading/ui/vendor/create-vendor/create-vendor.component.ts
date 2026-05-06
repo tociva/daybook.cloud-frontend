@@ -17,8 +17,7 @@ import {
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
-import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
-import { VendorStore } from '../../../data/vendor';
+import { VendorFacade, VendorStore } from '../../../data/vendor';
 import type { VendorPayload } from '../../../data/vendor';
 
 type VendorFormModel = {
@@ -64,7 +63,7 @@ type VendorFormModel = {
 })
 export class CreateVendorComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly burlNavigation = inject(BurlNavigationService);
+  private readonly facade = inject(VendorFacade);
   protected readonly vendorStore = inject(VendorStore);
 
   protected readonly vendorModel = signal<VendorFormModel>({
@@ -215,12 +214,10 @@ export class CreateVendorComponent implements OnInit {
     };
 
     const id = this.id();
-    const saved = id
-      ? await this.vendorStore.updateVendor(id, payload)
-      : await this.vendorStore.createVendor(payload);
-
-    if (saved) {
-      await this.burlNavigation.navigateBack();
+    if (id) {
+      await this.facade.update(id, payload);
+    } else {
+      await this.facade.create(payload);
     }
   }
 }

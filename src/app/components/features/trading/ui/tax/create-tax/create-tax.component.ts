@@ -17,8 +17,7 @@ import {
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
-import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
-import { Status, TaxStore } from '../../../data/tax';
+import { Status, TaxFacade, TaxStore } from '../../../data/tax';
 import type { TaxPayload } from '../../../data/tax';
 
 type TaxFormModel = {
@@ -53,7 +52,7 @@ type TaxFormModel = {
 })
 export class CreateTaxComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
-  private readonly burlNavigation = inject(BurlNavigationService);
+  private readonly facade = inject(TaxFacade);
   protected readonly taxStore = inject(TaxStore);
   protected readonly taxModel = signal<TaxFormModel>({
     appliedto: '',
@@ -157,12 +156,10 @@ export class CreateTaxComponent implements OnInit {
       ...(model.description.trim() ? { description: model.description.trim() } : {}),
     };
     const id = this.id();
-    const saved = id
-      ? await this.taxStore.updateTax(id, payload)
-      : await this.taxStore.createTax(payload);
-
-    if (saved) {
-      await this.burlNavigation.navigateBack();
+    if (id) {
+      await this.facade.update(id, payload);
+    } else {
+      await this.facade.create(payload);
     }
   }
 
