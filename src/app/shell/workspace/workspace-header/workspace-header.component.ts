@@ -10,6 +10,7 @@ import { TngIcon } from '@tailng-ui/icons';
 import { TngMenuGroupLabel, TngMenuItem, type TngMenuSelectEvent } from '@tailng-ui/primitives';
 import { applyTailngTheme, defaultDarkThemePreset, defaultThemePreset } from '@tailng-ui/theme';
 import { Organization } from '../../../components/features/management/data/organization/organization.model';
+import { BreadcrumbItem } from '../workspace-nav.model';
 
 @Component({
   selector: 'app-workspace-header',
@@ -28,6 +29,10 @@ import { Organization } from '../../../components/features/management/data/organ
 })
 export class WorkspaceHeaderComponent {
   readonly activeOrganizationName = input('No organization selected');
+  readonly breadcrumbItems = input<readonly BreadcrumbItem[]>([
+    { label: 'Home', routerLink: '/app/dashboard' },
+    { label: 'Workspace', current: true },
+  ]);
   readonly currentPageTitle = input('Workspace');
   readonly organizations = input<readonly Organization[]>([]);
   readonly userDisplayName = input('Daybook User');

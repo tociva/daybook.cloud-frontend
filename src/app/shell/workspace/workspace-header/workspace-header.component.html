@@ -11,8 +11,11 @@
     <div class="workspace-header-copy">
       <h1 class="workspace-title">{{ currentPageTitle() }}</h1>
       <tng-breadcrumb class="workspace-breadcrumb" ariaLabel="Workspace path">
-        <tng-breadcrumb-item href="#">Home</tng-breadcrumb-item>
-        <tng-breadcrumb-item [current]="true">{{ currentPageTitle() }}</tng-breadcrumb-item>
+        @for (item of breadcrumbItems(); track item.label) {
+          <tng-breadcrumb-item [routerLink]="item.routerLink ?? null" [current]="item.current ?? false">
+            {{ item.label }}
+          </tng-breadcrumb-item>
+        }
       </tng-breadcrumb>
     </div>
   </div>

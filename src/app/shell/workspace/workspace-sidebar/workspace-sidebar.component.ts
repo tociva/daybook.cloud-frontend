@@ -11,56 +11,7 @@ import { TngInput, TngInputGroup, TngPrefix, TngSuffix } from '@tailng-ui/primit
 import { TngIcon } from '@tailng-ui/icons';
 import { isMacPlatform } from '../../../core/system/platform.utils';
 import { CommandSearchDialogComponent } from './command-search-dialog/command-search-dialog.component';
-
-type MenuNode = Readonly<{
-  path: string;
-  name: string;
-  children?: readonly MenuNode[];
-}>;
-const menuList: readonly MenuNode[] = [
-  {
-    path: 'trading',
-    name: 'Trading',
-    children: [
-      { path: 'bank-cash', name: 'Bank & Cash' },
-      { path: 'tax', name: 'Tax' },
-      { path: 'item', name: 'Item' },
-      { path: 'customer', name: 'Customer' },
-      { path: 'sale-invoice', name: 'Sale Invoice' },
-      { path: 'customer-receipt', name: 'Receipts' },
-      { path: 'vendor', name: 'Vendor' },
-      { path: 'purchase-invoice', name: 'Purchase Invoice' },
-      { path: 'purchase-return', name: 'Purchase Return' },
-      { path: 'vendor-payment', name: 'Payments' },
-      { path: 'gst/gstr2b', name: 'GST Reconciliation' },
-    ],
-  },
-  {
-    path: 'accounting',
-    name: 'Accounting',
-    children: [
-      { path: 'ledger', name: 'Ledger' },
-      { path: 'journal', name: 'Journal' },
-      { path: 'documents', name: 'Documents' },
-      { path: 'reports/trial-balance', name: 'Trial balance' },
-      { path: 'daybook', name: 'Daybook' },
-      { path: 'reports/profit-loss', name: 'Profit and loss' },
-      { path: 'reports/balance-sheet', name: 'Balance sheet' },
-      { path: 'banking', name: 'Banking' },
-    ],
-  },
-  {
-    path: 'management',
-    name: 'Management',
-    children: [
-      { path: 'organization', name: 'Organization' },
-      { path: 'branch', name: 'Branch' },
-      { path: 'fiscal-year', name: 'Fiscal Year' },
-      { path: 'subscription', name: 'Subscription' },
-      { path: 'users', name: 'Users' },
-    ],
-  },
-];
+import { MenuNode, workspaceSidebarMenu } from '../workspace-nav.model';
 
 const groupSubtitleByPath: Readonly<Record<string, string>> = {
   trading: 'Sales and purchase operations',
@@ -91,7 +42,7 @@ const groupSubtitleByPath: Readonly<Record<string, string>> = {
 export class WorkspaceSidebarComponent {
   private readonly router = inject(Router);
 
-  protected readonly menuList = menuList;
+  protected readonly menuList = workspaceSidebarMenu;
   protected readonly searchShortcutHint = isMacPlatform() ? '⌘K' : 'Ctrl K';
   protected readonly commandSearchOpen = signal(false);
   protected readonly defaultExpandedGroups = computed(() =>

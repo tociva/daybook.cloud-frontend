@@ -6,7 +6,7 @@ import { AppSystemStore } from '../../../core/system/app-system.store';
 import { UserSessionStore } from '../../../components/features/management/data/user-session/user-session.store';
 import { WorkspaceContentComponent } from '../workspace-content/workspace-content.component';
 import { WorkspaceHeaderComponent } from '../workspace-header/workspace-header.component';
-import { WorkspaceNavItem } from '../workspace-nav.model';
+import { BreadcrumbItem, WorkspaceNavItem, workspaceSidebarMenu } from '../workspace-nav.model';
 import { WorkspaceSidebarComponent } from '../workspace-sidebar/workspace-sidebar.component';
 
 const workspaceNavItems: readonly WorkspaceNavItem[] = [
@@ -67,11 +67,57 @@ export class WorkspaceShellComponent {
 
     return name ?? 'Daybook User';
   });
-  protected readonly currentPageTitle = computed(() => {
+  protected readonly breadcrumbItems = computed((): readonly BreadcrumbItem[] => {
     const path = this.currentUrl().split('?')[0] ?? '/';
-    const item = this.workspaceNavItems.find((navItem) => navItem.path === path);
 
-    return item?.label ?? 'Workspace';
+    // Check top-level nav items first (Dashboard, Organization Setup, etc.)
+    const topLevelMatch = this.workspaceNavItems.find((navItem) => navItem.path === path);
+    if (topLevelMatch) {
+      return [
+        { label: 'Home', routerLink: '/app/dashboard' },
+        { label: topLevelMatch.label, current: true },
+      ];
+    }
+
+    // Check sidebar menu groups (e.g. /app/trading/bank-cash)
+    for (const group of workspaceSidebarMenu) {
+      const groupBase = `/app/${group.path}`;
+
+      if (!group.children) {
+        if (path === groupBase) {
+          return [
+            { label: 'Home', routerLink: '/app/dashboard' },
+            { label: group.name, current: true },
+          ];
+        }
+        continue;
+      }
+
+      const groupDefaultPath = group.defaultPath ?? group.children[0]?.path;
+      const groupHref = groupDefaultPath ? `${groupBase}/${groupDefaultPath}` : groupBase;
+
+      for (const child of group.children) {
+        const childPath = `${groupBase}/${child.path}`;
+        if (path === childPath || path.startsWith(`${childPath}/`)) {
+          return [
+            { label: 'Home', routerLink: '/app/dashboard' },
+            { label: group.name, routerLink: groupHref },
+            { label: child.name, current: true },
+          ];
+        }
+      }
+    }
+
+    return [
+      { label: 'Home', routerLink: '/app/dashboard' },
+      { label: 'Workspace', current: true },
+    ];
+  });
+
+  protected readonly currentPageTitle = computed(() => {
+    const items = this.breadcrumbItems();
+    const current = items.find((item) => item.current);
+    return current?.label ?? 'Workspace';
   });
 
   constructor() {
