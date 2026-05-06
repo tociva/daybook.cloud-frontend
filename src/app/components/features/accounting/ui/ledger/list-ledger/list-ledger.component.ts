@@ -1,0 +1,96 @@
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject } from '@angular/core';
+import { Router } from '@angular/router';
+import {
+  TngButtonComponent,
+  TngCardComponent,
+  TngTable,
+  TngTableCellTpl,
+} from '@tailng-ui/components';
+import type { TngTableColumn } from '@tailng-ui/components';
+import { TngIcon } from '@tailng-ui/icons';
+import {
+  CrudFilterPopoverComponent,
+  CrudListQueryService,
+  CrudPaginatorComponent,
+} from '../../../../../../shared/crud';
+import type { CrudFilterField } from '../../../../../../shared/crud';
+import { LedgerStore } from '../../../data/ledger';
+import type { Ledger } from '../../../data/ledger';
+
+@Component({
+  selector: 'app-list-ledger',
+  standalone: true,
+  imports: [
+    TngButtonComponent,
+    TngCardComponent,
+    CrudFilterPopoverComponent,
+    CrudPaginatorComponent,
+    TngIcon,
+    TngTable,
+    TngTableCellTpl,
+  ],
+  templateUrl: './list-ledger.component.html',
+  styleUrl: './list-ledger.component.css',
+  providers: [CrudListQueryService],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class ListLedgerComponent implements OnInit {
+  private readonly router = inject(Router);
+  protected readonly crudQuery = inject(CrudListQueryService);
+  protected readonly ledgerStore = inject(LedgerStore);
+  protected readonly hasError = computed(() => this.ledgerStore.error() !== null);
+
+  protected readonly columns: readonly TngTableColumn<Ledger>[] = [
+    { id: 'name', label: 'Name', sortable: true, width: '14rem' },
+    { id: 'category', label: 'Category', width: '12rem' },
+    { id: 'openingdr', label: 'Opening DR', sortable: true, width: '10rem', align: 'end', headerAlign: 'end' },
+    { id: 'openingcr', label: 'Opening CR', sortable: true, width: '10rem', align: 'end', headerAlign: 'end' },
+    { id: 'description', label: 'Description', sortable: true, truncate: true },
+    { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '8rem' },
+  ];
+
+  protected readonly filterFields: readonly CrudFilterField[] = [
+    { id: 'name', label: 'Name', placeholder: 'Ledger name', type: 'text' },
+    { id: 'description', label: 'Description', placeholder: 'Description text', type: 'text' },
+  ];
+
+  ngOnInit(): void {
+    this.crudQuery.init((filter) =>
+      void this.ledgerStore.loadLedgers({ ...filter, includes: ['category'] }),
+    );
+  }
+
+  protected createLedger(): void {
+    void this.router.navigate(['/app/accounting/ledger/create'], {
+      queryParams: { burl: this.router.url },
+    });
+  }
+
+  protected viewLedger(item: Ledger): void {
+    if (item.id) {
+      void this.router.navigate(['/app/accounting/ledger', item.id], {
+        queryParams: { burl: this.router.url },
+      });
+    }
+  }
+
+  protected editLedger(item: Ledger): void {
+    if (item.id) {
+      void this.router.navigate(['/app/accounting/ledger', item.id, 'edit'], {
+        queryParams: { burl: this.router.url },
+      });
+    }
+  }
+
+  protected deleteLedger(item: Ledger): void {
+    if (item.id) {
+      void this.router.navigate(['/app/accounting/ledger', item.id, 'delete'], {
+        queryParams: { burl: this.router.url },
+      });
+    }
+  }
+
+  protected openLedgerCategories(): void {
+    void this.router.navigate(['/app/accounting/ledger-category']);
+  }
+}

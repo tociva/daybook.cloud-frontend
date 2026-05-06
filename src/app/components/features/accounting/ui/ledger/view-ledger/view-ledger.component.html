@@ -1,0 +1,67 @@
+<main class="accounting-page">
+  <tng-card variant="outline" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Ledger Details</tng-card-title>
+      <tng-card-description>Review ledger information and opening balances.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (ledgerStore.error()) {
+        <div class="notice notice--danger">{{ ledgerStore.error() }}</div>
+      }
+
+      @if (ledgerStore.isLoading() && !ledgerStore.selectedItem()) {
+        <div class="notice">Loading ledger...</div>
+      } @else if (ledgerStore.selectedItem(); as ledger) {
+
+        <dl class="details-grid">
+          <div class="wide">
+            <dt>Name</dt>
+            <dd>{{ ledger.name }}</dd>
+          </div>
+          <div>
+            <dt>Category</dt>
+            <dd>{{ ledger.category?.name || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Category Type</dt>
+            <dd>{{ ledger.category?.props?.type || '—' }}</dd>
+          </div>
+          <div class="wide">
+            <dt>Description</dt>
+            <dd>{{ ledger.description || 'No description' }}</dd>
+          </div>
+        </dl>
+
+        <div class="section-title">Opening Balances</div>
+        <dl class="details-grid">
+          <div>
+            <dt>Opening DR</dt>
+            <dd>{{ ledger.openingdr != null ? ledger.openingdr : '—' }}</dd>
+          </div>
+          <div>
+            <dt>Opening CR</dt>
+            <dd>{{ ledger.openingcr != null ? ledger.openingcr : '—' }}</dd>
+          </div>
+        </dl>
+
+      } @else {
+        <div class="notice">Ledger not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button />
+        <tng-button type="button" appearance="outline" tone="danger" (click)="delete()">
+          <tng-icon icon="trash2" aria-hidden="true" />
+          Delete
+        </tng-button>
+        <tng-button type="button" appearance="solid" tone="primary" (click)="edit()">
+          <tng-icon icon="pencil" aria-hidden="true" />
+          Edit
+        </tng-button>
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>

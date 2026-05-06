@@ -1,0 +1,68 @@
+<main class="accounting-page">
+  <tng-card variant="outline" tone="danger" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Delete Ledger</tng-card-title>
+      <tng-card-description>This action cannot be undone.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (ledgerStore.error()) {
+        <div class="notice notice--danger">{{ ledgerStore.error() }}</div>
+      }
+
+      @if (ledgerStore.isLoading() && !ledgerStore.selectedItem()) {
+        <div class="notice">Loading ledger...</div>
+      } @else if (ledgerStore.selectedItem(); as ledger) {
+
+        <dl class="details-grid">
+          <div class="wide">
+            <dt>Name</dt>
+            <dd>{{ ledger.name }}</dd>
+          </div>
+          <div>
+            <dt>Category</dt>
+            <dd>{{ ledger.category?.name || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Opening DR</dt>
+            <dd>{{ ledger.openingdr != null ? ledger.openingdr : '—' }}</dd>
+          </div>
+          <div>
+            <dt>Opening CR</dt>
+            <dd>{{ ledger.openingcr != null ? ledger.openingcr : '—' }}</dd>
+          </div>
+          @if (ledger.description) {
+            <div class="wide">
+              <dt>Description</dt>
+              <dd>{{ ledger.description }}</dd>
+            </div>
+          }
+        </dl>
+
+        <label class="confirm-row">
+          <tng-checkbox [checked]="confirmed()" (checkedChange)="confirmed.set(!!$event)" />
+          <span>I understand that <strong>{{ ledger.name }}</strong> will be permanently deleted.</span>
+        </label>
+
+      } @else {
+        <div class="notice">Ledger not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button label="Cancel" />
+        <tng-button
+          type="button"
+          appearance="solid"
+          tone="danger"
+          [disabled]="!confirmed() || ledgerStore.isLoading()"
+          (click)="deleteLedger()"
+        >
+          <tng-icon icon="trash2" aria-hidden="true" />
+          {{ ledgerStore.isLoading() ? 'Deleting…' : 'Delete ledger' }}
+        </tng-button>
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>

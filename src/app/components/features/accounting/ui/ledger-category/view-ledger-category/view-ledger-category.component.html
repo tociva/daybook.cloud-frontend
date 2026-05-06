@@ -1,0 +1,53 @@
+<main class="accounting-page">
+  <tng-card variant="outline" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Ledger Category Details</tng-card-title>
+      <tng-card-description>Review ledger category information.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (ledgerCategoryStore.error()) {
+        <div class="notice notice--danger">{{ ledgerCategoryStore.error() }}</div>
+      }
+
+      @if (ledgerCategoryStore.isLoading() && !ledgerCategoryStore.selectedItem()) {
+        <div class="notice">Loading ledger category...</div>
+      } @else if (ledgerCategoryStore.selectedItem(); as cat) {
+        <dl class="details-grid">
+          <div class="wide">
+            <dt>Name</dt>
+            <dd>{{ cat.name }}</dd>
+          </div>
+          <div>
+            <dt>Type</dt>
+            <dd>{{ cat.props?.type || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Parent Category</dt>
+            <dd>{{ cat.parent?.name || '—' }}</dd>
+          </div>
+          <div class="wide">
+            <dt>Description</dt>
+            <dd>{{ cat.description || 'No description' }}</dd>
+          </div>
+        </dl>
+      } @else {
+        <div class="notice">Ledger category not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button />
+        <tng-button type="button" appearance="outline" tone="danger" (click)="delete()">
+          <tng-icon icon="trash2" aria-hidden="true" />
+          Delete
+        </tng-button>
+        <tng-button type="button" appearance="solid" tone="primary" (click)="edit()">
+          <tng-icon icon="pencil" aria-hidden="true" />
+          Edit
+        </tng-button>
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>

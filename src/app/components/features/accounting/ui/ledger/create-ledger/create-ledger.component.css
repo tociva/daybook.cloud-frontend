@@ -1,0 +1,67 @@
+.accounting-page {
+  padding: 1.25rem;
+}
+
+tng-card {
+  max-width: 60rem;
+}
+
+.notice {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+}
+
+.notice--danger {
+  border-color: var(--tng-semantic-accent-danger);
+  color: var(--tng-semantic-accent-danger);
+}
+
+.section-label {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  margin: 1.25rem 0 0.25rem;
+  text-transform: uppercase;
+}
+
+.field-grid {
+  display: grid;
+  gap: 0.25rem 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.field {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.field--wide {
+  grid-column: 1 / -1;
+}
+
+tng-input,
+tng-autocomplete,
+tng-textarea {
+  width: 100%;
+}
+
+.field-error {
+  color: var(--tng-semantic-accent-danger);
+  font-size: 0.8rem;
+  margin: 0;
+  min-height: 1.1rem;
+}
+
+.field-error--empty {
+  color: transparent;
+}
+
+@media (max-width: 700px) {
+  .field-grid {
+    grid-template-columns: 1fr;
+  }
+}

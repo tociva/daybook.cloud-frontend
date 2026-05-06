@@ -1,0 +1,113 @@
+<main class="accounting-page">
+  <tng-card variant="outline" padding="lg">
+    <tng-card-header>
+      <tng-card-title>{{ title() }}</tng-card-title>
+      <tng-card-description>Define the ledger name, category, and optional opening balances.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (ledgerStore.error()) {
+        <div class="notice notice--danger">{{ ledgerStore.error() }}</div>
+      }
+
+      @if (ledgerStore.isLoading() && mode() === 'edit' && !ledgerStore.selectedItem()) {
+        <div class="notice">Loading ledger...</div>
+      } @else {
+        <form (submit)="submitForm($event)" novalidate>
+
+          <div class="field-grid">
+
+            <div class="field field--wide">
+              <tng-label forId="l-name" required>Name</tng-label>
+              <tng-input
+                id="l-name"
+                placeholder="e.g. Cash at Bank"
+                [formField]="ledgerForm.name"
+                [ariaInvalid]="nameError() !== null"
+              />
+              <p class="field-error" [class.field-error--empty]="!nameError()">
+                {{ nameError() || ' ' }}
+              </p>
+            </div>
+
+            <div class="field field--wide">
+              <tng-label forId="l-category" required>Category</tng-label>
+              <tng-autocomplete
+                id="l-category"
+                placeholder="Search ledger category..."
+                ariaLabel="Ledger category"
+                [options]="ledgerCategoryStore.items()"
+                [formField]="ledgerForm.categoryId"
+                [getOptionValue]="categoryOptionValue"
+                [getOptionLabel]="categoryOptionLabel"
+                [trackBy]="categoryTrackBy"
+                (valueChange)="onCategoryChange($event)"
+              />
+              <p class="field-error" [class.field-error--empty]="!categoryError()">
+                {{ categoryError() || ' ' }}
+              </p>
+            </div>
+
+          </div>
+
+          <p class="section-label">Opening Balances</p>
+          <div class="field-grid">
+
+            <div class="field">
+              <tng-label forId="l-openingdr">Opening DR</tng-label>
+              <tng-input
+                id="l-openingdr"
+                type="number"
+                placeholder="0.00"
+                [formField]="ledgerForm.openingdr"
+              />
+              <p class="field-error field-error--empty">{{ ' ' }}</p>
+            </div>
+
+            <div class="field">
+              <tng-label forId="l-openingcr">Opening CR</tng-label>
+              <tng-input
+                id="l-openingcr"
+                type="number"
+                placeholder="0.00"
+                [formField]="ledgerForm.openingcr"
+              />
+              <p class="field-error field-error--empty">{{ ' ' }}</p>
+            </div>
+
+            <div class="field field--wide">
+              <tng-label forId="l-description">Description</tng-label>
+              <tng-textarea
+                id="l-description"
+                placeholder="Optional notes about this ledger"
+                rows="3"
+                [formField]="ledgerForm.description"
+              />
+              <p class="field-error field-error--empty">{{ ' ' }}</p>
+            </div>
+
+          </div>
+
+          <tng-card-footer>
+            <tng-card-actions align="end">
+              <app-burl-back-button label="Cancel" />
+              <tng-button
+                type="submit"
+                appearance="solid"
+                tone="primary"
+                [disabled]="ledgerStore.isLoading()"
+              >
+                <tng-icon
+                  [icon]="mode() === 'edit' ? 'save' : 'plus'"
+                  aria-hidden="true"
+                />
+                {{ mode() === 'edit' ? 'Save changes' : 'Create ledger' }}
+              </tng-button>
+            </tng-card-actions>
+          </tng-card-footer>
+
+        </form>
+      }
+    </tng-card-content>
+  </tng-card>
+</main>

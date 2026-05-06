@@ -92,5 +92,19 @@ export const routes: Routes = [
         (m) => m.fiscalYearRoutes,
       ),
   },
+  {
+    path: 'app/accounting/ledger-category',
+    loadChildren: () =>
+      import('./components/features/accounting/ui/ledger-category/ledger-category.routes').then(
+        (m) => m.ledgerCategoryRoutes,
+      ),
+  },
+  {
+    path: 'app/accounting/ledger',
+    loadChildren: () =>
+      import('./components/features/accounting/ui/ledger/ledger.routes').then(
+        (m) => m.ledgerRoutes,
+      ),
+  },
   { path: 'bootstrap/bootstrap-organization', component: BootstrapOrganizationComponent },
 ];
