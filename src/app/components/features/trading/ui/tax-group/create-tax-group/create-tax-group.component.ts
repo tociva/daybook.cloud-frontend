@@ -1,3 +1,4 @@
+import { DOCUMENT } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
@@ -68,6 +69,7 @@ type TaxGroupFormModel = {
   styleUrl: './create-tax-group.component.css',
 })
 export class CreateTaxGroupComponent implements OnInit {
+  private readonly document = inject(DOCUMENT);
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(TaxGroupFacade);
   protected readonly taxGroupStore = inject(TaxGroupStore);
@@ -210,6 +212,12 @@ export class CreateTaxGroupComponent implements OnInit {
       ...m,
       groups: [...m.groups, { mode: '', taxids: [] }],
     }));
+
+    const newIndex = this.taxGroupModel().groups.length - 1;
+    setTimeout(() => {
+      const inputEl = this.document.getElementById(`tax-group-mode-${newIndex}`);
+      inputEl?.focus();
+    }, 0);
   }
 
   protected removeGroup(index: number): void {
