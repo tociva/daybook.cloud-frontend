@@ -45,19 +45,19 @@
                 <div class="group-header">
                   <span class="mode-badge">{{ group.mode }}</span>
                   <span class="tax-count">
-                    {{ group.taxids?.length || 0 }}
-                    {{ (group.taxids?.length || 0) === 1 ? 'tax' : 'taxes' }}
+                    {{ getGroupTaxIds(group).length }}
+                    {{ getGroupTaxIds(group).length === 1 ? 'tax' : 'taxes' }}
                   </span>
                 </div>
 
-                @if (group.taxids?.length) {
+                @if (getGroupTaxIds(group).length) {
                   <div class="tax-table">
                     <div class="tax-table-head">
                       <span>Name</span>
                       <span>Short Name</span>
                       <span>Rate (%)</span>
                     </div>
-                    @for (taxId of group.taxids; track taxId) {
+                    @for (taxId of getGroupTaxIds(group); track taxId) {
                       @if (getTaxById(taxId); as tax) {
                         <div class="tax-table-row">
                           <span class="tax-name">{{ tax.name }}</span>

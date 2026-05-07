@@ -105,7 +105,7 @@
                       [id]="'tax-group-taxes-' + i"
                       placeholder="Search for a tax..."
                       ariaLabel="Taxes"
-                      [options]="taxStore.items()"
+                      [options]="taxOptions()"
                       [value]="taxGroupModel().groups[i].taxids"
                       [getOptionValue]="taxOptionValue"
                       [getOptionLabel]="taxOptionLabel"

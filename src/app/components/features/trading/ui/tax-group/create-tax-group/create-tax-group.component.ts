@@ -153,21 +153,59 @@ export class CreateTaxGroupComponent implements OnInit {
   protected readonly taxOptionLabel = (tax: Tax): string => tax.name ?? '';
   protected readonly taxTrackBy = (_index: number, tax: Tax): string => tax.id ?? '';
 
+  /**
+   * Cache of Tax objects for already-selected IDs.
+   * Prevents chips from falling back to showing the raw ID when a search
+   * query replaces taxStore.items() with filtered results that no longer
+   * contain the selected taxes.
+   */
+  private readonly taxCache = signal<readonly Tax[]>([]);
+
+  /**
+   * The options list passed to tng-multi-autocomplete.
+   * Always includes the cached selected taxes so chip labels resolve correctly
+   * regardless of what the current search query returns.
+   */
+  protected readonly taxOptions = computed(() => {
+    const items = this.taxStore.items();
+    const cached = this.taxCache();
+    if (cached.length === 0) return items;
+    const liveIds = new Set(items.map((t) => t.id));
+    const extra = cached.filter((t) => t.id && !liveIds.has(t.id));
+    return extra.length ? [...extra, ...items] : items;
+  });
+
   // ──────────────────────────────────────────────────────────────────────────
 
   async ngOnInit(): Promise<void> {
-    await this.taxStore.loadTaxes({});
+    // Read routeId synchronously first so we can decide the tax load strategy.
     const routeId = this.route.snapshot.paramMap.get('id');
     this.id.set(routeId);
 
     if (!routeId) {
+      // Create mode: a small first page is enough for the initial dropdown.
+      await this.taxStore.loadTaxes({});
       this.taxGroupStore.clearSelectedItem();
       return;
     }
 
+    // Edit mode: load taxes with a large limit so every selected tax is present
+    // in taxStore.items() when we seed the taxCache below.  The default page
+    // size is only 10, which may not cover all the taxes used in this group.
+    await this.taxStore.loadTaxes({ limit: 500 });
+
     const taxGroup = await this.taxGroupStore.loadTaxGroupById(routeId);
     if (taxGroup) {
       this.patchModelFromTaxGroup(taxGroup);
+      // Seed the cache so chips show names even after a search query narrows
+      // taxStore.items() back down to a filtered page.
+      const selectedIds = new Set(
+        (taxGroup.groups ?? []).flatMap((g) => [
+          ...(g.taxids ?? []),
+          ...(g.taxes ?? []),
+        ]),
+      );
+      this.taxCache.set(this.taxStore.items().filter((t) => t.id && selectedIds.has(t.id)));
     }
   }
 
@@ -181,6 +219,21 @@ export class CreateTaxGroupComponent implements OnInit {
   }
 
   protected onTaxIdsChange(groupIndex: number, ids: readonly string[]): void {
+    // Keep the cache up to date so chip labels survive subsequent search queries.
+    const selected = this.taxStore.items().filter((t) => t.id && ids.includes(t.id));
+    this.taxCache.update((cache) => {
+      const cacheIds = new Set(cache.map((t) => t.id));
+      const incoming = selected.filter((t) => !cacheIds.has(t.id));
+      // Also prune IDs that are no longer selected across any group.
+      const allSelectedIds = new Set([
+        ...this.taxGroupModel()
+          .groups.flatMap((g) => g.taxids),
+        ...ids,
+      ]);
+      const pruned = cache.filter((t) => t.id && allSelectedIds.has(t.id));
+      return incoming.length ? [...pruned, ...incoming] : pruned;
+    });
+
     this.taxGroupModel.update((m) => ({
       ...m,
       groups: m.groups.map((row, ri) =>
