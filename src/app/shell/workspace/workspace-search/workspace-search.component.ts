@@ -1,6 +1,6 @@
 import { Component, HostListener, signal } from '@angular/core';
 import { TngIcon } from '@tailng-ui/icons';
-import { isMacPlatform } from '../../../../core/system/platform.utils';
+import { isMacPlatform } from '../../../core/system/platform.utils';
 import { CommandSearchDialogComponent } from '../command-search-dialog/command-search-dialog.component';
 
 @Component({

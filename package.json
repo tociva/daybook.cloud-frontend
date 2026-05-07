@@ -27,6 +27,7 @@
     "@tailng-ui/primitives": "^0.49.0",
     "@tailng-ui/theme": "^0.35.0",
     "dayjs": "^1.11.20",
+    "fuse.js": "^7.3.0",
     "oidc-client-ts": "^3.5.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"

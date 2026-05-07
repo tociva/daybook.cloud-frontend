@@ -1,0 +1,212 @@
+[
+  {
+    "title": "List Bank & Cash",
+    "description": "View and manage cash and bank accounts.",
+    "keywords": ["list bank cash", "bank", "cash", "accounts", "trading"],
+    "url": "/app/trading/bank-cash"
+  },
+  {
+    "title": "Create Bank & Cash",
+    "description": "Add a new bank or cash account.",
+    "keywords": ["create bank cash", "bank", "cash", "new account"],
+    "url": "/app/trading/bank-cash/create"
+  },
+  {
+    "title": "List Tax",
+    "description": "View and manage trading tax records.",
+    "keywords": ["list tax", "tax", "gst", "trading"],
+    "url": "/app/trading/tax"
+  },
+  {
+    "title": "Create Tax",
+    "description": "Add a new trading tax entry.",
+    "keywords": ["create tax", "tax", "gst", "new tax"],
+    "url": "/app/trading/tax/create"
+  },
+  {
+    "title": "List Item",
+    "description": "View and manage inventory items.",
+    "keywords": ["list item", "item", "inventory", "product"],
+    "url": "/app/trading/item"
+  },
+  {
+    "title": "Create Item",
+    "description": "Add a new inventory item.",
+    "keywords": ["create item", "item", "inventory", "product"],
+    "url": "/app/trading/item/create"
+  },
+  {
+    "title": "List Customer",
+    "description": "View and manage customer records.",
+    "keywords": ["list customer", "customer", "client", "party"],
+    "url": "/app/trading/customer"
+  },
+  {
+    "title": "Create Customer",
+    "description": "Add a new customer record.",
+    "keywords": ["create customer", "customer", "client", "new customer"],
+    "url": "/app/trading/customer/create"
+  },
+  {
+    "title": "List Sale Invoice",
+    "description": "View and manage sale invoices.",
+    "keywords": ["list sale invoice", "sale invoice", "sales", "billing"],
+    "url": "/app/trading/sale-invoice"
+  },
+  {
+    "title": "Create Sale Invoice",
+    "description": "Create a new sale invoice.",
+    "keywords": ["create sale invoice", "sale invoice", "sales", "billing"],
+    "url": "/app/trading/sale-invoice/create"
+  },
+  {
+    "title": "List Receipts",
+    "description": "View and manage customer receipts.",
+    "keywords": ["list receipts", "customer receipt", "collections", "payments"],
+    "url": "/app/trading/customer-receipt"
+  },
+  {
+    "title": "Create Receipt",
+    "description": "Record a new customer receipt.",
+    "keywords": ["create receipt", "customer receipt", "collections", "payments"],
+    "url": "/app/trading/customer-receipt/create"
+  },
+  {
+    "title": "List Vendor",
+    "description": "View and manage vendor records.",
+    "keywords": ["list vendor", "vendor", "supplier", "party"],
+    "url": "/app/trading/vendor"
+  },
+  {
+    "title": "Create Vendor",
+    "description": "Add a new vendor record.",
+    "keywords": ["create vendor", "vendor", "supplier", "new vendor"],
+    "url": "/app/trading/vendor/create"
+  },
+  {
+    "title": "Purchase Invoice",
+    "description": "Create and review purchase invoices.",
+    "keywords": ["purchase invoice", "purchase", "invoice", "vendor"],
+    "url": "/app/trading/purchase-invoice"
+  },
+  {
+    "title": "Purchase Return",
+    "description": "Track returns against purchase invoices.",
+    "keywords": ["purchase return", "returns", "vendor return", "purchase"],
+    "url": "/app/trading/purchase-return"
+  },
+  {
+    "title": "Payments",
+    "description": "Record vendor payments and settlements.",
+    "keywords": ["payments", "vendor payment", "settlement", "payout"],
+    "url": "/app/trading/vendor-payment"
+  },
+  {
+    "title": "GST Reconciliation",
+    "description": "Reconcile GST input data and filings.",
+    "keywords": ["gst", "reconciliation", "gstr2b", "tax"],
+    "url": "/app/trading/gst/gstr2b"
+  },
+  {
+    "title": "List Ledger",
+    "description": "View and manage accounting ledgers.",
+    "keywords": ["list ledger", "ledger", "accounting", "accounts"],
+    "url": "/app/accounting/ledger"
+  },
+  {
+    "title": "Create Ledger",
+    "description": "Add a new accounting ledger.",
+    "keywords": ["create ledger", "ledger", "accounting", "accounts"],
+    "url": "/app/accounting/ledger/create"
+  },
+  {
+    "title": "Journal",
+    "description": "Record accounting journal entries.",
+    "keywords": ["journal", "entries", "accounting", "voucher"],
+    "url": "/app/accounting/journal"
+  },
+  {
+    "title": "Documents",
+    "description": "Access accounting documents and records.",
+    "keywords": ["documents", "files", "records", "accounting"],
+    "url": "/app/accounting/documents"
+  },
+  {
+    "title": "Trial balance",
+    "description": "View trial balance report.",
+    "keywords": ["trial balance", "report", "accounting", "books"],
+    "url": "/app/accounting/reports/trial-balance"
+  },
+  {
+    "title": "Daybook",
+    "description": "Review daily accounting transactions.",
+    "keywords": ["daybook", "transactions", "daily", "accounting"],
+    "url": "/app/accounting/daybook"
+  },
+  {
+    "title": "Profit and loss",
+    "description": "View profit and loss statement.",
+    "keywords": ["profit and loss", "pnl", "report", "accounting"],
+    "url": "/app/accounting/reports/profit-loss"
+  },
+  {
+    "title": "Balance sheet",
+    "description": "View balance sheet report.",
+    "keywords": ["balance sheet", "report", "financials", "accounting"],
+    "url": "/app/accounting/reports/balance-sheet"
+  },
+  {
+    "title": "Banking",
+    "description": "Manage accounting banking operations.",
+    "keywords": ["banking", "bank", "reconciliation", "accounting"],
+    "url": "/app/accounting/banking"
+  },
+  {
+    "title": "List Organization",
+    "description": "View and manage organizations.",
+    "keywords": ["list organization", "organization", "company", "management"],
+    "url": "/app/management/organization"
+  },
+  {
+    "title": "Create Organization",
+    "description": "Add a new organization.",
+    "keywords": ["create organization", "organization", "company", "setup"],
+    "url": "/app/management/organization/create"
+  },
+  {
+    "title": "List Branch",
+    "description": "View and manage organization branches.",
+    "keywords": ["list branch", "branch", "location", "organization"],
+    "url": "/app/management/branch"
+  },
+  {
+    "title": "Create Branch",
+    "description": "Add a new branch for the organization.",
+    "keywords": ["create branch", "branch", "location", "organization"],
+    "url": "/app/management/branch/create"
+  },
+  {
+    "title": "List Fiscal Year",
+    "description": "View and manage fiscal years.",
+    "keywords": ["list fiscal year", "fiscal year", "financial year", "period"],
+    "url": "/app/management/fiscal-year"
+  },
+  {
+    "title": "Create Fiscal Year",
+    "description": "Add a new fiscal year.",
+    "keywords": ["create fiscal year", "fiscal year", "financial year", "period"],
+    "url": "/app/management/fiscal-year/create"
+  },
+  {
+    "title": "Subscription",
+    "description": "View and manage subscription details.",
+    "keywords": ["subscription", "plan", "billing", "management"],
+    "url": "/app/management/subscription"
+  },
+  {
+    "title": "Users",
+    "description": "Manage workspace users and access.",
+    "keywords": ["users", "access", "roles", "management"],
+    "url": "/app/management/users"
+  }
+]

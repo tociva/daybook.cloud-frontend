@@ -11,23 +11,10 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { TngAutocompleteComponent, TngDialogComponent } from '@tailng-ui/components';
-import { workspaceSidebarMenu } from '../../workspace-nav.model';
-
-type SearchItem = {
-  label: string;
-  groupLabel: string;
-  path: string;
-};
-
-const allSearchItems: readonly SearchItem[] = workspaceSidebarMenu.flatMap((group) =>
-  (group.children ?? []).map((child) => ({
-    label: child.name,
-    groupLabel: group.name,
-    path: child.path.startsWith('/') ? child.path : `/app/${group.path}/${child.path}`,
-  })),
-);
+import { SearchEntry, SearchIndexService } from './search-index.service';
 
 @Component({
   selector: 'app-command-search-dialog',
@@ -45,29 +32,28 @@ export class CommandSearchDialogComponent implements OnChanges {
   private readonly autocompleteEl!: ElementRef<HTMLElement>;
 
   private readonly router = inject(Router);
+  private readonly searchIndex = toSignal(inject(SearchIndexService).index$);
 
   protected readonly query = signal('');
 
-  protected readonly filteredItems = computed(() => {
-    const q = this.query().toLowerCase().trim();
-    if (!q) return allSearchItems;
-    return allSearchItems.filter(
-      (item) =>
-        item.label.toLowerCase().includes(q) ||
-        item.groupLabel.toLowerCase().includes(q),
-    );
+  protected readonly filteredItems = computed((): readonly SearchEntry[] => {
+    const index = this.searchIndex();
+    if (!index) return [];
+
+    const q = this.query().trim();
+    if (!q) return index.entries;
+
+    return index.fuse.search(q).map((r) => r.item);
   });
 
-  protected readonly getItemValue = (item: SearchItem): string => item.path;
-  protected readonly getItemLabel = (item: SearchItem): string => item.label;
-  protected readonly trackItem = (_: number, item: SearchItem): string => item.path;
+  protected readonly getItemValue = (item: SearchEntry): string => item.url;
+  protected readonly getItemLabel = (item: SearchEntry): string => item.title;
+  protected readonly trackItem = (_: number, item: SearchEntry): string => item.url;
 
   ngOnChanges(changes: SimpleChanges): void {
     const openChange = changes['open'];
     if (openChange?.currentValue === true) {
-      // Seed the query with any pre-typed character before the dialog opens.
       this.query.set(this.initialValue);
-      // Wait one tick for the dialog animation, then focus the inner input.
       setTimeout(() => {
         const input = this.autocompleteEl?.nativeElement?.querySelector('input');
         input?.focus();
@@ -75,9 +61,9 @@ export class CommandSearchDialogComponent implements OnChanges {
     }
   }
 
-  protected onValueChange(path: string | null): void {
-    if (!path) return;
-    void this.router.navigateByUrl(path);
+  protected onValueChange(url: string | null): void {
+    if (!url) return;
+    void this.router.navigateByUrl(url);
     this.openChange.emit(false);
   }
 

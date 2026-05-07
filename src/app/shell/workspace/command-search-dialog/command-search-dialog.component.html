@@ -22,8 +22,8 @@
       >
         <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
           <span class="search-option">
-            <span class="search-option-group">{{ option.groupLabel }}</span>
-            <span class="search-option-label">{{ label }}</span>
+            <span class="search-option-title">{{ label }}</span>
+            <span class="search-option-desc">{{ option.description }}</span>
           </span>
         </ng-template>
       </tng-autocomplete>
