@@ -19,4 +19,3 @@ export const initialTaxState: TaxState = {
     selectedItem: null,
   },
 };
-

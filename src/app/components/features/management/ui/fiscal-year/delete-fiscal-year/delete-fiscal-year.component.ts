@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
   TngButtonComponent,
@@ -36,14 +36,18 @@ import { formatDisplayDate } from '../../../../../../core/date/dayjs-date.utils'
   styleUrl: './delete-fiscal-year.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DeleteFiscalYearComponent implements OnInit {
+export class DeleteFiscalYearComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(FiscalYearFacade);
   protected readonly fiscalYearStore = inject(FiscalYearStore);
   protected readonly confirmed = signal(false);
   protected readonly formatDate = formatDisplayDate;
 
-  async ngOnInit(): Promise<void> {
+  constructor() {
+    void this.loadInitialState();
+  }
+
+  private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       await this.fiscalYearStore.loadFiscalYearById(id, { includes: ['branch'] });

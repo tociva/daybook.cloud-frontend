@@ -1,6 +1,11 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
-import type { Customer, CustomerGetQuery, CustomerListQuery, CustomerPayload } from './customer.model';
+import type {
+  Customer,
+  CustomerGetQuery,
+  CustomerListQuery,
+  CustomerPayload,
+} from './customer.model';
 import { CustomerService } from './customer.service';
 import { initialCustomerState } from './customer.state';
 

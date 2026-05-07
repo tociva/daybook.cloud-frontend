@@ -1,6 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { CrudApiService } from '../../../../../shared/crud';
-import type { Organization, OrganizationListQuery, OrganizationPayload } from './organization.model';
+import type {
+  Organization,
+  OrganizationListQuery,
+  OrganizationPayload,
+} from './organization.model';
 
 const ORG_ENDPOINT = '/organization/organization';
 

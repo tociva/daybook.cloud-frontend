@@ -32,4 +32,3 @@ export class TaxService {
     return this.crudApi.update<Tax, TaxPayload>(TAX_ENDPOINT, id, payload);
   }
 }
-

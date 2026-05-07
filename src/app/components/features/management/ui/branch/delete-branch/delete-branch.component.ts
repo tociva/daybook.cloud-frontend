@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
   TngButtonComponent,
@@ -35,13 +35,17 @@ import { BranchFacade, BranchStore } from '../../../data/branch';
   styleUrl: './delete-branch.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DeleteBranchComponent implements OnInit {
+export class DeleteBranchComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(BranchFacade);
   protected readonly branchStore = inject(BranchStore);
   protected readonly confirmed = signal(false);
 
-  async ngOnInit(): Promise<void> {
+  constructor() {
+    void this.loadInitialState();
+  }
+
+  private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       await this.branchStore.loadBranchById(id, { includes: ['organization'] });

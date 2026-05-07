@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   TngButtonComponent,
@@ -40,7 +40,7 @@ type StatusBadgeTone = 'danger' | 'success' | 'warning';
   styleUrl: './list-bank-cash.component.css',
   providers: [CrudListQueryService],
 })
-export class ListBankCashComponent implements OnInit {
+export class ListBankCashComponent {
   private readonly router = inject(Router);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly bankCashStore = inject(BankCashStore);
@@ -77,7 +77,7 @@ export class ListBankCashComponent implements OnInit {
     },
   ];
 
-  ngOnInit(): void {
+  constructor() {
     this.crudQuery.init((filter) => void this.bankCashStore.loadBankCashes(filter));
   }
 

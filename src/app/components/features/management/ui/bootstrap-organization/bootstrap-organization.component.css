@@ -107,7 +107,7 @@ tng-textarea {
   min-width: 0;
 }
 
-.numbering-template-input-group-icon{
+.numbering-template-input-group-icon {
   border-radius: 0.35rem;
   color: var(--tng-semantic-foreground-secondary);
   cursor: pointer;

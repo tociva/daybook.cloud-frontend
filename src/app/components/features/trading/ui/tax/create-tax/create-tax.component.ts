@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -50,7 +50,7 @@ type TaxFormModel = {
   templateUrl: './create-tax.component.html',
   styleUrl: './create-tax.component.css',
 })
-export class CreateTaxComponent implements OnInit {
+export class CreateTaxComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(TaxFacade);
   protected readonly taxStore = inject(TaxStore);
@@ -83,11 +83,9 @@ export class CreateTaxComponent implements OnInit {
 
   protected readonly setupSteps = computed(() => {
     const model = this.taxModel();
-    const identityCompleted =
-      model.name.trim().length > 0 && model.shortname.trim().length > 0;
+    const identityCompleted = model.name.trim().length > 0 && model.shortname.trim().length > 0;
     const rateCompleted =
-      this.isValidNonNegativeNumber(model.rate) &&
-      this.isValidNonNegativeNumber(model.appliedto);
+      this.isValidNonNegativeNumber(model.rate) && this.isValidNonNegativeNumber(model.appliedto);
     const notesCompleted = model.description.trim().length > 0;
 
     return [
@@ -117,7 +115,11 @@ export class CreateTaxComponent implements OnInit {
     return firstPending?.value ?? 'notes';
   });
 
-  async ngOnInit(): Promise<void> {
+  constructor() {
+    void this.loadInitialState();
+  }
+
+  private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     this.id.set(id);
 
@@ -185,4 +187,3 @@ export class CreateTaxComponent implements OnInit {
     return Number.isFinite(numberValue) && numberValue >= 0;
   }
 }
-

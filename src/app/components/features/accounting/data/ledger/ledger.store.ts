@@ -1,11 +1,6 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
-import type {
-  Ledger,
-  LedgerGetQuery,
-  LedgerListQuery,
-  LedgerPayload,
-} from './ledger.model';
+import type { Ledger, LedgerGetQuery, LedgerListQuery, LedgerPayload } from './ledger.model';
 import { LedgerService } from './ledger.service';
 import { initialLedgerState } from './ledger.state';
 
@@ -74,8 +69,7 @@ export const LedgerStore = signalStore(
               error: null,
               isLoading: false,
               items: state.ledger.items.filter((i) => i.id !== id),
-              selectedItem:
-                state.ledger.selectedItem?.id === id ? null : state.ledger.selectedItem,
+              selectedItem: state.ledger.selectedItem?.id === id ? null : state.ledger.selectedItem,
             },
           }));
           return true;

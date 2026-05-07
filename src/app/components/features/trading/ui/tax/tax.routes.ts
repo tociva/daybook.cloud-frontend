@@ -25,4 +25,3 @@ export const taxRoutes: Routes = [
       import('./delete-tax/delete-tax.component').then((m) => m.DeleteTaxComponent),
   },
 ];
-

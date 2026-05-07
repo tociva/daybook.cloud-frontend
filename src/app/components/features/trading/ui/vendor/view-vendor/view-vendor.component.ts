@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   TngButtonComponent,
@@ -33,13 +33,17 @@ import { VendorStore } from '../../../data/vendor';
   templateUrl: './view-vendor.component.html',
   styleUrl: './view-vendor.component.css',
 })
-export class ViewVendorComponent implements OnInit {
+export class ViewVendorComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly burlNavigation = inject(BurlNavigationService);
   protected readonly vendorStore = inject(VendorStore);
 
-  async ngOnInit(): Promise<void> {
+  constructor() {
+    void this.loadInitialState();
+  }
+
+  private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       await this.vendorStore.loadVendorById(id);

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   TngButtonComponent,
@@ -39,13 +39,17 @@ type StatusTagTone = 'danger' | 'success' | 'warning';
   templateUrl: './view-tax.component.html',
   styleUrl: './view-tax.component.css',
 })
-export class ViewTaxComponent implements OnInit {
+export class ViewTaxComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly burlNavigation = inject(BurlNavigationService);
   protected readonly taxStore = inject(TaxStore);
 
-  async ngOnInit(): Promise<void> {
+  constructor() {
+    void this.loadInitialState();
+  }
+
+  private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       await this.taxStore.loadTaxById(id);
@@ -88,4 +92,3 @@ export class ViewTaxComponent implements OnInit {
     }
   }
 }
-

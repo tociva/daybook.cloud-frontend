@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   TngButtonComponent,
@@ -36,7 +36,7 @@ import type { LedgerCategory } from '../../../data/ledger-category';
   providers: [CrudListQueryService],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ListLedgerCategoryComponent implements OnInit {
+export class ListLedgerCategoryComponent {
   private readonly router = inject(Router);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly ledgerCategoryStore = inject(LedgerCategoryStore);
@@ -68,9 +68,10 @@ export class ListLedgerCategoryComponent implements OnInit {
     { id: 'description', label: 'Description', placeholder: 'Description text', type: 'text' },
   ];
 
-  ngOnInit(): void {
-    this.crudQuery.init((filter) =>
-      void this.ledgerCategoryStore.loadLedgerCategories({ ...filter, includes: ['parent'] }),
+  constructor() {
+    this.crudQuery.init(
+      (filter) =>
+        void this.ledgerCategoryStore.loadLedgerCategories({ ...filter, includes: ['parent'] }),
     );
   }
 

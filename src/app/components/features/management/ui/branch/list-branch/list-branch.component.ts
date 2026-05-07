@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   TngButtonComponent,
@@ -36,7 +36,7 @@ import type { Branch } from '../../../data/branch';
   providers: [CrudListQueryService],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ListBranchComponent implements OnInit {
+export class ListBranchComponent {
   private readonly router = inject(Router);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly branchStore = inject(BranchStore);
@@ -59,7 +59,7 @@ export class ListBranchComponent implements OnInit {
     { id: 'countrycode', label: 'Country code', placeholder: 'e.g. IN', type: 'text' },
   ];
 
-  ngOnInit(): void {
+  constructor() {
     this.crudQuery.init((filter) => void this.branchStore.loadBranches(filter));
   }
 

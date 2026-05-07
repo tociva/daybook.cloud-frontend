@@ -1,15 +1,14 @@
 import {
+  afterNextRender,
   Component,
   ElementRef,
-  EventEmitter,
-  Input,
-  OnChanges,
-  Output,
-  SimpleChanges,
-  ViewChild,
   computed,
+  effect,
   inject,
+  input,
+  output,
   signal,
+  viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
@@ -22,19 +21,29 @@ import { SearchEntry, SearchIndexService } from './search-index.service';
   templateUrl: './command-search-dialog.component.html',
   styleUrl: './command-search-dialog.component.css',
 })
-export class CommandSearchDialogComponent implements OnChanges {
-  @Input() open = false;
-  @Input() initialValue = '';
-  @Output() readonly openChange = new EventEmitter<boolean>();
-  @Output() readonly closed = new EventEmitter<void>();
+export class CommandSearchDialogComponent {
+  readonly open = input(false);
+  readonly initialValue = input('');
+  readonly openChange = output<boolean>();
+  readonly closed = output<void>();
 
-  @ViewChild(TngAutocompleteComponent, { read: ElementRef })
-  private readonly autocompleteEl!: ElementRef<HTMLElement>;
+  private readonly autocompleteEl = viewChild(TngAutocompleteComponent, { read: ElementRef });
 
   private readonly router = inject(Router);
   private readonly searchIndex = toSignal(inject(SearchIndexService).index$);
 
   protected readonly query = signal('');
+  private readonly syncOpenState = effect(() => {
+    if (!this.open()) {
+      return;
+    }
+
+    this.query.set(this.initialValue());
+    afterNextRender(() => {
+      const input = this.autocompleteEl()?.nativeElement?.querySelector('input');
+      input?.focus();
+    });
+  });
 
   protected readonly filteredItems = computed((): readonly SearchEntry[] => {
     const index = this.searchIndex();
@@ -49,17 +58,6 @@ export class CommandSearchDialogComponent implements OnChanges {
   protected readonly getItemValue = (item: SearchEntry): string => item.url;
   protected readonly getItemLabel = (item: SearchEntry): string => item.title;
   protected readonly trackItem = (_: number, item: SearchEntry): string => item.url;
-
-  ngOnChanges(changes: SimpleChanges): void {
-    const openChange = changes['open'];
-    if (openChange?.currentValue === true) {
-      this.query.set(this.initialValue);
-      setTimeout(() => {
-        const input = this.autocompleteEl?.nativeElement?.querySelector('input');
-        input?.focus();
-      }, 0);
-    }
-  }
 
   protected onValueChange(url: string | null): void {
     if (!url) return;

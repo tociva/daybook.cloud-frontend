@@ -10,4 +10,3 @@ export type Address = Readonly<{
   mobile?: string;
   email?: string;
 }>;
-

@@ -1,11 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { CrudApiService } from '../../../../../shared/crud';
-import type {
-  Vendor,
-  VendorGetQuery,
-  VendorListQuery,
-  VendorPayload,
-} from './vendor.model';
+import type { Vendor, VendorGetQuery, VendorListQuery, VendorPayload } from './vendor.model';
 
 const VENDOR_ENDPOINT = '/inventory/vendor';
 

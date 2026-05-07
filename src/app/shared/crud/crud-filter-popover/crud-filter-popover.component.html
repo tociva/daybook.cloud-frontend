@@ -4,7 +4,7 @@
   #filterPopover="tngPopover"
   [align]="'end'"
   [side]="'bottom'"
-  [ariaLabel]="ariaLabel"
+  [ariaLabel]="ariaLabel()"
   [closeOnOutsidePointer]="false"
   [open]="open()"
   (openChange)="onOpenChange($event)"
@@ -13,7 +13,7 @@
     type="button"
     class="filter-trigger"
     [tngPopoverTrigger]="filterPopover"
-    [attr.aria-label]="ariaLabel"
+    [attr.aria-label]="ariaLabel()"
   >
     <tng-icon icon="filter" aria-hidden="true" />
   </button>
@@ -22,10 +22,10 @@
     <form class="filter-form" (submit)="submitFilter($event)">
       <div class="filter-form__header">
         <tng-icon icon="filter" aria-hidden="true" />
-        <strong>{{ title }}</strong>
+        <strong>{{ title() }}</strong>
       </div>
 
-      @for (field of fields; track field.id) {
+      @for (field of fields(); track field.id) {
         <div class="filter-field">
           <tng-label [forId]="getFieldId(field)">{{ field.label }}</tng-label>
           @if (field.type === 'text') {

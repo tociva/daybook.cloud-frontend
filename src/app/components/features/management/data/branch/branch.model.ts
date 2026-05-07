@@ -54,4 +54,3 @@ export type BranchPayload = Readonly<{
 
 export type BranchListQuery = Lb4ListQuery;
 export type BranchGetQuery = Readonly<{ includes?: readonly string[] }>;
-

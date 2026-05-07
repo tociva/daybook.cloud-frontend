@@ -9,7 +9,9 @@ export const bankCashRoutes: Routes = [
   {
     path: 'create',
     loadComponent: () =>
-      import('./create-bank-cash/create-bank-cash.component').then((m) => m.CreateBankCashComponent),
+      import('./create-bank-cash/create-bank-cash.component').then(
+        (m) => m.CreateBankCashComponent,
+      ),
   },
   {
     path: ':id',
@@ -19,12 +21,15 @@ export const bankCashRoutes: Routes = [
   {
     path: ':id/edit',
     loadComponent: () =>
-      import('./create-bank-cash/create-bank-cash.component').then((m) => m.CreateBankCashComponent),
+      import('./create-bank-cash/create-bank-cash.component').then(
+        (m) => m.CreateBankCashComponent,
+      ),
   },
   {
     path: ':id/delete',
     loadComponent: () =>
-      import('./delete-bank-cash/delete-bank-cash.component').then((m) => m.DeleteBankCashComponent),
+      import('./delete-bank-cash/delete-bank-cash.component').then(
+        (m) => m.DeleteBankCashComponent,
+      ),
   },
 ];
-

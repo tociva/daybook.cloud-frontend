@@ -8,4 +8,3 @@ import { RouterOutlet } from '@angular/router';
   styleUrl: './workspace-content.component.css',
 })
 export class WorkspaceContentComponent {}
-

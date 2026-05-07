@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   TngButtonComponent,
@@ -36,7 +36,7 @@ import type { Ledger } from '../../../data/ledger';
   providers: [CrudListQueryService],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ListLedgerComponent implements OnInit {
+export class ListLedgerComponent {
   private readonly router = inject(Router);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly ledgerStore = inject(LedgerStore);
@@ -45,8 +45,22 @@ export class ListLedgerComponent implements OnInit {
   protected readonly columns: readonly TngTableColumn<Ledger>[] = [
     { id: 'name', label: 'Name', sortable: true, width: '14rem' },
     { id: 'category', label: 'Category', width: '12rem' },
-    { id: 'openingdr', label: 'Opening DR', sortable: true, width: '10rem', align: 'end', headerAlign: 'end' },
-    { id: 'openingcr', label: 'Opening CR', sortable: true, width: '10rem', align: 'end', headerAlign: 'end' },
+    {
+      id: 'openingdr',
+      label: 'Opening DR',
+      sortable: true,
+      width: '10rem',
+      align: 'end',
+      headerAlign: 'end',
+    },
+    {
+      id: 'openingcr',
+      label: 'Opening CR',
+      sortable: true,
+      width: '10rem',
+      align: 'end',
+      headerAlign: 'end',
+    },
     { id: 'description', label: 'Description', sortable: true, truncate: true },
     { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '8rem' },
   ];
@@ -56,9 +70,9 @@ export class ListLedgerComponent implements OnInit {
     { id: 'description', label: 'Description', placeholder: 'Description text', type: 'text' },
   ];
 
-  ngOnInit(): void {
-    this.crudQuery.init((filter) =>
-      void this.ledgerStore.loadLedgers({ ...filter, includes: ['category'] }),
+  constructor() {
+    this.crudQuery.init(
+      (filter) => void this.ledgerStore.loadLedgers({ ...filter, includes: ['category'] }),
     );
   }
 

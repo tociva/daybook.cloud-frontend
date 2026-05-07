@@ -72,8 +72,12 @@
   border-top: 1px solid var(--tng-semantic-border-subtle);
   font-size: 0.65rem;
 }
-.th-right  { text-align: right; }
-.th-center { text-align: center; }
+.th-right {
+  text-align: right;
+}
+.th-center {
+  text-align: center;
+}
 .th-taxgroup {
   border-left: 1px solid var(--tng-semantic-border-subtle);
 }
@@ -99,7 +103,9 @@
   border-bottom: none;
 }
 
-.td-right { text-align: right; }
+.td-right {
+  text-align: right;
+}
 .td-num {
   color: var(--tng-semantic-foreground-muted);
   font-size: 0.75rem;
@@ -108,13 +114,28 @@
   padding-top: 0.7rem;
   width: 2rem;
 }
-.td-name  { min-width: 14rem; max-width: 26rem; }
-.td-price { width: 7rem;  min-width: 6rem; }
-.td-qty   { width: 6rem;  min-width: 5rem; }
-.td-disc  { width: 6rem;  min-width: 5rem; }
+.td-name {
+  min-width: 14rem;
+  max-width: 26rem;
+}
+.td-price {
+  width: 7rem;
+  min-width: 6rem;
+}
+.td-qty {
+  width: 6rem;
+  min-width: 5rem;
+}
+.td-disc {
+  width: 6rem;
+  min-width: 5rem;
+}
 .td-taxable,
 .td-tax-rate,
-.td-total { min-width: 5.5rem; white-space: nowrap; }
+.td-total {
+  min-width: 5.5rem;
+  white-space: nowrap;
+}
 .td-action {
   text-align: center;
   vertical-align: top;

@@ -27,4 +27,3 @@ export const SubscriptionStore = signalStore(
     },
   })),
 );
-

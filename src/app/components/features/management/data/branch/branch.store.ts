@@ -10,18 +10,29 @@ const getErrorMessage = (error: unknown, fallback: string): string =>
 export const BranchStore = signalStore(
   { providedIn: 'root' },
   withState(initialBranchState),
-  withComputed(({ branches, selectedBranch, selectedBranchId, organizationId, count, isLoading, error, search }) => ({
-    branches: computed(() => branches()),
-    count: computed(() => count()),
-    error: computed(() => error()),
-    isLoading: computed(() => isLoading()),
-    items: computed(() => branches()),
-    organizationId: computed(() => organizationId()),
-    search: computed(() => search()),
-    selectedBranch: computed(() => selectedBranch()),
-    selectedBranchId: computed(() => selectedBranchId()),
-    selectedItem: computed(() => selectedBranch()),
-  })),
+  withComputed(
+    ({
+      branches,
+      selectedBranch,
+      selectedBranchId,
+      organizationId,
+      count,
+      isLoading,
+      error,
+      search,
+    }) => ({
+      branches: computed(() => branches()),
+      count: computed(() => count()),
+      error: computed(() => error()),
+      isLoading: computed(() => isLoading()),
+      items: computed(() => branches()),
+      organizationId: computed(() => organizationId()),
+      search: computed(() => search()),
+      selectedBranch: computed(() => selectedBranch()),
+      selectedBranchId: computed(() => selectedBranchId()),
+      selectedItem: computed(() => selectedBranch()),
+    }),
+  ),
   withMethods((store, service = inject(BranchService)) => {
     const setLoading = (): void => {
       patchState(store, { error: null, isLoading: true });
@@ -47,10 +58,7 @@ export const BranchStore = signalStore(
       async loadBranches(query: BranchListQuery = {}): Promise<void> {
         setLoading();
         try {
-          const [branches, count] = await Promise.all([
-            service.list(query),
-            service.count(query),
-          ]);
+          const [branches, count] = await Promise.all([service.list(query), service.count(query)]);
           patchState(store, { branches, count, error: null, isLoading: false });
         } catch (error) {
           setError(getErrorMessage(error, 'Failed to load branches.'));

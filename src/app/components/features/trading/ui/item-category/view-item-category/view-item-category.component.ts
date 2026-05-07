@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   TngButtonComponent,
@@ -33,13 +33,17 @@ import { ItemCategoryStore } from '../../../data/item-category';
   templateUrl: './view-item-category.component.html',
   styleUrl: './view-item-category.component.css',
 })
-export class ViewItemCategoryComponent implements OnInit {
+export class ViewItemCategoryComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly burlNavigation = inject(BurlNavigationService);
   protected readonly itemCategoryStore = inject(ItemCategoryStore);
 
-  async ngOnInit(): Promise<void> {
+  constructor() {
+    void this.loadInitialState();
+  }
+
+  private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       await this.itemCategoryStore.loadItemCategoryById(id, { includes: ['parent', 'taxgroup'] });

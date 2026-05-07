@@ -1,6 +1,11 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
-import type { SaleInvoice, SaleInvoiceGetQuery, SaleInvoiceListQuery, SaleInvoicePayload } from './sale-invoice.model';
+import type {
+  SaleInvoice,
+  SaleInvoiceGetQuery,
+  SaleInvoiceListQuery,
+  SaleInvoicePayload,
+} from './sale-invoice.model';
 import { SaleInvoiceService } from './sale-invoice.service';
 import { initialSaleInvoiceState } from './sale-invoice.state';
 
@@ -70,9 +75,7 @@ export const SaleInvoiceStore = signalStore(
               isLoading: false,
               items: state.saleInvoice.items.filter((inv) => inv.id !== id),
               selectedItem:
-                state.saleInvoice.selectedItem?.id === id
-                  ? null
-                  : state.saleInvoice.selectedItem,
+                state.saleInvoice.selectedItem?.id === id ? null : state.saleInvoice.selectedItem,
             },
           }));
           return true;
@@ -82,7 +85,10 @@ export const SaleInvoiceStore = signalStore(
         }
       },
 
-      async loadSaleInvoiceById(id: string, query?: SaleInvoiceGetQuery): Promise<SaleInvoice | null> {
+      async loadSaleInvoiceById(
+        id: string,
+        query?: SaleInvoiceGetQuery,
+      ): Promise<SaleInvoice | null> {
         setLoading();
         try {
           const invoice = await service.getById(id, query);
@@ -104,10 +110,7 @@ export const SaleInvoiceStore = signalStore(
       async loadSaleInvoices(query: SaleInvoiceListQuery = {}): Promise<void> {
         setLoading();
         try {
-          const [items, count] = await Promise.all([
-            service.list(query),
-            service.count(query),
-          ]);
+          const [items, count] = await Promise.all([service.list(query), service.count(query)]);
           patchState(store, (state) => ({
             saleInvoice: {
               ...state.saleInvoice,
@@ -122,10 +125,7 @@ export const SaleInvoiceStore = signalStore(
         }
       },
 
-      async updateSaleInvoice(
-        id: string,
-        payload: SaleInvoicePayload,
-      ): Promise<boolean> {
+      async updateSaleInvoice(id: string, payload: SaleInvoicePayload): Promise<boolean> {
         setLoading();
         try {
           await service.update(id, payload);

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
   TngButtonComponent,
@@ -50,7 +50,7 @@ const DEFAULT_INVOICE_NUMBER_FORMAT = '<<YYYY>>/<<SERIAL3>>';
   styleUrl: './create-branch.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CreateBranchComponent implements OnInit {
+export class CreateBranchComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(BranchFacade);
   protected readonly branchStore = inject(BranchStore);
@@ -125,9 +125,7 @@ export class CreateBranchComponent implements OnInit {
     const all = this.dateFormatStore.dateFormats();
     if (!q) return all.slice(0, 20);
     return all
-      .filter(
-        (df) => df.name.toLowerCase().includes(q) || df.example.toLowerCase().includes(q),
-      )
+      .filter((df) => df.name.toLowerCase().includes(q) || df.example.toLowerCase().includes(q))
       .slice(0, 20);
   });
 
@@ -204,9 +202,10 @@ export class CreateBranchComponent implements OnInit {
     void this.currencyStore.load();
     void this.dateFormatStore.load();
     void this.organizationStore.loadOrganizations();
+    void this.loadInitialState();
   }
 
-  async ngOnInit(): Promise<void> {
+  private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.id.set(id);
@@ -224,7 +223,9 @@ export class CreateBranchComponent implements OnInit {
         this.timezone.set(branch.timezone ?? 'Asia/Kolkata');
         this.invnumber.set(branch.invnumber ?? DEFAULT_INVOICE_NUMBER_FORMAT);
 
-        const addr = branch.address as { line1?: string; line2?: string; city?: string; pincode?: string } | undefined;
+        const addr = branch.address as
+          | { line1?: string; line2?: string; city?: string; pincode?: string }
+          | undefined;
         this.addressLine1.set(addr?.line1 ?? '');
         this.addressLine2.set(addr?.line2 ?? '');
         this.addressCity.set(addr?.city ?? '');
@@ -232,13 +233,24 @@ export class CreateBranchComponent implements OnInit {
 
         // Pre-fill autocomplete fields
         const country = this.countryStore.countries().find((c) => c.code === branch.countrycode);
-        if (country) { this.selectedCountry.set(country); this.countrySearch.set(country.name); }
+        if (country) {
+          this.selectedCountry.set(country);
+          this.countrySearch.set(country.name);
+        }
 
-        const currency = this.currencyStore.currencies().find((c) => c.code === branch.currencycode);
-        if (currency) { this.selectedCurrency.set(currency); this.currencySearch.set(`${currency.name} (${currency.symbol})`); }
+        const currency = this.currencyStore
+          .currencies()
+          .find((c) => c.code === branch.currencycode);
+        if (currency) {
+          this.selectedCurrency.set(currency);
+          this.currencySearch.set(`${currency.name} (${currency.symbol})`);
+        }
 
         const df = this.dateFormatStore.dateFormats().find((d) => d.name === branch.dateformat);
-        if (df) { this.selectedDateFormat.set(df); this.dateFormatSearch.set(`${df.name} (${df.example})`); }
+        if (df) {
+          this.selectedDateFormat.set(df);
+          this.dateFormatSearch.set(`${df.name} (${df.example})`);
+        }
 
         if (branch.organization) {
           this.selectedOrganization.set(branch.organization);
@@ -261,9 +273,7 @@ export class CreateBranchComponent implements OnInit {
     this.countrySearch.set(country.name);
     this.showCountryDropdown.set(false);
     // Auto-fill currency & mobile prefix from country
-    const currency = this.currencyStore
-      .currencies()
-      .find((c) => c.code === country.currencycode);
+    const currency = this.currencyStore.currencies().find((c) => c.code === country.currencycode);
     if (currency && !this.selectedCurrency()) {
       this.selectedCurrency.set(currency);
       this.currencySearch.set(`${currency.name} (${currency.symbol})`);
@@ -282,7 +292,7 @@ export class CreateBranchComponent implements OnInit {
   }
 
   protected onCountryBlur(): void {
-    setTimeout(() => this.showCountryDropdown.set(false), 200);
+    this.showCountryDropdown.set(false);
   }
 
   // ── Currency handlers ─────────────────────────────────────────────────────
@@ -300,7 +310,7 @@ export class CreateBranchComponent implements OnInit {
   }
 
   protected onCurrencyBlur(): void {
-    setTimeout(() => this.showCurrencyDropdown.set(false), 200);
+    this.showCurrencyDropdown.set(false);
   }
 
   // ── Date-format handlers ──────────────────────────────────────────────────
@@ -318,7 +328,7 @@ export class CreateBranchComponent implements OnInit {
   }
 
   protected onDateFormatBlur(): void {
-    setTimeout(() => this.showDateFormatDropdown.set(false), 200);
+    this.showDateFormatDropdown.set(false);
   }
 
   // ── Organization handlers ─────────────────────────────────────────────────
@@ -336,7 +346,7 @@ export class CreateBranchComponent implements OnInit {
   }
 
   protected onOrgBlur(): void {
-    setTimeout(() => this.showOrgDropdown.set(false), 200);
+    this.showOrgDropdown.set(false);
   }
 
   // ── Submit ────────────────────────────────────────────────────────────────

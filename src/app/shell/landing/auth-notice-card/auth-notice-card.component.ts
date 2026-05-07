@@ -41,4 +41,3 @@ export class AuthNoticeCardComponent {
   readonly notice = input<AuthNotice | null>(null);
   readonly noticeAction = output<AuthNoticeAction>();
 }
-

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, effect, inject } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { AuthService } from '../../data/auth.service';
 import { AppConfigStore } from '../../../../../core/config/app-config.store';
 
@@ -6,7 +6,7 @@ import { AppConfigStore } from '../../../../../core/config/app-config.store';
   selector: 'app-silent-renew',
   template: '',
 })
-export class SilentRenewComponent implements OnDestroy {
+export class SilentRenewComponent {
   private readonly authService = inject(AuthService);
   private readonly appConfigStore = inject(AppConfigStore);
   private hasHandledCallback = false;
@@ -24,9 +24,4 @@ export class SilentRenewComponent implements OnDestroy {
     this.hasHandledCallback = true;
     void this.authService.completeSilentRenew(authConfig);
   });
-
-  ngOnDestroy(): void {
-    this.callbackEffect.destroy();
-  }
 }
-

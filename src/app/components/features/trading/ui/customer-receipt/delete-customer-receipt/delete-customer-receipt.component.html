@@ -42,9 +42,7 @@
 
         <label class="confirm-row">
           <tng-checkbox [checked]="confirmed()" (checkedChange)="confirmed.set(!!$event)" />
-          <span>
-            I understand that this customer receipt will be permanently deleted.
-          </span>
+          <span> I understand that this customer receipt will be permanently deleted. </span>
         </label>
       } @else {
         <div class="notice">Receipt not found.</div>

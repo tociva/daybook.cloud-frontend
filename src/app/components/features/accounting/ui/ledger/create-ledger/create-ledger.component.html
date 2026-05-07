@@ -2,7 +2,9 @@
   <tng-card variant="outline" padding="lg">
     <tng-card-header>
       <tng-card-title>{{ title() }}</tng-card-title>
-      <tng-card-description>Define the ledger name, category, and optional opening balances.</tng-card-description>
+      <tng-card-description
+        >Define the ledger name, category, and optional opening balances.</tng-card-description
+      >
     </tng-card-header>
 
     <tng-card-content>
@@ -14,9 +16,7 @@
         <div class="notice">Loading ledger...</div>
       } @else {
         <form (submit)="submitForm($event)" novalidate>
-
           <div class="field-grid">
-
             <div class="field field--wide">
               <tng-label forId="l-name" required>Name</tng-label>
               <tng-input
@@ -48,12 +48,10 @@
                 {{ categoryError() || ' ' }}
               </p>
             </div>
-
           </div>
 
           <p class="section-label">Opening Balances</p>
           <div class="field-grid">
-
             <div class="field">
               <tng-label forId="l-openingdr">Opening DR</tng-label>
               <tng-input
@@ -86,7 +84,6 @@
               />
               <p class="field-error field-error--empty">{{ ' ' }}</p>
             </div>
-
           </div>
 
           <tng-card-footer>
@@ -98,15 +95,11 @@
                 tone="primary"
                 [disabled]="ledgerStore.isLoading()"
               >
-                <tng-icon
-                  [icon]="mode() === 'edit' ? 'save' : 'plus'"
-                  aria-hidden="true"
-                />
+                <tng-icon [icon]="mode() === 'edit' ? 'save' : 'plus'" aria-hidden="true" />
                 {{ mode() === 'edit' ? 'Save changes' : 'Create ledger' }}
               </tng-button>
             </tng-card-actions>
           </tng-card-footer>
-
         </form>
       }
     </tng-card-content>

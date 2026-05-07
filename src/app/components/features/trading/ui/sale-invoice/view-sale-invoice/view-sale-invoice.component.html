@@ -13,7 +13,6 @@
       @if (saleInvoiceStore.isLoading() && !saleInvoiceStore.selectedItem()) {
         <div class="notice">Loading invoice…</div>
       } @else if (saleInvoiceStore.selectedItem(); as inv) {
-
         <!-- ── Invoice properties ──────────────────────────────────────── -->
         <p class="section-title">Invoice Details</p>
         <dl class="details-grid">
@@ -54,24 +53,36 @@
               <p class="section-title">Billing Address</p>
               <p>{{ inv.billingaddress.name }}</p>
               <p>{{ inv.billingaddress.line1 }}</p>
-              @if (inv.billingaddress.line2) { <p>{{ inv.billingaddress.line2 }}</p> }
+              @if (inv.billingaddress.line2) {
+                <p>{{ inv.billingaddress.line2 }}</p>
+              }
               <p>
-                {{ inv.billingaddress.city }}{{ inv.billingaddress.city && inv.billingaddress.state ? ', ' : '' }}{{ inv.billingaddress.state }}
+                {{ inv.billingaddress.city
+                }}{{ inv.billingaddress.city && inv.billingaddress.state ? ', ' : ''
+                }}{{ inv.billingaddress.state }}
                 {{ inv.billingaddress.zip }}
               </p>
-              @if (inv.billingaddress.country) { <p>{{ inv.billingaddress.country }}</p> }
+              @if (inv.billingaddress.country) {
+                <p>{{ inv.billingaddress.country }}</p>
+              }
             </div>
             @if (inv.shippingaddress) {
               <div class="address-box">
                 <p class="section-title">Shipping Address</p>
                 <p>{{ inv.shippingaddress.name }}</p>
                 <p>{{ inv.shippingaddress.line1 }}</p>
-                @if (inv.shippingaddress.line2) { <p>{{ inv.shippingaddress.line2 }}</p> }
+                @if (inv.shippingaddress.line2) {
+                  <p>{{ inv.shippingaddress.line2 }}</p>
+                }
                 <p>
-                  {{ inv.shippingaddress.city }}{{ inv.shippingaddress.city && inv.shippingaddress.state ? ', ' : '' }}{{ inv.shippingaddress.state }}
+                  {{ inv.shippingaddress.city
+                  }}{{ inv.shippingaddress.city && inv.shippingaddress.state ? ', ' : ''
+                  }}{{ inv.shippingaddress.state }}
                   {{ inv.shippingaddress.zip }}
                 </p>
-                @if (inv.shippingaddress.country) { <p>{{ inv.shippingaddress.country }}</p> }
+                @if (inv.shippingaddress.country) {
+                  <p>{{ inv.shippingaddress.country }}</p>
+                }
               </div>
             }
           </div>
@@ -79,7 +90,7 @@
 
         <!-- ── Line items ─────────────────────────────────────────────── -->
         @if (inv.items && inv.items.length > 0) {
-          <p class="section-title" style="margin-top: 1.25rem;">Items</p>
+          <p class="section-title" style="margin-top: 1.25rem">Items</p>
           <div class="items-table">
             <div class="items-head">
               <span>#</span>
@@ -95,7 +106,9 @@
                 <span class="muted">{{ i + 1 }}</span>
                 <div>
                   <strong>{{ item.displayname || item.name }}</strong>
-                  @if (item.description) { <p class="muted">{{ item.description }}</p> }
+                  @if (item.description) {
+                    <p class="muted">{{ item.description }}</p>
+                  }
                 </div>
                 <span class="align-right">{{ formatAmount(item.price) }}</span>
                 <span class="align-right">{{ formatAmount(item.quantity) }}</span>
@@ -142,7 +155,6 @@
             </div>
           </div>
         </div>
-
       } @else {
         <div class="notice">Invoice not found.</div>
       }
@@ -151,21 +163,11 @@
     <tng-card-footer>
       <tng-card-actions align="end">
         <app-burl-back-button label="Back" />
-        <tng-button
-          type="button"
-          appearance="outline"
-          tone="primary"
-          (click)="editInvoice()"
-        >
+        <tng-button type="button" appearance="outline" tone="primary" (click)="editInvoice()">
           <tng-icon icon="pencil" aria-hidden="true" />
           Edit
         </tng-button>
-        <tng-button
-          type="button"
-          appearance="outline"
-          tone="danger"
-          (click)="deleteInvoice()"
-        >
+        <tng-button type="button" appearance="outline" tone="danger" (click)="deleteInvoice()">
           <tng-icon icon="trash2" aria-hidden="true" />
           Delete
         </tng-button>

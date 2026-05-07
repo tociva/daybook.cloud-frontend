@@ -59,9 +59,7 @@ export class WorkspaceSidebarComponent {
 
       if (selected !== null) {
         // Give this group the value only if one of its children owns it.
-        const owns = group.children.some(
-          (child) => this.getChildPath(group, child) === selected,
-        );
+        const owns = group.children.some((child) => this.getChildPath(group, child) === selected);
         map.set(group.path, owns ? selected : null);
       } else {
         // Fall back to router-URL-based detection (e.g. on initial load).
@@ -93,7 +91,9 @@ export class WorkspaceSidebarComponent {
       return null;
     }
 
-    const activeChild = group.children.find((child) => this.isRouteActive(this.getChildPath(group, child)));
+    const activeChild = group.children.find((child) =>
+      this.isRouteActive(this.getChildPath(group, child)),
+    );
     return activeChild ? this.getChildPath(group, activeChild) : null;
   }
 

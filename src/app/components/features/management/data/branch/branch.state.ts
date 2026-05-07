@@ -21,4 +21,3 @@ export const initialBranchState: BranchState = {
   error: null,
   search: '',
 };
-

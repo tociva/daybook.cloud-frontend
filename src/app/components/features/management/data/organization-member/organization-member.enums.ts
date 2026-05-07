@@ -13,4 +13,3 @@ export enum OrganizationMemberStatus {
   INVITE_EXPIRED = 4,
   MEMBER_EXITED = 5,
 }
-

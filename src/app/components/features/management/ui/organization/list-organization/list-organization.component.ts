@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   TngButtonComponent,
@@ -35,7 +35,7 @@ import type { Organization } from '../../../data/organization';
   styleUrl: './list-organization.component.css',
   providers: [CrudListQueryService],
 })
-export class ListOrganizationComponent implements OnInit {
+export class ListOrganizationComponent {
   private readonly router = inject(Router);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly organizationStore = inject(OrganizationStore);
@@ -55,7 +55,7 @@ export class ListOrganizationComponent implements OnInit {
     { id: 'mobile', label: 'Mobile', placeholder: 'Mobile number', type: 'text' },
   ];
 
-  ngOnInit(): void {
+  constructor() {
     this.crudQuery.init((filter) => void this.organizationStore.loadOrganizations(filter));
   }
 

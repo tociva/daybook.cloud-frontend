@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   TngButtonComponent,
@@ -34,13 +34,17 @@ import { OrganizationStore } from '../../../data/organization';
   styleUrl: './view-organization.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ViewOrganizationComponent implements OnInit {
+export class ViewOrganizationComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly burlNavigation = inject(BurlNavigationService);
   protected readonly organizationStore = inject(OrganizationStore);
 
-  async ngOnInit(): Promise<void> {
+  constructor() {
+    void this.loadInitialState();
+  }
+
+  private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       await this.organizationStore.loadOrganizationById(id);

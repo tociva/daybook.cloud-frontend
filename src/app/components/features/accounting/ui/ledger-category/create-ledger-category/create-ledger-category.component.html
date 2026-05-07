@@ -2,7 +2,9 @@
   <tng-card variant="outline" padding="lg">
     <tng-card-header>
       <tng-card-title>{{ title() }}</tng-card-title>
-      <tng-card-description>Define the category name, type, and optional parent hierarchy.</tng-card-description>
+      <tng-card-description
+        >Define the category name, type, and optional parent hierarchy.</tng-card-description
+      >
     </tng-card-header>
 
     <tng-card-content>
@@ -10,11 +12,12 @@
         <div class="notice notice--danger">{{ ledgerCategoryStore.error() }}</div>
       }
 
-      @if (ledgerCategoryStore.isLoading() && mode() === 'edit' && !ledgerCategoryStore.selectedItem()) {
+      @if (
+        ledgerCategoryStore.isLoading() && mode() === 'edit' && !ledgerCategoryStore.selectedItem()
+      ) {
         <div class="notice">Loading category...</div>
       } @else {
         <form (submit)="submitForm($event)" novalidate>
-
           <div class="field-grid">
             <div class="field field--wide">
               <tng-label forId="lc-name" required>Name</tng-label>
@@ -84,15 +87,11 @@
                 tone="primary"
                 [disabled]="ledgerCategoryStore.isLoading()"
               >
-                <tng-icon
-                  [icon]="mode() === 'edit' ? 'save' : 'plus'"
-                  aria-hidden="true"
-                />
+                <tng-icon [icon]="mode() === 'edit' ? 'save' : 'plus'" aria-hidden="true" />
                 {{ mode() === 'edit' ? 'Save changes' : 'Create category' }}
               </tng-button>
             </tng-card-actions>
           </tng-card-footer>
-
         </form>
       }
     </tng-card-content>

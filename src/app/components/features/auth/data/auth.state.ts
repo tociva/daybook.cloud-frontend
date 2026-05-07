@@ -10,4 +10,3 @@ export const initialAuthState: AuthState = {
     isAuthenticated: false,
   },
 };
-

@@ -14,10 +14,7 @@ export class ItemCategoryService {
   private readonly crudApi = inject(CrudApiService);
 
   async create(payload: ItemCategoryPayload): Promise<ItemCategory> {
-    return this.crudApi.create<ItemCategory, ItemCategoryPayload>(
-      ITEM_CATEGORY_ENDPOINT,
-      payload,
-    );
+    return this.crudApi.create<ItemCategory, ItemCategoryPayload>(ITEM_CATEGORY_ENDPOINT, payload);
   }
 
   async delete(id: string): Promise<void> {

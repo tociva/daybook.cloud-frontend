@@ -56,10 +56,20 @@
 
         <ng-template tngTableCellTemplate="actions" let-row="row">
           <div class="row-actions">
-            <button type="button" class="action-icon" aria-label="View item" (click)="viewItem(row)">
+            <button
+              type="button"
+              class="action-icon"
+              aria-label="View item"
+              (click)="viewItem(row)"
+            >
               <tng-icon icon="eye" aria-hidden="true" />
             </button>
-            <button type="button" class="action-icon" aria-label="Edit item" (click)="editItem(row)">
+            <button
+              type="button"
+              class="action-icon"
+              aria-label="Edit item"
+              (click)="editItem(row)"
+            >
               <tng-icon icon="pencil" aria-hidden="true" />
             </button>
             <button

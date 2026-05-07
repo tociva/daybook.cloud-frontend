@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
   TngButtonComponent,
@@ -35,13 +35,17 @@ import { formatDisplayDate } from '../../../../../../core/date/dayjs-date.utils'
   templateUrl: './delete-sale-invoice.component.html',
   styleUrl: './delete-sale-invoice.component.css',
 })
-export class DeleteSaleInvoiceComponent implements OnInit {
+export class DeleteSaleInvoiceComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(SaleInvoiceFacade);
   protected readonly saleInvoiceStore = inject(SaleInvoiceStore);
   protected readonly confirmed = signal(false);
 
-  async ngOnInit(): Promise<void> {
+  constructor() {
+    void this.loadInitialState();
+  }
+
+  private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       await this.saleInvoiceStore.loadSaleInvoiceById(id, {

@@ -13,7 +13,6 @@
       @if (fiscalYearStore.isLoading() && !fiscalYearStore.selectedItem()) {
         <div class="notice">Loading fiscal year...</div>
       } @else if (fiscalYearStore.selectedItem(); as fy) {
-
         <dl class="details-grid">
           <div class="wide">
             <dt>Name</dt>
@@ -54,7 +53,6 @@
             <dd>{{ fy.jnumber || '—' }}</dd>
           </div>
         </dl>
-
       } @else {
         <div class="notice">Fiscal year not found.</div>
       }

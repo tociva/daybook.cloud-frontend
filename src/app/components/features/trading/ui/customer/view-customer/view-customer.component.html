@@ -13,7 +13,6 @@
       @if (customerStore.isLoading() && !customerStore.selectedItem()) {
         <div class="notice">Loading customer...</div>
       } @else if (customerStore.selectedItem(); as customer) {
-
         <!-- Basic details -->
         <dl class="details-grid">
           <div>
@@ -82,7 +81,6 @@
             </div>
           </dl>
         }
-
       } @else {
         <div class="notice">Customer not found.</div>
       }

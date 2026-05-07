@@ -11,4 +11,3 @@ export const initialAppConfigState: AppConfigState = {
   isLoading: false,
   error: null,
 };
-

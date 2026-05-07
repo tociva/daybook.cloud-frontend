@@ -11,11 +11,9 @@
       }
 
       <form (submit)="submitForm($event)" novalidate>
-
         <!-- ── Basic Details ──────────────────────────────── -->
         <p class="section-label">Basic Details</p>
         <div class="fields-grid">
-
           <div class="field field--full">
             <tng-label required>Name</tng-label>
             <tng-input
@@ -24,7 +22,9 @@
               [ariaInvalid]="nameError() !== null"
               (input)="name.set($any($event.target).value)"
             />
-            @if (nameError()) { <p class="field-error">{{ nameError() }}</p> }
+            @if (nameError()) {
+              <p class="field-error">{{ nameError() }}</p>
+            }
           </div>
 
           <div class="field">
@@ -36,7 +36,9 @@
               [ariaInvalid]="emailError() !== null"
               (input)="email.set($any($event.target).value)"
             />
-            @if (emailError()) { <p class="field-error">{{ emailError() }}</p> }
+            @if (emailError()) {
+              <p class="field-error">{{ emailError() }}</p>
+            }
           </div>
 
           <div class="field">
@@ -73,7 +75,9 @@
                 </ul>
               }
             </div>
-            @if (organizationError()) { <p class="field-error">{{ organizationError() }}</p> }
+            @if (organizationError()) {
+              <p class="field-error">{{ organizationError() }}</p>
+            }
           </div>
 
           <div class="field field--full">
@@ -84,13 +88,11 @@
               (input)="description.set($any($event.target).value)"
             />
           </div>
-
         </div>
 
         <!-- ── Address ───────────────────────────────────── -->
         <p class="section-label">Address</p>
         <div class="fields-grid">
-
           <div class="field field--full">
             <tng-label>Address Line 1</tng-label>
             <tng-input
@@ -144,13 +146,11 @@
               (input)="gstin.set($any($event.target).value)"
             />
           </div>
-
         </div>
 
         <!-- ── Settings ──────────────────────────────────── -->
         <p class="section-label">Financial Settings</p>
         <div class="fields-grid">
-
           <!-- Country autocomplete -->
           <div class="field">
             <tng-label required>Country</tng-label>
@@ -176,7 +176,9 @@
                 </ul>
               }
             </div>
-            @if (countryError()) { <p class="field-error">{{ countryError() }}</p> }
+            @if (countryError()) {
+              <p class="field-error">{{ countryError() }}</p>
+            }
           </div>
 
           <!-- Currency autocomplete -->
@@ -204,7 +206,9 @@
                 </ul>
               }
             </div>
-            @if (currencyError()) { <p class="field-error">{{ currencyError() }}</p> }
+            @if (currencyError()) {
+              <p class="field-error">{{ currencyError() }}</p>
+            }
           </div>
 
           <!-- Date format autocomplete -->
@@ -232,7 +236,9 @@
                 </ul>
               }
             </div>
-            @if (dateFormatError()) { <p class="field-error">{{ dateFormatError() }}</p> }
+            @if (dateFormatError()) {
+              <p class="field-error">{{ dateFormatError() }}</p>
+            }
           </div>
 
           <div class="field">
@@ -243,7 +249,9 @@
               [ariaInvalid]="fiscalstartError() !== null"
               (input)="fiscalstart.set($any($event.target).value)"
             />
-            @if (fiscalstartError()) { <p class="field-error">{{ fiscalstartError() }}</p> }
+            @if (fiscalstartError()) {
+              <p class="field-error">{{ fiscalstartError() }}</p>
+            }
           </div>
 
           <div class="field">
@@ -263,29 +271,26 @@
               [ariaInvalid]="invnumberError() !== null"
               (input)="invnumber.set($any($event.target).value)"
             />
-            @if (invnumberError()) { <p class="field-error">{{ invnumberError() }}</p> }
+            @if (invnumberError()) {
+              <p class="field-error">{{ invnumberError() }}</p>
+            }
           </div>
-
         </div>
 
         <tng-card-footer>
           <tng-card-actions align="end">
             <app-burl-back-button />
-            <tng-button
-              type="submit"
-              appearance="solid"
-              tone="primary"
-              [disabled]="isSubmitting()"
-            >
+            <tng-button type="submit" appearance="solid" tone="primary" [disabled]="isSubmitting()">
               <tng-icon
-                [icon]="isSubmitting() ? 'loader' : (mode() === 'edit' ? 'save' : 'plus')"
+                [icon]="isSubmitting() ? 'loader' : mode() === 'edit' ? 'save' : 'plus'"
                 aria-hidden="true"
               />
-              {{ isSubmitting() ? 'Saving…' : (mode() === 'edit' ? 'Save changes' : 'Create branch') }}
+              {{
+                isSubmitting() ? 'Saving…' : mode() === 'edit' ? 'Save changes' : 'Create branch'
+              }}
             </tng-button>
           </tng-card-actions>
         </tng-card-footer>
-
       </form>
     </tng-card-content>
   </tng-card>

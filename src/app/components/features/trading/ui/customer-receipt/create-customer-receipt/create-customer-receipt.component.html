@@ -10,7 +10,6 @@
   <div class="receipt-layout">
     <!-- ══ LEFT — Main fields ════════════════════════════════════════════════ -->
     <div class="receipt-main">
-
       <!-- ── Basic Details ─────────────────────────────────────────────────── -->
       <tng-card variant="outline" tone="info" padding="lg">
         <tng-card-header>
@@ -19,12 +18,14 @@
 
         <tng-card-content>
           <div class="fields-grid">
-
             <!-- Date -->
             <div class="field">
               <tng-label forId="rcpt-date" required>Receipt Date</tng-label>
-              <tng-datepicker id="rcpt-date" [value]="rcptdate()"
-                (valueChange)="onDateChange($event)" />
+              <tng-datepicker
+                id="rcpt-date"
+                [value]="rcptdate()"
+                (valueChange)="onDateChange($event)"
+              />
               @if (dateError()) {
                 <p class="field-error">{{ dateError() }}</p>
               }
@@ -48,7 +49,9 @@
                     @for (c of filteredCustomers(); track c.id) {
                       <li class="dropdown-item" (mousedown)="selectCustomer(c)">
                         <strong>{{ c.name }}</strong>
-                        @if (c.mobile) { <span class="muted"> · {{ c.mobile }}</span> }
+                        @if (c.mobile) {
+                          <span class="muted"> · {{ c.mobile }}</span>
+                        }
                       </li>
                     }
                   </ul>
@@ -108,7 +111,9 @@
                     @for (b of filteredBankCashes(); track b.id) {
                       <li class="dropdown-item" (mousedown)="selectBankCash(b)">
                         {{ b.name }}
-                        @if (b.description) { <span class="muted"> — {{ b.description }}</span> }
+                        @if (b.description) {
+                          <span class="muted"> — {{ b.description }}</span>
+                        }
                       </li>
                     }
                   </ul>
@@ -130,7 +135,6 @@
                 (valueChange)="description.set($any($event) ?? '')"
               />
             </div>
-
           </div>
         </tng-card-content>
       </tng-card>
@@ -221,7 +225,6 @@
           </div>
         </tng-card-content>
       </tng-card>
-
     </div>
   </div>
 

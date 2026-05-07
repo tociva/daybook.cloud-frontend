@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -54,7 +54,7 @@ type LedgerFormModel = {
   styleUrl: './create-ledger.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CreateLedgerComponent implements OnInit {
+export class CreateLedgerComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(LedgerFacade);
   protected readonly ledgerStore = inject(LedgerStore);
@@ -100,7 +100,11 @@ export class CreateLedgerComponent implements OnInit {
       : null,
   );
 
-  async ngOnInit(): Promise<void> {
+  constructor() {
+    void this.loadInitialState();
+  }
+
+  private async loadInitialState(): Promise<void> {
     await this.ledgerCategoryStore.loadLedgerCategories({});
 
     const id = this.route.snapshot.paramMap.get('id');

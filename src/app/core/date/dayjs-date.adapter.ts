@@ -1,6 +1,4 @@
-import {
-  type TngDateAdapter,
-} from '@tailng-ui/primitives';
+import { type TngDateAdapter } from '@tailng-ui/primitives';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import updateLocale from 'dayjs/plugin/updateLocale';

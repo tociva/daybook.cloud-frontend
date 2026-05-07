@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TngButtonComponent } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
@@ -34,7 +34,7 @@ import { SiLineItemsComponent } from './si-line-items/si-line-items.component';
   templateUrl: './create-sale-invoice.component.html',
   styleUrl: './create-sale-invoice.component.css',
 })
-export class CreateSaleInvoiceComponent implements OnInit {
+export class CreateSaleInvoiceComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(SaleInvoiceFacade);
 
@@ -56,7 +56,11 @@ export class CreateSaleInvoiceComponent implements OnInit {
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
-  async ngOnInit(): Promise<void> {
+  constructor() {
+    void this.loadInitialState();
+  }
+
+  private async loadInitialState(): Promise<void> {
     await Promise.all([
       this.customerStore.loadCustomers({}),
       this.itemStore.loadItems({ includes: ['category'] }),
@@ -106,14 +110,20 @@ export class CreateSaleInvoiceComponent implements OnInit {
 
     const items: SaleInvoiceItemRequest[] = this.draft.items().map((row, i) => {
       const taxes: SaleInvoiceItemTaxRequest[] = row.taxes.map((t) => ({
-        name: t.name, shortname: t.shortname,
-        rate: toNum(t.rate), appliedto: toNum(t.appliedto), amount: toNum(t.amount),
+        name: t.name,
+        shortname: t.shortname,
+        rate: toNum(t.rate),
+        appliedto: toNum(t.appliedto),
+        amount: toNum(t.amount),
         ...(t.taxid ? { taxid: t.taxid } : {}),
       }));
       return {
-        name: row.name, code: row.code, order: i + 1,
+        name: row.name,
+        code: row.code,
+        order: i + 1,
         ...(row.description ? { description: row.description } : {}),
-        price: toNum(row.price), quantity: toNum(row.quantity),
+        price: toNum(row.price),
+        quantity: toNum(row.quantity),
         itemtotal: toNum(row.itemtotal),
         ...(row.discpercent ? { discpercent: toNum(row.discpercent) } : {}),
         ...(row.discamount ? { discamount: toNum(row.discamount) } : {}),
@@ -126,7 +136,9 @@ export class CreateSaleInvoiceComponent implements OnInit {
     });
 
     const payload: SaleInvoicePayload = {
-      ...(!this.draft.autoNumbering() && this.draft.number() ? { number: this.draft.number() } : {}),
+      ...(!this.draft.autoNumbering() && this.draft.number()
+        ? { number: this.draft.number() }
+        : {}),
       date: this.draft.date(),
       duedate: this.draft.duedate(),
       itemtotal: toNum(this.draft.itemtotal()),

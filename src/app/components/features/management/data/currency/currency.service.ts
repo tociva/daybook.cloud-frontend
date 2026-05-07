@@ -13,4 +13,3 @@ export class CurrencyService {
     return Array.isArray(currencies) ? currencies : [];
   }
 }
-

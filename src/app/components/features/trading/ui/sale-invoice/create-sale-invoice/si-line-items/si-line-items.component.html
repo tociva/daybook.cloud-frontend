@@ -4,23 +4,27 @@
   </tng-card-header>
 
   <tng-card-content>
-
     <!-- Feature toggles -->
     <div class="items-toggles">
       <label class="toggle-label">
         Enable Discount:
-        <tng-switch [checked]="draft.showDiscount()" (checkedChange)="draft.showDiscount.set(!!$event)" />
+        <tng-switch
+          [checked]="draft.showDiscount()"
+          (checkedChange)="draft.showDiscount.set(!!$event)"
+        />
       </label>
       <label class="toggle-label">
         Enable Description:
-        <tng-switch [checked]="draft.showDescription()" (checkedChange)="draft.showDescription.set(!!$event)" />
+        <tng-switch
+          [checked]="draft.showDescription()"
+          (checkedChange)="draft.showDescription.set(!!$event)"
+        />
       </label>
     </div>
 
     <!-- Scrollable table wrapper -->
     <div class="items-scroll">
       <table class="items-table">
-
         <!-- ── Two-row header ─────────────────────────────────────────── -->
         <thead>
           <tr class="items-head">
@@ -52,7 +56,6 @@
         <!-- ── Rows ───────────────────────────────────────────────────── -->
         <tbody>
           @for (row of draft.items(); track rowIndex; let rowIndex = $index) {
-
             <!-- Top sub-row: inputs & rates -->
             <tr class="items-row-top">
               <td class="td-num" rowspan="2">{{ rowIndex + 1 }}</td>
@@ -73,7 +76,9 @@
                       @for (it of draft.filteredItems(); track it.id) {
                         <li class="dropdown-item" (mousedown)="draft.selectItem(it, rowIndex)">
                           {{ it.displayname || it.name }}
-                          @if (it.code) { <span class="muted"> ({{ it.code }})</span> }
+                          @if (it.code) {
+                            <span class="muted"> ({{ it.code }})</span>
+                          }
                         </li>
                       }
                     </ul>
@@ -96,7 +101,10 @@
                   min="0"
                   step="0.01"
                   [value]="row.price.toString()"
-                  (valueChange)="draft.updateItemField(rowIndex, 'price', $any($event)); draft.recalcRow(rowIndex)"
+                  (valueChange)="
+                    draft.updateItemField(rowIndex, 'price', $any($event));
+                    draft.recalcRow(rowIndex)
+                  "
                 />
               </td>
 
@@ -106,7 +114,10 @@
                   type="number"
                   min="1"
                   [value]="row.quantity.toString()"
-                  (valueChange)="draft.updateItemField(rowIndex, 'quantity', $any($event)); draft.recalcRow(rowIndex)"
+                  (valueChange)="
+                    draft.updateItemField(rowIndex, 'quantity', $any($event));
+                    draft.recalcRow(rowIndex)
+                  "
                 />
               </td>
 
@@ -115,9 +126,14 @@
                 <td class="td-disc" rowspan="2">
                   <tng-input
                     type="number"
-                    min="0" max="100" step="0.01"
+                    min="0"
+                    max="100"
+                    step="0.01"
                     [value]="row.discpercent.toString()"
-                    (valueChange)="draft.updateItemField(rowIndex, 'discpercent', $any($event)); draft.recalcRow(rowIndex)"
+                    (valueChange)="
+                      draft.updateItemField(rowIndex, 'discpercent', $any($event));
+                      draft.recalcRow(rowIndex)
+                    "
                   />
                 </td>
               }
@@ -161,7 +177,6 @@
                 <td class="td-right">{{ (row.taxes[ti]?.amount ?? 0).toFixed(2) }}</td>
               }
             </tr>
-
           }
         </tbody>
       </table>
@@ -211,6 +226,5 @@
         </div>
       </div>
     </div>
-
   </tng-card-content>
 </tng-card>

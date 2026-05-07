@@ -14,4 +14,3 @@ export class CountryService {
     return Array.isArray(countries) ? countries : [];
   }
 }
-

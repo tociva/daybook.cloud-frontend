@@ -1,12 +1,13 @@
 <main class="trading-page">
   <section class="setup-layout" aria-labelledby="customer-setup-title">
     <form class="customer-form" novalidate (submit)="submitForm($event)">
-
       <!-- Basic details -->
       <tng-card variant="outline" tone="info" padding="lg">
         <tng-card-header>
           <tng-card-title>{{ title() }}</tng-card-title>
-          <tng-card-description>Set the customer name, country, currency, and contact details.</tng-card-description>
+          <tng-card-description
+            >Set the customer name, country, currency, and contact details.</tng-card-description
+          >
         </tng-card-header>
 
         <tng-card-content>
@@ -45,25 +46,15 @@
                   (valueChange)="selectCountry($event)"
                   (queryChange)="onCountryQueryChange($event)"
                 >
-                  <ng-template
-                    #tngAutocompleteOptionTpl
-                    let-option="option"
-                    let-label="label"
-                  >
+                  <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
                     <span class="country-option">
-                      <span
-                        [class]="getCountryFlagClass(option)"
-                        aria-hidden="true"
-                      ></span>
+                      <span [class]="getCountryFlagClass(option)" aria-hidden="true"></span>
                       <span class="country-option-label">{{ label }}</span>
                     </span>
                   </ng-template>
 
                   <ng-template #tngAutocompleteSelectedTpl let-option="option">
-                    <span
-                      [class]="getCountryFlagClass(option)"
-                      aria-hidden="true"
-                    ></span>
+                    <span [class]="getCountryFlagClass(option)" aria-hidden="true"></span>
                   </ng-template>
                 </tng-autocomplete>
                 <p class="field-error" [class.field-error--empty]="!countrycodeError()">
@@ -124,11 +115,7 @@
 
               <div class="field">
                 <tng-label forId="cust-state">State</tng-label>
-                <tng-input
-                  id="cust-state"
-                  placeholder="Kerala"
-                  [formField]="customerForm.state"
-                />
+                <tng-input id="cust-state" placeholder="Kerala" [formField]="customerForm.state" />
                 <p class="field-error field-error--empty">{{ ' ' }}</p>
               </div>
 
@@ -151,7 +138,9 @@
       <tng-card variant="outline" tone="neutral" padding="lg">
         <tng-card-header>
           <tng-card-title>Address</tng-card-title>
-          <tng-card-description>Billing or delivery address for this customer.</tng-card-description>
+          <tng-card-description
+            >Billing or delivery address for this customer.</tng-card-description
+          >
         </tng-card-header>
 
         <tng-card-content>
@@ -233,7 +222,6 @@
           </tng-card-actions>
         </tng-card-footer>
       </tng-card>
-
     </form>
 
     <aside class="setup-overview" aria-labelledby="customer-setup-title">
@@ -241,7 +229,8 @@
         <p class="eyebrow">Customer setup</p>
         <h1 id="customer-setup-title">{{ title() }}</h1>
         <p>
-          Create a customer record with contact information, country and currency, and a billing address.
+          Create a customer record with contact information, country and currency, and a billing
+          address.
         </p>
         <tng-stepper
           class="setup-stepper"

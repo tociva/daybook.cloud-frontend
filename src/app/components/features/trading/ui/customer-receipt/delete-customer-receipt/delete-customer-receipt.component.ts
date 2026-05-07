@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
   TngButtonComponent,
@@ -35,13 +35,17 @@ import { CustomerReceiptFacade, CustomerReceiptStore } from '../../../data/custo
   templateUrl: './delete-customer-receipt.component.html',
   styleUrl: './delete-customer-receipt.component.css',
 })
-export class DeleteCustomerReceiptComponent implements OnInit {
+export class DeleteCustomerReceiptComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(CustomerReceiptFacade);
   protected readonly customerReceiptStore = inject(CustomerReceiptStore);
   protected readonly confirmed = signal(false);
 
-  async ngOnInit(): Promise<void> {
+  constructor() {
+    void this.loadInitialState();
+  }
+
+  private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       await this.customerReceiptStore.loadCustomerReceiptById(id, {

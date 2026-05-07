@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
   TngButtonComponent,
@@ -34,21 +34,20 @@ import { formatDisplayDate } from '../../../../../../core/date/dayjs-date.utils'
   templateUrl: './view-sale-invoice.component.html',
   styleUrl: './view-sale-invoice.component.css',
 })
-export class ViewSaleInvoiceComponent implements OnInit {
+export class ViewSaleInvoiceComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   protected readonly saleInvoiceStore = inject(SaleInvoiceStore);
 
-  async ngOnInit(): Promise<void> {
+  constructor() {
+    void this.loadInitialState();
+  }
+
+  private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       await this.saleInvoiceStore.loadSaleInvoiceById(id, {
-        includes: [
-          'currency',
-          'customer',
-          'items.item.category.taxgroup',
-          'items.taxes.tax',
-        ],
+        includes: ['currency', 'customer', 'items.item.category.taxgroup', 'items.taxes.tax'],
       });
     }
   }
@@ -66,20 +65,18 @@ export class ViewSaleInvoiceComponent implements OnInit {
   protected editInvoice(): void {
     const id = this.saleInvoiceStore.selectedItem()?.id;
     if (id) {
-      void this.router.navigate(
-        ['/app/trading/sale-invoice', id, 'edit'],
-        { queryParams: { burl: this.router.url } },
-      );
+      void this.router.navigate(['/app/trading/sale-invoice', id, 'edit'], {
+        queryParams: { burl: this.router.url },
+      });
     }
   }
 
   protected deleteInvoice(): void {
     const id = this.saleInvoiceStore.selectedItem()?.id;
     if (id) {
-      void this.router.navigate(
-        ['/app/trading/sale-invoice', id, 'delete'],
-        { queryParams: { burl: this.router.url } },
-      );
+      void this.router.navigate(['/app/trading/sale-invoice', id, 'delete'], {
+        queryParams: { burl: this.router.url },
+      });
     }
   }
 }

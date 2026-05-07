@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   TngButtonComponent,
@@ -34,7 +34,7 @@ import type { TaxGroup } from '../../../data/tax-group';
   styleUrl: './list-tax-group.component.css',
   providers: [CrudListQueryService],
 })
-export class ListTaxGroupComponent implements OnInit {
+export class ListTaxGroupComponent {
   private readonly router = inject(Router);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly taxGroupStore = inject(TaxGroupStore);
@@ -50,7 +50,7 @@ export class ListTaxGroupComponent implements OnInit {
     { id: 'description', label: 'Description', placeholder: 'Description', type: 'text' },
   ];
 
-  ngOnInit(): void {
+  constructor() {
     this.crudQuery.init((filter) => void this.taxGroupStore.loadTaxGroups(filter));
   }
 
@@ -88,4 +88,3 @@ export class ListTaxGroupComponent implements OnInit {
     }
   }
 }
-

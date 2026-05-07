@@ -4,24 +4,31 @@
   </tng-card-header>
   <tng-card-content>
     <div class="aside-fields">
-
       <label class="toggle-row">
-        <tng-switch [checked]="draft.autoNumbering()"
-          (checkedChange)="draft.toggleAutoNumbering(!!$event)" />
+        <tng-switch
+          [checked]="draft.autoNumbering()"
+          (checkedChange)="draft.toggleAutoNumbering(!!$event)"
+        />
         Auto numbering
       </label>
 
       <div class="field">
         <tng-label forId="inv-number">Number</tng-label>
-        <tng-input id="inv-number" [value]="draft.number()"
+        <tng-input
+          id="inv-number"
+          [value]="draft.number()"
           [disabled]="!draft.numberEnabled()"
-          (valueChange)="draft.number.set($any($event))" />
+          (valueChange)="draft.number.set($any($event))"
+        />
       </div>
 
       <div class="field">
         <tng-label forId="inv-date" required>Date</tng-label>
-        <tng-datepicker id="inv-date" [value]="draft.date()"
-          (valueChange)="draft.onDateChange($event)" />
+        <tng-datepicker
+          id="inv-date"
+          [value]="draft.date()"
+          (valueChange)="draft.onDateChange($event)"
+        />
         @if (draft.dateError()) {
           <p class="field-error">{{ draft.dateError() }}</p>
         }
@@ -29,8 +36,11 @@
 
       <div class="field">
         <tng-label forId="inv-duedate">Due Date</tng-label>
-        <tng-datepicker id="inv-duedate" [value]="draft.duedate()"
-          (valueChange)="draft.onDueDateChange($event)" />
+        <tng-datepicker
+          id="inv-duedate"
+          [value]="draft.duedate()"
+          (valueChange)="draft.onDueDateChange($event)"
+        />
       </div>
 
       <div class="field">
@@ -48,17 +58,22 @@
 
       <div class="field">
         <tng-label forId="inv-deliverystate">Delivery State</tng-label>
-        <tng-input id="inv-deliverystate" [value]="draft.deliverystate()"
-          (valueChange)="draft.deliverystate.set($any($event))" />
+        <tng-input
+          id="inv-deliverystate"
+          [value]="draft.deliverystate()"
+          (valueChange)="draft.deliverystate.set($any($event))"
+        />
       </div>
 
       <div class="field">
         <tng-label forId="inv-currency" required>Currency</tng-label>
-        <tng-input id="inv-currency" placeholder="e.g. INR"
+        <tng-input
+          id="inv-currency"
+          placeholder="e.g. INR"
           [value]="draft.currencycode()"
-          (valueChange)="draft.currencycode.set($any($event))" />
+          (valueChange)="draft.currencycode.set($any($event))"
+        />
       </div>
-
     </div>
   </tng-card-content>
 </tng-card>

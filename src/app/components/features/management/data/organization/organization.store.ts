@@ -1,6 +1,10 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
-import type { Organization, OrganizationListQuery, OrganizationPayload } from './organization.model';
+import type {
+  Organization,
+  OrganizationListQuery,
+  OrganizationPayload,
+} from './organization.model';
 import { OrganizationService } from './organization.service';
 import { initialOrganizationState } from './organization.state';
 
@@ -10,17 +14,27 @@ const getErrorMessage = (error: unknown, fallback: string): string =>
 export const OrganizationStore = signalStore(
   { providedIn: 'root' },
   withState(initialOrganizationState),
-  withComputed(({ organizations, selectedOrganization, selectedOrganizationId, count, isLoading, error, search }) => ({
-    count: computed(() => count()),
-    error: computed(() => error()),
-    isLoading: computed(() => isLoading()),
-    items: computed(() => organizations()),
-    organizations: computed(() => organizations()),
-    search: computed(() => search()),
-    selectedItem: computed(() => selectedOrganization()),
-    selectedOrganization: computed(() => selectedOrganization()),
-    selectedOrganizationId: computed(() => selectedOrganizationId()),
-  })),
+  withComputed(
+    ({
+      organizations,
+      selectedOrganization,
+      selectedOrganizationId,
+      count,
+      isLoading,
+      error,
+      search,
+    }) => ({
+      count: computed(() => count()),
+      error: computed(() => error()),
+      isLoading: computed(() => isLoading()),
+      items: computed(() => organizations()),
+      organizations: computed(() => organizations()),
+      search: computed(() => search()),
+      selectedItem: computed(() => selectedOrganization()),
+      selectedOrganization: computed(() => selectedOrganization()),
+      selectedOrganizationId: computed(() => selectedOrganizationId()),
+    }),
+  ),
   withMethods((store, service = inject(OrganizationService)) => {
     const setLoading = (): void => {
       patchState(store, { error: null, isLoading: true });

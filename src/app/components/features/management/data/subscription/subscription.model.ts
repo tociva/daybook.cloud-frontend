@@ -14,4 +14,3 @@ export interface Subscription {
   subscriptionplanid: string;
   userid: string;
 }
-

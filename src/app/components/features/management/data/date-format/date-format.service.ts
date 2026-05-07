@@ -13,4 +13,3 @@ export class DateFormatService {
     return Array.isArray(dateFormats) ? dateFormats : [];
   }
 }
-

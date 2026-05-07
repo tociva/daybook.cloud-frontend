@@ -8,12 +8,19 @@
       <tng-card-content>
         <p class="auth-notice-context">{{ noticeValue.context }}</p>
         @if (noticeValue.showProgress) {
-          <tng-progress-bar [indeterminate]="true" ariaLabel="Loading Daybook Cloud account details"></tng-progress-bar>
+          <tng-progress-bar
+            [indeterminate]="true"
+            ariaLabel="Loading Daybook Cloud account details"
+          ></tng-progress-bar>
         }
       </tng-card-content>
       <tng-card-footer>
         <tng-card-actions>
-          <button class="auth-notice-action" type="button" (click)="noticeAction.emit(noticeValue.action)">
+          <button
+            class="auth-notice-action"
+            type="button"
+            (click)="noticeAction.emit(noticeValue.action)"
+          >
             {{ noticeValue.buttonLabel }}
           </button>
         </tng-card-actions>
@@ -21,4 +28,3 @@
     </tng-card>
   </div>
 }
-

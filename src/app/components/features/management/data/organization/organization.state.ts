@@ -19,4 +19,3 @@ export const initialOrganizationState: OrganizationState = {
   error: null,
   search: '',
 };
-

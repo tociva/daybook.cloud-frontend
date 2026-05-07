@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   TngButtonComponent,
@@ -34,13 +34,17 @@ import { BranchStore } from '../../../data/branch';
   styleUrl: './view-branch.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ViewBranchComponent implements OnInit {
+export class ViewBranchComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly burlNavigation = inject(BurlNavigationService);
   protected readonly branchStore = inject(BranchStore);
 
-  async ngOnInit(): Promise<void> {
+  constructor() {
+    void this.loadInitialState();
+  }
+
+  private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       await this.branchStore.loadBranchById(id, { includes: ['organization', 'country'] });

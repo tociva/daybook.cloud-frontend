@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -66,7 +66,7 @@ type CustomerFormModel = {
   templateUrl: './create-customer.component.html',
   styleUrls: ['./create-customer.component.css', '../../../../../../../styles/flags.css'],
 })
-export class CreateCustomerComponent implements OnInit {
+export class CreateCustomerComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(CustomerFacade);
   private readonly countryStore = inject(CountryStore);
@@ -85,12 +85,17 @@ export class CreateCustomerComponent implements OnInit {
   protected readonly currencyOptionValue = (currency: Currency): string => currency.code;
   protected readonly currencyOptionLabel = (currency: Currency): string =>
     `${currency.name} (${currency.symbol})`;
-  protected readonly currencyTrackBy = (_index: number, currency: Currency): string => currency.code;
+  protected readonly currencyTrackBy = (_index: number, currency: Currency): string =>
+    currency.code;
   protected readonly filteredCountries = computed(() =>
     this.filterAutocompleteOptions(this.countries(), this.countryOptionLabel, this.countryQuery()),
   );
   protected readonly filteredCurrencies = computed(() =>
-    this.filterAutocompleteOptions(this.currencies(), this.currencyOptionLabel, this.currencyQuery()),
+    this.filterAutocompleteOptions(
+      this.currencies(),
+      this.currencyOptionLabel,
+      this.currencyQuery(),
+    ),
   );
 
   protected readonly customerModel = signal<CustomerFormModel>({
@@ -143,8 +148,7 @@ export class CreateCustomerComponent implements OnInit {
       m.countrycode.trim().length > 0 &&
       m.currencycode.trim().length > 0;
     const contactCompleted = m.mobile.trim().length > 0 || m.email.trim().length > 0;
-    const addressCompleted =
-      m.addressName.trim().length > 0 && m.addressLine1.trim().length > 0;
+    const addressCompleted = m.addressName.trim().length > 0 && m.addressLine1.trim().length > 0;
 
     return [
       {
@@ -178,9 +182,10 @@ export class CreateCustomerComponent implements OnInit {
   constructor() {
     void this.countryStore.load();
     void this.currencyStore.load();
+    void this.loadInitialState();
   }
 
-  async ngOnInit(): Promise<void> {
+  private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     this.id.set(id);
 

@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, afterNextRender, computed, inject, signal } from '@angular/core';
 import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -24,12 +24,7 @@ import type { Tax } from '../../../data/tax';
 import { TaxGroupFacade, TaxGroupStore } from '../../../data/tax-group';
 import type { TaxGroup, TaxGroupCU } from '../../../data/tax-group';
 
-const TAX_GROUP_MODE_SUGGESTIONS = [
-  'Inter State',
-  'Intra State',
-  'EXPORT',
-  'NON-TAXABLE',
-] as const;
+const TAX_GROUP_MODE_SUGGESTIONS = ['Inter State', 'Intra State', 'EXPORT', 'NON-TAXABLE'] as const;
 
 /** Row model: API JSON shape. */
 type TaxGroupRowModel = {
@@ -68,7 +63,7 @@ type TaxGroupFormModel = {
   templateUrl: './create-tax-group.component.html',
   styleUrl: './create-tax-group.component.css',
 })
-export class CreateTaxGroupComponent implements OnInit {
+export class CreateTaxGroupComponent {
   private readonly document = inject(DOCUMENT);
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(TaxGroupFacade);
@@ -123,8 +118,7 @@ export class CreateTaxGroupComponent implements OnInit {
       Number.isFinite(Number(m.rate)) &&
       Number(m.rate) >= 0;
     const groupsCompleted =
-      m.groups.length > 0 &&
-      m.groups.every((g) => g.mode.trim().length > 0 && g.taxids.length > 0);
+      m.groups.length > 0 && m.groups.every((g) => g.mode.trim().length > 0 && g.taxids.length > 0);
 
     return [
       {
@@ -177,7 +171,11 @@ export class CreateTaxGroupComponent implements OnInit {
 
   // ──────────────────────────────────────────────────────────────────────────
 
-  async ngOnInit(): Promise<void> {
+  constructor() {
+    void this.loadInitialState();
+  }
+
+  private async loadInitialState(): Promise<void> {
     // Read routeId synchronously first so we can decide the tax load strategy.
     const routeId = this.route.snapshot.paramMap.get('id');
     this.id.set(routeId);
@@ -200,10 +198,7 @@ export class CreateTaxGroupComponent implements OnInit {
       // Seed the cache so chips show names even after a search query narrows
       // taxStore.items() back down to a filtered page.
       const selectedIds = new Set(
-        (taxGroup.groups ?? []).flatMap((g) => [
-          ...(g.taxids ?? []),
-          ...(g.taxes ?? []),
-        ]),
+        (taxGroup.groups ?? []).flatMap((g) => [...(g.taxids ?? []), ...(g.taxes ?? [])]),
       );
       this.taxCache.set(this.taxStore.items().filter((t) => t.id && selectedIds.has(t.id)));
     }
@@ -226,8 +221,7 @@ export class CreateTaxGroupComponent implements OnInit {
       const incoming = selected.filter((t) => !cacheIds.has(t.id));
       // Also prune IDs that are no longer selected across any group.
       const allSelectedIds = new Set([
-        ...this.taxGroupModel()
-          .groups.flatMap((g) => g.taxids),
+        ...this.taxGroupModel().groups.flatMap((g) => g.taxids),
         ...ids,
       ]);
       const pruned = cache.filter((t) => t.id && allSelectedIds.has(t.id));
@@ -236,9 +230,7 @@ export class CreateTaxGroupComponent implements OnInit {
 
     this.taxGroupModel.update((m) => ({
       ...m,
-      groups: m.groups.map((row, ri) =>
-        ri !== groupIndex ? row : { ...row, taxids: [...ids] },
-      ),
+      groups: m.groups.map((row, ri) => (ri !== groupIndex ? row : { ...row, taxids: [...ids] })),
     }));
   }
 
@@ -267,10 +259,10 @@ export class CreateTaxGroupComponent implements OnInit {
     }));
 
     const newIndex = this.taxGroupModel().groups.length - 1;
-    setTimeout(() => {
+    afterNextRender(() => {
       const inputEl = this.document.getElementById(`tax-group-mode-${newIndex}`);
       inputEl?.focus();
-    }, 0);
+    });
   }
 
   protected removeGroup(index: number): void {

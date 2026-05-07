@@ -26,4 +26,3 @@ export type Tax = TaxPayload &
   }>;
 
 export type TaxListQuery = Lb4ListQuery;
-

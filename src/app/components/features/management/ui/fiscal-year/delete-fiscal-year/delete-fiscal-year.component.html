@@ -13,7 +13,6 @@
       @if (fiscalYearStore.isLoading() && !fiscalYearStore.selectedItem()) {
         <div class="notice">Loading fiscal year...</div>
       } @else if (fiscalYearStore.selectedItem(); as fy) {
-
         <dl class="details-grid">
           <div class="wide">
             <dt>Name</dt>
@@ -43,17 +42,14 @@
 
         <div class="notice notice--danger">
           You are about to permanently delete the fiscal year
-          <strong>{{ fy.name }}</strong>. All associated journal entries and data will be lost.
+          <strong>{{ fy.name }}</strong
+          >. All associated journal entries and data will be lost.
         </div>
 
         <label class="confirm-row">
-          <tng-checkbox
-            [checked]="confirmed()"
-            (checkedChange)="confirmed.set($event)"
-          />
+          <tng-checkbox [checked]="confirmed()" (checkedChange)="confirmed.set($event)" />
           I understand this action is irreversible.
         </label>
-
       } @else {
         <div class="notice">Fiscal year not found.</div>
       }

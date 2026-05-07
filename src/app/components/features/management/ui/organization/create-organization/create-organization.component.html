@@ -11,11 +11,9 @@
       }
 
       <form (submit)="submitForm($event)" novalidate>
-
         <!-- ── Basic Details ──────────────────────────────── -->
         <p class="section-label">Basic Details</p>
         <div class="fields-grid">
-
           <div class="field field--full">
             <tng-label required>Name</tng-label>
             <tng-input
@@ -112,13 +110,11 @@
               (input)="description.set($any($event.target).value)"
             />
           </div>
-
         </div>
 
         <!-- ── Address ───────────────────────────────────── -->
         <p class="section-label">Address</p>
         <div class="fields-grid">
-
           <div class="field field--full">
             <tng-label required>Address Line 1</tng-label>
             <tng-input
@@ -167,27 +163,26 @@
               (input)="gstin.set($any($event.target).value)"
             />
           </div>
-
         </div>
 
         <tng-card-footer>
           <tng-card-actions align="end">
             <app-burl-back-button />
-            <tng-button
-              type="submit"
-              appearance="solid"
-              tone="primary"
-              [disabled]="isSubmitting()"
-            >
+            <tng-button type="submit" appearance="solid" tone="primary" [disabled]="isSubmitting()">
               <tng-icon
-                [icon]="isSubmitting() ? 'loader' : (mode() === 'edit' ? 'save' : 'plus')"
+                [icon]="isSubmitting() ? 'loader' : mode() === 'edit' ? 'save' : 'plus'"
                 aria-hidden="true"
               />
-              {{ isSubmitting() ? 'Saving…' : (mode() === 'edit' ? 'Save changes' : 'Create organization') }}
+              {{
+                isSubmitting()
+                  ? 'Saving…'
+                  : mode() === 'edit'
+                    ? 'Save changes'
+                    : 'Create organization'
+              }}
             </tng-button>
           </tng-card-actions>
         </tng-card-footer>
-
       </form>
     </tng-card-content>
   </tng-card>

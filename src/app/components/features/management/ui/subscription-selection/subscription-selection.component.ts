@@ -20,4 +20,3 @@ import {
   styleUrl: './subscription-selection.component.css',
 })
 export class SubscriptionSelectionComponent {}
-

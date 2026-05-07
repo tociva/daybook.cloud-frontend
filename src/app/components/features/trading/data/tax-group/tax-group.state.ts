@@ -19,4 +19,3 @@ export const initialTaxGroupState: TaxGroupState = {
     selectedItem: null,
   },
 };
-

@@ -188,4 +188,3 @@ export class WorkspaceShellComponent {
     return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null;
   }
 }
-

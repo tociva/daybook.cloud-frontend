@@ -13,7 +13,6 @@
       @if (taxGroupStore.isLoading() && !taxGroupStore.selectedItem()) {
         <div class="notice">Loading tax group...</div>
       } @else if (taxGroupStore.selectedItem(); as item) {
-
         <!-- Top-level fields -->
         <dl class="details-grid">
           <div>
@@ -78,7 +77,6 @@
             }
           }
         </div>
-
       } @else {
         <div class="notice">Tax group not found.</div>
       }

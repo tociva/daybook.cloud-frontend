@@ -1,11 +1,12 @@
 <main class="trading-page">
   <section class="setup-layout" aria-labelledby="item-setup-title">
     <form class="item-form" novalidate (submit)="submitForm($event)">
-
       <tng-card variant="outline" tone="info" padding="lg">
         <tng-card-header>
           <tng-card-title>{{ title() }}</tng-card-title>
-          <tng-card-description>Set the item identity and assign it to a category.</tng-card-description>
+          <tng-card-description
+            >Set the item identity and assign it to a category.</tng-card-description
+          >
         </tng-card-header>
 
         <tng-card-content>
@@ -149,7 +150,6 @@
           </tng-card-actions>
         </tng-card-footer>
       </tng-card>
-
     </form>
 
     <aside class="setup-overview" aria-labelledby="item-setup-title">
@@ -157,8 +157,8 @@
         <p class="eyebrow">Item setup</p>
         <h1 id="item-setup-title">{{ title() }}</h1>
         <p>
-          Define the item name, code, and display name, then link it to a category so it can
-          be used across invoices and transactions in Daybook Cloud.
+          Define the item name, code, and display name, then link it to a category so it can be used
+          across invoices and transactions in Daybook Cloud.
         </p>
         <tng-stepper
           class="setup-stepper"

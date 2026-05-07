@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -61,7 +61,7 @@ type VendorFormModel = {
   templateUrl: './create-vendor.component.html',
   styleUrl: './create-vendor.component.css',
 })
-export class CreateVendorComponent implements OnInit {
+export class CreateVendorComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(VendorFacade);
   protected readonly vendorStore = inject(VendorStore);
@@ -116,10 +116,8 @@ export class CreateVendorComponent implements OnInit {
       m.name.trim().length > 0 &&
       m.countrycode.trim().length > 0 &&
       m.currencycode.trim().length > 0;
-    const contactCompleted =
-      m.mobile.trim().length > 0 || m.email.trim().length > 0;
-    const addressCompleted =
-      m.addressName.trim().length > 0 && m.addressLine1.trim().length > 0;
+    const contactCompleted = m.mobile.trim().length > 0 || m.email.trim().length > 0;
+    const addressCompleted = m.addressName.trim().length > 0 && m.addressLine1.trim().length > 0;
 
     return [
       {
@@ -150,7 +148,11 @@ export class CreateVendorComponent implements OnInit {
 
   // ──────────────────────────────────────────────────────────────────────────
 
-  async ngOnInit(): Promise<void> {
+  constructor() {
+    void this.loadInitialState();
+  }
+
+  private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     this.id.set(id);
 

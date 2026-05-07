@@ -129,10 +129,7 @@ export const CustomerReceiptStore = signalStore(
         }
       },
 
-      async updateCustomerReceipt(
-        id: string,
-        payload: CustomerReceiptPayload,
-      ): Promise<boolean> {
+      async updateCustomerReceipt(id: string, payload: CustomerReceiptPayload): Promise<boolean> {
         setLoading();
         try {
           await service.update(id, payload);

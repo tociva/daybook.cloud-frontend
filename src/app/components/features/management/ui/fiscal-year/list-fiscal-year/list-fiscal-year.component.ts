@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   TngButtonComponent,
@@ -37,7 +37,7 @@ import { formatDisplayDate } from '../../../../../../core/date/dayjs-date.utils'
   providers: [CrudListQueryService],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ListFiscalYearComponent implements OnInit {
+export class ListFiscalYearComponent {
   private readonly router = inject(Router);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly fiscalYearStore = inject(FiscalYearStore);
@@ -58,10 +58,8 @@ export class ListFiscalYearComponent implements OnInit {
     { id: 'currencycode', label: 'Currency', placeholder: 'e.g. INR', type: 'text' },
   ];
 
-  ngOnInit(): void {
-    this.crudQuery.init((filter) =>
-      void this.fiscalYearStore.loadFiscalYears({ ...filter }),
-    );
+  constructor() {
+    this.crudQuery.init((filter) => void this.fiscalYearStore.loadFiscalYears({ ...filter }));
   }
 
   protected createFiscalYear(): void {

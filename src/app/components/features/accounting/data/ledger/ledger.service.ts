@@ -1,11 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { CrudApiService } from '../../../../../shared/crud';
-import type {
-  Ledger,
-  LedgerGetQuery,
-  LedgerListQuery,
-  LedgerPayload,
-} from './ledger.model';
+import type { Ledger, LedgerGetQuery, LedgerListQuery, LedgerPayload } from './ledger.model';
 
 const ENDPOINT = '/accounting/ledger';
 

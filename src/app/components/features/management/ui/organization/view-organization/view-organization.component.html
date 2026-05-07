@@ -13,7 +13,6 @@
       @if (organizationStore.isLoading() && !organizationStore.selectedItem()) {
         <div class="notice">Loading organization...</div>
       } @else if (organizationStore.selectedItem(); as org) {
-
         <!-- Basic details -->
         <dl class="details-grid">
           <div>
@@ -58,7 +57,6 @@
             </div>
           </dl>
         }
-
       } @else {
         <div class="notice">Organization not found.</div>
       }
@@ -67,12 +65,7 @@
     <tng-card-footer>
       <tng-card-actions align="end">
         <app-burl-back-button />
-        <tng-button
-          type="button"
-          appearance="outline"
-          tone="danger"
-          (click)="delete()"
-        >
+        <tng-button type="button" appearance="outline" tone="danger" (click)="delete()">
           <tng-icon icon="trash2" aria-hidden="true" />
           Delete
         </tng-button>

@@ -1,10 +1,4 @@
-import {
-  Component,
-  OnInit,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
   TngButtonComponent,
@@ -63,7 +57,7 @@ interface InvoiceRow {
   templateUrl: './create-customer-receipt.component.html',
   styleUrl: './create-customer-receipt.component.css',
 })
-export class CreateCustomerReceiptComponent implements OnInit {
+export class CreateCustomerReceiptComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(CustomerReceiptFacade);
 
@@ -123,9 +117,7 @@ export class CreateCustomerReceiptComponent implements OnInit {
   protected readonly filteredBankCashes = computed<BankCash[]>(() => {
     const q = this.bankCashSearch().toLowerCase();
     const list = this.bankCashStore.items() as BankCash[];
-    return (
-      q ? list.filter((b) => b.name?.toLowerCase().includes(q)) : list
-    ).slice(0, 15);
+    return (q ? list.filter((b) => b.name?.toLowerCase().includes(q)) : list).slice(0, 15);
   });
 
   // ── Invoice rows ──────────────────────────────────────────────────────────
@@ -133,8 +125,8 @@ export class CreateCustomerReceiptComponent implements OnInit {
   protected readonly invoiceRows = signal<InvoiceRow[]>([this.emptyInvoiceRow()]);
   protected readonly activeInvoiceRowIndex = signal(-1);
 
-  protected readonly filteredInvoices = computed<SaleInvoice[]>(() =>
-    this.saleInvoiceStore.items().slice(0, 15) as SaleInvoice[],
+  protected readonly filteredInvoices = computed<SaleInvoice[]>(
+    () => this.saleInvoiceStore.items().slice(0, 15) as SaleInvoice[],
   );
 
   // ── Computed total ────────────────────────────────────────────────────────
@@ -169,7 +161,11 @@ export class CreateCustomerReceiptComponent implements OnInit {
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
-  async ngOnInit(): Promise<void> {
+  constructor() {
+    void this.loadInitialState();
+  }
+
+  private async loadInitialState(): Promise<void> {
     await Promise.all([
       this.customerStore.loadCustomers({}),
       this.bankCashStore.loadBankCashes({}),
@@ -232,9 +228,7 @@ export class CreateCustomerReceiptComponent implements OnInit {
       this.selectedCustomer.set(null);
       this.customerid.set('');
     }
-    void this.customerStore.loadCustomers(
-      q ? { where: { name: { ilike: `%${q}%` } } } : {},
-    );
+    void this.customerStore.loadCustomers(q ? { where: { name: { ilike: `%${q}%` } } } : {});
   }
 
   protected selectCustomer(customer: Customer): void {
@@ -248,7 +242,7 @@ export class CreateCustomerReceiptComponent implements OnInit {
   }
 
   protected closeCustomerDropdown(): void {
-    setTimeout(() => this.showCustomerDropdown.set(false), 200);
+    this.showCustomerDropdown.set(false);
   }
 
   // ── Bank/Cash autocomplete ────────────────────────────────────────────────
@@ -261,9 +255,7 @@ export class CreateCustomerReceiptComponent implements OnInit {
       this.selectedBankCash.set(null);
       this.bcashid.set('');
     }
-    void this.bankCashStore.loadBankCashes(
-      q ? { where: { name: { ilike: `%${q}%` } } } : {},
-    );
+    void this.bankCashStore.loadBankCashes(q ? { where: { name: { ilike: `%${q}%` } } } : {});
   }
 
   protected selectBankCash(bcash: BankCash): void {
@@ -274,7 +266,7 @@ export class CreateCustomerReceiptComponent implements OnInit {
   }
 
   protected closeBankCashDropdown(): void {
-    setTimeout(() => this.showBankCashDropdown.set(false), 200);
+    this.showBankCashDropdown.set(false);
   }
 
   // ── Invoice row management ────────────────────────────────────────────────
@@ -336,7 +328,7 @@ export class CreateCustomerReceiptComponent implements OnInit {
   }
 
   protected closeInvoiceDropdown(): void {
-    setTimeout(() => this.activeInvoiceRowIndex.set(-1), 200);
+    this.activeInvoiceRowIndex.set(-1);
   }
 
   protected updateInvoiceAmount(rowIndex: number, value: string | null): void {

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
   TngButtonComponent,
@@ -34,13 +34,17 @@ import { ItemFacade, ItemStore } from '../../../data/item';
   templateUrl: './delete-item.component.html',
   styleUrl: './delete-item.component.css',
 })
-export class DeleteItemComponent implements OnInit {
+export class DeleteItemComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(ItemFacade);
   protected readonly itemStore = inject(ItemStore);
   protected readonly confirmed = signal(false);
 
-  async ngOnInit(): Promise<void> {
+  constructor() {
+    void this.loadInitialState();
+  }
+
+  private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       await this.itemStore.loadItemById(id, { includes: ['category'] });

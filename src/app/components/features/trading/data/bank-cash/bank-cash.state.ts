@@ -19,4 +19,3 @@ export const initialBankCashState: BankCashState = {
     selectedItem: null,
   },
 };
-

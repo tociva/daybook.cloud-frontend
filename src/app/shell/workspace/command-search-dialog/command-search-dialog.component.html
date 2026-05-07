@@ -2,12 +2,12 @@
   tabindex="-1"
   title="Command Search"
   description="Type a command, page, or action to jump quickly."
-  [open]="open"
+  [open]="open()"
   (openChange)="onDialogOpenChange($event)"
   (closed)="onDialogClosed()"
 >
   <div class="command-search-dialog">
-    @if (open) {
+    @if (open()) {
       <tng-autocomplete
         class="command-search-autocomplete"
         placeholder="Search commands, pages, or settings..."

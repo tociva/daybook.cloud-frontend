@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   TngButtonComponent,
@@ -35,7 +35,7 @@ import type { ItemCategory } from '../../../data/item-category';
   styleUrl: './list-item-category.component.css',
   providers: [CrudListQueryService],
 })
-export class ListItemCategoryComponent implements OnInit {
+export class ListItemCategoryComponent {
   private readonly router = inject(Router);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly itemCategoryStore = inject(ItemCategoryStore);
@@ -66,9 +66,10 @@ export class ListItemCategoryComponent implements OnInit {
     { id: 'description', label: 'Description', placeholder: 'Description', type: 'text' },
   ];
 
-  ngOnInit(): void {
-    this.crudQuery.init((filter) =>
-      void this.itemCategoryStore.loadItemCategories({ ...filter, includes: ['parent'] }),
+  constructor() {
+    this.crudQuery.init(
+      (filter) =>
+        void this.itemCategoryStore.loadItemCategories({ ...filter, includes: ['parent'] }),
     );
   }
 

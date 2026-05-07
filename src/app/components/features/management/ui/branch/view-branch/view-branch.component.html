@@ -13,7 +13,6 @@
       @if (branchStore.isLoading() && !branchStore.selectedItem()) {
         <div class="notice">Loading branch...</div>
       } @else if (branchStore.selectedItem(); as branch) {
-
         <!-- Basic details -->
         <dl class="details-grid">
           <div>
@@ -103,7 +102,6 @@
             </div>
           </dl>
         }
-
       } @else {
         <div class="notice">Branch not found.</div>
       }

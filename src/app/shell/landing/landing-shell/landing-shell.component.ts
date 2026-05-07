@@ -111,4 +111,3 @@ export class LandingShellComponent {
     void this.systemStore.initialize();
   }
 }
-

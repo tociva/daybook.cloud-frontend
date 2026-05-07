@@ -6,4 +6,3 @@ import { Component } from '@angular/core';
   styleUrl: './landing-hero.component.css',
 })
 export class LandingHeroComponent {}
-

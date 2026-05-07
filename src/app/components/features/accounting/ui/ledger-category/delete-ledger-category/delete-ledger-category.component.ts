@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
   TngButtonComponent,
@@ -35,13 +35,17 @@ import { LedgerCategoryFacade, LedgerCategoryStore } from '../../../data/ledger-
   styleUrl: './delete-ledger-category.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DeleteLedgerCategoryComponent implements OnInit {
+export class DeleteLedgerCategoryComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(LedgerCategoryFacade);
   protected readonly ledgerCategoryStore = inject(LedgerCategoryStore);
   protected readonly confirmed = signal(false);
 
-  async ngOnInit(): Promise<void> {
+  constructor() {
+    void this.loadInitialState();
+  }
+
+  private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       await this.ledgerCategoryStore.loadLedgerCategoryById(id, { includes: ['parent'] });

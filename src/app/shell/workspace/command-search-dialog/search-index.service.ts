@@ -21,19 +21,21 @@ export class SearchIndexService {
 
   /** Loads and caches the search index once for the lifetime of the app. */
   readonly index$ = this.http.get<SearchEntry[]>('/assets/search/index.json').pipe(
-    map((entries): SearchIndex => ({
-      entries,
-      fuse: new Fuse(entries, {
-        keys: [
-          { name: 'title', weight: 2 },
-          { name: 'keywords', weight: 1.5 },
-          { name: 'description', weight: 1 },
-        ],
-        threshold: 0.35,
-        includeScore: false,
-        ignoreLocation: true,
+    map(
+      (entries): SearchIndex => ({
+        entries,
+        fuse: new Fuse(entries, {
+          keys: [
+            { name: 'title', weight: 2 },
+            { name: 'keywords', weight: 1.5 },
+            { name: 'description', weight: 1 },
+          ],
+          threshold: 0.35,
+          includeScore: false,
+          ignoreLocation: true,
+        }),
       }),
-    })),
+    ),
     shareReplay(1),
   );
 }

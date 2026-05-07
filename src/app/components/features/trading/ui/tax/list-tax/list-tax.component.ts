@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   TngButtonComponent,
@@ -40,7 +40,7 @@ type StatusTagTone = 'danger' | 'success' | 'warning';
   styleUrl: './list-tax.component.css',
   providers: [CrudListQueryService],
 })
-export class ListTaxComponent implements OnInit {
+export class ListTaxComponent {
   private readonly router = inject(Router);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly taxStore = inject(TaxStore);
@@ -71,7 +71,7 @@ export class ListTaxComponent implements OnInit {
     },
   ];
 
-  ngOnInit(): void {
+  constructor() {
     this.crudQuery.init((filter) => void this.taxStore.loadTaxes(filter));
   }
 
@@ -136,4 +136,3 @@ export class ListTaxComponent implements OnInit {
     }
   }
 }
-

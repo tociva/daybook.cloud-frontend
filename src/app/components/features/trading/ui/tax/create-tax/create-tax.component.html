@@ -2,98 +2,105 @@
   <section class="setup-layout" aria-labelledby="tax-setup-title">
     <form class="tax-form" novalidate (submit)="submitForm($event)">
       <tng-card variant="outline" padding="lg">
-      <tng-card-header>
-        <tng-card-title>{{ title() }}</tng-card-title>
-        <tng-card-description>Add the tax identity, rate, and applied-to value.</tng-card-description>
-      </tng-card-header>
+        <tng-card-header>
+          <tng-card-title>{{ title() }}</tng-card-title>
+          <tng-card-description
+            >Add the tax identity, rate, and applied-to value.</tng-card-description
+          >
+        </tng-card-header>
 
-      <tng-card-content>
-        @if (taxStore.error()) {
-          <div class="notice notice--danger">{{ taxStore.error() }}</div>
-        }
+        <tng-card-content>
+          @if (taxStore.error()) {
+            <div class="notice notice--danger">{{ taxStore.error() }}</div>
+          }
 
-        @if (taxStore.isLoading() && mode() === 'edit' && !taxStore.selectedItem()) {
-          <div class="notice">Loading tax...</div>
-        } @else {
-          <div class="field-grid">
-            <div class="field">
-              <tng-label forId="tax-name" required>Name</tng-label>
-              <tng-input
-                id="tax-name"
-                placeholder="Goods and services tax"
-                [formField]="taxForm.name"
-                [ariaInvalid]="nameError() !== null"
-              />
-              <p class="field-error" [class.field-error--empty]="!nameError()">
-                {{ nameError() || '\u00A0' }}
-              </p>
+          @if (taxStore.isLoading() && mode() === 'edit' && !taxStore.selectedItem()) {
+            <div class="notice">Loading tax...</div>
+          } @else {
+            <div class="field-grid">
+              <div class="field">
+                <tng-label forId="tax-name" required>Name</tng-label>
+                <tng-input
+                  id="tax-name"
+                  placeholder="Goods and services tax"
+                  [formField]="taxForm.name"
+                  [ariaInvalid]="nameError() !== null"
+                />
+                <p class="field-error" [class.field-error--empty]="!nameError()">
+                  {{ nameError() || '\u00A0' }}
+                </p>
+              </div>
+
+              <div class="field">
+                <tng-label forId="tax-shortname" required>Short Name</tng-label>
+                <tng-input
+                  id="tax-shortname"
+                  placeholder="GST"
+                  [formField]="taxForm.shortname"
+                  [ariaInvalid]="shortnameError() !== null"
+                />
+                <p class="field-error" [class.field-error--empty]="!shortnameError()">
+                  {{ shortnameError() || '\u00A0' }}
+                </p>
+              </div>
+
+              <div class="field">
+                <tng-label forId="tax-rate" required>Rate (%)</tng-label>
+                <tng-input
+                  id="tax-rate"
+                  type="number"
+                  placeholder="18"
+                  [formField]="taxForm.rate"
+                  [ariaInvalid]="rateError() !== null"
+                />
+                <p class="field-error" [class.field-error--empty]="!rateError()">
+                  {{ rateError() || '\u00A0' }}
+                </p>
+              </div>
+
+              <div class="field">
+                <tng-label forId="tax-applied-to" required>Applied To</tng-label>
+                <tng-input
+                  id="tax-applied-to"
+                  type="number"
+                  placeholder="0"
+                  [formField]="taxForm.appliedto"
+                  [ariaInvalid]="appliedToError() !== null"
+                />
+                <p class="field-error" [class.field-error--empty]="!appliedToError()">
+                  {{ appliedToError() || '\u00A0' }}
+                </p>
+              </div>
+
+              <div class="field field--wide">
+                <tng-label forId="tax-description">Description</tng-label>
+                <tng-textarea
+                  id="tax-description"
+                  placeholder="Internal notes for this tax"
+                  rows="4"
+                  [formField]="taxForm.description"
+                />
+                <p class="field-error field-error--empty">{{ '\u00A0' }}</p>
+              </div>
             </div>
+          }
+        </tng-card-content>
 
-            <div class="field">
-              <tng-label forId="tax-shortname" required>Short Name</tng-label>
-              <tng-input
-                id="tax-shortname"
-                placeholder="GST"
-                [formField]="taxForm.shortname"
-                [ariaInvalid]="shortnameError() !== null"
-              />
-              <p class="field-error" [class.field-error--empty]="!shortnameError()">
-                {{ shortnameError() || '\u00A0' }}
-              </p>
-            </div>
-
-            <div class="field">
-              <tng-label forId="tax-rate" required>Rate (%)</tng-label>
-              <tng-input
-                id="tax-rate"
-                type="number"
-                placeholder="18"
-                [formField]="taxForm.rate"
-                [ariaInvalid]="rateError() !== null"
-              />
-              <p class="field-error" [class.field-error--empty]="!rateError()">
-                {{ rateError() || '\u00A0' }}
-              </p>
-            </div>
-
-            <div class="field">
-              <tng-label forId="tax-applied-to" required>Applied To</tng-label>
-              <tng-input
-                id="tax-applied-to"
-                type="number"
-                placeholder="0"
-                [formField]="taxForm.appliedto"
-                [ariaInvalid]="appliedToError() !== null"
-              />
-              <p class="field-error" [class.field-error--empty]="!appliedToError()">
-                {{ appliedToError() || '\u00A0' }}
-              </p>
-            </div>
-
-            <div class="field field--wide">
-              <tng-label forId="tax-description">Description</tng-label>
-              <tng-textarea
-                id="tax-description"
-                placeholder="Internal notes for this tax"
-                rows="4"
-                [formField]="taxForm.description"
-              />
-              <p class="field-error field-error--empty">{{ '\u00A0' }}</p>
-            </div>
-          </div>
-        }
-      </tng-card-content>
-
-      <tng-card-footer>
-        <tng-card-actions align="end">
-          <app-burl-back-button label="Cancel" />
-          <tng-button type="submit" appearance="solid" tone="primary" [disabled]="taxStore.isLoading()">
-            <tng-icon icon="save" aria-hidden="true" />
-            Save
-          </tng-button>
-        </tng-card-actions>
-      </tng-card-footer>
-    </tng-card>
+        <tng-card-footer>
+          <tng-card-actions align="end">
+            <app-burl-back-button label="Cancel" />
+            <tng-button
+              type="submit"
+              appearance="solid"
+              tone="primary"
+              [disabled]="taxStore.isLoading()"
+            >
+              <tng-icon icon="save" aria-hidden="true" />
+              Save
+            </tng-button>
+          </tng-card-actions>
+        </tng-card-footer>
+      </tng-card>
     </form>
 
     <aside class="setup-overview" aria-labelledby="tax-setup-title">
@@ -101,8 +108,8 @@
         <p class="eyebrow">Tax setup</p>
         <h1 id="tax-setup-title">Tax details.</h1>
         <p>
-          Add the tax identity, rate, and applied-to value so it can be reused across
-          invoices and documents in Daybook Cloud.
+          Add the tax identity, rate, and applied-to value so it can be reused across invoices and
+          documents in Daybook Cloud.
         </p>
         <tng-stepper
           class="setup-stepper"
@@ -115,4 +122,3 @@
     </aside>
   </section>
 </main>
-

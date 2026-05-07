@@ -19,10 +19,7 @@ export class UserSessionService {
     );
   }
 
-  async selectBranch(
-    apiBaseUrl: string,
-    branchid: UserSessionSelectionId,
-  ): Promise<UserSession> {
+  async selectBranch(apiBaseUrl: string, branchid: UserSessionSelectionId): Promise<UserSession> {
     return firstValueFrom(
       this.http.post<UserSession>(
         `${this.getUserSessionUrl(apiBaseUrl)}/select-branch`,

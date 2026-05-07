@@ -15,27 +15,29 @@ const getErrorMessage = (error: unknown, fallback: string): string =>
 export const FiscalYearStore = signalStore(
   { providedIn: 'root' },
   withState(initialFiscalYearState),
-  withComputed(({
-    fiscalYears,
-    selectedFiscalYear,
-    selectedFiscalYearId,
-    branchId,
-    count,
-    isLoading,
-    error,
-    search,
-  }) => ({
-    branchId: computed(() => branchId()),
-    count: computed(() => count()),
-    error: computed(() => error()),
-    fiscalYears: computed(() => fiscalYears()),
-    isLoading: computed(() => isLoading()),
-    items: computed(() => fiscalYears()),
-    search: computed(() => search()),
-    selectedFiscalYear: computed(() => selectedFiscalYear()),
-    selectedFiscalYearId: computed(() => selectedFiscalYearId()),
-    selectedItem: computed(() => selectedFiscalYear()),
-  })),
+  withComputed(
+    ({
+      fiscalYears,
+      selectedFiscalYear,
+      selectedFiscalYearId,
+      branchId,
+      count,
+      isLoading,
+      error,
+      search,
+    }) => ({
+      branchId: computed(() => branchId()),
+      count: computed(() => count()),
+      error: computed(() => error()),
+      fiscalYears: computed(() => fiscalYears()),
+      isLoading: computed(() => isLoading()),
+      items: computed(() => fiscalYears()),
+      search: computed(() => search()),
+      selectedFiscalYear: computed(() => selectedFiscalYear()),
+      selectedFiscalYearId: computed(() => selectedFiscalYearId()),
+      selectedItem: computed(() => selectedFiscalYear()),
+    }),
+  ),
   withMethods((store, service = inject(FiscalYearService)) => {
     const setLoading = (): void => {
       patchState(store, { error: null, isLoading: true });

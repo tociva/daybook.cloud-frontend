@@ -1,12 +1,13 @@
 <main class="trading-page">
   <section class="setup-layout" aria-labelledby="vendor-setup-title">
     <form class="vendor-form" novalidate (submit)="submitForm($event)">
-
       <!-- Basic details -->
       <tng-card variant="outline" tone="info" padding="lg">
         <tng-card-header>
           <tng-card-title>{{ title() }}</tng-card-title>
-          <tng-card-description>Set the vendor name, country, currency, and contact details.</tng-card-description>
+          <tng-card-description
+            >Set the vendor name, country, currency, and contact details.</tng-card-description
+          >
         </tng-card-header>
 
         <tng-card-content>
@@ -90,21 +91,13 @@
 
               <div class="field">
                 <tng-label forId="vend-pan">PAN</tng-label>
-                <tng-input
-                  id="vend-pan"
-                  placeholder="AAAAA0000A"
-                  [formField]="vendorForm.pan"
-                />
+                <tng-input id="vend-pan" placeholder="AAAAA0000A" [formField]="vendorForm.pan" />
                 <p class="field-error field-error--empty">{{ ' ' }}</p>
               </div>
 
               <div class="field">
                 <tng-label forId="vend-state">State</tng-label>
-                <tng-input
-                  id="vend-state"
-                  placeholder="Kerala"
-                  [formField]="vendorForm.state"
-                />
+                <tng-input id="vend-state" placeholder="Kerala" [formField]="vendorForm.state" />
                 <p class="field-error field-error--empty">{{ ' ' }}</p>
               </div>
 
@@ -209,7 +202,6 @@
           </tng-card-actions>
         </tng-card-footer>
       </tng-card>
-
     </form>
 
     <aside class="setup-overview" aria-labelledby="vendor-setup-title">
@@ -217,7 +209,8 @@
         <p class="eyebrow">Vendor setup</p>
         <h1 id="vendor-setup-title">{{ title() }}</h1>
         <p>
-          Create a vendor record with contact information, country and currency, and a billing address.
+          Create a vendor record with contact information, country and currency, and a billing
+          address.
         </p>
         <tng-stepper
           class="setup-stepper"

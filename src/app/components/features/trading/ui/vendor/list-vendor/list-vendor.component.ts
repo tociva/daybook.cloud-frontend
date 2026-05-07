@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   TngButtonComponent,
@@ -35,7 +35,7 @@ import type { Vendor } from '../../../data/vendor';
   styleUrl: './list-vendor.component.css',
   providers: [CrudListQueryService],
 })
-export class ListVendorComponent implements OnInit {
+export class ListVendorComponent {
   private readonly router = inject(Router);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly vendorStore = inject(VendorStore);
@@ -62,7 +62,7 @@ export class ListVendorComponent implements OnInit {
     { id: 'state', label: 'State', placeholder: 'State', type: 'text' },
   ];
 
-  ngOnInit(): void {
+  constructor() {
     this.crudQuery.init((filter) => void this.vendorStore.loadVendors(filter));
   }
 

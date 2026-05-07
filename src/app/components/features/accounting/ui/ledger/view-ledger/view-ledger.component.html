@@ -13,7 +13,6 @@
       @if (ledgerStore.isLoading() && !ledgerStore.selectedItem()) {
         <div class="notice">Loading ledger...</div>
       } @else if (ledgerStore.selectedItem(); as ledger) {
-
         <dl class="details-grid">
           <div class="wide">
             <dt>Name</dt>
@@ -44,7 +43,6 @@
             <dd>{{ ledger.openingcr != null ? ledger.openingcr : '—' }}</dd>
           </div>
         </dl>
-
       } @else {
         <div class="notice">Ledger not found.</div>
       }

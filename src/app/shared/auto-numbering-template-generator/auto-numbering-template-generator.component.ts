@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, computed, signal, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, computed, input, linkedSignal, output } from '@angular/core';
 import { TngButtonComponent, TngLabelComponent } from '@tailng-ui/components';
 import { TngInput } from '@tailng-ui/primitives';
 import dayjs from 'dayjs';
@@ -49,17 +49,17 @@ const placeholderGroups = [
   templateUrl: './auto-numbering-template-generator.component.html',
   styleUrl: './auto-numbering-template-generator.component.css',
 })
-export class AutoNumberingTemplateGeneratorComponent implements OnChanges {
-  @Input({ required: true }) initialTemplate!: string;
-  @Input({ required: true }) fiscalStartDate!: string;
-  @Input({ required: true }) fiscalEndDate!: string;
-  @Output() readonly applyTemplate = new EventEmitter<string>();
+export class AutoNumberingTemplateGeneratorComponent {
+  readonly initialTemplate = input.required<string>();
+  readonly fiscalStartDate = input.required<string>();
+  readonly fiscalEndDate = input.required<string>();
+  readonly applyTemplate = output<string>();
 
-  protected readonly template = signal('');
+  protected readonly template = linkedSignal(() => this.initialTemplate() ?? '');
   protected readonly placeholderGroups = placeholderGroups;
   protected readonly fiscalYearRange = computed<FiscalYearRange>(() => ({
-    startdate: this.fiscalStartDate,
-    enddate: this.fiscalEndDate,
+    startdate: this.fiscalStartDate(),
+    enddate: this.fiscalEndDate(),
   }));
 
   protected readonly resolvedTemplatePreview = computed(() =>
@@ -76,10 +76,6 @@ export class AutoNumberingTemplateGeneratorComponent implements OnChanges {
       AutoNumberingTemplateGeneratorComponent.updateSerialWithNumber(resolvedTemplate, index + 1),
     );
   });
-
-  ngOnChanges(_changes: SimpleChanges): void {
-    this.template.set(this.initialTemplate ?? '');
-  }
 
   protected onTemplateInput(event: Event): void {
     this.template.set((event.target as HTMLInputElement | null)?.value ?? '');
@@ -123,4 +119,3 @@ export class AutoNumberingTemplateGeneratorComponent implements OnChanges {
     });
   }
 }
-

@@ -54,16 +54,9 @@
                 (valueChange)="selectCountry($event)"
                 (queryChange)="onCountryQueryChange($event)"
               >
-                <ng-template
-                  #tngAutocompleteOptionTpl
-                  let-option="option"
-                  let-label="label"
-                >
+                <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
                   <span class="country-option">
-                    <span
-                      [class]="getCountryFlagClass(option)"
-                      aria-hidden="true"
-                    ></span>
+                    <span [class]="getCountryFlagClass(option)" aria-hidden="true"></span>
 
                     <span class="country-option-label">{{ label }}</span>
 
@@ -72,10 +65,7 @@
                 </ng-template>
 
                 <ng-template #tngAutocompleteSelectedTpl let-option="option">
-                  <span
-                    [class]="getCountryFlagClass(option)"
-                    aria-hidden="true"
-                  ></span>
+                  <span [class]="getCountryFlagClass(option)" aria-hidden="true"></span>
                 </ng-template>
               </tng-autocomplete>
               <p class="field-error" [class.field-error--empty]="!fieldError('country')">
@@ -245,9 +235,7 @@
               >
                 {{ fieldError('fiscalDateRange.start') || '\u00A0' }}
               </p>
-              <p class="field-help">
-                Date Range End: {{ formattedFiscalDateRangeEnd() }}
-              </p>
+              <p class="field-help">Date Range End: {{ formattedFiscalDateRangeEnd() }}</p>
             </div>
           </div>
         </tng-card-content>
@@ -413,8 +401,8 @@
         <p class="eyebrow">Workspace setup</p>
         <h1 id="organization-setup-title">Create your organization</h1>
         <p>
-          Add the core details we need to prepare fiscal years, numbering, currency, and regional defaults for
-          Daybook Cloud.
+          Add the core details we need to prepare fiscal years, numbering, currency, and regional
+          defaults for Daybook Cloud.
         </p>
         <tng-stepper
           class="setup-stepper"

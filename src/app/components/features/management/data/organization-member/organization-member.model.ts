@@ -12,4 +12,3 @@ export type OrganizationMember = Readonly<{
   permissions?: OrganizationMemberPermissions;
   organization?: Organization;
 }>;
-

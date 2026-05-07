@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import dayjs from 'dayjs';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -45,7 +45,7 @@ import type { FiscalYearPayload } from '../../../data/fiscal-year';
   styleUrl: './create-fiscal-year.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CreateFiscalYearComponent implements OnInit {
+export class CreateFiscalYearComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(FiscalYearFacade);
   protected readonly fiscalYearStore = inject(FiscalYearStore);
@@ -94,8 +94,7 @@ export class CreateFiscalYearComponent implements OnInit {
     return all
       .filter(
         (b) =>
-          (b.name ?? '').toLowerCase().includes(q) ||
-          (b.email ?? '').toLowerCase().includes(q),
+          (b.name ?? '').toLowerCase().includes(q) || (b.email ?? '').toLowerCase().includes(q),
       )
       .slice(0, 20);
   });
@@ -127,9 +126,7 @@ export class CreateFiscalYearComponent implements OnInit {
     return null;
   });
   protected readonly jnumberError = computed(() =>
-    this.submitted() && this.jnumber().trim() === ''
-      ? 'Journal number format is required.'
-      : null,
+    this.submitted() && this.jnumber().trim() === '' ? 'Journal number format is required.' : null,
   );
   protected readonly currencyError = computed(() =>
     this.submitted() && !this.selectedCurrency() ? 'Currency is required.' : null,
@@ -150,9 +147,10 @@ export class CreateFiscalYearComponent implements OnInit {
   constructor() {
     void this.currencyStore.load();
     void this.branchStore.loadBranches();
+    void this.loadInitialState();
   }
 
-  async ngOnInit(): Promise<void> {
+  private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.id.set(id);
@@ -166,9 +164,7 @@ export class CreateFiscalYearComponent implements OnInit {
         this.jnumber.set(fy.jnumber ?? '<<YYYY>>/<<SERIAL5>>');
         this.freezetill.set(fy.freezetill ?? '');
 
-        const currency = this.currencyStore
-          .currencies()
-          .find((c) => c.code === fy.currencycode);
+        const currency = this.currencyStore.currencies().find((c) => c.code === fy.currencycode);
         if (currency) {
           this.selectedCurrency.set(currency);
           this.currencySearch.set(`${currency.name} (${currency.symbol})`);
@@ -197,7 +193,7 @@ export class CreateFiscalYearComponent implements OnInit {
   }
 
   protected onCurrencyBlur(): void {
-    setTimeout(() => this.showCurrencyDropdown.set(false), 200);
+    this.showCurrencyDropdown.set(false);
   }
 
   // ── Branch handlers ───────────────────────────────────────────────────────
@@ -214,9 +210,7 @@ export class CreateFiscalYearComponent implements OnInit {
     this.showBranchDropdown.set(false);
     // Auto-fill currency from branch if not already selected
     if (!this.selectedCurrency() && branch.currencycode) {
-      const currency = this.currencyStore
-        .currencies()
-        .find((c) => c.code === branch.currencycode);
+      const currency = this.currencyStore.currencies().find((c) => c.code === branch.currencycode);
       if (currency) {
         this.selectedCurrency.set(currency);
         this.currencySearch.set(`${currency.name} (${currency.symbol})`);
@@ -225,7 +219,7 @@ export class CreateFiscalYearComponent implements OnInit {
   }
 
   protected onBranchBlur(): void {
-    setTimeout(() => this.showBranchDropdown.set(false), 200);
+    this.showBranchDropdown.set(false);
   }
 
   // ── Date handlers ─────────────────────────────────────────────────────────
@@ -240,7 +234,10 @@ export class CreateFiscalYearComponent implements OnInit {
   }
 
   protected onFreezetillChange(value: unknown): void {
-    if (!value) { this.freezetill.set(''); return; }
+    if (!value) {
+      this.freezetill.set('');
+      return;
+    }
     if (typeof value === 'string') this.freezetill.set(value);
     else this.freezetill.set(dayjs(value as Date).format('YYYY-MM-DD'));
   }

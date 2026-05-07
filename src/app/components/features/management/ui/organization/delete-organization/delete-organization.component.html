@@ -13,7 +13,6 @@
       @if (organizationStore.isLoading() && !organizationStore.selectedItem()) {
         <div class="notice">Loading organization...</div>
       } @else if (organizationStore.selectedItem(); as org) {
-
         <dl class="details-grid">
           <div>
             <dt>Name</dt>
@@ -35,17 +34,14 @@
 
         <div class="notice notice--danger">
           You are about to permanently delete the organization
-          <strong>{{ org.name }}</strong>. All associated data will be lost.
+          <strong>{{ org.name }}</strong
+          >. All associated data will be lost.
         </div>
 
         <label class="confirm-row">
-          <tng-checkbox
-            [checked]="confirmed()"
-            (checkedChange)="confirmed.set($event)"
-          />
+          <tng-checkbox [checked]="confirmed()" (checkedChange)="confirmed.set($event)" />
           I understand this action is irreversible.
         </label>
-
       } @else {
         <div class="notice">Organization not found.</div>
       }

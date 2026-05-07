@@ -74,4 +74,3 @@ export type OrganizationPayload = Readonly<{
 }>;
 
 export type OrganizationListQuery = Lb4ListQuery;
-

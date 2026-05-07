@@ -6,4 +6,3 @@ export type Currency = Readonly<{
   numericcode: number;
   symbol: string;
 }>;
-

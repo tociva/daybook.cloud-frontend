@@ -46,9 +46,7 @@ export const routes: Routes = [
   {
     path: 'app/trading/vendor',
     loadChildren: () =>
-      import('./components/features/trading/ui/vendor/vendor.routes').then(
-        (m) => m.vendorRoutes,
-      ),
+      import('./components/features/trading/ui/vendor/vendor.routes').then((m) => m.vendorRoutes),
   },
   {
     path: 'app/trading/customer',

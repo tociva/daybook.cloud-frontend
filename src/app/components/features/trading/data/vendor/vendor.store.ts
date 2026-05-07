@@ -69,8 +69,7 @@ export const VendorStore = signalStore(
               error: null,
               isLoading: false,
               items: state.vendor.items.filter((v) => v.id !== id),
-              selectedItem:
-                state.vendor.selectedItem?.id === id ? null : state.vendor.selectedItem,
+              selectedItem: state.vendor.selectedItem?.id === id ? null : state.vendor.selectedItem,
             },
           }));
           return true;

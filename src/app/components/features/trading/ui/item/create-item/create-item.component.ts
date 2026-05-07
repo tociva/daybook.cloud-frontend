@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -58,7 +58,7 @@ type ItemFormModel = {
   templateUrl: './create-item.component.html',
   styleUrl: './create-item.component.css',
 })
-export class CreateItemComponent implements OnInit {
+export class CreateItemComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(ItemFacade);
   protected readonly itemStore = inject(ItemStore);
@@ -80,9 +80,7 @@ export class CreateItemComponent implements OnInit {
   protected readonly id = signal<string | null>(null);
   protected readonly submitted = signal(false);
   protected readonly mode = computed(() => (this.id() ? 'edit' : 'create'));
-  protected readonly title = computed(() =>
-    this.mode() === 'edit' ? 'Edit Item' : 'Create Item',
-  );
+  protected readonly title = computed(() => (this.mode() === 'edit' ? 'Edit Item' : 'Create Item'));
 
   // ── Validation ────────────────────────────────────────────────────────────
 
@@ -98,9 +96,7 @@ export class CreateItemComponent implements OnInit {
       : null,
   );
   protected readonly categoryError = computed(() =>
-    this.submitted() && this.itemModel().categoryId.trim() === ''
-      ? 'Category is required.'
-      : null,
+    this.submitted() && this.itemModel().categoryId.trim() === '' ? 'Category is required.' : null,
   );
 
   // ── Stepper ───────────────────────────────────────────────────────────────
@@ -108,9 +104,7 @@ export class CreateItemComponent implements OnInit {
   protected readonly setupSteps = computed(() => {
     const m = this.itemModel();
     const identityCompleted =
-      m.name.trim().length > 0 &&
-      m.code.trim().length > 0 &&
-      m.displayname.trim().length > 0;
+      m.name.trim().length > 0 && m.code.trim().length > 0 && m.displayname.trim().length > 0;
     const categoryCompleted = m.categoryId.trim().length > 0;
     const detailsCompleted =
       m.barcode.trim().length > 0 ||
@@ -149,8 +143,7 @@ export class CreateItemComponent implements OnInit {
 
   protected readonly categoryOptionValue = (cat: ItemCategory): string => cat.id ?? '';
   protected readonly categoryOptionLabel = (cat: ItemCategory): string => cat.name ?? '';
-  protected readonly categoryTrackBy = (_index: number, cat: ItemCategory): string =>
-    cat.id ?? '';
+  protected readonly categoryTrackBy = (_index: number, cat: ItemCategory): string => cat.id ?? '';
   protected readonly filteredCategories = computed(() =>
     this.filterAutocompleteOptions(
       this.itemCategoryStore.items(),
@@ -161,7 +154,11 @@ export class CreateItemComponent implements OnInit {
 
   // ──────────────────────────────────────────────────────────────────────────
 
-  async ngOnInit(): Promise<void> {
+  constructor() {
+    void this.loadInitialState();
+  }
+
+  private async loadInitialState(): Promise<void> {
     // Pre-load categories for the autocomplete
     await this.itemCategoryStore.loadItemCategories({});
 

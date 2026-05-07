@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -45,7 +45,7 @@ type BankCashFormModel = {
   templateUrl: './create-bank-cash.component.html',
   styleUrl: './create-bank-cash.component.css',
 })
-export class CreateBankCashComponent implements OnInit {
+export class CreateBankCashComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(BankCashFacade);
   protected readonly bankCashStore = inject(BankCashStore);
@@ -64,7 +64,11 @@ export class CreateBankCashComponent implements OnInit {
     this.submitted() && this.bankCashModel().name.trim().length === 0 ? 'Name is required' : null,
   );
 
-  async ngOnInit(): Promise<void> {
+  constructor() {
+    void this.loadInitialState();
+  }
+
+  private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     this.id.set(id);
 

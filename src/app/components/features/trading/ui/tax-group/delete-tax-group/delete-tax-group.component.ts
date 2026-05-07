@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
   TngButtonComponent,
@@ -33,13 +33,17 @@ import { TaxGroupFacade, TaxGroupStore } from '../../../data/tax-group';
   templateUrl: './delete-tax-group.component.html',
   styleUrl: './delete-tax-group.component.css',
 })
-export class DeleteTaxGroupComponent implements OnInit {
+export class DeleteTaxGroupComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(TaxGroupFacade);
   protected readonly taxGroupStore = inject(TaxGroupStore);
   protected readonly confirmed = signal(false);
 
-  async ngOnInit(): Promise<void> {
+  constructor() {
+    void this.loadInitialState();
+  }
+
+  private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       await this.taxGroupStore.loadTaxGroupById(id);
@@ -55,4 +59,3 @@ export class DeleteTaxGroupComponent implements OnInit {
     await this.facade.delete(id);
   }
 }
-

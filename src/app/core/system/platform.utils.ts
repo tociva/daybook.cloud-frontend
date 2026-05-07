@@ -4,8 +4,7 @@ export const isMacPlatform = (): boolean => {
     return false;
   }
 
-  const userAgentDataPlatform = (
-    nav as Navigator & { userAgentData?: { platform?: string } }
-  ).userAgentData?.platform;
+  const userAgentDataPlatform = (nav as Navigator & { userAgentData?: { platform?: string } })
+    .userAgentData?.platform;
   return userAgentDataPlatform === 'macOS' || /Mac|iPhone|iPad|iPod/.test(nav.platform);
 };

@@ -11,4 +11,3 @@ export const initialDateFormatState: DateFormatState = {
   error: null,
   isLoading: false,
 };
-

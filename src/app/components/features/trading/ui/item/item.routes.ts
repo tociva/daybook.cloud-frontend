@@ -3,8 +3,7 @@ import { Routes } from '@angular/router';
 export const itemRoutes: Routes = [
   {
     path: '',
-    loadComponent: () =>
-      import('./list-item/list-item.component').then((m) => m.ListItemComponent),
+    loadComponent: () => import('./list-item/list-item.component').then((m) => m.ListItemComponent),
   },
   {
     path: 'create',
@@ -13,8 +12,7 @@ export const itemRoutes: Routes = [
   },
   {
     path: ':id',
-    loadComponent: () =>
-      import('./view-item/view-item.component').then((m) => m.ViewItemComponent),
+    loadComponent: () => import('./view-item/view-item.component').then((m) => m.ViewItemComponent),
   },
   {
     path: ':id/edit',

@@ -114,7 +114,8 @@ function asErrorMessage(error: unknown, fallbackMessage: string): string {
 }
 
 function isUnauthorizedSessionError(error: unknown): boolean {
-  const message = error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
+  const message =
+    error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
   return (
     message.includes('401') ||
     message.includes('unauthorized') ||

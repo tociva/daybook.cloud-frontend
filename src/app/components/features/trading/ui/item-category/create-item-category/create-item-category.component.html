@@ -1,11 +1,12 @@
 <main class="trading-page">
   <section class="setup-layout" aria-labelledby="item-category-setup-title">
     <form class="category-form" novalidate (submit)="submitForm($event)">
-
       <tng-card variant="outline" tone="info" padding="lg">
         <tng-card-header>
           <tng-card-title>{{ title() }}</tng-card-title>
-          <tng-card-description>Set the category identity, type, and optional parent.</tng-card-description>
+          <tng-card-description
+            >Set the category identity, type, and optional parent.</tng-card-description
+          >
         </tng-card-header>
 
         <tng-card-content>
@@ -13,7 +14,9 @@
             <div class="notice notice--danger">{{ itemCategoryStore.error() }}</div>
           }
 
-          @if (itemCategoryStore.isLoading() && mode() === 'edit' && !itemCategoryStore.selectedItem()) {
+          @if (
+            itemCategoryStore.isLoading() && mode() === 'edit' && !itemCategoryStore.selectedItem()
+          ) {
             <div class="notice">Loading category...</div>
           } @else {
             <div class="field-grid">
@@ -86,7 +89,9 @@
       <tng-card variant="outline" tone="neutral" padding="lg">
         <tng-card-header>
           <tng-card-title>Tax &amp; Notes</tng-card-title>
-          <tng-card-description>Assign a default tax group and add an optional description.</tng-card-description>
+          <tng-card-description
+            >Assign a default tax group and add an optional description.</tng-card-description
+          >
         </tng-card-header>
 
         <tng-card-content>
@@ -136,7 +141,6 @@
           </tng-card-actions>
         </tng-card-footer>
       </tng-card>
-
     </form>
 
     <aside class="setup-overview" aria-labelledby="item-category-setup-title">
@@ -144,8 +148,8 @@
         <p class="eyebrow">Category setup</p>
         <h1 id="item-category-setup-title">{{ title() }}</h1>
         <p>
-          Organise items by defining a category with a type (Product or Service), an optional
-          parent for hierarchy, and a default tax group.
+          Organise items by defining a category with a type (Product or Service), an optional parent
+          for hierarchy, and a default tax group.
         </p>
         <tng-stepper
           class="setup-stepper"

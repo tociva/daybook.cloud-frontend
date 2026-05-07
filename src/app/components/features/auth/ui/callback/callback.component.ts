@@ -1,4 +1,4 @@
-import { Component, OnDestroy, computed, effect, inject } from '@angular/core';
+import { Component, computed, effect, inject } from '@angular/core';
 import { AppStartupStatus } from '../../../../../core/system/app-system.model';
 import { AppSystemStore } from '../../../../../core/system/app-system.store';
 
@@ -7,7 +7,7 @@ import { AppSystemStore } from '../../../../../core/system/app-system.store';
   templateUrl: './callback.component.html',
   styleUrl: './callback.component.css',
 })
-export class CallbackComponent implements OnDestroy {
+export class CallbackComponent {
   private readonly systemStore = inject(AppSystemStore);
   private hasStartedCallback = false;
   protected readonly status = computed(() => this.systemStore.startupStatus());
@@ -26,10 +26,6 @@ export class CallbackComponent implements OnDestroy {
       return;
     }
   });
-
-  ngOnDestroy(): void {
-    this.callbackEffect.destroy();
-  }
 
   private buildMessage(status: AppStartupStatus, error: string | null): string {
     if (status === 'login-error') {

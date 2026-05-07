@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   TngButtonComponent,
@@ -34,13 +34,17 @@ import { LedgerStore } from '../../../data/ledger';
   styleUrl: './view-ledger.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ViewLedgerComponent implements OnInit {
+export class ViewLedgerComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly burlNavigation = inject(BurlNavigationService);
   protected readonly ledgerStore = inject(LedgerStore);
 
-  async ngOnInit(): Promise<void> {
+  constructor() {
+    void this.loadInitialState();
+  }
+
+  private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       await this.ledgerStore.loadLedgerById(id, { includes: ['category'] });

@@ -54,7 +54,9 @@ export const BootstrapOrganizationStore = signalStore(
         patchState(store, { isLoading: false, error: null });
       } catch (error) {
         const message =
-          error instanceof Error ? error.message : 'Failed to create organization. Please try again.';
+          error instanceof Error
+            ? error.message
+            : 'Failed to create organization. Please try again.';
         patchState(store, { isLoading: false, error: message });
         throw new Error(message);
       }

@@ -11,4 +11,3 @@ export const initialSubscriptionState: SubscriptionState = {
   isLoading: false,
   error: null,
 };
-

@@ -1,5 +1,8 @@
-import { Component, HostListener, signal } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Component, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TngIcon } from '@tailng-ui/icons';
+import { fromEvent } from 'rxjs';
 import { isMacPlatform } from '../../../core/system/platform.utils';
 import { CommandSearchDialogComponent } from '../command-search-dialog/command-search-dialog.component';
 
@@ -10,9 +13,16 @@ import { CommandSearchDialogComponent } from '../command-search-dialog/command-s
   styleUrl: './workspace-search.component.css',
 })
 export class WorkspaceSearchComponent {
+  private readonly document = inject(DOCUMENT);
   protected readonly searchShortcutHint = isMacPlatform() ? '⌘K' : 'Ctrl K';
   protected readonly commandSearchOpen = signal(false);
   protected readonly searchInitialValue = signal('');
+
+  constructor() {
+    fromEvent<KeyboardEvent>(this.document, 'keydown')
+      .pipe(takeUntilDestroyed())
+      .subscribe((event) => this.onDocumentKeydown(event));
+  }
 
   protected openCommandSearch(initialValue = ''): void {
     this.searchInitialValue.set(initialValue);
@@ -37,8 +47,7 @@ export class WorkspaceSearchComponent {
     this.commandSearchOpen.set(next);
   }
 
-  @HostListener('document:keydown', ['$event'])
-  protected onDocumentKeydown(event: KeyboardEvent): void {
+  private onDocumentKeydown(event: KeyboardEvent): void {
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
       event.preventDefault();
       this.openCommandSearch();

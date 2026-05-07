@@ -1,9 +1,4 @@
-import {
-  HttpClient,
-  HttpContext,
-  HttpHeaders,
-  HttpParams,
-} from '@angular/common/http';
+import { HttpClient, HttpContext, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { ProgressStore } from '../progress/progress.store';
@@ -13,9 +8,7 @@ type PrimitiveParam = string | number | boolean;
 export type ApiRequestOptions = Readonly<{
   context?: HttpContext;
   headers?: HttpHeaders | Record<string, string | string[]>;
-  params?:
-    | HttpParams
-    | Record<string, PrimitiveParam | readonly PrimitiveParam[]>;
+  params?: HttpParams | Record<string, PrimitiveParam | readonly PrimitiveParam[]>;
   reportProgress?: boolean;
   withCredentials?: boolean;
 }>;
@@ -66,4 +59,3 @@ export class ApiClientService {
     }
   }
 }
-

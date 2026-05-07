@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -48,7 +48,7 @@ import type { OrganizationPayload } from '../../../data/organization';
   styleUrls: ['./create-organization.component.css', '../../../../../../../styles/flags.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CreateOrganizationComponent implements OnInit {
+export class CreateOrganizationComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(OrganizationFacade);
   protected readonly organizationStore = inject(OrganizationStore);
@@ -87,12 +87,17 @@ export class CreateOrganizationComponent implements OnInit {
   protected readonly currencyOptionValue = (currency: Currency): string => currency.code;
   protected readonly currencyOptionLabel = (currency: Currency): string =>
     `${currency.name} (${currency.symbol})`;
-  protected readonly currencyTrackBy = (_index: number, currency: Currency): string => currency.code;
+  protected readonly currencyTrackBy = (_index: number, currency: Currency): string =>
+    currency.code;
   protected readonly filteredCountries = computed(() =>
     this.filterAutocompleteOptions(this.countries(), this.countryOptionLabel, this.countryQuery()),
   );
   protected readonly filteredCurrencies = computed(() =>
-    this.filterAutocompleteOptions(this.currencies(), this.currencyOptionLabel, this.currencyQuery()),
+    this.filterAutocompleteOptions(
+      this.currencies(),
+      this.currencyOptionLabel,
+      this.currencyQuery(),
+    ),
   );
 
   // ── Derived ───────────────────────────────────────────────────────────────
@@ -122,17 +127,16 @@ export class CreateOrganizationComponent implements OnInit {
   );
   protected readonly hasErrors = computed(
     () =>
-      this.nameError() !== null ||
-      this.emailError() !== null ||
-      this.addressLine1Error() !== null,
+      this.nameError() !== null || this.emailError() !== null || this.addressLine1Error() !== null,
   );
 
   constructor() {
     void this.countryStore.load();
     void this.currencyStore.load();
+    void this.loadInitialState();
   }
 
-  async ngOnInit(): Promise<void> {
+  private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.id.set(id);

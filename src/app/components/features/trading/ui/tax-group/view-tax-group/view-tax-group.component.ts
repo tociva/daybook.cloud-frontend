@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   TngButtonComponent,
@@ -34,7 +34,7 @@ import type { Tax } from '../../../data/tax';
   templateUrl: './view-tax-group.component.html',
   styleUrl: './view-tax-group.component.css',
 })
-export class ViewTaxGroupComponent implements OnInit {
+export class ViewTaxGroupComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly burlNavigation = inject(BurlNavigationService);
@@ -50,7 +50,11 @@ export class ViewTaxGroupComponent implements OnInit {
     return map;
   });
 
-  async ngOnInit(): Promise<void> {
+  constructor() {
+    void this.loadInitialState();
+  }
+
+  private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     // Load taxes with a large limit so getTaxById can resolve every tax used
     // in the group.  The default page size is only 10 which may not cover all
@@ -75,7 +79,10 @@ export class ViewTaxGroupComponent implements OnInit {
    * `taxids` field (write-side) and the `taxes` field (read-side) that the
    * API may populate.
    */
-  protected getGroupTaxIds(group: { taxids?: readonly string[]; taxes?: readonly string[] }): string[] {
+  protected getGroupTaxIds(group: {
+    taxids?: readonly string[];
+    taxes?: readonly string[];
+  }): string[] {
     const seen = new Set<string>();
     const result: string[] = [];
     for (const id of [...(group.taxids ?? []), ...(group.taxes ?? [])]) {
@@ -96,4 +103,3 @@ export class ViewTaxGroupComponent implements OnInit {
     }
   }
 }
-

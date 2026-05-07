@@ -8,4 +8,3 @@ export type Country = Readonly<{
   phone: string;
   timezone: string;
 }>;
-

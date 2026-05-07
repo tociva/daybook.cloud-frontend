@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   TngButtonComponent,
@@ -36,7 +36,7 @@ import { formatDisplayDate } from '../../../../../../core/date/dayjs-date.utils'
   styleUrl: './list-sale-invoice.component.css',
   providers: [CrudListQueryService],
 })
-export class ListSaleInvoiceComponent implements OnInit {
+export class ListSaleInvoiceComponent {
   private readonly router = inject(Router);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly saleInvoiceStore = inject(SaleInvoiceStore);
@@ -49,7 +49,14 @@ export class ListSaleInvoiceComponent implements OnInit {
     { id: 'itemtotal', label: 'Item Total', align: 'end', headerAlign: 'end', width: '9rem' },
     { id: 'discount', label: 'Discount', align: 'end', headerAlign: 'end', width: '8rem' },
     { id: 'tax', label: 'Tax', align: 'end', headerAlign: 'end', width: '8rem' },
-    { id: 'grandtotal', label: 'Grand Total', sortable: true, align: 'end', headerAlign: 'end', width: '10rem' },
+    {
+      id: 'grandtotal',
+      label: 'Grand Total',
+      sortable: true,
+      align: 'end',
+      headerAlign: 'end',
+      width: '10rem',
+    },
     { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '8rem' },
   ];
 
@@ -67,12 +74,13 @@ export class ListSaleInvoiceComponent implements OnInit {
     return value.toFixed(2);
   }
 
-  ngOnInit(): void {
-    this.crudQuery.init((filter) =>
-      void this.saleInvoiceStore.loadSaleInvoices({
-        ...filter,
-        includes: ['customer'],
-      }),
+  constructor() {
+    this.crudQuery.init(
+      (filter) =>
+        void this.saleInvoiceStore.loadSaleInvoices({
+          ...filter,
+          includes: ['customer'],
+        }),
     );
   }
 

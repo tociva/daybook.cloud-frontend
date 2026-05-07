@@ -11,4 +11,3 @@ export const initialCurrencyState: CurrencyState = {
   error: null,
   isLoading: false,
 };
-

@@ -1,9 +1,4 @@
-import {
-  HttpEvent,
-  HttpHandlerFn,
-  HttpInterceptorFn,
-  HttpRequest,
-} from '@angular/common/http';
+import { HttpEvent, HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Observable, from } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
@@ -36,9 +31,7 @@ export const authBearerTokenInterceptor: HttpInterceptorFn = (
 
   return from(appConfigStore.load()).pipe(
     switchMap((loadedConfig) =>
-      loadedConfig
-        ? attachTokenIfNeeded(request, next, authService, loadedConfig)
-        : next(request),
+      loadedConfig ? attachTokenIfNeeded(request, next, authService, loadedConfig) : next(request),
     ),
   );
 };

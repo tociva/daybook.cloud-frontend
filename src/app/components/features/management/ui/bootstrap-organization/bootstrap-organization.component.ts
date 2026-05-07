@@ -45,8 +45,7 @@ import { AutoNumberingTemplateGeneratorComponent } from '../../../../../shared/a
 import { DEFAULT_NODE_DATE_FORMAT } from '../../../../../util/constants';
 
 const DEFAULT_INVOICE_NUMBER_FORMAT = '<<YYYY>>/<<SERIAL3>>';
-const DEFAULT_JOURNAL_NUMBER_FORMAT =
-  '<<FISCAL_START_YY>>-<<FISCAL_END_YY>>/<<SERIAL1>>';
+const DEFAULT_JOURNAL_NUMBER_FORMAT = '<<FISCAL_START_YY>>-<<FISCAL_END_YY>>/<<SERIAL1>>';
 
 type OrgValidationFieldKey =
   | 'name'
@@ -253,7 +252,11 @@ export class BootstrapOrganizationComponent {
     this.filterAutocompleteOptions(this.countries(), this.countryOptionLabel, this.countryQuery()),
   );
   protected readonly filteredCurrencies = computed(() =>
-    this.filterAutocompleteOptions(this.currencies(), this.currencyOptionLabel, this.currencyQuery()),
+    this.filterAutocompleteOptions(
+      this.currencies(),
+      this.currencyOptionLabel,
+      this.currencyQuery(),
+    ),
   );
   protected readonly filteredDateFormats = computed(() =>
     this.filterAutocompleteOptions(
@@ -468,7 +471,7 @@ export class BootstrapOrganizationComponent {
       nextDateRangeStart,
       this.organizationModel().fiscalDateRange.end,
     );
-  
+
     this.organizationModel.update((current) => ({
       ...current,
       countryCode,
@@ -487,11 +490,11 @@ export class BootstrapOrganizationComponent {
       this.markTouched('fiscalDateRange.start');
       this.markTouched('fiscalDateRange.end');
     }
-  
+
     if (country?.currencycode) {
       this.markTouched('currency');
     }
-  
+
     if (country?.dateformat) {
       this.markTouched('dateformatForm');
     }
@@ -539,7 +542,9 @@ export class BootstrapOrganizationComponent {
 
   protected selectDateFormat(value: unknown): void {
     const dateFormatName = typeof value === 'string' ? value : '';
-    if (!this.shouldProcessAutocompleteValue(dateFormatName, this.organizationModel().dateFormatName)) {
+    if (
+      !this.shouldProcessAutocompleteValue(dateFormatName, this.organizationModel().dateFormatName)
+    ) {
       return;
     }
 
@@ -686,13 +691,8 @@ export class BootstrapOrganizationComponent {
     this.isSubmitting.set(true);
 
     try {
-      await this.bootstrapOrganizationStore.bootstrapOrganization(
-        appConfig.apiBaseUrl,
-        request,
-      );
-      const session = await this.userSessionService.createUserSession(
-        appConfig.apiBaseUrl,
-      );
+      await this.bootstrapOrganizationStore.bootstrapOrganization(appConfig.apiBaseUrl, request);
+      const session = await this.userSessionService.createUserSession(appConfig.apiBaseUrl);
       this.userSessionStore.setSession(session);
       this.saved.set(true);
       this.toastStore.success('Organization created successfully.');
@@ -706,5 +706,4 @@ export class BootstrapOrganizationComponent {
       this.isSubmitting.set(false);
     }
   }
-
 }

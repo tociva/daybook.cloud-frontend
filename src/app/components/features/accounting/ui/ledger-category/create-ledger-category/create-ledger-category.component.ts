@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -59,7 +59,7 @@ type LedgerCategoryFormModel = {
   styleUrl: './create-ledger-category.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CreateLedgerCategoryComponent implements OnInit {
+export class CreateLedgerCategoryComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(LedgerCategoryFacade);
   protected readonly ledgerCategoryStore = inject(LedgerCategoryStore);
@@ -96,7 +96,11 @@ export class CreateLedgerCategoryComponent implements OnInit {
     this.ledgerCategoryStore.items().filter((c) => c.id !== this.id()),
   );
   protected readonly filteredParentOptions = computed(() =>
-    this.filterAutocompleteOptions(this.parentOptions(), this.parentOptionLabel, this.parentQuery()),
+    this.filterAutocompleteOptions(
+      this.parentOptions(),
+      this.parentOptionLabel,
+      this.parentQuery(),
+    ),
   );
   protected readonly parentOptionValue = (cat: LedgerCategory): string => cat.id ?? '';
   protected readonly parentOptionLabel = (cat: LedgerCategory): string => cat.name ?? '';
@@ -107,7 +111,11 @@ export class CreateLedgerCategoryComponent implements OnInit {
     this.submitted() && this.categoryModel().name.trim() === '' ? 'Name is required.' : null,
   );
 
-  async ngOnInit(): Promise<void> {
+  constructor() {
+    void this.loadInitialState();
+  }
+
+  private async loadInitialState(): Promise<void> {
     await this.ledgerCategoryStore.loadLedgerCategories({});
 
     const id = this.route.snapshot.paramMap.get('id');
@@ -159,9 +167,7 @@ export class CreateLedgerCategoryComponent implements OnInit {
       name: m.name.trim(),
       ...(m.description.trim() ? { description: m.description.trim() } : {}),
       ...(m.parentId ? { parentid: m.parentId } : {}),
-      ...(m.type
-        ? { props: { type: m.type as LedgerCategoryType } }
-        : {}),
+      ...(m.type ? { props: { type: m.type as LedgerCategoryType } } : {}),
     };
 
     const currentId = this.id();

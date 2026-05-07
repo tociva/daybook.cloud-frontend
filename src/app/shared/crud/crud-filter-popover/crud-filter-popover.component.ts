@@ -1,10 +1,11 @@
 import {
   Component,
-  EventEmitter,
-  Input,
-  Output,
   booleanAttribute,
+  computed,
+  effect,
   inject,
+  input,
+  output,
   signal,
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
@@ -89,39 +90,18 @@ export class CrudFilterPopoverComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly crudUrl = inject(CrudUrlService);
 
-  @Input() ariaLabel = 'Filters';
-  @Input() defaultPageSize = DEFAULT_LB4_PAGE_SIZE;
-  @Input()
-  set fields(fields: readonly CrudFilterField[]) {
-    this._fields = fields;
-    this.operatorOptionsCache.clear();
-    this.syncDraftFromWhere();
-  }
+  readonly ariaLabel = input('Filters');
+  readonly defaultPageSize = input(DEFAULT_LB4_PAGE_SIZE);
+  readonly fields = input<readonly CrudFilterField[]>([]);
+  readonly title = input('Filter');
+  readonly replaceUrl = input(false, { transform: booleanAttribute });
+  readonly syncUrl = input(false, { transform: booleanAttribute });
+  readonly filter = input<Lb4ListQuery | undefined>();
+  readonly where = input<Lb4Where | undefined>();
 
-  get fields(): readonly CrudFilterField[] {
-    return this._fields;
-  }
-
-  @Input() title = 'Filter';
-  @Input({ transform: booleanAttribute }) replaceUrl = false;
-  @Input({ transform: booleanAttribute }) syncUrl = false;
-
-  @Input()
-  set filter(filter: Lb4ListQuery | undefined) {
-    this.currentFilter = filter ?? {};
-    this.currentWhere = this.currentFilter.where;
-    this.syncDraftFromWhere();
-  }
-
-  @Input()
-  set where(where: Lb4Where | undefined) {
-    this.currentWhere = where;
-    this.syncDraftFromWhere();
-  }
-
-  @Output() readonly clearFilters = new EventEmitter<void>();
-  @Output() readonly filterChange = new EventEmitter<Lb4ListQuery>();
-  @Output() readonly filterApply = new EventEmitter<Lb4Where | undefined>();
+  readonly clearFilters = output<void>();
+  readonly filterChange = output<Lb4ListQuery>();
+  readonly filterApply = output<Lb4Where | undefined>();
 
   protected readonly open = signal(false);
   protected readonly draft = signal<Record<string, DraftFilterValue>>({});
@@ -134,10 +114,15 @@ export class CrudFilterPopoverComponent {
   protected readonly trackByOperatorValue = (_: number, option: OperatorOption): string =>
     option.value;
 
-  private _fields: readonly CrudFilterField[] = [];
-  private currentFilter: Lb4ListQuery = {};
-  private currentWhere: Lb4Where | undefined;
+  private readonly currentFilter = computed(() => this.filter() ?? {});
+  private readonly currentWhere = computed(() => this.where() ?? this.currentFilter().where);
   private readonly operatorOptionsCache = new Map<CrudFilterField, readonly OperatorOption[]>();
+  private readonly syncDraftEffect = effect(() => {
+    this.fields();
+    this.currentWhere();
+    this.operatorOptionsCache.clear();
+    this.syncDraftFromWhere();
+  });
 
   protected onOpenChange(open: boolean): void {
     this.open.set(open);
@@ -220,7 +205,7 @@ export class CrudFilterPopoverComponent {
     event.preventDefault();
     const where = this.buildWhere();
     const filter = {
-      ...this.currentFilter,
+      ...this.currentFilter(),
       offset: 0,
       where,
     };
@@ -233,7 +218,7 @@ export class CrudFilterPopoverComponent {
   protected clearFilter(): void {
     this.draft.set(this.createEmptyDraft());
     const filter = {
-      ...this.currentFilter,
+      ...this.currentFilter(),
       offset: 0,
       where: undefined,
     };
@@ -246,13 +231,13 @@ export class CrudFilterPopoverComponent {
   private async emitFilterChange(filter: Lb4ListQuery): Promise<void> {
     this.filterChange.emit(filter);
 
-    if (!this.syncUrl) {
+    if (!this.syncUrl()) {
       return;
     }
 
     await this.crudUrl.updateFilterInUrl(filter, {
-      defaultPageSize: this.defaultPageSize,
-      replaceUrl: this.replaceUrl,
+      defaultPageSize: this.defaultPageSize(),
+      replaceUrl: this.replaceUrl(),
       route: this.route,
     });
   }
@@ -260,11 +245,11 @@ export class CrudFilterPopoverComponent {
   private syncDraftFromWhere(): void {
     const nextDraft: Record<string, DraftFilterValue> = {};
 
-    for (const field of this.fields) {
+    for (const field of this.fields()) {
       if (field.type === 'text') {
         nextDraft[field.id] = {
-          operator: readLb4TextFilterOperator(this.currentWhere, field.id),
-          value: readLb4TextFilterValue(this.currentWhere, field.id),
+          operator: readLb4TextFilterOperator(this.currentWhere(), field.id),
+          value: readLb4TextFilterValue(this.currentWhere(), field.id),
         };
         continue;
       }
@@ -282,7 +267,7 @@ export class CrudFilterPopoverComponent {
     const where: Lb4Where = {};
     const draft = this.draft();
 
-    for (const field of this.fields) {
+    for (const field of this.fields()) {
       const draftValue = draft[field.id];
       if (!draftValue) {
         continue;
@@ -310,7 +295,7 @@ export class CrudFilterPopoverComponent {
 
   private createEmptyDraft(): Record<string, DraftFilterValue> {
     return Object.fromEntries(
-      this.fields.map((field) => [
+      this.fields().map((field) => [
         field.id,
         {
           operator: this.getDefaultOperator(field),
@@ -343,7 +328,7 @@ export class CrudFilterPopoverComponent {
   }
 
   private readComparisonValue(fieldId: string): unknown {
-    const fieldFilter = this.currentWhere?.[fieldId];
+    const fieldFilter = this.currentWhere()?.[fieldId];
 
     if (fieldFilter === null || fieldFilter === undefined) {
       return null;

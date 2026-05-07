@@ -25,10 +25,7 @@
         </dl>
 
         <label class="confirm-row">
-          <tng-checkbox
-            [checked]="confirmed()"
-            (checkedChange)="confirmed.set(!!$event)"
-          />
+          <tng-checkbox [checked]="confirmed()" (checkedChange)="confirmed.set(!!$event)" />
           <span>I understand that {{ item.name }} will be permanently deleted.</span>
         </label>
       } @else {

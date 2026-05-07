@@ -177,18 +177,10 @@ export class SaleInvoiceDraftStore {
 
   // ── Computed summary ──────────────────────────────────────────────────────
 
-  readonly itemtotal = computed(() =>
-    fmt(this.items().reduce((s, r) => s + r.itemtotal, 0)),
-  );
-  readonly discount = computed(() =>
-    fmt(this.items().reduce((s, r) => s + r.discamount, 0)),
-  );
-  readonly subtotal = computed(() =>
-    fmt(this.items().reduce((s, r) => s + r.subtotal, 0)),
-  );
-  readonly tax = computed(() =>
-    fmt(this.items().reduce((s, r) => s + r.taxamount, 0)),
-  );
+  readonly itemtotal = computed(() => fmt(this.items().reduce((s, r) => s + r.itemtotal, 0)));
+  readonly discount = computed(() => fmt(this.items().reduce((s, r) => s + r.discamount, 0)));
+  readonly subtotal = computed(() => fmt(this.items().reduce((s, r) => s + r.subtotal, 0)));
+  readonly tax = computed(() => fmt(this.items().reduce((s, r) => s + r.taxamount, 0)));
   readonly grandtotal = computed(() =>
     fmt(this.items().reduce((s, r) => s + r.grandtotal, 0) + toNum(this.roundoff())),
   );
@@ -293,9 +285,7 @@ export class SaleInvoiceDraftStore {
       this.selectedCustomer.set(null);
       this.customerid.set('');
     }
-    void this.customerStore.loadCustomers(
-      q ? { where: { name: { ilike: `%${q}%` } } } : {},
-    );
+    void this.customerStore.loadCustomers(q ? { where: { name: { ilike: `%${q}%` } } } : {});
   }
 
   selectCustomer(customer: Customer): void {
@@ -316,7 +306,7 @@ export class SaleInvoiceDraftStore {
   }
 
   closeCustomerDropdown(): void {
-    setTimeout(() => this.showCustomerDropdown.set(false), 200);
+    this.showCustomerDropdown.set(false);
   }
 
   // ── Address methods ───────────────────────────────────────────────────────
@@ -398,7 +388,7 @@ export class SaleInvoiceDraftStore {
   }
 
   closeItemDropdown(): void {
-    setTimeout(() => this.activeItemRowIndex.set(-1), 200);
+    this.activeItemRowIndex.set(-1);
   }
 
   getItemDisplayName(row: ItemRow): string {
@@ -423,9 +413,7 @@ export class SaleInvoiceDraftStore {
   }
 
   recalcRow(rowIndex: number): void {
-    this.items.update((rows) =>
-      rows.map((row, i) => (i === rowIndex ? this.calcRow(row) : row)),
-    );
+    this.items.update((rows) => rows.map((row, i) => (i === rowIndex ? this.calcRow(row) : row)));
   }
 
   addItemRow(): void {
@@ -464,9 +452,7 @@ export class SaleInvoiceDraftStore {
 
   private applyTaxesToRow(rowIndex: number, item: Item): void {
     const taxes = this.buildTaxes(item, this.taxoption());
-    this.items.update((rows) =>
-      rows.map((row, i) => (i === rowIndex ? { ...row, taxes } : row)),
-    );
+    this.items.update((rows) => rows.map((row, i) => (i === rowIndex ? { ...row, taxes } : row)));
   }
 
   private calcRow(row: ItemRow): ItemRow {
@@ -484,7 +470,15 @@ export class SaleInvoiceDraftStore {
       return { ...t, amount };
     });
 
-    return { ...row, itemtotal, discamount, subtotal, taxamount, grandtotal: subtotal + taxamount, taxes };
+    return {
+      ...row,
+      itemtotal,
+      discamount,
+      subtotal,
+      taxamount,
+      grandtotal: subtotal + taxamount,
+      taxes,
+    };
   }
 
   private emptyTaxRow(): TaxRow {
@@ -493,10 +487,19 @@ export class SaleInvoiceDraftStore {
 
   private emptyItemRow(taxCount = 0): ItemRow {
     return {
-      item: null, itemid: '', name: '', code: '', description: '',
-      price: 0, quantity: 1,
-      itemtotal: 0, discpercent: 0, discamount: 0,
-      subtotal: 0, taxamount: 0, grandtotal: 0,
+      item: null,
+      itemid: '',
+      name: '',
+      code: '',
+      description: '',
+      price: 0,
+      quantity: 1,
+      itemtotal: 0,
+      discpercent: 0,
+      discamount: 0,
+      subtotal: 0,
+      taxamount: 0,
+      grandtotal: 0,
       taxes: Array.from({ length: taxCount }, () => this.emptyTaxRow()),
     };
   }

@@ -12,7 +12,10 @@
       <h1 class="workspace-title">{{ currentPageTitle() }}</h1>
       <tng-breadcrumb class="workspace-breadcrumb" ariaLabel="Workspace path">
         @for (item of breadcrumbItems(); track item.label) {
-          <tng-breadcrumb-item [routerLink]="item.routerLink ?? null" [current]="item.current ?? false">
+          <tng-breadcrumb-item
+            [routerLink]="item.routerLink ?? null"
+            [current]="item.current ?? false"
+          >
             {{ item.label }}
           </tng-breadcrumb-item>
         }
@@ -25,7 +28,12 @@
   <div class="workspace-header-actions">
     <span class="workspace-org-pill">{{ activeOrganizationName() }}</span>
 
-    <button class="mode-toggle" type="button" [attr.aria-label]="'Switch to ' + (darkMode() ? 'light' : 'dark') + ' mode'" (click)="toggleMode()">
+    <button
+      class="mode-toggle"
+      type="button"
+      [attr.aria-label]="'Switch to ' + (darkMode() ? 'light' : 'dark') + ' mode'"
+      (click)="toggleMode()"
+    >
       @if (darkMode()) {
         <tng-icon icon="moon" class="h-4 w-4" />
       } @else {
@@ -57,16 +65,15 @@
 
         <div tngMenuGroupLabel>Organizations</div>
         @if (organizations().length > 0) {
-          @for (
-            organization of organizations();
-            track organization.id ?? $index
-          ) {
+          @for (organization of organizations(); track organization.id ?? $index) {
             <button type="button" tngMenuItem [tngMenuItemValue]="organization.id ?? $index">
               {{ organization.name }}
             </button>
           }
         } @else {
-          <button type="button" tngMenuItem tngMenuItemValue="no-org" disabled>No organizations yet</button>
+          <button type="button" tngMenuItem tngMenuItemValue="no-org" disabled>
+            No organizations yet
+          </button>
         }
 
         <div tngMenuGroupLabel>Session</div>

@@ -11,4 +11,3 @@ export const initialCountryState: CountryState = {
   error: null,
   isLoading: false,
 };
-

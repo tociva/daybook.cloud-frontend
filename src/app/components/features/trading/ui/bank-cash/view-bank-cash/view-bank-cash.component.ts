@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   TngButtonComponent,
@@ -39,13 +39,17 @@ type StatusBadgeTone = 'danger' | 'success' | 'warning';
   templateUrl: './view-bank-cash.component.html',
   styleUrl: './view-bank-cash.component.css',
 })
-export class ViewBankCashComponent implements OnInit {
+export class ViewBankCashComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly burlNavigation = inject(BurlNavigationService);
   protected readonly bankCashStore = inject(BankCashStore);
 
-  async ngOnInit(): Promise<void> {
+  constructor() {
+    void this.loadInitialState();
+  }
+
+  private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       await this.bankCashStore.loadBankCashById(id);

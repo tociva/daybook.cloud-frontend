@@ -13,7 +13,6 @@
       @if (branchStore.isLoading() && !branchStore.selectedItem()) {
         <div class="notice">Loading branch...</div>
       } @else if (branchStore.selectedItem(); as branch) {
-
         <dl class="details-grid">
           <div>
             <dt>Name</dt>
@@ -43,17 +42,14 @@
 
         <div class="notice notice--danger">
           You are about to permanently delete the branch
-          <strong>{{ branch.name }}</strong>. All associated fiscal years and data will be lost.
+          <strong>{{ branch.name }}</strong
+          >. All associated fiscal years and data will be lost.
         </div>
 
         <label class="confirm-row">
-          <tng-checkbox
-            [checked]="confirmed()"
-            (checkedChange)="confirmed.set($event)"
-          />
+          <tng-checkbox [checked]="confirmed()" (checkedChange)="confirmed.set($event)" />
           I understand this action is irreversible.
         </label>
-
       } @else {
         <div class="notice">Branch not found.</div>
       }

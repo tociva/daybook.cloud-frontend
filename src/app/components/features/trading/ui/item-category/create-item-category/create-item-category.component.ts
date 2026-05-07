@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -58,7 +58,7 @@ type ItemCategoryFormModel = {
   templateUrl: './create-item-category.component.html',
   styleUrl: './create-item-category.component.css',
 })
-export class CreateItemCategoryComponent implements OnInit {
+export class CreateItemCategoryComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(ItemCategoryFacade);
   protected readonly itemCategoryStore = inject(ItemCategoryStore);
@@ -105,7 +105,11 @@ export class CreateItemCategoryComponent implements OnInit {
     this.itemCategoryStore.items().filter((c) => c.id !== this.id()),
   );
   protected readonly filteredParentOptions = computed(() =>
-    this.filterAutocompleteOptions(this.parentOptions(), this.parentOptionLabel, this.parentQuery()),
+    this.filterAutocompleteOptions(
+      this.parentOptions(),
+      this.parentOptionLabel,
+      this.parentQuery(),
+    ),
   );
 
   // ── Tax group autocomplete helpers ────────────────────────────────────────
@@ -171,7 +175,11 @@ export class CreateItemCategoryComponent implements OnInit {
 
   // ──────────────────────────────────────────────────────────────────────────
 
-  async ngOnInit(): Promise<void> {
+  constructor() {
+    void this.loadInitialState();
+  }
+
+  private async loadInitialState(): Promise<void> {
     await Promise.all([
       this.itemCategoryStore.loadItemCategories({}),
       this.taxGroupStore.loadTaxGroups({}),

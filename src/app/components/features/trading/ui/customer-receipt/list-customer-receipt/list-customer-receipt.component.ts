@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   TngButtonComponent,
@@ -36,7 +36,7 @@ import type { CustomerReceipt } from '../../../data/customer-receipt';
   styleUrl: './list-customer-receipt.component.css',
   providers: [CrudListQueryService],
 })
-export class ListCustomerReceiptComponent implements OnInit {
+export class ListCustomerReceiptComponent {
   private readonly router = inject(Router);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly customerReceiptStore = inject(CustomerReceiptStore);
@@ -45,7 +45,14 @@ export class ListCustomerReceiptComponent implements OnInit {
   protected readonly columns: readonly TngTableColumn<CustomerReceipt>[] = [
     { id: 'date', label: 'Date', sortable: true, width: '10rem' },
     { id: 'customer', label: 'Customer', width: '14rem' },
-    { id: 'amount', label: 'Amount', sortable: true, align: 'end', headerAlign: 'end', width: '10rem' },
+    {
+      id: 'amount',
+      label: 'Amount',
+      sortable: true,
+      align: 'end',
+      headerAlign: 'end',
+      width: '10rem',
+    },
     { id: 'currencycode', label: 'Currency', width: '8rem' },
     { id: 'bcash', label: 'Bank/Cash', width: '12rem' },
     { id: 'description', label: 'Description', width: '16rem' },
@@ -66,12 +73,13 @@ export class ListCustomerReceiptComponent implements OnInit {
     return value.toFixed(2);
   }
 
-  ngOnInit(): void {
-    this.crudQuery.init((filter) =>
-      void this.customerReceiptStore.loadCustomerReceipts({
-        ...filter,
-        includes: ['customer', 'bcash'],
-      }),
+  constructor() {
+    this.crudQuery.init(
+      (filter) =>
+        void this.customerReceiptStore.loadCustomerReceipts({
+          ...filter,
+          includes: ['customer', 'bcash'],
+        }),
     );
   }
 
