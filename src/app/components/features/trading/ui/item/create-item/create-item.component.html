@@ -21,7 +21,7 @@
                 <tng-label forId="item-name" required>Name</tng-label>
                 <tng-input
                   id="item-name"
-                  placeholder="Jasmine Rice 5kg"
+                  placeholder="Wireless Mouse"
                   [formField]="itemForm.name"
                   [ariaInvalid]="nameError() !== null"
                 />
@@ -34,7 +34,7 @@
                 <tng-label forId="item-displayname" required>Display Name</tng-label>
                 <tng-input
                   id="item-displayname"
-                  placeholder="Rice 5kg"
+                  placeholder="Mouse"
                   [formField]="itemForm.displayname"
                   [ariaInvalid]="displaynameError() !== null"
                 />
@@ -55,7 +55,7 @@
                   [getOptionLabel]="categoryOptionLabel"
                   [trackBy]="categoryTrackBy"
                   (valueChange)="onCategoryChange($event)"
-                  (queryChnage)="onCategoryQueryChnage($event)"
+                  (queryChange)="onCategoryQueryChange($event)"
                 />
                 <p class="field-error" [class.field-error--empty]="!categoryError()">
                   {{ categoryError() || ' ' }}
@@ -66,7 +66,7 @@
                 <tng-label forId="item-code" required>Code</tng-label>
                 <tng-input
                   id="item-code"
-                  placeholder="RICE-5KG"
+                  placeholder="WM-001"
                   [formField]="itemForm.code"
                   [ariaInvalid]="codeError() !== null"
                 />

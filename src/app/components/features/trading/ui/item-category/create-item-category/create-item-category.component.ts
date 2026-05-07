@@ -217,15 +217,15 @@ export class CreateItemCategoryComponent implements OnInit {
     this.categoryModel.update((m) => ({ ...m, taxgroupId }));
   }
 
-  protected onTypeQueryChnage(event: unknown): void {
+  protected onTypeQueryChange(event: unknown): void {
     this.typeQuery.set(this.normalizeAutocompleteQuery(event));
   }
 
-  protected onParentQueryChnage(event: unknown): void {
+  protected onParentQueryChange(event: unknown): void {
     this.parentQuery.set(this.normalizeAutocompleteQuery(event));
   }
 
-  protected onTaxGroupQueryChnage(event: unknown): void {
+  protected onTaxGroupQueryChange(event: unknown): void {
     this.taxGroupQuery.set(this.normalizeAutocompleteQuery(event));
   }
 

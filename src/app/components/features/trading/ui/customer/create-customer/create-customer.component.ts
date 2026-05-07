@@ -277,11 +277,11 @@ export class CreateCustomerComponent implements OnInit {
     }));
   }
 
-  protected onCountryQueryChnage(event: unknown): void {
+  protected onCountryQueryChange(event: unknown): void {
     this.countryQuery.set(this.normalizeAutocompleteQuery(event));
   }
 
-  protected onCurrencyQueryChnage(event: unknown): void {
+  protected onCurrencyQueryChange(event: unknown): void {
     this.currencyQuery.set(this.normalizeAutocompleteQuery(event));
   }
 

@@ -141,11 +141,11 @@ export class CreateLedgerCategoryComponent implements OnInit {
     this.categoryModel.update((m) => ({ ...m, parentId }));
   }
 
-  protected onTypeQueryChnage(event: unknown): void {
+  protected onTypeQueryChange(event: unknown): void {
     this.typeQuery.set(this.normalizeAutocompleteQuery(event));
   }
 
-  protected onParentQueryChnage(event: unknown): void {
+  protected onParentQueryChange(event: unknown): void {
     this.parentQuery.set(this.normalizeAutocompleteQuery(event));
   }
 

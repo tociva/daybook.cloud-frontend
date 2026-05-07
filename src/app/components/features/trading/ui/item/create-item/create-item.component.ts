@@ -201,7 +201,7 @@ export class CreateItemComponent implements OnInit {
     }));
   }
 
-  protected onCategoryQueryChnage(event: unknown): void {
+  protected onCategoryQueryChange(event: unknown): void {
     this.categoryQuery.set(this.normalizeAutocompleteQuery(event));
   }
 

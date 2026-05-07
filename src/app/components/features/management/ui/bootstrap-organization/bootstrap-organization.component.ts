@@ -552,15 +552,15 @@ export class BootstrapOrganizationComponent {
     }));
   }
 
-  protected onCountryQueryChnage(event: unknown): void {
+  protected onCountryQueryChange(event: unknown): void {
     this.countryQuery.set(this.normalizeAutocompleteQuery(event));
   }
 
-  protected onCurrencyQueryChnage(event: unknown): void {
+  protected onCurrencyQueryChange(event: unknown): void {
     this.currencyQuery.set(this.normalizeAutocompleteQuery(event));
   }
 
-  protected onDateFormatQueryChnage(event: unknown): void {
+  protected onDateFormatQueryChange(event: unknown): void {
     this.dateFormatQuery.set(this.normalizeAutocompleteQuery(event));
   }
 

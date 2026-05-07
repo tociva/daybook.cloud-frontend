@@ -64,7 +64,7 @@
               [getOptionLabel]="countryOptionLabel"
               [trackBy]="countryTrackBy"
               (valueChange)="selectCountry($event)"
-              (queryChnage)="onCountryQueryChnage($event)"
+              (queryChange)="onCountryQueryChange($event)"
             >
               <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
                 <span class="country-option">
@@ -91,7 +91,7 @@
               [getOptionLabel]="currencyOptionLabel"
               [trackBy]="currencyTrackBy"
               (valueChange)="selectCurrency($event)"
-              (queryChnage)="onCurrencyQueryChnage($event)"
+              (queryChange)="onCurrencyQueryChange($event)"
             />
           </div>
 

@@ -128,7 +128,7 @@ export class CreateLedgerComponent implements OnInit {
     this.ledgerModel.update((m) => ({ ...m, categoryId }));
   }
 
-  protected onCategoryQueryChnage(event: unknown): void {
+  protected onCategoryQueryChange(event: unknown): void {
     this.categoryQuery.set(this.normalizeAutocompleteQuery(event));
   }
 

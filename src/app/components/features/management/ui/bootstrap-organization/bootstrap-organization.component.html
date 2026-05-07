@@ -52,7 +52,7 @@
                 [getOptionLabel]="countryOptionLabel"
                 [trackBy]="countryTrackBy"
                 (valueChange)="selectCountry($event)"
-                (queryChnage)="onCountryQueryChnage($event)"
+                (queryChange)="onCountryQueryChange($event)"
               >
                 <ng-template
                   #tngAutocompleteOptionTpl
@@ -344,7 +344,7 @@
                 [getOptionLabel]="currencyOptionLabel"
                 [trackBy]="currencyTrackBy"
                 (valueChange)="selectCurrency($event)"
-                (queryChnage)="onCurrencyQueryChnage($event)"
+                (queryChange)="onCurrencyQueryChange($event)"
               />
               <p class="field-error" [class.field-error--empty]="!fieldError('currency')">
                 {{ fieldError('currency') || '\u00A0' }}
@@ -363,7 +363,7 @@
                 [getOptionLabel]="dateFormatOptionLabel"
                 [trackBy]="dateFormatTrackBy"
                 (valueChange)="selectDateFormat($event)"
-                (queryChnage)="onDateFormatQueryChnage($event)"
+                (queryChange)="onDateFormatQueryChange($event)"
               />
               <p class="field-error" [class.field-error--empty]="!fieldError('dateformatForm')">
                 {{ fieldError('dateformatForm') || '\u00A0' }}

@@ -21,7 +21,7 @@
                 <tng-label forId="cat-name" required>Name</tng-label>
                 <tng-input
                   id="cat-name"
-                  placeholder="Groceries"
+                  placeholder="Electronics"
                   [formField]="categoryForm.name"
                   [ariaInvalid]="nameError() !== null"
                 />
@@ -34,7 +34,7 @@
                 <tng-label forId="cat-code" required>Code</tng-label>
                 <tng-input
                   id="cat-code"
-                  placeholder="GROC"
+                  placeholder="ELEC"
                   [formField]="categoryForm.code"
                   [ariaInvalid]="codeError() !== null"
                 />
@@ -55,7 +55,7 @@
                   [getOptionLabel]="typeOptionLabel"
                   [trackBy]="typeTrackBy"
                   (valueChange)="onTypeChange($event)"
-                  (queryChnage)="onTypeQueryChnage($event)"
+                  (queryChange)="onTypeQueryChange($event)"
                 />
                 <p class="field-error" [class.field-error--empty]="!typeError()">
                   {{ typeError() || ' ' }}
@@ -74,7 +74,7 @@
                   [getOptionLabel]="parentOptionLabel"
                   [trackBy]="parentTrackBy"
                   (valueChange)="onParentChange($event)"
-                  (queryChnage)="onParentQueryChnage($event)"
+                  (queryChange)="onParentQueryChange($event)"
                 />
                 <p class="field-error field-error--empty">{{ ' ' }}</p>
               </div>
@@ -103,7 +103,7 @@
                 [getOptionLabel]="taxGroupOptionLabel"
                 [trackBy]="taxGroupTrackBy"
                 (valueChange)="onTaxGroupChange($event)"
-                (queryChnage)="onTaxGroupQueryChnage($event)"
+                (queryChange)="onTaxGroupQueryChange($event)"
               />
               <p class="field-error field-error--empty">{{ ' ' }}</p>
             </div>

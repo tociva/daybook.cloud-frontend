@@ -43,7 +43,7 @@
                   [getOptionLabel]="countryOptionLabel"
                   [trackBy]="countryTrackBy"
                   (valueChange)="selectCountry($event)"
-                  (queryChnage)="onCountryQueryChnage($event)"
+                  (queryChange)="onCountryQueryChange($event)"
                 >
                   <ng-template
                     #tngAutocompleteOptionTpl
@@ -83,7 +83,7 @@
                   [getOptionLabel]="currencyOptionLabel"
                   [trackBy]="currencyTrackBy"
                   (valueChange)="selectCurrency($event)"
-                  (queryChnage)="onCurrencyQueryChnage($event)"
+                  (queryChange)="onCurrencyQueryChange($event)"
                 />
                 <p class="field-error" [class.field-error--empty]="!currencycodeError()">
                   {{ currencycodeError() || ' ' }}

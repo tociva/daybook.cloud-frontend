@@ -42,7 +42,7 @@
                 [getOptionLabel]="categoryOptionLabel"
                 [trackBy]="categoryTrackBy"
                 (valueChange)="onCategoryChange($event)"
-                (queryChnage)="onCategoryQueryChnage($event)"
+                (queryChange)="onCategoryQueryChange($event)"
               />
               <p class="field-error" [class.field-error--empty]="!categoryError()">
                 {{ categoryError() || ' ' }}
