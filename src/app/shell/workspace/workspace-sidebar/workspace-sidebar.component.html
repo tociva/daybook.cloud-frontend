@@ -1,27 +1,4 @@
 <aside class="workspace-drawer" aria-label="Workspace navigation">
-  <div class="drawer-search">
-    <button
-      type="button"
-      class="drawer-search-btn"
-      aria-label="Open search"
-      (click)="openCommandSearch()"
-      (keydown)="onSearchBtnKeydown($event)"
-    >
-      <span aria-hidden="true" class="drawer-search-prefix">
-        <tng-icon icon="search" class="drawer-search-icon"></tng-icon>
-      </span>
-      <span class="drawer-search-placeholder">Search...</span>
-      <span class="drawer-search-meta">{{ searchShortcutHint }}</span>
-    </button>
-  </div>
-
-  <app-command-search-dialog
-    [open]="commandSearchOpen()"
-    [initialValue]="searchInitialValue()"
-    (openChange)="onCommandSearchOpenChange($event)"
-    (closed)="onCommandSearchClosed()"
-  />
-
   <div class="drawer-nav-scroll">
     <nav class="drawer-nav" aria-label="Primary">
       <tng-accordion

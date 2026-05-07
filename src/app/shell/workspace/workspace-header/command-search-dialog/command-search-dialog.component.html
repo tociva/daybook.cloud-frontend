@@ -1,0 +1,32 @@
+<tng-dialog
+  tabindex="-1"
+  title="Command Search"
+  description="Type a command, page, or action to jump quickly."
+  [open]="open"
+  (openChange)="onDialogOpenChange($event)"
+  (closed)="onDialogClosed()"
+>
+  <div class="command-search-dialog">
+    @if (open) {
+      <tng-autocomplete
+        class="command-search-autocomplete"
+        placeholder="Search commands, pages, or settings..."
+        ariaLabel="Command search"
+        [options]="filteredItems()"
+        [query]="query()"
+        [getOptionValue]="getItemValue"
+        [getOptionLabel]="getItemLabel"
+        [trackBy]="trackItem"
+        (queryChange)="query.set($event)"
+        (valueChange)="onValueChange($event)"
+      >
+        <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
+          <span class="search-option">
+            <span class="search-option-group">{{ option.groupLabel }}</span>
+            <span class="search-option-label">{{ label }}</span>
+          </span>
+        </ng-template>
+      </tng-autocomplete>
+    }
+  </div>
+</tng-dialog>

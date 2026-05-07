@@ -11,10 +11,12 @@ import { TngMenuGroupLabel, TngMenuItem, type TngMenuSelectEvent } from '@tailng
 import { applyTailngTheme, defaultDarkThemePreset, defaultThemePreset } from '@tailng-ui/theme';
 import { Organization } from '../../../components/features/management/data/organization/organization.model';
 import { BreadcrumbItem } from '../workspace-nav.model';
+import { WorkspaceSearchComponent } from './workspace-search/workspace-search.component';
 
 @Component({
   selector: 'app-workspace-header',
   imports: [
+    WorkspaceSearchComponent,
     TngAvatarComponent,
     TngBreadcrumbComponent,
     TngBreadcrumbItemComponent,

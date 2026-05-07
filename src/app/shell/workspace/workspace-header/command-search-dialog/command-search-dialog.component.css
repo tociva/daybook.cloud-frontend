@@ -1,0 +1,40 @@
+.command-search-dialog {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.command-search-autocomplete {
+  /* Raise the portalled overlay above the dialog backdrop (z-index: 70). */
+  --tng-autocomplete-overlay-z-index: 80;
+  width: 100%;
+}
+
+.search-option {
+  align-items: baseline;
+  display: flex;
+  gap: 0.5rem;
+  min-width: 0;
+  width: 100%;
+}
+
+.search-option-group {
+  color: var(--tng-semantic-foreground-secondary);
+  flex: 0 0 auto;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.search-option-group::after {
+  content: '›';
+  margin-left: 0.35rem;
+}
+
+.search-option-label {
+  flex: 1 1 auto;
+  font-size: 0.875rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
