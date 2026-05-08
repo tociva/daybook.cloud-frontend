@@ -1,8 +1,10 @@
-import { Component, computed, effect, input, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import {
   TngAvatarComponent,
   TngBreadcrumbComponent,
   TngBreadcrumbItemComponent,
+  TngButtonComponent,
   TngMenuComponent,
   TngMenuTriggerFor,
 } from '@tailng-ui/components';
@@ -20,6 +22,7 @@ import { WorkspaceSearchButtonComponent } from '../workspace-search-button/works
     TngAvatarComponent,
     TngBreadcrumbComponent,
     TngBreadcrumbItemComponent,
+    TngButtonComponent,
     TngIcon,
     TngMenuComponent,
     TngMenuTriggerFor,
@@ -30,6 +33,7 @@ import { WorkspaceSearchButtonComponent } from '../workspace-search-button/works
   styleUrl: './workspace-header.component.css',
 })
 export class WorkspaceHeaderComponent {
+  private readonly router = inject(Router);
   readonly activeOrganizationName = input('No organization selected');
   readonly breadcrumbItems = input<readonly BreadcrumbItem[]>([
     { label: 'Home', routerLink: '/app/dashboard' },
@@ -53,6 +57,12 @@ export class WorkspaceHeaderComponent {
 
   public toggleMode(): void {
     this.darkMode.update((current) => !current);
+  }
+
+  public goToSelectOrganization(): void {
+    void this.router.navigate(['/app/select-organization'], {
+      queryParams: { burl: this.router.url },
+    });
   }
 
   protected logout(): void {

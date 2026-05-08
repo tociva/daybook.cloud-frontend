@@ -1,0 +1,143 @@
+<main class="management-page select-organization-page">
+  <app-page-heading
+    eyebrow="Workspace"
+    title="Select Organization"
+    description="Pick an organization, branch, and fiscal year to switch into."
+  >
+  </app-page-heading>
+
+  @if (errorMessage()) {
+    <div class="notice notice--danger">{{ errorMessage() }}</div>
+  }
+
+  <p class="current-selection">
+    Current selection: <strong>{{ getCurrentSelectionLabel() }}</strong>
+  </p>
+
+  @if (organizationGroups().length === 0) {
+    <tng-card variant="outline" padding="lg">
+      <p class="empty-copy">
+        No organizations are available on this account yet. Please create one first.
+      </p>
+    </tng-card>
+  } @else {
+    <tng-accordion
+      class="organization-accordion"
+      [type]="'multiple'"
+      [collapsible]="true"
+      [defaultValue]="defaultExpandedOrganizationKeys()"
+      ariaLabel="Organizations"
+    >
+      @for (orgGroup of organizationGroups(); track trackOrganizationGroup($index, orgGroup)) {
+        <tng-accordion-item [value]="orgGroup.groupKey" class="organization-item">
+          <tng-accordion-trigger>
+            <span class="organization-trigger">
+              <span class="organization-trigger-copy">
+                <span class="organization-name">{{ orgGroup.organization.name }}</span>
+                @if (orgGroup.organization.email || orgGroup.organization.mobile) {
+                  <span class="organization-meta">
+                    @if (orgGroup.organization.email) {
+                      <span>{{ orgGroup.organization.email }}</span>
+                    }
+                    @if (orgGroup.organization.email && orgGroup.organization.mobile) {
+                      <span class="dot">•</span>
+                    }
+                    @if (orgGroup.organization.mobile) {
+                      <span>{{ orgGroup.organization.mobile }}</span>
+                    }
+                  </span>
+                }
+              </span>
+              <span class="organization-trigger-count">
+                {{ orgGroup.branchGroups.length }} branches
+              </span>
+            </span>
+          </tng-accordion-trigger>
+
+          <tng-accordion-panel class="organization-panel">
+            @if (orgGroup.branchGroups.length === 0) {
+              <p class="empty-copy">No branches yet for this organization.</p>
+            } @else {
+              <div class="branch-stack">
+                @for (
+                  branchGroup of orgGroup.branchGroups;
+                  track trackBranchGroup($index, branchGroup)
+                ) {
+                  <tng-card variant="outline" padding="lg" class="branch-card">
+                    <header class="branch-header">
+                      <div class="branch-copy">
+                        <h3>{{ branchGroup.branch.name }}</h3>
+                        @if (getBranchSubtitle(branchGroup.branch); as subtitle) {
+                          @if (subtitle) {
+                            <p>{{ subtitle }}</p>
+                          }
+                        }
+                      </div>
+                      <span class="branch-meta">
+                        {{ branchGroup.rows.length }} fiscal years
+                      </span>
+                    </header>
+
+                    @if (branchGroup.rows.length === 0) {
+                      <p class="empty-copy">No fiscal years configured for this branch.</p>
+                    } @else {
+                      <tng-table
+                        [ariaLabel]="'Fiscal years for ' + branchGroup.branch.name"
+                        density="comfortable"
+                        [columns]="fiscalYearColumns"
+                        [items]="branchGroup.rows"
+                        [loading]="isLoading()"
+                      >
+                        <ng-template tngTableCellTemplate="fiscalYearName" let-row="row">
+                          <strong>{{ row.fiscalYearName || '—' }}</strong>
+                        </ng-template>
+
+                        <ng-template tngTableCellTemplate="startDate" let-row="row">
+                          @if (row.startDate) {
+                            {{ formatDate(row.startDate) }}
+                          } @else {
+                            —
+                          }
+                        </ng-template>
+
+                        <ng-template tngTableCellTemplate="endDate" let-row="row">
+                          @if (row.endDate) {
+                            {{ formatDate(row.endDate) }}
+                          } @else {
+                            —
+                          }
+                        </ng-template>
+
+                        <ng-template tngTableCellTemplate="currencyCode" let-row="row">
+                          {{ row.currencyCode || '—' }}
+                        </ng-template>
+
+                        <ng-template tngTableCellTemplate="actions" let-row="row">
+                          <tng-button
+                            type="button"
+                            size="sm"
+                            [appearance]="isRowActive(row) ? 'solid' : 'outline'"
+                            [tone]="isRowActive(row) ? 'primary' : 'neutral'"
+                            [disabled]="isRowApplying(row) || !row.fiscalYearId"
+                            (click)="applyRow(row)"
+                          >
+                            @if (isRowActive(row)) {
+                              <tng-icon icon="check" aria-hidden="true" />
+                              Active
+                            } @else {
+                              Apply
+                            }
+                          </tng-button>
+                        </ng-template>
+                      </tng-table>
+                    }
+                  </tng-card>
+                }
+              </div>
+            }
+          </tng-accordion-panel>
+        </tng-accordion-item>
+      }
+    </tng-accordion>
+  }
+</main>

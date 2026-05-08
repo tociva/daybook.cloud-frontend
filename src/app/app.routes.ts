@@ -13,6 +13,13 @@ export const routes: Routes = [
   { path: 'app/dashboard', component: DashboardComponent },
   { path: 'app/management/subscription', component: SubscriptionSelectionComponent },
   {
+    path: 'app/select-organization',
+    loadComponent: () =>
+      import(
+        './components/features/management/ui/select-organization/select-organization.component'
+      ).then((m) => m.SelectOrganizationComponent),
+  },
+  {
     path: 'app/trading/bank-cash',
     loadChildren: () =>
       import('./components/features/trading/ui/bank-cash/bank-cash.routes').then(

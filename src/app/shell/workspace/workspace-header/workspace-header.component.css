@@ -112,23 +112,19 @@
   gap: 0.75rem;
 }
 
-.workspace-org-pill {
-  background: transparent;
-  border: 0;
-  border-radius: 0.75rem;
-  color: var(--tng-semantic-foreground-muted);
-  font-size: 0.85rem;
-  font-weight: 700;
+.workspace-org-button {
+  flex: 0 0 auto;
   max-width: 18rem;
   min-width: 0;
-  overflow: hidden;
-  padding: 0.45rem 0.6rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.workspace-org-pill:hover {
-  background: color-mix(in srgb, var(--tng-semantic-background-surface) 58%, transparent);
+.workspace-org-button-label {
+  display: inline-block;
+  max-width: 14rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
 }
 
 .mode-toggle {
@@ -246,7 +242,7 @@
   }
 
   .header-logo-copy,
-  .workspace-org-pill,
+  .workspace-org-button-label,
   .profile-trigger-copy {
     display: none;
   }
