@@ -24,6 +24,18 @@
     "url": "/app/trading/tax/create"
   },
   {
+    "title": "List Tax Group",
+    "description": "View and manage tax groups.",
+    "keywords": ["list tax group", "tax group", "tax", "gst", "trading"],
+    "url": "/app/trading/tax-group"
+  },
+  {
+    "title": "Create Tax Group",
+    "description": "Add a new tax group.",
+    "keywords": ["create tax group", "tax group", "tax", "gst", "new tax group"],
+    "url": "/app/trading/tax-group/create"
+  },
+  {
     "title": "List Item",
     "description": "View and manage inventory items.",
     "keywords": ["list item", "item", "inventory", "product"],
@@ -34,6 +46,18 @@
     "description": "Add a new inventory item.",
     "keywords": ["create item", "item", "inventory", "product"],
     "url": "/app/trading/item/create"
+  },
+  {
+    "title": "List Item Category",
+    "description": "View and manage item categories.",
+    "keywords": ["list item category", "item category", "category", "inventory", "product"],
+    "url": "/app/trading/item-category"
+  },
+  {
+    "title": "Create Item Category",
+    "description": "Add a new item category.",
+    "keywords": ["create item category", "item category", "category", "inventory", "product"],
+    "url": "/app/trading/item-category/create"
   },
   {
     "title": "List Customer",
@@ -118,6 +142,18 @@
     "description": "Add a new accounting ledger.",
     "keywords": ["create ledger", "ledger", "accounting", "accounts"],
     "url": "/app/accounting/ledger/create"
+  },
+  {
+    "title": "List Ledger Category",
+    "description": "View and manage ledger categories.",
+    "keywords": ["list ledger category", "ledger category", "category", "accounting", "accounts"],
+    "url": "/app/accounting/ledger-category"
+  },
+  {
+    "title": "Create Ledger Category",
+    "description": "Add a new ledger category.",
+    "keywords": ["create ledger category", "ledger category", "category", "accounting", "accounts"],
+    "url": "/app/accounting/ledger-category/create"
   },
   {
     "title": "Journal",
