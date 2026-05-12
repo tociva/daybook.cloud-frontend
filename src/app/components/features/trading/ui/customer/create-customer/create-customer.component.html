@@ -20,114 +20,119 @@
           } @else {
             <div class="field-grid">
               <div class="field field--wide">
-                <tng-label forId="cust-name" required>Name</tng-label>
-                <tng-input
-                  id="cust-name"
-                  placeholder="Acme Corp"
-                  [formField]="customerForm.name"
-                  [ariaInvalid]="nameError() !== null"
-                />
-                <p class="field-error" [class.field-error--empty]="!nameError()">
-                  {{ nameError() || ' ' }}
-                </p>
+                <tng-form-field labelPosition="above" [invalid]="nameError() !== null">
+                  <tng-label forId="cust-name" required>Name</tng-label>
+                  <tng-input
+                    id="cust-name"
+                    placeholder="Acme Corp"
+                    [formField]="customerForm.name"
+                    [ariaInvalid]="nameError() !== null"
+                  />
+                  <tng-error [show]="nameError() !== null">{{ nameError() }}</tng-error>
+                </tng-form-field>
               </div>
 
               <div class="field">
-                <tng-label forId="cust-countrycode" required>Country</tng-label>
-                <tng-autocomplete
-                  id="cust-countrycode"
-                  placeholder="Search for a country"
-                  ariaLabel="Country"
-                  [options]="filteredCountries()"
-                  [formField]="customerForm.countrycode"
-                  [getOptionValue]="countryOptionValue"
-                  [getOptionLabel]="countryOptionLabel"
-                  [trackBy]="countryTrackBy"
-                  (valueChange)="selectCountry($event)"
-                  (queryChange)="onCountryQueryChange($event)"
-                >
-                  <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
-                    <span class="country-option">
+                <tng-form-field labelPosition="above" [invalid]="countrycodeError() !== null">
+                  <tng-label forId="cust-countrycode" required>Country</tng-label>
+                  <tng-autocomplete
+                    id="cust-countrycode"
+                    placeholder="Search for a country"
+                    ariaLabel="Country"
+                    [options]="filteredCountries()"
+                    [formField]="customerForm.countrycode"
+                    [getOptionValue]="countryOptionValue"
+                    [getOptionLabel]="countryOptionLabel"
+                    [trackBy]="countryTrackBy"
+                    (valueChange)="selectCountry($event)"
+                    (queryChange)="onCountryQueryChange($event)"
+                  >
+                    <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
+                      <span class="country-option">
+                        <span [class]="getCountryFlagClass(option)" aria-hidden="true"></span>
+                        <span class="country-option-label">{{ label }}</span>
+                      </span>
+                    </ng-template>
+
+                    <ng-template #tngAutocompleteSelectedTpl let-option="option">
                       <span [class]="getCountryFlagClass(option)" aria-hidden="true"></span>
-                      <span class="country-option-label">{{ label }}</span>
-                    </span>
-                  </ng-template>
-
-                  <ng-template #tngAutocompleteSelectedTpl let-option="option">
-                    <span [class]="getCountryFlagClass(option)" aria-hidden="true"></span>
-                  </ng-template>
-                </tng-autocomplete>
-                <p class="field-error" [class.field-error--empty]="!countrycodeError()">
-                  {{ countrycodeError() || ' ' }}
-                </p>
+                    </ng-template>
+                  </tng-autocomplete>
+                  <tng-error [show]="countrycodeError() !== null">{{ countrycodeError() }}</tng-error>
+                </tng-form-field>
               </div>
 
               <div class="field">
-                <tng-label forId="cust-currencycode" required>Currency</tng-label>
-                <tng-autocomplete
-                  id="cust-currencycode"
-                  placeholder="Search for a currency"
-                  ariaLabel="Currency"
-                  [options]="filteredCurrencies()"
-                  [formField]="customerForm.currencycode"
-                  [getOptionValue]="currencyOptionValue"
-                  [getOptionLabel]="currencyOptionLabel"
-                  [trackBy]="currencyTrackBy"
-                  (valueChange)="selectCurrency($event)"
-                  (queryChange)="onCurrencyQueryChange($event)"
-                />
-                <p class="field-error" [class.field-error--empty]="!currencycodeError()">
-                  {{ currencycodeError() || ' ' }}
-                </p>
+                <tng-form-field labelPosition="above" [invalid]="currencycodeError() !== null">
+                  <tng-label forId="cust-currencycode" required>Currency</tng-label>
+                  <tng-autocomplete
+                    id="cust-currencycode"
+                    placeholder="Search for a currency"
+                    ariaLabel="Currency"
+                    [options]="filteredCurrencies()"
+                    [formField]="customerForm.currencycode"
+                    [getOptionValue]="currencyOptionValue"
+                    [getOptionLabel]="currencyOptionLabel"
+                    [trackBy]="currencyTrackBy"
+                    (valueChange)="selectCurrency($event)"
+                    (queryChange)="onCurrencyQueryChange($event)"
+                  />
+                  <tng-error [show]="currencycodeError() !== null">{{ currencycodeError() }}</tng-error>
+                </tng-form-field>
               </div>
 
               <div class="field">
-                <tng-label forId="cust-mobile">Mobile</tng-label>
-                <tng-input
-                  id="cust-mobile"
-                  type="tel"
-                  placeholder="+91-"
-                  [formField]="customerForm.mobile"
-                />
-                <p class="field-error field-error--empty">{{ ' ' }}</p>
+                <tng-form-field labelPosition="above">
+                  <tng-label forId="cust-mobile">Mobile</tng-label>
+                  <tng-input
+                    id="cust-mobile"
+                    type="tel"
+                    placeholder="+91-"
+                    [formField]="customerForm.mobile"
+                  />
+                </tng-form-field>
               </div>
 
               <div class="field">
-                <tng-label forId="cust-email">Email</tng-label>
-                <tng-input
-                  id="cust-email"
-                  type="email"
-                  placeholder="contact@acme.com"
-                  [formField]="customerForm.email"
-                />
-                <p class="field-error field-error--empty">{{ ' ' }}</p>
+                <tng-form-field labelPosition="above">
+                  <tng-label forId="cust-email">Email</tng-label>
+                  <tng-input
+                    id="cust-email"
+                    type="email"
+                    placeholder="contact@acme.com"
+                    [formField]="customerForm.email"
+                  />
+                </tng-form-field>
               </div>
 
               <div class="field">
-                <tng-label forId="cust-gstin">GSTIN</tng-label>
-                <tng-input
-                  id="cust-gstin"
-                  placeholder="22AAAAA0000A1Z5"
-                  [formField]="customerForm.gstin"
-                />
-                <p class="field-error field-error--empty">{{ ' ' }}</p>
+                <tng-form-field labelPosition="above">
+                  <tng-label forId="cust-gstin">GSTIN</tng-label>
+                  <tng-input
+                    id="cust-gstin"
+                    placeholder="22AAAAA0000A1Z5"
+                    [formField]="customerForm.gstin"
+                  />
+                </tng-form-field>
               </div>
 
               <div class="field">
-                <tng-label forId="cust-state">State</tng-label>
-                <tng-input id="cust-state" placeholder="Kerala" [formField]="customerForm.state" />
-                <p class="field-error field-error--empty">{{ ' ' }}</p>
+                <tng-form-field labelPosition="above">
+                  <tng-label forId="cust-state">State</tng-label>
+                  <tng-input id="cust-state" placeholder="Kerala" [formField]="customerForm.state" />
+                </tng-form-field>
               </div>
 
               <div class="field field--wide">
-                <tng-label forId="cust-description">Description</tng-label>
-                <tng-textarea
-                  id="cust-description"
-                  placeholder="Internal notes about this customer"
-                  rows="3"
-                  [formField]="customerForm.description"
-                />
-                <p class="field-error field-error--empty">{{ ' ' }}</p>
+                <tng-form-field labelPosition="above">
+                  <tng-label forId="cust-description">Description</tng-label>
+                  <tng-textarea
+                    id="cust-description"
+                    placeholder="Internal notes about this customer"
+                    rows="3"
+                    [formField]="customerForm.description"
+                  />
+                </tng-form-field>
               </div>
             </div>
           }
@@ -146,63 +151,69 @@
         <tng-card-content>
           <div class="field-grid">
             <div class="field field--wide">
-              <tng-label forId="cust-addr-name">House / Building Name</tng-label>
-              <tng-input
-                id="cust-addr-name"
-                placeholder="Sunrise Towers"
-                [formField]="customerForm.addressName"
-              />
-              <p class="field-error field-error--empty">{{ ' ' }}</p>
+              <tng-form-field labelPosition="above">
+                <tng-label forId="cust-addr-name">House / Building Name</tng-label>
+                <tng-input
+                  id="cust-addr-name"
+                  placeholder="Sunrise Towers"
+                  [formField]="customerForm.addressName"
+                />
+              </tng-form-field>
             </div>
 
             <div class="field field--wide">
-              <tng-label forId="cust-addr-line1">Address Line 1</tng-label>
-              <tng-input
-                id="cust-addr-line1"
-                placeholder="12, MG Road"
-                [formField]="customerForm.addressLine1"
-              />
-              <p class="field-error field-error--empty">{{ ' ' }}</p>
+              <tng-form-field labelPosition="above">
+                <tng-label forId="cust-addr-line1">Address Line 1</tng-label>
+                <tng-input
+                  id="cust-addr-line1"
+                  placeholder="12, MG Road"
+                  [formField]="customerForm.addressLine1"
+                />
+              </tng-form-field>
             </div>
 
             <div class="field field--wide">
-              <tng-label forId="cust-addr-line2">Address Line 2</tng-label>
-              <tng-input
-                id="cust-addr-line2"
-                placeholder="Near Central Park"
-                [formField]="customerForm.addressLine2"
-              />
-              <p class="field-error field-error--empty">{{ ' ' }}</p>
+              <tng-form-field labelPosition="above">
+                <tng-label forId="cust-addr-line2">Address Line 2</tng-label>
+                <tng-input
+                  id="cust-addr-line2"
+                  placeholder="Near Central Park"
+                  [formField]="customerForm.addressLine2"
+                />
+              </tng-form-field>
             </div>
 
             <div class="field">
-              <tng-label forId="cust-addr-street">Street</tng-label>
-              <tng-input
-                id="cust-addr-street"
-                placeholder="Brigade Road"
-                [formField]="customerForm.addressStreet"
-              />
-              <p class="field-error field-error--empty">{{ ' ' }}</p>
+              <tng-form-field labelPosition="above">
+                <tng-label forId="cust-addr-street">Street</tng-label>
+                <tng-input
+                  id="cust-addr-street"
+                  placeholder="Brigade Road"
+                  [formField]="customerForm.addressStreet"
+                />
+              </tng-form-field>
             </div>
 
             <div class="field">
-              <tng-label forId="cust-addr-city">City</tng-label>
-              <tng-input
-                id="cust-addr-city"
-                placeholder="Bengaluru"
-                [formField]="customerForm.addressCity"
-              />
-              <p class="field-error field-error--empty">{{ ' ' }}</p>
+              <tng-form-field labelPosition="above">
+                <tng-label forId="cust-addr-city">City</tng-label>
+                <tng-input
+                  id="cust-addr-city"
+                  placeholder="Bengaluru"
+                  [formField]="customerForm.addressCity"
+                />
+              </tng-form-field>
             </div>
 
             <div class="field">
-              <tng-label forId="cust-addr-zip">ZIP Code</tng-label>
-              <tng-input
-                id="cust-addr-zip"
-                placeholder="560001"
-                [formField]="customerForm.addressZip"
-              />
-              <p class="field-error field-error--empty">{{ ' ' }}</p>
+              <tng-form-field labelPosition="above">
+                <tng-label forId="cust-addr-zip">ZIP Code</tng-label>
+                <tng-input
+                  id="cust-addr-zip"
+                  placeholder="560001"
+                  [formField]="customerForm.addressZip"
+                />
+              </tng-form-field>
             </div>
           </div>
         </tng-card-content>

@@ -11,6 +11,7 @@ import {
 import { ActivatedRoute } from '@angular/router';
 import {
   TngButtonComponent,
+  TngFormFieldComponent,
   TngInputComponent,
   TngLabelComponent,
   TngSelectComponent,
@@ -75,6 +76,7 @@ const OPERATOR_LABELS: Record<Lb4TextFilterOperator, string> = {
   selector: 'app-crud-filter-popover',
   imports: [
     TngButtonComponent,
+    TngFormFieldComponent,
     TngIcon,
     TngInputComponent,
     TngLabelComponent,

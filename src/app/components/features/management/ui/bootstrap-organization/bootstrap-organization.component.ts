@@ -13,12 +13,15 @@ import {
   TngCardTitleComponent,
   TngDatepickerComponent,
   TngDialogComponent,
+  TngError,
+  TngFormFieldComponent,
+  TngHint,
   TngInputComponent,
   TngLabelComponent,
   TngStepperComponent,
   TngTextareaComponent,
 } from '@tailng-ui/components';
-import { TngInput, TngInputGroup, TngSuffix } from '@tailng-ui/primitives';
+import { TngInput, TngInputGroup, TngInputFieldSuffix } from '@tailng-ui/primitives';
 import { TngIcon } from '@tailng-ui/icons';
 import dayjs from 'dayjs';
 import { Country } from '../../data/country/country.model';
@@ -190,11 +193,14 @@ const createInitialForm = (): OrganizationSignalFormModel => ({
     TngCardTitleComponent,
     TngDatepickerComponent,
     TngDialogComponent,
+    TngError,
+    TngFormFieldComponent,
+    TngHint,
     TngInputComponent,
     TngInput,
     TngInputGroup,
     TngLabelComponent,
-    TngSuffix,
+    TngInputFieldSuffix,
     TngStepperComponent,
     TngIcon,
     TngTextareaComponent,

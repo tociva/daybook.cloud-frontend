@@ -19,61 +19,61 @@
           } @else {
             <div class="field-grid">
               <div class="field">
-                <tng-label forId="item-name" required>Name</tng-label>
-                <tng-input
-                  id="item-name"
-                  placeholder="Wireless Mouse"
-                  [formField]="itemForm.name"
-                  [ariaInvalid]="nameError() !== null"
-                />
-                <p class="field-error" [class.field-error--empty]="!nameError()">
-                  {{ nameError() || ' ' }}
-                </p>
+                <tng-form-field labelPosition="above" [invalid]="nameError() !== null">
+                  <tng-label forId="item-name" required>Name</tng-label>
+                  <tng-input
+                    id="item-name"
+                    placeholder="Wireless Mouse"
+                    [formField]="itemForm.name"
+                    [ariaInvalid]="nameError() !== null"
+                  />
+                  <tng-error [show]="nameError() !== null">{{ nameError() }}</tng-error>
+                </tng-form-field>
               </div>
 
               <div class="field">
-                <tng-label forId="item-displayname" required>Display Name</tng-label>
-                <tng-input
-                  id="item-displayname"
-                  placeholder="Mouse"
-                  [formField]="itemForm.displayname"
-                  [ariaInvalid]="displaynameError() !== null"
-                />
-                <p class="field-error" [class.field-error--empty]="!displaynameError()">
-                  {{ displaynameError() || ' ' }}
-                </p>
+                <tng-form-field labelPosition="above" [invalid]="displaynameError() !== null">
+                  <tng-label forId="item-displayname" required>Display Name</tng-label>
+                  <tng-input
+                    id="item-displayname"
+                    placeholder="Mouse"
+                    [formField]="itemForm.displayname"
+                    [ariaInvalid]="displaynameError() !== null"
+                  />
+                  <tng-error [show]="displaynameError() !== null">{{ displaynameError() }}</tng-error>
+                </tng-form-field>
               </div>
 
               <div class="field">
-                <tng-label forId="item-category" required>Category</tng-label>
-                <tng-autocomplete
-                  id="item-category"
-                  placeholder="Search for a category"
-                  ariaLabel="Category"
-                  [options]="filteredCategories()"
-                  [formField]="itemForm.categoryId"
-                  [getOptionValue]="categoryOptionValue"
-                  [getOptionLabel]="categoryOptionLabel"
-                  [trackBy]="categoryTrackBy"
-                  (valueChange)="onCategoryChange($event)"
-                  (queryChange)="onCategoryQueryChange($event)"
-                />
-                <p class="field-error" [class.field-error--empty]="!categoryError()">
-                  {{ categoryError() || ' ' }}
-                </p>
+                <tng-form-field labelPosition="above" [invalid]="categoryError() !== null">
+                  <tng-label forId="item-category" required>Category</tng-label>
+                  <tng-autocomplete
+                    id="item-category"
+                    placeholder="Search for a category"
+                    ariaLabel="Category"
+                    [options]="filteredCategories()"
+                    [formField]="itemForm.categoryId"
+                    [getOptionValue]="categoryOptionValue"
+                    [getOptionLabel]="categoryOptionLabel"
+                    [trackBy]="categoryTrackBy"
+                    (valueChange)="onCategoryChange($event)"
+                    (queryChange)="onCategoryQueryChange($event)"
+                  />
+                  <tng-error [show]="categoryError() !== null">{{ categoryError() }}</tng-error>
+                </tng-form-field>
               </div>
 
               <div class="field">
-                <tng-label forId="item-code" required>Code</tng-label>
-                <tng-input
-                  id="item-code"
-                  placeholder="WM-001"
-                  [formField]="itemForm.code"
-                  [ariaInvalid]="codeError() !== null"
-                />
-                <p class="field-error" [class.field-error--empty]="!codeError()">
-                  {{ codeError() || ' ' }}
-                </p>
+                <tng-form-field labelPosition="above" [invalid]="codeError() !== null">
+                  <tng-label forId="item-code" required>Code</tng-label>
+                  <tng-input
+                    id="item-code"
+                    placeholder="WM-001"
+                    [formField]="itemForm.code"
+                    [ariaInvalid]="codeError() !== null"
+                  />
+                  <tng-error [show]="codeError() !== null">{{ codeError() }}</tng-error>
+                </tng-form-field>
               </div>
             </div>
           }
@@ -89,13 +89,14 @@
         <tng-card-content>
           <div class="field-grid">
             <div class="field">
-              <tng-label forId="item-barcode">Barcode</tng-label>
-              <tng-input
-                id="item-barcode"
-                placeholder="1234567890123"
-                [formField]="itemForm.barcode"
-              />
-              <p class="field-error field-error--empty">{{ ' ' }}</p>
+              <tng-form-field labelPosition="above">
+                <tng-label forId="item-barcode">Barcode</tng-label>
+                <tng-input
+                  id="item-barcode"
+                  placeholder="1234567890123"
+                  [formField]="itemForm.barcode"
+                />
+              </tng-form-field>
             </div>
 
             <div class="field">
@@ -103,34 +104,37 @@
             </div>
 
             <div class="field">
-              <tng-label forId="item-purchase-ledger">Purchase Ledger</tng-label>
-              <tng-input
-                id="item-purchase-ledger"
-                placeholder="Purchases A/c"
-                [formField]="itemForm.purchaseledger"
-              />
-              <p class="field-error field-error--empty">{{ ' ' }}</p>
+              <tng-form-field labelPosition="above">
+                <tng-label forId="item-purchase-ledger">Purchase Ledger</tng-label>
+                <tng-input
+                  id="item-purchase-ledger"
+                  placeholder="Purchases A/c"
+                  [formField]="itemForm.purchaseledger"
+                />
+              </tng-form-field>
             </div>
 
             <div class="field">
-              <tng-label forId="item-sales-ledger">Sales Ledger</tng-label>
-              <tng-input
-                id="item-sales-ledger"
-                placeholder="Sales A/c"
-                [formField]="itemForm.salesledger"
-              />
-              <p class="field-error field-error--empty">{{ ' ' }}</p>
+              <tng-form-field labelPosition="above">
+                <tng-label forId="item-sales-ledger">Sales Ledger</tng-label>
+                <tng-input
+                  id="item-sales-ledger"
+                  placeholder="Sales A/c"
+                  [formField]="itemForm.salesledger"
+                />
+              </tng-form-field>
             </div>
 
             <div class="field field--wide">
-              <tng-label forId="item-description">Description</tng-label>
-              <tng-textarea
-                id="item-description"
-                placeholder="Internal notes for this item"
-                rows="4"
-                [formField]="itemForm.description"
-              />
-              <p class="field-error field-error--empty">{{ ' ' }}</p>
+              <tng-form-field labelPosition="above">
+                <tng-label forId="item-description">Description</tng-label>
+                <tng-textarea
+                  id="item-description"
+                  placeholder="Internal notes for this item"
+                  rows="4"
+                  [formField]="itemForm.description"
+                />
+              </tng-form-field>
             </div>
           </div>
         </tng-card-content>

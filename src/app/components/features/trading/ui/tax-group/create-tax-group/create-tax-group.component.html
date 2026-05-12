@@ -25,41 +25,42 @@
 
             <div>
               <div class="field">
-                <tng-label forId="tax-group-name" required>Name</tng-label>
-                <tng-input
-                  id="tax-group-name"
-                  placeholder="GST 18%"
-                  [formField]="taxGroupForm.name"
-                  [ariaInvalid]="nameError() !== null"
-                />
-                <p class="field-error" [class.field-error--empty]="!nameError()">
-                  {{ nameError() || '\u00A0' }}
-                </p>
+                <tng-form-field labelPosition="above" [invalid]="nameError() !== null">
+                  <tng-label forId="tax-group-name" required>Name</tng-label>
+                  <tng-input
+                    id="tax-group-name"
+                    placeholder="GST 18%"
+                    [formField]="taxGroupForm.name"
+                    [ariaInvalid]="nameError() !== null"
+                  />
+                  <tng-error [show]="nameError() !== null">{{ nameError() }}</tng-error>
+                </tng-form-field>
               </div>
 
               <div class="field">
-                <tng-label forId="tax-group-rate" required>Rate (%)</tng-label>
-                <tng-input
-                  id="tax-group-rate"
-                  type="number"
-                  placeholder="18"
-                  [formField]="taxGroupForm.rate"
-                  [ariaInvalid]="rateError() !== null"
-                />
-                <p class="field-error" [class.field-error--empty]="!rateError()">
-                  {{ rateError() || '\u00A0' }}
-                </p>
+                <tng-form-field labelPosition="above" [invalid]="rateError() !== null">
+                  <tng-label forId="tax-group-rate" required>Rate (%)</tng-label>
+                  <tng-input
+                    id="tax-group-rate"
+                    type="number"
+                    placeholder="18"
+                    [formField]="taxGroupForm.rate"
+                    [ariaInvalid]="rateError() !== null"
+                  />
+                  <tng-error [show]="rateError() !== null">{{ rateError() }}</tng-error>
+                </tng-form-field>
               </div>
 
               <div class="field field--wide">
-                <tng-label forId="tax-group-description">Description</tng-label>
-                <tng-textarea
-                  id="tax-group-description"
-                  placeholder="Internal notes for this tax group"
-                  rows="4"
-                  [formField]="taxGroupForm.description"
-                />
-                <p class="field-error field-error--empty">{{ '\u00A0' }}</p>
+                <tng-form-field labelPosition="above">
+                  <tng-label forId="tax-group-description">Description</tng-label>
+                  <tng-textarea
+                    id="tax-group-description"
+                    placeholder="Internal notes for this tax group"
+                    rows="4"
+                    [formField]="taxGroupForm.description"
+                  />
+                </tng-form-field>
               </div>
             </div>
 
@@ -87,47 +88,45 @@
                 <div class="group-shell">
                   <div class="field-grid group-grid">
                     <div class="field field--wide">
-                      <tng-label [forId]="'tax-group-mode-' + i" required>Mode / name</tng-label>
-                      <p class="mode-hint">
-                        Example: Inter State, Intra State, EXPORT, NON-TAXABLE.
-                      </p>
-                      <tng-input
-                        [id]="'tax-group-mode-' + i"
-                        placeholder="Search or type a mode…"
-                        [attr.list]="'tax-group-mode-suggestions'"
-                        [formField]="groupField.mode"
-                        [ariaInvalid]="!!groupRowErrors()[i]?.mode"
-                        (valueChange)="onModeSearch($event)"
-                      />
-                      <p
-                        class="field-error"
-                        [class.field-error--empty]="!groupRowErrors()[i]?.mode"
-                      >
-                        {{ groupRowErrors()[i]?.mode || '\u00A0' }}
-                      </p>
+                      <tng-form-field labelPosition="above" [invalid]="!!groupRowErrors()[i]?.mode">
+                        <tng-label [forId]="'tax-group-mode-' + i" required>Mode / name</tng-label>
+                        <tng-hint class="mode-hint">
+                          Example: Inter State, Intra State, EXPORT, NON-TAXABLE.
+                        </tng-hint>
+                        <tng-input
+                          [id]="'tax-group-mode-' + i"
+                          placeholder="Search or type a mode…"
+                          [attr.list]="'tax-group-mode-suggestions'"
+                          [formField]="groupField.mode"
+                          [ariaInvalid]="!!groupRowErrors()[i]?.mode"
+                          (valueChange)="onModeSearch($event)"
+                        />
+                        <tng-error [show]="!!groupRowErrors()[i]?.mode">{{
+                          groupRowErrors()[i]?.mode
+                        }}</tng-error>
+                      </tng-form-field>
                     </div>
 
                     <div class="field field--wide">
-                      <tng-label [forId]="'tax-group-taxes-' + i">Taxes</tng-label>
-                      <tng-multi-autocomplete
-                        [id]="'tax-group-taxes-' + i"
-                        placeholder="Search for a tax..."
-                        ariaLabel="Taxes"
-                        [options]="taxOptions()"
-                        [value]="taxGroupModel().groups[i].taxids"
-                        [getOptionValue]="taxOptionValue"
-                        [getOptionLabel]="taxOptionLabel"
-                        [trackBy]="taxTrackBy"
-                        [invalid]="!!groupRowErrors()[i]?.taxids"
-                        (queryChange)="onTaxSearch($event)"
-                        (valueChange)="onTaxIdsChange(i, $event)"
-                      />
-                      <p
-                        class="field-error"
-                        [class.field-error--empty]="!groupRowErrors()[i]?.taxids"
-                      >
-                        {{ groupRowErrors()[i]?.taxids || '\u00A0' }}
-                      </p>
+                      <tng-form-field labelPosition="above" [invalid]="!!groupRowErrors()[i]?.taxids">
+                        <tng-label [forId]="'tax-group-taxes-' + i">Taxes</tng-label>
+                        <tng-multi-autocomplete
+                          [id]="'tax-group-taxes-' + i"
+                          placeholder="Search for a tax..."
+                          ariaLabel="Taxes"
+                          [options]="taxOptions()"
+                          [value]="taxGroupModel().groups[i].taxids"
+                          [getOptionValue]="taxOptionValue"
+                          [getOptionLabel]="taxOptionLabel"
+                          [trackBy]="taxTrackBy"
+                          [invalid]="!!groupRowErrors()[i]?.taxids"
+                          (queryChange)="onTaxSearch($event)"
+                          (valueChange)="onTaxIdsChange(i, $event)"
+                        />
+                        <tng-error [show]="!!groupRowErrors()[i]?.taxids">{{
+                          groupRowErrors()[i]?.taxids
+                        }}</tng-error>
+                      </tng-form-field>
                     </div>
                   </div>
                 </div>

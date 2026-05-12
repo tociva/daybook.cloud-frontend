@@ -15,78 +15,87 @@
         <p class="section-label">Basic Details</p>
         <div class="fields-grid">
           <div class="field field--full">
-            <tng-label required>Name</tng-label>
-            <tng-input
-              placeholder="Branch name"
-              [value]="name()"
-              [ariaInvalid]="nameError() !== null"
-              (input)="name.set($any($event.target).value)"
-            />
-            @if (nameError()) {
-              <p class="field-error">{{ nameError() }}</p>
-            }
+            <tng-form-field labelPosition="above" [invalid]="nameError() !== null">
+              <tng-label forId="branch-name" required>Name</tng-label>
+              <tng-input
+                id="branch-name"
+                placeholder="Branch name"
+                [value]="name()"
+                [ariaInvalid]="nameError() !== null"
+                (input)="name.set($any($event.target).value)"
+              />
+              <tng-error [show]="nameError() !== null">{{ nameError() }}</tng-error>
+            </tng-form-field>
           </div>
 
           <div class="field">
-            <tng-label required>Email</tng-label>
-            <tng-input
-              type="email"
-              placeholder="branch@example.com"
-              [value]="email()"
-              [ariaInvalid]="emailError() !== null"
-              (input)="email.set($any($event.target).value)"
-            />
-            @if (emailError()) {
-              <p class="field-error">{{ emailError() }}</p>
-            }
+            <tng-form-field labelPosition="above" [invalid]="emailError() !== null">
+              <tng-label forId="branch-email" required>Email</tng-label>
+              <tng-input
+                id="branch-email"
+                type="email"
+                placeholder="branch@example.com"
+                [value]="email()"
+                [ariaInvalid]="emailError() !== null"
+                (input)="email.set($any($event.target).value)"
+              />
+              <tng-error [show]="emailError() !== null">{{ emailError() }}</tng-error>
+            </tng-form-field>
           </div>
 
           <div class="field">
-            <tng-label>Mobile</tng-label>
-            <tng-input
-              placeholder="+91-"
-              [value]="mobile()"
-              (input)="mobile.set($any($event.target).value)"
-            />
+            <tng-form-field labelPosition="above">
+              <tng-label forId="branch-mobile">Mobile</tng-label>
+              <tng-input
+                id="branch-mobile"
+                placeholder="+91-"
+                [value]="mobile()"
+                (input)="mobile.set($any($event.target).value)"
+              />
+            </tng-form-field>
           </div>
 
           <!-- Organization autocomplete -->
           <div class="field">
-            <tng-label required>Organization</tng-label>
-            <div class="autocomplete-wrap">
-              <input
-                class="field-input"
-                [class.field-input--invalid]="!!organizationError()"
-                type="text"
-                placeholder="Search organization..."
-                autocomplete="off"
-                [value]="orgSearch()"
-                (input)="onOrgInput($event)"
-                (focus)="showOrgDropdown.set(true)"
-                (blur)="onOrgBlur()"
-              />
-              @if (showOrgDropdown() && filteredOrganizations().length > 0) {
-                <ul class="dropdown" role="listbox">
-                  @for (org of filteredOrganizations(); track org.id) {
-                    <li class="dropdown-item" role="option" (mousedown)="selectOrganization(org)">
-                      {{ org.name }}
-                    </li>
-                  }
-                </ul>
-              }
-            </div>
-            @if (organizationError()) {
-              <p class="field-error">{{ organizationError() }}</p>
-            }
+            <tng-form-field labelPosition="above" [invalid]="organizationError() !== null">
+              <tng-label forId="branch-org-search" required>Organization</tng-label>
+              <div class="autocomplete-wrap">
+                <input
+                  id="branch-org-search"
+                  class="field-input"
+                  [class.field-input--invalid]="!!organizationError()"
+                  type="text"
+                  placeholder="Search organization..."
+                  autocomplete="off"
+                  [value]="orgSearch()"
+                  (input)="onOrgInput($event)"
+                  (focus)="showOrgDropdown.set(true)"
+                  (blur)="onOrgBlur()"
+                />
+                @if (showOrgDropdown() && filteredOrganizations().length > 0) {
+                  <ul class="dropdown" role="listbox">
+                    @for (org of filteredOrganizations(); track org.id) {
+                      <li class="dropdown-item" role="option" (mousedown)="selectOrganization(org)">
+                        {{ org.name }}
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
+              <tng-error [show]="organizationError() !== null">{{ organizationError() }}</tng-error>
+            </tng-form-field>
           </div>
 
           <div class="field field--full">
-            <tng-label>Description</tng-label>
-            <tng-textarea
-              placeholder="Brief description of this branch"
-              [value]="description()"
-              (input)="description.set($any($event.target).value)"
-            />
+            <tng-form-field labelPosition="above">
+              <tng-label forId="branch-description">Description</tng-label>
+              <tng-textarea
+                id="branch-description"
+                placeholder="Brief description of this branch"
+                [value]="description()"
+                (input)="description.set($any($event.target).value)"
+              />
+            </tng-form-field>
           </div>
         </div>
 
@@ -94,57 +103,75 @@
         <p class="section-label">Address</p>
         <div class="fields-grid">
           <div class="field field--full">
-            <tng-label>Address Line 1</tng-label>
-            <tng-input
-              placeholder="Building / Street"
-              [value]="addressLine1()"
-              (input)="addressLine1.set($any($event.target).value)"
-            />
+            <tng-form-field labelPosition="above">
+              <tng-label forId="branch-addr-line1">Address Line 1</tng-label>
+              <tng-input
+                id="branch-addr-line1"
+                placeholder="Building / Street"
+                [value]="addressLine1()"
+                (input)="addressLine1.set($any($event.target).value)"
+              />
+            </tng-form-field>
           </div>
 
           <div class="field field--full">
-            <tng-label>Address Line 2</tng-label>
-            <tng-input
-              placeholder="Apartment, suite, etc."
-              [value]="addressLine2()"
-              (input)="addressLine2.set($any($event.target).value)"
-            />
+            <tng-form-field labelPosition="above">
+              <tng-label forId="branch-addr-line2">Address Line 2</tng-label>
+              <tng-input
+                id="branch-addr-line2"
+                placeholder="Apartment, suite, etc."
+                [value]="addressLine2()"
+                (input)="addressLine2.set($any($event.target).value)"
+              />
+            </tng-form-field>
           </div>
 
           <div class="field">
-            <tng-label>City</tng-label>
-            <tng-input
-              placeholder="City"
-              [value]="addressCity()"
-              (input)="addressCity.set($any($event.target).value)"
-            />
+            <tng-form-field labelPosition="above">
+              <tng-label forId="branch-addr-city">City</tng-label>
+              <tng-input
+                id="branch-addr-city"
+                placeholder="City"
+                [value]="addressCity()"
+                (input)="addressCity.set($any($event.target).value)"
+              />
+            </tng-form-field>
           </div>
 
           <div class="field">
-            <tng-label>Pincode / ZIP</tng-label>
-            <tng-input
-              placeholder="Pincode"
-              [value]="addressPincode()"
-              (input)="addressPincode.set($any($event.target).value)"
-            />
+            <tng-form-field labelPosition="above">
+              <tng-label forId="branch-addr-pincode">Pincode / ZIP</tng-label>
+              <tng-input
+                id="branch-addr-pincode"
+                placeholder="Pincode"
+                [value]="addressPincode()"
+                (input)="addressPincode.set($any($event.target).value)"
+              />
+            </tng-form-field>
           </div>
 
           <div class="field">
-            <tng-label>State / Province</tng-label>
-            <tng-input
-              placeholder="State"
-              [value]="state()"
-              (input)="state.set($any($event.target).value)"
-            />
+            <tng-form-field labelPosition="above">
+              <tng-label forId="branch-state">State / Province</tng-label>
+              <tng-input
+                id="branch-state"
+                placeholder="State"
+                [value]="state()"
+                (input)="state.set($any($event.target).value)"
+              />
+            </tng-form-field>
           </div>
 
           <div class="field">
-            <tng-label>GSTIN</tng-label>
-            <tng-input
-              placeholder="GST Identification Number"
-              [value]="gstin()"
-              (input)="gstin.set($any($event.target).value)"
-            />
+            <tng-form-field labelPosition="above">
+              <tng-label forId="branch-gstin">GSTIN</tng-label>
+              <tng-input
+                id="branch-gstin"
+                placeholder="GST Identification Number"
+                [value]="gstin()"
+                (input)="gstin.set($any($event.target).value)"
+              />
+            </tng-form-field>
           </div>
         </div>
 
@@ -153,127 +180,135 @@
         <div class="fields-grid">
           <!-- Country autocomplete -->
           <div class="field">
-            <tng-label required>Country</tng-label>
-            <div class="autocomplete-wrap">
-              <input
-                class="field-input"
-                [class.field-input--invalid]="!!countryError()"
-                type="text"
-                placeholder="Search country..."
-                autocomplete="off"
-                [value]="countrySearch()"
-                (input)="onCountryInput($event)"
-                (focus)="showCountryDropdown.set(true)"
-                (blur)="onCountryBlur()"
-              />
-              @if (showCountryDropdown() && filteredCountries().length > 0) {
-                <ul class="dropdown" role="listbox">
-                  @for (c of filteredCountries(); track c.code) {
-                    <li class="dropdown-item" role="option" (mousedown)="selectCountry(c)">
-                      {{ c.name }}
-                    </li>
-                  }
-                </ul>
-              }
-            </div>
-            @if (countryError()) {
-              <p class="field-error">{{ countryError() }}</p>
-            }
+            <tng-form-field labelPosition="above" [invalid]="countryError() !== null">
+              <tng-label forId="branch-country-search" required>Country</tng-label>
+              <div class="autocomplete-wrap">
+                <input
+                  id="branch-country-search"
+                  class="field-input"
+                  [class.field-input--invalid]="!!countryError()"
+                  type="text"
+                  placeholder="Search country..."
+                  autocomplete="off"
+                  [value]="countrySearch()"
+                  (input)="onCountryInput($event)"
+                  (focus)="showCountryDropdown.set(true)"
+                  (blur)="onCountryBlur()"
+                />
+                @if (showCountryDropdown() && filteredCountries().length > 0) {
+                  <ul class="dropdown" role="listbox">
+                    @for (c of filteredCountries(); track c.code) {
+                      <li class="dropdown-item" role="option" (mousedown)="selectCountry(c)">
+                        {{ c.name }}
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
+              <tng-error [show]="countryError() !== null">{{ countryError() }}</tng-error>
+            </tng-form-field>
           </div>
 
           <!-- Currency autocomplete -->
           <div class="field">
-            <tng-label required>Currency</tng-label>
-            <div class="autocomplete-wrap">
-              <input
-                class="field-input"
-                [class.field-input--invalid]="!!currencyError()"
-                type="text"
-                placeholder="Search currency..."
-                autocomplete="off"
-                [value]="currencySearch()"
-                (input)="onCurrencyInput($event)"
-                (focus)="showCurrencyDropdown.set(true)"
-                (blur)="onCurrencyBlur()"
-              />
-              @if (showCurrencyDropdown() && filteredCurrencies().length > 0) {
-                <ul class="dropdown" role="listbox">
-                  @for (c of filteredCurrencies(); track c.code) {
-                    <li class="dropdown-item" role="option" (mousedown)="selectCurrency(c)">
-                      {{ c.name }} ({{ c.symbol }})
-                    </li>
-                  }
-                </ul>
-              }
-            </div>
-            @if (currencyError()) {
-              <p class="field-error">{{ currencyError() }}</p>
-            }
+            <tng-form-field labelPosition="above" [invalid]="currencyError() !== null">
+              <tng-label forId="branch-currency-search" required>Currency</tng-label>
+              <div class="autocomplete-wrap">
+                <input
+                  id="branch-currency-search"
+                  class="field-input"
+                  [class.field-input--invalid]="!!currencyError()"
+                  type="text"
+                  placeholder="Search currency..."
+                  autocomplete="off"
+                  [value]="currencySearch()"
+                  (input)="onCurrencyInput($event)"
+                  (focus)="showCurrencyDropdown.set(true)"
+                  (blur)="onCurrencyBlur()"
+                />
+                @if (showCurrencyDropdown() && filteredCurrencies().length > 0) {
+                  <ul class="dropdown" role="listbox">
+                    @for (c of filteredCurrencies(); track c.code) {
+                      <li class="dropdown-item" role="option" (mousedown)="selectCurrency(c)">
+                        {{ c.name }} ({{ c.symbol }})
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
+              <tng-error [show]="currencyError() !== null">{{ currencyError() }}</tng-error>
+            </tng-form-field>
           </div>
 
           <!-- Date format autocomplete -->
           <div class="field">
-            <tng-label required>Date Format</tng-label>
-            <div class="autocomplete-wrap">
-              <input
-                class="field-input"
-                [class.field-input--invalid]="!!dateFormatError()"
-                type="text"
-                placeholder="Search date format..."
-                autocomplete="off"
-                [value]="dateFormatSearch()"
-                (input)="onDateFormatInput($event)"
-                (focus)="showDateFormatDropdown.set(true)"
-                (blur)="onDateFormatBlur()"
+            <tng-form-field labelPosition="above" [invalid]="dateFormatError() !== null">
+              <tng-label forId="branch-dateformat-search" required>Date Format</tng-label>
+              <div class="autocomplete-wrap">
+                <input
+                  id="branch-dateformat-search"
+                  class="field-input"
+                  [class.field-input--invalid]="!!dateFormatError()"
+                  type="text"
+                  placeholder="Search date format..."
+                  autocomplete="off"
+                  [value]="dateFormatSearch()"
+                  (input)="onDateFormatInput($event)"
+                  (focus)="showDateFormatDropdown.set(true)"
+                  (blur)="onDateFormatBlur()"
+                />
+                @if (showDateFormatDropdown() && filteredDateFormats().length > 0) {
+                  <ul class="dropdown" role="listbox">
+                    @for (df of filteredDateFormats(); track df.name) {
+                      <li class="dropdown-item" role="option" (mousedown)="selectDateFormat(df)">
+                        {{ df.name }} ({{ df.example }})
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
+              <tng-error [show]="dateFormatError() !== null">{{ dateFormatError() }}</tng-error>
+            </tng-form-field>
+          </div>
+
+          <div class="field">
+            <tng-form-field labelPosition="above" [invalid]="fiscalstartError() !== null">
+              <tng-label forId="branch-fiscalstart" required>Fiscal Start</tng-label>
+              <tng-input
+                id="branch-fiscalstart"
+                placeholder="e.g. January-01 or April-01"
+                [value]="fiscalstart()"
+                [ariaInvalid]="fiscalstartError() !== null"
+                (input)="fiscalstart.set($any($event.target).value)"
               />
-              @if (showDateFormatDropdown() && filteredDateFormats().length > 0) {
-                <ul class="dropdown" role="listbox">
-                  @for (df of filteredDateFormats(); track df.name) {
-                    <li class="dropdown-item" role="option" (mousedown)="selectDateFormat(df)">
-                      {{ df.name }} ({{ df.example }})
-                    </li>
-                  }
-                </ul>
-              }
-            </div>
-            @if (dateFormatError()) {
-              <p class="field-error">{{ dateFormatError() }}</p>
-            }
+              <tng-error [show]="fiscalstartError() !== null">{{ fiscalstartError() }}</tng-error>
+            </tng-form-field>
           </div>
 
           <div class="field">
-            <tng-label required>Fiscal Start</tng-label>
-            <tng-input
-              placeholder="e.g. January-01 or April-01"
-              [value]="fiscalstart()"
-              [ariaInvalid]="fiscalstartError() !== null"
-              (input)="fiscalstart.set($any($event.target).value)"
-            />
-            @if (fiscalstartError()) {
-              <p class="field-error">{{ fiscalstartError() }}</p>
-            }
+            <tng-form-field labelPosition="above">
+              <tng-label forId="branch-timezone">Timezone</tng-label>
+              <tng-input
+                id="branch-timezone"
+                placeholder="e.g. Asia/Kolkata"
+                [value]="timezone()"
+                (input)="timezone.set($any($event.target).value)"
+              />
+            </tng-form-field>
           </div>
 
           <div class="field">
-            <tng-label>Timezone</tng-label>
-            <tng-input
-              placeholder="e.g. Asia/Kolkata"
-              [value]="timezone()"
-              (input)="timezone.set($any($event.target).value)"
-            />
-          </div>
-
-          <div class="field">
-            <tng-label required>Invoice Number Format</tng-label>
-            <tng-input
-              placeholder="e.g. <<YYYY>>/<<SERIAL3>>"
-              [value]="invnumber()"
-              [ariaInvalid]="invnumberError() !== null"
-              (input)="invnumber.set($any($event.target).value)"
-            />
-            @if (invnumberError()) {
-              <p class="field-error">{{ invnumberError() }}</p>
-            }
+            <tng-form-field labelPosition="above" [invalid]="invnumberError() !== null">
+              <tng-label forId="branch-invnumber" required>Invoice Number Format</tng-label>
+              <tng-input
+                id="branch-invnumber"
+                placeholder="e.g. <<YYYY>>/<<SERIAL3>>"
+                [value]="invnumber()"
+                [ariaInvalid]="invnumberError() !== null"
+                (input)="invnumber.set($any($event.target).value)"
+              />
+              <tng-error [show]="invnumberError() !== null">{{ invnumberError() }}</tng-error>
+            </tng-form-field>
           </div>
         </div>
 

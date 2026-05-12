@@ -21,65 +21,66 @@
           } @else {
             <div class="field-grid">
               <div class="field">
-                <tng-label forId="cat-name" required>Name</tng-label>
-                <tng-input
-                  id="cat-name"
-                  placeholder="Electronics"
-                  [formField]="categoryForm.name"
-                  [ariaInvalid]="nameError() !== null"
-                />
-                <p class="field-error" [class.field-error--empty]="!nameError()">
-                  {{ nameError() || ' ' }}
-                </p>
+                <tng-form-field labelPosition="above" [invalid]="nameError() !== null">
+                  <tng-label forId="cat-name" required>Name</tng-label>
+                  <tng-input
+                    id="cat-name"
+                    placeholder="Electronics"
+                    [formField]="categoryForm.name"
+                    [ariaInvalid]="nameError() !== null"
+                  />
+                  <tng-error [show]="nameError() !== null">{{ nameError() }}</tng-error>
+                </tng-form-field>
               </div>
 
               <div class="field">
-                <tng-label forId="cat-code" required>Code</tng-label>
-                <tng-input
-                  id="cat-code"
-                  placeholder="ELEC"
-                  [formField]="categoryForm.code"
-                  [ariaInvalid]="codeError() !== null"
-                />
-                <p class="field-error" [class.field-error--empty]="!codeError()">
-                  {{ codeError() || ' ' }}
-                </p>
+                <tng-form-field labelPosition="above" [invalid]="codeError() !== null">
+                  <tng-label forId="cat-code" required>Code</tng-label>
+                  <tng-input
+                    id="cat-code"
+                    placeholder="ELEC"
+                    [formField]="categoryForm.code"
+                    [ariaInvalid]="codeError() !== null"
+                  />
+                  <tng-error [show]="codeError() !== null">{{ codeError() }}</tng-error>
+                </tng-form-field>
               </div>
 
               <div class="field">
-                <tng-label forId="cat-type" required>Type</tng-label>
-                <tng-autocomplete
-                  id="cat-type"
-                  placeholder="Select a type"
-                  ariaLabel="Type"
-                  [options]="filteredTypeOptions()"
-                  [formField]="categoryForm.type"
-                  [getOptionValue]="typeOptionValue"
-                  [getOptionLabel]="typeOptionLabel"
-                  [trackBy]="typeTrackBy"
-                  (valueChange)="onTypeChange($event)"
-                  (queryChange)="onTypeQueryChange($event)"
-                />
-                <p class="field-error" [class.field-error--empty]="!typeError()">
-                  {{ typeError() || ' ' }}
-                </p>
+                <tng-form-field labelPosition="above" [invalid]="typeError() !== null">
+                  <tng-label forId="cat-type" required>Type</tng-label>
+                  <tng-autocomplete
+                    id="cat-type"
+                    placeholder="Select a type"
+                    ariaLabel="Type"
+                    [options]="filteredTypeOptions()"
+                    [formField]="categoryForm.type"
+                    [getOptionValue]="typeOptionValue"
+                    [getOptionLabel]="typeOptionLabel"
+                    [trackBy]="typeTrackBy"
+                    (valueChange)="onTypeChange($event)"
+                    (queryChange)="onTypeQueryChange($event)"
+                  />
+                  <tng-error [show]="typeError() !== null">{{ typeError() }}</tng-error>
+                </tng-form-field>
               </div>
 
               <div class="field">
-                <tng-label forId="cat-parent">Parent Category</tng-label>
-                <tng-autocomplete
-                  id="cat-parent"
-                  placeholder="Search for a parent category"
-                  ariaLabel="Parent category"
-                  [options]="filteredParentOptions()"
-                  [formField]="categoryForm.parentId"
-                  [getOptionValue]="parentOptionValue"
-                  [getOptionLabel]="parentOptionLabel"
-                  [trackBy]="parentTrackBy"
-                  (valueChange)="onParentChange($event)"
-                  (queryChange)="onParentQueryChange($event)"
-                />
-                <p class="field-error field-error--empty">{{ ' ' }}</p>
+                <tng-form-field labelPosition="above">
+                  <tng-label forId="cat-parent">Parent Category</tng-label>
+                  <tng-autocomplete
+                    id="cat-parent"
+                    placeholder="Search for a parent category"
+                    ariaLabel="Parent category"
+                    [options]="filteredParentOptions()"
+                    [formField]="categoryForm.parentId"
+                    [getOptionValue]="parentOptionValue"
+                    [getOptionLabel]="parentOptionLabel"
+                    [trackBy]="parentTrackBy"
+                    (valueChange)="onParentChange($event)"
+                    (queryChange)="onParentQueryChange($event)"
+                  />
+                </tng-form-field>
               </div>
             </div>
           }
@@ -97,31 +98,33 @@
         <tng-card-content>
           <div class="field-grid">
             <div class="field field--wide">
-              <tng-label forId="cat-taxgroup">Tax Group</tng-label>
-              <tng-autocomplete
-                id="cat-taxgroup"
-                placeholder="Search for a tax group"
-                ariaLabel="Tax group"
-                [options]="filteredTaxGroupOptions()"
-                [formField]="categoryForm.taxgroupId"
-                [getOptionValue]="taxGroupOptionValue"
-                [getOptionLabel]="taxGroupOptionLabel"
-                [trackBy]="taxGroupTrackBy"
-                (valueChange)="onTaxGroupChange($event)"
-                (queryChange)="onTaxGroupQueryChange($event)"
-              />
-              <p class="field-error field-error--empty">{{ ' ' }}</p>
+              <tng-form-field labelPosition="above">
+                <tng-label forId="cat-taxgroup">Tax Group</tng-label>
+                <tng-autocomplete
+                  id="cat-taxgroup"
+                  placeholder="Search for a tax group"
+                  ariaLabel="Tax group"
+                  [options]="filteredTaxGroupOptions()"
+                  [formField]="categoryForm.taxgroupId"
+                  [getOptionValue]="taxGroupOptionValue"
+                  [getOptionLabel]="taxGroupOptionLabel"
+                  [trackBy]="taxGroupTrackBy"
+                  (valueChange)="onTaxGroupChange($event)"
+                  (queryChange)="onTaxGroupQueryChange($event)"
+                />
+              </tng-form-field>
             </div>
 
             <div class="field field--wide">
-              <tng-label forId="cat-description">Description</tng-label>
-              <tng-textarea
-                id="cat-description"
-                placeholder="Internal notes for this category"
-                rows="4"
-                [formField]="categoryForm.description"
-              />
-              <p class="field-error field-error--empty">{{ ' ' }}</p>
+              <tng-form-field labelPosition="above">
+                <tng-label forId="cat-description">Description</tng-label>
+                <tng-textarea
+                  id="cat-description"
+                  placeholder="Internal notes for this category"
+                  rows="4"
+                  [formField]="categoryForm.description"
+                />
+              </tng-form-field>
             </div>
           </div>
         </tng-card-content>

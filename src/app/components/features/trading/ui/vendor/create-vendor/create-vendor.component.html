@@ -20,96 +20,102 @@
           } @else {
             <div class="field-grid">
               <div class="field field--wide">
-                <tng-label forId="vend-name" required>Name</tng-label>
-                <tng-input
-                  id="vend-name"
-                  placeholder="Sunrise Suppliers"
-                  [formField]="vendorForm.name"
-                  [ariaInvalid]="nameError() !== null"
-                />
-                <p class="field-error" [class.field-error--empty]="!nameError()">
-                  {{ nameError() || ' ' }}
-                </p>
+                <tng-form-field labelPosition="above" [invalid]="nameError() !== null">
+                  <tng-label forId="vend-name" required>Name</tng-label>
+                  <tng-input
+                    id="vend-name"
+                    placeholder="Sunrise Suppliers"
+                    [formField]="vendorForm.name"
+                    [ariaInvalid]="nameError() !== null"
+                  />
+                  <tng-error [show]="nameError() !== null">{{ nameError() }}</tng-error>
+                </tng-form-field>
               </div>
 
               <div class="field">
-                <tng-label forId="vend-countrycode" required>Country Code</tng-label>
-                <tng-input
-                  id="vend-countrycode"
-                  placeholder="IN"
-                  [formField]="vendorForm.countrycode"
-                  [ariaInvalid]="countrycodeError() !== null"
-                />
-                <p class="field-error" [class.field-error--empty]="!countrycodeError()">
-                  {{ countrycodeError() || ' ' }}
-                </p>
+                <tng-form-field labelPosition="above" [invalid]="countrycodeError() !== null">
+                  <tng-label forId="vend-countrycode" required>Country Code</tng-label>
+                  <tng-input
+                    id="vend-countrycode"
+                    placeholder="IN"
+                    [formField]="vendorForm.countrycode"
+                    [ariaInvalid]="countrycodeError() !== null"
+                  />
+                  <tng-error [show]="countrycodeError() !== null">{{ countrycodeError() }}</tng-error>
+                </tng-form-field>
               </div>
 
               <div class="field">
-                <tng-label forId="vend-currencycode" required>Currency Code</tng-label>
-                <tng-input
-                  id="vend-currencycode"
-                  placeholder="INR"
-                  [formField]="vendorForm.currencycode"
-                  [ariaInvalid]="currencycodeError() !== null"
-                />
-                <p class="field-error" [class.field-error--empty]="!currencycodeError()">
-                  {{ currencycodeError() || ' ' }}
-                </p>
+                <tng-form-field labelPosition="above" [invalid]="currencycodeError() !== null">
+                  <tng-label forId="vend-currencycode" required>Currency Code</tng-label>
+                  <tng-input
+                    id="vend-currencycode"
+                    placeholder="INR"
+                    [formField]="vendorForm.currencycode"
+                    [ariaInvalid]="currencycodeError() !== null"
+                  />
+                  <tng-error [show]="currencycodeError() !== null">{{ currencycodeError() }}</tng-error>
+                </tng-form-field>
               </div>
 
               <div class="field">
-                <tng-label forId="vend-mobile">Mobile</tng-label>
-                <tng-input
-                  id="vend-mobile"
-                  placeholder="+91 98765 43210"
-                  [formField]="vendorForm.mobile"
-                />
-                <p class="field-error field-error--empty">{{ ' ' }}</p>
+                <tng-form-field labelPosition="above">
+                  <tng-label forId="vend-mobile">Mobile</tng-label>
+                  <tng-input
+                    id="vend-mobile"
+                    placeholder="+91 98765 43210"
+                    [formField]="vendorForm.mobile"
+                  />
+                </tng-form-field>
               </div>
 
               <div class="field">
-                <tng-label forId="vend-email">Email</tng-label>
-                <tng-input
-                  id="vend-email"
-                  type="email"
-                  placeholder="contact@supplier.com"
-                  [formField]="vendorForm.email"
-                />
-                <p class="field-error field-error--empty">{{ ' ' }}</p>
+                <tng-form-field labelPosition="above">
+                  <tng-label forId="vend-email">Email</tng-label>
+                  <tng-input
+                    id="vend-email"
+                    type="email"
+                    placeholder="contact@supplier.com"
+                    [formField]="vendorForm.email"
+                  />
+                </tng-form-field>
               </div>
 
               <div class="field">
-                <tng-label forId="vend-gstin">GSTIN</tng-label>
-                <tng-input
-                  id="vend-gstin"
-                  placeholder="22AAAAA0000A1Z5"
-                  [formField]="vendorForm.gstin"
-                />
-                <p class="field-error field-error--empty">{{ ' ' }}</p>
+                <tng-form-field labelPosition="above">
+                  <tng-label forId="vend-gstin">GSTIN</tng-label>
+                  <tng-input
+                    id="vend-gstin"
+                    placeholder="22AAAAA0000A1Z5"
+                    [formField]="vendorForm.gstin"
+                  />
+                </tng-form-field>
               </div>
 
               <div class="field">
-                <tng-label forId="vend-pan">PAN</tng-label>
-                <tng-input id="vend-pan" placeholder="AAAAA0000A" [formField]="vendorForm.pan" />
-                <p class="field-error field-error--empty">{{ ' ' }}</p>
+                <tng-form-field labelPosition="above">
+                  <tng-label forId="vend-pan">PAN</tng-label>
+                  <tng-input id="vend-pan" placeholder="AAAAA0000A" [formField]="vendorForm.pan" />
+                </tng-form-field>
               </div>
 
               <div class="field">
-                <tng-label forId="vend-state">State</tng-label>
-                <tng-input id="vend-state" placeholder="Kerala" [formField]="vendorForm.state" />
-                <p class="field-error field-error--empty">{{ ' ' }}</p>
+                <tng-form-field labelPosition="above">
+                  <tng-label forId="vend-state">State</tng-label>
+                  <tng-input id="vend-state" placeholder="Kerala" [formField]="vendorForm.state" />
+                </tng-form-field>
               </div>
 
               <div class="field field--wide">
-                <tng-label forId="vend-description">Description</tng-label>
-                <tng-textarea
-                  id="vend-description"
-                  placeholder="Internal notes about this vendor"
-                  rows="3"
-                  [formField]="vendorForm.description"
-                />
-                <p class="field-error field-error--empty">{{ ' ' }}</p>
+                <tng-form-field labelPosition="above">
+                  <tng-label forId="vend-description">Description</tng-label>
+                  <tng-textarea
+                    id="vend-description"
+                    placeholder="Internal notes about this vendor"
+                    rows="3"
+                    [formField]="vendorForm.description"
+                  />
+                </tng-form-field>
               </div>
             </div>
           }
@@ -126,63 +132,69 @@
         <tng-card-content>
           <div class="field-grid">
             <div class="field field--wide">
-              <tng-label forId="vend-addr-name">House / Building Name</tng-label>
-              <tng-input
-                id="vend-addr-name"
-                placeholder="Sunrise Towers"
-                [formField]="vendorForm.addressName"
-              />
-              <p class="field-error field-error--empty">{{ ' ' }}</p>
+              <tng-form-field labelPosition="above">
+                <tng-label forId="vend-addr-name">House / Building Name</tng-label>
+                <tng-input
+                  id="vend-addr-name"
+                  placeholder="Sunrise Towers"
+                  [formField]="vendorForm.addressName"
+                />
+              </tng-form-field>
             </div>
 
             <div class="field field--wide">
-              <tng-label forId="vend-addr-line1">Address Line 1</tng-label>
-              <tng-input
-                id="vend-addr-line1"
-                placeholder="12, MG Road"
-                [formField]="vendorForm.addressLine1"
-              />
-              <p class="field-error field-error--empty">{{ ' ' }}</p>
+              <tng-form-field labelPosition="above">
+                <tng-label forId="vend-addr-line1">Address Line 1</tng-label>
+                <tng-input
+                  id="vend-addr-line1"
+                  placeholder="12, MG Road"
+                  [formField]="vendorForm.addressLine1"
+                />
+              </tng-form-field>
             </div>
 
             <div class="field field--wide">
-              <tng-label forId="vend-addr-line2">Address Line 2</tng-label>
-              <tng-input
-                id="vend-addr-line2"
-                placeholder="Near Central Park"
-                [formField]="vendorForm.addressLine2"
-              />
-              <p class="field-error field-error--empty">{{ ' ' }}</p>
+              <tng-form-field labelPosition="above">
+                <tng-label forId="vend-addr-line2">Address Line 2</tng-label>
+                <tng-input
+                  id="vend-addr-line2"
+                  placeholder="Near Central Park"
+                  [formField]="vendorForm.addressLine2"
+                />
+              </tng-form-field>
             </div>
 
             <div class="field">
-              <tng-label forId="vend-addr-street">Street</tng-label>
-              <tng-input
-                id="vend-addr-street"
-                placeholder="Brigade Road"
-                [formField]="vendorForm.addressStreet"
-              />
-              <p class="field-error field-error--empty">{{ ' ' }}</p>
+              <tng-form-field labelPosition="above">
+                <tng-label forId="vend-addr-street">Street</tng-label>
+                <tng-input
+                  id="vend-addr-street"
+                  placeholder="Brigade Road"
+                  [formField]="vendorForm.addressStreet"
+                />
+              </tng-form-field>
             </div>
 
             <div class="field">
-              <tng-label forId="vend-addr-city">City</tng-label>
-              <tng-input
-                id="vend-addr-city"
-                placeholder="Bengaluru"
-                [formField]="vendorForm.addressCity"
-              />
-              <p class="field-error field-error--empty">{{ ' ' }}</p>
+              <tng-form-field labelPosition="above">
+                <tng-label forId="vend-addr-city">City</tng-label>
+                <tng-input
+                  id="vend-addr-city"
+                  placeholder="Bengaluru"
+                  [formField]="vendorForm.addressCity"
+                />
+              </tng-form-field>
             </div>
 
             <div class="field">
-              <tng-label forId="vend-addr-zip">ZIP Code</tng-label>
-              <tng-input
-                id="vend-addr-zip"
-                placeholder="560001"
-                [formField]="vendorForm.addressZip"
-              />
-              <p class="field-error field-error--empty">{{ ' ' }}</p>
+              <tng-form-field labelPosition="above">
+                <tng-label forId="vend-addr-zip">ZIP Code</tng-label>
+                <tng-input
+                  id="vend-addr-zip"
+                  placeholder="560001"
+                  [formField]="vendorForm.addressZip"
+                />
+              </tng-form-field>
             </div>
           </div>
         </tng-card-content>

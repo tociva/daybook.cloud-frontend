@@ -18,71 +18,74 @@
         <form (submit)="submitForm($event)" novalidate>
           <div class="field-grid">
             <div class="field field--wide">
-              <tng-label forId="l-name" required>Name</tng-label>
-              <tng-input
-                id="l-name"
-                placeholder="e.g. Cash at Bank"
-                [formField]="ledgerForm.name"
-                [ariaInvalid]="nameError() !== null"
-              />
-              <p class="field-error" [class.field-error--empty]="!nameError()">
-                {{ nameError() || ' ' }}
-              </p>
+              <tng-form-field labelPosition="above" [invalid]="nameError() !== null">
+                <tng-label forId="l-name" required>Name</tng-label>
+                <tng-input
+                  id="l-name"
+                  placeholder="e.g. Cash at Bank"
+                  [formField]="ledgerForm.name"
+                  [ariaInvalid]="nameError() !== null"
+                />
+                <tng-error [show]="nameError() !== null">{{ nameError() }}</tng-error>
+              </tng-form-field>
             </div>
 
             <div class="field field--wide">
-              <tng-label forId="l-category" required>Category</tng-label>
-              <tng-autocomplete
-                id="l-category"
-                placeholder="Search ledger category..."
-                ariaLabel="Ledger category"
-                [options]="filteredCategories()"
-                [formField]="ledgerForm.categoryId"
-                [getOptionValue]="categoryOptionValue"
-                [getOptionLabel]="categoryOptionLabel"
-                [trackBy]="categoryTrackBy"
-                (valueChange)="onCategoryChange($event)"
-                (queryChange)="onCategoryQueryChange($event)"
-              />
-              <p class="field-error" [class.field-error--empty]="!categoryError()">
-                {{ categoryError() || ' ' }}
-              </p>
+              <tng-form-field labelPosition="above" [invalid]="categoryError() !== null">
+                <tng-label forId="l-category" required>Category</tng-label>
+                <tng-autocomplete
+                  id="l-category"
+                  placeholder="Search ledger category..."
+                  ariaLabel="Ledger category"
+                  [options]="filteredCategories()"
+                  [formField]="ledgerForm.categoryId"
+                  [getOptionValue]="categoryOptionValue"
+                  [getOptionLabel]="categoryOptionLabel"
+                  [trackBy]="categoryTrackBy"
+                  (valueChange)="onCategoryChange($event)"
+                  (queryChange)="onCategoryQueryChange($event)"
+                />
+                <tng-error [show]="categoryError() !== null">{{ categoryError() }}</tng-error>
+              </tng-form-field>
             </div>
           </div>
 
           <p class="section-label">Opening Balances</p>
           <div class="field-grid">
             <div class="field">
-              <tng-label forId="l-openingdr">Opening DR</tng-label>
-              <tng-input
-                id="l-openingdr"
-                type="number"
-                placeholder="0.00"
-                [formField]="ledgerForm.openingdr"
-              />
-              <p class="field-error field-error--empty">{{ ' ' }}</p>
+              <tng-form-field labelPosition="above">
+                <tng-label forId="l-openingdr">Opening DR</tng-label>
+                <tng-input
+                  id="l-openingdr"
+                  type="number"
+                  placeholder="0.00"
+                  [formField]="ledgerForm.openingdr"
+                />
+              </tng-form-field>
             </div>
 
             <div class="field">
-              <tng-label forId="l-openingcr">Opening CR</tng-label>
-              <tng-input
-                id="l-openingcr"
-                type="number"
-                placeholder="0.00"
-                [formField]="ledgerForm.openingcr"
-              />
-              <p class="field-error field-error--empty">{{ ' ' }}</p>
+              <tng-form-field labelPosition="above">
+                <tng-label forId="l-openingcr">Opening CR</tng-label>
+                <tng-input
+                  id="l-openingcr"
+                  type="number"
+                  placeholder="0.00"
+                  [formField]="ledgerForm.openingcr"
+                />
+              </tng-form-field>
             </div>
 
             <div class="field field--wide">
-              <tng-label forId="l-description">Description</tng-label>
-              <tng-textarea
-                id="l-description"
-                placeholder="Optional notes about this ledger"
-                rows="3"
-                [formField]="ledgerForm.description"
-              />
-              <p class="field-error field-error--empty">{{ ' ' }}</p>
+              <tng-form-field labelPosition="above">
+                <tng-label forId="l-description">Description</tng-label>
+                <tng-textarea
+                  id="l-description"
+                  placeholder="Optional notes about this ledger"
+                  rows="3"
+                  [formField]="ledgerForm.description"
+                />
+              </tng-form-field>
             </div>
           </div>
 

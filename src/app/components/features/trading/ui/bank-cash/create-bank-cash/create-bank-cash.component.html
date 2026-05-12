@@ -18,27 +18,28 @@
         } @else {
           <div class="field-grid">
             <div class="field">
-              <tng-label forId="bank-cash-name" required>Name</tng-label>
-              <tng-input
-                id="bank-cash-name"
-                placeholder="Cash counter"
-                [formField]="bankCashForm.name"
-                [ariaInvalid]="nameError() !== null"
-              />
-              <p class="field-error" [class.field-error--empty]="!nameError()">
-                {{ nameError() || '\u00A0' }}
-              </p>
+              <tng-form-field labelPosition="above" [invalid]="nameError() !== null">
+                <tng-label forId="bank-cash-name" required>Name</tng-label>
+                <tng-input
+                  id="bank-cash-name"
+                  placeholder="Cash counter"
+                  [formField]="bankCashForm.name"
+                  [ariaInvalid]="nameError() !== null"
+                />
+                <tng-error [show]="nameError() !== null">{{ nameError() }}</tng-error>
+              </tng-form-field>
             </div>
 
             <div class="field field--wide">
-              <tng-label forId="bank-cash-description">Description</tng-label>
-              <tng-textarea
-                id="bank-cash-description"
-                placeholder="Internal notes for this account"
-                rows="4"
-                [formField]="bankCashForm.description"
-              />
-              <p class="field-error field-error--empty">{{ '\u00A0' }}</p>
+              <tng-form-field labelPosition="above">
+                <tng-label forId="bank-cash-description">Description</tng-label>
+                <tng-textarea
+                  id="bank-cash-description"
+                  placeholder="Internal notes for this account"
+                  rows="4"
+                  [formField]="bankCashForm.description"
+                />
+              </tng-form-field>
             </div>
           </div>
         }

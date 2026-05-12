@@ -15,100 +15,115 @@
         <p class="section-label">Basic Details</p>
         <div class="fields-grid">
           <div class="field field--full">
-            <tng-label required>Name</tng-label>
-            <tng-input
-              placeholder="Organization name"
-              [value]="name()"
-              [ariaInvalid]="nameError() !== null"
-              (input)="name.set($any($event.target).value)"
-            />
-            @if (nameError()) {
-              <p class="field-error">{{ nameError() }}</p>
-            }
+            <tng-form-field labelPosition="above" [invalid]="nameError() !== null">
+              <tng-label forId="org-create-name" required>Name</tng-label>
+              <tng-input
+                id="org-create-name"
+                placeholder="Organization name"
+                [value]="name()"
+                [ariaInvalid]="nameError() !== null"
+                (input)="name.set($any($event.target).value)"
+              />
+              <tng-error [show]="nameError() !== null">{{ nameError() }}</tng-error>
+            </tng-form-field>
           </div>
 
           <div class="field">
-            <tng-label required>Email</tng-label>
-            <tng-input
-              type="email"
-              placeholder="contact@example.com"
-              [value]="email()"
-              [ariaInvalid]="emailError() !== null"
-              (input)="email.set($any($event.target).value)"
-            />
-            @if (emailError()) {
-              <p class="field-error">{{ emailError() }}</p>
-            }
+            <tng-form-field labelPosition="above" [invalid]="emailError() !== null">
+              <tng-label forId="org-create-email" required>Email</tng-label>
+              <tng-input
+                id="org-create-email"
+                type="email"
+                placeholder="contact@example.com"
+                [value]="email()"
+                [ariaInvalid]="emailError() !== null"
+                (input)="email.set($any($event.target).value)"
+              />
+              <tng-error [show]="emailError() !== null">{{ emailError() }}</tng-error>
+            </tng-form-field>
           </div>
 
           <div class="field">
-            <tng-label>Mobile</tng-label>
-            <tng-input
-              placeholder="+91-"
-              [value]="mobile()"
-              (input)="mobile.set($any($event.target).value)"
-            />
+            <tng-form-field labelPosition="above">
+              <tng-label forId="org-create-mobile">Mobile</tng-label>
+              <tng-input
+                id="org-create-mobile"
+                placeholder="+91-"
+                [value]="mobile()"
+                (input)="mobile.set($any($event.target).value)"
+              />
+            </tng-form-field>
           </div>
 
           <div class="field">
-            <tng-label>Country</tng-label>
-            <tng-autocomplete
-              id="org-country"
-              placeholder="Search for a country"
-              ariaLabel="Country"
-              [options]="filteredCountries()"
-              [formField]="countryCurrencyForm.countrycode"
-              [getOptionValue]="countryOptionValue"
-              [getOptionLabel]="countryOptionLabel"
-              [trackBy]="countryTrackBy"
-              (valueChange)="selectCountry($event)"
-              (queryChange)="onCountryQueryChange($event)"
-            >
-              <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
-                <span class="country-option">
+            <tng-form-field labelPosition="above">
+              <tng-label forId="org-country">Country</tng-label>
+              <tng-autocomplete
+                id="org-country"
+                placeholder="Search for a country"
+                ariaLabel="Country"
+                [options]="filteredCountries()"
+                [formField]="countryCurrencyForm.countrycode"
+                [getOptionValue]="countryOptionValue"
+                [getOptionLabel]="countryOptionLabel"
+                [trackBy]="countryTrackBy"
+                (valueChange)="selectCountry($event)"
+                (queryChange)="onCountryQueryChange($event)"
+              >
+                <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
+                  <span class="country-option">
+                    <span [class]="getCountryFlagClass(option)" aria-hidden="true"></span>
+                    <span class="country-option-label">{{ label }}</span>
+                  </span>
+                </ng-template>
+
+                <ng-template #tngAutocompleteSelectedTpl let-option="option">
                   <span [class]="getCountryFlagClass(option)" aria-hidden="true"></span>
-                  <span class="country-option-label">{{ label }}</span>
-                </span>
-              </ng-template>
-
-              <ng-template #tngAutocompleteSelectedTpl let-option="option">
-                <span [class]="getCountryFlagClass(option)" aria-hidden="true"></span>
-              </ng-template>
-            </tng-autocomplete>
+                </ng-template>
+              </tng-autocomplete>
+            </tng-form-field>
           </div>
 
           <div class="field">
-            <tng-label>Currency</tng-label>
-            <tng-autocomplete
-              id="org-currency"
-              placeholder="Search for a currency"
-              ariaLabel="Currency"
-              [options]="filteredCurrencies()"
-              [formField]="countryCurrencyForm.currencycode"
-              [getOptionValue]="currencyOptionValue"
-              [getOptionLabel]="currencyOptionLabel"
-              [trackBy]="currencyTrackBy"
-              (valueChange)="selectCurrency($event)"
-              (queryChange)="onCurrencyQueryChange($event)"
-            />
+            <tng-form-field labelPosition="above">
+              <tng-label forId="org-currency">Currency</tng-label>
+              <tng-autocomplete
+                id="org-currency"
+                placeholder="Search for a currency"
+                ariaLabel="Currency"
+                [options]="filteredCurrencies()"
+                [formField]="countryCurrencyForm.currencycode"
+                [getOptionValue]="currencyOptionValue"
+                [getOptionLabel]="currencyOptionLabel"
+                [trackBy]="currencyTrackBy"
+                (valueChange)="selectCurrency($event)"
+                (queryChange)="onCurrencyQueryChange($event)"
+              />
+            </tng-form-field>
           </div>
 
           <div class="field">
-            <tng-label>State / Province</tng-label>
-            <tng-input
-              placeholder="State"
-              [value]="state()"
-              (input)="state.set($any($event.target).value)"
-            />
+            <tng-form-field labelPosition="above">
+              <tng-label forId="org-create-state">State / Province</tng-label>
+              <tng-input
+                id="org-create-state"
+                placeholder="State"
+                [value]="state()"
+                (input)="state.set($any($event.target).value)"
+              />
+            </tng-form-field>
           </div>
 
           <div class="field field--full">
-            <tng-label>Description</tng-label>
-            <tng-textarea
-              placeholder="Brief description of the organization"
-              [value]="description()"
-              (input)="description.set($any($event.target).value)"
-            />
+            <tng-form-field labelPosition="above">
+              <tng-label forId="org-create-description">Description</tng-label>
+              <tng-textarea
+                id="org-create-description"
+                placeholder="Brief description of the organization"
+                [value]="description()"
+                (input)="description.set($any($event.target).value)"
+              />
+            </tng-form-field>
           </div>
         </div>
 
@@ -116,52 +131,65 @@
         <p class="section-label">Address</p>
         <div class="fields-grid">
           <div class="field field--full">
-            <tng-label required>Address Line 1</tng-label>
-            <tng-input
-              placeholder="Building / Street"
-              [value]="addressLine1()"
-              [ariaInvalid]="addressLine1Error() !== null"
-              (input)="addressLine1.set($any($event.target).value)"
-            />
-            @if (addressLine1Error()) {
-              <p class="field-error">{{ addressLine1Error() }}</p>
-            }
+            <tng-form-field labelPosition="above" [invalid]="addressLine1Error() !== null">
+              <tng-label forId="org-create-addr-line1" required>Address Line 1</tng-label>
+              <tng-input
+                id="org-create-addr-line1"
+                placeholder="Building / Street"
+                [value]="addressLine1()"
+                [ariaInvalid]="addressLine1Error() !== null"
+                (input)="addressLine1.set($any($event.target).value)"
+              />
+              <tng-error [show]="addressLine1Error() !== null">{{ addressLine1Error() }}</tng-error>
+            </tng-form-field>
           </div>
 
           <div class="field field--full">
-            <tng-label>Address Line 2</tng-label>
-            <tng-input
-              placeholder="Apartment, suite, etc."
-              [value]="addressLine2()"
-              (input)="addressLine2.set($any($event.target).value)"
-            />
+            <tng-form-field labelPosition="above">
+              <tng-label forId="org-create-addr-line2">Address Line 2</tng-label>
+              <tng-input
+                id="org-create-addr-line2"
+                placeholder="Apartment, suite, etc."
+                [value]="addressLine2()"
+                (input)="addressLine2.set($any($event.target).value)"
+              />
+            </tng-form-field>
           </div>
 
           <div class="field">
-            <tng-label>City</tng-label>
-            <tng-input
-              placeholder="City"
-              [value]="addressCity()"
-              (input)="addressCity.set($any($event.target).value)"
-            />
+            <tng-form-field labelPosition="above">
+              <tng-label forId="org-create-addr-city">City</tng-label>
+              <tng-input
+                id="org-create-addr-city"
+                placeholder="City"
+                [value]="addressCity()"
+                (input)="addressCity.set($any($event.target).value)"
+              />
+            </tng-form-field>
           </div>
 
           <div class="field">
-            <tng-label>Pincode / ZIP</tng-label>
-            <tng-input
-              placeholder="Pincode"
-              [value]="addressPincode()"
-              (input)="addressPincode.set($any($event.target).value)"
-            />
+            <tng-form-field labelPosition="above">
+              <tng-label forId="org-create-addr-pincode">Pincode / ZIP</tng-label>
+              <tng-input
+                id="org-create-addr-pincode"
+                placeholder="Pincode"
+                [value]="addressPincode()"
+                (input)="addressPincode.set($any($event.target).value)"
+              />
+            </tng-form-field>
           </div>
 
           <div class="field">
-            <tng-label>GSTIN</tng-label>
-            <tng-input
-              placeholder="GST Identification Number"
-              [value]="gstin()"
-              (input)="gstin.set($any($event.target).value)"
-            />
+            <tng-form-field labelPosition="above">
+              <tng-label forId="org-create-gstin">GSTIN</tng-label>
+              <tng-input
+                id="org-create-gstin"
+                placeholder="GST Identification Number"
+                [value]="gstin()"
+                (input)="gstin.set($any($event.target).value)"
+              />
+            </tng-form-field>
           </div>
         </div>
 

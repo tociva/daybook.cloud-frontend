@@ -20,61 +20,64 @@
         <form (submit)="submitForm($event)" novalidate>
           <div class="field-grid">
             <div class="field field--wide">
-              <tng-label forId="lc-name" required>Name</tng-label>
-              <tng-input
-                id="lc-name"
-                placeholder="e.g. Current Assets"
-                [formField]="categoryForm.name"
-                [ariaInvalid]="nameError() !== null"
-              />
-              <p class="field-error" [class.field-error--empty]="!nameError()">
-                {{ nameError() || ' ' }}
-              </p>
+              <tng-form-field labelPosition="above" [invalid]="nameError() !== null">
+                <tng-label forId="lc-name" required>Name</tng-label>
+                <tng-input
+                  id="lc-name"
+                  placeholder="e.g. Current Assets"
+                  [formField]="categoryForm.name"
+                  [ariaInvalid]="nameError() !== null"
+                />
+                <tng-error [show]="nameError() !== null">{{ nameError() }}</tng-error>
+              </tng-form-field>
             </div>
 
             <div class="field">
-              <tng-label forId="lc-type">Type</tng-label>
-              <tng-autocomplete
-                id="lc-type"
-                placeholder="Select a type"
-                ariaLabel="Category type"
-                [options]="filteredTypeOptions()"
-                [formField]="categoryForm.type"
-                [getOptionValue]="typeOptionValue"
-                [getOptionLabel]="typeOptionLabel"
-                [trackBy]="typeTrackBy"
-                (valueChange)="onTypeChange($event)"
-                (queryChange)="onTypeQueryChange($event)"
-              />
-              <p class="field-error field-error--empty">{{ ' ' }}</p>
+              <tng-form-field labelPosition="above">
+                <tng-label forId="lc-type">Type</tng-label>
+                <tng-autocomplete
+                  id="lc-type"
+                  placeholder="Select a type"
+                  ariaLabel="Category type"
+                  [options]="filteredTypeOptions()"
+                  [formField]="categoryForm.type"
+                  [getOptionValue]="typeOptionValue"
+                  [getOptionLabel]="typeOptionLabel"
+                  [trackBy]="typeTrackBy"
+                  (valueChange)="onTypeChange($event)"
+                  (queryChange)="onTypeQueryChange($event)"
+                />
+              </tng-form-field>
             </div>
 
             <div class="field">
-              <tng-label forId="lc-parent">Parent Category</tng-label>
-              <tng-autocomplete
-                id="lc-parent"
-                placeholder="Search parent category..."
-                ariaLabel="Parent category"
-                [options]="filteredParentOptions()"
-                [formField]="categoryForm.parentId"
-                [getOptionValue]="parentOptionValue"
-                [getOptionLabel]="parentOptionLabel"
-                [trackBy]="parentTrackBy"
-                (valueChange)="onParentChange($event)"
-                (queryChange)="onParentQueryChange($event)"
-              />
-              <p class="field-error field-error--empty">{{ ' ' }}</p>
+              <tng-form-field labelPosition="above">
+                <tng-label forId="lc-parent">Parent Category</tng-label>
+                <tng-autocomplete
+                  id="lc-parent"
+                  placeholder="Search parent category..."
+                  ariaLabel="Parent category"
+                  [options]="filteredParentOptions()"
+                  [formField]="categoryForm.parentId"
+                  [getOptionValue]="parentOptionValue"
+                  [getOptionLabel]="parentOptionLabel"
+                  [trackBy]="parentTrackBy"
+                  (valueChange)="onParentChange($event)"
+                  (queryChange)="onParentQueryChange($event)"
+                />
+              </tng-form-field>
             </div>
 
             <div class="field field--wide">
-              <tng-label forId="lc-description">Description</tng-label>
-              <tng-textarea
-                id="lc-description"
-                placeholder="Optional notes about this category"
-                rows="3"
-                [formField]="categoryForm.description"
-              />
-              <p class="field-error field-error--empty">{{ ' ' }}</p>
+              <tng-form-field labelPosition="above">
+                <tng-label forId="lc-description">Description</tng-label>
+                <tng-textarea
+                  id="lc-description"
+                  placeholder="Optional notes about this category"
+                  rows="3"
+                  [formField]="categoryForm.description"
+                />
+              </tng-form-field>
             </div>
           </div>
 

@@ -27,38 +27,40 @@
 
       @for (field of fields(); track field.id) {
         <div class="filter-field">
-          <tng-label [forId]="getFieldId(field)">{{ field.label }}</tng-label>
-          @if (field.type === 'text') {
-            <div class="filter-comparison">
-              <tng-select
-                [attr.aria-label]="field.label + ' filter operator'"
-                [options]="getOperatorOptions(field)"
-                [getOptionLabel]="getOperatorLabel"
-                [getOptionValue]="getOperatorValue"
-                [trackBy]="trackByOperatorValue"
-                [value]="getOperatorValueForField(field)"
-                (valueChange)="setOperator(field, $event)"
-              />
+          <tng-form-field labelPosition="above">
+            <tng-label [forId]="getFieldId(field)">{{ field.label }}</tng-label>
+            @if (field.type === 'text') {
+              <div class="filter-comparison">
+                <tng-select
+                  [attr.aria-label]="field.label + ' filter operator'"
+                  [options]="getOperatorOptions(field)"
+                  [getOptionLabel]="getOperatorLabel"
+                  [getOptionValue]="getOperatorValue"
+                  [trackBy]="trackByOperatorValue"
+                  [value]="getOperatorValueForField(field)"
+                  (valueChange)="setOperator(field, $event)"
+                />
 
-              <tng-input
+                <tng-input
+                  [id]="getFieldId(field)"
+                  [placeholder]="field.placeholder ?? field.label"
+                  [value]="getTextValue(field.id)"
+                  (valueChange)="setTextValue(field, $event)"
+                />
+              </div>
+            } @else {
+              <tng-select
                 [id]="getFieldId(field)"
-                [placeholder]="field.placeholder ?? field.label"
-                [value]="getTextValue(field.id)"
-                (valueChange)="setTextValue(field, $event)"
+                [placeholder]="field.placeholder ?? 'Any ' + field.label.toLowerCase()"
+                [options]="getEnumOptions(field)"
+                [getOptionLabel]="getOptionLabel"
+                [getOptionValue]="getOptionValue"
+                [trackBy]="trackByOptionValue"
+                [value]="getSelectValue(field.id)"
+                (valueChange)="setSelectValue(field, $event)"
               />
-            </div>
-          } @else {
-            <tng-select
-              [id]="getFieldId(field)"
-              [placeholder]="field.placeholder ?? 'Any ' + field.label.toLowerCase()"
-              [options]="getEnumOptions(field)"
-              [getOptionLabel]="getOptionLabel"
-              [getOptionValue]="getOptionValue"
-              [trackBy]="trackByOptionValue"
-              [value]="getSelectValue(field.id)"
-              (valueChange)="setSelectValue(field, $event)"
-            />
-          }
+            }
+          </tng-form-field>
         </div>
       }
 
