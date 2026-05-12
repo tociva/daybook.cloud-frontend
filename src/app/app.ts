@@ -43,8 +43,19 @@ export class App {
       .subscribe((event) => this.currentUrl.set(event.urlAfterRedirects));
 
     effect(() => {
-      if (this.startupStatus() === 'idle' && !this.authService.isCurrentLoginCallbackUrl()) {
+      const status = this.startupStatus();
+      const path = this.currentUrl().split('?')[0];
+
+      if (status === 'idle' && !this.authService.isCurrentLoginCallbackUrl()) {
         queueMicrotask(() => void this.systemStore.initialize());
+        return;
+      }
+
+      // Session is fully loaded but user landed on '/' (e.g. burl fallback with no stored URL).
+      // The landing shell has no handler for 'user-session-ready', so redirect to dashboard
+      // to avoid the user being stuck on the wordmark screen indefinitely.
+      if (status === 'user-session-ready' && (path === '' || path === '/')) {
+        void this.router.navigateByUrl('/app/dashboard');
       }
     });
 

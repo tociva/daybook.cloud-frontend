@@ -14,7 +14,7 @@ export class BurlBackButtonComponent {
   private readonly burlNavigation = inject(BurlNavigationService);
 
   readonly appearance = input<BurlBackButtonAppearance>('outline');
-  readonly fallbackUrl = input('/');
+  readonly fallbackUrl = input('/app/dashboard');
   readonly label = input('Back');
   readonly tone = input<BurlBackButtonTone>('neutral');
 
