@@ -45,6 +45,7 @@
                 [placeholder]="field.placeholder ?? field.label"
                 [value]="getTextValue(field.id)"
                 (valueChange)="setTextValue(field, $event)"
+                (keydown)="onInputKeydown($event)"
               />
             </div>
           } @else {

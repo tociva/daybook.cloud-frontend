@@ -128,6 +128,12 @@ export class CrudFilterPopoverComponent {
     this.syncDraftFromWhere();
   });
 
+  protected onInputKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') {
+      this.open.set(false);
+    }
+  }
+
   protected onOpenChange(open: boolean): void {
     this.open.set(open);
 
