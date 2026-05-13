@@ -20,6 +20,13 @@ export const routes: Routes = [
       ).then((m) => m.SelectOrganizationComponent),
   },
   {
+    path: 'app/profile',
+    loadComponent: () =>
+      import('./components/features/profile/ui/profile/profile.component').then(
+        (m) => m.ProfileComponent,
+      ),
+  },
+  {
     path: 'app/trading/bank-cash',
     loadChildren: () =>
       import('./components/features/trading/ui/bank-cash/bank-cash.routes').then(

@@ -10,6 +10,7 @@ import { ToastStore } from '../toast/toast.store';
 import { UserSession } from '../../components/features/management/data/user-session/user-session.model';
 import { UserSessionService } from '../../components/features/management/data/user-session/user-session.service';
 import { UserSessionStore } from '../../components/features/management/data/user-session/user-session.store';
+import { AppThemeStore } from '../theme/app-theme.store';
 import { AppStartupStatus, AppSystemModel } from './app-system.model';
 import { initialAppSystemState } from './app-system.state';
 
@@ -150,6 +151,7 @@ export const AppSystemStore = signalStore(
       toastStore = inject(ToastStore),
       userSessionService = inject(UserSessionService),
       userSessionStore = inject(UserSessionStore),
+      appThemeStore = inject(AppThemeStore),
     ) => {
       function updateStartupStatus(
         status: AppStartupStatus,
@@ -209,6 +211,7 @@ export const AppSystemStore = signalStore(
         try {
           const session = await userSessionService.createUserSession(config.apiBaseUrl);
           userSessionStore.setSession(session);
+          appThemeStore.initFromSession(session);
 
           const returnUri = resolveSessionReturnUri(config, strategy);
           const hasOrganizationAccess =
@@ -228,6 +231,7 @@ export const AppSystemStore = signalStore(
               await authService.renewSessionSilently(config.auth);
               const renewedSession = await userSessionService.createUserSession(config.apiBaseUrl);
               userSessionStore.setSession(renewedSession);
+              appThemeStore.initFromSession(renewedSession);
 
               const returnUri = resolveSessionReturnUri(config, strategy);
               const hasOrganizationAccess =

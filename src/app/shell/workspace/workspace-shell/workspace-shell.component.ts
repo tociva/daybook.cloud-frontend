@@ -17,6 +17,12 @@ const workspaceNavItems: readonly WorkspaceNavItem[] = [
     shortcut: 'D',
   },
   {
+    description: 'Manage your account and appearance',
+    label: 'Profile',
+    path: '/app/profile',
+    shortcut: '',
+  },
+  {
     description: 'Create or complete setup',
     label: 'Organization Setup',
     path: '/bootstrap/bootstrap-organization',

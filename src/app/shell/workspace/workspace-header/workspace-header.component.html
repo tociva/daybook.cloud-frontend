@@ -39,19 +39,6 @@
       <span class="workspace-org-button-label">{{ activeOrganizationName() }}</span>
     </tng-button>
 
-    <button
-      class="mode-toggle"
-      type="button"
-      [attr.aria-label]="'Switch to ' + (darkMode() ? 'light' : 'dark') + ' mode'"
-      (click)="toggleMode()"
-    >
-      @if (darkMode()) {
-        <tng-icon icon="moon" class="h-4 w-4" />
-      } @else {
-        <tng-icon icon="sun" class="h-4 w-4" />
-      }
-    </button>
-
     <div class="profile-menu">
       <button
         class="profile-trigger"

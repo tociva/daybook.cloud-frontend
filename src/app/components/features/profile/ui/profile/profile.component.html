@@ -1,0 +1,102 @@
+<main class="profile-page">
+  <div class="profile-card">
+
+    <!-- Identity -->
+    <div class="profile-identity">
+      <tng-avatar [fallback]="userDisplayName()" size="lg" class="profile-avatar" />
+      <div class="profile-identity-copy">
+        <span class="profile-name">{{ userDisplayName() }}</span>
+        @if (userEmail()) {
+          <span class="profile-email">{{ userEmail() }}</span>
+        }
+      </div>
+    </div>
+
+    <div class="profile-divider" role="separator"></div>
+
+    <!-- Appearance form -->
+    <section class="profile-section">
+      <h2 class="profile-section-title">Appearance</h2>
+
+      <form (submit)="submitAppearance($event)" novalidate class="appearance-form">
+
+        <!-- Color mode -->
+        <tng-form-field labelPosition="above">
+          <tng-label>Color Mode</tng-label>
+          <tng-button-toggle-group
+            ariaLabel="Color mode"
+            type="single"
+            [value]="draftMode()"
+            (valueChange)="onModeChange($event)"
+            class="mode-toggle-group"
+          >
+            <tng-button-toggle [value]="'light'">
+              <tng-icon icon="sun" aria-hidden="true" />
+              Light
+            </tng-button-toggle>
+            <tng-button-toggle [value]="'dark'">
+              <tng-icon icon="moon" aria-hidden="true" />
+              Dark
+            </tng-button-toggle>
+          </tng-button-toggle-group>
+        </tng-form-field>
+
+        <!-- Theme preset -->
+        <tng-form-field labelPosition="above">
+          <tng-label forId="theme-select">Theme</tng-label>
+          <tng-select
+            id="theme-select"
+            placeholder="Select a theme"
+            [options]="themeOptions"
+            [getOptionLabel]="getThemeLabel"
+            [getOptionValue]="getThemeValue"
+            [trackBy]="trackThemeBy"
+            [value]="draftThemeName()"
+            (valueChange)="onThemeChange($event)"
+          >
+            <ng-template #tngSelectOptionTpl let-ctx>
+              <span class="theme-option">
+                <span class="theme-option-label">{{ ctx.label }}</span>
+                <span class="theme-option-description">{{ ctx.option.description }}</span>
+              </span>
+            </ng-template>
+          </tng-select>
+        </tng-form-field>
+
+        <!-- Error -->
+        @if (saveError()) {
+          <p class="form-error" role="alert">
+            <tng-icon icon="circle-alert" aria-hidden="true" />
+            {{ saveError() }}
+          </p>
+        }
+
+        <!-- Actions -->
+        <div class="form-actions">
+          @if (saveSuccess()) {
+            <span class="save-feedback" role="status">
+              <tng-icon icon="check" aria-hidden="true" />
+              Appearance updated
+            </span>
+          }
+          <tng-button
+            type="submit"
+            appearance="solid"
+            tone="primary"
+            [disabled]="isSaving()"
+          >
+            @if (isSaving()) {
+              <tng-icon icon="loader-circle" aria-hidden="true" class="spin" />
+              Saving…
+            } @else {
+              <tng-icon icon="save" aria-hidden="true" />
+              Update
+            }
+          </tng-button>
+        </div>
+
+      </form>
+    </section>
+
+  </div>
+</main>

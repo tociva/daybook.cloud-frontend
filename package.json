@@ -25,7 +25,7 @@
     "@tailng-ui/components": "^0.62.0",
     "@tailng-ui/icons": "^0.14.0",
     "@tailng-ui/primitives": "^0.54.0",
-    "@tailng-ui/theme": "^0.40.0",
+    "@tailng-ui/theme": "^0.41.0",
     "dayjs": "^1.11.20",
     "fuse.js": "^7.3.0",
     "oidc-client-ts": "^3.5.0",

@@ -127,36 +127,6 @@
   vertical-align: middle;
 }
 
-.mode-toggle {
-  align-items: center;
-  background: transparent;
-  border: 0;
-  border-radius: 0.75rem;
-  color: var(--tng-semantic-foreground-primary);
-  cursor: pointer;
-  display: inline-flex;
-  flex: 0 0 auto;
-  font: inherit;
-  height: 2.75rem;
-  justify-content: center;
-  width: 2.75rem;
-}
-
-.mode-toggle:focus-visible {
-  outline: 2px solid var(--tng-semantic-focus-ring);
-  outline-offset: 2px;
-}
-
-.mode-toggle tng-icon {
-  font-size: 1.45rem;
-  height: 1.45rem;
-  width: 1.45rem;
-}
-
-.mode-toggle:hover {
-  background: color-mix(in srgb, var(--tng-semantic-background-surface) 64%, transparent);
-}
-
 .profile-menu {
   background: transparent;
   border: 0;

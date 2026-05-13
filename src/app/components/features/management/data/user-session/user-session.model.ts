@@ -4,6 +4,11 @@ import type { OrganizationMember } from '../organization-member/organization-mem
 import type { Organization } from '../organization/organization.model';
 import type { Subscription } from '../subscription/subscription.model';
 
+export type UserProps = {
+  mode?: string;
+  theme?: string;
+} & Record<string, unknown>;
+
 export interface UserSession {
   id?: string;
   displayname?: string;
@@ -20,6 +25,7 @@ export interface UserSession {
   member: OrganizationMember | null;
   memberorgs: OrganizationMember[];
   ownorgs?: Organization[] | null;
+  props?: UserProps | null;
 }
 
 export interface UserSessionStateModel {
