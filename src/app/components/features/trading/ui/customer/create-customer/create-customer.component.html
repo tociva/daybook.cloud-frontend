@@ -49,9 +49,9 @@
                     (queryChange)="onCountryQueryChange($event)"
                   >
                     <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
-                      <span class="country-option">
-                        <span [class]="getCountryFlagClass(option)" aria-hidden="true"></span>
-                        <span class="country-option-label">{{ label }}</span>
+                      <span class="flag-option">
+                        <span [class]="getCountryFlagClass(option) + ' flag-chip'" aria-hidden="true"></span>
+                        <span>{{ label }}</span>
                       </span>
                     </ng-template>
 
