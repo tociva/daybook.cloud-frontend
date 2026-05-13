@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
+  TngBadge,
   TngButtonComponent,
   TngFormFieldComponent,
   TngInputComponent,
@@ -76,6 +77,7 @@ const OPERATOR_LABELS: Record<Lb4TextFilterOperator, string> = {
 @Component({
   selector: 'app-crud-filter-popover',
   imports: [
+    TngBadge,
     TngButtonComponent,
     TngFormFieldComponent,
     TngIcon,
@@ -120,6 +122,13 @@ export class CrudFilterPopoverComponent {
 
   private readonly currentFilter = computed(() => this.filter() ?? {});
   private readonly currentWhere = computed(() => this.where() ?? this.currentFilter().where);
+
+  protected readonly activeFilterCount = computed(() => {
+    const where = this.currentWhere();
+    if (!where) return null;
+    const count = Object.keys(where).length;
+    return count > 0 ? count : null;
+  });
   private readonly operatorOptionsCache = new Map<CrudFilterField, readonly OperatorOption[]>();
   private readonly syncDraftEffect = effect(() => {
     this.fields();
@@ -188,7 +197,14 @@ export class CrudFilterPopoverComponent {
   }
 
   protected getEnumOptions(field: CrudFilterField): readonly CrudFilterOption[] {
-    return field.type === 'enum' ? field.options : [];
+    if (field.type !== 'enum') return [];
+
+    const emptyOption: CrudFilterOption = {
+      label: field.placeholder ?? `Any ${field.label.toLowerCase()}`,
+      value: null,
+    };
+
+    return [emptyOption, ...field.options];
   }
 
   protected setTextValue(field: CrudTextFilterField, value: string): void {
@@ -232,14 +248,9 @@ export class CrudFilterPopoverComponent {
 
   protected clearFilter(): void {
     this.draft.set(this.createEmptyDraft());
-    const filter = {
-      ...this.currentFilter(),
-      offset: 0,
-      where: undefined,
-    };
+  }
 
-    this.clearFilters.emit();
-    void this.emitFilterChange(filter);
+  protected closePopover(): void {
     this.open.set(false);
   }
 
