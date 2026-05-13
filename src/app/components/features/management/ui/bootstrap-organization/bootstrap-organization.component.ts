@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
 import { Router } from '@angular/router';
 import {
@@ -210,7 +210,8 @@ const createInitialForm = (): OrganizationSignalFormModel => ({
   styleUrls: ['./bootstrap-organization.component.css', '../../../../../../styles/flags.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BootstrapOrganizationComponent {
+export class BootstrapOrganizationComponent implements AfterViewInit {
+  @ViewChild('nameInputRef', { read: ElementRef }) private nameInputRef!: ElementRef;
   private readonly countryStore = inject(CountryStore);
   private readonly currencyStore = inject(CurrencyStore);
   private readonly dateFormatStore = inject(DateFormatStore);
@@ -510,6 +511,10 @@ export class BootstrapOrganizationComponent {
     void this.countryStore.load();
     void this.currencyStore.load();
     void this.dateFormatStore.load();
+  }
+
+  ngAfterViewInit(): void {
+    this.nameInputRef?.nativeElement.querySelector('input')?.focus();
   }
 
   protected onDateRangeStartChange(value: unknown): void {

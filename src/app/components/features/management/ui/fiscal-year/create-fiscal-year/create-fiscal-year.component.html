@@ -18,6 +18,7 @@
             <tng-form-field labelPosition="above" [invalid]="nameError() !== null">
               <tng-label forId="fy-name" required>Name</tng-label>
               <tng-input
+                #nameInputRef
                 id="fy-name"
                 placeholder="e.g. FY 2025-26"
                 [value]="name()"

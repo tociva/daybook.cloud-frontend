@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
 import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -52,7 +52,8 @@ import type { OrganizationPayload } from '../../../data/organization';
   styleUrls: ['./create-organization.component.css', '../../../../../../../styles/flags.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CreateOrganizationComponent {
+export class CreateOrganizationComponent implements AfterViewInit {
+  @ViewChild('nameInputRef', { read: ElementRef }) private nameInputRef!: ElementRef;
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(OrganizationFacade);
   protected readonly organizationStore = inject(OrganizationStore);
@@ -138,6 +139,10 @@ export class CreateOrganizationComponent {
     void this.countryStore.load();
     void this.currencyStore.load();
     void this.loadInitialState();
+  }
+
+  ngAfterViewInit(): void {
+    this.nameInputRef?.nativeElement.querySelector('input')?.focus();
   }
 
   private async loadInitialState(): Promise<void> {

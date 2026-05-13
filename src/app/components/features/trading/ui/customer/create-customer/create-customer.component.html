@@ -23,6 +23,7 @@
                 <tng-form-field labelPosition="above" [invalid]="nameError() !== null">
                   <tng-label forId="cust-name" required>Name</tng-label>
                   <tng-input
+                    #nameInputRef
                     id="cust-name"
                     placeholder="Acme Corp"
                     [formField]="customerForm.name"

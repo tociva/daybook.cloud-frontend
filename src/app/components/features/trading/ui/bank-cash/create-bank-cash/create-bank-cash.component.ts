@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
 import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -49,7 +49,8 @@ type BankCashFormModel = {
   templateUrl: './create-bank-cash.component.html',
   styleUrl: './create-bank-cash.component.css',
 })
-export class CreateBankCashComponent {
+export class CreateBankCashComponent implements AfterViewInit {
+  @ViewChild('nameInputRef', { read: ElementRef }) private nameInputRef!: ElementRef;
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(BankCashFacade);
   protected readonly bankCashStore = inject(BankCashStore);
@@ -70,6 +71,10 @@ export class CreateBankCashComponent {
 
   constructor() {
     void this.loadInitialState();
+  }
+
+  ngAfterViewInit(): void {
+    this.nameInputRef?.nativeElement.querySelector('input')?.focus();
   }
 
   private async loadInitialState(): Promise<void> {

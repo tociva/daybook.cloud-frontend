@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
 import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -54,7 +54,8 @@ type TaxFormModel = {
   templateUrl: './create-tax.component.html',
   styleUrl: './create-tax.component.css',
 })
-export class CreateTaxComponent {
+export class CreateTaxComponent implements AfterViewInit {
+  @ViewChild('nameInputRef', { read: ElementRef }) private nameInputRef!: ElementRef;
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(TaxFacade);
   protected readonly taxStore = inject(TaxStore);
@@ -121,6 +122,10 @@ export class CreateTaxComponent {
 
   constructor() {
     void this.loadInitialState();
+  }
+
+  ngAfterViewInit(): void {
+    this.nameInputRef?.nativeElement.querySelector('input')?.focus();
   }
 
   private async loadInitialState(): Promise<void> {

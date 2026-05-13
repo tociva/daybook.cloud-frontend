@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { Component, afterNextRender, computed, inject, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild, afterNextRender, computed, inject, signal } from '@angular/core';
 import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -69,7 +69,8 @@ type TaxGroupFormModel = {
   templateUrl: './create-tax-group.component.html',
   styleUrl: './create-tax-group.component.css',
 })
-export class CreateTaxGroupComponent {
+export class CreateTaxGroupComponent implements AfterViewInit {
+  @ViewChild('nameInputRef', { read: ElementRef }) private nameInputRef!: ElementRef;
   private readonly document = inject(DOCUMENT);
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(TaxGroupFacade);
@@ -179,6 +180,10 @@ export class CreateTaxGroupComponent {
 
   constructor() {
     void this.loadInitialState();
+  }
+
+  ngAfterViewInit(): void {
+    this.nameInputRef?.nativeElement.querySelector('input')?.focus();
   }
 
   private async loadInitialState(): Promise<void> {

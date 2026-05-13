@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
   TngButtonComponent,
@@ -54,7 +54,8 @@ const DEFAULT_INVOICE_NUMBER_FORMAT = '<<YYYY>>/<<SERIAL3>>';
   styleUrl: './create-branch.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CreateBranchComponent {
+export class CreateBranchComponent implements AfterViewInit {
+  @ViewChild('nameInputRef', { read: ElementRef }) private nameInputRef!: ElementRef;
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(BranchFacade);
   protected readonly branchStore = inject(BranchStore);
@@ -207,6 +208,10 @@ export class CreateBranchComponent {
     void this.dateFormatStore.load();
     void this.organizationStore.loadOrganizations();
     void this.loadInitialState();
+  }
+
+  ngAfterViewInit(): void {
+    this.nameInputRef?.nativeElement.querySelector('input')?.focus();
   }
 
   private async loadInitialState(): Promise<void> {

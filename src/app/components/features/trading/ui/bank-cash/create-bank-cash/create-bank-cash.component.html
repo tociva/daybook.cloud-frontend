@@ -21,6 +21,7 @@
               <tng-form-field labelPosition="above" [invalid]="nameError() !== null">
                 <tng-label forId="bank-cash-name" required>Name</tng-label>
                 <tng-input
+                  #nameInputRef
                   id="bank-cash-name"
                   placeholder="Cash counter"
                   [formField]="bankCashForm.name"

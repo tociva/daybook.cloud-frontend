@@ -21,6 +21,7 @@
               <tng-form-field labelPosition="above" [invalid]="nameError() !== null">
                 <tng-label forId="l-name" required>Name</tng-label>
                 <tng-input
+                  #nameInputRef
                   id="l-name"
                   placeholder="e.g. Cash at Bank"
                   [formField]="ledgerForm.name"

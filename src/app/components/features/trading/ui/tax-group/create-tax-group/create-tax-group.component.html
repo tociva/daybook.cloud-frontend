@@ -28,6 +28,7 @@
                 <tng-form-field labelPosition="above" [invalid]="nameError() !== null">
                   <tng-label forId="tax-group-name" required>Name</tng-label>
                   <tng-input
+                    #nameInputRef
                     id="tax-group-name"
                     placeholder="GST 18%"
                     [formField]="taxGroupForm.name"

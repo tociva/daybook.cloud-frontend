@@ -18,6 +18,7 @@
             <tng-form-field labelPosition="above" [invalid]="nameError() !== null">
               <tng-label forId="branch-name" required>Name</tng-label>
               <tng-input
+                #nameInputRef
                 id="branch-name"
                 placeholder="Branch name"
                 [value]="name()"

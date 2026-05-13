@@ -22,6 +22,7 @@
                 <tng-form-field labelPosition="above" [invalid]="nameError() !== null">
                   <tng-label forId="item-name" required>Name</tng-label>
                   <tng-input
+                    #nameInputRef
                     id="item-name"
                     placeholder="Wireless Mouse"
                     [formField]="itemForm.name"

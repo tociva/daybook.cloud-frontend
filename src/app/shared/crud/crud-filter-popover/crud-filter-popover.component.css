@@ -106,11 +106,6 @@
   color: var(--tng-semantic-foreground-primary);
 }
 
-.filter-field {
-  display: grid;
-  gap: 0.4rem;
-}
-
 .filter-comparison {
   display: grid;
   gap: 0.5rem;

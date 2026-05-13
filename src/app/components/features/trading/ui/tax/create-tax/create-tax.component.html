@@ -22,6 +22,7 @@
                 <tng-form-field labelPosition="above" [invalid]="nameError() !== null">
                   <tng-label forId="tax-name" required>Name</tng-label>
                   <tng-input
+                    #nameInputRef
                     id="tax-name"
                     placeholder="Goods and services tax"
                     [formField]="taxForm.name"

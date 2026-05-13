@@ -15,6 +15,7 @@
               <tng-form-field labelPosition="above" [invalid]="isInvalid('name')">
                 <tng-label forId="org-name" required>Name</tng-label>
                 <tng-input
+                  #nameInputRef
                   id="org-name"
                   placeholder="Example Trading Co."
                   [formField]="organizationForm.name"

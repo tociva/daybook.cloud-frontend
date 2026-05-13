@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
 import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -62,7 +62,8 @@ type ItemCategoryFormModel = {
   templateUrl: './create-item-category.component.html',
   styleUrl: './create-item-category.component.css',
 })
-export class CreateItemCategoryComponent {
+export class CreateItemCategoryComponent implements AfterViewInit {
+  @ViewChild('nameInputRef', { read: ElementRef }) private nameInputRef!: ElementRef;
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(ItemCategoryFacade);
   protected readonly itemCategoryStore = inject(ItemCategoryStore);
@@ -181,6 +182,10 @@ export class CreateItemCategoryComponent {
 
   constructor() {
     void this.loadInitialState();
+  }
+
+  ngAfterViewInit(): void {
+    this.nameInputRef?.nativeElement.querySelector('input')?.focus();
   }
 
   private async loadInitialState(): Promise<void> {

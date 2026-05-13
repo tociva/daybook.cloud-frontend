@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
 import dayjs from 'dayjs';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -49,7 +49,8 @@ import type { FiscalYearPayload } from '../../../data/fiscal-year';
   styleUrl: './create-fiscal-year.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CreateFiscalYearComponent {
+export class CreateFiscalYearComponent implements AfterViewInit {
+  @ViewChild('nameInputRef', { read: ElementRef }) private nameInputRef!: ElementRef;
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(FiscalYearFacade);
   protected readonly fiscalYearStore = inject(FiscalYearStore);
@@ -152,6 +153,10 @@ export class CreateFiscalYearComponent {
     void this.currencyStore.load();
     void this.branchStore.loadBranches();
     void this.loadInitialState();
+  }
+
+  ngAfterViewInit(): void {
+    this.nameInputRef?.nativeElement.querySelector('input')?.focus();
   }
 
   private async loadInitialState(): Promise<void> {

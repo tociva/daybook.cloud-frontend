@@ -1,5 +1,6 @@
 import {
   Component,
+  ElementRef,
   booleanAttribute,
   computed,
   effect,
@@ -89,6 +90,7 @@ const OPERATOR_LABELS: Record<Lb4TextFilterOperator, string> = {
   styleUrl: './crud-filter-popover.component.css',
 })
 export class CrudFilterPopoverComponent {
+  private readonly elementRef = inject(ElementRef);
   private readonly route = inject(ActivatedRoute);
   private readonly crudUrl = inject(CrudUrlService);
 
@@ -131,6 +133,11 @@ export class CrudFilterPopoverComponent {
 
     if (open) {
       this.syncDraftFromWhere();
+      setTimeout(() => {
+        const panel = this.elementRef.nativeElement.querySelector('.filter-panel');
+        const firstInput = panel?.querySelector('input, select') as HTMLElement | null;
+        firstInput?.focus();
+      }, 50);
     }
   }
 

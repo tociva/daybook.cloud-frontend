@@ -23,6 +23,7 @@
                 <tng-form-field labelPosition="above" [invalid]="nameError() !== null">
                   <tng-label forId="vend-name" required>Name</tng-label>
                   <tng-input
+                    #nameInputRef
                     id="vend-name"
                     placeholder="Sunrise Suppliers"
                     [formField]="vendorForm.name"

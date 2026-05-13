@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
 import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -58,7 +58,8 @@ type LedgerFormModel = {
   styleUrl: './create-ledger.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CreateLedgerComponent {
+export class CreateLedgerComponent implements AfterViewInit {
+  @ViewChild('nameInputRef', { read: ElementRef }) private nameInputRef!: ElementRef;
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(LedgerFacade);
   protected readonly ledgerStore = inject(LedgerStore);
@@ -106,6 +107,10 @@ export class CreateLedgerComponent {
 
   constructor() {
     void this.loadInitialState();
+  }
+
+  ngAfterViewInit(): void {
+    this.nameInputRef?.nativeElement.querySelector('input')?.focus();
   }
 
   private async loadInitialState(): Promise<void> {

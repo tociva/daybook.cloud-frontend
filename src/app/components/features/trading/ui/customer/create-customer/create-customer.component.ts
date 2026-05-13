@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
 import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -70,7 +70,8 @@ type CustomerFormModel = {
   templateUrl: './create-customer.component.html',
   styleUrls: ['./create-customer.component.css', '../../../../../../../styles/flags.css'],
 })
-export class CreateCustomerComponent {
+export class CreateCustomerComponent implements AfterViewInit {
+  @ViewChild('nameInputRef', { read: ElementRef }) private nameInputRef!: ElementRef;
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(CustomerFacade);
   private readonly countryStore = inject(CountryStore);
@@ -187,6 +188,10 @@ export class CreateCustomerComponent {
     void this.countryStore.load();
     void this.currencyStore.load();
     void this.loadInitialState();
+  }
+
+  ngAfterViewInit(): void {
+    this.nameInputRef?.nativeElement.querySelector('input')?.focus();
   }
 
   private async loadInitialState(): Promise<void> {

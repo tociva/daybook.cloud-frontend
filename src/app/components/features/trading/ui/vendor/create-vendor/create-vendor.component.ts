@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
 import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -65,7 +65,8 @@ type VendorFormModel = {
   templateUrl: './create-vendor.component.html',
   styleUrl: './create-vendor.component.css',
 })
-export class CreateVendorComponent {
+export class CreateVendorComponent implements AfterViewInit {
+  @ViewChild('nameInputRef', { read: ElementRef }) private nameInputRef!: ElementRef;
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(VendorFacade);
   protected readonly vendorStore = inject(VendorStore);
@@ -154,6 +155,10 @@ export class CreateVendorComponent {
 
   constructor() {
     void this.loadInitialState();
+  }
+
+  ngAfterViewInit(): void {
+    this.nameInputRef?.nativeElement.querySelector('input')?.focus();
   }
 
   private async loadInitialState(): Promise<void> {
