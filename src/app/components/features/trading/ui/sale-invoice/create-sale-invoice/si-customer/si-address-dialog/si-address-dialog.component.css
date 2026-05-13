@@ -1,0 +1,55 @@
+/* ── Fields ────────────────────────────────────────────────────────────── */
+.field {
+  display: grid;
+  margin-bottom: 0.5rem;
+}
+.field-row {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* ── Address grid ──────────────────────────────────────────────────────── */
+.address-row {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr 1fr;
+}
+.address-box {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  padding: 0.85rem;
+}
+.address-box legend {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0 0.25rem;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.same-as-billing {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 400;
+  text-transform: none;
+  cursor: pointer;
+}
+
+/* ── Dialog footer ─────────────────────────────────────────────────────── */
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.25rem;
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .address-row {
+    grid-template-columns: 1fr;
+  }
+}

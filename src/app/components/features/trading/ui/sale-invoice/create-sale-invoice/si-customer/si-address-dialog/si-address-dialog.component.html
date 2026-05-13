@@ -1,0 +1,146 @@
+<tng-dialog
+  title="Update Addresses"
+  size="lg"
+  [open]="open()"
+  (closed)="onDialogClose()"
+>
+  <div class="address-row">
+
+    <!-- Billing address -->
+    <fieldset class="address-box">
+      <legend>Billing Address</legend>
+      <div class="field">
+        <tng-input
+          id="bill-name"
+          placeholder="House / Building Name"
+          [value]="draft.billingName()"
+          (valueChange)="draft.billingName.set($any($event)); draft.onBillingChange()"
+        />
+      </div>
+      <div class="field">
+        <tng-input
+          id="bill-line1"
+          placeholder="Address Line 1"
+          [value]="draft.billingLine1()"
+          (valueChange)="draft.billingLine1.set($any($event)); draft.onBillingChange()"
+        />
+      </div>
+      <div class="field">
+        <tng-input
+          id="bill-line2"
+          placeholder="Line 2"
+          [value]="draft.billingLine2()"
+          (valueChange)="draft.billingLine2.set($any($event)); draft.onBillingChange()"
+        />
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <tng-input
+            id="bill-city"
+            placeholder="City"
+            [value]="draft.billingCity()"
+            (valueChange)="draft.billingCity.set($any($event)); draft.onBillingChange()"
+          />
+        </div>
+        <div class="field">
+          <tng-input
+            id="bill-state"
+            placeholder="State"
+            [value]="draft.billingState()"
+            (valueChange)="draft.billingState.set($any($event)); draft.onBillingChange()"
+          />
+        </div>
+        <div class="field">
+          <tng-input
+            id="bill-zip"
+            placeholder="ZIP"
+            [value]="draft.billingZip()"
+            (valueChange)="draft.billingZip.set($any($event)); draft.onBillingChange()"
+          />
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- Shipping address -->
+    <fieldset class="address-box">
+      <legend>
+        Shipping Address
+        <label class="same-as-billing">
+          <tng-switch
+            [checked]="draft.useBillingForShipping()"
+            (checkedChange)="draft.toggleUseBillingForShipping(!!$event)"
+          />
+          Same as billing
+        </label>
+      </legend>
+      <div class="field">
+        <tng-input
+          id="ship-name"
+          placeholder="House / Building Name"
+          [value]="draft.shippingName()"
+          [readonly]="draft.useBillingForShipping()"
+          (valueChange)="draft.shippingName.set($any($event))"
+        />
+      </div>
+      <div class="field">
+        <tng-input
+          id="ship-line1"
+          placeholder="Address Line 1"
+          [value]="draft.shippingLine1()"
+          [readonly]="draft.useBillingForShipping()"
+          (valueChange)="draft.shippingLine1.set($any($event))"
+        />
+      </div>
+      <div class="field">
+        <tng-input
+          id="ship-line2"
+          placeholder="Line 2"
+          [value]="draft.shippingLine2()"
+          [readonly]="draft.useBillingForShipping()"
+          (valueChange)="draft.shippingLine2.set($any($event))"
+        />
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <tng-input
+            id="ship-city"
+            placeholder="City"
+            [value]="draft.shippingCity()"
+            [readonly]="draft.useBillingForShipping()"
+            (valueChange)="draft.shippingCity.set($any($event))"
+          />
+        </div>
+        <div class="field">
+          <tng-input
+            id="ship-state"
+            placeholder="State"
+            [value]="draft.shippingState()"
+            [readonly]="draft.useBillingForShipping()"
+            (valueChange)="draft.shippingState.set($any($event))"
+          />
+        </div>
+        <div class="field">
+          <tng-input
+            id="ship-zip"
+            placeholder="ZIP"
+            [value]="draft.shippingZip()"
+            [readonly]="draft.useBillingForShipping()"
+            (valueChange)="draft.shippingZip.set($any($event))"
+          />
+        </div>
+      </div>
+    </fieldset>
+
+  </div>
+
+  <div class="dialog-actions">
+    <tng-button
+      type="button"
+      appearance="solid"
+      tone="primary"
+      (click)="onDialogClose()"
+    >
+      Done
+    </tng-button>
+  </div>
+</tng-dialog>
