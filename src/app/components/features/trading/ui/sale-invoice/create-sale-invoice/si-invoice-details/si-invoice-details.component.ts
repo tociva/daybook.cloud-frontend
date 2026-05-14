@@ -11,6 +11,7 @@ import {
   TngSwitchComponent,
 } from '@tailng-ui/components';
 import { DateManagementService } from '../../../../../../../core/date/date-management.service';
+import { FiscalYearDatepickerComponent } from '../../../../../../../shared/fiscal-year-datepicker';
 import { SaleInvoiceDraftStore, type SelectOption } from '../sale-invoice-draft.store';
 
 @Component({
@@ -22,6 +23,7 @@ import { SaleInvoiceDraftStore, type SelectOption } from '../sale-invoice-draft.
     TngCardHeaderComponent,
     TngCardTitleComponent,
     TngDatepickerComponent,
+    FiscalYearDatepickerComponent,
     TngInputComponent,
     TngLabelComponent,
     TngSelectComponent,

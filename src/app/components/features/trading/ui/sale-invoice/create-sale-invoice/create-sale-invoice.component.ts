@@ -88,7 +88,7 @@ export class CreateSaleInvoiceComponent {
   protected async submitForm(event: Event): Promise<void> {
     event.preventDefault();
     this.draft.submitted.set(true);
-    if (!this.draft.customerid() || !this.draft.date()) return;
+    if (!this.draft.customerid() || this.draft.dateError() !== null) return;
 
     const billing: InvoiceAddress = {
       name: this.draft.billingName(),

@@ -11,6 +11,7 @@ import type { Tax } from '../../../data/tax';
 import { TaxStore } from '../../../data/tax';
 import type { TaxGroup } from '../../../data/tax-group';
 import { TaxGroupStore } from '../../../data/tax-group';
+import { FiscalYearDateRangeService } from '../../../../../../shared/fiscal-year-datepicker';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -63,6 +64,7 @@ export class SaleInvoiceDraftStore {
   private readonly itemCategoryStore = inject(ItemCategoryStore);
   private readonly taxGroupStore = inject(TaxGroupStore);
   private readonly taxStore = inject(TaxStore);
+  private readonly fiscalYearDateRange = inject(FiscalYearDateRangeService);
 
   // ── Submission flag ───────────────────────────────────────────────────────
 
@@ -73,7 +75,7 @@ export class SaleInvoiceDraftStore {
   readonly autoNumbering = signal(true);
   readonly numberEnabled = signal(false);
   readonly number = signal('Auto Number');
-  readonly date = signal(dayjs().format('YYYY-MM-DD'));
+  readonly date = signal(this.fiscalYearDateRange.defaultDate());
   readonly duedate = signal(dayjs().add(7, 'day').format('YYYY-MM-DD'));
   readonly currencycode = signal('INR');
   readonly taxoption = signal('Intra State');
@@ -196,9 +198,11 @@ export class SaleInvoiceDraftStore {
   readonly customerError = computed(() =>
     this.submitted() && !this.customerid() ? 'Customer is required.' : null,
   );
-  readonly dateError = computed(() =>
-    this.submitted() && !this.date() ? 'Date is required.' : null,
-  );
+  readonly dateError = computed(() => {
+    if (!this.submitted()) return null;
+    if (!this.date()) return 'Date is required.';
+    return this.fiscalYearDateRange.errorMessage(this.date());
+  });
 
   // ── Auto-numbering effect ─────────────────────────────────────────────────
 
@@ -564,7 +568,9 @@ export class SaleInvoiceDraftStore {
   }
 
   private async fetchTax(taxId: string): Promise<Tax | null> {
-    return this.taxStore.items().find((tax) => tax.id === taxId) ?? this.taxStore.loadTaxById(taxId);
+    return (
+      this.taxStore.items().find((tax) => tax.id === taxId) ?? this.taxStore.loadTaxById(taxId)
+    );
   }
 
   private taxIdsForMode(taxGroup: TaxGroup, taxOption: string): readonly string[] {

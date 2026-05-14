@@ -21,9 +21,10 @@
             <!-- Date -->
             <div class="field">
               <tng-label forId="rcpt-date" required>Receipt Date</tng-label>
-              <tng-datepicker
+              <app-fiscal-year-datepicker
                 id="rcpt-date"
                 [value]="rcptdate()"
+                [invalid]="dateError() !== null"
                 (valueChange)="onDateChange($event)"
               />
               @if (dateError()) {

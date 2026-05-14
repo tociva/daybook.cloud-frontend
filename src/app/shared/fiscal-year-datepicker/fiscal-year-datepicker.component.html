@@ -1,0 +1,15 @@
+<tng-datepicker
+  [id]="id()"
+  [value]="value()"
+  [minDate]="dateRange.minDate()"
+  [maxDate]="dateRange.maxDate()"
+  [disableDate]="disableDate()"
+  [disabled]="disabled()"
+  [fullWidth]="fullWidth()"
+  [inputAriaLabel]="inputAriaLabel()"
+  [invalid]="datepickerInvalid()"
+  [placeholder]="placeholder()"
+  [readonly]="readonly()"
+  [today]="today()"
+  (valueChange)="valueChange.emit($event)"
+/>

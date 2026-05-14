@@ -6,7 +6,6 @@ import {
   TngCardContentComponent,
   TngCardHeaderComponent,
   TngCardTitleComponent,
-  TngDatepickerComponent,
   TngInputComponent,
   TngLabelComponent,
   TngTextareaComponent,
@@ -27,6 +26,10 @@ import { CustomerReceiptFacade, CustomerReceiptStore } from '../../../data/custo
 import type { SaleInvoice } from '../../../data/sale-invoice/sale-invoice.model';
 import { SaleInvoiceStore } from '../../../data/sale-invoice';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
+import {
+  FiscalYearDatepickerComponent,
+  FiscalYearDateRangeService,
+} from '../../../../../../shared/fiscal-year-datepicker';
 
 // ── Internal row type ─────────────────────────────────────────────────────────
 
@@ -48,11 +51,11 @@ interface InvoiceRow {
     TngCardContentComponent,
     TngCardHeaderComponent,
     TngCardTitleComponent,
-    TngDatepickerComponent,
     TngInputComponent,
     TngIcon,
     TngLabelComponent,
     TngTextareaComponent,
+    FiscalYearDatepickerComponent,
     BurlBackButtonComponent,
   ],
   templateUrl: './create-customer-receipt.component.html',
@@ -62,6 +65,7 @@ export class CreateCustomerReceiptComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(CustomerReceiptFacade);
   private readonly dateManagement = inject(DateManagementService);
+  private readonly fiscalYearDateRange = inject(FiscalYearDateRangeService);
 
   protected readonly customerReceiptStore = inject(CustomerReceiptStore);
   protected readonly customerStore = inject(CustomerStore);
@@ -82,7 +86,7 @@ export class CreateCustomerReceiptComponent {
 
   // ── Form signals ──────────────────────────────────────────────────────────
 
-  protected readonly rcptdate = signal(dayjs().format('YYYY-MM-DD'));
+  protected readonly rcptdate = signal(this.fiscalYearDateRange.defaultDate());
   protected readonly amount = signal('');
   protected readonly currencycode = signal('INR');
   protected readonly description = signal('');
@@ -141,9 +145,11 @@ export class CreateCustomerReceiptComponent {
 
   // ── Errors ────────────────────────────────────────────────────────────────
 
-  protected readonly dateError = computed(() =>
-    this.submitted() && !this.rcptdate() ? 'Date is required.' : null,
-  );
+  protected readonly dateError = computed(() => {
+    if (!this.submitted()) return null;
+    if (!this.rcptdate()) return 'Date is required.';
+    return this.fiscalYearDateRange.errorMessage(this.rcptdate(), 'Receipt date');
+  });
   protected readonly customerError = computed(() =>
     this.submitted() && !this.customerid() ? 'Customer is required.' : null,
   );
@@ -187,7 +193,7 @@ export class CreateCustomerReceiptComponent {
   // ── Patch signals from loaded receipt (edit mode) ─────────────────────────
 
   private patchFromReceipt(r: CustomerReceipt): void {
-    this.rcptdate.set(r.date ?? dayjs().format('YYYY-MM-DD'));
+    this.rcptdate.set(r.date ?? this.fiscalYearDateRange.defaultDate());
     this.amount.set(String(r.amount ?? ''));
     this.currencycode.set(r.currencycode ?? 'INR');
     this.description.set(r.description ?? '');
@@ -370,7 +376,7 @@ export class CreateCustomerReceiptComponent {
 
     const amountVal = Number(this.amount());
     if (
-      !this.rcptdate() ||
+      this.dateError() !== null ||
       !this.customerid() ||
       !this.amount() ||
       amountVal <= 0 ||
