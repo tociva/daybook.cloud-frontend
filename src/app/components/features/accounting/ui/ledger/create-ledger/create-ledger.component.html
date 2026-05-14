@@ -93,15 +93,11 @@
           <tng-card-footer>
             <tng-card-actions align="end">
               <app-burl-back-button label="Cancel" />
-              <tng-button
-                type="submit"
-                appearance="solid"
-                tone="primary"
+              <app-burl-create-button
+                [icon]="mode() === 'edit' ? 'save' : 'plus'"
+                [label]="mode() === 'edit' ? 'Save changes' : 'Create ledger'"
                 [disabled]="ledgerStore.isLoading()"
-              >
-                <tng-icon [icon]="mode() === 'edit' ? 'save' : 'plus'" aria-hidden="true" />
-                {{ mode() === 'edit' ? 'Save changes' : 'Create ledger' }}
-              </tng-button>
+              />
             </tng-card-actions>
           </tng-card-footer>
         </form>

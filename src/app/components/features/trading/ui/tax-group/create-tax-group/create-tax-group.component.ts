@@ -22,6 +22,7 @@ import {
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
+import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
 import { TaxStore } from '../../../data/tax';
 import type { Tax } from '../../../data/tax';
 import { TaxGroupFacade, TaxGroupStore } from '../../../data/tax-group';
@@ -65,6 +66,7 @@ type TaxGroupFormModel = {
     TngStepperComponent,
     TngTextareaComponent,
     BurlBackButtonComponent,
+    BurlCreateButtonComponent,
   ],
   templateUrl: './create-tax-group.component.html',
   styleUrl: './create-tax-group.component.css',

@@ -1,8 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { TngButtonComponent } from '@tailng-ui/components';
-import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
+import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
 import { CustomerStore } from '../../../data/customer';
 import { ItemStore } from '../../../data/item';
 import type {
@@ -28,9 +27,8 @@ import { SiLineItemsComponent } from './si-line-items/si-line-items.component';
   standalone: true,
   providers: [SaleInvoiceDraftStore],
   imports: [
-    TngButtonComponent,
-    TngIcon,
     BurlBackButtonComponent,
+    BurlCreateButtonComponent,
     SiCustomerComponent,
     SiLineItemsComponent,
     SiInvoiceDetailsComponent,

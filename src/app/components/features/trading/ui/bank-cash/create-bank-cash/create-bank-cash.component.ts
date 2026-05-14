@@ -2,7 +2,6 @@ import { AfterViewInit, Component, ElementRef, ViewChild, computed, inject, sign
 import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import {
-  TngButtonComponent,
   TngCardActionsComponent,
   TngCardComponent,
   TngCardContentComponent,
@@ -16,8 +15,8 @@ import {
   TngLabelComponent,
   TngTextareaComponent,
 } from '@tailng-ui/components';
-import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
+import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
 import { BankCashFacade, BankCashStore } from '../../../data/bank-cash';
 import type { BankCashPayload } from '../../../data/bank-cash';
 
@@ -30,7 +29,6 @@ type BankCashFormModel = {
   selector: 'app-create-bank-cash',
   imports: [
     FormField,
-    TngButtonComponent,
     TngCardActionsComponent,
     TngCardComponent,
     TngCardContentComponent,
@@ -40,11 +38,11 @@ type BankCashFormModel = {
     TngCardTitleComponent,
     TngError,
     TngFormFieldComponent,
-    TngIcon,
     TngInputComponent,
     TngLabelComponent,
     TngTextareaComponent,
     BurlBackButtonComponent,
+    BurlCreateButtonComponent,
   ],
   templateUrl: './create-bank-cash.component.html',
   styleUrl: './create-bank-cash.component.css',

@@ -13,6 +13,7 @@ import {
 import { TngIcon } from '@tailng-ui/icons';
 import dayjs from 'dayjs';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
+import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
 import type { BankCash } from '../../../data/bank-cash/bank-cash.model';
 import { BankCashStore } from '../../../data/bank-cash';
 import type { Customer } from '../../../data/customer/customer.model';
@@ -57,6 +58,7 @@ interface InvoiceRow {
     TngTextareaComponent,
     FiscalYearDatepickerComponent,
     BurlBackButtonComponent,
+    BurlCreateButtonComponent,
   ],
   templateUrl: './create-customer-receipt.component.html',
   styleUrl: './create-customer-receipt.component.css',

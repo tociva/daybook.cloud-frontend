@@ -3,7 +3,6 @@ import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import {
   TngAutocompleteComponent,
-  TngButtonComponent,
   TngCardActionsComponent,
   TngCardComponent,
   TngCardContentComponent,
@@ -18,8 +17,8 @@ import {
   TngStepperComponent,
   TngTextareaComponent,
 } from '@tailng-ui/components';
-import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
+import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
 import { CustomerFacade, CustomerStore } from '../../../data/customer';
 import type { CustomerPayload } from '../../../data/customer';
 import type { Country } from '../../../../management/data/country/country.model';
@@ -50,7 +49,6 @@ type CustomerFormModel = {
   imports: [
     FormField,
     TngAutocompleteComponent,
-    TngButtonComponent,
     TngCardActionsComponent,
     TngCardComponent,
     TngCardContentComponent,
@@ -60,12 +58,12 @@ type CustomerFormModel = {
     TngCardTitleComponent,
     TngError,
     TngFormFieldComponent,
-    TngIcon,
     TngInputComponent,
     TngLabelComponent,
     TngStepperComponent,
     TngTextareaComponent,
     BurlBackButtonComponent,
+    BurlCreateButtonComponent,
   ],
   templateUrl: './create-customer.component.html',
   styleUrls: ['./create-customer.component.css', '../../../../../../../styles/flags.css'],

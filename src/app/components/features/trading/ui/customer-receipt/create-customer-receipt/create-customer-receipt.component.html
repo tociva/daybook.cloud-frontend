@@ -232,15 +232,11 @@
   <!-- ── Footer ─────────────────────────────────────────────────────────── -->
   <div class="receipt-actions">
     <app-burl-back-button label="Cancel" />
-    <tng-button
-      type="button"
-      appearance="solid"
-      tone="primary"
+    <app-burl-create-button
+      [type]="'button'"
+      [label]="mode() === 'edit' ? 'Update Receipt' : 'Create Receipt'"
       [disabled]="customerReceiptStore.isLoading()"
-      (click)="submitForm($event)"
-    >
-      <tng-icon icon="save" aria-hidden="true" />
-      {{ mode() === 'edit' ? 'Update Receipt' : 'Create Receipt' }}
-    </tng-button>
+      (clicked)="submitForm($event)"
+    />
   </div>
 </main>

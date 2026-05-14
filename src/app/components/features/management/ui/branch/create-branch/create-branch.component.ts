@@ -1,7 +1,6 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
-  TngButtonComponent,
   TngCardActionsComponent,
   TngCardComponent,
   TngCardContentComponent,
@@ -15,8 +14,8 @@ import {
   TngLabelComponent,
   TngTextareaComponent,
 } from '@tailng-ui/components';
-import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
+import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
 import { CountryStore } from '../../../data/country/country.store';
 import type { Country } from '../../../data/country/country.model';
 import { CurrencyStore } from '../../../data/currency/currency.store';
@@ -34,7 +33,6 @@ const DEFAULT_INVOICE_NUMBER_FORMAT = '<<YYYY>>/<<SERIAL3>>';
   selector: 'app-create-branch',
   standalone: true,
   imports: [
-    TngButtonComponent,
     TngCardActionsComponent,
     TngCardComponent,
     TngCardContentComponent,
@@ -44,11 +42,11 @@ const DEFAULT_INVOICE_NUMBER_FORMAT = '<<YYYY>>/<<SERIAL3>>';
     TngCardTitleComponent,
     TngError,
     TngFormFieldComponent,
-    TngIcon,
     TngInputComponent,
     TngLabelComponent,
     TngTextareaComponent,
     BurlBackButtonComponent,
+    BurlCreateButtonComponent,
   ],
   templateUrl: './create-branch.component.html',
   styleUrl: './create-branch.component.css',

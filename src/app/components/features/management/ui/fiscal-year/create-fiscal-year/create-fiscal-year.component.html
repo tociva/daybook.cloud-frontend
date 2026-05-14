@@ -153,19 +153,11 @@
         <tng-card-footer>
           <tng-card-actions align="end">
             <app-burl-back-button />
-            <tng-button type="submit" appearance="solid" tone="primary" [disabled]="isSubmitting()">
-              <tng-icon
-                [icon]="isSubmitting() ? 'loader' : mode() === 'edit' ? 'save' : 'plus'"
-                aria-hidden="true"
-              />
-              {{
-                isSubmitting()
-                  ? 'Saving…'
-                  : mode() === 'edit'
-                    ? 'Save changes'
-                    : 'Create fiscal year'
-              }}
-            </tng-button>
+            <app-burl-create-button
+              [icon]="isSubmitting() ? 'loader' : mode() === 'edit' ? 'save' : 'plus'"
+              [label]="isSubmitting() ? 'Saving…' : mode() === 'edit' ? 'Save changes' : 'Create fiscal year'"
+              [disabled]="isSubmitting()"
+            />
           </tng-card-actions>
         </tng-card-footer>
       </form>

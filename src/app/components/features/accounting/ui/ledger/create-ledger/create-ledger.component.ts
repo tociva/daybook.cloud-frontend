@@ -3,7 +3,6 @@ import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import {
   TngAutocompleteComponent,
-  TngButtonComponent,
   TngCardActionsComponent,
   TngCardComponent,
   TngCardContentComponent,
@@ -17,8 +16,8 @@ import {
   TngLabelComponent,
   TngTextareaComponent,
 } from '@tailng-ui/components';
-import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
+import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
 import { LedgerCategoryStore } from '../../../data/ledger-category';
 import type { LedgerCategory } from '../../../data/ledger-category';
 import { LedgerFacade, LedgerStore } from '../../../data/ledger';
@@ -38,7 +37,6 @@ type LedgerFormModel = {
   imports: [
     FormField,
     TngAutocompleteComponent,
-    TngButtonComponent,
     TngCardActionsComponent,
     TngCardComponent,
     TngCardContentComponent,
@@ -48,11 +46,11 @@ type LedgerFormModel = {
     TngCardTitleComponent,
     TngError,
     TngFormFieldComponent,
-    TngIcon,
     TngInputComponent,
     TngLabelComponent,
     TngTextareaComponent,
     BurlBackButtonComponent,
+    BurlCreateButtonComponent,
   ],
   templateUrl: './create-ledger.component.html',
   styleUrl: './create-ledger.component.css',

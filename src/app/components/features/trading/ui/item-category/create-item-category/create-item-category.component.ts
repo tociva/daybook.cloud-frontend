@@ -3,7 +3,6 @@ import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import {
   TngAutocompleteComponent,
-  TngButtonComponent,
   TngCardActionsComponent,
   TngCardComponent,
   TngCardContentComponent,
@@ -18,8 +17,8 @@ import {
   TngStepperComponent,
   TngTextareaComponent,
 } from '@tailng-ui/components';
-import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
+import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
 import { ItemCategoryFacade, ItemCategoryStore } from '../../../data/item-category';
 import type { ItemCategory, ItemCategoryPayload, ItemType } from '../../../data/item-category';
 import { TaxGroupStore } from '../../../data/tax-group';
@@ -42,7 +41,6 @@ type ItemCategoryFormModel = {
   imports: [
     FormField,
     TngAutocompleteComponent,
-    TngButtonComponent,
     TngCardActionsComponent,
     TngCardComponent,
     TngCardContentComponent,
@@ -52,12 +50,12 @@ type ItemCategoryFormModel = {
     TngCardTitleComponent,
     TngError,
     TngFormFieldComponent,
-    TngIcon,
     TngInputComponent,
     TngLabelComponent,
     TngStepperComponent,
     TngTextareaComponent,
     BurlBackButtonComponent,
+    BurlCreateButtonComponent,
   ],
   templateUrl: './create-item-category.component.html',
   styleUrl: './create-item-category.component.css',

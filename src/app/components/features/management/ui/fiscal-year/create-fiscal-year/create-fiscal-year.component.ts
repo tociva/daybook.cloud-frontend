@@ -11,7 +11,6 @@ import {
 import dayjs from 'dayjs';
 import { ActivatedRoute } from '@angular/router';
 import {
-  TngButtonComponent,
   TngCardActionsComponent,
   TngCardComponent,
   TngCardContentComponent,
@@ -25,8 +24,8 @@ import {
   TngInputComponent,
   TngLabelComponent,
 } from '@tailng-ui/components';
-import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
+import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
 import { DatepickerDateAdapterService } from '../../../../../../core/date/datepicker-date-adapter.service';
 import { CurrencyStore } from '../../../data/currency/currency.store';
 import type { Currency } from '../../../data/currency/currency.model';
@@ -39,7 +38,6 @@ import type { FiscalYearPayload } from '../../../data/fiscal-year';
   selector: 'app-create-fiscal-year',
   standalone: true,
   imports: [
-    TngButtonComponent,
     TngCardActionsComponent,
     TngCardComponent,
     TngCardContentComponent,
@@ -50,10 +48,10 @@ import type { FiscalYearPayload } from '../../../data/fiscal-year';
     TngDatepickerComponent,
     TngError,
     TngFormFieldComponent,
-    TngIcon,
     TngInputComponent,
     TngLabelComponent,
     BurlBackButtonComponent,
+    BurlCreateButtonComponent,
   ],
   templateUrl: './create-fiscal-year.component.html',
   styleUrl: './create-fiscal-year.component.css',

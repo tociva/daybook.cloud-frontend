@@ -85,15 +85,11 @@
           <tng-card-footer>
             <tng-card-actions align="end">
               <app-burl-back-button label="Cancel" />
-              <tng-button
-                type="submit"
-                appearance="solid"
-                tone="primary"
+              <app-burl-create-button
+                [icon]="mode() === 'edit' ? 'save' : 'plus'"
+                [label]="mode() === 'edit' ? 'Save changes' : 'Create category'"
                 [disabled]="ledgerCategoryStore.isLoading()"
-              >
-                <tng-icon [icon]="mode() === 'edit' ? 'save' : 'plus'" aria-hidden="true" />
-                {{ mode() === 'edit' ? 'Save changes' : 'Create category' }}
-              </tng-button>
+              />
             </tng-card-actions>
           </tng-card-footer>
         </form>

@@ -3,7 +3,6 @@ import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import {
   TngAutocompleteComponent,
-  TngButtonComponent,
   TngCardActionsComponent,
   TngCardComponent,
   TngCardContentComponent,
@@ -17,8 +16,8 @@ import {
   TngLabelComponent,
   TngTextareaComponent,
 } from '@tailng-ui/components';
-import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
+import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
 import { CountryStore } from '../../../data/country/country.store';
 import type { Country } from '../../../data/country/country.model';
 import { CurrencyStore } from '../../../data/currency/currency.store';
@@ -32,7 +31,6 @@ import type { OrganizationPayload } from '../../../data/organization';
   imports: [
     FormField,
     TngAutocompleteComponent,
-    TngButtonComponent,
     TngCardActionsComponent,
     TngCardComponent,
     TngCardContentComponent,
@@ -42,11 +40,11 @@ import type { OrganizationPayload } from '../../../data/organization';
     TngCardTitleComponent,
     TngError,
     TngFormFieldComponent,
-    TngIcon,
     TngInputComponent,
     TngLabelComponent,
     TngTextareaComponent,
     BurlBackButtonComponent,
+    BurlCreateButtonComponent,
   ],
   templateUrl: './create-organization.component.html',
   styleUrls: ['./create-organization.component.css', '../../../../../../../styles/flags.css'],

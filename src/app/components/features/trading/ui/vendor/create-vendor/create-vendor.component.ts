@@ -2,7 +2,6 @@ import { AfterViewInit, Component, ElementRef, ViewChild, computed, inject, sign
 import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import {
-  TngButtonComponent,
   TngCardActionsComponent,
   TngCardComponent,
   TngCardContentComponent,
@@ -17,8 +16,8 @@ import {
   TngStepperComponent,
   TngTextareaComponent,
 } from '@tailng-ui/components';
-import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
+import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
 import { VendorFacade, VendorStore } from '../../../data/vendor';
 import type { VendorPayload } from '../../../data/vendor';
 
@@ -45,7 +44,6 @@ type VendorFormModel = {
   standalone: true,
   imports: [
     FormField,
-    TngButtonComponent,
     TngCardActionsComponent,
     TngCardComponent,
     TngCardContentComponent,
@@ -55,12 +53,12 @@ type VendorFormModel = {
     TngCardTitleComponent,
     TngError,
     TngFormFieldComponent,
-    TngIcon,
     TngInputComponent,
     TngLabelComponent,
     TngStepperComponent,
     TngTextareaComponent,
     BurlBackButtonComponent,
+    BurlCreateButtonComponent,
   ],
   templateUrl: './create-vendor.component.html',
   styleUrl: './create-vendor.component.css',

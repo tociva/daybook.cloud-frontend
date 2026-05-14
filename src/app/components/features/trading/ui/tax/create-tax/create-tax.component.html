@@ -91,15 +91,7 @@
         <tng-card-footer>
           <tng-card-actions align="end">
             <app-burl-back-button label="Cancel" />
-            <tng-button
-              type="submit"
-              appearance="solid"
-              tone="primary"
-              [disabled]="taxStore.isLoading()"
-            >
-              <tng-icon icon="save" aria-hidden="true" />
-              Save
-            </tng-button>
+            <app-burl-create-button label="Save" [disabled]="taxStore.isLoading()" />
           </tng-card-actions>
         </tng-card-footer>
       </tng-card>
