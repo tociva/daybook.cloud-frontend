@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal, ViewEncapsulation } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import {
   TngAccordionComponent,
   TngAccordionItemComponent,
@@ -8,6 +9,7 @@ import {
   TngListboxComponent,
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
+import { filter } from 'rxjs';
 import { MenuNode, workspaceSidebarMenu } from '../workspace-nav.model';
 
 const groupSubtitleByPath: Readonly<Record<string, string>> = {
@@ -33,42 +35,36 @@ const groupSubtitleByPath: Readonly<Record<string, string>> = {
 })
 export class WorkspaceSidebarComponent {
   private readonly router = inject(Router);
+  private readonly currentUrl = signal(this.router.url);
 
   protected readonly menuList = workspaceSidebarMenu;
   protected readonly defaultExpandedGroups = computed(() =>
     this.menuList.filter((node) => node.children?.length).map((node) => node.path),
   );
 
-  /** Tracks the single globally-selected listbox path across all accordion panels. */
-  private readonly selectedPath = signal<string | null>(null);
-
   /**
    * Computed map: group.path → the selected child path (or null).
-   * Only the panel that "owns" the selected path gets a non-null value;
+   * Only the panel that owns the current route gets a non-null value;
    * every other panel receives null, clearing its selection automatically.
    */
   protected readonly activeGroupPaths = computed(() => {
-    const selected = this.selectedPath();
     const map = new Map<string, string | null>();
 
     for (const group of this.menuList) {
-      if (!group.children?.length) {
-        map.set(group.path, null);
-        continue;
-      }
-
-      if (selected !== null) {
-        // Give this group the value only if one of its children owns it.
-        const owns = group.children.some((child) => this.getChildPath(group, child) === selected);
-        map.set(group.path, owns ? selected : null);
-      } else {
-        // Fall back to router-URL-based detection (e.g. on initial load).
-        map.set(group.path, this.getActiveGroupPath(group));
-      }
+      map.set(group.path, this.getActiveGroupPath(group));
     }
 
     return map;
   });
+
+  constructor() {
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(),
+      )
+      .subscribe((event) => this.currentUrl.set(event.urlAfterRedirects));
+  }
 
   protected getNodePath(node: MenuNode): string {
     if (node.path.startsWith('/')) {
@@ -83,7 +79,8 @@ export class WorkspaceSidebarComponent {
   }
 
   protected isRouteActive(path: string): boolean {
-    return this.router.url === path || this.router.url.startsWith(`${path}/`);
+    const currentPath = this.currentUrl().split(/[?#]/)[0] ?? '';
+    return currentPath === path || currentPath.startsWith(`${path}/`);
   }
 
   protected getActiveGroupPath(group: MenuNode): string | null {
@@ -111,13 +108,9 @@ export class WorkspaceSidebarComponent {
 
   protected onGroupValueChange(value: unknown): void {
     if (typeof value !== 'string' || value.length === 0) {
-      // A deselect event — clear the global selection.
-      this.selectedPath.set(null);
       return;
     }
 
-    // Update the shared signal so all other panels lose their selection.
-    this.selectedPath.set(value);
-    this.router.navigateByUrl(value);
+    void this.router.navigateByUrl(value);
   }
 }
