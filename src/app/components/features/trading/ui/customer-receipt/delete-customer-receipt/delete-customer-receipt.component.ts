@@ -13,7 +13,7 @@ import {
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
-import { formatDisplayDate } from '../../../../../../core/date/dayjs-date.utils';
+import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { CustomerReceiptFacade, CustomerReceiptStore } from '../../../data/customer-receipt';
 
 @Component({
@@ -38,6 +38,7 @@ import { CustomerReceiptFacade, CustomerReceiptStore } from '../../../data/custo
 export class DeleteCustomerReceiptComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(CustomerReceiptFacade);
+  private readonly dateManagement = inject(DateManagementService);
   protected readonly customerReceiptStore = inject(CustomerReceiptStore);
   protected readonly confirmed = signal(false);
 
@@ -55,8 +56,7 @@ export class DeleteCustomerReceiptComponent {
   }
 
   protected formatDate(value: string | undefined): string {
-    if (!value) return '—';
-    return formatDisplayDate(value, '—');
+    return this.dateManagement.formatDisplayDate(value, '—');
   }
 
   protected formatAmount(value: number | undefined): string {

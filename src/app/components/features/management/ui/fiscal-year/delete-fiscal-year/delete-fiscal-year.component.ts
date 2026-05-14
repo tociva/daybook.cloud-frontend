@@ -14,7 +14,7 @@ import {
 import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 import { FiscalYearFacade, FiscalYearStore } from '../../../data/fiscal-year';
-import { formatDisplayDate } from '../../../../../../core/date/dayjs-date.utils';
+import { DateManagementService } from '../../../../../../core/date/date-management.service';
 
 @Component({
   selector: 'app-delete-fiscal-year',
@@ -39,9 +39,11 @@ import { formatDisplayDate } from '../../../../../../core/date/dayjs-date.utils'
 export class DeleteFiscalYearComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(FiscalYearFacade);
+  private readonly dateManagement = inject(DateManagementService);
   protected readonly fiscalYearStore = inject(FiscalYearStore);
   protected readonly confirmed = signal(false);
-  protected readonly formatDate = formatDisplayDate;
+  protected readonly formatDate = (value: string | null | undefined): string =>
+    this.dateManagement.formatDisplayDate(value);
 
   constructor() {
     void this.loadInitialState();

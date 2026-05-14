@@ -3,6 +3,8 @@ import customParseFormat from 'dayjs/plugin/customParseFormat';
 
 dayjs.extend(customParseFormat);
 
+export const DEFAULT_DISPLAY_DATE_FORMAT = 'DD MMM YYYY';
+
 export const toIsoDate = (value: unknown, fallback: string): string => {
   if (value instanceof Date && !Number.isNaN(value.getTime())) {
     return dayjs(value).format('YYYY-MM-DD');
@@ -46,16 +48,7 @@ export const toDateRangeEnd = (start: string, fallback: string): string => {
   return parsedStart.add(1, 'year').subtract(1, 'day').format('YYYY-MM-DD');
 };
 
-export const formatDisplayDate = (value: string, fallback = '-'): string => {
-  const parsed = parseIsoDate(value);
-  if (!parsed) {
-    return fallback;
-  }
-
-  return parsed.format('DD MMM YYYY');
-};
-
-const parseIsoDate = (value: string): dayjs.Dayjs | null => {
+export const parseIsoDate = (value: string): dayjs.Dayjs | null => {
   const parsed = dayjs(value, 'YYYY-MM-DD', true);
   return parsed.isValid() ? parsed : null;
 };

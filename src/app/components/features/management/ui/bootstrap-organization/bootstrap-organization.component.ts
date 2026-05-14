@@ -1,4 +1,13 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  ViewChild,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
 import { Router } from '@angular/router';
 import {
@@ -30,11 +39,11 @@ import { Currency } from '../../data/currency/currency.model';
 import { CurrencyStore } from '../../data/currency/currency.store';
 import { AppConfigStore } from '../../../../../core/config/app-config.store';
 import {
-  formatDisplayDate,
   toDateRangeEnd,
   toDateRangeStartFromFiscalStart,
   toIsoDate,
 } from '../../../../../core/date/dayjs-date.utils';
+import { DateManagementService } from '../../../../../core/date/date-management.service';
 import { DateFormat } from '../../data/date-format/date-format.model';
 import { DateFormatStore } from '../../data/date-format/date-format.store';
 import {
@@ -215,6 +224,7 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
   private readonly countryStore = inject(CountryStore);
   private readonly currencyStore = inject(CurrencyStore);
   private readonly dateFormatStore = inject(DateFormatStore);
+  private readonly dateManagement = inject(DateManagementService);
   private readonly appConfigStore = inject(AppConfigStore);
   private readonly bootstrapOrganizationStore = inject(BootstrapOrganizationStore);
   private readonly userSessionService = inject(UserSessionService);
@@ -425,7 +435,7 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
     return firstPending?.value ?? 'defaults';
   });
   protected readonly formattedFiscalDateRangeEnd = computed(() =>
-    formatDisplayDate(this.organizationModel().fiscalDateRange.end),
+    this.dateManagement.formatDisplayDate(this.organizationModel().fiscalDateRange.end),
   );
 
   protected fieldError(field: OrgValidationFieldKey): string | null {

@@ -14,7 +14,7 @@ import { TngIcon } from '@tailng-ui/icons';
 import { Router } from '@angular/router';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 import { SALE_INVOICE_DETAIL_INCLUDES, SaleInvoiceStore } from '../../../data/sale-invoice';
-import { formatDisplayDate } from '../../../../../../core/date/dayjs-date.utils';
+import { DateManagementService } from '../../../../../../core/date/date-management.service';
 
 @Component({
   selector: 'app-view-sale-invoice',
@@ -37,6 +37,7 @@ import { formatDisplayDate } from '../../../../../../core/date/dayjs-date.utils'
 export class ViewSaleInvoiceComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly dateManagement = inject(DateManagementService);
   protected readonly saleInvoiceStore = inject(SaleInvoiceStore);
 
   constructor() {
@@ -53,8 +54,7 @@ export class ViewSaleInvoiceComponent {
   }
 
   protected formatDate(value: string | undefined): string {
-    if (!value) return '—';
-    return formatDisplayDate(value, '—');
+    return this.dateManagement.formatDisplayDate(value, '—');
   }
 
   protected formatAmount(value: number | undefined): string {

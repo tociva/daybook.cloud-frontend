@@ -15,7 +15,7 @@ import {
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
-import { formatDisplayDate } from '../../../../../../core/date/dayjs-date.utils';
+import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { CustomerReceiptStore } from '../../../data/customer-receipt';
 import type { CustomerReceipt } from '../../../data/customer-receipt';
 
@@ -38,6 +38,7 @@ import type { CustomerReceipt } from '../../../data/customer-receipt';
 })
 export class ListCustomerReceiptComponent {
   private readonly router = inject(Router);
+  private readonly dateManagement = inject(DateManagementService);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly customerReceiptStore = inject(CustomerReceiptStore);
   protected readonly hasError = computed(() => this.customerReceiptStore.error() !== null);
@@ -64,8 +65,7 @@ export class ListCustomerReceiptComponent {
   ];
 
   protected formatDate(value: string | undefined): string {
-    if (!value) return '—';
-    return formatDisplayDate(value, '—');
+    return this.dateManagement.formatDisplayDate(value, '—');
   }
 
   protected formatAmount(value: number | undefined): string {

@@ -14,7 +14,7 @@ import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
 import { FiscalYearStore } from '../../../data/fiscal-year';
-import { formatDisplayDate } from '../../../../../../core/date/dayjs-date.utils';
+import { DateManagementService } from '../../../../../../core/date/date-management.service';
 
 @Component({
   selector: 'app-view-fiscal-year',
@@ -39,8 +39,10 @@ export class ViewFiscalYearComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly burlNavigation = inject(BurlNavigationService);
+  private readonly dateManagement = inject(DateManagementService);
   protected readonly fiscalYearStore = inject(FiscalYearStore);
-  protected readonly formatDate = formatDisplayDate;
+  protected readonly formatDate = (value: string | null | undefined): string =>
+    this.dateManagement.formatDisplayDate(value);
 
   constructor() {
     void this.loadInitialState();

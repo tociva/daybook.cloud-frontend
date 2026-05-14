@@ -17,7 +17,7 @@ import type { CrudFilterField } from '../../../../../../shared/crud';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { SaleInvoiceStore } from '../../../data/sale-invoice';
 import type { SaleInvoice } from '../../../data/sale-invoice';
-import { formatDisplayDate } from '../../../../../../core/date/dayjs-date.utils';
+import { DateManagementService } from '../../../../../../core/date/date-management.service';
 
 @Component({
   selector: 'app-list-sale-invoice',
@@ -38,6 +38,7 @@ import { formatDisplayDate } from '../../../../../../core/date/dayjs-date.utils'
 })
 export class ListSaleInvoiceComponent {
   private readonly router = inject(Router);
+  private readonly dateManagement = inject(DateManagementService);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly saleInvoiceStore = inject(SaleInvoiceStore);
   protected readonly hasError = computed(() => this.saleInvoiceStore.error() !== null);
@@ -65,8 +66,7 @@ export class ListSaleInvoiceComponent {
   ];
 
   protected formatDate(value: string | undefined): string {
-    if (!value) return '—';
-    return formatDisplayDate(value, '—');
+    return this.dateManagement.formatDisplayDate(value, '—');
   }
 
   protected formatAmount(value: number | undefined): string {

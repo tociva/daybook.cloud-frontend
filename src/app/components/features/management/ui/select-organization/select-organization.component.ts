@@ -13,7 +13,7 @@ import {
 import type { TngTableColumn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { PageHeadingComponent } from '../../../../../shared/page-heading/page-heading.component';
-import { formatDisplayDate } from '../../../../../core/date/dayjs-date.utils';
+import { DateManagementService } from '../../../../../core/date/date-management.service';
 import { UserSessionStore } from '../../data/user-session/user-session.store';
 import type { Branch } from '../../data/branch/branch.model';
 import type { FiscalYear } from '../../data/fiscal-year/fiscal-year.model';
@@ -64,9 +64,11 @@ export type OrganizationGroup = Readonly<{
 })
 export class SelectOrganizationComponent {
   private readonly router = inject(Router);
+  private readonly dateManagement = inject(DateManagementService);
   private readonly userSessionStore = inject(UserSessionStore);
 
-  protected readonly formatDate = formatDisplayDate;
+  protected readonly formatDate = (value: string | null | undefined): string =>
+    this.dateManagement.formatDisplayDate(value);
   protected readonly applyingRowKey = signal<string | null>(null);
   protected readonly errorMessage = signal<string | null>(null);
 

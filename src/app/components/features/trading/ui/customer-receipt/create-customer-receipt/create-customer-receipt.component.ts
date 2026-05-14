@@ -26,6 +26,7 @@ import type {
 import { CustomerReceiptFacade, CustomerReceiptStore } from '../../../data/customer-receipt';
 import type { SaleInvoice } from '../../../data/sale-invoice/sale-invoice.model';
 import { SaleInvoiceStore } from '../../../data/sale-invoice';
+import { DateManagementService } from '../../../../../../core/date/date-management.service';
 
 // ── Internal row type ─────────────────────────────────────────────────────────
 
@@ -60,6 +61,7 @@ interface InvoiceRow {
 export class CreateCustomerReceiptComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(CustomerReceiptFacade);
+  private readonly dateManagement = inject(DateManagementService);
 
   protected readonly customerReceiptStore = inject(CustomerReceiptStore);
   protected readonly customerStore = inject(CustomerStore);
@@ -341,7 +343,8 @@ export class CreateCustomerReceiptComponent {
   protected invoiceDisplayName(invoice: SaleInvoice): string {
     const parts: string[] = [];
     if (invoice.number) parts.push(invoice.number);
-    if (invoice.date) parts.push(`dated ${dayjs(invoice.date).format('DD MMM YYYY')}`);
+    const formattedDate = this.dateManagement.formatDisplayDate(invoice.date, '');
+    if (formattedDate) parts.push(`dated ${formattedDate}`);
     if (invoice.grandtotal != null)
       parts.push(`(${this.currencycode()} ${invoice.grandtotal.toFixed(2)})`);
     return parts.join(' ');

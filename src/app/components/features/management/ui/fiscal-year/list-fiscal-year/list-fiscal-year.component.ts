@@ -17,7 +17,7 @@ import type { CrudFilterField } from '../../../../../../shared/crud';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { FiscalYearStore } from '../../../data/fiscal-year';
 import type { FiscalYear } from '../../../data/fiscal-year';
-import { formatDisplayDate } from '../../../../../../core/date/dayjs-date.utils';
+import { DateManagementService } from '../../../../../../core/date/date-management.service';
 
 @Component({
   selector: 'app-list-fiscal-year',
@@ -39,10 +39,12 @@ import { formatDisplayDate } from '../../../../../../core/date/dayjs-date.utils'
 })
 export class ListFiscalYearComponent {
   private readonly router = inject(Router);
+  private readonly dateManagement = inject(DateManagementService);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly fiscalYearStore = inject(FiscalYearStore);
   protected readonly hasError = computed(() => this.fiscalYearStore.error() !== null);
-  protected readonly formatDate = formatDisplayDate;
+  protected readonly formatDate = (value: string | null | undefined): string =>
+    this.dateManagement.formatDisplayDate(value);
 
   protected readonly columns: readonly TngTableColumn<FiscalYear>[] = [
     { id: 'name', label: 'Name', sortable: true, width: '14rem' },
