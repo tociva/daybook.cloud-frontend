@@ -10,6 +10,7 @@ import {
   TngSelectComponent,
   TngSwitchComponent,
 } from '@tailng-ui/components';
+import { DatepickerDateAdapterService } from '../../../../../../../core/date/datepicker-date-adapter.service';
 import { DateManagementService } from '../../../../../../../core/date/date-management.service';
 import { FiscalYearDatepickerComponent } from '../../../../../../../shared/fiscal-year-datepicker';
 import { SaleInvoiceDraftStore, type SelectOption } from '../sale-invoice-draft.store';
@@ -34,6 +35,7 @@ import { SaleInvoiceDraftStore, type SelectOption } from '../sale-invoice-draft.
 })
 export class SiInvoiceDetailsComponent {
   protected readonly draft = inject(SaleInvoiceDraftStore);
+  protected readonly datepickerAdapter = inject(DatepickerDateAdapterService);
   private readonly dateManagement = inject(DateManagementService);
   readonly readOnly = input(false);
 

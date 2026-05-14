@@ -351,12 +351,14 @@ export class SaleInvoiceDraftStore {
 
   onDateChange(value: unknown): void {
     if (typeof value === 'string') this.date.set(value);
+    else if (dayjs.isDayjs(value) && value.isValid()) this.date.set(value.format('YYYY-MM-DD'));
     else if (value instanceof Date && !Number.isNaN(value.getTime()))
       this.date.set(dayjs(value).format('YYYY-MM-DD'));
   }
 
   onDueDateChange(value: unknown): void {
     if (typeof value === 'string') this.duedate.set(value);
+    else if (dayjs.isDayjs(value) && value.isValid()) this.duedate.set(value.format('YYYY-MM-DD'));
     else if (value instanceof Date && !Number.isNaN(value.getTime()))
       this.duedate.set(dayjs(value).format('YYYY-MM-DD'));
   }

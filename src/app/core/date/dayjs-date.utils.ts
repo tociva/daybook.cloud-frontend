@@ -6,6 +6,10 @@ dayjs.extend(customParseFormat);
 export const DEFAULT_DISPLAY_DATE_FORMAT = 'DD MMM YYYY';
 
 export const toIsoDate = (value: unknown, fallback: string): string => {
+  if (dayjs.isDayjs(value) && value.isValid()) {
+    return value.format('YYYY-MM-DD');
+  }
+
   if (value instanceof Date && !Number.isNaN(value.getTime())) {
     return dayjs(value).format('YYYY-MM-DD');
   }

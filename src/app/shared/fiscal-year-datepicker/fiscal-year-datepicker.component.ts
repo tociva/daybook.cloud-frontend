@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { TngDatepickerComponent } from '@tailng-ui/components';
 import type { TngDateInputValue, TngDateSelectionInput, TngDateValue } from '@tailng-ui/primitives';
+import { DatepickerDateAdapterService } from '../../core/date/datepicker-date-adapter.service';
 import { FiscalYearDateRangeService } from './fiscal-year-date-range.service';
 
 @Component({
@@ -19,6 +20,7 @@ import { FiscalYearDateRangeService } from './fiscal-year-date-range.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FiscalYearDatepickerComponent {
+  protected readonly datepickerAdapter = inject(DatepickerDateAdapterService);
   protected readonly dateRange = inject(FiscalYearDateRangeService);
 
   readonly disabled = input(false, { transform: booleanAttribute });

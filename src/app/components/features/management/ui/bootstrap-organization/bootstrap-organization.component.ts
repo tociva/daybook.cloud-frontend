@@ -38,6 +38,7 @@ import { CountryStore } from '../../data/country/country.store';
 import { Currency } from '../../data/currency/currency.model';
 import { CurrencyStore } from '../../data/currency/currency.store';
 import { AppConfigStore } from '../../../../../core/config/app-config.store';
+import { DatepickerDateAdapterService } from '../../../../../core/date/datepicker-date-adapter.service';
 import {
   toDateRangeEnd,
   toDateRangeStartFromFiscalStart,
@@ -225,6 +226,7 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
   private readonly currencyStore = inject(CurrencyStore);
   private readonly dateFormatStore = inject(DateFormatStore);
   private readonly dateManagement = inject(DateManagementService);
+  protected readonly datepickerAdapter = inject(DatepickerDateAdapterService);
   private readonly appConfigStore = inject(AppConfigStore);
   private readonly bootstrapOrganizationStore = inject(BootstrapOrganizationStore);
   private readonly userSessionService = inject(UserSessionService);

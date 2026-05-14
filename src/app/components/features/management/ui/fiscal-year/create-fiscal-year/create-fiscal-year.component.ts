@@ -1,4 +1,13 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  ViewChild,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import dayjs from 'dayjs';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -18,6 +27,7 @@ import {
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
+import { DatepickerDateAdapterService } from '../../../../../../core/date/datepicker-date-adapter.service';
 import { CurrencyStore } from '../../../data/currency/currency.store';
 import type { Currency } from '../../../data/currency/currency.model';
 import { BranchStore } from '../../../data/branch';
@@ -53,6 +63,7 @@ export class CreateFiscalYearComponent implements AfterViewInit {
   @ViewChild('nameInputRef', { read: ElementRef }) private nameInputRef!: ElementRef;
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(FiscalYearFacade);
+  protected readonly datepickerAdapter = inject(DatepickerDateAdapterService);
   protected readonly fiscalYearStore = inject(FiscalYearStore);
   protected readonly currencyStore = inject(CurrencyStore);
   protected readonly branchStore = inject(BranchStore);

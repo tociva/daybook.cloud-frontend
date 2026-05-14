@@ -37,7 +37,9 @@
                   [ariaInvalid]="isInvalid('email')"
                   (valueChange)="markTouched('email')"
                 />
-                <tng-error [show]="fieldError('email') !== null">{{ fieldError('email') }}</tng-error>
+                <tng-error [show]="fieldError('email') !== null">{{
+                  fieldError('email')
+                }}</tng-error>
               </tng-form-field>
             </div>
 
@@ -70,7 +72,9 @@
                     <span [class]="getCountryFlagClass(option)" aria-hidden="true"></span>
                   </ng-template>
                 </tng-autocomplete>
-                <tng-error [show]="fieldError('country') !== null">{{ fieldError('country') }}</tng-error>
+                <tng-error [show]="fieldError('country') !== null">{{
+                  fieldError('country')
+                }}</tng-error>
               </tng-form-field>
             </div>
 
@@ -224,11 +228,14 @@
                 <tng-datepicker
                   id="org-fiscal-range-start"
                   placeholder="2026-01-01"
+                  [adapter]="datepickerAdapter.adapter()"
                   [formField]="organizationForm.fiscalDateRange.start"
                   [ariaInvalid]="isInvalid('fiscalDateRange.start')"
                   (valueChange)="onDateRangeStartChange($event)"
                 />
-                <tng-hint class="field-help">Date Range End: {{ formattedFiscalDateRangeEnd() }}</tng-hint>
+                <tng-hint class="field-help"
+                  >Date Range End: {{ formattedFiscalDateRangeEnd() }}</tng-hint
+                >
                 <tng-error [show]="fieldError('fiscalDateRange.start') !== null">{{
                   fieldError('fiscalDateRange.start')
                 }}</tng-error>
@@ -271,7 +278,9 @@
                     (keydown.space)="$event.preventDefault(); invoiceTemplateDialogOpen.set(true)"
                   />
                 </tng-input-group>
-                <tng-error [show]="fieldError('invnumber') !== null">{{ fieldError('invnumber') }}</tng-error>
+                <tng-error [show]="fieldError('invnumber') !== null">{{
+                  fieldError('invnumber')
+                }}</tng-error>
               </tng-form-field>
             </div>
 
@@ -298,7 +307,9 @@
                     (keydown.space)="$event.preventDefault(); journalTemplateDialogOpen.set(true)"
                   />
                 </tng-input-group>
-                <tng-error [show]="fieldError('jnumber') !== null">{{ fieldError('jnumber') }}</tng-error>
+                <tng-error [show]="fieldError('jnumber') !== null">{{
+                  fieldError('jnumber')
+                }}</tng-error>
               </tng-form-field>
             </div>
 
@@ -332,7 +343,9 @@
                   (valueChange)="selectCurrency($event)"
                   (queryChange)="onCurrencyQueryChange($event)"
                 />
-                <tng-error [show]="fieldError('currency') !== null">{{ fieldError('currency') }}</tng-error>
+                <tng-error [show]="fieldError('currency') !== null">{{
+                  fieldError('currency')
+                }}</tng-error>
               </tng-form-field>
             </div>
 

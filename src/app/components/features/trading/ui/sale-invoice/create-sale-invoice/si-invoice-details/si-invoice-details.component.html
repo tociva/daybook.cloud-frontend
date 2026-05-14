@@ -67,6 +67,7 @@
           <tng-label forId="inv-duedate">Due Date</tng-label>
           <tng-datepicker
             id="inv-duedate"
+            [adapter]="datepickerAdapter.adapter()"
             [value]="draft.duedate()"
             (valueChange)="draft.onDueDateChange($event)"
           />

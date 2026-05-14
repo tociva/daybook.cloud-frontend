@@ -1,59 +1,91 @@
-import { type TngDateAdapter } from '@tailng-ui/primitives';
+import {
+  defaultDatepickerDateAdapter,
+  type TngDateAdapter,
+  type TngDateFormatToken,
+} from '@tailng-ui/primitives';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import updateLocale from 'dayjs/plugin/updateLocale';
+import { DEFAULT_DISPLAY_DATE_FORMAT } from './dayjs-date.utils';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(updateLocale);
 
-const withLocale = (value: dayjs.Dayjs, locale?: string): dayjs.Dayjs =>
-  locale ? value.locale(locale) : value;
+function resolveDatepickerFormat(
+  format: TngDateFormatToken | string,
+  inputDateFormat: string,
+): string {
+  switch (format) {
+    case 'input':
+      return inputDateFormat;
+    case 'label':
+      return 'D MMMM YYYY';
+    case 'month-year':
+      return 'MMMM YYYY';
+    case 'month-long':
+      return 'MMMM';
+    case 'month-short':
+      return 'MMM';
+    case 'weekday-short':
+      return 'ddd';
+    case 'weekday-narrow':
+      return 'dd';
+    case 'day-number':
+      return 'D';
+    case 'year-label':
+      return 'YYYY';
+    default:
+      return format;
+  }
+}
 
-export const dayjsDatepickerDateAdapter: TngDateAdapter<dayjs.Dayjs> = Object.freeze({
-  addDays: (date, amount) => date.add(amount, 'day'),
-  addMonths: (date, amount) => date.add(amount, 'month'),
-  addYears: (date, amount) => date.add(amount, 'year'),
-  compare: (left, right) => {
-    const leftValue = left.valueOf();
-    const rightValue = right.valueOf();
-    if (leftValue < rightValue) {
-      return -1;
-    }
-    if (leftValue > rightValue) {
-      return 1;
-    }
-    return 0;
-  },
-  createDate: (year, month, day) => dayjs().year(year).month(month).date(day).startOf('day'),
-  deserialize: (value, locale) => {
-    if (dayjs.isDayjs(value)) {
-      return withLocale(value.startOf('day'), locale);
-    }
-    if (value instanceof Date && !Number.isNaN(value.getTime())) {
-      return withLocale(dayjs(value).startOf('day'), locale);
-    }
-    if (typeof value === 'string') {
-      const parsed = dayjs(value, ['YYYY-MM-DD', 'YYYY/MM/DD'], true);
-      return parsed.isValid() ? withLocale(parsed.startOf('day'), locale) : null;
-    }
-    return null;
-  },
-  endOfMonth: (date) => date.endOf('month').startOf('day'),
-  format: (date, format, locale) => withLocale(date, locale).format(format),
-  getDate: (date) => date.date(),
-  getDay: (date) => date.day(),
-  getMonth: (date) => date.month(),
-  getYear: (date) => date.year(),
-  isValid: (date) => date.isValid(),
-  parse: (text, locale) => {
-    const parsed = dayjs(text, ['YYYY-MM-DD', 'DD/MM/YYYY', 'MM/DD/YYYY'], true);
-    return parsed.isValid() ? withLocale(parsed.startOf('day'), locale) : null;
-  },
-  startOfMonth: (date) => date.startOf('month'),
-  startOfWeek: (date, weekStartsOn) => {
-    const current = date.day();
-    const offset = (current - weekStartsOn + 7) % 7;
-    return date.subtract(offset, 'day').startOf('day');
-  },
-  today: () => dayjs().startOf('day'),
-});
+export function createDayjsDatepickerDateAdapter(
+  inputDateFormat = DEFAULT_DISPLAY_DATE_FORMAT,
+): TngDateAdapter<Date> {
+  const inputFormats = Array.from(
+    new Set([
+      inputDateFormat,
+      DEFAULT_DISPLAY_DATE_FORMAT,
+      'YYYY-MM-DD',
+      'YYYY/MM/DD',
+      'DD/MM/YYYY',
+      'MM/DD/YYYY',
+    ]),
+  );
+
+  return Object.freeze({
+    ...defaultDatepickerDateAdapter,
+    deserialize: (value, locale) => {
+      if (typeof value === 'string') {
+        const parsed = dayjs(value, inputFormats, true);
+        if (parsed.isValid()) {
+          return defaultDatepickerDateAdapter.createDate(
+            parsed.year(),
+            parsed.month(),
+            parsed.date(),
+          );
+        }
+      }
+
+      return defaultDatepickerDateAdapter.deserialize?.(value, locale) ?? null;
+    },
+    format: (date, format, locale) =>
+      dayjs(date)
+        .locale(locale ?? 'en')
+        .format(resolveDatepickerFormat(format, inputDateFormat)),
+    parse: (text, locale) => {
+      const parsed = dayjs(text, inputFormats, true);
+      if (parsed.isValid()) {
+        return defaultDatepickerDateAdapter.createDate(
+          parsed.year(),
+          parsed.month(),
+          parsed.date(),
+        );
+      }
+
+      return defaultDatepickerDateAdapter.parse(text, locale);
+    },
+  });
+}
+
+export const dayjsDatepickerDateAdapter: TngDateAdapter<Date> = createDayjsDatepickerDateAdapter();
