@@ -2,7 +2,7 @@ import { HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { ApiClientService } from '../../core/api/api-client.service';
 import { AppConfigStore } from '../../core/config/app-config.store';
-import type { Lb4Count, Lb4ListQuery } from './lb4-query';
+import type { Lb4Count, Lb4Include, Lb4ListQuery } from './lb4-query';
 import { normalizeLb4Filter, toLb4ListRequestFilterBody } from './lb4-query';
 
 @Injectable({ providedIn: 'root' })
@@ -25,10 +25,12 @@ export class CrudApiService {
   async getById<TEntity>(
     endpointPath: string,
     id: string,
-    query?: Readonly<{ includes?: readonly string[] }>,
+    query?: Readonly<{ includes?: readonly Lb4Include[] }>,
   ): Promise<TEntity> {
     const url = `${await this.collectionUrl(endpointPath)}/${id}`;
-    const include = query?.includes?.filter((name) => name.length > 0);
+    const include = query?.includes?.filter((entry) =>
+      typeof entry === 'string' ? entry.length > 0 : entry.relation.length > 0,
+    );
     if (!include?.length) {
       return this.api.get<TEntity>(url);
     }

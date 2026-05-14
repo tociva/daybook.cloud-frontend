@@ -1,4 +1,4 @@
-import type { Lb4ListQuery } from '../../../../../shared/crud';
+import type { Lb4Include, Lb4ListQuery } from '../../../../../shared/crud';
 import type { Customer } from '../customer/customer.model';
 import type { Item } from '../item/item.model';
 import type { Tax } from '../tax/tax.model';
@@ -87,7 +87,7 @@ export type SaleInvoiceItemTaxRequest = Readonly<{
 
 export type SaleInvoiceItemRequest = Readonly<{
   name: string;
-  displayname?: string;
+  displayname: string;
   description?: string;
   order: number;
   code: string;
@@ -161,5 +161,32 @@ export type SaleInvoice = Readonly<{
 export type SaleInvoiceListQuery = Lb4ListQuery;
 
 export type SaleInvoiceGetQuery = Readonly<{
-  includes?: readonly string[];
+  includes?: readonly Lb4Include[];
 }>;
+
+export const SALE_INVOICE_DETAIL_INCLUDES = [
+  'currency',
+  'customer',
+  {
+    relation: 'items',
+    scope: {
+      include: [
+        {
+          relation: 'item',
+          scope: {
+            include: [
+              {
+                relation: 'category',
+                scope: { include: ['taxgroup'] },
+              },
+            ],
+          },
+        },
+        {
+          relation: 'taxes',
+          scope: { include: ['tax'] },
+        },
+      ],
+    },
+  },
+] as const satisfies readonly Lb4Include[];

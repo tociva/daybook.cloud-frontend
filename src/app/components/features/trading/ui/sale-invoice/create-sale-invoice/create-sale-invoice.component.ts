@@ -11,7 +11,11 @@ import type {
   SaleInvoiceItemTaxRequest,
   SaleInvoicePayload,
 } from '../../../data/sale-invoice';
-import { SaleInvoiceFacade, SaleInvoiceStore } from '../../../data/sale-invoice';
+import {
+  SALE_INVOICE_DETAIL_INCLUDES,
+  SaleInvoiceFacade,
+  SaleInvoiceStore,
+} from '../../../data/sale-invoice';
 import { TaxStore } from '../../../data/tax';
 import { TaxGroupStore } from '../../../data/tax-group';
 import { SaleInvoiceDraftStore, toNum } from './sale-invoice-draft.store';
@@ -73,7 +77,7 @@ export class CreateSaleInvoiceComponent {
 
     if (id) {
       const invoice = await this.saleInvoiceStore.loadSaleInvoiceById(id, {
-        includes: ['currency', 'customer', 'items.item.category.taxgroup', 'items.taxes.tax'],
+        includes: SALE_INVOICE_DETAIL_INCLUDES,
       });
       if (invoice) this.draft.patchFromInvoice(invoice);
     }
@@ -117,19 +121,21 @@ export class CreateSaleInvoiceComponent {
         amount: toNum(t.amount),
         ...(t.taxid ? { taxid: t.taxid } : {}),
       }));
+      const displayname = row.item?.displayname ?? row.item?.name ?? row.name ?? '';
+
       return {
         name: row.name,
+        displayname,
+        description: row.description,
         code: row.code,
         order: i + 1,
-        ...(row.description ? { description: row.description } : {}),
         price: toNum(row.price),
-        quantity1: toNum(row.quantity1),
-        quantity: toNum(row.quantity2),
+        quantity: Math.max(1, toNum(this.draft.quantityForRow(row))),
         itemtotal: toNum(row.itemtotal),
-        ...(row.discpercent ? { discpercent: toNum(row.discpercent) } : {}),
-        ...(row.discamount ? { discamount: toNum(row.discamount) } : {}),
+        discpercent: toNum(row.discpercent),
+        discamount: toNum(row.discamount),
         subtotal: toNum(row.subtotal),
-        ...(row.taxamount ? { taxamount: toNum(row.taxamount) } : {}),
+        taxamount: toNum(row.taxamount),
         grandtotal: toNum(row.grandtotal),
         itemid: row.itemid,
         taxes,
@@ -143,19 +149,21 @@ export class CreateSaleInvoiceComponent {
       date: this.draft.date(),
       duedate: this.draft.duedate(),
       itemtotal: toNum(this.draft.itemtotal()),
-      ...(toNum(this.draft.discount()) ? { discount: toNum(this.draft.discount()) } : {}),
+      discount: toNum(this.draft.discount()),
       subtotal: toNum(this.draft.subtotal()),
-      ...(toNum(this.draft.tax()) ? { tax: toNum(this.draft.tax()) } : {}),
-      ...(toNum(this.draft.roundoff()) ? { roundoff: toNum(this.draft.roundoff()) } : {}),
+      tax: toNum(this.draft.tax()),
+      roundoff: toNum(this.draft.roundoff()),
       grandtotal: toNum(this.draft.grandtotal()),
       currencycode: this.draft.currencycode(),
       billingaddress: billing,
       shippingaddress: shipping,
+      description: '',
       customerid: this.draft.customerid(),
       items,
       cprops: {
         autoNumbering: this.draft.autoNumbering(),
         showdiscount: this.draft.showDiscount(),
+        showdescription: this.draft.showDescription(),
         taxoption: this.draft.taxoption(),
         deliverystate: this.draft.deliverystate(),
         usebillingforshipping: this.draft.useBillingForShipping(),

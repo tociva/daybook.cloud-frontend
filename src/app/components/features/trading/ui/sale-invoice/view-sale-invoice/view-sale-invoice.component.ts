@@ -13,7 +13,7 @@ import {
 import { TngIcon } from '@tailng-ui/icons';
 import { Router } from '@angular/router';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
-import { SaleInvoiceStore } from '../../../data/sale-invoice';
+import { SALE_INVOICE_DETAIL_INCLUDES, SaleInvoiceStore } from '../../../data/sale-invoice';
 import { formatDisplayDate } from '../../../../../../core/date/dayjs-date.utils';
 
 @Component({
@@ -47,7 +47,7 @@ export class ViewSaleInvoiceComponent {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       await this.saleInvoiceStore.loadSaleInvoiceById(id, {
-        includes: ['currency', 'customer', 'items.item.category.taxgroup', 'items.taxes.tax'],
+        includes: SALE_INVOICE_DETAIL_INCLUDES,
       });
     }
   }

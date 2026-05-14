@@ -1,8 +1,10 @@
 export type Lb4Where = Record<string, unknown>;
 
+export type Lb4Include = string | Readonly<{ relation: string; scope?: Record<string, unknown> }>;
+
 export type Lb4ListQuery = Readonly<{
   /** Relation names to embed; serialized to LoopBack `include` on list requests. */
-  includes?: readonly string[];
+  includes?: readonly Lb4Include[];
   limit?: number;
   offset?: number;
   order?: readonly string[];
@@ -31,11 +33,15 @@ export type Lb4SortState = Readonly<{
 
 export const DEFAULT_LB4_PAGE_SIZE = 10;
 
+function isNonEmptyInclude(include: Lb4Include): boolean {
+  return typeof include === 'string' ? include.length > 0 : include.relation.length > 0;
+}
+
 export function normalizeLb4Filter(
   filter: Lb4ListQuery,
   defaultLimit = DEFAULT_LB4_PAGE_SIZE,
 ): Lb4ListQuery {
-  const includes = filter.includes?.filter((name) => name.length > 0);
+  const includes = filter.includes?.filter(isNonEmptyInclude);
   return {
     limit: filter.limit ?? defaultLimit,
     offset: filter.offset ?? 0,
@@ -47,13 +53,13 @@ export function normalizeLb4Filter(
 
 /** LoopBack list `filter` JSON uses `include`, not `includes`. */
 export function toLb4ListRequestFilterBody(normalized: Lb4ListQuery): Record<string, unknown> {
-  const includeNames = normalized.includes?.filter((n) => n.length > 0);
+  const includes = normalized.includes?.filter(isNonEmptyInclude);
   return {
     limit: normalized.limit,
     offset: normalized.offset,
     ...(normalized.order?.length ? { order: normalized.order } : {}),
     ...(normalized.where !== undefined ? { where: normalized.where } : {}),
-    ...(includeNames?.length ? { include: [...includeNames] } : {}),
+    ...(includes?.length ? { include: [...includes] } : {}),
   };
 }
 
@@ -79,7 +85,7 @@ export function parseLb4FilterParam(
   }
 
   try {
-    const raw = JSON.parse(filterParam) as Lb4ListQuery & { include?: readonly string[] };
+    const raw = JSON.parse(filterParam) as Lb4ListQuery & { include?: readonly Lb4Include[] };
     const includes =
       raw.includes && raw.includes.length > 0
         ? raw.includes

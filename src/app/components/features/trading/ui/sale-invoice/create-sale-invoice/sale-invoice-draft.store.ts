@@ -423,6 +423,10 @@ export class SaleInvoiceDraftStore {
     return row.item?.displayname ?? row.item?.name ?? row.name ?? '';
   }
 
+  quantityForRow(row: ItemRow): number {
+    return this.showQty1Value(row);
+  }
+
   updateItemField(
     rowIndex: number,
     field: 'price' | 'quantity1' | 'quantity2' | 'discpercent',
@@ -569,7 +573,7 @@ export class SaleInvoiceDraftStore {
 
   private calcRow(row: ItemRow): ItemRow {
     const price = toNum(row.price);
-    const quantity = toNum(this.showQty1Value(row)) || 1;
+    const quantity = toNum(this.quantityForRow(row)) || 1;
     const itemtotal = price * quantity;
     const discpercent = toNum(row.discpercent);
     const discamount = this.showDiscount() ? (itemtotal * discpercent) / 100 : 0;
