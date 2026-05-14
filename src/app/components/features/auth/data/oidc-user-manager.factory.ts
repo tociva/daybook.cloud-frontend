@@ -4,10 +4,17 @@ import { AuthConfig } from '../../../../core/config/app-config.model';
 
 @Injectable({ providedIn: 'root' })
 export class OidcUserManagerFactory {
+  private readonly instances = new Map<string, UserManager>();
+
   create(authConfig: AuthConfig): UserManager {
+    const existing = this.instances.get(authConfig.authority);
+    if (existing) {
+      return existing;
+    }
+
     const silentRedirectUri = `${window.location.origin}/auth/silent-renew`;
 
-    return new UserManager({
+    const manager = new UserManager({
       authority: authConfig.authority,
       client_id: authConfig.clientId,
       redirect_uri: authConfig.redirectUri,
@@ -21,5 +28,8 @@ export class OidcUserManagerFactory {
       requestTimeoutInSeconds: 8,
       userStore: new WebStorageStateStore({ store: window.localStorage }),
     });
+
+    this.instances.set(authConfig.authority, manager);
+    return manager;
   }
 }
