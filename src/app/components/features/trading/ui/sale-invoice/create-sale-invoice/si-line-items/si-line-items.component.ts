@@ -1,4 +1,4 @@
-import { Component, ElementRef, computed, inject } from '@angular/core';
+import { Component, ElementRef, computed, inject, input } from '@angular/core';
 import { form } from '@angular/forms/signals';
 import {
   TngAutocompleteComponent,
@@ -36,6 +36,7 @@ const INTERACTIVE_CLICK_TARGET_SELECTOR = [
 })
 export class SiLineItemsComponent {
   protected readonly draft = inject(SaleInvoiceDraftStore);
+  readonly readOnly = input(false);
   protected readonly lineItemsForm = form(this.draft.items);
   protected readonly rowCount = computed(() => this.lineItemsForm().value().length);
   protected readonly itemOptionValue = (item: Item): string => item.id ?? '';
@@ -158,4 +159,8 @@ export class SiLineItemsComponent {
     // disc=ON → base desc 16%; disc=OFF → base desc 24%
     return `${base} w-${(this.draft.showDiscount() ? 16 : 24) + tf / 2}`;
   });
+
+  protected formatAmount(value: number | undefined | null): string {
+    return value === undefined || value === null ? '—' : value.toFixed(2);
+  }
 }

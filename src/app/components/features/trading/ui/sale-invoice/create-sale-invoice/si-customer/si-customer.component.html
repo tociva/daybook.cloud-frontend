@@ -1,6 +1,6 @@
 <ng-container>
   <!-- Customer search (hidden once a customer is chosen) -->
-  @if (!draft.selectedCustomer()) {
+  @if (!readOnly() && !draft.selectedCustomer()) {
     <div class="field field--full">
       <tng-form-field labelPosition="above" [invalid]="draft.customerError() !== null">
         <tng-label forId="cust-search" required>Customer</tng-label>
@@ -46,14 +46,22 @@
           <span class="customer-summary__meta">GSTIN: {{ cust.gstin }}</span>
         }
       </div>
-      <button type="button" class="change-customer-btn" (click)="clearCustomer()">
-        Change customer
-      </button>
+      @if (!readOnly()) {
+        <button type="button" class="change-customer-btn" (click)="clearCustomer()">
+          Change customer
+        </button>
+      }
+    </div>
+  } @else if (readOnly()) {
+    <div class="customer-summary">
+      <div class="customer-summary__info">
+        <span class="customer-summary__name">—</span>
+      </div>
     </div>
   }
 
   <!-- Compact address summary + update link (shown once a customer is selected) -->
-  @if (draft.selectedCustomer()) {
+  @if (draft.selectedCustomer() || readOnly()) {
     <div class="address-summary">
       <div class="address-summary__blocks">
         <div class="address-summary__block">
@@ -65,14 +73,16 @@
           <span class="address-summary__text">{{ shippingAddressSummary() }}</span>
         </div>
       </div>
-      <button type="button" class="address-link-btn" (click)="addressDialogOpen.set(true)">
-        Update address
-      </button>
+      @if (!readOnly()) {
+        <button type="button" class="address-link-btn" (click)="addressDialogOpen.set(true)">
+          Update address
+        </button>
+      }
     </div>
   }
 
   <!-- Address edit dialog -->
-  @if (draft.selectedCustomer()) {
+  @if (!readOnly() && draft.selectedCustomer()) {
     <app-si-address-dialog
       [open]="addressDialogOpen()"
       (closed)="addressDialogOpen.set(false)"

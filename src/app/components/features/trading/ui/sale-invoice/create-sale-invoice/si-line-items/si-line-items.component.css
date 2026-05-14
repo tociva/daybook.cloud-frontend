@@ -138,6 +138,14 @@
   color: var(--tng-semantic-foreground-secondary);
 }
 
+.si-li-read-value {
+  display: block;
+  overflow: hidden;
+  padding: 0 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 :host {
   --si-li-cell-focus-border: var(--tng-semantic-accent-brand, var(--tng-semantic-focus-ring));
 }

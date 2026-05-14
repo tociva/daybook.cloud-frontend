@@ -228,6 +228,7 @@ export class SaleInvoiceDraftStore {
     this.customerid.set(inv.customerid ?? inv.customer?.id ?? '');
     this.useBillingForShipping.set(cprops?.usebillingforshipping ?? false);
     this.showDiscount.set(cprops?.showdiscount ?? false);
+    this.showDescription.set(cprops?.showdescription ?? false);
 
     if (inv.customer) {
       this.selectedCustomer.set(inv.customer as Customer);
@@ -262,7 +263,7 @@ export class SaleInvoiceDraftStore {
         code: si.code,
         description: si.description ?? '',
         price: si.price,
-        quantity1: 0,
+        quantity1: si.quantity,
         quantity2: si.quantity,
         itemtotal: si.itemtotal,
         discpercent: si.discpercent ?? 0,

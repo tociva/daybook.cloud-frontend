@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, input, signal } from '@angular/core';
 import {
   TngAutocompleteComponent,
   TngError,
@@ -24,6 +24,7 @@ import { SiAddressDialogComponent } from './si-address-dialog/si-address-dialog.
 })
 export class SiCustomerComponent {
   protected readonly draft = inject(SaleInvoiceDraftStore);
+  readonly readOnly = input(false);
 
   protected readonly customerOptionValue = (c: Customer): string => c.id ?? '';
   protected readonly customerOptionLabel = (c: Customer): string => c.name ?? '';

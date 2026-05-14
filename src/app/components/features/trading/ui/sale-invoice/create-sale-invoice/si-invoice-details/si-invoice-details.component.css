@@ -15,6 +15,25 @@
   display: grid;
   gap: 0;
 }
+.aside-fields--read {
+  gap: 0.75rem;
+  margin: 0;
+}
+.detail-field {
+  display: grid;
+  gap: 0.2rem;
+}
+.detail-field dt {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.detail-field dd {
+  color: var(--tng-semantic-foreground-primary);
+  font-size: 0.9rem;
+  margin: 0;
+}
 .toggle-row {
   align-items: center;
   cursor: pointer;

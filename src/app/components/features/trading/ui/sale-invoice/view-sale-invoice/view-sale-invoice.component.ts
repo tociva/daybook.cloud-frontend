@@ -1,35 +1,25 @@
 import { Component, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import {
-  TngButtonComponent,
-  TngCardActionsComponent,
-  TngCardComponent,
-  TngCardContentComponent,
-  TngCardDescriptionComponent,
-  TngCardFooterComponent,
-  TngCardHeaderComponent,
-  TngCardTitleComponent,
-} from '@tailng-ui/components';
+import { ActivatedRoute, Router } from '@angular/router';
+import { TngButtonComponent } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
-import { Router } from '@angular/router';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 import { SALE_INVOICE_DETAIL_INCLUDES, SaleInvoiceStore } from '../../../data/sale-invoice';
-import { DateManagementService } from '../../../../../../core/date/date-management.service';
+import { SaleInvoiceDraftStore } from '../create-sale-invoice/sale-invoice-draft.store';
+import { SiCustomerComponent } from '../create-sale-invoice/si-customer/si-customer.component';
+import { SiInvoiceDetailsComponent } from '../create-sale-invoice/si-invoice-details/si-invoice-details.component';
+import { SiLineItemsComponent } from '../create-sale-invoice/si-line-items/si-line-items.component';
 
 @Component({
   selector: 'app-view-sale-invoice',
   standalone: true,
+  providers: [SaleInvoiceDraftStore],
   imports: [
     TngButtonComponent,
-    TngCardActionsComponent,
-    TngCardComponent,
-    TngCardContentComponent,
-    TngCardDescriptionComponent,
-    TngCardFooterComponent,
-    TngCardHeaderComponent,
-    TngCardTitleComponent,
     TngIcon,
     BurlBackButtonComponent,
+    SiCustomerComponent,
+    SiLineItemsComponent,
+    SiInvoiceDetailsComponent,
   ],
   templateUrl: './view-sale-invoice.component.html',
   styleUrl: './view-sale-invoice.component.css',
@@ -37,8 +27,8 @@ import { DateManagementService } from '../../../../../../core/date/date-manageme
 export class ViewSaleInvoiceComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly dateManagement = inject(DateManagementService);
   protected readonly saleInvoiceStore = inject(SaleInvoiceStore);
+  protected readonly draft = inject(SaleInvoiceDraftStore);
 
   constructor() {
     void this.loadInitialState();
@@ -47,19 +37,11 @@ export class ViewSaleInvoiceComponent {
   private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
-      await this.saleInvoiceStore.loadSaleInvoiceById(id, {
+      const invoice = await this.saleInvoiceStore.loadSaleInvoiceById(id, {
         includes: SALE_INVOICE_DETAIL_INCLUDES,
       });
+      if (invoice) this.draft.patchFromInvoice(invoice);
     }
-  }
-
-  protected formatDate(value: string | undefined): string {
-    return this.dateManagement.formatDisplayDate(value, '—');
-  }
-
-  protected formatAmount(value: number | undefined): string {
-    if (value === undefined || value === null) return '—';
-    return value.toFixed(2);
   }
 
   protected editInvoice(): void {

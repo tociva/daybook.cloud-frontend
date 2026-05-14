@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import {
   TngCardComponent,
   TngCardContentComponent,
@@ -10,6 +10,7 @@ import {
   TngSelectComponent,
   TngSwitchComponent,
 } from '@tailng-ui/components';
+import { DateManagementService } from '../../../../../../../core/date/date-management.service';
 import { SaleInvoiceDraftStore, type SelectOption } from '../sale-invoice-draft.store';
 
 @Component({
@@ -31,8 +32,14 @@ import { SaleInvoiceDraftStore, type SelectOption } from '../sale-invoice-draft.
 })
 export class SiInvoiceDetailsComponent {
   protected readonly draft = inject(SaleInvoiceDraftStore);
+  private readonly dateManagement = inject(DateManagementService);
+  readonly readOnly = input(false);
 
   readonly getOptionLabel = (o: SelectOption): string => o.label;
   readonly getOptionValue = (o: SelectOption): string => o.value;
   readonly trackByValue = (_: number, o: SelectOption): string => o.value;
+
+  protected formatDate(value: string): string {
+    return this.dateManagement.formatDisplayDate(value, '—');
+  }
 }

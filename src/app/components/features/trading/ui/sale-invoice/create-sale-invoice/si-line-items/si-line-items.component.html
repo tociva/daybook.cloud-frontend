@@ -1,26 +1,28 @@
 <!-- ── Column visibility toolbar ─────────────────────────────────────────── -->
-<div class="si-li-toolbar">
-  <label class="si-li-switch-label">
-    <tng-switch
-      [checked]="draft.showDiscount()"
-      (checkedChange)="draft.setShowDiscount(!!$event)"
-    />
-    Show Discount
-  </label>
+@if (!readOnly()) {
+  <div class="si-li-toolbar">
+    <label class="si-li-switch-label">
+      <tng-switch
+        [checked]="draft.showDiscount()"
+        (checkedChange)="draft.setShowDiscount(!!$event)"
+      />
+      Show Discount
+    </label>
 
-  <label class="si-li-switch-label">
-    <tng-switch
-      [checked]="draft.showDescription()"
-      (checkedChange)="draft.showDescription.set(!!$event)"
-    />
-    Show Description
-  </label>
+    <label class="si-li-switch-label">
+      <tng-switch
+        [checked]="draft.showDescription()"
+        (checkedChange)="draft.showDescription.set(!!$event)"
+      />
+      Show Description
+    </label>
 
-  <button type="button" class="si-li-add-btn" (click)="draft.addItemRow()">
-    <tng-icon icon="plus" aria-hidden="true" />
-    Add Row
-  </button>
-</div>
+    <button type="button" class="si-li-add-btn" (click)="draft.addItemRow()">
+      <tng-icon icon="plus" aria-hidden="true" />
+      Add Row
+    </button>
+  </div>
+}
 
 <!-- ── Table ─────────────────────────────────────────────────────────────── -->
 <div class="si-li-scroll">
@@ -58,7 +60,9 @@
           <th class="si-li-col-igst-pct w-5 px-4 text-right">%</th>
         }
         <th [attr.rowspan]="rowSpan()" class="si-li-col-grand-total w-7 px-4 text-right">Grand Total</th>
-        <th [attr.rowspan]="rowSpan()" class="si-li-col-actions w-6 px-4 text-center">Actions</th>
+        @if (!readOnly()) {
+          <th [attr.rowspan]="rowSpan()" class="si-li-col-actions w-6 px-4 text-center">Actions</th>
+        }
       </tr>
       <!-- Second header row: only rendered when Qty2 is active (discount or tax present) -->
       @if (!showQty1()) {
@@ -90,24 +94,30 @@
             class="si-li-col-name p-0"
             (click)="focusNameAutocomplete($event)"
           >
-            <tng-autocomplete
-              ariaLabel="Item"
-              placeholder="Search item"
-              [options]="itemOptionsForRow(_row)"
-              [value]="_row.itemid"
-              [getOptionValue]="itemOptionValue"
-              [getOptionLabel]="itemOptionLabel"
-              [trackBy]="itemTrackBy"
-              (queryChange)="draft.onItemSearchInput($any($event), i)"
-              (valueChange)="onItemValueChange($event, i)"
-            >
-              <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
-                <span>{{ label }}</span>
-                @if (option.code) {
-                  <span class="si-li-option-code"> - {{ option.code }}</span>
-                }
-              </ng-template>
-            </tng-autocomplete>
+            @if (readOnly()) {
+              <strong class="si-li-read-value">
+                {{ draft.getItemDisplayName(_row) || '—' }}
+              </strong>
+            } @else {
+              <tng-autocomplete
+                ariaLabel="Item"
+                placeholder="Search item"
+                [options]="itemOptionsForRow(_row)"
+                [value]="_row.itemid"
+                [getOptionValue]="itemOptionValue"
+                [getOptionLabel]="itemOptionLabel"
+                [trackBy]="itemTrackBy"
+                (queryChange)="draft.onItemSearchInput($any($event), i)"
+                (valueChange)="onItemValueChange($event, i)"
+              >
+                <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
+                  <span>{{ label }}</span>
+                  @if (option.code) {
+                    <span class="si-li-option-code"> - {{ option.code }}</span>
+                  }
+                </ng-template>
+              </tng-autocomplete>
+            }
           </td>
 
           <!-- Description -->
@@ -117,13 +127,17 @@
               class="si-li-col-description p-0"
               (click)="focusTableTextarea($event)"
             >
-              <tng-textarea
-                rows="1"
-                resize="none"
-                ariaLabel="Description"
-                [value]="_row.description"
-                (valueChange)="draft.updateItemDescription(i, $event)"
-              />
+              @if (readOnly()) {
+                <span class="si-li-read-value">{{ _row.description || '—' }}</span>
+              } @else {
+                <tng-textarea
+                  rows="1"
+                  resize="none"
+                  ariaLabel="Description"
+                  [value]="_row.description"
+                  (valueChange)="draft.updateItemDescription(i, $event)"
+                />
+              }
             </td>
           }
 
@@ -134,16 +148,20 @@
             class="si-li-col-price px-2 text-right"
             (click)="focusTableInput($event)"
           >
-            <tng-input
-              type="number"
-              inputmode="decimal"
-              min="0"
-              step="0.01"
-              fullWidth
-              ariaLabel="Price"
-              [value]="_row.price.toString()"
-              (valueChange)="draft.updateItemFieldAndRecalc(i, 'price', $event)"
-            />
+            @if (readOnly()) {
+              {{ formatAmount(_row.price) }}
+            } @else {
+              <tng-input
+                type="number"
+                inputmode="decimal"
+                min="0"
+                step="0.01"
+                fullWidth
+                ariaLabel="Price"
+                [value]="_row.price.toString()"
+                (valueChange)="draft.updateItemFieldAndRecalc(i, 'price', $event)"
+              />
+            }
           </td>
 
           <!-- Qty1 (rowspan=2, single-row mode) or Qty2 (first sub-row only) -->
@@ -153,29 +171,37 @@
               class="si-li-col-qty1 px-2 text-right"
               (click)="focusTableInput($event)"
             >
-              <tng-input
-                type="number"
-                inputmode="decimal"
-                min="0"
-                step="1"
-                fullWidth
-                ariaLabel="Quantity"
-                [value]="_row.quantity1.toString()"
-                (valueChange)="draft.updateItemFieldAndRecalc(i, 'quantity1', $event)"
-              />
+              @if (readOnly()) {
+                {{ formatAmount(_row.quantity1) }}
+              } @else {
+                <tng-input
+                  type="number"
+                  inputmode="decimal"
+                  min="0"
+                  step="1"
+                  fullWidth
+                  ariaLabel="Quantity"
+                  [value]="_row.quantity1.toString()"
+                  (valueChange)="draft.updateItemFieldAndRecalc(i, 'quantity1', $event)"
+                />
+              }
             </td>
           } @else {
             <td class="si-li-col-qty2 px-2 text-right" (click)="focusTableInput($event)">
-              <tng-input
-                type="number"
-                inputmode="decimal"
-                min="0"
-                step="1"
-                fullWidth
-                ariaLabel="Quantity"
-                [value]="_row.quantity2.toString()"
-                (valueChange)="draft.updateItemFieldAndRecalc(i, 'quantity2', $event)"
-              />
+              @if (readOnly()) {
+                {{ formatAmount(_row.quantity2) }}
+              } @else {
+                <tng-input
+                  type="number"
+                  inputmode="decimal"
+                  min="0"
+                  step="1"
+                  fullWidth
+                  ariaLabel="Quantity"
+                  [value]="_row.quantity2.toString()"
+                  (valueChange)="draft.updateItemFieldAndRecalc(i, 'quantity2', $event)"
+                />
+              }
             </td>
           }
 
@@ -186,17 +212,21 @@
               class="si-li-col-disc-pct px-2 text-right"
               (click)="focusTableInput($event)"
             >
-              <tng-input
-                type="number"
-                inputmode="decimal"
-                min="0"
-                max="100"
-                step="0.01"
-                fullWidth
-                ariaLabel="Discount percent"
-                [value]="_row.discpercent.toString()"
-                (valueChange)="draft.updateItemFieldAndRecalc(i, 'discpercent', $event)"
-              />
+              @if (readOnly()) {
+                {{ formatAmount(_row.discpercent) }}%
+              } @else {
+                <tng-input
+                  type="number"
+                  inputmode="decimal"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  fullWidth
+                  ariaLabel="Discount percent"
+                  [value]="_row.discpercent.toString()"
+                  (valueChange)="draft.updateItemFieldAndRecalc(i, 'discpercent', $event)"
+                />
+              }
             </td>
             <!-- Taxable Amount = subtotal after discount (rowspan covers both sub-rows) -->
             <td [attr.rowspan]="rowSpan()" class="si-li-col-taxable px-4 text-right">
@@ -233,18 +263,20 @@
           </td>
 
           <!-- Actions (rowspan covers both sub-rows) -->
-          <td [attr.rowspan]="rowSpan()" class="si-li-col-actions text-center">
-            <button
-              type="button"
-              class="si-li-remove-btn"
-              (click)="draft.removeItemRow(i)"
-              [disabled]="rowCount() === 1"
-              aria-label="Remove row"
-              title="Remove row"
-            >
-              <tng-icon icon="trash2" aria-hidden="true" />
-            </button>
-          </td>
+          @if (!readOnly()) {
+            <td [attr.rowspan]="rowSpan()" class="si-li-col-actions text-center">
+              <button
+                type="button"
+                class="si-li-remove-btn"
+                (click)="draft.removeItemRow(i)"
+                [disabled]="rowCount() === 1"
+                aria-label="Remove row"
+                title="Remove row"
+              >
+                <tng-icon icon="trash2" aria-hidden="true" />
+              </button>
+            </td>
+          }
         </tr>
 
         <!-- ── Second sub-row: only rendered when Qty2 is active ─────── -->
@@ -307,15 +339,19 @@
       <tr>
         <td class="si-li-summary-label">Round Off</td>
         <td class="si-li-summary-value si-li-summary-roundoff" (click)="focusTableInput($event)">
-          <tng-input
-            type="number"
-            inputmode="decimal"
-            step="0.01"
-            fullWidth
-            ariaLabel="Round off"
-            [value]="draft.roundoff()"
-            (valueChange)="draft.roundoff.set($event)"
-          />
+          @if (readOnly()) {
+            {{ draft.roundoff() }}
+          } @else {
+            <tng-input
+              type="number"
+              inputmode="decimal"
+              step="0.01"
+              fullWidth
+              ariaLabel="Round off"
+              [value]="draft.roundoff()"
+              (valueChange)="draft.roundoff.set($event)"
+            />
+          }
         </td>
       </tr>
       <tr class="si-li-summary-total-row">
