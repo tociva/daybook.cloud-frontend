@@ -4,8 +4,12 @@ import type { Customer } from '../../../data/customer';
 import { CustomerStore } from '../../../data/customer';
 import type { Item } from '../../../data/item';
 import { ItemStore } from '../../../data/item';
+import type { ItemCategory } from '../../../data/item-category';
+import { ItemCategoryStore } from '../../../data/item-category';
 import type { SaleInvoice } from '../../../data/sale-invoice';
+import type { Tax } from '../../../data/tax';
 import { TaxStore } from '../../../data/tax';
+import type { TaxGroup } from '../../../data/tax-group';
 import { TaxGroupStore } from '../../../data/tax-group';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -36,7 +40,8 @@ export interface ItemRow {
   name: string;
   code: string;
   price: number;
-  quantity: number;
+  quantity1: number;
+  quantity2: number;
   itemtotal: number;
   discpercent: number;
   discamount: number;
@@ -55,6 +60,7 @@ export type SelectOption = Readonly<{ label: string; value: string }>;
 export class SaleInvoiceDraftStore {
   private readonly customerStore = inject(CustomerStore);
   private readonly itemStore = inject(ItemStore);
+  private readonly itemCategoryStore = inject(ItemCategoryStore);
   private readonly taxGroupStore = inject(TaxGroupStore);
   private readonly taxStore = inject(TaxStore);
 
@@ -256,7 +262,8 @@ export class SaleInvoiceDraftStore {
         code: si.code,
         description: si.description ?? '',
         price: si.price,
-        quantity: si.quantity,
+        quantity1: 0,
+        quantity2: si.quantity,
         itemtotal: si.itemtotal,
         discpercent: si.discpercent ?? 0,
         discamount: si.discamount ?? 0,
@@ -373,7 +380,7 @@ export class SaleInvoiceDraftStore {
     );
   }
 
-  selectItem(item: Item, rowIndex: number): void {
+  async selectItem(item: Item, rowIndex: number): Promise<void> {
     this.activeItemRowIndex.set(-1);
     this.itemSearch.set('');
     this.items.update((rows) =>
@@ -383,12 +390,33 @@ export class SaleInvoiceDraftStore {
           : row,
       ),
     );
-    this.applyTaxesToRow(rowIndex, item);
-    this.recalcRow(rowIndex);
+
+    const enrichedItem = await this.withFetchedCategory(item);
+    const taxes = await this.buildTaxesForItem(enrichedItem, this.taxoption());
+
+    this.items.update((rows) =>
+      rows.map((row, i) => {
+        if (i !== rowIndex || row.itemid !== (item.id ?? '')) return row;
+
+        return this.calcRow({
+          ...row,
+          item: enrichedItem,
+          itemid: enrichedItem.id ?? '',
+          name: enrichedItem.name,
+          code: enrichedItem.code ?? '',
+          taxes,
+        });
+      }),
+    );
   }
 
   closeItemDropdown(): void {
     this.activeItemRowIndex.set(-1);
+  }
+
+  setShowDiscount(value: boolean): void {
+    this.showDiscount.set(value);
+    this.items.update((rows) => rows.map((row) => this.calcRow(row)));
   }
 
   getItemDisplayName(row: ItemRow): string {
@@ -397,12 +425,23 @@ export class SaleInvoiceDraftStore {
 
   updateItemField(
     rowIndex: number,
-    field: 'price' | 'quantity' | 'discpercent',
+    field: 'price' | 'quantity1' | 'quantity2' | 'discpercent',
     value: string | null,
   ): void {
     const num = toNum(value ?? '');
     this.items.update((rows) =>
       rows.map((row, i) => (i === rowIndex ? { ...row, [field]: num } : row)),
+    );
+  }
+
+  updateItemFieldAndRecalc(
+    rowIndex: number,
+    field: 'price' | 'quantity1' | 'quantity2' | 'discpercent',
+    value: string | null,
+  ): void {
+    const num = toNum(value ?? '');
+    this.items.update((rows) =>
+      rows.map((row, i) => (i === rowIndex ? this.calcRow({ ...row, [field]: num }) : row)),
     );
   }
 
@@ -434,10 +473,12 @@ export class SaleInvoiceDraftStore {
     if (!taxGroupId || !taxOption) return [];
 
     const tg = this.taxGroupStore.items().find((g) => g.id === taxGroupId);
+    if (!tg) return [];
+
     const group = tg?.groups?.find((g) => g.mode === taxOption);
     if (!group) return [];
 
-    return (group.taxids ?? []).map((taxId) => {
+    return this.taxIdsForMode(tg, taxOption).map((taxId) => {
       const tax = this.taxStore.items().find((t) => t.id === taxId);
       return {
         taxid: tax?.id ?? taxId,
@@ -455,9 +496,80 @@ export class SaleInvoiceDraftStore {
     this.items.update((rows) => rows.map((row, i) => (i === rowIndex ? { ...row, taxes } : row)));
   }
 
+  private async withFetchedCategory(item: Item): Promise<Item> {
+    const categoryId = item.categoryid || item.category?.id;
+    if (!categoryId) return item;
+
+    const category =
+      (await this.itemCategoryStore.loadItemCategoryById(categoryId, {
+        includes: ['taxgroup'],
+      })) ??
+      item.category ??
+      null;
+
+    return category ? { ...item, category } : item;
+  }
+
+  private async buildTaxesForItem(item: Item, taxOption: string): Promise<TaxRow[]> {
+    const category = item.category ?? (await this.fetchItemCategory(item));
+    const taxGroup = category ? await this.fetchTaxGroup(category) : null;
+    if (!taxGroup || !taxOption) return [];
+
+    const taxIds = this.taxIdsForMode(taxGroup, taxOption);
+    const taxes = await Promise.all(taxIds.map((taxId) => this.fetchTax(taxId)));
+
+    return taxes.map((tax, index) => {
+      const taxId = taxIds[index] ?? tax?.id ?? '';
+      return {
+        taxid: tax?.id ?? taxId,
+        name: tax?.name ?? '',
+        shortname: tax?.shortname ?? taxId.slice(0, 4),
+        rate: tax?.rate ?? 0,
+        appliedto: tax?.appliedto ?? 100,
+        amount: 0,
+      };
+    });
+  }
+
+  private async fetchItemCategory(item: Item): Promise<ItemCategory | null> {
+    const categoryId = item.categoryid || item.category?.id;
+    if (!categoryId) return item.category ?? null;
+
+    return (
+      (await this.itemCategoryStore.loadItemCategoryById(categoryId, {
+        includes: ['taxgroup'],
+      })) ??
+      item.category ??
+      null
+    );
+  }
+
+  private async fetchTaxGroup(category: ItemCategory): Promise<TaxGroup | null> {
+    if (category.taxgroup?.groups?.length) {
+      return category.taxgroup;
+    }
+
+    const taxGroupId = category.taxgroupid || category.taxgroup?.id;
+    if (!taxGroupId) return null;
+
+    return (
+      this.taxGroupStore.items().find((taxGroup) => taxGroup.id === taxGroupId) ??
+      (await this.taxGroupStore.loadTaxGroupById(taxGroupId))
+    );
+  }
+
+  private async fetchTax(taxId: string): Promise<Tax | null> {
+    return this.taxStore.items().find((tax) => tax.id === taxId) ?? this.taxStore.loadTaxById(taxId);
+  }
+
+  private taxIdsForMode(taxGroup: TaxGroup, taxOption: string): readonly string[] {
+    const group = taxGroup.groups?.find((currentGroup) => currentGroup.mode === taxOption);
+    return group?.taxids ?? group?.taxes ?? [];
+  }
+
   private calcRow(row: ItemRow): ItemRow {
     const price = toNum(row.price);
-    const quantity = toNum(row.quantity) || 1;
+    const quantity = toNum(this.showQty1Value(row)) || 1;
     const itemtotal = price * quantity;
     const discpercent = toNum(row.discpercent);
     const discamount = this.showDiscount() ? (itemtotal * discpercent) / 100 : 0;
@@ -493,7 +605,8 @@ export class SaleInvoiceDraftStore {
       code: '',
       description: '',
       price: 0,
-      quantity: 1,
+      quantity1: 1,
+      quantity2: 1,
       itemtotal: 0,
       discpercent: 0,
       discamount: 0,
@@ -502,5 +615,13 @@ export class SaleInvoiceDraftStore {
       grandtotal: 0,
       taxes: Array.from({ length: taxCount }, () => this.emptyTaxRow()),
     };
+  }
+
+  private showQty1Value(row: ItemRow): number {
+    return this.taxoption() !== 'Intra State' &&
+      this.taxoption() !== 'Inter State' &&
+      !this.showDiscount()
+      ? row.quantity1
+      : row.quantity2;
   }
 }

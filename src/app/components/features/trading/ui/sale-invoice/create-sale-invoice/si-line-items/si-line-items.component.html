@@ -1,230 +1,327 @@
-<tng-card variant="outline" padding="lg">
-  <tng-card-header>
-    <tng-card-title>Line Items</tng-card-title>
-  </tng-card-header>
+<!-- ── Column visibility toolbar ─────────────────────────────────────────── -->
+<div class="si-li-toolbar">
+  <label class="si-li-switch-label">
+    <tng-switch
+      [checked]="draft.showDiscount()"
+      (checkedChange)="draft.setShowDiscount(!!$event)"
+    />
+    Show Discount
+  </label>
 
-  <tng-card-content>
-    <!-- Feature toggles -->
-    <div class="items-toggles">
-      <label class="toggle-label">
-        Enable Discount:
-        <tng-switch
-          [checked]="draft.showDiscount()"
-          (checkedChange)="draft.showDiscount.set(!!$event)"
-        />
-      </label>
-      <label class="toggle-label">
-        Enable Description:
-        <tng-switch
-          [checked]="draft.showDescription()"
-          (checkedChange)="draft.showDescription.set(!!$event)"
-        />
-      </label>
-    </div>
+  <label class="si-li-switch-label">
+    <tng-switch
+      [checked]="draft.showDescription()"
+      (checkedChange)="draft.showDescription.set(!!$event)"
+    />
+    Show Description
+  </label>
 
-    <!-- Scrollable table wrapper -->
-    <div class="items-scroll">
-      <table class="items-table">
-        <!-- ── Two-row header ─────────────────────────────────────────── -->
-        <thead>
-          <tr class="items-head">
-            <th class="th-num" rowspan="2">#</th>
-            <th class="th-name" rowspan="2">Name</th>
-            <th class="th-price th-right" rowspan="2">Price</th>
-            <th class="th-qty th-right">Quantity</th>
-            @if (draft.showDiscount()) {
-              <th class="th-disc th-right" rowspan="2">Disc %</th>
-            }
-            @if (draft.taxColumns().length > 0) {
-              <th class="th-taxable th-right" rowspan="2">Taxable Amount</th>
-            }
-            @for (tc of draft.taxColumns(); track tc.shortname) {
-              <th class="th-taxgroup th-center" colspan="2">{{ tc.shortname }}</th>
-            }
-            <th class="th-total th-right" rowspan="2">Grand Total</th>
-            <th class="th-action" rowspan="2"></th>
-          </tr>
-          <tr class="items-head-sub">
-            <th class="th-itemtotal th-right">Item Total</th>
-            @for (tc of draft.taxColumns(); track tc.shortname) {
-              <th class="th-tax-sub th-right">%</th>
-              <th class="th-tax-sub th-right">Amount</th>
-            }
-          </tr>
-        </thead>
+  <button type="button" class="si-li-add-btn" (click)="draft.addItemRow()">
+    <tng-icon icon="plus" aria-hidden="true" />
+    Add Row
+  </button>
+</div>
 
-        <!-- ── Rows ───────────────────────────────────────────────────── -->
-        <tbody>
-          @for (row of draft.items(); track rowIndex; let rowIndex = $index) {
-            <!-- Top sub-row: inputs & rates -->
-            <tr class="items-row-top">
-              <td class="td-num" rowspan="2">{{ rowIndex + 1 }}</td>
+<!-- ── Table ─────────────────────────────────────────────────────────────── -->
+<div class="si-li-scroll">
+  <table class="si-li-table">
 
-              <!-- Item name / search (spans both sub-rows) -->
-              <td class="td-name" rowspan="2">
-                <div class="autocomplete-wrap">
-                  <tng-input
-                    placeholder="Search for an item"
-                    [value]="draft.getItemDisplayName(row)"
-                    (valueChange)="draft.onItemSearchInput($any($event), rowIndex)"
-                    (focus)="draft.activeItemRowIndex.set(rowIndex)"
-                    (blur)="draft.closeItemDropdown()"
-                    autocomplete="off"
-                  />
-                  @if (draft.activeItemRowIndex() === rowIndex && draft.filteredItems().length) {
-                    <ul class="dropdown">
-                      @for (it of draft.filteredItems(); track it.id) {
-                        <li class="dropdown-item" (mousedown)="draft.selectItem(it, rowIndex)">
-                          {{ it.displayname || it.name }}
-                          @if (it.code) {
-                            <span class="muted"> ({{ it.code }})</span>
-                          }
-                        </li>
-                      }
-                    </ul>
-                  }
-                </div>
-                @if (draft.showDescription()) {
-                  <tng-input
-                    class="item-desc-input"
-                    placeholder="Description…"
-                    [value]="row.description"
-                    (valueChange)="draft.updateItemDescription(rowIndex, $any($event))"
-                  />
-                }
-              </td>
-
-              <!-- Price (spans both sub-rows) -->
-              <td class="td-price" rowspan="2">
-                <tng-input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  [value]="row.price.toString()"
-                  (valueChange)="
-                    draft.updateItemField(rowIndex, 'price', $any($event));
-                    draft.recalcRow(rowIndex)
-                  "
-                />
-              </td>
-
-              <!-- Quantity (top sub-row only) -->
-              <td class="td-qty">
-                <tng-input
-                  type="number"
-                  min="1"
-                  [value]="row.quantity.toString()"
-                  (valueChange)="
-                    draft.updateItemField(rowIndex, 'quantity', $any($event));
-                    draft.recalcRow(rowIndex)
-                  "
-                />
-              </td>
-
-              <!-- Discount % (spans both sub-rows) -->
-              @if (draft.showDiscount()) {
-                <td class="td-disc" rowspan="2">
-                  <tng-input
-                    type="number"
-                    min="0"
-                    max="100"
-                    step="0.01"
-                    [value]="row.discpercent.toString()"
-                    (valueChange)="
-                      draft.updateItemField(rowIndex, 'discpercent', $any($event));
-                      draft.recalcRow(rowIndex)
-                    "
-                  />
-                </td>
-              }
-
-              <!-- Taxable amount (spans both sub-rows) -->
-              @if (draft.taxColumns().length > 0) {
-                <td class="td-taxable td-right" rowspan="2">{{ row.subtotal.toFixed(2) }}</td>
-              }
-
-              <!-- Tax rate per column (top sub-row) -->
-              @for (tc of draft.taxColumns(); track tc.shortname; let ti = $index) {
-                <td class="td-right td-tax-rate">{{ row.taxes[ti]?.rate ?? 0 }} %</td>
-                <td></td>
-              }
-
-              <!-- Grand total (spans both sub-rows) -->
-              <td class="td-total td-right" rowspan="2">{{ row.grandtotal.toFixed(2) }}</td>
-
-              <!-- Delete (spans both sub-rows) -->
-              <td class="td-action" rowspan="2">
-                <tng-button
-                  type="button"
-                  appearance="ghost"
-                  tone="danger"
-                  title="Remove item"
-                  (click)="draft.removeItemRow(rowIndex)"
-                >
-                  <tng-icon icon="trash2" aria-hidden="true" />
-                </tng-button>
-              </td>
-            </tr>
-
-            <!-- Bottom sub-row: computed values -->
-            <tr class="items-row-bottom">
-              <!-- Item total -->
-              <td class="td-right">{{ row.itemtotal.toFixed(2) }}</td>
-
-              <!-- Tax amounts -->
-              @for (tc of draft.taxColumns(); track tc.shortname; let ti = $index) {
-                <td></td>
-                <td class="td-right">{{ (row.taxes[ti]?.amount ?? 0).toFixed(2) }}</td>
-              }
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Add row + Summary -->
-    <div class="items-footer">
-      <tng-button type="button" appearance="outline" tone="primary" (click)="draft.addItemRow()">
-        <tng-icon icon="plus" aria-hidden="true" />
-        Add Another Item
-      </tng-button>
-
-      <div class="summary-box">
-        <div class="summary-row">
-          <span>Item Total</span>
-          <span>{{ draft.itemtotal() }}</span>
-        </div>
+    <!-- ── Two-row header ──────────────────────────────────────────────── -->
+    <thead>
+      <tr>
+        <th [attr.rowspan]="rowSpan()" class="si-li-col-serial w-3 p-0 text-center">#</th>
+        <th [attr.rowspan]="rowSpan()" [class]="nameColClass()">Name</th>
+        @if (draft.showDescription()) {
+          <th [attr.rowspan]="rowSpan()" [class]="descColClass()">Description</th>
+        }
+        <th [attr.rowspan]="rowSpan()" class="si-li-col-price w-7 px-4 text-right">Price</th>
+        <!-- Qty1 (rowspan=2, no sub-row) when no discount and no tax;
+             Qty2 (with Item Total sub-row) otherwise -->
+        @if (showQty1()) {
+          <th [attr.rowspan]="rowSpan()" class="si-li-col-qty1 w-8 px-4 text-right">Quantity</th>
+        } @else {
+          <th class="si-li-col-qty2 w-8 px-4 text-right">Quantity</th>
+        }
         @if (draft.showDiscount()) {
-          <div class="summary-row">
-            <span>Discount</span>
-            <span>{{ draft.discount() }}</span>
-          </div>
-          <div class="summary-row">
-            <span>Subtotal</span>
-            <span>{{ draft.subtotal() }}</span>
-          </div>
+          <th [attr.rowspan]="rowSpan()" class="si-li-col-disc-label w-3 p-0 rotate-270" data-label="Discount"></th>
+          <th class="si-li-col-disc-pct w-5 px-4 text-right">%</th>
+          <th [attr.rowspan]="rowSpan()" class="si-li-col-taxable w-7 px-4 text-right">Taxable Amount</th>
         }
-        @if (draft.taxColumnCount() > 0) {
-          <div class="summary-row">
-            <span>Tax</span>
-            <span>{{ draft.tax() }}</span>
-          </div>
+        @if (showIntraStateTax()) {
+          <th [attr.rowspan]="rowSpan()" class="si-li-col-cgst-label w-3 p-0 rotate-270" data-label="CGST"></th>
+          <th class="si-li-col-cgst-pct w-5 px-4 text-right">%</th>
+          <th [attr.rowspan]="rowSpan()" class="si-li-col-sgst-label w-3 p-0 rotate-270" data-label="SGST"></th>
+          <th class="si-li-col-sgst-pct w-5 px-4 text-right">%</th>
         }
-        <div class="summary-row">
-          <span>Round off</span>
+        @if (showIGST()) {
+          <th [attr.rowspan]="rowSpan()" class="si-li-col-igst-label w-3 p-0 rotate-270" data-label="IGST"></th>
+          <th class="si-li-col-igst-pct w-5 px-4 text-right">%</th>
+        }
+        <th [attr.rowspan]="rowSpan()" class="si-li-col-grand-total w-7 px-4 text-right">Grand Total</th>
+        <th [attr.rowspan]="rowSpan()" class="si-li-col-actions w-6 px-4 text-center">Actions</th>
+      </tr>
+      <!-- Second header row: only rendered when Qty2 is active (discount or tax present) -->
+      @if (!showQty1()) {
+        <tr>
+          <th class="si-li-col-item-total w-8 px-4 text-right">Item Total</th>
+          @if (draft.showDiscount()) {
+            <th class="si-li-col-disc-amt w-8 px-4 text-right">Amount</th>
+          }
+          @if (showIntraStateTax()) {
+            <th class="si-li-col-cgst-amt w-8 px-4 text-right">Amount</th>
+            <th class="si-li-col-sgst-amt w-8 px-4 text-right">Amount</th>
+          }
+          @if (showIGST()) {
+            <th class="si-li-col-igst-amt w-8 px-4 text-right">Amount</th>
+          }
+        </tr>
+      }
+    </thead>
+
+    <!-- ── Body rows ───────────────────────────────────────────────────── -->
+    <tbody>
+      @for (_row of lineItemsForm().value(); track $index; let i = $index) {
+
+        <!-- ── First sub-row ──────────────────────────────────────────── -->
+        <tr>
+          <td [attr.rowspan]="rowSpan()" class="si-li-col-serial text-center">{{ i + 1 }}</td>
+          <td
+            [attr.rowspan]="rowSpan()"
+            class="si-li-col-name p-0"
+            (click)="focusNameAutocomplete($event)"
+          >
+            <tng-autocomplete
+              ariaLabel="Item"
+              placeholder="Search item"
+              [options]="itemOptionsForRow(_row)"
+              [value]="_row.itemid"
+              [getOptionValue]="itemOptionValue"
+              [getOptionLabel]="itemOptionLabel"
+              [trackBy]="itemTrackBy"
+              (queryChange)="draft.onItemSearchInput($any($event), i)"
+              (valueChange)="onItemValueChange($event, i)"
+            >
+              <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
+                <span>{{ label }}</span>
+                @if (option.code) {
+                  <span class="si-li-option-code"> - {{ option.code }}</span>
+                }
+              </ng-template>
+            </tng-autocomplete>
+          </td>
+
+          <!-- Description -->
+          @if (draft.showDescription()) {
+            <td
+              [attr.rowspan]="rowSpan()"
+              class="si-li-col-description p-0"
+              (click)="focusTableTextarea($event)"
+            >
+              <tng-textarea
+                rows="1"
+                resize="none"
+                ariaLabel="Description"
+                [value]="_row.description"
+                (valueChange)="draft.updateItemDescription(i, $event)"
+              />
+            </td>
+          }
+
+          <!-- Price -->
+          <td
+            [attr.rowspan]="rowSpan()"
+            [attr.data-row-index]="i"
+            class="si-li-col-price px-2 text-right"
+            (click)="focusTableInput($event)"
+          >
+            <tng-input
+              type="number"
+              inputmode="decimal"
+              min="0"
+              step="0.01"
+              fullWidth
+              ariaLabel="Price"
+              [value]="_row.price.toString()"
+              (valueChange)="draft.updateItemFieldAndRecalc(i, 'price', $event)"
+            />
+          </td>
+
+          <!-- Qty1 (rowspan=2, single-row mode) or Qty2 (first sub-row only) -->
+          @if (showQty1()) {
+            <td
+              [attr.rowspan]="rowSpan()"
+              class="si-li-col-qty1 px-2 text-right"
+              (click)="focusTableInput($event)"
+            >
+              <tng-input
+                type="number"
+                inputmode="decimal"
+                min="0"
+                step="1"
+                fullWidth
+                ariaLabel="Quantity"
+                [value]="_row.quantity1.toString()"
+                (valueChange)="draft.updateItemFieldAndRecalc(i, 'quantity1', $event)"
+              />
+            </td>
+          } @else {
+            <td class="si-li-col-qty2 px-2 text-right" (click)="focusTableInput($event)">
+              <tng-input
+                type="number"
+                inputmode="decimal"
+                min="0"
+                step="1"
+                fullWidth
+                ariaLabel="Quantity"
+                [value]="_row.quantity2.toString()"
+                (valueChange)="draft.updateItemFieldAndRecalc(i, 'quantity2', $event)"
+              />
+            </td>
+          }
+
+          <!-- Discount % (spans the label + pct columns) -->
+          @if (draft.showDiscount()) {
+            <td
+              colspan="2"
+              class="si-li-col-disc-pct px-2 text-right"
+              (click)="focusTableInput($event)"
+            >
+              <tng-input
+                type="number"
+                inputmode="decimal"
+                min="0"
+                max="100"
+                step="0.01"
+                fullWidth
+                ariaLabel="Discount percent"
+                [value]="_row.discpercent.toString()"
+                (valueChange)="draft.updateItemFieldAndRecalc(i, 'discpercent', $event)"
+              />
+            </td>
+            <!-- Taxable Amount = subtotal after discount (rowspan covers both sub-rows) -->
+            <td [attr.rowspan]="rowSpan()" class="si-li-col-taxable px-4 text-right">
+              {{ _row.subtotal.toFixed(2) }}
+            </td>
+          }
+
+          <!-- CGST % / SGST % rates -->
+          @if (showIntraStateTax()) {
+            <td colspan="2" class="si-li-col-cgst-pct px-4 text-right">
+              @if (_row.taxes[0]; as tax) {
+                {{ tax.rate }}%
+              }
+            </td>
+            <td colspan="2" class="si-li-col-sgst-pct px-4 text-right">
+              @if (_row.taxes[1]; as tax) {
+                {{ tax.rate }}%
+              }
+            </td>
+          }
+
+          <!-- IGST % rate -->
+          @if (showIGST()) {
+            <td colspan="2" class="si-li-col-igst-pct px-4 text-right">
+              @if (_row.taxes[0]; as tax) {
+                {{ tax.rate }}%
+              }
+            </td>
+          }
+
+          <!-- Grand Total (rowspan covers both sub-rows) -->
+          <td [attr.rowspan]="rowSpan()" class="si-li-col-grand-total px-4 text-right">
+            {{ _row.grandtotal.toFixed(2) }}
+          </td>
+
+          <!-- Actions (rowspan covers both sub-rows) -->
+          <td [attr.rowspan]="rowSpan()" class="si-li-col-actions text-center">
+            <button
+              type="button"
+              class="si-li-remove-btn"
+              (click)="draft.removeItemRow(i)"
+              [disabled]="rowCount() === 1"
+              aria-label="Remove row"
+              title="Remove row"
+            >
+              <tng-icon icon="trash2" aria-hidden="true" />
+            </button>
+          </td>
+        </tr>
+
+        <!-- ── Second sub-row: only rendered when Qty2 is active ─────── -->
+        @if (!showQty1()) {
+          <tr>
+            <!-- Item Total = price × qty (before discount) -->
+            <td class="si-li-col-item-total px-4 text-right">{{ _row.itemtotal.toFixed(2) }}</td>
+
+            <!-- Discount Amount -->
+            @if (draft.showDiscount()) {
+              <td colspan="2" class="si-li-col-disc-amt px-4 text-right">
+                {{ _row.discamount.toFixed(2) }}
+              </td>
+            }
+
+            <!-- CGST Amount / SGST Amount -->
+            @if (showIntraStateTax()) {
+              <td colspan="2" class="si-li-col-cgst-amt px-4 text-right">
+                {{ (_row.taxes[0]?.amount ?? 0).toFixed(2) }}
+              </td>
+              <td colspan="2" class="si-li-col-sgst-amt px-4 text-right">
+                {{ (_row.taxes[1]?.amount ?? 0).toFixed(2) }}
+              </td>
+            }
+
+            <!-- IGST Amount -->
+            @if (showIGST()) {
+              <td colspan="2" class="si-li-col-igst-amt px-4 text-right">
+                {{ (_row.taxes[0]?.amount ?? 0).toFixed(2) }}
+              </td>
+            }
+          </tr>
+        }
+
+      }
+    </tbody>
+
+  </table>
+</div>
+
+<div class="si-li-summary-wrap">
+  <table class="si-li-summary-table" aria-label="Invoice summary">
+    <tbody>
+      <tr>
+        <td class="si-li-summary-label">Item total</td>
+        <td class="si-li-summary-value">{{ draft.itemtotal() }}</td>
+      </tr>
+      @if (draft.showDiscount()) {
+        <tr>
+          <td class="si-li-summary-label">Discount Total</td>
+          <td class="si-li-summary-value">{{ draft.discount() }}</td>
+        </tr>
+      }
+      @if (showIntraStateTax() || showIGST()) {
+        <tr>
+          <td class="si-li-summary-label">Tax Total</td>
+          <td class="si-li-summary-value">{{ draft.tax() }}</td>
+        </tr>
+      }
+      <tr>
+        <td class="si-li-summary-label">Round Off</td>
+        <td class="si-li-summary-value si-li-summary-roundoff" (click)="focusTableInput($event)">
           <tng-input
             type="number"
-            class="summary-roundoff"
-            [value]="draft.roundoff()"
+            inputmode="decimal"
             step="0.01"
-            (valueChange)="draft.roundoff.set($any($event) ?? '0')"
+            fullWidth
+            ariaLabel="Round off"
+            [value]="draft.roundoff()"
+            (valueChange)="draft.roundoff.set($event)"
           />
-        </div>
-        <div class="summary-row summary-row--total">
-          <span>Grand Total</span>
-          <strong>{{ draft.grandtotal() }}</strong>
-        </div>
-      </div>
-    </div>
-  </tng-card-content>
-</tng-card>
+        </td>
+      </tr>
+      <tr class="si-li-summary-total-row">
+        <td class="si-li-summary-label">Grand Total</td>
+        <td class="si-li-summary-value">{{ draft.grandtotal() }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
