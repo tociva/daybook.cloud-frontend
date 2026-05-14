@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
-  TngButtonComponent,
   TngCardActionsComponent,
   TngCardComponent,
   TngCardContentComponent,
@@ -10,8 +9,9 @@ import {
   TngCardHeaderComponent,
   TngCardTitleComponent,
 } from '@tailng-ui/components';
-import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
+import { BurlDeleteButtonComponent } from '../../../../../../shared/burl-delete-button/burl-delete-button.component';
+import { BurlEditButtonComponent } from '../../../../../../shared/burl-edit-button/burl-edit-button.component';
 import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
 import { LedgerStore } from '../../../data/ledger';
 
@@ -19,7 +19,6 @@ import { LedgerStore } from '../../../data/ledger';
   selector: 'app-view-ledger',
   standalone: true,
   imports: [
-    TngButtonComponent,
     TngCardActionsComponent,
     TngCardComponent,
     TngCardContentComponent,
@@ -27,8 +26,9 @@ import { LedgerStore } from '../../../data/ledger';
     TngCardFooterComponent,
     TngCardHeaderComponent,
     TngCardTitleComponent,
-    TngIcon,
     BurlBackButtonComponent,
+    BurlDeleteButtonComponent,
+    BurlEditButtonComponent,
   ],
   templateUrl: './view-ledger.component.html',
   styleUrl: './view-ledger.component.css',

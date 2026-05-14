@@ -55,16 +55,10 @@
     <tng-card-footer>
       <tng-card-actions align="end">
         <app-burl-back-button label="Cancel" />
-        <tng-button
-          type="button"
-          appearance="solid"
-          tone="danger"
+        <app-burl-delete-button
           [disabled]="!confirmed() || customerStore.isLoading()"
-          (click)="deleteCustomer()"
-        >
-          <tng-icon icon="trash2" aria-hidden="true" />
-          Delete
-        </tng-button>
+          (clicked)="deleteCustomer()"
+        />
       </tng-card-actions>
     </tng-card-footer>
   </tng-card>

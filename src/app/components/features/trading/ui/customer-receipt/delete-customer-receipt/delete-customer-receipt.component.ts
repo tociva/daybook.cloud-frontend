@@ -1,7 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
-  TngButtonComponent,
   TngCardActionsComponent,
   TngCardComponent,
   TngCardContentComponent,
@@ -11,8 +10,8 @@ import {
   TngCardTitleComponent,
   TngCheckboxComponent,
 } from '@tailng-ui/components';
-import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
+import { BurlDeleteButtonComponent } from '../../../../../../shared/burl-delete-button/burl-delete-button.component';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { CustomerReceiptFacade, CustomerReceiptStore } from '../../../data/customer-receipt';
 
@@ -20,7 +19,6 @@ import { CustomerReceiptFacade, CustomerReceiptStore } from '../../../data/custo
   selector: 'app-delete-customer-receipt',
   standalone: true,
   imports: [
-    TngButtonComponent,
     TngCardActionsComponent,
     TngCardComponent,
     TngCardContentComponent,
@@ -29,8 +27,8 @@ import { CustomerReceiptFacade, CustomerReceiptStore } from '../../../data/custo
     TngCardHeaderComponent,
     TngCardTitleComponent,
     TngCheckboxComponent,
-    TngIcon,
     BurlBackButtonComponent,
+    BurlDeleteButtonComponent,
   ],
   templateUrl: './delete-customer-receipt.component.html',
   styleUrl: './delete-customer-receipt.component.css',

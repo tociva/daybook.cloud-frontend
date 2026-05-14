@@ -26,13 +26,7 @@
 
   <div class="invoice-actions">
     <app-burl-back-button label="Back" />
-    <tng-button type="button" appearance="solid" tone="primary" (click)="editInvoice()">
-      <tng-icon icon="pencil" aria-hidden="true" />
-      Edit
-    </tng-button>
-    <tng-button type="button" appearance="solid" tone="danger" (click)="deleteInvoice()">
-      <tng-icon icon="trash2" aria-hidden="true" />
-      Delete
-    </tng-button>
+    <app-burl-edit-button (clicked)="editInvoice()" />
+    <app-burl-delete-button (clicked)="deleteInvoice()" />
   </div>
 </main>

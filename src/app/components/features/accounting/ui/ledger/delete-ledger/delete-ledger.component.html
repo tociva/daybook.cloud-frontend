@@ -52,16 +52,11 @@
     <tng-card-footer>
       <tng-card-actions align="end">
         <app-burl-back-button label="Cancel" />
-        <tng-button
-          type="button"
-          appearance="solid"
-          tone="danger"
+        <app-burl-delete-button
+          [label]="ledgerStore.isLoading() ? 'Deleting…' : 'Delete ledger'"
           [disabled]="!confirmed() || ledgerStore.isLoading()"
-          (click)="deleteLedger()"
-        >
-          <tng-icon icon="trash2" aria-hidden="true" />
-          {{ ledgerStore.isLoading() ? 'Deleting…' : 'Delete ledger' }}
-        </tng-button>
+          (clicked)="deleteLedger()"
+        />
       </tng-card-actions>
     </tng-card-footer>
   </tng-card>

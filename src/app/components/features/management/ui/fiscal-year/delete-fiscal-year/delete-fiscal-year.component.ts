@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
-  TngButtonComponent,
   TngCardActionsComponent,
   TngCardComponent,
   TngCardContentComponent,
@@ -11,8 +10,8 @@ import {
   TngCardTitleComponent,
   TngCheckboxComponent,
 } from '@tailng-ui/components';
-import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
+import { BurlDeleteButtonComponent } from '../../../../../../shared/burl-delete-button/burl-delete-button.component';
 import { FiscalYearFacade, FiscalYearStore } from '../../../data/fiscal-year';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 
@@ -20,7 +19,6 @@ import { DateManagementService } from '../../../../../../core/date/date-manageme
   selector: 'app-delete-fiscal-year',
   standalone: true,
   imports: [
-    TngButtonComponent,
     TngCardActionsComponent,
     TngCardComponent,
     TngCardContentComponent,
@@ -29,8 +27,8 @@ import { DateManagementService } from '../../../../../../core/date/date-manageme
     TngCardHeaderComponent,
     TngCardTitleComponent,
     TngCheckboxComponent,
-    TngIcon,
     BurlBackButtonComponent,
+    BurlDeleteButtonComponent,
   ],
   templateUrl: './delete-fiscal-year.component.html',
   styleUrl: './delete-fiscal-year.component.css',

@@ -58,16 +58,11 @@
     <tng-card-footer>
       <tng-card-actions align="end">
         <app-burl-back-button />
-        <tng-button
-          type="button"
-          appearance="solid"
-          tone="danger"
+        <app-burl-delete-button
+          [label]="branchStore.isLoading() ? 'Deleting…' : 'Delete branch'"
           [disabled]="!confirmed() || branchStore.isLoading()"
-          (click)="deleteBranch()"
-        >
-          <tng-icon icon="trash2" aria-hidden="true" />
-          {{ branchStore.isLoading() ? 'Deleting…' : 'Delete branch' }}
-        </tng-button>
+          (clicked)="deleteBranch()"
+        />
       </tng-card-actions>
     </tng-card-footer>
   </tng-card>

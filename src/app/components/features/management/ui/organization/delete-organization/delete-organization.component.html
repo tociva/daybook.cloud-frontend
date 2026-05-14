@@ -50,16 +50,11 @@
     <tng-card-footer>
       <tng-card-actions align="end">
         <app-burl-back-button />
-        <tng-button
-          type="button"
-          appearance="solid"
-          tone="danger"
+        <app-burl-delete-button
+          [label]="organizationStore.isLoading() ? 'Deleting…' : 'Delete organization'"
           [disabled]="!confirmed() || organizationStore.isLoading()"
-          (click)="deleteOrganization()"
-        >
-          <tng-icon icon="trash2" aria-hidden="true" />
-          {{ organizationStore.isLoading() ? 'Deleting…' : 'Delete organization' }}
-        </tng-button>
+          (clicked)="deleteOrganization()"
+        />
       </tng-card-actions>
     </tng-card-footer>
   </tng-card>

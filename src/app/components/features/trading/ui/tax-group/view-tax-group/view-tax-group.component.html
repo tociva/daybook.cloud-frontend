@@ -85,10 +85,7 @@
     <tng-card-footer>
       <tng-card-actions align="end">
         <app-burl-back-button />
-        <tng-button type="button" appearance="solid" tone="primary" (click)="edit()">
-          <tng-icon icon="pencil" aria-hidden="true" />
-          Edit
-        </tng-button>
+        <app-burl-edit-button (clicked)="edit()" />
       </tng-card-actions>
     </tng-card-footer>
   </tng-card>

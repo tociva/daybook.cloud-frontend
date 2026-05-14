@@ -1,7 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
-  TngButtonComponent,
   TngCardActionsComponent,
   TngCardComponent,
   TngCardContentComponent,
@@ -10,8 +9,8 @@ import {
   TngCardHeaderComponent,
   TngCardTitleComponent,
 } from '@tailng-ui/components';
-import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
+import { BurlEditButtonComponent } from '../../../../../../shared/burl-edit-button/burl-edit-button.component';
 import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
 import { VendorStore } from '../../../data/vendor';
 
@@ -19,7 +18,6 @@ import { VendorStore } from '../../../data/vendor';
   selector: 'app-view-vendor',
   standalone: true,
   imports: [
-    TngButtonComponent,
     TngCardActionsComponent,
     TngCardComponent,
     TngCardContentComponent,
@@ -27,8 +25,8 @@ import { VendorStore } from '../../../data/vendor';
     TngCardFooterComponent,
     TngCardHeaderComponent,
     TngCardTitleComponent,
-    TngIcon,
     BurlBackButtonComponent,
+    BurlEditButtonComponent,
   ],
   templateUrl: './view-vendor.component.html',
   styleUrl: './view-vendor.component.css',

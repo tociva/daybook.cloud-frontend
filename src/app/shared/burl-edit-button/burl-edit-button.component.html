@@ -1,0 +1,10 @@
+<tng-button
+  type="button"
+  appearance="solid"
+  tone="primary"
+  [disabled]="disabled()"
+  (click)="clicked.emit()"
+>
+  <tng-icon icon="pencil" aria-hidden="true" />
+  {{ label() }}
+</tng-button>

@@ -1,7 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
-  TngButtonComponent,
   TngCardActionsComponent,
   TngCardComponent,
   TngCardContentComponent,
@@ -10,8 +9,8 @@ import {
   TngCardHeaderComponent,
   TngCardTitleComponent,
 } from '@tailng-ui/components';
-import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
+import { BurlEditButtonComponent } from '../../../../../../shared/burl-edit-button/burl-edit-button.component';
 import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
 import { ItemCategoryStore } from '../../../data/item-category';
 
@@ -19,7 +18,6 @@ import { ItemCategoryStore } from '../../../data/item-category';
   selector: 'app-view-item-category',
   standalone: true,
   imports: [
-    TngButtonComponent,
     TngCardActionsComponent,
     TngCardComponent,
     TngCardContentComponent,
@@ -27,8 +25,8 @@ import { ItemCategoryStore } from '../../../data/item-category';
     TngCardFooterComponent,
     TngCardHeaderComponent,
     TngCardTitleComponent,
-    TngIcon,
     BurlBackButtonComponent,
+    BurlEditButtonComponent,
   ],
   templateUrl: './view-item-category.component.html',
   styleUrl: './view-item-category.component.css',

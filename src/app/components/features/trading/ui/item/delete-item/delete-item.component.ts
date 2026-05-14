@@ -1,7 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
-  TngButtonComponent,
   TngCardActionsComponent,
   TngCardComponent,
   TngCardContentComponent,
@@ -11,15 +10,14 @@ import {
   TngCardTitleComponent,
   TngCheckboxComponent,
 } from '@tailng-ui/components';
-import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
+import { BurlDeleteButtonComponent } from '../../../../../../shared/burl-delete-button/burl-delete-button.component';
 import { ItemFacade, ItemStore } from '../../../data/item';
 
 @Component({
   selector: 'app-delete-item',
   standalone: true,
   imports: [
-    TngButtonComponent,
     TngCardActionsComponent,
     TngCardComponent,
     TngCardContentComponent,
@@ -28,8 +26,8 @@ import { ItemFacade, ItemStore } from '../../../data/item';
     TngCardHeaderComponent,
     TngCardTitleComponent,
     TngCheckboxComponent,
-    TngIcon,
     BurlBackButtonComponent,
+    BurlDeleteButtonComponent,
   ],
   templateUrl: './delete-item.component.html',
   styleUrl: './delete-item.component.css',

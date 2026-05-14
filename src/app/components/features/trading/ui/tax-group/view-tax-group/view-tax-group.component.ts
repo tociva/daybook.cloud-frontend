@@ -1,7 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
-  TngButtonComponent,
   TngCardActionsComponent,
   TngCardComponent,
   TngCardContentComponent,
@@ -10,8 +9,8 @@ import {
   TngCardHeaderComponent,
   TngCardTitleComponent,
 } from '@tailng-ui/components';
-import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
+import { BurlEditButtonComponent } from '../../../../../../shared/burl-edit-button/burl-edit-button.component';
 import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
 import { TaxGroupStore } from '../../../data/tax-group';
 import { TaxStore } from '../../../data/tax';
@@ -20,7 +19,6 @@ import type { Tax } from '../../../data/tax';
 @Component({
   selector: 'app-view-tax-group',
   imports: [
-    TngButtonComponent,
     TngCardActionsComponent,
     TngCardComponent,
     TngCardContentComponent,
@@ -28,8 +26,8 @@ import type { Tax } from '../../../data/tax';
     TngCardFooterComponent,
     TngCardHeaderComponent,
     TngCardTitleComponent,
-    TngIcon,
     BurlBackButtonComponent,
+    BurlEditButtonComponent,
   ],
   templateUrl: './view-tax-group.component.html',
   styleUrl: './view-tax-group.component.css',

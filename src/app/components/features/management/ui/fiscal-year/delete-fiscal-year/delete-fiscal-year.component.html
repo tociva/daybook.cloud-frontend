@@ -58,16 +58,11 @@
     <tng-card-footer>
       <tng-card-actions align="end">
         <app-burl-back-button />
-        <tng-button
-          type="button"
-          appearance="solid"
-          tone="danger"
+        <app-burl-delete-button
+          [label]="fiscalYearStore.isLoading() ? 'Deleting…' : 'Delete fiscal year'"
           [disabled]="!confirmed() || fiscalYearStore.isLoading()"
-          (click)="deleteFiscalYear()"
-        >
-          <tng-icon icon="trash2" aria-hidden="true" />
-          {{ fiscalYearStore.isLoading() ? 'Deleting…' : 'Delete fiscal year' }}
-        </tng-button>
+          (clicked)="deleteFiscalYear()"
+        />
       </tng-card-actions>
     </tng-card-footer>
   </tng-card>

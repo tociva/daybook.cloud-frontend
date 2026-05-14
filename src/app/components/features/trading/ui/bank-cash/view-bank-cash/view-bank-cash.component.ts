@@ -1,7 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
-  TngButtonComponent,
   TngCardActionsComponent,
   TngCardComponent,
   TngCardContentComponent,
@@ -11,8 +10,8 @@ import {
   TngCardTitleComponent,
   TngTag,
 } from '@tailng-ui/components';
-import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
+import { BurlEditButtonComponent } from '../../../../../../shared/burl-edit-button/burl-edit-button.component';
 import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
 import { BankCashStore, Status } from '../../../data/bank-cash';
 import type { BankCash } from '../../../data/bank-cash';
@@ -23,7 +22,6 @@ type StatusBadgeTone = 'danger' | 'success' | 'warning';
 @Component({
   selector: 'app-view-bank-cash',
   imports: [
-    TngButtonComponent,
     TngCardActionsComponent,
     TngCardComponent,
     TngCardContentComponent,
@@ -31,10 +29,10 @@ type StatusBadgeTone = 'danger' | 'success' | 'warning';
     TngCardFooterComponent,
     TngCardHeaderComponent,
     TngCardTitleComponent,
-    TngIcon,
     TngTag,
     TngTagIcon,
     BurlBackButtonComponent,
+    BurlEditButtonComponent,
   ],
   templateUrl: './view-bank-cash.component.html',
   styleUrl: './view-bank-cash.component.css',
