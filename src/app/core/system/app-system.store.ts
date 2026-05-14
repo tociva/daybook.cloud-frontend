@@ -5,8 +5,6 @@ import { AuthService } from '../../components/features/auth/data/auth.service';
 import { AuthStore } from '../../components/features/auth/data/auth.store';
 import { AppConfig } from '../config/app-config.model';
 import { AppConfigStore } from '../config/app-config.store';
-import { AppToastTone } from '../toast/toast.model';
-import { ToastStore } from '../toast/toast.store';
 import { UserSession } from '../../components/features/management/data/user-session/user-session.model';
 import { UserSessionService } from '../../components/features/management/data/user-session/user-session.service';
 import { UserSessionStore } from '../../components/features/management/data/user-session/user-session.store';
@@ -37,55 +35,6 @@ function isConfigLoadedStatus(status: AppStartupStatus): boolean {
     status === 'session-error' ||
     status === 'login-error'
   );
-}
-
-function buildToast(
-  status: AppStartupStatus,
-  error: string | null,
-): Readonly<{ tone: AppToastTone; message: string }> | null {
-  switch (status) {
-    case 'loading-config':
-      return { tone: 'neutral', message: 'Loading config...' };
-    case 'config-loaded':
-      return { tone: 'success', message: 'Config loaded' };
-    case 'auth-provider-unavailable':
-      return {
-        tone: 'warning',
-        message: error ?? 'Authentication is temporarily unavailable. Hydra lookups are paused.',
-      };
-    case 'processing-login-callback':
-      return { tone: 'neutral', message: 'Completing login...' };
-    case 'login-success':
-      return { tone: 'success', message: 'Login completed' };
-    case 'loading-user-session':
-      return { tone: 'neutral', message: 'Loading Daybook Cloud user session...' };
-    case 'user-session-ready':
-      return { tone: 'success', message: 'Daybook Cloud user session loaded' };
-    case 'user-session-error':
-      return { tone: 'danger', message: error ?? 'Daybook Cloud user session failed' };
-    case 'checking-session':
-      return { tone: 'neutral', message: 'Checking active session...' };
-    case 'session-active':
-      return { tone: 'success', message: 'Existing session found' };
-    case 'session-missing':
-      return { tone: 'neutral', message: 'No active session' };
-    case 'redirecting-to-login':
-      return { tone: 'neutral', message: 'Redirecting to login...' };
-    case 'redirecting-to-bootstrap':
-      return { tone: 'neutral', message: 'Opening organization setup...' };
-    case 'redirecting-to-subscription':
-      return { tone: 'neutral', message: 'Opening subscription selection...' };
-    case 'redirecting-to-dashboard':
-      return { tone: 'neutral', message: 'Opening dashboard...' };
-    case 'config-load-error':
-      return { tone: 'danger', message: error ?? 'Config load failed' };
-    case 'session-error':
-      return { tone: 'danger', message: error ?? 'Session check failed' };
-    case 'login-error':
-      return { tone: 'danger', message: error ?? 'Login redirect failed' };
-    default:
-      return null;
-  }
 }
 
 function setStartupStatus(
@@ -148,7 +97,6 @@ export const AppSystemStore = signalStore(
       authStore = inject(AuthStore),
       authService = inject(AuthService),
       router = inject(Router),
-      toastStore = inject(ToastStore),
       userSessionService = inject(UserSessionService),
       userSessionStore = inject(UserSessionStore),
       appThemeStore = inject(AppThemeStore),
@@ -165,12 +113,6 @@ export const AppSystemStore = signalStore(
             error,
           ),
         }));
-
-        const toast = buildToast(status, error);
-
-        if (toast) {
-          toastStore.show(toast.message, { tone: toast.tone });
-        }
       }
 
       async function loadConfigForStartup(): Promise<AppConfig | null> {
