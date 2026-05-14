@@ -1,8 +1,8 @@
-<tng-card variant="outline" tone="info" padding="lg">
-  <tng-card-content>
-    <!-- Customer search (hidden once a customer is chosen) -->
-    @if (!draft.selectedCustomer()) {
-      <div class="field field--full">
+<ng-container>
+  <!-- Customer search (hidden once a customer is chosen) -->
+  @if (!draft.selectedCustomer()) {
+    <div class="field field--full">
+      <tng-form-field labelPosition="above" [invalid]="draft.customerError() !== null">
         <tng-label forId="cust-search" required>Customer</tng-label>
         <tng-autocomplete
           id="cust-search"
@@ -23,61 +23,59 @@
             }
           </ng-template>
         </tng-autocomplete>
-        @if (draft.customerError()) {
-          <p class="field-error">{{ draft.customerError() }}</p>
+        <tng-error [show]="draft.customerError() !== null">{{ draft.customerError() }}</tng-error>
+      </tng-form-field>
+    </div>
+  }
+
+  <!-- Selected customer summary (shown after a customer is chosen) -->
+  @if (draft.selectedCustomer(); as cust) {
+    <div class="customer-summary">
+      <div class="customer-summary__info">
+        <span class="customer-summary__name">{{ cust.name }}</span>
+        @if (cust.mobile) {
+          <span class="customer-summary__sep">·</span>
+          <span class="customer-summary__meta">{{ cust.mobile }}</span>
+        }
+        @if (cust.email) {
+          <span class="customer-summary__sep">·</span>
+          <span class="customer-summary__meta">{{ cust.email }}</span>
+        }
+        @if (cust.gstin) {
+          <span class="customer-summary__sep">·</span>
+          <span class="customer-summary__meta">GSTIN: {{ cust.gstin }}</span>
         }
       </div>
-    }
+      <button type="button" class="change-customer-btn" (click)="clearCustomer()">
+        Change customer
+      </button>
+    </div>
+  }
 
-    <!-- Selected customer summary (shown after a customer is chosen) -->
-    @if (draft.selectedCustomer(); as cust) {
-      <div class="customer-summary">
-        <div class="customer-summary__info">
-          <span class="customer-summary__name">{{ cust.name }}</span>
-          @if (cust.mobile) {
-            <span class="customer-summary__sep">·</span>
-            <span class="customer-summary__meta">{{ cust.mobile }}</span>
-          }
-          @if (cust.email) {
-            <span class="customer-summary__sep">·</span>
-            <span class="customer-summary__meta">{{ cust.email }}</span>
-          }
-          @if (cust.gstin) {
-            <span class="customer-summary__sep">·</span>
-            <span class="customer-summary__meta">GSTIN: {{ cust.gstin }}</span>
-          }
+  <!-- Compact address summary + update link (shown once a customer is selected) -->
+  @if (draft.selectedCustomer()) {
+    <div class="address-summary">
+      <div class="address-summary__blocks">
+        <div class="address-summary__block">
+          <span class="address-summary__label">Billing</span>
+          <span class="address-summary__text">{{ billingAddressSummary() || '—' }}</span>
         </div>
-        <button type="button" class="change-customer-btn" (click)="clearCustomer()">
-          Change customer
-        </button>
-      </div>
-    }
-
-    <!-- Compact address summary + update link (shown once a customer is selected) -->
-    @if (draft.selectedCustomer()) {
-      <div class="address-summary">
-        <div class="address-summary__blocks">
-          <div class="address-summary__block">
-            <span class="address-summary__label">Billing</span>
-            <span class="address-summary__text">{{ billingAddressSummary() || '—' }}</span>
-          </div>
-          <div class="address-summary__block">
-            <span class="address-summary__label">Shipping</span>
-            <span class="address-summary__text">{{ shippingAddressSummary() }}</span>
-          </div>
+        <div class="address-summary__block">
+          <span class="address-summary__label">Shipping</span>
+          <span class="address-summary__text">{{ shippingAddressSummary() }}</span>
         </div>
-        <button type="button" class="address-link-btn" (click)="addressDialogOpen.set(true)">
-          Update address
-        </button>
       </div>
-    }
-  </tng-card-content>
-</tng-card>
+      <button type="button" class="address-link-btn" (click)="addressDialogOpen.set(true)">
+        Update address
+      </button>
+    </div>
+  }
 
-<!-- Address edit dialog -->
-@if (draft.selectedCustomer()) {
-  <app-si-address-dialog
-    [open]="addressDialogOpen()"
-    (closed)="addressDialogOpen.set(false)"
-  />
-}
+  <!-- Address edit dialog -->
+  @if (draft.selectedCustomer()) {
+    <app-si-address-dialog
+      [open]="addressDialogOpen()"
+      (closed)="addressDialogOpen.set(false)"
+    />
+  }
+</ng-container>

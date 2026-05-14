@@ -1,8 +1,8 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import {
   TngAutocompleteComponent,
-  TngCardComponent,
-  TngCardContentComponent,
+  TngError,
+  TngFormFieldComponent,
   TngLabelComponent,
 } from '@tailng-ui/components';
 import type { Customer } from '../../../../data/customer';
@@ -14,8 +14,8 @@ import { SiAddressDialogComponent } from './si-address-dialog/si-address-dialog.
   standalone: true,
   imports: [
     TngAutocompleteComponent,
-    TngCardComponent,
-    TngCardContentComponent,
+    TngError,
+    TngFormFieldComponent,
     TngLabelComponent,
     SiAddressDialogComponent,
   ],

@@ -6,11 +6,6 @@
 .field--full {
   grid-column: 1 / -1;
 }
-.field-error {
-  color: var(--tng-semantic-accent-danger);
-  font-size: 0.75rem;
-  margin: 0;
-}
 
 .muted {
   color: var(--tng-semantic-foreground-muted);
