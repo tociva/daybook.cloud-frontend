@@ -51,6 +51,84 @@
                 (keydown)="onInputKeydown($event)"
               />
             </div>
+          } @else if (field.type === 'date' || field.type === 'number') {
+            <div class="filter-comparison">
+              <tng-select
+                [attr.aria-label]="field.label + ' filter operator'"
+                [options]="getOperatorOptions(field)"
+                [getOptionLabel]="getOperatorLabel"
+                [getOptionValue]="getOperatorValue"
+                [trackBy]="trackByOperatorValue"
+                [value]="getOperatorValueForField(field)"
+                (valueChange)="setOperator(field, $event)"
+              />
+
+              @if (isBetweenOperator(field)) {
+                @if (field.type === 'date') {
+                  @if (isFiscalDateField(field)) {
+                    <app-fiscal-year-date-range-picker
+                      [value]="getDateRangeValue(field.id)"
+                      (valueChange)="setDateRangeValue(field, $event)"
+                    />
+                  } @else {
+                    <tng-date-range-picker
+                      [adapter]="datepickerAdapter.adapter()"
+                      [value]="getDateRangeValue(field.id)"
+                      (valueChange)="setDateRangeValue(field, $event)"
+                    />
+                  }
+                } @else {
+                  <tng-number-range
+                    [value]="getNumberRangeValue(field.id)"
+                    [step]="getFieldStep(field)"
+                    minPlaceholder="From"
+                    maxPlaceholder="To"
+                    (valueChange)="setNumberRangeValue(field, $event)"
+                  />
+                }
+              } @else if (field.type === 'date') {
+                @if (isFiscalDateField(field)) {
+                  <app-fiscal-year-datepicker
+                    [id]="getFieldId(field)"
+                    [inputAriaLabel]="field.label"
+                    [value]="getComparisonValue(field.id, 'single')"
+                    (valueChange)="setDatepickerValue(field, $event)"
+                  />
+                } @else {
+                  <tng-datepicker
+                    [adapter]="datepickerAdapter.adapter()"
+                    [id]="getFieldId(field)"
+                    [ariaLabel]="field.label"
+                    [value]="getComparisonValue(field.id, 'single')"
+                    (valueChange)="setDatepickerValue(field, $event)"
+                  />
+                }
+              } @else {
+                <tng-input
+                  [id]="getFieldId(field)"
+                  type="number"
+                  [inputmode]="getInputMode(field)"
+                  [step]="field.step ?? 'any'"
+                  [placeholder]="field.placeholder ?? field.label"
+                  [value]="getComparisonValue(field.id, 'single')"
+                  (valueChange)="setComparisonValue(field, 'single', $event)"
+                  (keydown)="onInputKeydown($event)"
+                />
+              }
+            </div>
+          } @else if (field.type === 'autocomplete') {
+            <tng-autocomplete
+              [id]="getFieldId(field)"
+              [placeholder]="field.placeholder ?? 'Search ' + field.label.toLowerCase()"
+              [ariaLabel]="field.label"
+              [options]="getAutocompleteOptions(field)"
+              [value]="getAutocompleteValue(field.id)"
+              [getOptionLabel]="getAutocompleteOptionLabel(field)"
+              [getOptionValue]="getAutocompleteOptionValue(field)"
+              [trackBy]="getAutocompleteTrackBy(field)"
+              (valueChange)="setAutocompleteValue(field, $event)"
+              (queryChange)="setAutocompleteQuery(field, $any($event))"
+            />
           } @else {
             <tng-select
               [id]="getFieldId(field)"

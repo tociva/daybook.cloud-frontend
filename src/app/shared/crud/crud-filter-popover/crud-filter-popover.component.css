@@ -92,6 +92,22 @@
 
   --tng-form-field-frame-min-height: 2.25rem;
   --tng-form-field-label-gap: 0.35rem;
+  --tng-autocomplete-overlay-z-index: var(--crud-filter-menu-z-index);
+  --tng-autocomplete-z-overlay: var(--crud-filter-menu-z-index);
+  --tng-autocomplete-bg: var(--tng-semantic-background-surface);
+  --tng-autocomplete-surface: var(--tng-semantic-background-base);
+  --tng-autocomplete-fg: var(--tng-semantic-foreground-primary);
+  --tng-autocomplete-muted: var(--tng-semantic-foreground-muted);
+  --tng-autocomplete-brand: var(--tng-semantic-accent-brand);
+  --tng-autocomplete-border: var(--tng-semantic-border-subtle);
+  --tng-autocomplete-border-strong: var(--tng-semantic-border-strong);
+  --tng-autocomplete-border-hover: var(--tng-semantic-accent-brand);
+
+  --tng-number-range-border: transparent;
+  --tng-number-range-bg: transparent;
+  --tng-number-range-px: 0;
+  --tng-number-range-min-height: var(--tng-form-field-frame-min-height, 2.25rem);
+  --tng-number-range-focus-ring: transparent;
 
   display: grid;
   gap: 0.6rem;
@@ -112,7 +128,26 @@
 .filter-comparison {
   display: grid;
   gap: 0.5rem;
-  grid-template-columns: 7rem minmax(0, 1fr);
+  grid-template-columns: 8.25rem minmax(0, 1fr);
+}
+
+.filter-native-input {
+  background: transparent;
+  border: 0;
+  box-sizing: border-box;
+  color: var(--tng-semantic-foreground-primary);
+  font: inherit;
+  min-height: 2.25rem;
+  min-width: 0;
+  outline: none;
+  padding: 0 0.15rem;
+  width: 100%;
+}
+
+.filter-range {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
 
 .filter-actions {
@@ -126,6 +161,10 @@
   }
 
   .filter-comparison {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-range {
     grid-template-columns: 1fr;
   }
 }

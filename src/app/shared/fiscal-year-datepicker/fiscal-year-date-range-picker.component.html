@@ -1,0 +1,14 @@
+<tng-date-range-picker
+  [adapter]="datepickerAdapter.adapter()"
+  [id]="id()"
+  [value]="value()"
+  [minDate]="dateRange.minDate()"
+  [maxDate]="dateRange.maxDate()"
+  [disableDate]="disableDate()"
+  [disabled]="disabled()"
+  [fullWidth]="fullWidth()"
+  [invalid]="pickerInvalid()"
+  [placeholder]="placeholder()"
+  [readonly]="readonly()"
+  (valueChange)="valueChange.emit($event)"
+/>

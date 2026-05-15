@@ -15,6 +15,8 @@ import {
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
+import { CustomerStore } from '../../../data/customer';
+import type { Customer } from '../../../data/customer';
 import { SaleInvoiceStore } from '../../../data/sale-invoice';
 import type { SaleInvoice } from '../../../data/sale-invoice';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
@@ -40,8 +42,18 @@ export class ListSaleInvoiceComponent {
   private readonly router = inject(Router);
   private readonly dateManagement = inject(DateManagementService);
   protected readonly crudQuery = inject(CrudListQueryService);
+  protected readonly customerStore = inject(CustomerStore);
   protected readonly saleInvoiceStore = inject(SaleInvoiceStore);
   protected readonly hasError = computed(() => this.saleInvoiceStore.error() !== null);
+  protected readonly customerOptionValue = (option: unknown): string =>
+    (option as Customer).id ?? '';
+  protected readonly customerOptionLabel = (option: unknown): string =>
+    (option as Customer).name ?? '';
+  protected readonly customerTrackBy = (_index: number, option: unknown): unknown => {
+    const customer = option as Customer;
+
+    return customer.id ?? customer.name;
+  };
 
   protected readonly columns: readonly TngTableColumn<SaleInvoice>[] = [
     { id: 'number', label: 'Number', sortable: true, width: '10rem' },
@@ -63,6 +75,38 @@ export class ListSaleInvoiceComponent {
 
   protected readonly filterFields: readonly CrudFilterField[] = [
     { id: 'number', label: 'Number', placeholder: 'Invoice number', type: 'text' },
+    {
+      id: 'customerid',
+      label: 'Customer',
+      placeholder: 'Search customer',
+      type: 'autocomplete',
+      options: () => this.customerStore.items() as readonly Customer[],
+      getOptionValue: this.customerOptionValue,
+      getOptionLabel: this.customerOptionLabel,
+      trackBy: this.customerTrackBy,
+      queryChange: (query) => this.searchCustomers(query),
+    },
+    {
+      id: 'date',
+      label: 'Date',
+      type: 'date',
+      fiscalYear: true,
+      operators: ['between', '=', '>=', '<='],
+    },
+    {
+      id: 'duedate',
+      label: 'Due Date',
+      type: 'date',
+      operators: ['between', '=', '>=', '<='],
+    },
+    {
+      id: 'grandtotal',
+      label: 'Grand Total',
+      placeholder: 'Amount',
+      step: '0.01',
+      type: 'number',
+      operators: ['between', '=', '>=', '<='],
+    },
   ];
 
   protected formatDate(value: string | undefined): string {
@@ -75,6 +119,7 @@ export class ListSaleInvoiceComponent {
   }
 
   constructor() {
+    void this.customerStore.loadCustomers({});
     this.crudQuery.init(
       (filter) =>
         void this.saleInvoiceStore.loadSaleInvoices({
@@ -82,6 +127,12 @@ export class ListSaleInvoiceComponent {
           includes: ['customer'],
         }),
     );
+  }
+
+  private searchCustomers(query: string): void {
+    const q = query.trim();
+
+    void this.customerStore.loadCustomers(q ? { where: { name: { ilike: `%${q}%` } } } : {});
   }
 
   protected createSaleInvoice(): void {

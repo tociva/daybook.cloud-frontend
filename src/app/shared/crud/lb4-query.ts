@@ -17,7 +17,7 @@ export type Lb4Count = Readonly<{
 
 export type Lb4TextFilterOperator = '=' | '!=' | 'like';
 
-export type Lb4ComparisonFilterOperator = '!=' | '<' | '<=' | '=' | '>' | '>=';
+export type Lb4ComparisonFilterOperator = '!=' | '<' | '<=' | '=' | '>' | '>=' | 'between';
 
 export type Lb4SortDirection = 'asc' | 'desc';
 
@@ -158,10 +158,12 @@ export function buildLb4TextFilterValue(value: string, operator: Lb4TextFilterOp
 }
 
 export function buildLb4ComparisonFilterValue<T>(
-  value: T,
+  value: T | readonly [T, T],
   operator: Lb4ComparisonFilterOperator,
 ): unknown {
   switch (operator) {
+    case 'between':
+      return Array.isArray(value) && value.length === 2 ? { between: value } : undefined;
     case '!=':
       return { neq: value };
     case '<':
