@@ -2,23 +2,28 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
   TngAutocompleteComponent,
-  TngButtonComponent,
+  TngCardActionsComponent,
+  TngCardComponent,
+  TngCardContentComponent,
+  TngCardDescriptionComponent,
+  TngCardFooterComponent,
+  TngCardHeaderComponent,
+  TngCardTitleComponent,
   TngError,
   TngFormFieldComponent,
   TngInputComponent,
   TngLabelComponent,
   TngStepperComponent,
-  TngTable,
-  TngTableCellTpl,
   TngTextareaComponent,
 } from '@tailng-ui/components';
-import type { TngTableColumn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import dayjs from 'dayjs';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
 import type { BankCash } from '../../../data/bank-cash/bank-cash.model';
 import { BankCashStore } from '../../../data/bank-cash';
+import type { Currency } from '../../../../../features/management/data/currency/currency.model';
+import { CurrencyStore } from '../../../../../features/management/data/currency/currency.store';
 import type { Customer } from '../../../data/customer/customer.model';
 import { CustomerStore } from '../../../data/customer';
 import type {
@@ -50,15 +55,19 @@ interface InvoiceRow {
   standalone: true,
   imports: [
     TngAutocompleteComponent,
-    TngButtonComponent,
+    TngCardActionsComponent,
+    TngCardComponent,
+    TngCardContentComponent,
+    TngCardDescriptionComponent,
+    TngCardFooterComponent,
+    TngCardHeaderComponent,
+    TngCardTitleComponent,
     TngError,
     TngFormFieldComponent,
     TngInputComponent,
     TngIcon,
     TngLabelComponent,
     TngStepperComponent,
-    TngTable,
-    TngTableCellTpl,
     TngTextareaComponent,
     FiscalYearDatepickerComponent,
     BurlBackButtonComponent,
@@ -77,6 +86,7 @@ export class CreateCustomerReceiptComponent {
   protected readonly customerStore = inject(CustomerStore);
   protected readonly bankCashStore = inject(BankCashStore);
   protected readonly saleInvoiceStore = inject(SaleInvoiceStore);
+  private readonly currencyStore = inject(CurrencyStore);
 
   // ── Mode ──────────────────────────────────────────────────────────────────
 
@@ -94,7 +104,7 @@ export class CreateCustomerReceiptComponent {
 
   protected readonly rcptdate = signal(this.fiscalYearDateRange.defaultDate());
   protected readonly amount = signal('');
-  protected readonly currencycode = signal('INR');
+  protected readonly currencycode = signal('');
   protected readonly description = signal('');
 
   // ── Customer autocomplete ─────────────────────────────────────────────────
@@ -138,25 +148,32 @@ export class CreateCustomerReceiptComponent {
   protected readonly bankCashOptionLabel = (b: BankCash): string => b.name ?? '';
   protected readonly bankCashTrackBy = (_index: number, b: BankCash): string => b.id ?? '';
 
+  // ── Currency autocomplete ──────────────────────────────────────────────────
+
+  protected readonly currencyQuery = signal('');
+
+  protected readonly filteredCurrencies = computed<Currency[]>(() =>
+    this.filterCurrencies(this.currencyStore.currencies(), this.currencyQuery()),
+  );
+
+  protected readonly currencyOptionValue = (c: Currency): string => c.code;
+  protected readonly currencyOptionLabel = (c: Currency): string => `${c.name} (${c.symbol})`;
+  protected readonly currencyTrackBy = (_index: number, c: Currency): string => c.code;
+
   // ── Invoice rows ──────────────────────────────────────────────────────────
 
   protected readonly invoiceRows = signal<InvoiceRow[]>([this.emptyInvoiceRow()]);
 
-  protected readonly filteredInvoices = computed<SaleInvoice[]>(
-    () => this.saleInvoiceStore.items().slice(0, 15) as SaleInvoice[],
-  );
+  protected readonly filteredInvoices = computed<SaleInvoice[]>(() => {
+    const customerId = this.customerid();
+    const items = this.saleInvoiceStore.items() as SaleInvoice[];
+    return (customerId ? items.filter((inv) => inv.customerid === customerId) : items).slice(0, 15);
+  });
 
   protected readonly invoiceOptionValue = (inv: SaleInvoice): string => inv.id ?? '';
   protected readonly invoiceOptionLabel = (inv: SaleInvoice): string =>
     this.invoiceDisplayName(inv);
   protected readonly invoiceTrackBy = (_index: number, inv: SaleInvoice): string => inv.id ?? '';
-
-  protected readonly invoiceColumns: readonly TngTableColumn<InvoiceRow>[] = [
-    { id: 'index', label: '#', width: '3rem' },
-    { id: 'invoice', label: 'Invoice' },
-    { id: 'amount', label: 'Amount', align: 'end', headerAlign: 'end', width: '10rem' },
-    { id: 'actions', label: '', align: 'end', headerAlign: 'end', width: '6rem' },
-  ];
 
   // ── Computed total ────────────────────────────────────────────────────────
 
@@ -230,14 +247,26 @@ export class CreateCustomerReceiptComponent {
     void this.loadInitialState();
   }
 
+  private filterCurrencies(currencies: readonly Currency[], query: string): Currency[] {
+    if (!query) return [...currencies];
+    return currencies.filter((c) => this.currencyOptionLabel(c).toLowerCase().includes(query));
+  }
+
   private async loadInitialState(): Promise<void> {
     await Promise.all([
       this.customerStore.loadCustomers({}),
       this.bankCashStore.loadBankCashes({}),
+      this.currencyStore.load(),
     ]);
 
     const id = this.route.snapshot.paramMap.get('id');
     this.id.set(id);
+
+    if (!id) {
+      // Set default currency after options are loaded so the autocomplete
+      // can resolve the label (Name + Symbol) instead of showing the raw code.
+      this.currencycode.set('INR');
+    }
 
     if (id) {
       const receipt = await this.customerReceiptStore.loadCustomerReceiptById(id, {
@@ -288,6 +317,7 @@ export class CreateCustomerReceiptComponent {
     if (!q) {
       this.selectedCustomer.set(null);
       this.customerid.set('');
+      this.invoiceRows.set([this.emptyInvoiceRow()]);
     }
     void this.customerStore.loadCustomers(q ? { where: { name: { ilike: `%${q}%` } } } : {});
   }
@@ -306,10 +336,21 @@ export class CreateCustomerReceiptComponent {
       this.currencycode.set(customer.currencycode ?? this.currencycode());
       // Reset invoice rows when customer changes
       this.invoiceRows.set([this.emptyInvoiceRow()]);
+      // Load invoices for this customer
+      void this.saleInvoiceStore.loadSaleInvoices({ where: { customerid: customer.id } });
     }
   }
 
   // ── Bank/Cash autocomplete ────────────────────────────────────────────────
+
+  protected onCurrencyQueryChange(event: unknown): void {
+    this.currencyQuery.set(typeof event === 'string' ? event.trim().toLowerCase() : '');
+  }
+
+  protected onCurrencyValueChange(value: unknown): void {
+    const code = typeof value === 'string' ? value : '';
+    if (code) this.currencycode.set(code);
+  }
 
   protected onBankCashQueryChange(event: unknown): void {
     const q = typeof event === 'string' ? event : '';
@@ -350,10 +391,6 @@ export class CreateCustomerReceiptComponent {
       const next = rows.filter((r) => r !== row);
       return next.length ? next : [this.emptyInvoiceRow()];
     });
-  }
-
-  protected getInvoiceRowNumber(row: InvoiceRow): number {
-    return this.invoiceRows().indexOf(row) + 1;
   }
 
   protected onInvoiceQueryChange(event: unknown, row: InvoiceRow): void {

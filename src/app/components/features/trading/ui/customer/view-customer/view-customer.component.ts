@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   TngCardActionsComponent,
@@ -13,6 +13,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 import { BurlEditButtonComponent } from '../../../../../../shared/burl-edit-button/burl-edit-button.component';
 import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
 import { CustomerStore } from '../../../data/customer';
+import { CurrencyStore } from '../../../../../features/management/data/currency/currency.store';
 
 @Component({
   selector: 'app-view-customer',
@@ -36,6 +37,14 @@ export class ViewCustomerComponent {
   private readonly router = inject(Router);
   private readonly burlNavigation = inject(BurlNavigationService);
   protected readonly customerStore = inject(CustomerStore);
+  private readonly currencyStore = inject(CurrencyStore);
+
+  protected readonly currencyLabel = computed(() => {
+    const code = this.customerStore.selectedItem()?.currencycode;
+    if (!code) return '—';
+    const match = this.currencyStore.currencies().find((c) => c.code === code);
+    return match ? `${match.name} (${match.symbol})` : code;
+  });
 
   constructor() {
     void this.loadInitialState();
@@ -44,7 +53,10 @@ export class ViewCustomerComponent {
   private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
-      await this.customerStore.loadCustomerById(id);
+      await Promise.all([
+        this.customerStore.loadCustomerById(id),
+        this.currencyStore.load(),
+      ]);
     }
   }
 

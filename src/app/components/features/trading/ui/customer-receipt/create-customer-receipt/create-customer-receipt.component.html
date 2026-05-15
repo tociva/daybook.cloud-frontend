@@ -4,217 +4,240 @@
     <!-- ══ Form ═══════════════════════════════════════════════════════════════ -->
     <form class="receipt-form" novalidate (submit)="submitForm($event)">
 
-      @if (customerReceiptStore.error()) {
-        <div class="notice notice--danger">{{ customerReceiptStore.error() }}</div>
-      }
-
       <!-- ── Basic Details ───────────────────────────────────────────────── -->
-      <section class="form-section">
-        <header class="section-header">
-          <h2 class="section-title">Basic Details</h2>
-          <p class="section-description">Date, customer, amount and bank/cash account.</p>
-        </header>
+      <tng-card variant="outline" padding="lg">
+        <tng-card-header>
+          <tng-card-title>Basic Details</tng-card-title>
+          <tng-card-description>Date, customer, amount and bank/cash account.</tng-card-description>
+        </tng-card-header>
 
-        <div class="field-grid">
-          <!-- Date -->
-          <div class="field">
-            <tng-form-field labelPosition="above" [invalid]="dateError() !== null">
-              <tng-label forId="rcpt-date" required>Receipt Date</tng-label>
-              <app-fiscal-year-datepicker
-                id="rcpt-date"
-                [value]="rcptdate()"
-                [invalid]="dateError() !== null"
-                (valueChange)="onDateChange($event)"
-              />
-              <tng-error [show]="dateError() !== null">{{ dateError() }}</tng-error>
-            </tng-form-field>
-          </div>
+        <tng-card-content>
+          @if (customerReceiptStore.error()) {
+            <div class="notice notice--danger">{{ customerReceiptStore.error() }}</div>
+          }
 
-          <!-- Customer -->
-          <div class="field">
-            <tng-form-field labelPosition="above" [invalid]="customerError() !== null">
-              <tng-label forId="rcpt-customer" required>Customer</tng-label>
-              <tng-autocomplete
-                id="rcpt-customer"
-                placeholder="Search by name, mobile or email…"
-                ariaLabel="Customer"
-                [options]="filteredCustomers()"
-                [value]="customerid()"
-                [getOptionValue]="customerOptionValue"
-                [getOptionLabel]="customerOptionLabel"
-                [trackBy]="customerTrackBy"
-                (valueChange)="onCustomerValueChange($event)"
-                (queryChange)="onCustomerQueryChange($event)"
-              >
-                <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
-                  <span>{{ label }}</span>
-                  @if (option.mobile) {
-                    <span class="muted"> · {{ option.mobile }}</span>
-                  }
-                </ng-template>
-              </tng-autocomplete>
-              <tng-error [show]="customerError() !== null">{{ customerError() }}</tng-error>
-            </tng-form-field>
-          </div>
+          <div class="field-grid">
+            <!-- Date -->
+            <div class="field">
+              <tng-form-field labelPosition="above" [invalid]="dateError() !== null">
+                <tng-label forId="rcpt-date" required>Receipt Date</tng-label>
+                <app-fiscal-year-datepicker
+                  id="rcpt-date"
+                  [value]="rcptdate()"
+                  [invalid]="dateError() !== null"
+                  (valueChange)="onDateChange($event)"
+                />
+                <tng-error [show]="dateError() !== null">{{ dateError() }}</tng-error>
+              </tng-form-field>
+            </div>
 
-          <!-- Amount -->
-          <div class="field">
-            <tng-form-field labelPosition="above" [invalid]="amountError() !== null">
-              <tng-label forId="rcpt-amount" required>Amount</tng-label>
-              <tng-input
-                id="rcpt-amount"
-                type="number"
-                min="0.01"
-                step="0.01"
-                placeholder="0.00"
-                [value]="amount()"
-                (valueChange)="amount.set($any($event) ?? '')"
-              />
-              <tng-error [show]="amountError() !== null">{{ amountError() }}</tng-error>
-            </tng-form-field>
-          </div>
+            <!-- Customer -->
+            <div class="field">
+              <tng-form-field labelPosition="above" [invalid]="customerError() !== null">
+                <tng-label forId="rcpt-customer" required>Customer</tng-label>
+                <tng-autocomplete
+                  id="rcpt-customer"
+                  placeholder="Search by name, mobile or email…"
+                  ariaLabel="Customer"
+                  [options]="filteredCustomers()"
+                  [value]="customerid()"
+                  [getOptionValue]="customerOptionValue"
+                  [getOptionLabel]="customerOptionLabel"
+                  [trackBy]="customerTrackBy"
+                  (valueChange)="onCustomerValueChange($event)"
+                  (queryChange)="onCustomerQueryChange($event)"
+                >
+                  <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
+                    <span>{{ label }}</span>
+                    @if (option.mobile) {
+                      <span class="muted"> · {{ option.mobile }}</span>
+                    }
+                  </ng-template>
+                </tng-autocomplete>
+                <tng-error [show]="customerError() !== null">{{ customerError() }}</tng-error>
+              </tng-form-field>
+            </div>
 
-          <!-- Currency -->
-          <div class="field">
-            <tng-form-field labelPosition="above" [invalid]="currencyError() !== null">
-              <tng-label forId="rcpt-currency" required>Currency</tng-label>
-              <tng-input
-                id="rcpt-currency"
-                placeholder="e.g. INR"
-                [value]="currencycode()"
-                (valueChange)="currencycode.set($any($event) ?? '')"
-              />
-              <tng-error [show]="currencyError() !== null">{{ currencyError() }}</tng-error>
-            </tng-form-field>
-          </div>
+            <!-- Amount -->
+            <div class="field">
+              <tng-form-field labelPosition="above" [invalid]="amountError() !== null">
+                <tng-label forId="rcpt-amount" required>Amount</tng-label>
+                <tng-input
+                  id="rcpt-amount"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  placeholder="0.00"
+                  [value]="amount()"
+                  (valueChange)="amount.set($any($event) ?? '')"
+                />
+                <tng-error [show]="amountError() !== null">{{ amountError() }}</tng-error>
+              </tng-form-field>
+            </div>
 
-          <!-- Bank/Cash -->
-          <div class="field">
-            <tng-form-field labelPosition="above" [invalid]="bankCashError() !== null">
-              <tng-label forId="rcpt-bcash" required>Bank/Cash Account</tng-label>
-              <tng-autocomplete
-                id="rcpt-bcash"
-                placeholder="Search bank or cash account…"
-                ariaLabel="Bank/Cash Account"
-                [options]="filteredBankCashes()"
-                [value]="bcashid()"
-                [getOptionValue]="bankCashOptionValue"
-                [getOptionLabel]="bankCashOptionLabel"
-                [trackBy]="bankCashTrackBy"
-                (valueChange)="onBankCashValueChange($event)"
-                (queryChange)="onBankCashQueryChange($event)"
-              >
-                <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
-                  <span>{{ label }}</span>
-                  @if (option.description) {
-                    <span class="muted"> — {{ option.description }}</span>
-                  }
-                </ng-template>
-              </tng-autocomplete>
-              <tng-error [show]="bankCashError() !== null">{{ bankCashError() }}</tng-error>
-            </tng-form-field>
-          </div>
+            <!-- Currency -->
+            <div class="field">
+              <tng-form-field labelPosition="above" [invalid]="currencyError() !== null">
+                <tng-label forId="rcpt-currency" required>Currency</tng-label>
+                <tng-autocomplete
+                  id="rcpt-currency"
+                  placeholder="Search for a currency"
+                  ariaLabel="Currency"
+                  [options]="filteredCurrencies()"
+                  [value]="currencycode()"
+                  [getOptionValue]="currencyOptionValue"
+                  [getOptionLabel]="currencyOptionLabel"
+                  [trackBy]="currencyTrackBy"
+                  (valueChange)="onCurrencyValueChange($event)"
+                  (queryChange)="onCurrencyQueryChange($event)"
+                />
+                <tng-error [show]="currencyError() !== null">{{ currencyError() }}</tng-error>
+              </tng-form-field>
+            </div>
 
-          <!-- Description -->
-          <div class="field field--wide">
-            <tng-form-field labelPosition="above">
-              <tng-label forId="rcpt-desc">Description</tng-label>
-              <tng-textarea
-                id="rcpt-desc"
-                rows="2"
-                placeholder="Optional notes…"
-                [value]="description()"
-                (valueChange)="description.set($any($event) ?? '')"
-              />
-            </tng-form-field>
+            <!-- Bank/Cash -->
+            <div class="field">
+              <tng-form-field labelPosition="above" [invalid]="bankCashError() !== null">
+                <tng-label forId="rcpt-bcash" required>Bank/Cash Account</tng-label>
+                <tng-autocomplete
+                  id="rcpt-bcash"
+                  placeholder="Search bank or cash account…"
+                  ariaLabel="Bank/Cash Account"
+                  [options]="filteredBankCashes()"
+                  [value]="bcashid()"
+                  [getOptionValue]="bankCashOptionValue"
+                  [getOptionLabel]="bankCashOptionLabel"
+                  [trackBy]="bankCashTrackBy"
+                  (valueChange)="onBankCashValueChange($event)"
+                  (queryChange)="onBankCashQueryChange($event)"
+                >
+                  <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
+                    <span>{{ label }}</span>
+                    @if (option.description) {
+                      <span class="muted"> — {{ option.description }}</span>
+                    }
+                  </ng-template>
+                </tng-autocomplete>
+                <tng-error [show]="bankCashError() !== null">{{ bankCashError() }}</tng-error>
+              </tng-form-field>
+            </div>
+
+            <!-- Description -->
+            <div class="field field--wide">
+              <tng-form-field labelPosition="above">
+                <tng-label forId="rcpt-desc">Description</tng-label>
+                <tng-textarea
+                  id="rcpt-desc"
+                  rows="2"
+                  placeholder="Optional notes…"
+                  [value]="description()"
+                  (valueChange)="description.set($any($event) ?? '')"
+                />
+              </tng-form-field>
+            </div>
           </div>
-        </div>
-      </section>
+        </tng-card-content>
+      </tng-card>
 
       <!-- ── Related Invoices ────────────────────────────────────────────── -->
-      <section class="form-section">
-        <header class="section-header">
-          <h2 class="section-title">Related Invoices</h2>
-          <p class="section-description">Optionally link this receipt to one or more sale invoices.</p>
-        </header>
+      @if (customerid()) {
+      <tng-card variant="outline" padding="lg">
+        <tng-card-header>
+          <tng-card-title>Related Invoices</tng-card-title>
+          <tng-card-description>Optionally link this receipt to one or more sale invoices.</tng-card-description>
+        </tng-card-header>
 
-        <tng-table
-          ariaLabel="Related invoices"
-          density="comfortable"
-          [columns]="invoiceColumns"
-          [items]="invoiceRows()"
-        >
-          <!-- # -->
-          <ng-template tngTableCellTemplate="index" let-row="row">
-            <span class="row-num">{{ getInvoiceRowNumber(row) }}</span>
-          </ng-template>
-
-          <!-- Invoice autocomplete -->
-          <ng-template tngTableCellTemplate="invoice" let-row="row">
-            <tng-autocomplete
-              placeholder="Search invoice by number…"
-              ariaLabel="Invoice"
-              [options]="filteredInvoices()"
-              [value]="row.invoice?.id ?? ''"
-              [getOptionValue]="invoiceOptionValue"
-              [getOptionLabel]="invoiceOptionLabel"
-              [trackBy]="invoiceTrackBy"
-              (valueChange)="onInvoiceValueChange($event, row)"
-              (queryChange)="onInvoiceQueryChange($event, row)"
-            />
-          </ng-template>
-
-          <!-- Amount input -->
-          <ng-template tngTableCellTemplate="amount" let-row="row">
-            <tng-input
-              type="number"
-              min="0"
-              step="0.01"
-              fullWidth
-              ariaLabel="Amount"
-              [value]="row.amount.toString()"
-              (valueChange)="updateInvoiceAmount(row, $any($event))"
-            />
-          </ng-template>
-
-          <!-- Row actions -->
-          <ng-template tngTableCellTemplate="actions" let-row="row">
-            <tng-button
-              type="button"
-              appearance="ghost"
-              tone="danger"
-              title="Remove row"
-              (click)="removeInvoiceRow(row)"
-            >
-              <tng-icon icon="trash2" aria-hidden="true" />
-            </tng-button>
-          </ng-template>
-        </tng-table>
-
-        <!-- Add row + total -->
-        <div class="inv-toolbar">
-          <tng-button type="button" appearance="outline" tone="primary" (click)="addInvoiceRow()">
-            <tng-icon icon="plus" aria-hidden="true" />
-            Add Row
-          </tng-button>
-
-          <div class="inv-total">
-            <span>Invoices Total</span>
-            <strong>{{ currencycode() }} {{ invoicesTotal() }}</strong>
+        <tng-card-content>
+          <!-- Toolbar -->
+          <div class="rcpt-inv-toolbar">
+            <button type="button" class="si-li-add-btn" (click)="addInvoiceRow()">
+              <tng-icon icon="plus" aria-hidden="true" />
+              Add Row
+            </button>
           </div>
-        </div>
-      </section>
 
-      <!-- ── Form actions ────────────────────────────────────────────────── -->
-      <div class="form-actions">
-        <app-burl-back-button label="Cancel" />
-        <app-burl-create-button
-          [type]="'button'"
-          [label]="mode() === 'edit' ? 'Update Receipt' : 'Create Receipt'"
-          [disabled]="customerReceiptStore.isLoading()"
-          (clicked)="submitForm($event)"
-        />
-      </div>
+          <!-- Table -->
+          <div class="si-li-scroll">
+            <table class="si-li-table">
+              <thead>
+                <tr>
+                  <th class="rcpt-inv-col-serial p-0 text-center">#</th>
+                  <th class="rcpt-inv-col-invoice px-4 text-left">Invoice</th>
+                  <th class="rcpt-inv-col-amount px-4 text-right">Amount</th>
+                  <th class="rcpt-inv-col-actions p-0 text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of invoiceRows(); track $index; let i = $index) {
+                  <tr>
+                    <td class="rcpt-inv-col-serial text-center">{{ i + 1 }}</td>
+                    <td class="rcpt-inv-col-invoice p-0">
+                      <tng-autocomplete
+                        placeholder="Search invoice by number…"
+                        ariaLabel="Invoice"
+                        [options]="filteredInvoices()"
+                        [value]="row.invoice?.id ?? ''"
+                        [getOptionValue]="invoiceOptionValue"
+                        [getOptionLabel]="invoiceOptionLabel"
+                        [trackBy]="invoiceTrackBy"
+                        (valueChange)="onInvoiceValueChange($event, row)"
+                        (queryChange)="onInvoiceQueryChange($event, row)"
+                      />
+                    </td>
+                    <td class="rcpt-inv-col-amount px-2 text-right">
+                      <tng-input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        fullWidth
+                        ariaLabel="Amount"
+                        [value]="row.amount.toString()"
+                        (valueChange)="updateInvoiceAmount(row, $any($event))"
+                      />
+                    </td>
+                    <td class="rcpt-inv-col-actions text-center">
+                      <button
+                        type="button"
+                        class="si-li-remove-btn"
+                        title="Remove row"
+                        aria-label="Remove row"
+                        (click)="removeInvoiceRow(row)"
+                      >
+                        <tng-icon icon="trash2" aria-hidden="true" />
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Summary -->
+          <div class="si-li-summary-wrap">
+            <table class="si-li-summary-table" aria-label="Invoices summary">
+              <tbody>
+                <tr class="si-li-summary-total-row">
+                  <td class="si-li-summary-label">Invoices Total</td>
+                  <td class="si-li-summary-value">{{ currencycode() }} {{ invoicesTotal() }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </tng-card-content>
+
+        <tng-card-footer>
+          <tng-card-actions align="end">
+            <app-burl-back-button label="Cancel" />
+            <app-burl-create-button
+              [type]="'button'"
+              [label]="mode() === 'edit' ? 'Update Receipt' : 'Create Receipt'"
+              [disabled]="customerReceiptStore.isLoading()"
+              (clicked)="submitForm($event)"
+            />
+          </tng-card-actions>
+        </tng-card-footer>
+      </tng-card>
+      } <!-- end @if (customerid()) -->
 
     </form>
 
