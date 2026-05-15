@@ -2,11 +2,9 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
   TngAutocompleteComponent,
-  TngCardActionsComponent,
   TngCardComponent,
   TngCardContentComponent,
   TngCardDescriptionComponent,
-  TngCardFooterComponent,
   TngCardHeaderComponent,
   TngCardTitleComponent,
   TngError,
@@ -16,7 +14,6 @@ import {
   TngStepperComponent,
   TngTextareaComponent,
 } from '@tailng-ui/components';
-import { TngIcon } from '@tailng-ui/icons';
 import dayjs from 'dayjs';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
@@ -33,20 +30,14 @@ import type {
 } from '../../../data/customer-receipt';
 import { CustomerReceiptFacade, CustomerReceiptStore } from '../../../data/customer-receipt';
 import type { SaleInvoice } from '../../../data/sale-invoice/sale-invoice.model';
-import { SaleInvoiceStore } from '../../../data/sale-invoice';
-import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import {
   FiscalYearDatepickerComponent,
   FiscalYearDateRangeService,
 } from '../../../../../../shared/fiscal-year-datepicker';
-
-// ── Internal row type ─────────────────────────────────────────────────────────
-
-interface InvoiceRow {
-  invoice: SaleInvoice | null;
-  invoiceSearch: string;
-  amount: number;
-}
+import {
+  InvoiceRow,
+  RcptInvoiceLinesComponent,
+} from './rcpt-invoice-lines/rcpt-invoice-lines.component';
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -55,23 +46,21 @@ interface InvoiceRow {
   standalone: true,
   imports: [
     TngAutocompleteComponent,
-    TngCardActionsComponent,
     TngCardComponent,
     TngCardContentComponent,
     TngCardDescriptionComponent,
-    TngCardFooterComponent,
     TngCardHeaderComponent,
     TngCardTitleComponent,
     TngError,
     TngFormFieldComponent,
     TngInputComponent,
-    TngIcon,
     TngLabelComponent,
     TngStepperComponent,
     TngTextareaComponent,
     FiscalYearDatepickerComponent,
     BurlBackButtonComponent,
     BurlCreateButtonComponent,
+    RcptInvoiceLinesComponent,
   ],
   templateUrl: './create-customer-receipt.component.html',
   styleUrl: './create-customer-receipt.component.css',
@@ -79,13 +68,11 @@ interface InvoiceRow {
 export class CreateCustomerReceiptComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(CustomerReceiptFacade);
-  private readonly dateManagement = inject(DateManagementService);
   private readonly fiscalYearDateRange = inject(FiscalYearDateRangeService);
 
   protected readonly customerReceiptStore = inject(CustomerReceiptStore);
   protected readonly customerStore = inject(CustomerStore);
   protected readonly bankCashStore = inject(BankCashStore);
-  protected readonly saleInvoiceStore = inject(SaleInvoiceStore);
   private readonly currencyStore = inject(CurrencyStore);
 
   // ── Mode ──────────────────────────────────────────────────────────────────
@@ -160,28 +147,9 @@ export class CreateCustomerReceiptComponent {
   protected readonly currencyOptionLabel = (c: Currency): string => `${c.name} (${c.symbol})`;
   protected readonly currencyTrackBy = (_index: number, c: Currency): string => c.code;
 
-  // ── Invoice rows ──────────────────────────────────────────────────────────
+  // ── Invoice rows (two-way bound to child RcptInvoiceLinesComponent) ──────
 
-  protected readonly invoiceRows = signal<InvoiceRow[]>([this.emptyInvoiceRow()]);
-
-  protected readonly filteredInvoices = computed<SaleInvoice[]>(() => {
-    const customerId = this.customerid();
-    const items = this.saleInvoiceStore.items() as SaleInvoice[];
-    return (customerId ? items.filter((inv) => inv.customerid === customerId) : items).slice(0, 15);
-  });
-
-  protected readonly invoiceOptionValue = (inv: SaleInvoice): string => inv.id ?? '';
-  protected readonly invoiceOptionLabel = (inv: SaleInvoice): string =>
-    this.invoiceDisplayName(inv);
-  protected readonly invoiceTrackBy = (_index: number, inv: SaleInvoice): string => inv.id ?? '';
-
-  // ── Computed total ────────────────────────────────────────────────────────
-
-  protected readonly invoicesTotal = computed(() =>
-    this.invoiceRows()
-      .reduce((s, r) => s + (Number(r.amount) || 0), 0)
-      .toFixed(2),
-  );
+  protected readonly invoiceRows = signal<InvoiceRow[]>([]);
 
   // ── Errors ────────────────────────────────────────────────────────────────
 
@@ -218,7 +186,7 @@ export class CreateCustomerReceiptComponent {
       !!this.bcashid() &&
       !!this.currencycode().trim();
 
-    const invoicesLinked = this.invoiceRows().some((r) => r.invoice !== null);
+    const invoicesLinked = this.invoiceRows().some((r) => r.invoice !== null); // driven by child via two-way binding
 
     return [
       {
@@ -300,9 +268,9 @@ export class CreateCustomerReceiptComponent {
       this.invoiceRows.set(
         r.invoices.map((inv) => ({
           invoice: (inv.saleinvoice as SaleInvoice) ?? null,
-          invoiceSearch: inv.saleinvoice
-            ? this.invoiceDisplayName(inv.saleinvoice as SaleInvoice)
-            : '',
+          // invoiceSearch is just the search-input string; the child resolves
+          // the full display label via getOptionLabel once the invoice is set.
+          invoiceSearch: (inv.saleinvoice as SaleInvoice)?.number ?? '',
           amount: inv.amount,
         })),
       );
@@ -317,7 +285,7 @@ export class CreateCustomerReceiptComponent {
     if (!q) {
       this.selectedCustomer.set(null);
       this.customerid.set('');
-      this.invoiceRows.set([this.emptyInvoiceRow()]);
+      this.invoiceRows.set([]);
     }
     void this.customerStore.loadCustomers(q ? { where: { name: { ilike: `%${q}%` } } } : {});
   }
@@ -330,15 +298,12 @@ export class CreateCustomerReceiptComponent {
       return;
     }
     const customer = this.filteredCustomers().find((c) => c.id === id) ?? null;
-    if (customer) {
-      this.selectedCustomer.set(customer);
-      this.customerid.set(customer.id ?? '');
-      this.currencycode.set(customer.currencycode ?? this.currencycode());
-      // Reset invoice rows when customer changes
-      this.invoiceRows.set([this.emptyInvoiceRow()]);
-      // Load invoices for this customer
-      void this.saleInvoiceStore.loadSaleInvoices({ where: { customerid: customer.id } });
-    }
+    if (!customer) return;
+
+    this.selectedCustomer.set(customer);
+    this.customerid.set(customer.id ?? '');
+    this.currencycode.set(customer.currencycode ?? this.currencycode());
+    // Invoice pre-fill is handled by RcptInvoiceLinesComponent via its effect()
   }
 
   // ── Bank/Cash autocomplete ────────────────────────────────────────────────
@@ -374,86 +339,6 @@ export class CreateCustomerReceiptComponent {
       this.selectedBankCash.set(bcash);
       this.bcashid.set(bcash.id ?? '');
     }
-  }
-
-  // ── Invoice row management ────────────────────────────────────────────────
-
-  private emptyInvoiceRow(): InvoiceRow {
-    return { invoice: null, invoiceSearch: '', amount: 0 };
-  }
-
-  protected addInvoiceRow(): void {
-    this.invoiceRows.update((rows) => [...rows, this.emptyInvoiceRow()]);
-  }
-
-  protected removeInvoiceRow(row: InvoiceRow): void {
-    this.invoiceRows.update((rows) => {
-      const next = rows.filter((r) => r !== row);
-      return next.length ? next : [this.emptyInvoiceRow()];
-    });
-  }
-
-  protected onInvoiceQueryChange(event: unknown, row: InvoiceRow): void {
-    const q = typeof event === 'string' ? event : '';
-    const idx = this.invoiceRows().indexOf(row);
-    if (idx === -1) return;
-    this.invoiceRows.update((rows) =>
-      rows.map((r, i) => (i === idx ? { ...r, invoiceSearch: q } : r)),
-    );
-    const customerId = this.customerid();
-    void this.saleInvoiceStore.loadSaleInvoices(
-      q
-        ? {
-            where: {
-              and: [
-                { number: { ilike: `%${q}%` } },
-                ...(customerId ? [{ customerid: customerId }] : []),
-              ],
-            },
-          }
-        : customerId
-          ? { where: { customerid: customerId } }
-          : {},
-    );
-  }
-
-  protected onInvoiceValueChange(value: unknown, row: InvoiceRow): void {
-    const id = typeof value === 'string' ? value : '';
-    const idx = this.invoiceRows().indexOf(row);
-    if (idx === -1) return;
-    if (!id) {
-      this.invoiceRows.update((rows) =>
-        rows.map((r, i) => (i === idx ? { ...r, invoice: null, invoiceSearch: '' } : r)),
-      );
-      return;
-    }
-    const invoice = this.filteredInvoices().find((inv) => inv.id === id) ?? null;
-    if (invoice) {
-      this.invoiceRows.update((rows) =>
-        rows.map((r, i) =>
-          i === idx ? { ...r, invoice, invoiceSearch: this.invoiceDisplayName(invoice) } : r,
-        ),
-      );
-    }
-  }
-
-  protected updateInvoiceAmount(row: InvoiceRow, value: string | null): void {
-    const num = Number(value ?? '0') || 0;
-    const idx = this.invoiceRows().indexOf(row);
-    if (idx === -1) return;
-    this.invoiceRows.update((rows) =>
-      rows.map((r, i) => (i === idx ? { ...r, amount: num } : r)),
-    );
-  }
-
-  protected invoiceDisplayName(invoice: SaleInvoice): string {
-    const parts: string[] = [];
-    if (invoice.number) parts.push(invoice.number);
-    const formattedDate = this.dateManagement.formatDisplayDate(invoice.date, '');
-    if (formattedDate) parts.push(`dated ${formattedDate}`);
-    if (invoice.grandtotal != null)
-      parts.push(`(${this.currencycode()} ${invoice.grandtotal.toFixed(2)})`);
-    return parts.join(' ');
   }
 
   // ── Date helpers ──────────────────────────────────────────────────────────
