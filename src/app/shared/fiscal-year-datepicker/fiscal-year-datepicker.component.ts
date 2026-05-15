@@ -18,13 +18,14 @@ import { FiscalYearDateRangeService } from './fiscal-year-date-range.service';
   imports: [TngDatepickerComponent],
   templateUrl: './fiscal-year-datepicker.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { style: 'display: block; width: 100%;' },
 })
 export class FiscalYearDatepickerComponent {
   protected readonly datepickerAdapter = inject(DatepickerDateAdapterService);
   protected readonly dateRange = inject(FiscalYearDateRangeService);
 
   readonly disabled = input(false, { transform: booleanAttribute });
-  readonly fullWidth = input(false, { transform: booleanAttribute });
+  readonly fullWidth = input(true, { transform: booleanAttribute });
   readonly id = input<string | null>(null);
   readonly inputAriaLabel = input('Choose date');
   readonly invalid = input(false, { transform: booleanAttribute });

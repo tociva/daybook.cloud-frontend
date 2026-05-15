@@ -1,15 +1,18 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
+  TngAutocompleteComponent,
   TngButtonComponent,
-  TngCardComponent,
-  TngCardContentComponent,
-  TngCardHeaderComponent,
-  TngCardTitleComponent,
+  TngError,
+  TngFormFieldComponent,
   TngInputComponent,
   TngLabelComponent,
+  TngStepperComponent,
+  TngTable,
+  TngTableCellTpl,
   TngTextareaComponent,
 } from '@tailng-ui/components';
+import type { TngTableColumn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import dayjs from 'dayjs';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
@@ -37,7 +40,6 @@ import {
 interface InvoiceRow {
   invoice: SaleInvoice | null;
   invoiceSearch: string;
-  showDropdown: boolean;
   amount: number;
 }
 
@@ -47,14 +49,16 @@ interface InvoiceRow {
   selector: 'app-create-customer-receipt',
   standalone: true,
   imports: [
+    TngAutocompleteComponent,
     TngButtonComponent,
-    TngCardComponent,
-    TngCardContentComponent,
-    TngCardHeaderComponent,
-    TngCardTitleComponent,
+    TngError,
+    TngFormFieldComponent,
     TngInputComponent,
     TngIcon,
     TngLabelComponent,
+    TngStepperComponent,
+    TngTable,
+    TngTableCellTpl,
     TngTextareaComponent,
     FiscalYearDatepickerComponent,
     BurlBackButtonComponent,
@@ -95,13 +99,12 @@ export class CreateCustomerReceiptComponent {
 
   // ── Customer autocomplete ─────────────────────────────────────────────────
 
-  protected readonly customerSearch = signal('');
-  protected readonly showCustomerDropdown = signal(false);
   protected readonly selectedCustomer = signal<Customer | null>(null);
   protected readonly customerid = signal('');
+  protected readonly customerQuery = signal('');
 
   protected readonly filteredCustomers = computed<Customer[]>(() => {
-    const q = this.customerSearch().toLowerCase();
+    const q = this.customerQuery().toLowerCase();
     const list = this.customerStore.items() as Customer[];
     return (
       q
@@ -115,27 +118,45 @@ export class CreateCustomerReceiptComponent {
     ).slice(0, 15);
   });
 
+  protected readonly customerOptionValue = (c: Customer): string => c.id ?? '';
+  protected readonly customerOptionLabel = (c: Customer): string => c.name ?? '';
+  protected readonly customerTrackBy = (_index: number, c: Customer): string => c.id ?? '';
+
   // ── Bank/Cash autocomplete ────────────────────────────────────────────────
 
-  protected readonly bankCashSearch = signal('');
-  protected readonly showBankCashDropdown = signal(false);
   protected readonly selectedBankCash = signal<BankCash | null>(null);
   protected readonly bcashid = signal('');
+  protected readonly bankCashQuery = signal('');
 
   protected readonly filteredBankCashes = computed<BankCash[]>(() => {
-    const q = this.bankCashSearch().toLowerCase();
+    const q = this.bankCashQuery().toLowerCase();
     const list = this.bankCashStore.items() as BankCash[];
     return (q ? list.filter((b) => b.name?.toLowerCase().includes(q)) : list).slice(0, 15);
   });
 
+  protected readonly bankCashOptionValue = (b: BankCash): string => b.id ?? '';
+  protected readonly bankCashOptionLabel = (b: BankCash): string => b.name ?? '';
+  protected readonly bankCashTrackBy = (_index: number, b: BankCash): string => b.id ?? '';
+
   // ── Invoice rows ──────────────────────────────────────────────────────────
 
   protected readonly invoiceRows = signal<InvoiceRow[]>([this.emptyInvoiceRow()]);
-  protected readonly activeInvoiceRowIndex = signal(-1);
 
   protected readonly filteredInvoices = computed<SaleInvoice[]>(
     () => this.saleInvoiceStore.items().slice(0, 15) as SaleInvoice[],
   );
+
+  protected readonly invoiceOptionValue = (inv: SaleInvoice): string => inv.id ?? '';
+  protected readonly invoiceOptionLabel = (inv: SaleInvoice): string =>
+    this.invoiceDisplayName(inv);
+  protected readonly invoiceTrackBy = (_index: number, inv: SaleInvoice): string => inv.id ?? '';
+
+  protected readonly invoiceColumns: readonly TngTableColumn<InvoiceRow>[] = [
+    { id: 'index', label: '#', width: '3rem' },
+    { id: 'invoice', label: 'Invoice' },
+    { id: 'amount', label: 'Amount', align: 'end', headerAlign: 'end', width: '10rem' },
+    { id: 'actions', label: '', align: 'end', headerAlign: 'end', width: '6rem' },
+  ];
 
   // ── Computed total ────────────────────────────────────────────────────────
 
@@ -168,6 +189,40 @@ export class CreateCustomerReceiptComponent {
   protected readonly currencyError = computed(() =>
     this.submitted() && !this.currencycode().trim() ? 'Currency is required.' : null,
   );
+
+  // ── Stepper ───────────────────────────────────────────────────────────────
+
+  protected readonly setupSteps = computed(() => {
+    const basicCompleted =
+      !!this.rcptdate() &&
+      !!this.customerid() &&
+      !!this.amount() &&
+      Number(this.amount()) > 0 &&
+      !!this.bcashid() &&
+      !!this.currencycode().trim();
+
+    const invoicesLinked = this.invoiceRows().some((r) => r.invoice !== null);
+
+    return [
+      {
+        value: 'basic',
+        label: 'Basic Details',
+        description: 'Date, customer, amount & bank',
+        completed: basicCompleted,
+      },
+      {
+        value: 'invoices',
+        label: 'Related Invoices',
+        description: 'Link to sale invoices',
+        completed: invoicesLinked,
+      },
+    ] as const;
+  });
+
+  protected readonly activeSetupStep = computed(() => {
+    const firstPending = this.setupSteps().find((step) => !step.completed);
+    return firstPending?.value ?? 'invoices';
+  });
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
@@ -203,12 +258,10 @@ export class CreateCustomerReceiptComponent {
 
     if (r.customer) {
       this.selectedCustomer.set(r.customer as Customer);
-      this.customerSearch.set(r.customer.name ?? '');
     }
 
     if (r.bcash) {
       this.selectedBankCash.set(r.bcash as BankCash);
-      this.bankCashSearch.set(r.bcash.name ?? '');
       this.bcashid.set(r.bcash.id ?? '');
     } else if (r.bcashid) {
       this.bcashid.set(r.bcashid);
@@ -221,7 +274,6 @@ export class CreateCustomerReceiptComponent {
           invoiceSearch: inv.saleinvoice
             ? this.invoiceDisplayName(inv.saleinvoice as SaleInvoice)
             : '',
-          showDropdown: false,
           amount: inv.amount,
         })),
       );
@@ -230,10 +282,9 @@ export class CreateCustomerReceiptComponent {
 
   // ── Customer autocomplete ─────────────────────────────────────────────────
 
-  protected onCustomerSearchInput(value: string | null): void {
-    const q = value ?? '';
-    this.customerSearch.set(q);
-    this.showCustomerDropdown.set(true);
+  protected onCustomerQueryChange(event: unknown): void {
+    const q = typeof event === 'string' ? event : '';
+    this.customerQuery.set(q);
     if (!q) {
       this.selectedCustomer.set(null);
       this.customerid.set('');
@@ -241,26 +292,28 @@ export class CreateCustomerReceiptComponent {
     void this.customerStore.loadCustomers(q ? { where: { name: { ilike: `%${q}%` } } } : {});
   }
 
-  protected selectCustomer(customer: Customer): void {
-    this.selectedCustomer.set(customer);
-    this.customerSearch.set(customer.name);
-    this.customerid.set(customer.id ?? '');
-    this.showCustomerDropdown.set(false);
-    this.currencycode.set(customer.currencycode ?? this.currencycode());
-    // Reset invoice rows when customer changes
-    this.invoiceRows.set([this.emptyInvoiceRow()]);
-  }
-
-  protected closeCustomerDropdown(): void {
-    this.showCustomerDropdown.set(false);
+  protected onCustomerValueChange(value: unknown): void {
+    const id = typeof value === 'string' ? value : '';
+    if (!id) {
+      this.selectedCustomer.set(null);
+      this.customerid.set('');
+      return;
+    }
+    const customer = this.filteredCustomers().find((c) => c.id === id) ?? null;
+    if (customer) {
+      this.selectedCustomer.set(customer);
+      this.customerid.set(customer.id ?? '');
+      this.currencycode.set(customer.currencycode ?? this.currencycode());
+      // Reset invoice rows when customer changes
+      this.invoiceRows.set([this.emptyInvoiceRow()]);
+    }
   }
 
   // ── Bank/Cash autocomplete ────────────────────────────────────────────────
 
-  protected onBankCashSearchInput(value: string | null): void {
-    const q = value ?? '';
-    this.bankCashSearch.set(q);
-    this.showBankCashDropdown.set(true);
+  protected onBankCashQueryChange(event: unknown): void {
+    const q = typeof event === 'string' ? event : '';
+    this.bankCashQuery.set(q);
     if (!q) {
       this.selectedBankCash.set(null);
       this.bcashid.set('');
@@ -268,42 +321,48 @@ export class CreateCustomerReceiptComponent {
     void this.bankCashStore.loadBankCashes(q ? { where: { name: { ilike: `%${q}%` } } } : {});
   }
 
-  protected selectBankCash(bcash: BankCash): void {
-    this.selectedBankCash.set(bcash);
-    this.bankCashSearch.set(bcash.name);
-    this.bcashid.set(bcash.id ?? '');
-    this.showBankCashDropdown.set(false);
-  }
-
-  protected closeBankCashDropdown(): void {
-    this.showBankCashDropdown.set(false);
+  protected onBankCashValueChange(value: unknown): void {
+    const id = typeof value === 'string' ? value : '';
+    if (!id) {
+      this.selectedBankCash.set(null);
+      this.bcashid.set('');
+      return;
+    }
+    const bcash = this.filteredBankCashes().find((b) => b.id === id) ?? null;
+    if (bcash) {
+      this.selectedBankCash.set(bcash);
+      this.bcashid.set(bcash.id ?? '');
+    }
   }
 
   // ── Invoice row management ────────────────────────────────────────────────
 
   private emptyInvoiceRow(): InvoiceRow {
-    return { invoice: null, invoiceSearch: '', showDropdown: false, amount: 0 };
+    return { invoice: null, invoiceSearch: '', amount: 0 };
   }
 
   protected addInvoiceRow(): void {
     this.invoiceRows.update((rows) => [...rows, this.emptyInvoiceRow()]);
   }
 
-  protected removeInvoiceRow(index: number): void {
+  protected removeInvoiceRow(row: InvoiceRow): void {
     this.invoiceRows.update((rows) => {
-      const next = rows.filter((_, i) => i !== index);
+      const next = rows.filter((r) => r !== row);
       return next.length ? next : [this.emptyInvoiceRow()];
     });
   }
 
-  protected onInvoiceSearchInput(value: string | null, rowIndex: number): void {
-    const q = value ?? '';
+  protected getInvoiceRowNumber(row: InvoiceRow): number {
+    return this.invoiceRows().indexOf(row) + 1;
+  }
+
+  protected onInvoiceQueryChange(event: unknown, row: InvoiceRow): void {
+    const q = typeof event === 'string' ? event : '';
+    const idx = this.invoiceRows().indexOf(row);
+    if (idx === -1) return;
     this.invoiceRows.update((rows) =>
-      rows.map((row, i) =>
-        i === rowIndex ? { ...row, invoiceSearch: q, showDropdown: true } : row,
-      ),
+      rows.map((r, i) => (i === idx ? { ...r, invoiceSearch: q } : r)),
     );
-    this.activeInvoiceRowIndex.set(rowIndex);
     const customerId = this.customerid();
     void this.saleInvoiceStore.loadSaleInvoices(
       q
@@ -321,30 +380,32 @@ export class CreateCustomerReceiptComponent {
     );
   }
 
-  protected selectInvoice(invoice: SaleInvoice, rowIndex: number): void {
-    this.invoiceRows.update((rows) =>
-      rows.map((row, i) =>
-        i === rowIndex
-          ? {
-              ...row,
-              invoice,
-              invoiceSearch: this.invoiceDisplayName(invoice),
-              showDropdown: false,
-            }
-          : row,
-      ),
-    );
-    this.activeInvoiceRowIndex.set(-1);
+  protected onInvoiceValueChange(value: unknown, row: InvoiceRow): void {
+    const id = typeof value === 'string' ? value : '';
+    const idx = this.invoiceRows().indexOf(row);
+    if (idx === -1) return;
+    if (!id) {
+      this.invoiceRows.update((rows) =>
+        rows.map((r, i) => (i === idx ? { ...r, invoice: null, invoiceSearch: '' } : r)),
+      );
+      return;
+    }
+    const invoice = this.filteredInvoices().find((inv) => inv.id === id) ?? null;
+    if (invoice) {
+      this.invoiceRows.update((rows) =>
+        rows.map((r, i) =>
+          i === idx ? { ...r, invoice, invoiceSearch: this.invoiceDisplayName(invoice) } : r,
+        ),
+      );
+    }
   }
 
-  protected closeInvoiceDropdown(): void {
-    this.activeInvoiceRowIndex.set(-1);
-  }
-
-  protected updateInvoiceAmount(rowIndex: number, value: string | null): void {
+  protected updateInvoiceAmount(row: InvoiceRow, value: string | null): void {
     const num = Number(value ?? '0') || 0;
+    const idx = this.invoiceRows().indexOf(row);
+    if (idx === -1) return;
     this.invoiceRows.update((rows) =>
-      rows.map((row, i) => (i === rowIndex ? { ...row, amount: num } : row)),
+      rows.map((r, i) => (i === idx ? { ...r, amount: num } : r)),
     );
   }
 
@@ -356,10 +417,6 @@ export class CreateCustomerReceiptComponent {
     if (invoice.grandtotal != null)
       parts.push(`(${this.currencycode()} ${invoice.grandtotal.toFixed(2)})`);
     return parts.join(' ');
-  }
-
-  protected getInvoiceRowDisplayName(row: InvoiceRow): string {
-    return row.invoice ? this.invoiceDisplayName(row.invoice) : row.invoiceSearch;
   }
 
   // ── Date helpers ──────────────────────────────────────────────────────────
