@@ -26,18 +26,38 @@
   <app-workspace-search-button class="workspace-header-search" />
 
   <div class="workspace-header-actions">
-    <tng-button
-      type="button"
-      appearance="outline"
-      tone="neutral"
-      size="sm"
-      class="workspace-org-button"
-      [attr.aria-label]="'Select organization (current: ' + activeOrganizationName() + ')'"
-      (click)="goToSelectOrganization()"
+    <tng-tooltip
+      class="workspace-org-tooltip"
+      side="top"
+      [openDelay]="150"
+      [closeDelay]="100"
+      [ariaLabel]="'Select organization (current: ' + activeOrganizationName() + ')'"
+      (click)="onOrgTooltipTriggerClick($event)"
     >
-      <tng-icon icon="building" aria-hidden="true" />
-      <span class="workspace-org-button-label">{{ activeOrganizationName() }}</span>
-    </tng-button>
+      <span trigger class="workspace-org-button">
+        <tng-icon icon="building" aria-hidden="true" />
+        <span class="workspace-org-button-label">{{ activeOrganizationName() }}</span>
+      </span>
+
+      <div class="workspace-org-tooltip-panel">
+        <p class="workspace-org-tooltip-title">Workspace context</p>
+        <dl class="workspace-org-tooltip-details">
+          <div class="workspace-org-tooltip-row">
+            <dt>Organization</dt>
+            <dd>{{ activeOrganizationLabel() }}</dd>
+          </div>
+          <div class="workspace-org-tooltip-row">
+            <dt>Branch</dt>
+            <dd>{{ activeBranchName() }}</dd>
+          </div>
+          <div class="workspace-org-tooltip-row">
+            <dt>Fiscal year</dt>
+            <dd>{{ activeFiscalYearName() }}</dd>
+          </div>
+        </dl>
+        <p class="workspace-org-tooltip-footnote">Click to change selection</p>
+      </div>
+    </tng-tooltip>
 
     <div class="profile-menu">
       <button

@@ -68,6 +68,18 @@ export class WorkspaceShellComponent {
 
     return 'No organization selected';
   });
+  protected readonly activeOrganizationLabel = computed(() => {
+    const session = this.userSessionStore.session();
+    return this.readString(session?.organization?.name) ?? 'Not set';
+  });
+  protected readonly activeBranchName = computed(() => {
+    const session = this.userSessionStore.session();
+    return this.readString(session?.branch?.name) ?? 'Not set';
+  });
+  protected readonly activeFiscalYearName = computed(() => {
+    const session = this.userSessionStore.session();
+    return this.readString(session?.fiscalyear?.name) ?? 'Not set';
+  });
   protected readonly userDisplayName = computed(() => {
     const session = this.userSessionStore.session();
     const name =

@@ -4,8 +4,8 @@ import {
   TngAvatarComponent,
   TngBreadcrumbComponent,
   TngBreadcrumbItemComponent,
-  TngButtonComponent,
   TngMenuComponent,
+  TngTooltipComponent,
   TngMenuTriggerFor,
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
@@ -22,8 +22,8 @@ import { WorkspaceSearchButtonComponent } from '../workspace-search-button/works
     TngAvatarComponent,
     TngBreadcrumbComponent,
     TngBreadcrumbItemComponent,
-    TngButtonComponent,
     TngIcon,
+    TngTooltipComponent,
     TngMenuComponent,
     TngMenuTriggerFor,
     TngMenuGroupLabel,
@@ -37,6 +37,9 @@ export class WorkspaceHeaderComponent {
   private readonly themeStore = inject(AppThemeStore);
 
   readonly activeOrganizationName = input('No organization selected');
+  readonly activeOrganizationLabel = input('Not set');
+  readonly activeBranchName = input('Not set');
+  readonly activeFiscalYearName = input('Not set');
   readonly breadcrumbItems = input<readonly BreadcrumbItem[]>([
     { label: 'Home', routerLink: '/app/dashboard' },
     { label: 'Workspace', current: true },
@@ -50,6 +53,19 @@ export class WorkspaceHeaderComponent {
     void this.router.navigate(['/app/select-organization'], {
       queryParams: { burl: this.router.url },
     });
+  }
+
+  protected onOrgTooltipTriggerClick(event: MouseEvent): void {
+    const target = event.target;
+    if (!(target instanceof Element)) {
+      return;
+    }
+
+    if (!target.closest('.tng-tooltip-trigger')) {
+      return;
+    }
+
+    this.goToSelectOrganization();
   }
 
   protected goToProfile(): void {

@@ -112,10 +112,114 @@
   gap: 0.75rem;
 }
 
-.workspace-org-button {
+.workspace-org-tooltip {
   flex: 0 0 auto;
   max-width: 18rem;
   min-width: 0;
+}
+
+:host ::ng-deep .workspace-org-tooltip .tng-tooltip-trigger {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--tng-semantic-border-default);
+  border-radius: 0.5rem;
+  color: var(--tng-semantic-foreground-primary);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  gap: 0.4rem;
+  justify-content: flex-start;
+  max-width: 18rem;
+  min-height: 2rem;
+  min-width: 0;
+  padding: 0.35rem 0.65rem;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+:host ::ng-deep .workspace-org-tooltip .tng-tooltip-trigger:hover,
+:host ::ng-deep .workspace-org-tooltip .tng-tooltip-trigger[data-state='open'] {
+  background: color-mix(in srgb, var(--tng-semantic-background-surface) 72%, transparent);
+  border-color: color-mix(in srgb, var(--tng-semantic-border-subtle) 70%, transparent);
+}
+
+:host ::ng-deep .workspace-org-tooltip .tng-tooltip-trigger:focus-visible {
+  border-color: var(--tng-semantic-accent-brand);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--tng-semantic-accent-brand) 24%, transparent);
+  outline: none;
+}
+
+:host ::ng-deep .workspace-org-tooltip .tng-tooltip-content {
+  border-radius: 0.65rem;
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--tng-semantic-foreground-primary) 12%, transparent);
+  max-width: min(16rem, calc(100vw - 2rem));
+  padding: 0;
+  pointer-events: none;
+}
+
+.workspace-org-button {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.workspace-org-tooltip-panel {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.65rem 0.75rem;
+}
+
+.workspace-org-tooltip-title {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.workspace-org-tooltip-details {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+}
+
+.workspace-org-tooltip-row {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.workspace-org-tooltip-row dt {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.workspace-org-tooltip-row dd {
+  color: var(--tng-semantic-foreground-primary);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.35;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.workspace-org-tooltip-footnote {
+  border-top: 1px solid color-mix(in srgb, var(--tng-semantic-border-subtle) 65%, transparent);
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.35;
+  margin: 0;
+  padding-top: 0.45rem;
 }
 
 .workspace-org-button-label {
