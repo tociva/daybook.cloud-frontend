@@ -54,15 +54,15 @@
         </ng-template>
 
         <ng-template tngTableCellTemplate="discount" let-row="row">
-          {{ formatAmount(row.discount) }}
+          {{ formatOptionalAmount(row.discount) }}
         </ng-template>
 
         <ng-template tngTableCellTemplate="tax" let-row="row">
-          {{ formatAmount(row.tax) }}
+          {{ formatOptionalAmount(row.tax) }}
         </ng-template>
 
         <ng-template tngTableCellTemplate="grandtotal" let-row="row">
-          {{ formatAmount(row.grandtotal) }}
+          {{ formatAmountWithCurrency(row.grandtotal, row.currencycode) }}
         </ng-template>
 
         <ng-template tngTableCellTemplate="actions" let-row="row">

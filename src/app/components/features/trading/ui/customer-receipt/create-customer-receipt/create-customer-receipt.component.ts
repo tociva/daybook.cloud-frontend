@@ -376,7 +376,7 @@ export class CreateCustomerReceiptComponent {
       }));
 
     const payload: CustomerReceiptPayload = {
-      date: this.rcptdate(),
+      date: dayjs(this.rcptdate()).toISOString(),
       amount: amountVal,
       currencycode: this.currencycode().trim(),
       customerid: this.customerid(),

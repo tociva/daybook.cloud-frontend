@@ -97,11 +97,17 @@
 
         <div class="field">
           <tng-label forId="inv-currency" required>Currency</tng-label>
-          <tng-input
+          <tng-autocomplete
             id="inv-currency"
-            placeholder="e.g. INR"
+            placeholder="Search for a currency"
+            ariaLabel="Currency"
+            [options]="filteredCurrencies()"
             [value]="draft.currencycode()"
-            (valueChange)="draft.currencycode.set($any($event))"
+            [getOptionValue]="currencyOptionValue"
+            [getOptionLabel]="currencyOptionLabel"
+            [trackBy]="currencyTrackBy"
+            (valueChange)="onCurrencyValueChange($event)"
+            (queryChange)="onCurrencyQueryChange($event)"
           />
         </div>
       </div>

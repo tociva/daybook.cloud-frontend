@@ -44,11 +44,7 @@
         </ng-template>
 
         <ng-template tngTableCellTemplate="amount" let-row="row">
-          {{ formatAmount(row.amount) }}
-        </ng-template>
-
-        <ng-template tngTableCellTemplate="currencycode" let-row="row">
-          {{ row.currencycode || '—' }}
+          {{ formatAmountWithCurrency(row.amount, row.currencycode) }}
         </ng-template>
 
         <ng-template tngTableCellTemplate="bcash" let-row="row">

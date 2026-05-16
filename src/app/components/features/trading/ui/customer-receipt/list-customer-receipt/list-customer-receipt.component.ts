@@ -16,6 +16,7 @@ import {
 import type { CrudFilterField } from '../../../../../../shared/crud';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
+import { formatAmountWithCurrency } from '../../../../../../shared/format/currency';
 import { CustomerReceiptStore } from '../../../data/customer-receipt';
 import type { CustomerReceipt } from '../../../data/customer-receipt';
 
@@ -52,9 +53,8 @@ export class ListCustomerReceiptComponent {
       sortable: true,
       align: 'end',
       headerAlign: 'end',
-      width: '10rem',
+      width: '12rem',
     },
-    { id: 'currencycode', label: 'Currency', width: '8rem' },
     { id: 'bcash', label: 'Bank/Cash', width: '12rem' },
     { id: 'description', label: 'Description', width: '16rem' },
     { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '8rem' },
@@ -68,10 +68,7 @@ export class ListCustomerReceiptComponent {
     return this.dateManagement.formatDisplayDate(value, '—');
   }
 
-  protected formatAmount(value: number | undefined): string {
-    if (value === undefined || value === null) return '—';
-    return value.toFixed(2);
-  }
+  protected readonly formatAmountWithCurrency = formatAmountWithCurrency;
 
   constructor() {
     this.crudQuery.init(

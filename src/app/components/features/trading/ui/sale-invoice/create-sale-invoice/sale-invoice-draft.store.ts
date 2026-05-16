@@ -75,6 +75,8 @@ export class SaleInvoiceDraftStore {
   readonly autoNumbering = signal(true);
   readonly numberEnabled = signal(false);
   readonly number = signal('Auto Number');
+  /** Stores the server-assigned number when editing an existing invoice. */
+  readonly invoiceNumber = signal('');
   readonly date = signal(this.fiscalYearDateRange.defaultDate());
   readonly duedate = signal(dayjs().add(7, 'day').format('YYYY-MM-DD'));
   readonly currencycode = signal('INR');
@@ -209,7 +211,8 @@ export class SaleInvoiceDraftStore {
   private readonly _autoNumberingEffect = effect(() => {
     if (this.autoNumbering()) {
       this.numberEnabled.set(false);
-      this.number.set('Auto Number');
+      // In edit mode use the server-assigned number; in create mode fall back to placeholder.
+      this.number.set(this.invoiceNumber() || 'Auto Number');
     } else {
       this.numberEnabled.set(true);
     }
@@ -221,6 +224,7 @@ export class SaleInvoiceDraftStore {
     const cprops = inv.cprops;
     const auto = cprops?.autoNumbering ?? false;
 
+    this.invoiceNumber.set(inv.number ?? '');
     this.autoNumbering.set(auto);
     this.number.set(inv.number ?? '');
     this.numberEnabled.set(!auto);

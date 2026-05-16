@@ -20,6 +20,7 @@ import type { Customer } from '../../../data/customer';
 import { SaleInvoiceStore } from '../../../data/sale-invoice';
 import type { SaleInvoice } from '../../../data/sale-invoice';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
+import { formatAmountWithCurrency } from '../../../../../../shared/format/currency';
 
 @Component({
   selector: 'app-list-sale-invoice',
@@ -113,8 +114,16 @@ export class ListSaleInvoiceComponent {
     return this.dateManagement.formatDisplayDate(value, '—');
   }
 
+  protected readonly formatAmountWithCurrency = formatAmountWithCurrency;
+
   protected formatAmount(value: number | undefined): string {
     if (value === undefined || value === null) return '—';
+    return value.toFixed(2);
+  }
+
+  /** Returns empty string for zero/absent values — used for optional columns like tax and discount. */
+  protected formatOptionalAmount(value: number | undefined): string {
+    if (value === undefined || value === null || value === 0) return '';
     return value.toFixed(2);
   }
 
