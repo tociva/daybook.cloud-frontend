@@ -1,4 +1,4 @@
-import type { Lb4ListQuery } from '../../../../../shared/crud';
+import type { Lb4Include, Lb4ListQuery } from '../../../../../shared/crud';
 import type { BankCash } from '../bank-cash/bank-cash.model';
 import type { Customer } from '../customer/customer.model';
 import type { SaleInvoice } from '../sale-invoice/sale-invoice.model';
@@ -49,4 +49,4 @@ export type CustomerReceipt = Readonly<{
 // ── Query types ───────────────────────────────────────────────────────────────
 
 export type CustomerReceiptListQuery = Lb4ListQuery;
-export type CustomerReceiptGetQuery = Readonly<{ includes?: readonly string[] }>;
+export type CustomerReceiptGetQuery = Readonly<{ includes?: readonly Lb4Include[] }>;

@@ -71,6 +71,7 @@ export class ListSaleInvoiceComponent {
       headerAlign: 'end',
       width: '10rem',
     },
+    { id: 'received', label: 'Received', align: 'end', headerAlign: 'end', width: '10rem' },
     { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '8rem' },
   ];
 
@@ -127,13 +128,33 @@ export class ListSaleInvoiceComponent {
     return value.toFixed(2);
   }
 
+  /** Sum of all receipt-link amounts for the invoice. Returns undefined when no receipts are linked. */
+  protected totalReceived(row: SaleInvoice): number | undefined {
+    if (!row.receipts?.length) return undefined;
+    return row.receipts.reduce((sum, r) => sum + r.amount, 0);
+  }
+
+  /** True when the sum of receipts covers the grand total in full. */
+  protected isPaid(row: SaleInvoice): boolean {
+    const grandtotal = row.grandtotal ?? 0;
+    if (grandtotal <= 0) return false;
+    const received = row.receipts?.reduce((sum, r) => sum + r.amount, 0) ?? 0;
+    return received >= grandtotal;
+  }
+
+  /** True when there is an outstanding balance and the due date has passed. */
+  protected isOverdue(row: SaleInvoice): boolean {
+    if (this.isPaid(row) || !row.duedate) return false;
+    return new Date() > new Date(row.duedate);
+  }
+
   constructor() {
     void this.customerStore.loadCustomers({});
     this.crudQuery.init(
       (filter) =>
         void this.saleInvoiceStore.loadSaleInvoices({
           ...filter,
-          includes: ['customer'],
+          includes: ['customer', 'receipts'],
         }),
     );
   }
@@ -144,6 +165,24 @@ export class ListSaleInvoiceComponent {
     void this.customerStore.loadCustomers(q ? { where: { name: { ilike: `%${q}%` } } } : {});
   }
 
+  /** Navigate to new receipt pre-linked to this invoice. */
+  protected createReceiptForInvoice(item: SaleInvoice): void {
+    this.saleInvoiceStore.setSelectedItem(item);
+    void this.router.navigate(['/app/trading/customer-receipt/create'], {
+      queryParams: { saleinvoiceid: item.id, burl: this.router.url },
+    });
+  }
+
+  /** Navigate to the customer receipt that covers this invoice (first receipt). */
+  protected viewReceiptForInvoice(item: SaleInvoice): void {
+    const receiptId = item.receipts?.[0]?.customerreceiptid;
+    if (receiptId) {
+      void this.router.navigate(['/app/trading/customer-receipt', receiptId], {
+        queryParams: { burl: this.router.url },
+      });
+    }
+  }
+
   protected createSaleInvoice(): void {
     void this.router.navigate(['/app/trading/sale-invoice/create'], {
       queryParams: { burl: this.router.url },
@@ -152,6 +191,7 @@ export class ListSaleInvoiceComponent {
 
   protected viewSaleInvoice(item: SaleInvoice): void {
     if (item.id) {
+      this.saleInvoiceStore.setSelectedItem(item);
       void this.router.navigate(['/app/trading/sale-invoice', item.id], {
         queryParams: { burl: this.router.url },
       });
@@ -160,6 +200,7 @@ export class ListSaleInvoiceComponent {
 
   protected editSaleInvoice(item: SaleInvoice): void {
     if (item.id) {
+      this.saleInvoiceStore.setSelectedItem(item);
       void this.router.navigate(['/app/trading/sale-invoice', item.id, 'edit'], {
         queryParams: { burl: this.router.url },
       });
@@ -168,6 +209,7 @@ export class ListSaleInvoiceComponent {
 
   protected deleteSaleInvoice(item: SaleInvoice): void {
     if (item.id) {
+      this.saleInvoiceStore.setSelectedItem(item);
       void this.router.navigate(['/app/trading/sale-invoice', item.id, 'delete'], {
         queryParams: { burl: this.router.url },
       });

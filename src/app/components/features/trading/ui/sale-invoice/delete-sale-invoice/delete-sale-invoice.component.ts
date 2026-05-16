@@ -46,11 +46,13 @@ export class DeleteSaleInvoiceComponent {
 
   private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      await this.saleInvoiceStore.loadSaleInvoiceById(id, {
-        includes: ['customer'],
-      });
-    }
+    if (!id) return;
+
+    // If the list page set selectedItem before navigating, we already have
+    // everything the delete page needs — skip the API call entirely.
+    if (this.saleInvoiceStore.selectedItem()?.id === id) return;
+
+    await this.saleInvoiceStore.loadSaleInvoiceById(id, { includes: ['customer'] });
   }
 
   protected formatDate(value: string | undefined): string {

@@ -66,3 +66,38 @@
   font-weight: 700;
   padding: 0;
 }
+
+.link-button--muted {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+.number-cell {
+  align-items: center;
+  display: flex;
+  gap: 0.4rem;
+}
+
+.status-badge {
+  align-items: center;
+  border-radius: 999px;
+  display: inline-flex;
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  font-weight: 700;
+  height: 1.1rem;
+  justify-content: center;
+  line-height: 1;
+  width: 1.1rem;
+}
+
+.status-badge--paid {
+  background: var(--tng-semantic-accent-success, #16a34a);
+  color: #fff;
+}
+
+.status-badge--overdue {
+  background: var(--tng-semantic-accent-danger, #dc2626);
+  color: #fff;
+}

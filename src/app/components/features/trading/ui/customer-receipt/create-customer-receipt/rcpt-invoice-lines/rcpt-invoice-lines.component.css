@@ -250,3 +250,7 @@
   border-top-color: var(--tng-semantic-border-strong);
   font-weight: 700;
 }
+
+.si-li-summary-negative td {
+  color: var(--tng-semantic-accent-danger);
+}

@@ -36,9 +36,18 @@
         (sortChange)="crudQuery.applySort($event)"
       >
         <ng-template tngTableCellTemplate="number" let-row="row">
-          <button type="button" class="link-button" (click)="viewSaleInvoice(row)">
-            {{ row.number || '—' }}
-          </button>
+          <div class="number-cell">
+            <button type="button" class="link-button" (click)="viewSaleInvoice(row)">
+              {{ row.number || '—' }}
+            </button>
+            @if (isPaid(row)) {
+              <span class="status-badge status-badge--paid" title="Paid in full">
+                <tng-icon icon="check" aria-hidden="true" />
+              </span>
+            } @else if (isOverdue(row)) {
+              <span class="status-badge status-badge--overdue" title="Overdue">!</span>
+            }
+          </div>
         </ng-template>
 
         <ng-template tngTableCellTemplate="customer" let-row="row">
@@ -63,6 +72,20 @@
 
         <ng-template tngTableCellTemplate="grandtotal" let-row="row">
           {{ formatAmountWithCurrency(row.grandtotal, row.currencycode) }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="received" let-row="row">
+          @if (totalReceived(row) === undefined) {
+            <button type="button" class="link-button link-button--muted" (click)="createReceiptForInvoice(row)">
+              New Receipt
+            </button>
+          } @else if (isPaid(row)) {
+            <button type="button" class="link-button" (click)="viewReceiptForInvoice(row)">
+              {{ formatAmountWithCurrency(totalReceived(row), row.currencycode) }}
+            </button>
+          } @else {
+            {{ formatAmountWithCurrency(totalReceived(row), row.currencycode) }}
+          }
         </ng-template>
 
         <ng-template tngTableCellTemplate="actions" let-row="row">

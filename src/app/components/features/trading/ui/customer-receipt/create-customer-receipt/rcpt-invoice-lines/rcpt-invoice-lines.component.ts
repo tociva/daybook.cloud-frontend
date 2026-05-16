@@ -48,6 +48,7 @@ export class RcptInvoiceLinesComponent {
 
   readonly customerId = input('');
   readonly currencycode = input('INR');
+  readonly receiptAmount = input(0);
   /** Set to true in edit mode so the effect does not auto-load and overwrite
    *  the rows that were patched in by the parent from the receipt data. */
   readonly editMode = input(false);
@@ -67,6 +68,12 @@ export class RcptInvoiceLinesComponent {
       .reduce((s, r) => s + (Number(r.amount) || 0), 0)
       .toFixed(2),
   );
+
+  protected readonly remaining = computed(() =>
+    (this.receiptAmount() - Number(this.invoicesTotal())).toFixed(2),
+  );
+
+  protected readonly remainingIsNegative = computed(() => Number(this.remaining()) < 0);
 
   /** Exposed so the parent stepper can track completion. */
   readonly hasLinkedInvoices = computed(() => this.rows().some((r) => r.invoice !== null));

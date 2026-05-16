@@ -42,6 +42,12 @@ export const SaleInvoiceStore = signalStore(
         }));
       },
 
+      setSelectedItem(invoice: SaleInvoice): void {
+        patchState(store, (state) => ({
+          saleInvoice: { ...state.saleInvoice, selectedItem: invoice },
+        }));
+      },
+
       async createSaleInvoice(payload: SaleInvoicePayload): Promise<SaleInvoice | null> {
         setLoading();
         try {

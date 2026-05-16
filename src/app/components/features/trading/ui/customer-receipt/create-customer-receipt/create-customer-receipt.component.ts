@@ -30,6 +30,7 @@ import type {
 } from '../../../data/customer-receipt';
 import { CustomerReceiptFacade, CustomerReceiptStore } from '../../../data/customer-receipt';
 import type { SaleInvoice } from '../../../data/sale-invoice/sale-invoice.model';
+import { SaleInvoiceStore } from '../../../data/sale-invoice';
 import {
   FiscalYearDatepickerComponent,
   FiscalYearDateRangeService,
@@ -74,6 +75,7 @@ export class CreateCustomerReceiptComponent {
   protected readonly customerStore = inject(CustomerStore);
   protected readonly bankCashStore = inject(BankCashStore);
   private readonly currencyStore = inject(CurrencyStore);
+  private readonly saleInvoiceStore = inject(SaleInvoiceStore);
 
   // ── Mode ──────────────────────────────────────────────────────────────────
 
@@ -82,6 +84,12 @@ export class CreateCustomerReceiptComponent {
   protected readonly title = computed(() =>
     this.mode() === 'edit' ? 'Edit Customer Receipt' : 'New Customer Receipt',
   );
+
+  /**
+   * Set to true when the form is pre-filled from a sale-invoice query param so
+   * that RcptInvoiceLinesComponent's auto-load effect does not overwrite the row.
+   */
+  protected readonly prefillMode = signal(false);
 
   // ── Validation ────────────────────────────────────────────────────────────
 
@@ -230,18 +238,69 @@ export class CreateCustomerReceiptComponent {
     const id = this.route.snapshot.paramMap.get('id');
     this.id.set(id);
 
-    if (!id) {
+    if (id) {
+      const receipt = await this.customerReceiptStore.loadCustomerReceiptById(id, {
+        includes: [
+          'customer',
+          'bcash',
+          { relation: 'invoices', scope: { include: [{ relation: 'saleinvoice' }] } },
+        ],
+      });
+      if (receipt) this.patchFromReceipt(receipt);
+      return;
+    }
+
+    // ── Create mode: check for pre-fill from a sale invoice ──────────────────
+    const saleinvoiceid = this.route.snapshot.queryParamMap.get('saleinvoiceid');
+
+    if (saleinvoiceid) {
+      // Fast path: list page set selectedItem before navigating — use it directly.
+      const cached = this.saleInvoiceStore.selectedItem();
+      if (cached?.id === saleinvoiceid) {
+        this.saleInvoiceStore.clearSelectedItem();
+        this.applyInvoicePrefill(cached);
+      } else {
+        // Fallback: user opened the URL directly (bookmark, shared link).
+        const invoice = await this.saleInvoiceStore.loadSaleInvoiceById(saleinvoiceid, {
+          includes: ['customer'],
+        });
+        if (invoice) this.applyInvoicePrefill(invoice);
+      }
+    } else {
       // Set default currency after options are loaded so the autocomplete
       // can resolve the label (Name + Symbol) instead of showing the raw code.
       this.currencycode.set('INR');
     }
+  }
 
-    if (id) {
-      const receipt = await this.customerReceiptStore.loadCustomerReceiptById(id, {
-        includes: ['customer', 'bcash', 'invoices.saleinvoice'],
-      });
-      if (receipt) this.patchFromReceipt(receipt);
+  private applyInvoicePrefill(invoice: SaleInvoice): void {
+    this.currencycode.set(invoice.currencycode ?? 'INR');
+
+    // Remaining balance = grand total minus whatever has already been received.
+    const received = invoice.receipts?.reduce((sum, r) => sum + r.amount, 0) ?? 0;
+    const remaining = Math.max((invoice.grandtotal ?? 0) - received, 0);
+    this.amount.set((remaining || invoice.grandtotal || 0).toFixed(2));
+
+    // Customer — prefer embedded relation, fall back to the already-loaded list.
+    const customer =
+      (invoice.customer as Customer | undefined) ??
+      (this.customerStore.items() as Customer[]).find((c) => c.id === invoice.customerid) ??
+      null;
+
+    if (customer) {
+      this.selectedCustomer.set(customer);
+      this.customerid.set(customer.id ?? '');
+    } else if (invoice.customerid) {
+      this.customerid.set(invoice.customerid);
     }
+
+    // Pre-fill the invoice row.
+    const rowAmount = remaining || (invoice.grandtotal ?? 0);
+    this.invoiceRows.set([{ invoice, invoiceSearch: invoice.number ?? '', amount: rowAmount }]);
+
+    // Suppress RcptInvoiceLinesComponent's auto-load effect so it doesn't
+    // overwrite the row we just set when customerid is applied.
+    this.prefillMode.set(true);
   }
 
   // ── Patch signals from loaded receipt (edit mode) ─────────────────────────
@@ -376,7 +435,7 @@ export class CreateCustomerReceiptComponent {
       }));
 
     const payload: CustomerReceiptPayload = {
-      date: dayjs(this.rcptdate()).toISOString(),
+      date: this.rcptdate(),
       amount: amountVal,
       currencycode: this.currencycode().trim(),
       customerid: this.customerid(),

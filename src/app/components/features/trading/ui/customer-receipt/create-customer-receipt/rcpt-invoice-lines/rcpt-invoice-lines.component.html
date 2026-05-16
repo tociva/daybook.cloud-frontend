@@ -1,7 +1,11 @@
 <tng-card variant="outline" padding="lg">
   <tng-card-header>
     <tng-card-title>Related Invoices</tng-card-title>
-    <tng-card-description>Optionally link this receipt to one or more sale invoices.</tng-card-description>
+    <tng-card-description>
+      Optionally link this receipt to one or more sale invoices. You can split the receipt amount
+      across multiple invoices — adjust each row's amount as needed. Remove any rows you don't
+      want to link.
+    </tng-card-description>
   </tng-card-header>
 
   <tng-card-content>
@@ -86,6 +90,12 @@
               <td class="si-li-summary-label">Invoices Total</td>
               <td class="si-li-summary-value">{{ currencycode() }} {{ invoicesTotal() }}</td>
             </tr>
+            @if (receiptAmount() > 0) {
+              <tr class="si-li-summary-total-row" [class.si-li-summary-negative]="remainingIsNegative()">
+                <td class="si-li-summary-label">Remaining</td>
+                <td class="si-li-summary-value">{{ currencycode() }} {{ remaining() }}</td>
+              </tr>
+            }
           </tbody>
         </table>
       </div>

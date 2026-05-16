@@ -123,6 +123,15 @@ export type SaleInvoicePayload = Readonly<{
   items: readonly SaleInvoiceItemRequest[];
 }>;
 
+// ── Minimal receipt-link shape (avoids circular import with customer-receipt) ─
+
+export type SaleInvoiceReceiptLink = Readonly<{
+  id?: string;
+  amount: number;
+  customerreceiptid?: string;
+  saleinvoiceid?: string;
+}>;
+
 // ── Read model (includes embedded relations) ─────────────────────────────────
 
 export type SaleInvoiceCurrency = Readonly<{
@@ -153,6 +162,7 @@ export type SaleInvoice = Readonly<{
   customerid?: string;
   customer?: Customer;
   items?: readonly SaleItem[];
+  receipts?: readonly SaleInvoiceReceiptLink[];
   branchid?: string;
 }>;
 

@@ -74,6 +74,12 @@ export class CreateSaleInvoiceComponent {
     this.id.set(id);
 
     if (id) {
+      // Instant pre-fill: if the list set selectedItem before navigating, patch
+      // the draft immediately so the form isn't blank while the fetch is in flight.
+      const cached = this.saleInvoiceStore.selectedItem();
+      if (cached?.id === id) this.draft.patchFromInvoice(cached);
+
+      // Always fetch full detail — line items, taxes, addresses are not in the list response.
       const invoice = await this.saleInvoiceStore.loadSaleInvoiceById(id, {
         includes: SALE_INVOICE_DETAIL_INCLUDES,
       });

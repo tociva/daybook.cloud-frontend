@@ -36,12 +36,18 @@ export class ViewSaleInvoiceComponent {
 
   private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      const invoice = await this.saleInvoiceStore.loadSaleInvoiceById(id, {
-        includes: SALE_INVOICE_DETAIL_INCLUDES,
-      });
-      if (invoice) this.draft.patchFromInvoice(invoice);
-    }
+    if (!id) return;
+
+    // Instant render: if the list set selectedItem before navigating, patch the
+    // draft immediately so the page appears populated before the API responds.
+    const cached = this.saleInvoiceStore.selectedItem();
+    if (cached?.id === id) this.draft.patchFromInvoice(cached);
+
+    // Always fetch full detail — the list response omits line items, addresses, etc.
+    const invoice = await this.saleInvoiceStore.loadSaleInvoiceById(id, {
+      includes: SALE_INVOICE_DETAIL_INCLUDES,
+    });
+    if (invoice) this.draft.patchFromInvoice(invoice);
   }
 
   protected editInvoice(): void {
