@@ -66,6 +66,7 @@ export class ListTaxGroupComponent {
 
   protected viewTaxGroup(item: TaxGroup): void {
     if (item.id) {
+      this.taxGroupStore.setSelectedItem(item);
       void this.router.navigate(['/app/trading/tax-group', item.id], {
         queryParams: { burl: this.router.url },
       });
@@ -74,6 +75,7 @@ export class ListTaxGroupComponent {
 
   protected editTaxGroup(item: TaxGroup): void {
     if (item.id) {
+      this.taxGroupStore.setSelectedItem(item);
       void this.router.navigate(['/app/trading/tax-group', item.id, 'edit'], {
         queryParams: { burl: this.router.url },
       });
@@ -82,6 +84,7 @@ export class ListTaxGroupComponent {
 
   protected deleteTaxGroup(item: TaxGroup): void {
     if (item.id) {
+      this.taxGroupStore.setSelectedItem(item);
       void this.router.navigate(['/app/trading/tax-group', item.id, 'delete'], {
         queryParams: { burl: this.router.url },
       });

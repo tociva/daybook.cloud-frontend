@@ -122,6 +122,19 @@ export class CreateLedgerComponent implements AfterViewInit {
       return;
     }
 
+    // Instant pre-fill from cache; categoryId resolves via already-loaded ledgerCategoryStore.items().
+    const cached = this.ledgerStore.selectedItem();
+    if (cached?.id === id) {
+      this.ledgerModel.set({
+        name: cached.name ?? '',
+        categoryId: cached.category?.id ?? cached.categoryid ?? '',
+        openingdr: cached.openingdr != null ? String(cached.openingdr) : '',
+        openingcr: cached.openingcr != null ? String(cached.openingcr) : '',
+        description: cached.description ?? '',
+      });
+      return;
+    }
+
     const ledger = await this.ledgerStore.loadLedgerById(id, { includes: ['category'] });
     if (ledger) {
       this.ledgerModel.set({

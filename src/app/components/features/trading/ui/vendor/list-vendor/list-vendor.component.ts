@@ -74,6 +74,7 @@ export class ListVendorComponent {
 
   protected viewVendor(item: Vendor): void {
     if (item.id) {
+      this.vendorStore.setSelectedItem(item);
       void this.router.navigate(['/app/trading/vendor', item.id], {
         queryParams: { burl: this.router.url },
       });
@@ -82,6 +83,7 @@ export class ListVendorComponent {
 
   protected editVendor(item: Vendor): void {
     if (item.id) {
+      this.vendorStore.setSelectedItem(item);
       void this.router.navigate(['/app/trading/vendor', item.id, 'edit'], {
         queryParams: { burl: this.router.url },
       });
@@ -90,6 +92,7 @@ export class ListVendorComponent {
 
   protected deleteVendor(item: Vendor): void {
     if (item.id) {
+      this.vendorStore.setSelectedItem(item);
       void this.router.navigate(['/app/trading/vendor', item.id, 'delete'], {
         queryParams: { burl: this.router.url },
       });

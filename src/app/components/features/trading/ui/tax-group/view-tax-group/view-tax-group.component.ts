@@ -54,11 +54,12 @@ export class ViewTaxGroupComponent {
 
   private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
+    const skipGroupFetch = id != null && this.taxGroupStore.selectedItem()?.id === id;
     // Load taxes with a large limit so getTaxById can resolve every tax used
     // in the group.  The default page size is only 10 which may not cover all
     // referenced taxes.
     await Promise.all([
-      id ? this.taxGroupStore.loadTaxGroupById(id) : Promise.resolve(null),
+      skipGroupFetch ? Promise.resolve(null) : id ? this.taxGroupStore.loadTaxGroupById(id) : Promise.resolve(null),
       this.taxStore.loadTaxes({ limit: 500 }),
     ]);
   }

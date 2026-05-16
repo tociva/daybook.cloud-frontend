@@ -201,6 +201,28 @@ export class CreateCustomerComponent implements AfterViewInit {
       return;
     }
 
+    // Instant pre-fill from cache; skip API call if data is already available.
+    const cached = this.customerStore.selectedItem();
+    if (cached?.id === id) {
+      this.customerModel.set({
+        name: cached.name ?? '',
+        mobile: cached.mobile ?? '',
+        email: cached.email ?? '',
+        gstin: cached.gstin ?? '',
+        countrycode: cached.countrycode ?? '',
+        currencycode: cached.currencycode ?? '',
+        state: cached.state ?? '',
+        description: cached.description ?? '',
+        addressName: cached.address?.name ?? '',
+        addressLine1: cached.address?.line1 ?? '',
+        addressLine2: cached.address?.line2 ?? '',
+        addressStreet: cached.address?.street ?? '',
+        addressCity: cached.address?.city ?? '',
+        addressZip: cached.address?.zip ?? '',
+      });
+      return;
+    }
+
     const customer = await this.customerStore.loadCustomerById(id);
     if (customer) {
       this.customerModel.set({

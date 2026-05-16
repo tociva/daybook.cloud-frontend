@@ -44,9 +44,9 @@ export class DeleteCustomerComponent {
 
   private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      await this.customerStore.loadCustomerById(id);
-    }
+    if (!id) return;
+    if (this.customerStore.selectedItem()?.id === id) return;
+    await this.customerStore.loadCustomerById(id);
   }
 
   protected async deleteCustomer(): Promise<void> {

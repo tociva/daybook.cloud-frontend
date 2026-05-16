@@ -41,6 +41,11 @@ export const CustomerStore = signalStore(
           customer: { ...state.customer, selectedItem: null },
         }));
       },
+      setSelectedItem(customer: Customer): void {
+        patchState(store, (state) => ({
+          customer: { ...state.customer, selectedItem: customer },
+        }));
+      },
 
       async createCustomer(payload: CustomerPayload): Promise<Customer | null> {
         setLoading();

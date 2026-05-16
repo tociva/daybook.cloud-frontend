@@ -47,6 +47,11 @@ export const TaxStore = signalStore(
           },
         }));
       },
+      setSelectedItem(tax: Tax): void {
+        patchState(store, (state) => ({
+          tax: { ...state.tax, selectedItem: tax },
+        }));
+      },
       async createTax(payload: TaxPayload): Promise<Tax | null> {
         setLoading();
 

@@ -36,6 +36,11 @@ export const VendorStore = signalStore(
           vendor: { ...state.vendor, selectedItem: null },
         }));
       },
+      setSelectedItem(vendor: Vendor): void {
+        patchState(store, (state) => ({
+          vendor: { ...state.vendor, selectedItem: vendor },
+        }));
+      },
 
       async createVendor(payload: VendorPayload): Promise<Vendor | null> {
         setLoading();

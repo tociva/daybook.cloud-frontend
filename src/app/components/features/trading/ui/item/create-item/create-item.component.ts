@@ -177,6 +177,22 @@ export class CreateItemComponent implements AfterViewInit {
       return;
     }
 
+    // Instant pre-fill from cache; skip API call if data is already available.
+    const cached = this.itemStore.selectedItem();
+    if (cached?.id === id) {
+      this.itemModel.set({
+        name: cached.name ?? '',
+        code: cached.code ?? '',
+        displayname: cached.displayname ?? '',
+        categoryId: cached.category?.id ?? cached.categoryid ?? '',
+        barcode: cached.barcode ?? '',
+        description: cached.description ?? '',
+        purchaseledger: cached.purchaseledger ?? '',
+        salesledger: cached.salesledger ?? '',
+      });
+      return;
+    }
+
     const item = await this.itemStore.loadItemById(id, { includes: ['category'] });
     if (item) {
       this.itemModel.set({

@@ -47,6 +47,11 @@ export const BankCashStore = signalStore(
           },
         }));
       },
+      setSelectedItem(bankCash: BankCash): void {
+        patchState(store, (state) => ({
+          bankCash: { ...state.bankCash, selectedItem: bankCash },
+        }));
+      },
       async createBankCash(payload: BankCashPayload): Promise<BankCash | null> {
         setLoading();
 

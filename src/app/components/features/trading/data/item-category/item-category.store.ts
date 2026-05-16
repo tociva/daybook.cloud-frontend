@@ -41,6 +41,11 @@ export const ItemCategoryStore = signalStore(
           itemCategory: { ...state.itemCategory, selectedItem: null },
         }));
       },
+      setSelectedItem(itemCategory: ItemCategory): void {
+        patchState(store, (state) => ({
+          itemCategory: { ...state.itemCategory, selectedItem: itemCategory },
+        }));
+      },
 
       async createItemCategory(payload: ItemCategoryPayload): Promise<ItemCategory | null> {
         setLoading();

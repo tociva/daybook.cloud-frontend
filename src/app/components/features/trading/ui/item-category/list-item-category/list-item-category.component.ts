@@ -85,6 +85,7 @@ export class ListItemCategoryComponent {
 
   protected viewItemCategory(item: ItemCategory): void {
     if (item.id) {
+      this.itemCategoryStore.setSelectedItem(item);
       void this.router.navigate(['/app/trading/item-category', item.id], {
         queryParams: { burl: this.router.url },
       });
@@ -93,6 +94,7 @@ export class ListItemCategoryComponent {
 
   protected editItemCategory(item: ItemCategory): void {
     if (item.id) {
+      this.itemCategoryStore.setSelectedItem(item);
       void this.router.navigate(['/app/trading/item-category', item.id, 'edit'], {
         queryParams: { burl: this.router.url },
       });
@@ -101,6 +103,7 @@ export class ListItemCategoryComponent {
 
   protected deleteItemCategory(item: ItemCategory): void {
     if (item.id) {
+      this.itemCategoryStore.setSelectedItem(item);
       void this.router.navigate(['/app/trading/item-category', item.id, 'delete'], {
         queryParams: { burl: this.router.url },
       });

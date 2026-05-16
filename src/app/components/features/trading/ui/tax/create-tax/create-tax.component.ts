@@ -135,6 +135,19 @@ export class CreateTaxComponent implements AfterViewInit {
       return;
     }
 
+    // Instant pre-fill from cache; skip API call if data is already available.
+    const cached = this.taxStore.selectedItem();
+    if (cached?.id === id) {
+      this.taxModel.set({
+        appliedto: String(cached.appliedto ?? ''),
+        description: cached.description ?? '',
+        name: cached.name,
+        rate: String(cached.rate ?? ''),
+        shortname: cached.shortname,
+      });
+      return;
+    }
+
     const tax = await this.taxStore.loadTaxById(id);
     if (tax) {
       this.taxModel.set({

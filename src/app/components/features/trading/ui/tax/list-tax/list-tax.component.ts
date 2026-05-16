@@ -87,6 +87,7 @@ export class ListTaxComponent {
 
   protected viewTax(item: Tax): void {
     if (item.id) {
+      this.taxStore.setSelectedItem(item);
       void this.router.navigate(['/app/trading/tax', item.id], {
         queryParams: { burl: this.router.url },
       });
@@ -95,6 +96,7 @@ export class ListTaxComponent {
 
   protected editTax(item: Tax): void {
     if (item.id) {
+      this.taxStore.setSelectedItem(item);
       void this.router.navigate(['/app/trading/tax', item.id, 'edit'], {
         queryParams: { burl: this.router.url },
       });
@@ -103,6 +105,7 @@ export class ListTaxComponent {
 
   protected deleteTax(item: Tax): void {
     if (item.id) {
+      this.taxStore.setSelectedItem(item);
       void this.router.navigate(['/app/trading/tax', item.id, 'delete'], {
         queryParams: { burl: this.router.url },
       });

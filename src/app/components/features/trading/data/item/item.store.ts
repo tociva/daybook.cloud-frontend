@@ -36,6 +36,11 @@ export const ItemStore = signalStore(
           item: { ...state.item, selectedItem: null },
         }));
       },
+      setSelectedItem(item: Item): void {
+        patchState(store, (state) => ({
+          item: { ...state.item, selectedItem: item },
+        }));
+      },
 
       async createItem(payload: ItemPayload): Promise<Item | null> {
         setLoading();

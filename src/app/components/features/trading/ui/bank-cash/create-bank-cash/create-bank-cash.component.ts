@@ -84,6 +84,16 @@ export class CreateBankCashComponent implements AfterViewInit {
       return;
     }
 
+    // Instant pre-fill from cache; skip API call if data is already available.
+    const cached = this.bankCashStore.selectedItem();
+    if (cached?.id === id) {
+      this.bankCashModel.set({
+        description: cached.description ?? '',
+        name: cached.name,
+      });
+      return;
+    }
+
     const bankCash = await this.bankCashStore.loadBankCashById(id);
     if (bankCash) {
       this.bankCashModel.set({

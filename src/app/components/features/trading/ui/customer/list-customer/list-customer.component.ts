@@ -72,6 +72,7 @@ export class ListCustomerComponent {
 
   protected viewCustomer(item: Customer): void {
     if (item.id) {
+      this.customerStore.setSelectedItem(item);
       void this.router.navigate(['/app/trading/customer', item.id], {
         queryParams: { burl: this.router.url },
       });
@@ -80,6 +81,7 @@ export class ListCustomerComponent {
 
   protected editCustomer(item: Customer): void {
     if (item.id) {
+      this.customerStore.setSelectedItem(item);
       void this.router.navigate(['/app/trading/customer', item.id, 'edit'], {
         queryParams: { burl: this.router.url },
       });
@@ -88,6 +90,7 @@ export class ListCustomerComponent {
 
   protected deleteCustomer(item: Customer): void {
     if (item.id) {
+      this.customerStore.setSelectedItem(item);
       void this.router.navigate(['/app/trading/customer', item.id, 'delete'], {
         queryParams: { burl: this.router.url },
       });

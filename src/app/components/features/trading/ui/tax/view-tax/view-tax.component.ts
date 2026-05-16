@@ -49,9 +49,9 @@ export class ViewTaxComponent {
 
   private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      await this.taxStore.loadTaxById(id);
-    }
+    if (!id) return;
+    if (this.taxStore.selectedItem()?.id === id) return;
+    await this.taxStore.loadTaxById(id);
   }
 
   protected edit(): void {

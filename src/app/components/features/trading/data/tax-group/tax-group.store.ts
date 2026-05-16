@@ -58,6 +58,11 @@ export const TaxGroupStore = signalStore(
           },
         }));
       },
+      setSelectedItem(taxGroup: TaxGroup): void {
+        patchState(store, (state) => ({
+          taxGroup: { ...state.taxGroup, selectedItem: taxGroup },
+        }));
+      },
       async createTaxGroup(payload: TaxGroupPayload): Promise<TaxGroup | null> {
         setLoading();
 

@@ -89,6 +89,7 @@ export class ListBankCashComponent {
 
   protected viewBankCash(item: BankCash): void {
     if (item.id) {
+      this.bankCashStore.setSelectedItem(item);
       void this.router.navigate(['/app/trading/bank-cash', item.id], {
         queryParams: { burl: this.router.url },
       });
@@ -97,6 +98,7 @@ export class ListBankCashComponent {
 
   protected editBankCash(item: BankCash): void {
     if (item.id) {
+      this.bankCashStore.setSelectedItem(item);
       void this.router.navigate(['/app/trading/bank-cash', item.id, 'edit'], {
         queryParams: { burl: this.router.url },
       });
@@ -105,6 +107,7 @@ export class ListBankCashComponent {
 
   protected deleteBankCash(item: BankCash): void {
     if (item.id) {
+      this.bankCashStore.setSelectedItem(item);
       void this.router.navigate(['/app/trading/bank-cash', item.id, 'delete'], {
         queryParams: { burl: this.router.url },
       });

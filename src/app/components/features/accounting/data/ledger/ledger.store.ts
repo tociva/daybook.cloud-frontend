@@ -36,6 +36,11 @@ export const LedgerStore = signalStore(
           ledger: { ...state.ledger, selectedItem: null },
         }));
       },
+      setSelectedItem(ledger: Ledger): void {
+        patchState(store, (state) => ({
+          ledger: { ...state.ledger, selectedItem: ledger },
+        }));
+      },
 
       async createLedger(payload: LedgerPayload): Promise<Ledger | null> {
         setLoading();

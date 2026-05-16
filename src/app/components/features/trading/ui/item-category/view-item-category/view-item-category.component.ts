@@ -43,9 +43,9 @@ export class ViewItemCategoryComponent {
 
   private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      await this.itemCategoryStore.loadItemCategoryById(id, { includes: ['parent', 'taxgroup'] });
-    }
+    if (!id) return;
+    // Always fetch full detail — taxgroup is not included in the list response.
+    await this.itemCategoryStore.loadItemCategoryById(id, { includes: ['parent', 'taxgroup'] });
   }
 
   protected edit(): void {

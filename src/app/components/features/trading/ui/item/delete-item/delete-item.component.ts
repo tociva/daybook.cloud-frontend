@@ -44,9 +44,9 @@ export class DeleteItemComponent {
 
   private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      await this.itemStore.loadItemById(id, { includes: ['category'] });
-    }
+    if (!id) return;
+    if (this.itemStore.selectedItem()?.id === id) return;
+    await this.itemStore.loadItemById(id, { includes: ['category'] });
   }
 
   protected async deleteItem(): Promise<void> {

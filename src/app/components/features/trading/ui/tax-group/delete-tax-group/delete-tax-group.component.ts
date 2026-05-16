@@ -43,9 +43,9 @@ export class DeleteTaxGroupComponent {
 
   private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      await this.taxGroupStore.loadTaxGroupById(id);
-    }
+    if (!id) return;
+    if (this.taxGroupStore.selectedItem()?.id === id) return;
+    await this.taxGroupStore.loadTaxGroupById(id);
   }
 
   protected async deleteTaxGroup(): Promise<void> {

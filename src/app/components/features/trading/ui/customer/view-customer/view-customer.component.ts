@@ -52,12 +52,12 @@ export class ViewCustomerComponent {
 
   private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      await Promise.all([
-        this.customerStore.loadCustomerById(id),
-        this.currencyStore.load(),
-      ]);
-    }
+    if (!id) return;
+    const skipCustomerFetch = this.customerStore.selectedItem()?.id === id;
+    await Promise.all([
+      skipCustomerFetch ? Promise.resolve(null) : this.customerStore.loadCustomerById(id),
+      this.currencyStore.load(),
+    ]);
   }
 
   protected edit(): void {

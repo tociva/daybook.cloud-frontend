@@ -84,6 +84,7 @@ export class ListLedgerComponent {
 
   protected viewLedger(item: Ledger): void {
     if (item.id) {
+      this.ledgerStore.setSelectedItem(item);
       void this.router.navigate(['/app/accounting/ledger', item.id], {
         queryParams: { burl: this.router.url },
       });
@@ -92,6 +93,7 @@ export class ListLedgerComponent {
 
   protected editLedger(item: Ledger): void {
     if (item.id) {
+      this.ledgerStore.setSelectedItem(item);
       void this.router.navigate(['/app/accounting/ledger', item.id, 'edit'], {
         queryParams: { burl: this.router.url },
       });
@@ -100,6 +102,7 @@ export class ListLedgerComponent {
 
   protected deleteLedger(item: Ledger): void {
     if (item.id) {
+      this.ledgerStore.setSelectedItem(item);
       void this.router.navigate(['/app/accounting/ledger', item.id, 'delete'], {
         queryParams: { burl: this.router.url },
       });

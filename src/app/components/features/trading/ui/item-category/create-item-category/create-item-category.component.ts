@@ -200,6 +200,20 @@ export class CreateItemCategoryComponent implements AfterViewInit {
       return;
     }
 
+    // Instant pre-fill from cache; taxGroupId resolves via already-loaded taxGroupStore.items().
+    const cached = this.itemCategoryStore.selectedItem();
+    if (cached?.id === id) {
+      this.categoryModel.set({
+        name: cached.name ?? '',
+        code: cached.code ?? '',
+        type: cached.type ?? '',
+        parentId: cached.parent?.id ?? cached.parentid ?? '',
+        taxgroupId: cached.taxgroup?.id ?? cached.taxgroupid ?? '',
+        description: cached.description ?? '',
+      });
+      return;
+    }
+
     const cat = await this.itemCategoryStore.loadItemCategoryById(id, {
       includes: ['parent', 'taxgroup'],
     });

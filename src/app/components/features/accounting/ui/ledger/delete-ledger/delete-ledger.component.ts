@@ -45,9 +45,9 @@ export class DeleteLedgerComponent {
 
   private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      await this.ledgerStore.loadLedgerById(id, { includes: ['category'] });
-    }
+    if (!id) return;
+    if (this.ledgerStore.selectedItem()?.id === id) return;
+    await this.ledgerStore.loadLedgerById(id, { includes: ['category'] });
   }
 
   protected async deleteLedger(): Promise<void> {

@@ -76,6 +76,7 @@ export class ListItemComponent {
 
   protected viewItem(item: Item): void {
     if (item.id) {
+      this.itemStore.setSelectedItem(item);
       void this.router.navigate(['/app/trading/item', item.id], {
         queryParams: { burl: this.router.url },
       });
@@ -84,6 +85,7 @@ export class ListItemComponent {
 
   protected editItem(item: Item): void {
     if (item.id) {
+      this.itemStore.setSelectedItem(item);
       void this.router.navigate(['/app/trading/item', item.id, 'edit'], {
         queryParams: { burl: this.router.url },
       });
@@ -92,6 +94,7 @@ export class ListItemComponent {
 
   protected deleteItem(item: Item): void {
     if (item.id) {
+      this.itemStore.setSelectedItem(item);
       void this.router.navigate(['/app/trading/item', item.id, 'delete'], {
         queryParams: { burl: this.router.url },
       });

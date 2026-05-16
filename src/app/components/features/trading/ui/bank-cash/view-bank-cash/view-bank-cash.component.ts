@@ -49,9 +49,9 @@ export class ViewBankCashComponent {
 
   private async loadInitialState(): Promise<void> {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      await this.bankCashStore.loadBankCashById(id);
-    }
+    if (!id) return;
+    if (this.bankCashStore.selectedItem()?.id === id) return;
+    await this.bankCashStore.loadBankCashById(id);
   }
 
   protected edit(): void {

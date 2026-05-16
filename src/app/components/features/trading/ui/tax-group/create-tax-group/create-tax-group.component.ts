@@ -205,7 +205,12 @@ export class CreateTaxGroupComponent implements AfterViewInit {
     // size is only 10, which may not cover all the taxes used in this group.
     await this.taxStore.loadTaxes({ limit: 500 });
 
-    const taxGroup = await this.taxGroupStore.loadTaxGroupById(routeId);
+    // Use cached selectedItem if it matches; skip the API call in that case.
+    const cached = this.taxGroupStore.selectedItem();
+    const taxGroup = cached?.id === routeId
+      ? cached
+      : await this.taxGroupStore.loadTaxGroupById(routeId);
+
     if (taxGroup) {
       this.patchModelFromTaxGroup(taxGroup);
       // Seed the cache so chips show names even after a search query narrows
