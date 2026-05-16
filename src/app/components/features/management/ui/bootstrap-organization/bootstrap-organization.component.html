@@ -198,9 +198,9 @@
 
       <tng-card variant="outline" tone="success" padding="lg">
         <tng-card-header>
-          <tng-card-title>Financial Info</tng-card-title>
+          <tng-card-title>Financial Year Info</tng-card-title>
           <tng-card-description>
-            Configure fiscal defaults and document numbering.
+            Configure fiscal year defaults.
           </tng-card-description>
         </tng-card-header>
 
@@ -255,78 +255,7 @@
 
         <tng-card-content>
           <div class="field-grid">
-            <div class="field">
-              <tng-form-field labelPosition="above" [invalid]="isInvalid('invnumber')">
-                <tng-label forId="org-invoice-number" required>Invoice number format</tng-label>
-                <tng-input-group class="numbering-template-input-group">
-                  <input
-                    tngInput
-                    id="org-invoice-number"
-                    [formField]="organizationForm.invnumber"
-                    [ariaInvalid]="isInvalid('invnumber')"
-                    (valueChange)="markTouched('invnumber')"
-                  />
-                  <tng-icon
-                    tngInputFieldSuffix
-                    class="numbering-template-input-group-icon"
-                    icon="external-link"
-                    aria-hidden="true"
-                    role="button"
-                    tabindex="0"
-                    (click)="invoiceTemplateDialogOpen.set(true)"
-                    (keydown.enter)="invoiceTemplateDialogOpen.set(true)"
-                    (keydown.space)="$event.preventDefault(); invoiceTemplateDialogOpen.set(true)"
-                  />
-                </tng-input-group>
-                <tng-error [show]="fieldError('invnumber') !== null">{{
-                  fieldError('invnumber')
-                }}</tng-error>
-              </tng-form-field>
-            </div>
 
-            <div class="field">
-              <tng-form-field labelPosition="above" [invalid]="isInvalid('jnumber')">
-                <tng-label forId="org-journal-number" required>Journal number format</tng-label>
-                <tng-input-group class="numbering-template-input-group">
-                  <input
-                    tngInput
-                    id="org-journal-number"
-                    [formField]="organizationForm.jnumber"
-                    [ariaInvalid]="isInvalid('jnumber')"
-                    (valueChange)="markTouched('jnumber')"
-                  />
-                  <tng-icon
-                    tngInputFieldSuffix
-                    class="numbering-template-input-group-icon"
-                    icon="external-link"
-                    aria-hidden="true"
-                    role="button"
-                    tabindex="0"
-                    (click)="journalTemplateDialogOpen.set(true)"
-                    (keydown.enter)="journalTemplateDialogOpen.set(true)"
-                    (keydown.space)="$event.preventDefault(); journalTemplateDialogOpen.set(true)"
-                  />
-                </tng-input-group>
-                <tng-error [show]="fieldError('jnumber') !== null">{{
-                  fieldError('jnumber')
-                }}</tng-error>
-              </tng-form-field>
-            </div>
-
-            <tng-dialog
-              title="Generate invoice numbering template"
-              description="Build a template like <<FISCAL_START_YY>>-<<FISCAL_END_YY>>/<<SERIAL1>>."
-              [open]="invoiceTemplateDialogOpen()"
-              (openChange)="invoiceTemplateDialogOpen.set($event)"
-              (closed)="invoiceTemplateDialogOpen.set(false)"
-            >
-              <app-auto-numbering-template-generator
-                [initialTemplate]="organizationModel().invnumber"
-                [fiscalStartDate]="organizationModel().fiscalDateRange.start"
-                [fiscalEndDate]="organizationModel().fiscalDateRange.end"
-                (applyTemplate)="applyInvoiceNumberTemplate($event)"
-              />
-            </tng-dialog>
 
             <div class="field">
               <tng-form-field labelPosition="above" [invalid]="isInvalid('currency')">
@@ -369,6 +298,93 @@
                 }}</tng-error>
               </tng-form-field>
             </div>
+
+            <div class="field">
+              <tng-form-field labelPosition="above" [invalid]="isInvalid('invnumber')">
+                <tng-label forId="org-invoice-number" required>Invoice number format</tng-label>
+                <tng-input-group>
+                  <input
+                    tngInput
+                    id="org-invoice-number"
+                    [formField]="organizationForm.invnumber"
+                    [ariaInvalid]="isInvalid('invnumber')"
+                    (valueChange)="markTouched('invnumber')"
+                  />
+                  <tng-icon
+                    tngInputFieldSuffix
+                    icon="external-link"
+                    aria-hidden="true"
+                    role="button"
+                    tabindex="0"
+                    (click)="invoiceTemplateDialogOpen.set(true)"
+                    (keydown.enter)="invoiceTemplateDialogOpen.set(true)"
+                    (keydown.space)="$event.preventDefault(); invoiceTemplateDialogOpen.set(true)"
+                  />
+                </tng-input-group>
+                <tng-error [show]="fieldError('invnumber') !== null">{{
+                  fieldError('invnumber')
+                }}</tng-error>
+              </tng-form-field>
+              <div class="numbering-sequences-preview">
+                <tng-label>Next 5 invoice numbers</tng-label>
+                <ul class="numbering-sequences">
+                  @for (item of invoiceNextSequences(); track item) {
+                    <li>{{ item }}</li>
+                  }
+                </ul>
+              </div>
+            </div>
+
+            <div class="field">
+              <tng-form-field labelPosition="above" [invalid]="isInvalid('jnumber')">
+                <tng-label forId="org-journal-number" required>Journal number format</tng-label>
+                <tng-input-group>
+                  <input
+                    tngInput
+                    id="org-journal-number"
+                    [formField]="organizationForm.jnumber"
+                    [ariaInvalid]="isInvalid('jnumber')"
+                    (valueChange)="markTouched('jnumber')"
+                  />
+                  <tng-icon
+                    tngInputFieldSuffix
+                    icon="external-link"
+                    aria-hidden="true"
+                    role="button"
+                    tabindex="0"
+                    (click)="journalTemplateDialogOpen.set(true)"
+                    (keydown.enter)="journalTemplateDialogOpen.set(true)"
+                    (keydown.space)="$event.preventDefault(); journalTemplateDialogOpen.set(true)"
+                  />
+                </tng-input-group>
+                <tng-error [show]="fieldError('jnumber') !== null">{{
+                  fieldError('jnumber')
+                }}</tng-error>
+              </tng-form-field>
+              <div class="numbering-sequences-preview">
+                <tng-label>Next 5 journal numbers</tng-label>
+                <ul class="numbering-sequences">
+                  @for (item of journalNextSequences(); track item) {
+                    <li>{{ item }}</li>
+                  }
+                </ul>
+              </div>
+            </div>
+
+            <tng-dialog
+              title="Generate invoice numbering template"
+              description="Build a template like <<FISCAL_START_YY>>-<<FISCAL_END_YY>>/<<SERIAL1>>."
+              [open]="invoiceTemplateDialogOpen()"
+              (openChange)="invoiceTemplateDialogOpen.set($event)"
+              (closed)="invoiceTemplateDialogOpen.set(false)"
+            >
+              <app-auto-numbering-template-generator
+                [initialTemplate]="organizationModel().invnumber"
+                [fiscalStartDate]="organizationModel().fiscalDateRange.start"
+                [fiscalEndDate]="organizationModel().fiscalDateRange.end"
+                (applyTemplate)="applyInvoiceNumberTemplate($event)"
+              />
+            </tng-dialog>
           </div>
 
           <tng-dialog

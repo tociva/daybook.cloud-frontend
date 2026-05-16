@@ -165,6 +165,21 @@ const getCurrentFiscalDateRange = (): { start: string; end: string } => {
   };
 };
 
+const buildNextNumberingSequences = (
+  template: string,
+  fiscalYearRange: Readonly<{ enddate: string; startdate: string }>,
+): string[] => {
+  const resolvedTemplate = AutoNumberingTemplateGeneratorComponent.fillAutoNumberingTemplate(
+    template,
+    new Date(),
+    fiscalYearRange,
+  );
+
+  return Array.from({ length: 5 }, (_unused, index) =>
+    AutoNumberingTemplateGeneratorComponent.updateSerialWithNumber(resolvedTemplate, index + 1),
+  );
+};
+
 const createInitialForm = (): OrganizationSignalFormModel => ({
   address: {
     city: '',
@@ -302,6 +317,23 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
 
     return this.dateFormats().find((dateFormat) => dateFormat.name === dateFormatName) ?? null;
   });
+
+  protected readonly fiscalYearRange = computed(() => {
+    const { fiscalDateRange } = this.organizationModel();
+
+    return {
+      startdate: fiscalDateRange.start,
+      enddate: fiscalDateRange.end,
+    };
+  });
+
+  protected readonly invoiceNextSequences = computed(() =>
+    buildNextNumberingSequences(this.organizationModel().invnumber, this.fiscalYearRange()),
+  );
+
+  protected readonly journalNextSequences = computed(() =>
+    buildNextNumberingSequences(this.organizationModel().jnumber, this.fiscalYearRange()),
+  );
 
   protected readonly formValue = computed<OrganizationFormPayload>(() => {
     const model = this.organizationModel();
