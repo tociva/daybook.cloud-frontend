@@ -1,13 +1,14 @@
 import { Component, input, output } from '@angular/core';
-import { TngButtonComponent } from '@tailng-ui/components';
+import { TngButtonComponent, TngProgressSpinnerComponent } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 
 type BurlCreateButtonType = 'button' | 'submit';
 
 @Component({
   selector: 'app-burl-create-button',
-  imports: [TngButtonComponent, TngIcon],
+  imports: [TngButtonComponent, TngIcon, TngProgressSpinnerComponent],
   templateUrl: './burl-create-button.component.html',
+  styleUrl: './burl-create-button.component.css',
 })
 export class BurlCreateButtonComponent {
   readonly disabled = input(false);

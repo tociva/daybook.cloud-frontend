@@ -5,6 +5,23 @@
   [disabled]="disabled()"
   (click)="clicked.emit()"
 >
-  <tng-icon icon="trash2" aria-hidden="true" />
-  {{ label() }}
+  <span class="burl-delete-button-content">
+    @if (disabled()) {
+      <tng-progress-spinner
+        class="burl-delete-button-spinner"
+        [indeterminate]="true"
+        [size]="16"
+        [strokeWidth]="2"
+        ariaLabel="Deleting"
+      />
+    }
+    <span
+      class="burl-delete-button-label"
+      [class.burl-delete-button-label--concealed]="disabled()"
+      [attr.aria-hidden]="disabled()"
+    >
+      <tng-icon icon="trash2" aria-hidden="true" />
+      {{ label() }}
+    </span>
+  </span>
 </tng-button>

@@ -1,0 +1,19 @@
+.burl-delete-button-content {
+  display: inline-grid;
+  place-items: center;
+}
+
+.burl-delete-button-spinner,
+.burl-delete-button-label {
+  grid-area: 1 / 1;
+}
+
+.burl-delete-button-label {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.375rem;
+}
+
+.burl-delete-button-label--concealed {
+  visibility: hidden;
+}

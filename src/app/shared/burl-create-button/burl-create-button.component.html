@@ -5,6 +5,23 @@
   [disabled]="disabled()"
   (click)="clicked.emit($event)"
 >
-  <tng-icon [icon]="icon()" aria-hidden="true" />
-  {{ label() }}
+  <span class="burl-create-button-content">
+    @if (disabled()) {
+      <tng-progress-spinner
+        class="burl-create-button-spinner"
+        [indeterminate]="true"
+        [size]="16"
+        [strokeWidth]="2"
+        ariaLabel="Saving"
+      />
+    }
+    <span
+      class="burl-create-button-label"
+      [class.burl-create-button-label--concealed]="disabled()"
+      [attr.aria-hidden]="disabled()"
+    >
+      <tng-icon [icon]="icon()" aria-hidden="true" />
+      {{ label() }}
+    </span>
+  </span>
 </tng-button>

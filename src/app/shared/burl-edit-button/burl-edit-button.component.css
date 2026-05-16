@@ -1,0 +1,19 @@
+.burl-edit-button-content {
+  display: inline-grid;
+  place-items: center;
+}
+
+.burl-edit-button-spinner,
+.burl-edit-button-label {
+  grid-area: 1 / 1;
+}
+
+.burl-edit-button-label {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.375rem;
+}
+
+.burl-edit-button-label--concealed {
+  visibility: hidden;
+}
