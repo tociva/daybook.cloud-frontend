@@ -354,10 +354,19 @@ export class SaleInvoiceDraftStore {
   }
 
   onDateChange(value: unknown): void {
-    if (typeof value === 'string') this.date.set(value);
-    else if (dayjs.isDayjs(value) && value.isValid()) this.date.set(value.format('YYYY-MM-DD'));
+    let newDate = '';
+    if (typeof value === 'string') newDate = value;
+    else if (dayjs.isDayjs(value) && value.isValid()) newDate = value.format('YYYY-MM-DD');
     else if (value instanceof Date && !Number.isNaN(value.getTime()))
-      this.date.set(dayjs(value).format('YYYY-MM-DD'));
+      newDate = dayjs(value).format('YYYY-MM-DD');
+
+    if (!newDate) return;
+    this.date.set(newDate);
+
+    // Ensure due date is never before the invoice date
+    if (this.duedate() && this.duedate() < newDate) {
+      this.duedate.set(newDate);
+    }
   }
 
   onDueDateChange(value: unknown): void {

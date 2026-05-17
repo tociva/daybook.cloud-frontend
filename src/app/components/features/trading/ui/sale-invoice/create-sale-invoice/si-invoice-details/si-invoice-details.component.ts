@@ -56,8 +56,10 @@ export class SiInvoiceDetailsComponent {
     const q = this.currencyQuery();
     const currencies = this.currencyStore.currencies();
     if (!q) return [...currencies];
-    return currencies.filter((c) =>
-      `${c.name} (${c.symbol})`.toLowerCase().includes(q),
+    return currencies.filter(
+      (c) =>
+        `${c.name} (${c.symbol})`.toLowerCase().includes(q) ||
+        c.code.toLowerCase().includes(q),
     );
   });
 

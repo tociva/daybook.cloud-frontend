@@ -261,12 +261,40 @@
   margin: 0;
 }
 
-/* ── Summary table ──────────────────────────────────────────────────────── */
+/* ── Summary section ────────────────────────────────────────────────────── */
 .si-li-summary-wrap {
+  align-items: flex-end;
   display: flex;
-  justify-content: flex-end;
+  gap: 16px;
+  justify-content: space-between;
   margin-top: 12px;
   width: 100%;
+}
+
+.si-li-amount-words {
+  background: var(--tng-semantic-background-canvas);
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 6px;
+  flex: 1;
+  min-width: 0;
+  padding: 10px 14px;
+}
+
+.si-li-amount-words-label {
+  color: var(--tng-semantic-foreground-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.si-li-amount-words-value {
+  color: var(--tng-semantic-foreground-primary);
+  font-size: 13px;
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.5;
 }
 
 .si-li-summary-table {

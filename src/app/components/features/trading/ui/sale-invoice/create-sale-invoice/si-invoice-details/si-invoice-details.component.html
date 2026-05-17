@@ -69,6 +69,7 @@
             id="inv-duedate"
             [adapter]="datepickerAdapter.adapter()"
             [value]="draft.duedate()"
+            [minDate]="draft.date()"
             (valueChange)="draft.onDueDateChange($event)"
           />
         </div>
