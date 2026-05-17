@@ -109,7 +109,7 @@
                         </ng-template>
 
                         <ng-template tngTableCellTemplate="currencyCode" let-row="row">
-                          {{ row.currencyCode || '—' }}
+                          {{ getCurrencyDisplay(row.currencyCode) }}
                         </ng-template>
 
                         <ng-template tngTableCellTemplate="actions" let-row="row">
@@ -118,7 +118,7 @@
                             size="sm"
                             [appearance]="isRowActive(row) ? 'solid' : 'outline'"
                             [tone]="isRowActive(row) ? 'primary' : 'neutral'"
-                            [disabled]="isRowApplying(row) || !row.fiscalYearId"
+                            [disabled]="isRowActive(row) || isRowApplying(row) || !row.fiscalYearId"
                             (click)="applyRow(row)"
                           >
                             @if (isRowActive(row)) {

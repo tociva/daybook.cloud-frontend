@@ -157,6 +157,21 @@ export class SelectOrganizationComponent {
     return group.groupKey;
   }
 
+  protected getCurrencyDisplay(code: string): string {
+    if (!code) return '—';
+    try {
+      const symbol =
+        new Intl.NumberFormat(undefined, { style: 'currency', currency: code })
+          .formatToParts(0)
+          .find((p) => p.type === 'currency')?.value ?? code;
+      const name =
+        new Intl.DisplayNames([navigator.language || 'en'], { type: 'currency' }).of(code) ?? code;
+      return `${name} (${symbol})`;
+    } catch {
+      return code;
+    }
+  }
+
   protected getBranchSubtitle(branch: Branch): string {
     const parts: string[] = [];
     if (branch.email) parts.push(branch.email);

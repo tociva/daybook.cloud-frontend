@@ -98,7 +98,8 @@ function resolveThemeName(raw: unknown): AppThemeName {
 }
 
 function resolveDarkMode(raw: unknown): boolean {
-  return raw === 'dark';
+  if (raw === 'light') return false;
+  return true; // default to dark when no preference is stored
 }
 
 // ── localStorage persistence ──────────────────────────────────────────────────
@@ -110,14 +111,14 @@ type PersistedTheme = { darkMode: boolean; themeName: AppThemeName };
 function loadPersistedTheme(): PersistedTheme {
   try {
     const raw = localStorage.getItem(THEME_STORAGE_KEY);
-    if (!raw) return { darkMode: false, themeName: 'default' };
+    if (!raw) return { darkMode: true, themeName: 'default' };
     const parsed = JSON.parse(raw) as Partial<PersistedTheme>;
     return {
-      darkMode: typeof parsed.darkMode === 'boolean' ? parsed.darkMode : false,
+      darkMode: typeof parsed.darkMode === 'boolean' ? parsed.darkMode : true,
       themeName: resolveThemeName(parsed.themeName),
     };
   } catch {
-    return { darkMode: false, themeName: 'default' };
+    return { darkMode: true, themeName: 'default' };
   }
 }
 

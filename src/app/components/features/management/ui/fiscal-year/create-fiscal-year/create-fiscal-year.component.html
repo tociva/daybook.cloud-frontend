@@ -1,154 +1,153 @@
 <main class="management-page">
-  <tng-card variant="outline" padding="lg">
-    <tng-card-header>
-      <tng-card-title>{{ title() }}</tng-card-title>
-      <tng-card-description>{{ subtitle() }}</tng-card-description>
-    </tng-card-header>
+  <section class="setup-layout" aria-labelledby="fy-setup-title">
+    <form class="fiscal-year-form" novalidate (submit)="submitForm($event)">
 
-    <tng-card-content>
-      @if (fiscalYearStore.error()) {
-        <div class="notice notice--danger">{{ fiscalYearStore.error() }}</div>
-      }
+      <!-- ── Details card ── -->
+      <tng-card variant="outline" tone="info" padding="lg">
+        <tng-card-header>
+          <tng-card-title>{{ title() }}</tng-card-title>
+          <tng-card-description>{{ subtitle() }}</tng-card-description>
+        </tng-card-header>
 
-      <form (submit)="submitForm($event)" novalidate>
-        <!-- ── Details ──────────────────────────────────── -->
-        <p class="section-label">Fiscal Year Details</p>
-        <div class="fields-grid">
-          <div class="field field--full">
-            <tng-form-field labelPosition="above" [invalid]="nameError() !== null">
-              <tng-label forId="fy-name" required>Name</tng-label>
-              <tng-input
-                #nameInputRef
-                id="fy-name"
-                placeholder="e.g. FY 2025-26"
-                [value]="name()"
-                [ariaInvalid]="nameError() !== null"
-                (input)="name.set($any($event.target).value)"
-              />
-              <tng-error [show]="nameError() !== null">{{ nameError() }}</tng-error>
-            </tng-form-field>
-          </div>
+        <tng-card-content>
+          @if (fiscalYearStore.error()) {
+            <div class="notice notice--danger">{{ fiscalYearStore.error() }}</div>
+          }
 
-          <div class="field">
-            <tng-form-field labelPosition="above" [invalid]="startdateError() !== null">
-              <tng-label forId="fy-start" required>Start Date</tng-label>
-              <tng-datepicker
-                id="fy-start"
-                [adapter]="datepickerAdapter.adapter()"
-                [value]="startdate()"
-                [invalid]="startdateError() !== null"
-                (valueChange)="onStartdateChange($event)"
-              />
-              <tng-error [show]="startdateError() !== null">{{ startdateError() }}</tng-error>
-            </tng-form-field>
-          </div>
-
-          <div class="field">
-            <tng-form-field labelPosition="above" [invalid]="enddateError() !== null">
-              <tng-label forId="fy-end" required>End Date</tng-label>
-              <tng-datepicker
-                id="fy-end"
-                [adapter]="datepickerAdapter.adapter()"
-                [value]="enddate()"
-                [invalid]="enddateError() !== null"
-                (valueChange)="onEnddateChange($event)"
-              />
-              <tng-error [show]="enddateError() !== null">{{ enddateError() }}</tng-error>
-            </tng-form-field>
-          </div>
-
-          <div class="field">
-            <tng-form-field labelPosition="above">
-              <tng-label forId="fy-freeze">Freeze Till</tng-label>
-              <tng-datepicker
-                id="fy-freeze"
-                [adapter]="datepickerAdapter.adapter()"
-                [value]="freezetill()"
-                (valueChange)="onFreezetillChange($event)"
-              />
-            </tng-form-field>
-          </div>
-
-          <div class="field">
-            <tng-form-field labelPosition="above" [invalid]="jnumberError() !== null">
-              <tng-label forId="fy-jnumber" required>Journal Number Format</tng-label>
-              <tng-input
-                id="fy-jnumber"
-                placeholder="e.g. <<YYYY>>/<<SERIAL5>>"
-                [value]="jnumber()"
-                [ariaInvalid]="jnumberError() !== null"
-                (input)="jnumber.set($any($event.target).value)"
-              />
-              <tng-error [show]="jnumberError() !== null">{{ jnumberError() }}</tng-error>
-            </tng-form-field>
-          </div>
-        </div>
-
-        <!-- ── Associations ────────────────────────────── -->
-        <p class="section-label">Branch & Currency</p>
-        <div class="fields-grid">
-          <!-- Branch autocomplete -->
-          <div class="field">
-            <tng-form-field labelPosition="above" [invalid]="branchError() !== null">
-              <tng-label forId="fy-branch-search" required>Branch</tng-label>
-              <div class="autocomplete-wrap">
-                <input
-                  id="fy-branch-search"
-                  class="field-input"
-                  [class.field-input--invalid]="!!branchError()"
-                  type="text"
-                  placeholder="Search branch..."
-                  autocomplete="off"
-                  [value]="branchSearch()"
-                  (input)="onBranchInput($event)"
-                  (focus)="showBranchDropdown.set(true)"
-                  (blur)="onBranchBlur()"
+          <div class="fields-grid">
+            <!-- Name -->
+            <div class="field field--full">
+              <tng-form-field labelPosition="above" [invalid]="nameError() !== null">
+                <tng-label forId="fy-name" required>Name</tng-label>
+                <tng-input
+                  #nameInputRef
+                  id="fy-name"
+                  placeholder="e.g. FY 2025-26"
+                  [value]="name()"
+                  [ariaInvalid]="nameError() !== null"
+                  (input)="name.set($any($event.target).value)"
                 />
-                @if (showBranchDropdown() && filteredBranches().length > 0) {
-                  <ul class="dropdown" role="listbox">
-                    @for (b of filteredBranches(); track b.id) {
-                      <li class="dropdown-item" role="option" (mousedown)="selectBranch(b)">
-                        {{ b.name }}
-                      </li>
-                    }
-                  </ul>
-                }
-              </div>
-              <tng-error [show]="branchError() !== null">{{ branchError() }}</tng-error>
-            </tng-form-field>
-          </div>
+                <tng-error [show]="nameError() !== null">{{ nameError() }}</tng-error>
+              </tng-form-field>
+            </div>
 
-          <!-- Currency autocomplete -->
-          <div class="field">
-            <tng-form-field labelPosition="above" [invalid]="currencyError() !== null">
-              <tng-label forId="fy-currency-search" required>Currency</tng-label>
-              <div class="autocomplete-wrap">
-                <input
-                  id="fy-currency-search"
-                  class="field-input"
-                  [class.field-input--invalid]="!!currencyError()"
-                  type="text"
-                  placeholder="Search currency..."
-                  autocomplete="off"
-                  [value]="currencySearch()"
-                  (input)="onCurrencyInput($event)"
-                  (focus)="showCurrencyDropdown.set(true)"
-                  (blur)="onCurrencyBlur()"
+            <!-- Start Year (year picker, month/day fixed from session branch) -->
+            <div class="field">
+              <tng-form-field labelPosition="above">
+                <tng-label forId="fy-start-year" required>Fiscal Year</tng-label>
+                <tng-yearpicker
+                  id="fy-start-year"
+                  [value]="startYear()"
+                  [fixedMonth]="fiscalStartMonth()"
+                  [fixedDay]="fiscalStartDay()"
+                  [minYear]="minYear()"
+                  [maxYear]="maxYear()"
+                  [fullWidth]="true"
+                  (valueChange)="startYear.set($event)"
                 />
-                @if (showCurrencyDropdown() && filteredCurrencies().length > 0) {
-                  <ul class="dropdown" role="listbox">
-                    @for (c of filteredCurrencies(); track c.code) {
-                      <li class="dropdown-item" role="option" (mousedown)="selectCurrency(c)">
-                        {{ c.name }} ({{ c.symbol }})
-                      </li>
-                    }
-                  </ul>
-                }
-              </div>
-              <tng-error [show]="currencyError() !== null">{{ currencyError() }}</tng-error>
-            </tng-form-field>
+              </tng-form-field>
+            </div>
+
+            <!-- Derived period display (startdate – enddate) -->
+            <div class="field">
+              <tng-form-field labelPosition="above">
+                <tng-label>Period</tng-label>
+                <div class="date-range-display" aria-live="polite">
+                  {{ formattedDateRange() }}
+                </div>
+              </tng-form-field>
+            </div>
+
+            <!-- Currency (tng-autocomplete, default from branch) -->
+            <div class="field">
+              <tng-form-field labelPosition="above" [invalid]="currencyError() !== null">
+                <tng-label forId="fy-currency" required>Currency</tng-label>
+                <tng-autocomplete
+                  id="fy-currency"
+                  placeholder="Search for a currency"
+                  ariaLabel="Currency"
+                  [value]="selectedCurrencyCode()"
+                  [options]="filteredCurrencies()"
+                  [getOptionValue]="currencyOptionValue"
+                  [getOptionLabel]="currencyOptionLabel"
+                  [trackBy]="currencyTrackBy"
+                  (valueChange)="onCurrencyChange($event)"
+                  (queryChange)="onCurrencyQueryChange($event)"
+                />
+                <tng-error [show]="currencyError() !== null">{{ currencyError() }}</tng-error>
+              </tng-form-field>
+            </div>
+
+            <!-- Transfer data from previous financial year -->
+            <div class="field field--full">
+              <label class="toggle-row">
+                <tng-switch
+                  [checked]="transferData()"
+                  (checkedChange)="transferData.set(!!$event)"
+                />
+                <span class="toggle-label">
+                  <span class="toggle-label-title">Transfer data from previous financial year</span>
+                  <span class="toggle-label-description">
+                    Carry over opening balances and carry-forward entries from the prior year.
+                  </span>
+                </span>
+              </label>
+            </div>
           </div>
-        </div>
+        </tng-card-content>
+      </tng-card>
+
+      <!-- ── Numbering & Controls card ── -->
+      <tng-card variant="outline" tone="neutral" padding="lg">
+        <tng-card-header>
+          <tng-card-title>Numbering &amp; Controls</tng-card-title>
+          <tng-card-description>
+            Configure journal number format and data freeze date.
+          </tng-card-description>
+        </tng-card-header>
+
+        <tng-card-content>
+          <div class="fields-grid">
+            <!-- Journal Number Format + next-5 preview -->
+            <div class="field field--full">
+              <tng-form-field labelPosition="above" [invalid]="jnumberError() !== null">
+                <tng-label forId="fy-jnumber" required>Journal Number Format</tng-label>
+                <tng-input
+                  id="fy-jnumber"
+                  placeholder="e.g. <<YYYY>>/<<SERIAL5>>"
+                  [value]="jnumber()"
+                  [ariaInvalid]="jnumberError() !== null"
+                  (input)="jnumber.set($any($event.target).value)"
+                />
+                <tng-error [show]="jnumberError() !== null">{{ jnumberError() }}</tng-error>
+              </tng-form-field>
+              <div class="numbering-sequences-preview">
+                <tng-label>Next 5 journal numbers</tng-label>
+                <ul class="numbering-sequences">
+                  @for (item of journalNextSequences(); track item) {
+                    <li>{{ item }}</li>
+                  }
+                </ul>
+              </div>
+            </div>
+
+            <!-- Freeze Till (dates constrained to fiscal year range) -->
+            <div class="field">
+              <tng-form-field labelPosition="above">
+                <tng-label forId="fy-freeze">Freeze Till</tng-label>
+                <tng-datepicker
+                  id="fy-freeze"
+                  [adapter]="datepickerAdapter.adapter()"
+                  [value]="freezetill()"
+                  [minDate]="startdate()"
+                  [maxDate]="enddate()"
+                  (valueChange)="onFreezetillChange($event)"
+                />
+                <tng-hint>Restrict entries before this date within the fiscal year.</tng-hint>
+              </tng-form-field>
+            </div>
+          </div>
+        </tng-card-content>
 
         <tng-card-footer>
           <tng-card-actions align="end">
@@ -160,7 +159,27 @@
             />
           </tng-card-actions>
         </tng-card-footer>
-      </form>
-    </tng-card-content>
-  </tng-card>
+      </tng-card>
+
+    </form>
+
+    <!-- Right: stepper overview -->
+    <aside class="setup-overview" aria-labelledby="fy-setup-title">
+      <div class="setup-copy">
+        <p class="eyebrow">Fiscal year setup</p>
+        <h1 id="fy-setup-title">{{ title() }}</h1>
+        <p>
+          Configure the fiscal period, currency, numbering format, and data controls for this year.
+        </p>
+        <tng-stepper
+          class="setup-stepper"
+          ariaLabel="Fiscal year setup progress"
+          [ordered]="true"
+          [steps]="setupSteps()"
+          [value]="activeSetupStep()"
+        />
+      </div>
+    </aside>
+
+  </section>
 </main>

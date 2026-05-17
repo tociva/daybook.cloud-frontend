@@ -50,8 +50,7 @@ export class ListFiscalYearComponent {
     { id: 'name', label: 'Name', sortable: true, width: '14rem' },
     { id: 'startdate', label: 'Start Date', sortable: true, width: '10rem' },
     { id: 'enddate', label: 'End Date', sortable: true, width: '10rem' },
-    { id: 'branch', label: 'Branch', width: '12rem' },
-    { id: 'currencycode', label: 'Currency', sortable: true, width: '8rem' },
+    { id: 'currencycode', label: 'Currency', sortable: true, width: '14rem' },
     { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '8rem' },
   ];
 
@@ -61,7 +60,9 @@ export class ListFiscalYearComponent {
   ];
 
   constructor() {
-    this.crudQuery.init((filter) => void this.fiscalYearStore.loadFiscalYears({ ...filter }));
+    this.crudQuery.init((filter) =>
+      void this.fiscalYearStore.loadFiscalYears({ ...filter, includes: ['currency'] }),
+    );
   }
 
   protected createFiscalYear(): void {

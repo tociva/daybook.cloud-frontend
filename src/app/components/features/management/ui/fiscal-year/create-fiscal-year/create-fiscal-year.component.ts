@@ -5,12 +5,15 @@ import {
   ElementRef,
   ViewChild,
   computed,
+  effect,
   inject,
   signal,
 } from '@angular/core';
 import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { ActivatedRoute } from '@angular/router';
 import {
+  TngAutocompleteComponent,
   TngCardActionsComponent,
   TngCardComponent,
   TngCardContentComponent,
@@ -21,23 +24,31 @@ import {
   TngDatepickerComponent,
   TngError,
   TngFormFieldComponent,
+  TngHint,
   TngInputComponent,
   TngLabelComponent,
+  TngStepperComponent,
+  TngSwitchComponent,
+  TngYearpickerComponent,
 } from '@tailng-ui/components';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
 import { DatepickerDateAdapterService } from '../../../../../../core/date/datepicker-date-adapter.service';
 import { CurrencyStore } from '../../../data/currency/currency.store';
 import type { Currency } from '../../../data/currency/currency.model';
-import { BranchStore } from '../../../data/branch';
-import type { Branch } from '../../../data/branch';
+import { UserSessionStore } from '../../../data/user-session/user-session.store';
 import { FiscalYearFacade, FiscalYearStore } from '../../../data/fiscal-year';
 import type { FiscalYearPayload } from '../../../data/fiscal-year';
+import { AutoNumberingTemplateGeneratorComponent } from '../../../../../../shared/auto-numbering-template-generator/auto-numbering-template-generator.component';
+import { toDateRangeEnd } from '../../../../../../core/date/dayjs-date.utils';
+
+dayjs.extend(customParseFormat);
 
 @Component({
   selector: 'app-create-fiscal-year',
   standalone: true,
   imports: [
+    TngAutocompleteComponent,
     TngCardActionsComponent,
     TngCardComponent,
     TngCardContentComponent,
@@ -48,8 +59,12 @@ import type { FiscalYearPayload } from '../../../data/fiscal-year';
     TngDatepickerComponent,
     TngError,
     TngFormFieldComponent,
+    TngHint,
     TngInputComponent,
     TngLabelComponent,
+    TngStepperComponent,
+    TngSwitchComponent,
+    TngYearpickerComponent,
     BurlBackButtonComponent,
     BurlCreateButtonComponent,
   ],
@@ -64,7 +79,10 @@ export class CreateFiscalYearComponent implements AfterViewInit {
   protected readonly datepickerAdapter = inject(DatepickerDateAdapterService);
   protected readonly fiscalYearStore = inject(FiscalYearStore);
   protected readonly currencyStore = inject(CurrencyStore);
-  protected readonly branchStore = inject(BranchStore);
+  private readonly userSessionStore = inject(UserSessionStore);
+
+  /** The branch the user is currently working in (set via the session selector). */
+  private readonly sessionBranch = computed(() => this.userSessionStore.session()?.branch ?? null);
 
   protected readonly id = signal<string | null>(null);
   protected readonly submitted = signal(false);
@@ -72,45 +90,123 @@ export class CreateFiscalYearComponent implements AfterViewInit {
 
   // ── Form fields ───────────────────────────────────────────────────────────
   protected readonly name = signal('');
-  protected readonly startdate = signal('');
-  protected readonly enddate = signal('');
+  protected readonly startYear = signal(dayjs().year());
   protected readonly jnumber = signal('<<YYYY>>/<<SERIAL5>>');
   protected readonly freezetill = signal('');
+  protected readonly transferData = signal(false);
 
-  // ── Currency autocomplete ─────────────────────────────────────────────────
-  protected readonly selectedCurrency = signal<Currency | null>(null);
-  protected readonly currencySearch = signal('');
-  protected readonly showCurrencyDropdown = signal(false);
+  // ── Currency (tng-autocomplete) ───────────────────────────────────────────
+  protected readonly selectedCurrencyCode = signal<string | null>(null);
+  protected readonly currencyQuery = signal('');
+
+  protected readonly currencyOptionValue = (currency: Currency): string => currency.code;
+  protected readonly currencyOptionLabel = (currency: Currency): string =>
+    `${currency.name} (${currency.symbol})`;
+  protected readonly currencyTrackBy = (_index: number, currency: Currency): string =>
+    currency.code;
 
   protected readonly filteredCurrencies = computed(() => {
-    const q = this.currencySearch().toLowerCase().trim();
+    const q = this.currencyQuery().toLowerCase().trim();
+    const selectedCode = this.selectedCurrencyCode();
     const all = this.currencyStore.currencies();
-    if (!q) return all.slice(0, 20);
-    return all
-      .filter(
-        (c) =>
-          c.name.toLowerCase().includes(q) ||
-          c.code.toLowerCase().includes(q) ||
-          c.symbol.includes(q),
-      )
-      .slice(0, 20);
+
+    const matches = q
+      ? all.filter(
+          (c) =>
+            c.name.toLowerCase().includes(q) ||
+            c.code.toLowerCase().includes(q) ||
+            c.symbol.includes(q),
+        )
+      : all;
+
+    const page = matches.slice(0, 20);
+
+    // Always keep the selected currency in the list so the autocomplete can
+    // resolve its label (name + symbol) for the trigger display.
+    if (selectedCode && !page.some((c) => c.code === selectedCode)) {
+      const selected = all.find((c) => c.code === selectedCode);
+      if (selected) return [selected, ...page];
+    }
+
+    return page;
   });
 
-  // ── Branch autocomplete ───────────────────────────────────────────────────
-  protected readonly selectedBranch = signal<Branch | null>(null);
-  protected readonly branchSearch = signal('');
-  protected readonly showBranchDropdown = signal(false);
+  // ── Year picker bounds ────────────────────────────────────────────────────
+  protected readonly minYear = computed(() => dayjs().year() - 5);
+  protected readonly maxYear = computed(() => dayjs().year() + 10);
 
-  protected readonly filteredBranches = computed(() => {
-    const q = this.branchSearch().toLowerCase().trim();
-    const all = this.branchStore.items();
-    if (!q) return all.slice(0, 20);
-    return all
-      .filter(
-        (b) =>
-          (b.name ?? '').toLowerCase().includes(q) || (b.email ?? '').toLowerCase().includes(q),
-      )
-      .slice(0, 20);
+  // ── Fiscal start month/day from session branch ────────────────────────────
+  /** 1-indexed month parsed from branch.fiscalstart (e.g. "April-01" → 4) */
+  protected readonly fiscalStartMonth = computed(() => {
+    const fiscalStart = this.sessionBranch()?.fiscalstart ?? 'January-01';
+    const parsed = dayjs(fiscalStart, ['MMMM-D', 'MMMM-DD'], true);
+    return parsed.isValid() ? parsed.month() + 1 : 1;
+  });
+
+  /** Day parsed from branch.fiscalstart (e.g. "April-01" → 1) */
+  protected readonly fiscalStartDay = computed(() => {
+    const fiscalStart = this.sessionBranch()?.fiscalstart ?? 'January-01';
+    const parsed = dayjs(fiscalStart, ['MMMM-D', 'MMMM-DD'], true);
+    return parsed.isValid() ? parsed.date() : 1;
+  });
+
+  // ── Derived dates ─────────────────────────────────────────────────────────
+  protected readonly startdate = computed(() => {
+    const year = this.startYear();
+    const month = this.fiscalStartMonth(); // 1-indexed
+    const day = this.fiscalStartDay();
+    return dayjs().year(year).month(month - 1).date(day).format('YYYY-MM-DD');
+  });
+
+  protected readonly enddate = computed(() =>
+    toDateRangeEnd(this.startdate(), `${this.startYear()}-12-31`),
+  );
+
+  protected readonly formattedDateRange = computed(() => {
+    const start = this.startdate();
+    const end = this.enddate();
+    if (!start || !end) return '—';
+    return `${dayjs(start).format('D MMM YYYY')} – ${dayjs(end).format('D MMM YYYY')}`;
+  });
+
+  // ── Journal number sequences ───────────────────────────────────────────────
+  protected readonly journalNextSequences = computed(() => {
+    const template = this.jnumber();
+    const range = { startdate: this.startdate(), enddate: this.enddate() };
+    const resolvedTemplate = AutoNumberingTemplateGeneratorComponent.fillAutoNumberingTemplate(
+      template,
+      new Date(),
+      range,
+    );
+    return Array.from({ length: 5 }, (_, i) =>
+      AutoNumberingTemplateGeneratorComponent.updateSerialWithNumber(resolvedTemplate, i + 1),
+    );
+  });
+
+  // ── Stepper ───────────────────────────────────────────────────────────────
+  protected readonly setupSteps = computed(() => {
+    const detailsCompleted = this.name().trim().length > 0 && !!this.selectedCurrencyCode();
+    const numberingCompleted = this.jnumber().trim().length > 0;
+
+    return [
+      {
+        value: 'details',
+        label: 'Details',
+        description: 'Name, period & currency',
+        completed: detailsCompleted,
+      },
+      {
+        value: 'numbering',
+        label: 'Numbering',
+        description: 'Journal number format',
+        completed: numberingCompleted,
+      },
+    ] as const;
+  });
+
+  protected readonly activeSetupStep = computed(() => {
+    const firstPending = this.setupSteps().find((step) => !step.completed);
+    return firstPending?.value ?? 'numbering';
   });
 
   // ── Derived ───────────────────────────────────────────────────────────────
@@ -128,40 +224,30 @@ export class CreateFiscalYearComponent implements AfterViewInit {
   protected readonly nameError = computed(() =>
     this.submitted() && this.name().trim() === '' ? 'Name is required.' : null,
   );
-  protected readonly startdateError = computed(() =>
-    this.submitted() && this.startdate().trim() === '' ? 'Start date is required.' : null,
-  );
-  protected readonly enddateError = computed((): string | null => {
-    if (!this.submitted()) return null;
-    if (this.enddate().trim() === '') return 'End date is required.';
-    if (this.startdate().trim() && this.enddate() <= this.startdate()) {
-      return 'End date must be after start date.';
-    }
-    return null;
-  });
   protected readonly jnumberError = computed(() =>
     this.submitted() && this.jnumber().trim() === '' ? 'Journal number format is required.' : null,
   );
   protected readonly currencyError = computed(() =>
-    this.submitted() && !this.selectedCurrency() ? 'Currency is required.' : null,
-  );
-  protected readonly branchError = computed(() =>
-    this.submitted() && !this.selectedBranch() ? 'Branch is required.' : null,
+    this.submitted() && !this.selectedCurrencyCode() ? 'Currency is required.' : null,
   );
   protected readonly hasErrors = computed(
     () =>
       this.nameError() !== null ||
-      this.startdateError() !== null ||
-      this.enddateError() !== null ||
       this.jnumberError() !== null ||
-      this.currencyError() !== null ||
-      this.branchError() !== null,
+      this.currencyError() !== null,
   );
 
   constructor() {
     void this.currencyStore.load();
-    void this.branchStore.loadBranches();
     void this.loadInitialState();
+
+    // Auto-fill currency from the session branch when available
+    effect(() => {
+      const branch = this.sessionBranch();
+      if (branch?.currencycode && !this.selectedCurrencyCode()) {
+        this.selectedCurrencyCode.set(branch.currencycode);
+      }
+    });
   }
 
   ngAfterViewInit(): void {
@@ -177,80 +263,30 @@ export class CreateFiscalYearComponent implements AfterViewInit {
       });
       if (fy) {
         this.name.set(fy.name ?? '');
-        this.startdate.set(fy.startdate ?? '');
-        this.enddate.set(fy.enddate ?? '');
+        // Extract year from startdate for the year picker
+        if (fy.startdate) {
+          const yr = dayjs(fy.startdate, 'YYYY-MM-DD').year();
+          if (yr > 0) this.startYear.set(yr);
+        }
         this.jnumber.set(fy.jnumber ?? '<<YYYY>>/<<SERIAL5>>');
         this.freezetill.set(fy.freezetill ?? '');
-
-        const currency = this.currencyStore.currencies().find((c) => c.code === fy.currencycode);
-        if (currency) {
-          this.selectedCurrency.set(currency);
-          this.currencySearch.set(`${currency.name} (${currency.symbol})`);
-        }
-
-        if (fy.branch) {
-          this.selectedBranch.set(fy.branch);
-          this.branchSearch.set(fy.branch.name ?? '');
+        if (fy.currencycode) {
+          this.selectedCurrencyCode.set(fy.currencycode);
         }
       }
     }
   }
 
   // ── Currency handlers ─────────────────────────────────────────────────────
-  protected onCurrencyInput(event: Event): void {
-    const v = (event.target as HTMLInputElement).value;
-    this.currencySearch.set(v);
-    this.showCurrencyDropdown.set(true);
-    if (!v.trim()) this.selectedCurrency.set(null);
+  protected onCurrencyChange(value: unknown): void {
+    this.selectedCurrencyCode.set(value as string | null);
   }
 
-  protected selectCurrency(currency: Currency): void {
-    this.selectedCurrency.set(currency);
-    this.currencySearch.set(`${currency.name} (${currency.symbol})`);
-    this.showCurrencyDropdown.set(false);
+  protected onCurrencyQueryChange(q: string): void {
+    this.currencyQuery.set(q);
   }
 
-  protected onCurrencyBlur(): void {
-    this.showCurrencyDropdown.set(false);
-  }
-
-  // ── Branch handlers ───────────────────────────────────────────────────────
-  protected onBranchInput(event: Event): void {
-    const v = (event.target as HTMLInputElement).value;
-    this.branchSearch.set(v);
-    this.showBranchDropdown.set(true);
-    if (!v.trim()) this.selectedBranch.set(null);
-  }
-
-  protected selectBranch(branch: Branch): void {
-    this.selectedBranch.set(branch);
-    this.branchSearch.set(branch.name ?? '');
-    this.showBranchDropdown.set(false);
-    // Auto-fill currency from branch if not already selected
-    if (!this.selectedCurrency() && branch.currencycode) {
-      const currency = this.currencyStore.currencies().find((c) => c.code === branch.currencycode);
-      if (currency) {
-        this.selectedCurrency.set(currency);
-        this.currencySearch.set(`${currency.name} (${currency.symbol})`);
-      }
-    }
-  }
-
-  protected onBranchBlur(): void {
-    this.showBranchDropdown.set(false);
-  }
-
-  // ── Date handlers ─────────────────────────────────────────────────────────
-  protected onStartdateChange(value: unknown): void {
-    if (typeof value === 'string') this.startdate.set(value);
-    else this.startdate.set(dayjs(value as Date).format('YYYY-MM-DD'));
-  }
-
-  protected onEnddateChange(value: unknown): void {
-    if (typeof value === 'string') this.enddate.set(value);
-    else this.enddate.set(dayjs(value as Date).format('YYYY-MM-DD'));
-  }
-
+  // ── Freeze handler ────────────────────────────────────────────────────────
   protected onFreezetillChange(value: unknown): void {
     if (!value) {
       this.freezetill.set('');
@@ -268,14 +304,17 @@ export class CreateFiscalYearComponent implements AfterViewInit {
     this.submitted.set(true);
     if (this.hasErrors()) return;
 
+    const branchId = this.sessionBranch()?.id;
+    if (!branchId) return;
+
     this.isSubmitting.set(true);
     const payload: FiscalYearPayload = {
       name: this.name().trim(),
-      startdate: this.startdate().trim(),
-      enddate: this.enddate().trim(),
+      startdate: this.startdate(),
+      enddate: this.enddate(),
       jnumber: this.jnumber().trim(),
-      currencycode: this.selectedCurrency()!.code,
-      branchid: this.selectedBranch()!.id!,
+      currencycode: this.selectedCurrencyCode()!,
+      branchid: branchId,
       ...(this.freezetill().trim() && { freezetill: this.freezetill().trim() }),
     };
 

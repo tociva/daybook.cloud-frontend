@@ -49,12 +49,8 @@
           {{ formatDate(row.enddate) }}
         </ng-template>
 
-        <ng-template tngTableCellTemplate="branch" let-row="row">
-          {{ row.branch?.name || '—' }}
-        </ng-template>
-
         <ng-template tngTableCellTemplate="currencycode" let-row="row">
-          {{ row.currencycode || '—' }}
+          {{ row.currency ? row.currency.name + ' (' + row.currency.symbol + ')' : (row.currencycode || '—') }}
         </ng-template>
 
         <ng-template tngTableCellTemplate="actions" let-row="row">
