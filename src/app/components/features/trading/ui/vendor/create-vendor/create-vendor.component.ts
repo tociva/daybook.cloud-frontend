@@ -2,6 +2,7 @@ import { AfterViewInit, Component, ElementRef, ViewChild, computed, inject, sign
 import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import {
+  TngAutocompleteComponent,
   TngCardActionsComponent,
   TngCardComponent,
   TngCardContentComponent,
@@ -20,6 +21,10 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
 import { VendorFacade, VendorStore } from '../../../data/vendor';
 import type { VendorPayload } from '../../../data/vendor';
+import type { Country } from '../../../../management/data/country/country.model';
+import { CountryStore } from '../../../../management/data/country/country.store';
+import type { Currency } from '../../../../management/data/currency/currency.model';
+import { CurrencyStore } from '../../../../management/data/currency/currency.store';
 
 type VendorFormModel = {
   name: string;
@@ -44,6 +49,7 @@ type VendorFormModel = {
   standalone: true,
   imports: [
     FormField,
+    TngAutocompleteComponent,
     TngCardActionsComponent,
     TngCardComponent,
     TngCardContentComponent,
@@ -61,13 +67,40 @@ type VendorFormModel = {
     BurlCreateButtonComponent,
   ],
   templateUrl: './create-vendor.component.html',
-  styleUrl: './create-vendor.component.css',
+  styleUrls: ['./create-vendor.component.css', '../../../../../../../styles/flags.css'],
 })
 export class CreateVendorComponent implements AfterViewInit {
   @ViewChild('nameInputRef', { read: ElementRef }) private nameInputRef!: ElementRef;
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(VendorFacade);
+  private readonly countryStore = inject(CountryStore);
+  private readonly currencyStore = inject(CurrencyStore);
   protected readonly vendorStore = inject(VendorStore);
+  protected readonly countries = this.countryStore.countries;
+  protected readonly currencies = this.currencyStore.currencies;
+  protected readonly countryQuery = signal('');
+  protected readonly currencyQuery = signal('');
+
+  protected readonly countryOptionValue = (country: Country): string => country.code;
+  protected readonly countryOptionLabel = (country: Country): string => country.name;
+  protected readonly countryTrackBy = (_index: number, country: Country): string => country.code;
+  protected readonly getCountryFlagClass = (country: Country): string =>
+    `country-flag country-flag--${country.code.toLowerCase()}`;
+  protected readonly currencyOptionValue = (currency: Currency): string => currency.code;
+  protected readonly currencyOptionLabel = (currency: Currency): string =>
+    `${currency.name} (${currency.symbol})`;
+  protected readonly currencyTrackBy = (_index: number, currency: Currency): string =>
+    currency.code;
+  protected readonly filteredCountries = computed(() =>
+    this.filterAutocompleteOptions(this.countries(), this.countryOptionLabel, this.countryQuery()),
+  );
+  protected readonly filteredCurrencies = computed(() =>
+    this.filterAutocompleteOptions(
+      this.currencies(),
+      this.currencyOptionLabel,
+      this.currencyQuery(),
+    ),
+  );
 
   protected readonly vendorModel = signal<VendorFormModel>({
     name: '',
@@ -152,6 +185,8 @@ export class CreateVendorComponent implements AfterViewInit {
   // ──────────────────────────────────────────────────────────────────────────
 
   constructor() {
+    void this.countryStore.load();
+    void this.currencyStore.load();
     void this.loadInitialState();
   }
 
@@ -211,6 +246,58 @@ export class CreateVendorComponent implements AfterViewInit {
         addressZip: vendor.address?.zip ?? '',
       });
     }
+  }
+
+  protected selectCountry(value: unknown): void {
+    const countryCode = typeof value === 'string' ? value : '';
+    if (!countryCode.trim()) {
+      return;
+    }
+
+    const country = this.countries().find((item) => item.code === countryCode) ?? null;
+
+    this.vendorModel.update((current) => ({
+      ...current,
+      countrycode: countryCode,
+      currencycode: country?.currencycode ?? current.currencycode,
+      mobile: country ? `+${country.phone}-` : current.mobile,
+    }));
+  }
+
+  protected selectCurrency(value: unknown): void {
+    const currencyCode = typeof value === 'string' ? value : '';
+    if (!currencyCode.trim()) {
+      return;
+    }
+
+    this.vendorModel.update((current) => ({
+      ...current,
+      currencycode: currencyCode,
+    }));
+  }
+
+  protected onCountryQueryChange(event: unknown): void {
+    this.countryQuery.set(this.normalizeAutocompleteQuery(event));
+  }
+
+  protected onCurrencyQueryChange(event: unknown): void {
+    this.currencyQuery.set(this.normalizeAutocompleteQuery(event));
+  }
+
+  private normalizeAutocompleteQuery(event: unknown): string {
+    return typeof event === 'string' ? event.trim().toLowerCase() : '';
+  }
+
+  private filterAutocompleteOptions<T>(
+    options: readonly T[],
+    getLabel: (option: T) => string,
+    query: string,
+  ): T[] {
+    if (!query) {
+      return [...options];
+    }
+
+    return options.filter((option) => getLabel(option).toLowerCase().includes(query));
   }
 
   protected async submitForm(event: SubmitEvent): Promise<void> {

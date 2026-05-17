@@ -91,6 +91,25 @@ tng-textarea {
   width: 100%;
 }
 
+.flag-option {
+  align-items: center;
+  display: inline-flex;
+  gap: var(--tng-autocomplete-rich-content-gap, 0.55rem);
+  min-width: 0;
+}
+
+.flag-option > span:not(.flag-chip):not(.flag-code) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flag-chip {
+  flex: 0 0 auto;
+  margin-inline-start: 0;
+}
+
 .field-error {
   color: var(--tng-semantic-accent-danger);
   font-size: 0.8rem;

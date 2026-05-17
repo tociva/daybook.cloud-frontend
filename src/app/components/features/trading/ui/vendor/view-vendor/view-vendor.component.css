@@ -45,6 +45,12 @@ dd {
   text-transform: uppercase;
 }
 
+.flag-display {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.55rem;
+}
+
 .notice {
   border: 1px solid var(--tng-semantic-border-subtle);
   border-radius: 0.5rem;

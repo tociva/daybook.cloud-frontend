@@ -20,12 +20,21 @@
             <dd>{{ vendor.name }}</dd>
           </div>
           <div>
-            <dt>Country Code</dt>
-            <dd>{{ vendor.countrycode || '—' }}</dd>
+            <dt>Country</dt>
+            <dd>
+              @if (country(); as c) {
+                <span class="flag-display">
+                  <span [class]="'country-flag country-flag--' + c.code.toLowerCase()"></span>
+                  <span>{{ c.name }}</span>
+                </span>
+              } @else {
+                {{ vendor.countrycode || '—' }}
+              }
+            </dd>
           </div>
           <div>
-            <dt>Currency Code</dt>
-            <dd>{{ vendor.currencycode || '—' }}</dd>
+            <dt>Currency</dt>
+            <dd>{{ currencyLabel() }}</dd>
           </div>
           <div>
             <dt>State</dt>
