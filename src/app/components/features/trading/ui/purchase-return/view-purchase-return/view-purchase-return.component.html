@@ -1,0 +1,32 @@
+<main class="invoice-page">
+  <header class="invoice-header">
+    <h1>View Purchase Return</h1>
+  </header>
+
+  @if (purchaseReturnStore.error()) {
+    <div class="notice notice--danger">{{ purchaseReturnStore.error() }}</div>
+  }
+
+  @if (purchaseReturnStore.isLoading() && !purchaseReturnStore.selectedItem()) {
+    <div class="notice">Loading return…</div>
+  } @else if (purchaseReturnStore.selectedItem()) {
+    <div class="invoice-layout">
+      <div class="invoice-main">
+        <app-pr-invoice-ref [readOnly]="true" />
+        <app-pr-line-items [readOnly]="true" />
+      </div>
+
+      <aside class="invoice-aside">
+        <app-pr-return-details [readOnly]="true" />
+      </aside>
+    </div>
+  } @else {
+    <div class="notice">Purchase return not found.</div>
+  }
+
+  <div class="invoice-actions">
+    <app-burl-back-button label="Back" />
+    <app-burl-edit-button (clicked)="editReturn()" />
+    <app-burl-delete-button (clicked)="deleteReturn()" />
+  </div>
+</main>

@@ -1,0 +1,305 @@
+/* ── Utility — text alignment ────────────────────────────────────────────── */
+.text-left   { text-align: left; }
+.text-center { text-align: center; }
+.text-right  { text-align: right; }
+
+/* ── Utility — padding ───────────────────────────────────────────────────── */
+.p-0  { padding: 0; }
+.px-2 { padding-left: 2px;  padding-right: 2px; }
+.px-4 { padding-left: 4px;  padding-right: 4px; }
+
+/* ── Utility — rotated label ─────────────────────────────────────────────── */
+.rotate-270 {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.rotate-270::before {
+  content: attr(data-label);
+  display: inline-block;
+  transform: rotate(270deg);
+  transform-origin: center;
+}
+
+/* ── Utility — column widths ─────────────────────────────────────────────── */
+.w-3  { width: 3%; }
+.w-6  { width: 6%; }
+.w-7  { width: 7%; }
+.w-8  { width: 8%; }
+
+/* ── Column visibility toolbar ──────────────────────────────────────────── */
+.pr-li-toolbar {
+  align-items: center;
+  display: flex;
+  gap: 20px;
+  padding-bottom: 10px;
+}
+
+.pr-li-switch-label {
+  align-items: center;
+  color: var(--tng-semantic-foreground-secondary);
+  cursor: pointer;
+  display: flex;
+  font-size: 13px;
+  gap: 8px;
+  user-select: none;
+}
+
+.pr-li-add-btn,
+.pr-li-remove-btn {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 1px solid var(--tng-semantic-border-strong);
+  color: var(--tng-semantic-foreground-primary);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  justify-content: center;
+  line-height: 1;
+}
+
+.pr-li-add-btn {
+  border-radius: 6px;
+  gap: 6px;
+  margin-left: auto;
+  min-height: 32px;
+  padding: 0 10px;
+}
+
+.pr-li-remove-btn {
+  border-color: transparent;
+  border-radius: 6px;
+  color: var(--tng-semantic-accent-danger);
+  height: 28px;
+  padding: 0;
+  width: 28px;
+}
+
+.pr-li-add-btn:hover,
+.pr-li-remove-btn:hover {
+  background: var(--tng-semantic-background-surface);
+}
+
+.pr-li-add-btn:disabled,
+.pr-li-remove-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.pr-li-option-code {
+  color: var(--tng-semantic-foreground-secondary);
+}
+
+.pr-li-read-value {
+  display: block;
+  overflow: hidden;
+  padding: 0 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:host {
+  --pr-li-cell-focus-border: var(--tng-semantic-accent-brand, var(--tng-semantic-focus-ring));
+}
+
+.pr-li-col-name > tng-autocomplete {
+  --tng-autocomplete-bg: var(--tng-semantic-background-canvas);
+  --tng-autocomplete-border-hover: transparent;
+  --tng-autocomplete-border-strong: transparent;
+  --tng-autocomplete-focus-ring: transparent;
+  --tng-autocomplete-radius: 0;
+  --tng-autocomplete-shadow: none;
+  --tng-autocomplete-shadow-focus: none;
+  --tng-autocomplete-surface: var(--tng-semantic-background-canvas);
+  --tng-autocomplete-trigger-container-min-height: 100%;
+  --tng-autocomplete-trigger-container-px: 0;
+  --tng-autocomplete-trigger-min-height: 100%;
+  --tng-autocomplete-trigger-px: 8px;
+  --tng-autocomplete-trigger-py: 0;
+
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+:host ::ng-deep .pr-li-col-name > tng-autocomplete [data-slot='autocomplete-trigger'] {
+  background: var(--tng-semantic-background-canvas);
+}
+
+.pr-li-col-price > tng-input,
+.pr-li-col-qty > tng-input,
+.pr-li-summary-value > tng-input {
+  --tng-input-bg: var(--tng-semantic-background-canvas);
+  --tng-input-border: transparent;
+  --tng-input-focus-ring: transparent;
+  --tng-input-min-height: 100%;
+  --tng-input-number-controls-display: none;
+  --tng-input-px: 0;
+  --tng-input-radius: 0;
+
+  display: block;
+  width: 100%;
+}
+
+.pr-li-col-description > tng-textarea {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.pr-li-col-description:focus-within {
+  box-shadow: inset 0 -1px 0 var(--pr-li-cell-focus-border);
+}
+
+:host ::ng-deep .pr-li-col-price > tng-input [data-slot='input-group'],
+:host ::ng-deep .pr-li-col-qty > tng-input [data-slot='input-group'],
+:host ::ng-deep .pr-li-summary-value > tng-input [data-slot='input-group'],
+:host ::ng-deep .pr-li-col-name > tng-autocomplete [data-slot='autocomplete-trigger-container'] {
+  border-color: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+:host ::ng-deep .pr-li-col-description > tng-textarea .tng-textarea {
+  background: var(--tng-semantic-background-canvas);
+  border-color: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  min-height: 100%;
+  padding: 0 8px;
+  resize: none;
+}
+
+:host ::ng-deep .pr-li-col-price > tng-input [data-slot='input-group'][data-focused],
+:host ::ng-deep .pr-li-col-qty > tng-input [data-slot='input-group'][data-focused],
+:host ::ng-deep .pr-li-summary-value > tng-input [data-slot='input-group'][data-focused],
+:host ::ng-deep .pr-li-col-name > tng-autocomplete [data-slot='autocomplete-trigger-container']:focus-within {
+  border-bottom-color: var(--pr-li-cell-focus-border);
+}
+
+:host ::ng-deep .pr-li-col-description > tng-textarea .tng-textarea:focus,
+:host ::ng-deep .pr-li-col-description > tng-textarea .tng-textarea:focus-visible {
+  box-shadow: none;
+  outline: none;
+}
+
+:host ::ng-deep .pr-li-col-price input[type='number'],
+:host ::ng-deep .pr-li-col-qty input[type='number'],
+:host ::ng-deep .pr-li-summary-value input[type='number'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+:host ::ng-deep .pr-li-col-price input[type='number']::-webkit-inner-spin-button,
+:host ::ng-deep .pr-li-col-price input[type='number']::-webkit-outer-spin-button,
+:host ::ng-deep .pr-li-col-qty input[type='number']::-webkit-inner-spin-button,
+:host ::ng-deep .pr-li-col-qty input[type='number']::-webkit-outer-spin-button,
+:host ::ng-deep .pr-li-summary-value input[type='number']::-webkit-inner-spin-button,
+:host ::ng-deep .pr-li-summary-value input[type='number']::-webkit-outer-spin-button {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* ── Summary table ──────────────────────────────────────────────────────── */
+.pr-li-summary-wrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+  width: 100%;
+}
+
+.pr-li-summary-table {
+  background: var(--tng-semantic-background-canvas);
+  border-collapse: collapse;
+  color: var(--tng-semantic-foreground-primary);
+  font-family: 'Roboto', system-ui, sans-serif;
+  font-size: 13px;
+  min-width: 320px;
+}
+
+.pr-li-summary-table td {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  height: 34px;
+  padding: 0 10px;
+  vertical-align: middle;
+}
+
+.pr-li-summary-label {
+  color: var(--tng-semantic-foreground-secondary);
+  font-weight: 500;
+  width: 55%;
+}
+
+.pr-li-summary-value {
+  text-align: right;
+}
+
+.pr-li-summary-roundoff {
+  padding: 0 8px;
+}
+
+.pr-li-summary-total-row td {
+  border-top-color: var(--tng-semantic-border-strong);
+  font-weight: 700;
+}
+
+/* ── Scroll wrapper ─────────────────────────────────────────────────────── */
+.pr-li-scroll {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  width: 100%;
+}
+
+/* ── Table shell ────────────────────────────────────────────────────────── */
+.pr-li-table {
+  background: var(--tng-semantic-background-canvas);
+  border-collapse: collapse;
+  color: var(--tng-semantic-foreground-primary);
+  font-family: 'Roboto', system-ui, sans-serif;
+  font-size: 13px;
+  min-width: 100%;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.pr-li-table th,
+.pr-li-table td {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  vertical-align: middle;
+}
+
+.pr-li-table th {
+  background: var(--tng-semantic-background-surface);
+  color: var(--tng-semantic-foreground-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  height: 34px;
+  line-height: 1;
+  min-height: 34px;
+  text-align: center;
+}
+
+.pr-li-table td {
+  background: var(--tng-semantic-background-canvas);
+  color: var(--tng-semantic-foreground-primary);
+  height: 38px;
+}
+
+.pr-li-col-serial,
+.pr-li-col-name,
+.pr-li-col-description,
+.pr-li-col-price,
+.pr-li-col-qty,
+.pr-li-col-item-total,
+.pr-li-col-cgst-label,
+.pr-li-col-cgst-amt,
+.pr-li-col-sgst-label,
+.pr-li-col-sgst-amt,
+.pr-li-col-igst-label,
+.pr-li-col-igst-amt,
+.pr-li-col-grand-total,
+.pr-li-col-actions {
+  border-right-color: var(--tng-semantic-border-strong);
+}

@@ -1,0 +1,66 @@
+<main class="trading-page">
+  <tng-card variant="outline" tone="danger" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Delete Purchase Return</tng-card-title>
+      <tng-card-description>This action cannot be undone.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (purchaseReturnStore.error()) {
+        <div class="notice notice--danger">{{ purchaseReturnStore.error() }}</div>
+      }
+
+      @if (purchaseReturnStore.isLoading() && !purchaseReturnStore.selectedItem()) {
+        <div class="notice">Loading return…</div>
+      } @else if (purchaseReturnStore.selectedItem(); as ret) {
+        <dl class="details-grid">
+          <div>
+            <dt>Number</dt>
+            <dd>{{ ret.number || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Purchase Invoice</dt>
+            <dd>{{ ret.purchaseinvoice?.number || ret.purchaseinvoiceid || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Vendor</dt>
+            <dd>{{ ret.purchaseinvoice?.vendor?.name || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Date</dt>
+            <dd>{{ formatDate(ret.date) }}</dd>
+          </div>
+          <div>
+            <dt>Due Date</dt>
+            <dd>{{ formatDate(ret.duedate) }}</dd>
+          </div>
+          <div>
+            <dt>Grand Total</dt>
+            <dd>{{ formatAmount(ret.grandtotal) }}</dd>
+          </div>
+        </dl>
+
+        <label class="confirm-row">
+          <tng-checkbox [checked]="confirmed()" (checkedChange)="confirmed.set(!!$event)" />
+          <span>
+            I understand that return
+            <strong>{{ ret.number || ret.id }}</strong>
+            will be permanently deleted.
+          </span>
+        </label>
+      } @else {
+        <div class="notice">Purchase return not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button label="Cancel" />
+        <app-burl-delete-button
+          [disabled]="!confirmed() || purchaseReturnStore.isLoading()"
+          (clicked)="deleteReturn()"
+        />
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>

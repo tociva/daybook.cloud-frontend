@@ -1,0 +1,55 @@
+.invoice-page {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.25rem;
+}
+
+.invoice-header h1 {
+  color: var(--tng-semantic-foreground-primary);
+  font-size: 1.5rem;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.notice {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+.notice--danger {
+  border-color: var(--tng-semantic-accent-danger);
+  color: var(--tng-semantic-accent-danger);
+}
+
+.invoice-layout {
+  align-items: start;
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: minmax(0, 1.6fr) minmax(16rem, 0.4fr);
+}
+
+.invoice-main {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.invoice-aside {
+  position: sticky;
+  top: 1.25rem;
+}
+
+.invoice-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  padding-top: 0.5rem;
+}
+
+@media (max-width: 900px) {
+  .invoice-layout {
+    grid-template-columns: 1fr;
+  }
+  .invoice-aside {
+    position: static;
+  }
+}

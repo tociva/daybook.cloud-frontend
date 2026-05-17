@@ -1,0 +1,54 @@
+.field--full {
+  width: 100%;
+}
+
+.invoice-summary {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+}
+
+.invoice-summary__info {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.invoice-summary__number {
+  color: var(--tng-semantic-foreground-primary);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.invoice-summary__sep {
+  color: var(--tng-semantic-foreground-muted);
+}
+
+.invoice-summary__meta {
+  color: var(--tng-semantic-foreground-secondary);
+  font-size: 0.875rem;
+}
+
+.change-invoice-btn {
+  background: transparent;
+  border: 0;
+  color: var(--tng-semantic-accent-brand);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 0;
+  white-space: nowrap;
+}
+
+.change-invoice-btn:hover {
+  text-decoration: underline;
+}
+
+.muted {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.8rem;
+}

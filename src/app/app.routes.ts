@@ -91,6 +91,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'app/trading/purchase-return',
+    loadChildren: () =>
+      import('./components/features/trading/ui/purchase-return/purchase-return.routes').then(
+        (m) => m.purchaseReturnRoutes,
+      ),
+  },
+  {
     path: 'app/management/organization',
     loadChildren: () =>
       import('./components/features/management/ui/organization/organization.routes').then(

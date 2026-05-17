@@ -1,0 +1,113 @@
+<main class="trading-page">
+  <app-page-heading
+    eyebrow="Trading"
+    title="Purchase Returns"
+    description="Manage your purchase return notes."
+  >
+    <app-crud-filter-popover
+      ariaLabel="Purchase return filters"
+      title="Filter purchase returns"
+      [fields]="filterFields"
+      [filter]="crudQuery.filter()"
+      syncUrl
+    />
+
+    <tng-button type="button" appearance="solid" tone="primary" (click)="createPurchaseReturn()">
+      <tng-icon icon="plus" aria-hidden="true" />
+      New Return
+    </tng-button>
+  </app-page-heading>
+
+  <tng-card variant="outline" padding="lg">
+    @if (purchaseReturnStore.error()) {
+      <div class="notice notice--danger">{{ purchaseReturnStore.error() }}</div>
+    }
+
+    <div class="table-stack">
+      <tng-table
+        ariaLabel="Purchase returns"
+        density="comfortable"
+        [columns]="columns"
+        [items]="purchaseReturnStore.items()"
+        [loading]="purchaseReturnStore.isLoading()"
+        [error]="hasError()"
+        [sortActive]="crudQuery.sortActive()"
+        [sortDirection]="crudQuery.sortDirection()"
+        (sortChange)="crudQuery.applySort($event)"
+      >
+        <ng-template tngTableCellTemplate="number" let-row="row">
+          <button type="button" class="link-button" (click)="viewPurchaseReturn(row)">
+            {{ row.number || '—' }}
+          </button>
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="invoice" let-row="row">
+          {{ row.purchaseinvoice?.number || '—' }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="vendor" let-row="row">
+          {{ row.purchaseinvoice?.vendor?.name || '—' }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="date" let-row="row">
+          {{ formatDate(row.date) }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="duedate" let-row="row">
+          {{ formatDate(row.duedate) }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="itemtotal" let-row="row">
+          {{ formatAmount(row.itemtotal) }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="tax" let-row="row">
+          {{ formatOptionalAmount(row.tax) }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="grandtotal" let-row="row">
+          {{ formatAmount(row.grandtotal) }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="actions" let-row="row">
+          <div class="row-actions">
+            <button
+              type="button"
+              class="action-icon"
+              aria-label="View purchase return"
+              (click)="viewPurchaseReturn(row)"
+            >
+              <tng-icon icon="eye" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              class="action-icon"
+              aria-label="Edit purchase return"
+              (click)="editPurchaseReturn(row)"
+            >
+              <tng-icon icon="pencil" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              class="action-icon action-icon--danger"
+              aria-label="Delete purchase return"
+              (click)="deletePurchaseReturn(row)"
+            >
+              <tng-icon icon="trash2" aria-hidden="true" />
+            </button>
+          </div>
+        </ng-template>
+      </tng-table>
+
+      <div class="table-footer">
+        <app-crud-paginator
+          ariaLabel="Purchase return pagination"
+          [filter]="crudQuery.filter()"
+          [totalItems]="purchaseReturnStore.count()"
+          [pageSizeOptions]="crudQuery.pageSizeOptions()"
+          syncUrl
+        />
+      </div>
+    </div>
+  </tng-card>
+</main>

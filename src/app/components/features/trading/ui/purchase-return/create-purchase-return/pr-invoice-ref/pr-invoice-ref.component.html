@@ -1,0 +1,62 @@
+<ng-container>
+  <!-- Invoice search (hidden once an invoice is chosen) -->
+  @if (!readOnly() && !draft.selectedPurchaseInvoice()) {
+    <div class="field field--full">
+      <tng-form-field labelPosition="above" [invalid]="draft.invoiceError() !== null">
+        <tng-label forId="invoice-search" required>Purchase Invoice</tng-label>
+        <tng-autocomplete
+          id="invoice-search"
+          placeholder="Search by invoice number or vendor…"
+          ariaLabel="Purchase Invoice"
+          [options]="draft.filteredInvoices()"
+          [value]="draft.purchaseinvoiceid()"
+          [getOptionValue]="invoiceOptionValue"
+          [getOptionLabel]="invoiceOptionLabel"
+          [trackBy]="invoiceTrackBy"
+          (valueChange)="onInvoiceValueChange($event)"
+          (queryChange)="draft.onInvoiceSearchInput($any($event))"
+        >
+          <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
+            <span>{{ label }}</span>
+            @if (option.date) {
+              <span class="muted"> · {{ option.date }}</span>
+            }
+          </ng-template>
+        </tng-autocomplete>
+        <tng-error [show]="draft.invoiceError() !== null">{{ draft.invoiceError() }}</tng-error>
+      </tng-form-field>
+    </div>
+  }
+
+  <!-- Selected invoice summary -->
+  @if (draft.selectedPurchaseInvoice(); as inv) {
+    <div class="invoice-summary">
+      <div class="invoice-summary__info">
+        <span class="invoice-summary__number">{{ inv.number || '—' }}</span>
+        @if (inv.vendor?.name) {
+          <span class="invoice-summary__sep">·</span>
+          <span class="invoice-summary__meta">{{ inv.vendor!.name }}</span>
+        }
+        @if (inv.date) {
+          <span class="invoice-summary__sep">·</span>
+          <span class="invoice-summary__meta">{{ inv.date }}</span>
+        }
+        @if (inv.grandtotal) {
+          <span class="invoice-summary__sep">·</span>
+          <span class="invoice-summary__meta">Total: {{ inv.grandtotal | number: '1.2-2' }}</span>
+        }
+      </div>
+      @if (!readOnly()) {
+        <button type="button" class="change-invoice-btn" (click)="clearInvoice()">
+          Change invoice
+        </button>
+      }
+    </div>
+  } @else if (readOnly()) {
+    <div class="invoice-summary">
+      <div class="invoice-summary__info">
+        <span class="invoice-summary__number">—</span>
+      </div>
+    </div>
+  }
+</ng-container>
