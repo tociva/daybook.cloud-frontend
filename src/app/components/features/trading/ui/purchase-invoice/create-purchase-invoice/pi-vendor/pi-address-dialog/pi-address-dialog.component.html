@@ -1,0 +1,80 @@
+<tng-dialog
+  title="Update Address"
+  size="md"
+  [open]="open()"
+  (closed)="onDialogClose()"
+>
+  <fieldset class="address-box">
+    <legend>Vendor Address</legend>
+
+    <div class="field">
+      <tng-input
+        id="va-name"
+        placeholder="House / Building Name"
+        [value]="draft.vendorAddressName()"
+        (valueChange)="draft.vendorAddressName.set($any($event))"
+      />
+    </div>
+    <div class="field">
+      <tng-input
+        id="va-line1"
+        placeholder="Address Line 1"
+        [value]="draft.vendorAddressLine1()"
+        (valueChange)="draft.vendorAddressLine1.set($any($event))"
+      />
+    </div>
+    <div class="field">
+      <tng-input
+        id="va-line2"
+        placeholder="Line 2"
+        [value]="draft.vendorAddressLine2()"
+        (valueChange)="draft.vendorAddressLine2.set($any($event))"
+      />
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <tng-input
+          id="va-city"
+          placeholder="City"
+          [value]="draft.vendorAddressCity()"
+          (valueChange)="draft.vendorAddressCity.set($any($event))"
+        />
+      </div>
+      <div class="field">
+        <tng-input
+          id="va-state"
+          placeholder="State"
+          [value]="draft.vendorAddressState()"
+          (valueChange)="draft.vendorAddressState.set($any($event))"
+        />
+      </div>
+      <div class="field">
+        <tng-input
+          id="va-zip"
+          placeholder="ZIP"
+          [value]="draft.vendorAddressZip()"
+          (valueChange)="draft.vendorAddressZip.set($any($event))"
+        />
+      </div>
+    </div>
+    <div class="field">
+      <tng-input
+        id="va-country"
+        placeholder="Country"
+        [value]="draft.vendorAddressCountry()"
+        (valueChange)="draft.vendorAddressCountry.set($any($event))"
+      />
+    </div>
+  </fieldset>
+
+  <div class="dialog-actions">
+    <tng-button
+      type="button"
+      appearance="solid"
+      tone="primary"
+      (click)="onDialogClose()"
+    >
+      Done
+    </tng-button>
+  </div>
+</tng-dialog>

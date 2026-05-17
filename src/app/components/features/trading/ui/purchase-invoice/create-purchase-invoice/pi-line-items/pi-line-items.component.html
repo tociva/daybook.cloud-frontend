@@ -1,0 +1,363 @@
+<!-- ── Column visibility toolbar ─────────────────────────────────────────── -->
+@if (!readOnly()) {
+  <div class="pi-li-toolbar">
+    <label class="pi-li-switch-label">
+      <tng-switch
+        [checked]="draft.showDiscount()"
+        (checkedChange)="draft.setShowDiscount(!!$event)"
+      />
+      Show Discount
+    </label>
+
+    <label class="pi-li-switch-label">
+      <tng-switch
+        [checked]="draft.showDescription()"
+        (checkedChange)="draft.showDescription.set(!!$event)"
+      />
+      Show Description
+    </label>
+
+    <button type="button" class="pi-li-add-btn" (click)="draft.addItemRow()">
+      <tng-icon icon="plus" aria-hidden="true" />
+      Add Row
+    </button>
+  </div>
+}
+
+<!-- ── Table ─────────────────────────────────────────────────────────────── -->
+<div class="pi-li-scroll">
+  <table class="pi-li-table">
+
+    <!-- ── Two-row header ──────────────────────────────────────────────── -->
+    <thead>
+      <tr>
+        <th [attr.rowspan]="rowSpan()" class="pi-li-col-serial w-3 p-0 text-center">#</th>
+        <th [attr.rowspan]="rowSpan()" [class]="nameColClass()">Name</th>
+        @if (draft.showDescription()) {
+          <th [attr.rowspan]="rowSpan()" [class]="descColClass()">Description</th>
+        }
+        <th [attr.rowspan]="rowSpan()" class="pi-li-col-price w-7 px-4 text-right">Price</th>
+        <!-- Qty1 (rowspan=2, no sub-row) when no discount and no tax;
+             Qty2 (with Item Total sub-row) otherwise -->
+        @if (showQty1()) {
+          <th [attr.rowspan]="rowSpan()" class="pi-li-col-qty1 w-8 px-4 text-right">Quantity</th>
+        } @else {
+          <th class="pi-li-col-qty2 w-8 px-4 text-right">Quantity</th>
+        }
+        @if (draft.showDiscount()) {
+          <th [attr.rowspan]="rowSpan()" class="pi-li-col-disc-label w-3 p-0 rotate-270" data-label="Discount"></th>
+          <th class="pi-li-col-disc-pct w-5 px-4 text-right">%</th>
+          <th [attr.rowspan]="rowSpan()" class="pi-li-col-taxable w-7 px-4 text-right">Taxable Amount</th>
+        }
+        @if (showIntraStateTax()) {
+          <th [attr.rowspan]="rowSpan()" class="pi-li-col-cgst-label w-3 p-0 rotate-270" data-label="CGST"></th>
+          <th class="pi-li-col-cgst-pct w-5 px-4 text-right">%</th>
+          <th [attr.rowspan]="rowSpan()" class="pi-li-col-sgst-label w-3 p-0 rotate-270" data-label="SGST"></th>
+          <th class="pi-li-col-sgst-pct w-5 px-4 text-right">%</th>
+        }
+        @if (showIGST()) {
+          <th [attr.rowspan]="rowSpan()" class="pi-li-col-igst-label w-3 p-0 rotate-270" data-label="IGST"></th>
+          <th class="pi-li-col-igst-pct w-5 px-4 text-right">%</th>
+        }
+        <th [attr.rowspan]="rowSpan()" class="pi-li-col-grand-total w-7 px-4 text-right">Grand Total</th>
+        @if (!readOnly()) {
+          <th [attr.rowspan]="rowSpan()" class="pi-li-col-actions w-6 px-4 text-center">Actions</th>
+        }
+      </tr>
+      <!-- Second header row: only rendered when Qty2 is active (discount or tax present) -->
+      @if (!showQty1()) {
+        <tr>
+          <th class="pi-li-col-item-total w-8 px-4 text-right">Item Total</th>
+          @if (draft.showDiscount()) {
+            <th class="pi-li-col-disc-amt w-8 px-4 text-right">Amount</th>
+          }
+          @if (showIntraStateTax()) {
+            <th class="pi-li-col-cgst-amt w-8 px-4 text-right">Amount</th>
+            <th class="pi-li-col-sgst-amt w-8 px-4 text-right">Amount</th>
+          }
+          @if (showIGST()) {
+            <th class="pi-li-col-igst-amt w-8 px-4 text-right">Amount</th>
+          }
+        </tr>
+      }
+    </thead>
+
+    <!-- ── Body rows ───────────────────────────────────────────────────── -->
+    <tbody>
+      @for (_row of lineItemsForm().value(); track $index; let i = $index) {
+
+        <!-- ── First sub-row ──────────────────────────────────────────── -->
+        <tr>
+          <td [attr.rowspan]="rowSpan()" class="pi-li-col-serial text-center">{{ i + 1 }}</td>
+          <td
+            [attr.rowspan]="rowSpan()"
+            class="pi-li-col-name p-0"
+            (click)="focusNameAutocomplete($event)"
+          >
+            @if (readOnly()) {
+              <strong class="pi-li-read-value">
+                {{ draft.getItemDisplayName(_row) || '—' }}
+              </strong>
+            } @else {
+              <tng-autocomplete
+                ariaLabel="Item"
+                placeholder="Search item"
+                [options]="itemOptionsForRow(_row)"
+                [value]="_row.itemid"
+                [getOptionValue]="itemOptionValue"
+                [getOptionLabel]="itemOptionLabel"
+                [trackBy]="itemTrackBy"
+                (queryChange)="draft.onItemSearchInput($any($event), i)"
+                (valueChange)="onItemValueChange($event, i)"
+              >
+                <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
+                  <span>{{ label }}</span>
+                  @if (option.code) {
+                    <span class="pi-li-option-code"> - {{ option.code }}</span>
+                  }
+                </ng-template>
+              </tng-autocomplete>
+            }
+          </td>
+
+          <!-- Description -->
+          @if (draft.showDescription()) {
+            <td
+              [attr.rowspan]="rowSpan()"
+              class="pi-li-col-description p-0"
+              (click)="focusTableTextarea($event)"
+            >
+              @if (readOnly()) {
+                <span class="pi-li-read-value">{{ _row.description || '—' }}</span>
+              } @else {
+                <tng-textarea
+                  rows="1"
+                  resize="none"
+                  ariaLabel="Description"
+                  [value]="_row.description"
+                  (valueChange)="draft.updateItemDescription(i, $event)"
+                />
+              }
+            </td>
+          }
+
+          <!-- Price -->
+          <td
+            [attr.rowspan]="rowSpan()"
+            [attr.data-row-index]="i"
+            class="pi-li-col-price px-2 text-right"
+            (click)="focusTableInput($event)"
+          >
+            @if (readOnly()) {
+              {{ formatAmount(_row.price) }}
+            } @else {
+              <tng-input
+                type="number"
+                inputmode="decimal"
+                min="0"
+                step="0.01"
+                fullWidth
+                ariaLabel="Price"
+                [value]="_row.price.toString()"
+                (valueChange)="draft.updateItemFieldAndRecalc(i, 'price', $event)"
+              />
+            }
+          </td>
+
+          <!-- Qty1 (rowspan=2, single-row mode) or Qty2 (first sub-row only) -->
+          @if (showQty1()) {
+            <td
+              [attr.rowspan]="rowSpan()"
+              class="pi-li-col-qty1 px-2 text-right"
+              (click)="focusTableInput($event)"
+            >
+              @if (readOnly()) {
+                {{ formatAmount(_row.quantity) }}
+              } @else {
+                <tng-input
+                  type="number"
+                  inputmode="decimal"
+                  min="0"
+                  step="1"
+                  fullWidth
+                  ariaLabel="Quantity"
+                  [value]="_row.quantity.toString()"
+                  (valueChange)="draft.updateItemFieldAndRecalc(i, 'quantity', $event)"
+                />
+              }
+            </td>
+          } @else {
+            <td class="pi-li-col-qty2 px-2 text-right" (click)="focusTableInput($event)">
+              @if (readOnly()) {
+                {{ formatAmount(_row.quantity) }}
+              } @else {
+                <tng-input
+                  type="number"
+                  inputmode="decimal"
+                  min="0"
+                  step="1"
+                  fullWidth
+                  ariaLabel="Quantity"
+                  [value]="_row.quantity.toString()"
+                  (valueChange)="draft.updateItemFieldAndRecalc(i, 'quantity', $event)"
+                />
+              }
+            </td>
+          }
+
+          <!-- Discount % (spans the label + pct columns) -->
+          @if (draft.showDiscount()) {
+            <td
+              colspan="2"
+              class="pi-li-col-disc-pct px-2 text-right"
+              (click)="focusTableInput($event)"
+            >
+              @if (readOnly()) {
+                {{ formatAmount(_row.discpercent) }}%
+              } @else {
+                <tng-input
+                  type="number"
+                  inputmode="decimal"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  fullWidth
+                  ariaLabel="Discount percent"
+                  [value]="_row.discpercent.toString()"
+                  (valueChange)="draft.updateItemFieldAndRecalc(i, 'discpercent', $event)"
+                />
+              }
+            </td>
+            <!-- Taxable Amount = subtotal after discount (rowspan covers both sub-rows) -->
+            <td [attr.rowspan]="rowSpan()" class="pi-li-col-taxable px-4 text-right">
+              {{ _row.subtotal.toFixed(2) }}
+            </td>
+          }
+
+          <!-- CGST % / SGST % rates -->
+          @if (showIntraStateTax()) {
+            <td colspan="2" class="pi-li-col-cgst-pct px-4 text-right">
+              @if (_row.taxes[0]; as tax) {
+                {{ tax.rate }}%
+              }
+            </td>
+            <td colspan="2" class="pi-li-col-sgst-pct px-4 text-right">
+              @if (_row.taxes[1]; as tax) {
+                {{ tax.rate }}%
+              }
+            </td>
+          }
+
+          <!-- IGST % rate -->
+          @if (showIGST()) {
+            <td colspan="2" class="pi-li-col-igst-pct px-4 text-right">
+              @if (_row.taxes[0]; as tax) {
+                {{ tax.rate }}%
+              }
+            </td>
+          }
+
+          <!-- Grand Total (rowspan covers both sub-rows) -->
+          <td [attr.rowspan]="rowSpan()" class="pi-li-col-grand-total px-4 text-right">
+            {{ _row.grandtotal.toFixed(2) }}
+          </td>
+
+          <!-- Actions (rowspan covers both sub-rows) -->
+          @if (!readOnly()) {
+            <td [attr.rowspan]="rowSpan()" class="pi-li-col-actions text-center">
+              <button
+                type="button"
+                class="pi-li-remove-btn"
+                (click)="draft.removeItemRow(i)"
+                [disabled]="rowCount() === 1"
+                aria-label="Remove row"
+                title="Remove row"
+              >
+                <tng-icon icon="trash2" aria-hidden="true" />
+              </button>
+            </td>
+          }
+        </tr>
+
+        <!-- ── Second sub-row: only rendered when Qty2 is active ─────── -->
+        @if (!showQty1()) {
+          <tr>
+            <!-- Item Total = price × qty (before discount) -->
+            <td class="pi-li-col-item-total px-4 text-right">{{ _row.itemtotal.toFixed(2) }}</td>
+
+            <!-- Discount Amount -->
+            @if (draft.showDiscount()) {
+              <td colspan="2" class="pi-li-col-disc-amt px-4 text-right">
+                {{ _row.discamount.toFixed(2) }}
+              </td>
+            }
+
+            <!-- CGST Amount / SGST Amount -->
+            @if (showIntraStateTax()) {
+              <td colspan="2" class="pi-li-col-cgst-amt px-4 text-right">
+                {{ (_row.taxes[0]?.amount ?? 0).toFixed(2) }}
+              </td>
+              <td colspan="2" class="pi-li-col-sgst-amt px-4 text-right">
+                {{ (_row.taxes[1]?.amount ?? 0).toFixed(2) }}
+              </td>
+            }
+
+            <!-- IGST Amount -->
+            @if (showIGST()) {
+              <td colspan="2" class="pi-li-col-igst-amt px-4 text-right">
+                {{ (_row.taxes[0]?.amount ?? 0).toFixed(2) }}
+              </td>
+            }
+          </tr>
+        }
+
+      }
+    </tbody>
+
+  </table>
+</div>
+
+<div class="pi-li-summary-wrap">
+  <table class="pi-li-summary-table" aria-label="Invoice summary">
+    <tbody>
+      <tr>
+        <td class="pi-li-summary-label">Item total</td>
+        <td class="pi-li-summary-value">{{ draft.itemtotal() }}</td>
+      </tr>
+      @if (draft.showDiscount()) {
+        <tr>
+          <td class="pi-li-summary-label">Discount Total</td>
+          <td class="pi-li-summary-value">{{ draft.discount() }}</td>
+        </tr>
+      }
+      @if (showIntraStateTax() || showIGST()) {
+        <tr>
+          <td class="pi-li-summary-label">Tax Total</td>
+          <td class="pi-li-summary-value">{{ draft.tax() }}</td>
+        </tr>
+      }
+      <tr>
+        <td class="pi-li-summary-label">Round Off</td>
+        <td class="pi-li-summary-value pi-li-summary-roundoff" (click)="focusTableInput($event)">
+          @if (readOnly()) {
+            {{ draft.roundoff() }}
+          } @else {
+            <tng-input
+              type="number"
+              inputmode="decimal"
+              step="0.01"
+              fullWidth
+              ariaLabel="Round off"
+              [value]="draft.roundoff()"
+              (valueChange)="draft.roundoff.set($event)"
+            />
+          }
+        </td>
+      </tr>
+      <tr class="pi-li-summary-total-row">
+        <td class="pi-li-summary-label">Grand Total</td>
+        <td class="pi-li-summary-value">{{ draft.grandtotal() }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

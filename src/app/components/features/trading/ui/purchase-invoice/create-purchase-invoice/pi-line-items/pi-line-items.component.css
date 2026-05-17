@@ -1,0 +1,389 @@
+/* ── Utility — text alignment ────────────────────────────────────────────── */
+.text-left   { text-align: left; }
+.text-center { text-align: center; }
+.text-right  { text-align: right; }
+
+/* ── Utility — padding ───────────────────────────────────────────────────── */
+.p-0  { padding: 0; }
+.p-8  { padding: 8px; }
+.px-2 { padding-left: 2px;  padding-right: 2px; }
+.px-4 { padding-left: 4px;  padding-right: 4px; }
+.pl-2 { padding-left: 2px; }
+.pr-2 { padding-right: 2px; }
+
+/* ── Utility — rotated label ─────────────────────────────────────────────── */
+.rotate-270 {
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.rotate-270::before {
+  content: attr(data-label);
+  display: inline-block;
+  transform: rotate(270deg);
+  transform-origin: center;
+}
+
+/* ── Utility — column widths ─────────────────────────────────────────────── */
+/* Fixed structural columns */
+.w-3  { width: 3%;  }
+.w-5  { width: 5%;  }
+.w-6  { width: 6%;  }
+.w-7  { width: 7%;  }
+.w-8  { width: 8%;  }
+.w-9  { width: 9%;  }
+.w-12 { width: 12%; }
+
+/* Name / Description dynamic widths
+ * Exactly one qty column (Qty1 or Qty2) is visible at a time — both are w-8.
+ *
+ * taxFreeWidth (tf):  8% (Intra State – IGST hidden)
+ *                    16% (Inter State – CGST+SGST hidden)
+ *                    24% (Export / No Taxable – all tax hidden)
+ *
+ * Base combos (tf=0 reference, single qty col):
+ *   disc=ON,  desc=ON  → name=15, desc=16
+ *   disc=ON,  desc=OFF → name=31
+ *   disc=OFF, desc=ON  → name=22, desc=24
+ *   disc=OFF, desc=OFF → name=46
+ *
+ * Final formulas (tf freed space split evenly to name+desc; all to name if desc=OFF):
+ *   name: disc=ON,  desc=ON  → 15 + tf/2  (Intra→19, Inter→23, None→27)
+ *   name: disc=ON,  desc=OFF → 31 + tf    (Intra→39, Inter→47, None→55)
+ *   name: disc=OFF, desc=ON  → 22 + tf/2  (Intra→26, Inter→30, None→34)
+ *   name: disc=OFF, desc=OFF → 46 + tf    (Intra→54, Inter→62, None→70)
+ *   desc: disc=ON            → 16 + tf/2  (Intra→20, Inter→24, None→28)
+ *   desc: disc=OFF           → 24 + tf/2  (Intra→28, Inter→32, None→36)
+ *
+ * Note: disc=OFF + no-tax triggers Qty1 mode (showQty1=true).
+ */
+.w-19 { width: 19%; }   /* name: disc=ON,  desc=ON,  Intra  (15 + 4) */
+.w-20 { width: 20%; }   /* desc: disc=ON,             Intra  (16 + 4) */
+.w-23 { width: 23%; }   /* name: disc=ON,  desc=ON,  Inter  (15 + 8) */
+.w-24 { width: 24%; }   /* desc: disc=ON,             Inter  (16 + 8) */
+.w-26 { width: 26%; }   /* name: disc=OFF, desc=ON,  Intra  (22 + 4) */
+.w-27 { width: 27%; }   /* name: disc=ON,  desc=ON,  No Tax (15 + 12) */
+.w-28 { width: 28%; }   /* desc: disc=ON, NoTax(16+12) / disc=OFF Intra(24+4) */
+.w-30 { width: 30%; }   /* name: disc=OFF, desc=ON,  Inter  (22 + 8) */
+.w-32 { width: 32%; }   /* desc: disc=OFF,            Inter  (24 + 8) */
+.w-34 { width: 34%; }   /* name: disc=OFF, desc=ON,  No Tax / Qty1 (22 + 12) */
+.w-36 { width: 36%; }   /* desc: disc=OFF,            No Tax / Qty1 (24 + 12) */
+.w-39 { width: 39%; }   /* name: disc=ON,  desc=OFF, Intra  (31 + 8) */
+.w-47 { width: 47%; }   /* name: disc=ON,  desc=OFF, Inter  (31 + 16) */
+.w-54 { width: 54%; }   /* name: disc=OFF, desc=OFF, Intra  (46 + 8) */
+.w-55 { width: 55%; }   /* name: disc=ON,  desc=OFF, No Tax (31 + 24) */
+.w-62 { width: 62%; }   /* name: disc=OFF, desc=OFF, Inter  (46 + 16) */
+.w-70 { width: 70%; }   /* name: disc=OFF, desc=OFF, No Tax / Qty1 (46 + 24) */
+
+/* ── Column-visibility toolbar ──────────────────────────────────────────── */
+.pi-li-toolbar {
+  align-items: center;
+  display: flex;
+  gap: 20px;
+  padding-bottom: 10px;
+}
+
+.pi-li-switch-label {
+  align-items: center;
+  color: var(--tng-semantic-foreground-secondary);
+  cursor: pointer;
+  display: flex;
+  font-size: 13px;
+  gap: 8px;
+  user-select: none;
+}
+
+.pi-li-add-btn,
+.pi-li-remove-btn {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 1px solid var(--tng-semantic-border-strong);
+  color: var(--tng-semantic-foreground-primary);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  justify-content: center;
+  line-height: 1;
+}
+
+.pi-li-add-btn {
+  border-radius: 6px;
+  gap: 6px;
+  margin-left: auto;
+  min-height: 32px;
+  padding: 0 10px;
+}
+
+.pi-li-remove-btn {
+  border-color: transparent;
+  border-radius: 6px;
+  color: var(--tng-semantic-accent-danger);
+  height: 28px;
+  padding: 0;
+  width: 28px;
+}
+
+.pi-li-add-btn:hover,
+.pi-li-remove-btn:hover {
+  background: var(--tng-semantic-background-surface);
+}
+
+.pi-li-add-btn:disabled,
+.pi-li-remove-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.pi-li-option-code {
+  color: var(--tng-semantic-foreground-secondary);
+}
+
+.pi-li-read-value {
+  display: block;
+  overflow: hidden;
+  padding: 0 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:host {
+  --pi-li-cell-focus-border: var(--tng-semantic-accent-brand, var(--tng-semantic-focus-ring));
+}
+
+.pi-li-col-name > tng-autocomplete {
+  --tng-autocomplete-bg: var(--tng-semantic-background-canvas);
+  --tng-autocomplete-border-hover: transparent;
+  --tng-autocomplete-border-strong: transparent;
+  --tng-autocomplete-focus-ring: transparent;
+  --tng-autocomplete-radius: 0;
+  --tng-autocomplete-shadow: none;
+  --tng-autocomplete-shadow-focus: none;
+  --tng-autocomplete-surface: var(--tng-semantic-background-canvas);
+  --tng-autocomplete-trigger-container-min-height: 100%;
+  --tng-autocomplete-trigger-container-px: 0;
+  --tng-autocomplete-trigger-min-height: 100%;
+  --tng-autocomplete-trigger-px: 8px;
+  --tng-autocomplete-trigger-py: 0;
+
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+:host ::ng-deep .pi-li-col-name > tng-autocomplete [data-slot='autocomplete-trigger'] {
+  background: var(--tng-semantic-background-canvas);
+}
+
+.pi-li-col-price > tng-input,
+.pi-li-col-qty1 > tng-input,
+.pi-li-col-qty2 > tng-input,
+.pi-li-col-disc-pct > tng-input,
+.pi-li-summary-value > tng-input {
+  --tng-input-bg: var(--tng-semantic-background-canvas);
+  --tng-input-border: transparent;
+  --tng-input-focus-ring: transparent;
+  --tng-input-min-height: 100%;
+  --tng-input-number-controls-display: none;
+  --tng-input-px: 0;
+  --tng-input-radius: 0;
+
+  display: block;
+  width: 100%;
+}
+
+.pi-li-col-description > tng-textarea {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.pi-li-col-description:focus-within {
+  box-shadow: inset 0 -1px 0 var(--pi-li-cell-focus-border);
+}
+
+:host ::ng-deep .pi-li-col-price > tng-input [data-slot='input-group'],
+:host ::ng-deep .pi-li-col-qty1 > tng-input [data-slot='input-group'],
+:host ::ng-deep .pi-li-col-qty2 > tng-input [data-slot='input-group'],
+:host ::ng-deep .pi-li-col-disc-pct > tng-input [data-slot='input-group'],
+:host ::ng-deep .pi-li-summary-value > tng-input [data-slot='input-group'],
+:host ::ng-deep .pi-li-col-name > tng-autocomplete [data-slot='autocomplete-trigger-container'] {
+  border-color: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+:host ::ng-deep .pi-li-col-description > tng-textarea .tng-textarea {
+  background: var(--tng-semantic-background-canvas);
+  border-color: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  min-height: 100%;
+  padding: 0 8px;
+  resize: none;
+}
+
+:host ::ng-deep .pi-li-col-price > tng-input [data-slot='input-group'][data-focused],
+:host ::ng-deep .pi-li-col-qty1 > tng-input [data-slot='input-group'][data-focused],
+:host ::ng-deep .pi-li-col-qty2 > tng-input [data-slot='input-group'][data-focused],
+:host ::ng-deep .pi-li-col-disc-pct > tng-input [data-slot='input-group'][data-focused],
+:host ::ng-deep .pi-li-summary-value > tng-input [data-slot='input-group'][data-focused],
+:host ::ng-deep .pi-li-col-name > tng-autocomplete [data-slot='autocomplete-trigger-container']:focus-within {
+  border-bottom-color: var(--pi-li-cell-focus-border);
+}
+
+:host ::ng-deep .pi-li-col-description > tng-textarea .tng-textarea:focus,
+:host ::ng-deep .pi-li-col-description > tng-textarea .tng-textarea:focus-visible {
+  box-shadow: none;
+  outline: none;
+}
+
+:host ::ng-deep .pi-li-col-price input[type='number'],
+:host ::ng-deep .pi-li-col-qty1 input[type='number'],
+:host ::ng-deep .pi-li-col-qty2 input[type='number'],
+:host ::ng-deep .pi-li-col-disc-pct input[type='number'],
+:host ::ng-deep .pi-li-summary-value input[type='number'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+:host ::ng-deep .pi-li-col-price input[type='number']::-webkit-inner-spin-button,
+:host ::ng-deep .pi-li-col-price input[type='number']::-webkit-outer-spin-button,
+:host ::ng-deep .pi-li-col-qty1 input[type='number']::-webkit-inner-spin-button,
+:host ::ng-deep .pi-li-col-qty1 input[type='number']::-webkit-outer-spin-button,
+:host ::ng-deep .pi-li-col-qty2 input[type='number']::-webkit-inner-spin-button,
+:host ::ng-deep .pi-li-col-qty2 input[type='number']::-webkit-outer-spin-button,
+:host ::ng-deep .pi-li-col-disc-pct input[type='number']::-webkit-inner-spin-button,
+:host ::ng-deep .pi-li-col-disc-pct input[type='number']::-webkit-outer-spin-button,
+:host ::ng-deep .pi-li-summary-value input[type='number']::-webkit-inner-spin-button,
+:host ::ng-deep .pi-li-summary-value input[type='number']::-webkit-outer-spin-button {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* ── Summary table ──────────────────────────────────────────────────────── */
+.pi-li-summary-wrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+  width: 100%;
+}
+
+.pi-li-summary-table {
+  background: var(--tng-semantic-background-canvas);
+  border-collapse: collapse;
+  color: var(--tng-semantic-foreground-primary);
+  font-family: 'Roboto', system-ui, sans-serif;
+  font-size: 13px;
+  min-width: 320px;
+}
+
+.pi-li-summary-table td {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  height: 34px;
+  padding: 0 10px;
+  vertical-align: middle;
+}
+
+.pi-li-summary-label {
+  color: var(--tng-semantic-foreground-secondary);
+  font-weight: 500;
+  width: 55%;
+}
+
+.pi-li-summary-value {
+  text-align: right;
+}
+
+.pi-li-summary-roundoff {
+  padding: 0 8px;
+}
+
+.pi-li-summary-total-row td {
+  border-top-color: var(--tng-semantic-border-strong);
+  font-weight: 700;
+}
+
+/* ── Scroll wrapper ─────────────────────────────────────────────────────── */
+.pi-li-scroll {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  width: 100%;
+}
+
+/* ── Table shell ────────────────────────────────────────────────────────── */
+.pi-li-table {
+  background: var(--tng-semantic-background-canvas);
+  border-collapse: collapse;
+  color: var(--tng-semantic-foreground-primary);
+  font-family: 'Roboto', system-ui, sans-serif;
+  font-size: 13px;
+  min-width: 100%;
+  table-layout: fixed;
+  width: 100%;
+}
+
+/* ── All cells ──────────────────────────────────────────────────────────── */
+.pi-li-table th,
+.pi-li-table td {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  vertical-align: middle;
+}
+
+/* ── Header cells ───────────────────────────────────────────────────────── */
+.pi-li-table th {
+  background: var(--tng-semantic-background-surface);
+  color: var(--tng-semantic-foreground-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  height: 34px;
+  line-height: 1;
+  min-height: 34px;
+  text-align: center;
+}
+
+/* Tall rowspan-2 header cells */
+.pi-li-table thead tr:first-child th[rowspan='2'] {
+  height: 68px;
+}
+
+/* ── Body cells ─────────────────────────────────────────────────────────── */
+.pi-li-table td {
+  background: var(--tng-semantic-background-canvas);
+  color: var(--tng-semantic-foreground-primary);
+  height: 38px;
+}
+
+/* ── Column definitions — border-right only ─────────────────────────────── */
+/* Width, padding, and text-align are composed from utility classes in HTML.  */
+/* Only border-right-color is component-specific and lives here.              */
+
+.pi-li-col-serial,
+.pi-li-col-name,
+.pi-li-col-description,
+.pi-li-col-price,
+.pi-li-col-qty1,
+.pi-li-col-item-total,
+.pi-li-col-disc-pct,
+.pi-li-col-disc-amt,
+.pi-li-col-taxable,
+.pi-li-col-sgst-pct,
+.pi-li-col-sgst-amt,
+.pi-li-col-cgst-pct,
+.pi-li-col-cgst-amt,
+.pi-li-col-igst-pct,
+.pi-li-col-igst-amt,
+.pi-li-col-grand-total,
+.pi-li-col-actions {
+  border-right-color: var(--tng-semantic-border-strong);
+}
+
+/* Subtle right border — label columns and qty */
+.pi-li-col-qty2,
+.pi-li-col-disc-label,
+.pi-li-col-sgst-label,
+.pi-li-col-cgst-label,
+.pi-li-col-igst-label {
+  border-right-color: var(--tng-semantic-border-subtle);
+}

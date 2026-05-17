@@ -108,10 +108,16 @@
     "url": "/app/trading/vendor/create"
   },
   {
-    "title": "Purchase Invoice",
-    "description": "Create and review purchase invoices.",
-    "keywords": ["purchase invoice", "purchase", "invoice", "vendor"],
+    "title": "List Purchase Invoice",
+    "description": "View and manage purchase invoices.",
+    "keywords": ["list purchase invoice", "purchase invoice", "purchase", "billing", "vendor"],
     "url": "/app/trading/purchase-invoice"
+  },
+  {
+    "title": "Create Purchase Invoice",
+    "description": "Create a new purchase invoice.",
+    "keywords": ["create purchase invoice", "purchase invoice", "purchase", "billing", "vendor"],
+    "url": "/app/trading/purchase-invoice/create"
   },
   {
     "title": "Purchase Return",

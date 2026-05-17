@@ -1,0 +1,55 @@
+<main class="invoice-page">
+  <header class="invoice-header">
+    <h1>View Purchase Invoice</h1>
+  </header>
+
+  @if (purchaseInvoiceStore.error()) {
+    <div class="notice notice--danger">{{ purchaseInvoiceStore.error() }}</div>
+  }
+
+  @if (purchaseInvoiceStore.isLoading() && !purchaseInvoiceStore.selectedItem()) {
+    <div class="notice">Loading invoice…</div>
+  } @else if (purchaseInvoiceStore.selectedItem()) {
+    <div class="invoice-layout">
+      <div class="invoice-main">
+        <app-pi-vendor [readOnly]="true" />
+        <app-pi-line-items [readOnly]="true" />
+      </div>
+
+      <aside class="invoice-aside">
+        <app-pi-invoice-details [readOnly]="true" />
+      </aside>
+    </div>
+
+    <!-- ── Payments summary ─────────────────────────────────────────── -->
+    @if (purchaseInvoiceStore.selectedItem()?.payments?.length) {
+      <div class="payments-section">
+        <h2 class="payments-heading">Payments</h2>
+        <table class="payments-table" aria-label="Invoice payments">
+          <thead>
+            <tr>
+              <th>Payment ID</th>
+              <th class="text-right">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (pmt of purchaseInvoiceStore.selectedItem()?.payments ?? []; track pmt.id) {
+              <tr>
+                <td>{{ pmt.vendorpaymentid || pmt.id || '—' }}</td>
+                <td class="text-right">{{ pmt.amount?.toFixed(2) ?? '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  } @else {
+    <div class="notice">Invoice not found.</div>
+  }
+
+  <div class="invoice-actions">
+    <app-burl-back-button label="Back" />
+    <app-burl-edit-button (clicked)="editInvoice()" />
+    <app-burl-delete-button (clicked)="deleteInvoice()" />
+  </div>
+</main>

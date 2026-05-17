@@ -1,0 +1,33 @@
+<main class="invoice-page">
+  <header class="invoice-header">
+    <h1>{{ title() }}</h1>
+  </header>
+
+  @if (purchaseInvoiceStore.error()) {
+    <div class="notice notice--danger">{{ purchaseInvoiceStore.error() }}</div>
+  }
+
+  <div class="invoice-layout">
+    <!-- ══ LEFT COLUMN ════════════════════════════════════════════════════ -->
+    <div class="invoice-main">
+      <app-pi-vendor />
+      <app-pi-line-items />
+    </div>
+
+    <!-- ══ RIGHT COLUMN ══════════════════════════════════════════════════ -->
+    <aside class="invoice-aside">
+      <app-pi-invoice-details />
+    </aside>
+  </div>
+
+  <!-- ── Footer ───────────────────────────────────────────────────────── -->
+  <div class="invoice-actions">
+    <app-burl-back-button label="Cancel" />
+    <app-burl-create-button
+      [type]="'button'"
+      [label]="mode() === 'edit' ? 'Update Invoice' : 'Create Invoice'"
+      [disabled]="purchaseInvoiceStore.isLoading()"
+      (clicked)="submitForm($event)"
+    />
+  </div>
+</main>

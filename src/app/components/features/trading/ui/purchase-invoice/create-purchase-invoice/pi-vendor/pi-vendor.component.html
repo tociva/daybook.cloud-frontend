@@ -1,0 +1,87 @@
+<ng-container>
+  <!-- Vendor search (hidden once a vendor is chosen) -->
+  @if (!readOnly() && !draft.selectedVendor()) {
+    <div class="field field--full">
+      <tng-form-field labelPosition="above" [invalid]="draft.vendorError() !== null">
+        <tng-label forId="vendor-search" required>Vendor</tng-label>
+        <tng-autocomplete
+          id="vendor-search"
+          placeholder="Search by name, mobile or email…"
+          ariaLabel="Vendor"
+          [options]="draft.filteredVendors()"
+          [value]="draft.vendorid()"
+          [getOptionValue]="vendorOptionValue"
+          [getOptionLabel]="vendorOptionLabel"
+          [trackBy]="vendorTrackBy"
+          (valueChange)="onVendorValueChange($event)"
+          (queryChange)="draft.onVendorSearchInput($any($event))"
+        >
+          <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
+            <span>{{ label }}</span>
+            @if (option.mobile) {
+              <span class="muted"> · {{ option.mobile }}</span>
+            }
+          </ng-template>
+        </tng-autocomplete>
+        <tng-error [show]="draft.vendorError() !== null">{{ draft.vendorError() }}</tng-error>
+      </tng-form-field>
+    </div>
+  }
+
+  <!-- Selected vendor summary (shown after a vendor is chosen) -->
+  @if (draft.selectedVendor(); as vendor) {
+    <div class="vendor-summary">
+      <div class="vendor-summary__info">
+        <span class="vendor-summary__name">{{ vendor.name }}</span>
+        @if (vendor.mobile) {
+          <span class="vendor-summary__sep">·</span>
+          <span class="vendor-summary__meta">{{ vendor.mobile }}</span>
+        }
+        @if (vendor.email) {
+          <span class="vendor-summary__sep">·</span>
+          <span class="vendor-summary__meta">{{ vendor.email }}</span>
+        }
+        @if (vendor.gstin) {
+          <span class="vendor-summary__sep">·</span>
+          <span class="vendor-summary__meta">GSTIN: {{ vendor.gstin }}</span>
+        }
+      </div>
+      @if (!readOnly()) {
+        <button type="button" class="change-vendor-btn" (click)="clearVendor()">
+          Change vendor
+        </button>
+      }
+    </div>
+  } @else if (readOnly()) {
+    <div class="vendor-summary">
+      <div class="vendor-summary__info">
+        <span class="vendor-summary__name">—</span>
+      </div>
+    </div>
+  }
+
+  <!-- Compact address summary + update link (shown once a vendor is selected) -->
+  @if (draft.selectedVendor() || readOnly()) {
+    <div class="address-summary">
+      <div class="address-summary__blocks">
+        <div class="address-summary__block">
+          <span class="address-summary__label">Address</span>
+          <span class="address-summary__text">{{ addressSummary() || '—' }}</span>
+        </div>
+      </div>
+      @if (!readOnly()) {
+        <button type="button" class="address-link-btn" (click)="addressDialogOpen.set(true)">
+          Update address
+        </button>
+      }
+    </div>
+  }
+
+  <!-- Address edit dialog -->
+  @if (!readOnly() && draft.selectedVendor()) {
+    <app-pi-address-dialog
+      [open]="addressDialogOpen()"
+      (closed)="addressDialogOpen.set(false)"
+    />
+  }
+</ng-container>
