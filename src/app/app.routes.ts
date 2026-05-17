@@ -98,6 +98,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'app/trading/vendor-payment',
+    loadChildren: () =>
+      import('./components/features/trading/ui/vendor-payment/vendor-payment.routes').then(
+        (m) => m.vendorPaymentRoutes,
+      ),
+  },
+  {
     path: 'app/management/organization',
     loadChildren: () =>
       import('./components/features/management/ui/organization/organization.routes').then(

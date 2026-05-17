@@ -1,0 +1,105 @@
+<tng-card variant="outline" padding="lg">
+  <tng-card-header>
+    <tng-card-title>Related Invoices</tng-card-title>
+    <tng-card-description>
+      Optionally link this payment to one or more purchase invoices. You can split the payment amount
+      across multiple invoices — adjust each row's amount as needed. Remove any rows you don't
+      want to link.
+    </tng-card-description>
+  </tng-card-header>
+
+  <tng-card-content>
+    @if (!vendorId()) {
+      <!-- Empty state: no vendor selected yet -->
+      <div class="vpmt-inv-empty">
+        <tng-icon icon="file-text" class="vpmt-inv-empty-icon" aria-hidden="true" />
+        <p class="vpmt-inv-empty-title">No vendor selected</p>
+        <p class="vpmt-inv-empty-desc">Select a vendor above to link related invoices.</p>
+      </div>
+    } @else {
+
+      <!-- Toolbar -->
+      <div class="vpmt-inv-toolbar">
+        <button type="button" class="si-li-add-btn" (click)="addRow()">
+          <tng-icon icon="plus" aria-hidden="true" />
+          Add Row
+        </button>
+      </div>
+
+      <!-- Table -->
+      <div class="si-li-scroll">
+        <table class="si-li-table">
+          <thead>
+            <tr>
+              <th class="vpmt-inv-col-serial p-0 text-center">#</th>
+              <th class="vpmt-inv-col-invoice px-4 text-left">Invoice</th>
+              <th class="vpmt-inv-col-amount px-4 text-right">Amount</th>
+              <th class="vpmt-inv-col-actions p-0 text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rows(); track $index; let i = $index) {
+              <tr>
+                <td class="vpmt-inv-col-serial text-center">{{ i + 1 }}</td>
+                <td class="vpmt-inv-col-invoice p-0">
+                  <tng-autocomplete
+                    placeholder="Search invoice by number…"
+                    ariaLabel="Invoice"
+                    [options]="invoiceOptionsForRow(row)"
+                    [value]="row.invoice?.id ?? ''"
+                    [getOptionValue]="invoiceOptionValue"
+                    [getOptionLabel]="invoiceOptionLabel"
+                    [trackBy]="invoiceTrackBy"
+                    (valueChange)="onValueChange($event, row)"
+                    (queryChange)="onQueryChange($event, row)"
+                  />
+                </td>
+                <td class="vpmt-inv-col-amount px-2 text-right">
+                  <tng-input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    fullWidth
+                    ariaLabel="Amount"
+                    [value]="row.amount.toString()"
+                    (valueChange)="updateAmount(row, $any($event))"
+                  />
+                </td>
+                <td class="vpmt-inv-col-actions text-center">
+                  <button
+                    type="button"
+                    class="si-li-remove-btn"
+                    title="Remove row"
+                    aria-label="Remove row"
+                    (click)="removeRow(row)"
+                  >
+                    <tng-icon icon="trash2" aria-hidden="true" />
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Summary -->
+      <div class="si-li-summary-wrap">
+        <table class="si-li-summary-table" aria-label="Invoices summary">
+          <tbody>
+            <tr class="si-li-summary-total-row">
+              <td class="si-li-summary-label">Invoices Total</td>
+              <td class="si-li-summary-value">{{ currencycode() }} {{ invoicesTotal() }}</td>
+            </tr>
+            @if (paymentAmount() > 0) {
+              <tr class="si-li-summary-total-row" [class.si-li-summary-negative]="remainingIsNegative()">
+                <td class="si-li-summary-label">Remaining</td>
+                <td class="si-li-summary-value">{{ currencycode() }} {{ remaining() }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+    } <!-- end @else (vendorId) -->
+  </tng-card-content>
+</tng-card>

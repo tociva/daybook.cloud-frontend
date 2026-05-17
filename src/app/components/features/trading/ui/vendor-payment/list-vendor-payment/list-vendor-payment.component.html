@@ -1,0 +1,91 @@
+<main class="trading-page">
+  <app-page-heading
+    eyebrow="Trading"
+    title="Vendor Payments"
+    description="Manage payments made to vendors."
+  >
+    <app-crud-filter-popover
+      ariaLabel="Vendor payment filters"
+      title="Filter payments"
+      [fields]="filterFields"
+      [filter]="crudQuery.filter()"
+      syncUrl
+    />
+
+    <tng-button type="button" appearance="solid" tone="primary" (click)="createPayment()">
+      <tng-icon icon="plus" aria-hidden="true" />
+      New Payment
+    </tng-button>
+  </app-page-heading>
+
+  <tng-card variant="outline" padding="lg">
+    @if (vendorPaymentStore.error()) {
+      <div class="notice notice--danger">{{ vendorPaymentStore.error() }}</div>
+    }
+
+    <div class="table-stack">
+      <tng-table
+        ariaLabel="Vendor payments"
+        density="comfortable"
+        [columns]="columns"
+        [items]="vendorPaymentStore.items()"
+        [loading]="vendorPaymentStore.isLoading()"
+        [error]="hasError()"
+        [sortActive]="crudQuery.sortActive()"
+        [sortDirection]="crudQuery.sortDirection()"
+        (sortChange)="crudQuery.applySort($event)"
+      >
+        <ng-template tngTableCellTemplate="date" let-row="row">
+          {{ formatDate(row.date) }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="vendor" let-row="row">
+          {{ row.vendor?.name || '—' }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="amount" let-row="row">
+          {{ formatAmountWithCurrency(row.amount, row.currencycode) }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="bcash" let-row="row">
+          {{ row.bcash?.name || '—' }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="description" let-row="row">
+          {{ row.description || '—' }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="actions" let-row="row">
+          <div class="row-actions">
+            <button
+              type="button"
+              class="action-icon"
+              aria-label="Edit vendor payment"
+              (click)="editPayment(row)"
+            >
+              <tng-icon icon="pencil" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              class="action-icon action-icon--danger"
+              aria-label="Delete vendor payment"
+              (click)="deletePayment(row)"
+            >
+              <tng-icon icon="trash2" aria-hidden="true" />
+            </button>
+          </div>
+        </ng-template>
+      </tng-table>
+
+      <div class="table-footer">
+        <app-crud-paginator
+          ariaLabel="Vendor payment pagination"
+          [filter]="crudQuery.filter()"
+          [totalItems]="vendorPaymentStore.count()"
+          [pageSizeOptions]="crudQuery.pageSizeOptions()"
+          syncUrl
+        />
+      </div>
+    </div>
+  </tng-card>
+</main>

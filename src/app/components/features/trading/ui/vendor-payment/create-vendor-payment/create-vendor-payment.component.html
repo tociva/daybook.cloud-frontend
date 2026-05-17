@@ -1,0 +1,185 @@
+<main class="trading-page">
+  <section class="setup-layout" aria-labelledby="vpmt-setup-title">
+
+    <!-- ══ Form ═══════════════════════════════════════════════════════════════ -->
+    <form class="payment-form" novalidate (submit)="submitForm($event)">
+
+      <!-- ── Basic Details ───────────────────────────────────────────────── -->
+      <tng-card variant="outline" padding="lg">
+        <tng-card-header>
+          <tng-card-title>Basic Details</tng-card-title>
+          <tng-card-description>Date, vendor, amount and bank/cash account.</tng-card-description>
+        </tng-card-header>
+
+        <tng-card-content>
+          @if (vendorPaymentStore.error()) {
+            <div class="notice notice--danger">{{ vendorPaymentStore.error() }}</div>
+          }
+
+          <div class="field-grid">
+            <!-- Date -->
+            <div class="field">
+              <tng-form-field labelPosition="above" [invalid]="dateError() !== null">
+                <tng-label forId="vpmt-date" required>Payment Date</tng-label>
+                <app-fiscal-year-datepicker
+                  id="vpmt-date"
+                  [value]="pmtdate()"
+                  [invalid]="dateError() !== null"
+                  (valueChange)="onDateChange($event)"
+                />
+                <tng-error [show]="dateError() !== null">{{ dateError() }}</tng-error>
+              </tng-form-field>
+            </div>
+
+            <!-- Vendor -->
+            <div class="field">
+              <tng-form-field labelPosition="above" [invalid]="vendorError() !== null">
+                <tng-label forId="vpmt-vendor" required>Vendor</tng-label>
+                <tng-autocomplete
+                  id="vpmt-vendor"
+                  placeholder="Search by name, mobile or email…"
+                  ariaLabel="Vendor"
+                  [options]="filteredVendors()"
+                  [value]="vendorid()"
+                  [getOptionValue]="vendorOptionValue"
+                  [getOptionLabel]="vendorOptionLabel"
+                  [trackBy]="vendorTrackBy"
+                  (valueChange)="onVendorValueChange($event)"
+                  (queryChange)="onVendorQueryChange($event)"
+                >
+                  <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
+                    <span>{{ label }}</span>
+                    @if (option.mobile) {
+                      <span class="muted"> · {{ option.mobile }}</span>
+                    }
+                  </ng-template>
+                </tng-autocomplete>
+                <tng-error [show]="vendorError() !== null">{{ vendorError() }}</tng-error>
+              </tng-form-field>
+            </div>
+
+            <!-- Amount -->
+            <div class="field">
+              <tng-form-field labelPosition="above" [invalid]="amountError() !== null">
+                <tng-label forId="vpmt-amount" required>Amount</tng-label>
+                <tng-input
+                  id="vpmt-amount"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  placeholder="0.00"
+                  [value]="amount()"
+                  (valueChange)="amount.set($any($event) ?? '')"
+                />
+                <tng-error [show]="amountError() !== null">{{ amountError() }}</tng-error>
+              </tng-form-field>
+            </div>
+
+            <!-- Currency -->
+            <div class="field">
+              <tng-form-field labelPosition="above" [invalid]="currencyError() !== null">
+                <tng-label forId="vpmt-currency" required>Currency</tng-label>
+                <tng-autocomplete
+                  id="vpmt-currency"
+                  placeholder="Search for a currency"
+                  ariaLabel="Currency"
+                  [options]="filteredCurrencies()"
+                  [value]="currencycode()"
+                  [getOptionValue]="currencyOptionValue"
+                  [getOptionLabel]="currencyOptionLabel"
+                  [trackBy]="currencyTrackBy"
+                  (valueChange)="onCurrencyValueChange($event)"
+                  (queryChange)="onCurrencyQueryChange($event)"
+                />
+                <tng-error [show]="currencyError() !== null">{{ currencyError() }}</tng-error>
+              </tng-form-field>
+            </div>
+
+            <!-- Bank/Cash -->
+            <div class="field">
+              <tng-form-field labelPosition="above" [invalid]="bankCashError() !== null">
+                <tng-label forId="vpmt-bcash" required>Bank/Cash Account</tng-label>
+                <tng-autocomplete
+                  id="vpmt-bcash"
+                  placeholder="Search bank or cash account…"
+                  ariaLabel="Bank/Cash Account"
+                  [options]="filteredBankCashes()"
+                  [value]="bcashid()"
+                  [getOptionValue]="bankCashOptionValue"
+                  [getOptionLabel]="bankCashOptionLabel"
+                  [trackBy]="bankCashTrackBy"
+                  (valueChange)="onBankCashValueChange($event)"
+                  (queryChange)="onBankCashQueryChange($event)"
+                >
+                  <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
+                    <span>{{ label }}</span>
+                    @if (option.description) {
+                      <span class="muted"> — {{ option.description }}</span>
+                    }
+                  </ng-template>
+                </tng-autocomplete>
+                <tng-error [show]="bankCashError() !== null">{{ bankCashError() }}</tng-error>
+              </tng-form-field>
+            </div>
+
+            <!-- Description -->
+            <div class="field field--wide">
+              <tng-form-field labelPosition="above">
+                <tng-label forId="vpmt-desc">Description</tng-label>
+                <tng-textarea
+                  id="vpmt-desc"
+                  rows="2"
+                  placeholder="Optional notes…"
+                  [value]="description()"
+                  (valueChange)="description.set($any($event) ?? '')"
+                />
+              </tng-form-field>
+            </div>
+          </div>
+        </tng-card-content>
+      </tng-card>
+
+      <!-- ── Related Invoices ────────────────────────────────────────────── -->
+      <app-vpmt-invoice-lines
+        [vendorId]="vendorid()"
+        [currencycode]="currencycode()"
+        [paymentAmount]="amount() ? +amount() : 0"
+        [editMode]="mode() === 'edit' || prefillMode()"
+        [rows]="invoiceRows()"
+        (rowsChange)="invoiceRows.set($event)"
+      />
+
+      <!-- ── Form actions ────────────────────────────────────────────────── -->
+      <div class="form-actions">
+        <app-burl-back-button label="Cancel" />
+        <app-burl-create-button
+          [type]="'button'"
+          [label]="mode() === 'edit' ? 'Update Payment' : 'Create Payment'"
+          [disabled]="vendorPaymentStore.isLoading()"
+          (clicked)="submitForm($event)"
+        />
+      </div>
+
+    </form>
+
+    <!-- ══ Right: Stepper ═════════════════════════════════════════════════════ -->
+    <aside class="setup-overview" aria-labelledby="vpmt-setup-title">
+      <div class="setup-copy">
+        <p class="eyebrow">Vendor Payment</p>
+        <h1 id="vpmt-setup-title">{{ title() }}</h1>
+        <p>
+          Record a payment made to a vendor. Link to the relevant purchase invoices to keep
+          your books accurate.
+        </p>
+        <tng-stepper
+          class="setup-stepper"
+          ariaLabel="Payment setup progress"
+          [ordered]="true"
+          [steps]="setupSteps()"
+          [value]="activeSetupStep()"
+        />
+      </div>
+    </aside>
+
+  </section>
+</main>

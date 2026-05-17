@@ -1,0 +1,62 @@
+<main class="trading-page">
+  <tng-card variant="outline" tone="danger" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Delete Vendor Payment</tng-card-title>
+      <tng-card-description>This action cannot be undone.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (vendorPaymentStore.error()) {
+        <div class="notice notice--danger">{{ vendorPaymentStore.error() }}</div>
+      }
+
+      @if (vendorPaymentStore.isLoading() && !vendorPaymentStore.selectedItem()) {
+        <div class="notice">Loading payment…</div>
+      } @else if (vendorPaymentStore.selectedItem(); as pmt) {
+        <dl class="details-grid">
+          <div>
+            <dt>Date</dt>
+            <dd>{{ formatDate(pmt.date) }}</dd>
+          </div>
+          <div>
+            <dt>Vendor</dt>
+            <dd>{{ pmt.vendor?.name || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Amount</dt>
+            <dd>{{ formatAmount(pmt.amount) }}</dd>
+          </div>
+          <div>
+            <dt>Currency</dt>
+            <dd>{{ pmt.currencycode || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Bank/Cash</dt>
+            <dd>{{ pmt.bcash?.name || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Description</dt>
+            <dd>{{ pmt.description || '—' }}</dd>
+          </div>
+        </dl>
+
+        <label class="confirm-row">
+          <tng-checkbox [checked]="confirmed()" (checkedChange)="confirmed.set(!!$event)" />
+          <span> I understand that this vendor payment will be permanently deleted. </span>
+        </label>
+      } @else {
+        <div class="notice">Payment not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button label="Cancel" />
+        <app-burl-delete-button
+          [disabled]="!confirmed() || vendorPaymentStore.isLoading()"
+          (clicked)="deletePayment()"
+        />
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>

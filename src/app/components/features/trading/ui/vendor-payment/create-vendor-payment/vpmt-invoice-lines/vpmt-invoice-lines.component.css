@@ -1,0 +1,256 @@
+:host {
+  display: block;
+}
+
+/* ── Invoice empty state ───────────────────────────────────────────────────── */
+.vpmt-inv-empty {
+  align-items: center;
+  color: var(--tng-semantic-foreground-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 2.5rem 1rem;
+  text-align: center;
+}
+
+.vpmt-inv-empty-icon {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.5;
+}
+
+.vpmt-inv-empty-title {
+  color: var(--tng-semantic-foreground-secondary);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.vpmt-inv-empty-desc {
+  font-size: 0.8125rem;
+  margin: 0;
+}
+
+/* ── Toolbar ────────────────────────────────────────────────────────────────── */
+.vpmt-inv-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  padding-bottom: 10px;
+}
+
+/* ── Add / Remove buttons ───────────────────────────────────────────────────── */
+.si-li-add-btn,
+.si-li-remove-btn {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 1px solid var(--tng-semantic-border-strong);
+  color: var(--tng-semantic-foreground-primary);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  justify-content: center;
+  line-height: 1;
+}
+
+.si-li-add-btn {
+  border-radius: 6px;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 10px;
+}
+
+.si-li-remove-btn {
+  border-color: transparent;
+  border-radius: 6px;
+  color: var(--tng-semantic-accent-danger);
+  height: 28px;
+  padding: 0;
+  width: 28px;
+}
+
+.si-li-add-btn:hover,
+.si-li-remove-btn:hover {
+  background: var(--tng-semantic-background-surface);
+}
+
+/* ── Utility ────────────────────────────────────────────────────────────────── */
+.text-left   { text-align: left; }
+.text-center { text-align: center; }
+.text-right  { text-align: right; }
+
+.p-0  { padding: 0; }
+.px-2 { padding-left: 2px;  padding-right: 2px; }
+.px-4 { padding-left: 4px;  padding-right: 4px; }
+
+/* ── Scroll wrapper ─────────────────────────────────────────────────────────── */
+.si-li-scroll {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  width: 100%;
+}
+
+/* ── Table shell ────────────────────────────────────────────────────────────── */
+.si-li-table {
+  background: var(--tng-semantic-background-canvas);
+  border-collapse: collapse;
+  color: var(--tng-semantic-foreground-primary);
+  font-family: 'Roboto', system-ui, sans-serif;
+  font-size: 13px;
+  min-width: 100%;
+  table-layout: fixed;
+  width: 100%;
+}
+
+/* ── All cells ──────────────────────────────────────────────────────────────── */
+.si-li-table th,
+.si-li-table td {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  vertical-align: middle;
+}
+
+/* ── Header cells ───────────────────────────────────────────────────────────── */
+.si-li-table th {
+  background: var(--tng-semantic-background-surface);
+  color: var(--tng-semantic-foreground-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  height: 34px;
+  line-height: 1;
+  text-align: center;
+}
+
+/* ── Body cells ─────────────────────────────────────────────────────────────── */
+.si-li-table td {
+  background: var(--tng-semantic-background-canvas);
+  color: var(--tng-semantic-foreground-primary);
+  height: 38px;
+}
+
+/* ── Column definitions ─────────────────────────────────────────────────────── */
+.vpmt-inv-col-serial  { width: 4%; }
+.vpmt-inv-col-amount  { width: 22%; }
+.vpmt-inv-col-actions { width: 7%; }
+
+.vpmt-inv-col-serial,
+.vpmt-inv-col-invoice,
+.vpmt-inv-col-amount,
+.vpmt-inv-col-actions {
+  border-right-color: var(--tng-semantic-border-strong);
+}
+
+/* ── Invoice autocomplete (flush, borderless inside cell) ───────────────────── */
+.vpmt-inv-col-invoice > tng-autocomplete {
+  --tng-autocomplete-bg: var(--tng-semantic-background-canvas);
+  --tng-autocomplete-border-hover: transparent;
+  --tng-autocomplete-border-strong: transparent;
+  --tng-autocomplete-focus-ring: transparent;
+  --tng-autocomplete-radius: 0;
+  --tng-autocomplete-shadow: none;
+  --tng-autocomplete-shadow-focus: none;
+  --tng-autocomplete-surface: var(--tng-semantic-background-canvas);
+  --tng-autocomplete-trigger-container-min-height: 100%;
+  --tng-autocomplete-trigger-container-px: 0;
+  --tng-autocomplete-trigger-min-height: 100%;
+  --tng-autocomplete-trigger-px: 8px;
+  --tng-autocomplete-trigger-py: 0;
+
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+:host ::ng-deep .vpmt-inv-col-invoice > tng-autocomplete [data-slot='autocomplete-trigger'] {
+  background: var(--tng-semantic-background-canvas);
+}
+
+:host ::ng-deep .vpmt-inv-col-invoice > tng-autocomplete [data-slot='autocomplete-trigger-container'] {
+  border-color: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+:host ::ng-deep .vpmt-inv-col-invoice > tng-autocomplete [data-slot='autocomplete-trigger-container']:focus-within {
+  border-bottom-color: var(--tng-semantic-accent-brand, var(--tng-semantic-focus-ring));
+}
+
+/* ── Amount input (flush, borderless inside cell) ───────────────────────────── */
+.vpmt-inv-col-amount > tng-input {
+  --tng-input-bg: var(--tng-semantic-background-canvas);
+  --tng-input-border: transparent;
+  --tng-input-focus-ring: transparent;
+  --tng-input-min-height: 100%;
+  --tng-input-number-controls-display: none;
+  --tng-input-px: 0;
+  --tng-input-radius: 0;
+
+  display: block;
+  width: 100%;
+}
+
+:host ::ng-deep .vpmt-inv-col-amount > tng-input [data-slot='input-group'] {
+  border-color: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+:host ::ng-deep .vpmt-inv-col-amount > tng-input [data-slot='input-group'][data-focused] {
+  border-bottom-color: var(--tng-semantic-accent-brand, var(--tng-semantic-focus-ring));
+}
+
+:host ::ng-deep .vpmt-inv-col-amount input[type='number'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+:host ::ng-deep .vpmt-inv-col-amount input[type='number']::-webkit-inner-spin-button,
+:host ::ng-deep .vpmt-inv-col-amount input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+/* ── Summary table ──────────────────────────────────────────────────────────── */
+.si-li-summary-wrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+  width: 100%;
+}
+
+.si-li-summary-table {
+  background: var(--tng-semantic-background-canvas);
+  border-collapse: collapse;
+  color: var(--tng-semantic-foreground-primary);
+  font-family: 'Roboto', system-ui, sans-serif;
+  font-size: 13px;
+  min-width: 320px;
+}
+
+.si-li-summary-table td {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  height: 34px;
+  padding: 0 10px;
+  vertical-align: middle;
+}
+
+.si-li-summary-label {
+  color: var(--tng-semantic-foreground-secondary);
+  font-weight: 500;
+  width: 55%;
+}
+
+.si-li-summary-value {
+  text-align: right;
+}
+
+.si-li-summary-total-row td {
+  border-top-color: var(--tng-semantic-border-strong);
+  font-weight: 700;
+}
+
+.si-li-summary-negative td {
+  color: var(--tng-semantic-accent-danger);
+}
