@@ -24,6 +24,30 @@
     }
 
     <div class="table-stack">
+      @if (!saleInvoiceStore.isLoading() && !hasError() && saleInvoiceStore.items().length === 0) {
+        @if (crudQuery.hasActiveFilter()) {
+          <app-empty-state
+            icon="searchX"
+            title="No sale invoices match your filter"
+            description="Try adjusting or clearing your filter to find what you're looking for."
+          >
+            <tng-button type="button" appearance="outline" tone="neutral" (click)="crudQuery.clearFilter()">
+              Clear filter
+            </tng-button>
+          </app-empty-state>
+        } @else {
+          <app-empty-state
+            icon="fileText"
+            title="No sale invoices yet"
+            description="Get started by creating your first sale invoice."
+          >
+            <tng-button type="button" appearance="solid" tone="primary" (click)="createSaleInvoice()">
+              <tng-icon icon="plus" aria-hidden="true" />
+              New sale invoice
+            </tng-button>
+          </app-empty-state>
+        }
+      } @else {
       <tng-table
         ariaLabel="Sale invoices"
         density="comfortable"
@@ -127,6 +151,7 @@
           syncUrl
         />
       </div>
+      }
     </div>
   </tng-card>
 </main>

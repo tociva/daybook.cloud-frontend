@@ -30,6 +30,10 @@ export class CrudListQueryService {
   readonly sortState = computed(() => parseLb4SortState(this.filter().order));
   readonly sortActive = computed(() => this.sortState().active);
   readonly sortDirection = computed(() => this.sortState().direction);
+  readonly hasActiveFilter = computed(() => {
+    const where = this.filter().where;
+    return where !== undefined && Object.keys(where).length > 0;
+  });
 
   init(
     onFilterChange: (filter: Lb4ListQuery) => Promise<void> | void,
@@ -45,6 +49,14 @@ export class CrudListQueryService {
 
       this.filter.set(normalizedFilter);
       void onFilterChange(normalizedFilter);
+    });
+  }
+
+  async clearFilter(): Promise<void> {
+    await this.crudUrl.updateFilterInUrl(normalizeLb4Filter({}), {
+      defaultPageSize: this.defaultPageSize,
+      queryParamName: this.queryParamName,
+      route: this.route,
     });
   }
 

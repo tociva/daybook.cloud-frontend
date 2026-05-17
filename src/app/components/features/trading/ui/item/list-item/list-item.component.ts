@@ -14,6 +14,7 @@ import {
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
+import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { ItemStore } from '../../../data/item';
 import type { Item } from '../../../data/item';
@@ -21,6 +22,7 @@ import type { Item } from '../../../data/item';
 @Component({
   selector: 'app-list-item',
   imports: [
+    EmptyStateComponent,
     PageHeadingComponent,
     TngButtonComponent,
     TngCardComponent,

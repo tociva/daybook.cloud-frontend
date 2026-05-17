@@ -24,6 +24,30 @@
     }
 
     <div class="table-stack">
+      @if (!customerReceiptStore.isLoading() && !hasError() && customerReceiptStore.items().length === 0) {
+        @if (crudQuery.hasActiveFilter()) {
+          <app-empty-state
+            icon="searchX"
+            title="No customer receipts match your filter"
+            description="Try adjusting or clearing your filter to find what you're looking for."
+          >
+            <tng-button type="button" appearance="outline" tone="neutral" (click)="crudQuery.clearFilter()">
+              Clear filter
+            </tng-button>
+          </app-empty-state>
+        } @else {
+          <app-empty-state
+            icon="receipt"
+            title="No customer receipts yet"
+            description="Get started by creating your first customer receipt."
+          >
+            <tng-button type="button" appearance="solid" tone="primary" (click)="createReceipt()">
+              <tng-icon icon="plus" aria-hidden="true" />
+              New receipt
+            </tng-button>
+          </app-empty-state>
+        }
+      } @else {
       <tng-table
         ariaLabel="Customer receipts"
         density="comfortable"
@@ -86,6 +110,7 @@
           syncUrl
         />
       </div>
+      }
     </div>
   </tng-card>
 </main>

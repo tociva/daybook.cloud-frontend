@@ -24,6 +24,30 @@
     }
 
     <div class="table-stack">
+      @if (!branchStore.isLoading() && !hasError() && branchStore.items().length === 0) {
+        @if (crudQuery.hasActiveFilter()) {
+          <app-empty-state
+            icon="searchX"
+            title="No branches match your filter"
+            description="Try adjusting or clearing your filter to find what you're looking for."
+          >
+            <tng-button type="button" appearance="outline" tone="neutral" (click)="crudQuery.clearFilter()">
+              Clear filter
+            </tng-button>
+          </app-empty-state>
+        } @else {
+          <app-empty-state
+            icon="building"
+            title="No branches yet"
+            description="Get started by creating your first branch."
+          >
+            <tng-button type="button" appearance="solid" tone="primary" (click)="createBranch()">
+              <tng-icon icon="plus" aria-hidden="true" />
+              New branch
+            </tng-button>
+          </app-empty-state>
+        }
+      } @else {
       <tng-table
         ariaLabel="Branches"
         density="comfortable"
@@ -88,6 +112,7 @@
           syncUrl
         />
       </div>
+      }
     </div>
   </tng-card>
 </main>

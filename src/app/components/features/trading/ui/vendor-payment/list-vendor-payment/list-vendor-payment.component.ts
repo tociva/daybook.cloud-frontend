@@ -15,6 +15,7 @@ import {
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
+import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { formatAmountWithCurrency } from '../../../../../../shared/format/currency';
 import { VendorPaymentStore } from '../../../data/vendor-payment';
@@ -30,6 +31,7 @@ import type { VendorPayment } from '../../../data/vendor-payment';
     CrudFilterPopoverComponent,
     CrudPaginatorComponent,
     TngIcon,
+    EmptyStateComponent,
     TngTable,
     TngTableCellTpl,
   ],

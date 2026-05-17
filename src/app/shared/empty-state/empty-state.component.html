@@ -1,0 +1,12 @@
+<div class="empty-state">
+  <div class="empty-state__icon-wrap">
+    <tng-icon [icon]="icon()" aria-hidden="true" />
+  </div>
+  <p class="empty-state__title">{{ title() }}</p>
+  @if (description()) {
+    <p class="empty-state__description">{{ description() }}</p>
+  }
+  <div class="empty-state__actions">
+    <ng-content />
+  </div>
+</div>

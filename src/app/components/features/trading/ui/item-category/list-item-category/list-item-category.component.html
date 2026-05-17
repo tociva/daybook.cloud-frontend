@@ -29,6 +29,30 @@
     }
 
     <div class="table-stack">
+      @if (!itemCategoryStore.isLoading() && !hasError() && itemCategoryStore.items().length === 0) {
+        @if (crudQuery.hasActiveFilter()) {
+          <app-empty-state
+            icon="searchX"
+            title="No item categories match your filter"
+            description="Try adjusting or clearing your filter to find what you're looking for."
+          >
+            <tng-button type="button" appearance="outline" tone="neutral" (click)="crudQuery.clearFilter()">
+              Clear filter
+            </tng-button>
+          </app-empty-state>
+        } @else {
+          <app-empty-state
+            icon="layers"
+            title="No item categories yet"
+            description="Get started by creating your first item category."
+          >
+            <tng-button type="button" appearance="solid" tone="primary" (click)="createItemCategory()">
+              <tng-icon icon="plus" aria-hidden="true" />
+              New category
+            </tng-button>
+          </app-empty-state>
+        }
+      } @else {
       <tng-table
         ariaLabel="Item categories"
         density="comfortable"
@@ -93,6 +117,7 @@
           syncUrl
         />
       </div>
+      }
     </div>
   </tng-card>
 </main>

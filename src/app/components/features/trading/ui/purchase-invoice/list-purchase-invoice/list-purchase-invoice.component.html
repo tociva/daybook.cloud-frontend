@@ -24,6 +24,30 @@
     }
 
     <div class="table-stack">
+      @if (!purchaseInvoiceStore.isLoading() && !hasError() && purchaseInvoiceStore.items().length === 0) {
+        @if (crudQuery.hasActiveFilter()) {
+          <app-empty-state
+            icon="searchX"
+            title="No purchase invoices match your filter"
+            description="Try adjusting or clearing your filter to find what you're looking for."
+          >
+            <tng-button type="button" appearance="outline" tone="neutral" (click)="crudQuery.clearFilter()">
+              Clear filter
+            </tng-button>
+          </app-empty-state>
+        } @else {
+          <app-empty-state
+            icon="shoppingCart"
+            title="No purchase invoices yet"
+            description="Get started by creating your first purchase invoice."
+          >
+            <tng-button type="button" appearance="solid" tone="primary" (click)="createPurchaseInvoice()">
+              <tng-icon icon="plus" aria-hidden="true" />
+              New purchase invoice
+            </tng-button>
+          </app-empty-state>
+        }
+      } @else {
       <tng-table
         ariaLabel="Purchase invoices"
         density="comfortable"
@@ -125,6 +149,7 @@
           syncUrl
         />
       </div>
+      }
     </div>
   </tng-card>
 </main>

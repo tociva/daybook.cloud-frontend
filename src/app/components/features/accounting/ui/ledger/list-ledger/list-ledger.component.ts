@@ -15,6 +15,7 @@ import {
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
+import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { LedgerStore } from '../../../data/ledger';
 import type { Ledger } from '../../../data/ledger';
 
@@ -28,6 +29,7 @@ import type { Ledger } from '../../../data/ledger';
     CrudFilterPopoverComponent,
     CrudPaginatorComponent,
     TngIcon,
+    EmptyStateComponent,
     TngTable,
     TngTableCellTpl,
   ],

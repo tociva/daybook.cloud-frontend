@@ -24,6 +24,30 @@
     }
 
     <div class="table-stack">
+      @if (!bankCashStore.isLoading() && !hasError() && bankCashStore.items().length === 0) {
+        @if (crudQuery.hasActiveFilter()) {
+          <app-empty-state
+            icon="searchX"
+            title="No bank & cash accounts match your filter"
+            description="Try adjusting or clearing your filter to find what you're looking for."
+          >
+            <tng-button type="button" appearance="outline" tone="neutral" (click)="crudQuery.clearFilter()">
+              Clear filter
+            </tng-button>
+          </app-empty-state>
+        } @else {
+          <app-empty-state
+            icon="landmark"
+            title="No bank & cash accounts yet"
+            description="Get started by adding your first bank or cash account."
+          >
+            <tng-button type="button" appearance="solid" tone="primary" (click)="createBankCash()">
+              <tng-icon icon="plus" aria-hidden="true" />
+              New account
+            </tng-button>
+          </app-empty-state>
+        }
+      } @else {
       <tng-table
         ariaLabel="Bank and cash accounts"
         density="comfortable"
@@ -96,6 +120,7 @@
           syncUrl
         />
       </div>
+      }
     </div>
   </tng-card>
 </main>

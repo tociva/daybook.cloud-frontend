@@ -24,6 +24,30 @@
     }
 
     <div class="table-stack">
+      @if (!customerStore.isLoading() && !hasError() && customerStore.items().length === 0) {
+        @if (crudQuery.hasActiveFilter()) {
+          <app-empty-state
+            icon="searchX"
+            title="No customers match your filter"
+            description="Try adjusting or clearing your filter to find what you're looking for."
+          >
+            <tng-button type="button" appearance="outline" tone="neutral" (click)="crudQuery.clearFilter()">
+              Clear filter
+            </tng-button>
+          </app-empty-state>
+        } @else {
+          <app-empty-state
+            icon="users"
+            title="No customers yet"
+            description="Get started by adding your first customer."
+          >
+            <tng-button type="button" appearance="solid" tone="primary" (click)="createCustomer()">
+              <tng-icon icon="plus" aria-hidden="true" />
+              New customer
+            </tng-button>
+          </app-empty-state>
+        }
+      } @else {
       <tng-table
         ariaLabel="Customers"
         density="comfortable"
@@ -88,6 +112,7 @@
           syncUrl
         />
       </div>
+      }
     </div>
   </tng-card>
 </main>

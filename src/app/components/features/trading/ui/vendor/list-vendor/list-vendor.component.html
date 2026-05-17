@@ -24,6 +24,30 @@
     }
 
     <div class="table-stack">
+      @if (!vendorStore.isLoading() && !hasError() && vendorStore.items().length === 0) {
+        @if (crudQuery.hasActiveFilter()) {
+          <app-empty-state
+            icon="searchX"
+            title="No vendors match your filter"
+            description="Try adjusting or clearing your filter to find what you're looking for."
+          >
+            <tng-button type="button" appearance="outline" tone="neutral" (click)="crudQuery.clearFilter()">
+              Clear filter
+            </tng-button>
+          </app-empty-state>
+        } @else {
+          <app-empty-state
+            icon="truck"
+            title="No vendors yet"
+            description="Get started by adding your first vendor."
+          >
+            <tng-button type="button" appearance="solid" tone="primary" (click)="createVendor()">
+              <tng-icon icon="plus" aria-hidden="true" />
+              New vendor
+            </tng-button>
+          </app-empty-state>
+        }
+      } @else {
       <tng-table
         ariaLabel="Vendors"
         density="comfortable"
@@ -88,6 +112,7 @@
           syncUrl
         />
       </div>
+      }
     </div>
   </tng-card>
 </main>

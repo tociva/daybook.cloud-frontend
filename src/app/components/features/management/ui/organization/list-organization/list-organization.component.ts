@@ -15,6 +15,7 @@ import {
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
+import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { OrganizationStore } from '../../../data/organization';
 import type { Organization } from '../../../data/organization';
 
@@ -28,6 +29,7 @@ import type { Organization } from '../../../data/organization';
     CrudFilterPopoverComponent,
     CrudPaginatorComponent,
     TngIcon,
+    EmptyStateComponent,
     TngTable,
     TngTableCellTpl,
   ],

@@ -24,6 +24,30 @@
     }
 
     <div class="table-stack">
+      @if (!organizationStore.isLoading() && !hasError() && organizationStore.items().length === 0) {
+        @if (crudQuery.hasActiveFilter()) {
+          <app-empty-state
+            icon="searchX"
+            title="No organizations match your filter"
+            description="Try adjusting or clearing your filter to find what you're looking for."
+          >
+            <tng-button type="button" appearance="outline" tone="neutral" (click)="crudQuery.clearFilter()">
+              Clear filter
+            </tng-button>
+          </app-empty-state>
+        } @else {
+          <app-empty-state
+            icon="building"
+            title="No organizations yet"
+            description="Get started by creating your first organization."
+          >
+            <tng-button type="button" appearance="solid" tone="primary" (click)="createOrganization()">
+              <tng-icon icon="plus" aria-hidden="true" />
+              New organization
+            </tng-button>
+          </app-empty-state>
+        }
+      } @else {
       <tng-table
         ariaLabel="Organizations"
         density="comfortable"
@@ -88,6 +112,7 @@
           syncUrl
         />
       </div>
+      }
     </div>
   </tng-card>
 </main>

@@ -16,6 +16,7 @@ import {
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
+import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { Status, TaxStore } from '../../../data/tax';
 import type { Tax } from '../../../data/tax';
 import { TngTagIcon } from '../../bank-cash/tng-tag-icon.directive';
@@ -33,6 +34,7 @@ type StatusTagTone = 'danger' | 'success' | 'warning';
     TngIcon,
     TngTag,
     TngTagIcon,
+    EmptyStateComponent,
     TngTable,
     TngTableCellTpl,
   ],

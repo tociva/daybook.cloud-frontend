@@ -29,6 +29,30 @@
     }
 
     <div class="table-stack">
+      @if (!taxGroupStore.isLoading() && !hasError() && taxGroupStore.items().length === 0) {
+        @if (crudQuery.hasActiveFilter()) {
+          <app-empty-state
+            icon="searchX"
+            title="No tax groups match your filter"
+            description="Try adjusting or clearing your filter to find what you're looking for."
+          >
+            <tng-button type="button" appearance="outline" tone="neutral" (click)="crudQuery.clearFilter()">
+              Clear filter
+            </tng-button>
+          </app-empty-state>
+        } @else {
+          <app-empty-state
+            icon="percent"
+            title="No tax groups yet"
+            description="Get started by creating your first tax group."
+          >
+            <tng-button type="button" appearance="solid" tone="primary" (click)="createTaxGroup()">
+              <tng-icon icon="plus" aria-hidden="true" />
+              New tax group
+            </tng-button>
+          </app-empty-state>
+        }
+      } @else {
       <tng-table
         ariaLabel="Tax groups"
         density="comfortable"
@@ -89,6 +113,7 @@
           syncUrl
         />
       </div>
+      }
     </div>
   </tng-card>
 </main>

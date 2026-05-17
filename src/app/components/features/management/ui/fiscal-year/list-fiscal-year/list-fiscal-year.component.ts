@@ -15,6 +15,7 @@ import {
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
+import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { FiscalYearStore } from '../../../data/fiscal-year';
 import type { FiscalYear } from '../../../data/fiscal-year';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
@@ -29,6 +30,7 @@ import { DateManagementService } from '../../../../../../core/date/date-manageme
     CrudFilterPopoverComponent,
     CrudPaginatorComponent,
     TngIcon,
+    EmptyStateComponent,
     TngTable,
     TngTableCellTpl,
   ],

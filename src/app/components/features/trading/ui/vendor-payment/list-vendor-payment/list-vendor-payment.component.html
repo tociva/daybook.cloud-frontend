@@ -24,6 +24,30 @@
     }
 
     <div class="table-stack">
+      @if (!vendorPaymentStore.isLoading() && !hasError() && vendorPaymentStore.items().length === 0) {
+        @if (crudQuery.hasActiveFilter()) {
+          <app-empty-state
+            icon="searchX"
+            title="No vendor payments match your filter"
+            description="Try adjusting or clearing your filter to find what you're looking for."
+          >
+            <tng-button type="button" appearance="outline" tone="neutral" (click)="crudQuery.clearFilter()">
+              Clear filter
+            </tng-button>
+          </app-empty-state>
+        } @else {
+          <app-empty-state
+            icon="creditCard"
+            title="No vendor payments yet"
+            description="Get started by creating your first vendor payment."
+          >
+            <tng-button type="button" appearance="solid" tone="primary" (click)="createPayment()">
+              <tng-icon icon="plus" aria-hidden="true" />
+              New payment
+            </tng-button>
+          </app-empty-state>
+        }
+      } @else {
       <tng-table
         ariaLabel="Vendor payments"
         density="comfortable"
@@ -86,6 +110,7 @@
           syncUrl
         />
       </div>
+      }
     </div>
   </tng-card>
 </main>
