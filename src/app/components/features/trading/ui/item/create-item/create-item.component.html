@@ -46,8 +46,11 @@
               </div>
 
               <div class="field">
-                <tng-form-field labelPosition="above" [invalid]="categoryError() !== null">
+                <div class="label-with-action">
                   <tng-label forId="item-category" required>Category</tng-label>
+                  <button type="button" class="create-category-link" (click)="createNewCategory()">+ Create new category</button>
+                </div>
+                <tng-form-field [invalid]="categoryError() !== null" [requiredMarker]="false">
                   <tng-autocomplete
                     id="item-category"
                     placeholder="Search for a category"

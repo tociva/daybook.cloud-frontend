@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
 import { FormField, form } from '@angular/forms/signals';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   TngAutocompleteComponent,
   TngCardActionsComponent,
@@ -22,7 +22,7 @@ import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-
 import { ItemCategoryStore } from '../../../data/item-category';
 import type { ItemCategory } from '../../../data/item-category';
 import { ItemFacade, ItemStore } from '../../../data/item';
-import type { ItemPayload } from '../../../data/item';
+import type { Item, ItemPayload } from '../../../data/item';
 
 type ItemFormModel = {
   name: string;
@@ -63,6 +63,7 @@ type ItemFormModel = {
 export class CreateItemComponent implements AfterViewInit {
   @ViewChild('nameInputRef', { read: ElementRef }) private nameInputRef!: ElementRef;
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly facade = inject(ItemFacade);
   protected readonly itemStore = inject(ItemStore);
   protected readonly itemCategoryStore = inject(ItemCategoryStore);
@@ -174,6 +175,25 @@ export class CreateItemComponent implements AfterViewInit {
 
     if (!id) {
       this.itemStore.clearSelectedItem();
+      const draft = this.itemStore.createDraft();
+      this.itemStore.clearCreateDraft();
+      if (draft) {
+        // If a new category was just created on the category page, its id is
+        // sitting in itemCategoryStore.selectedItem(). Prefer it over whatever
+        // categoryId the draft had before the user navigated away.
+        const newCategory = this.itemCategoryStore.selectedItem();
+        this.itemCategoryStore.clearSelectedItem();
+        this.itemModel.set({
+          name: draft.name ?? '',
+          code: draft.code ?? '',
+          displayname: draft.displayname ?? '',
+          categoryId: newCategory?.id ?? draft.category?.id ?? draft.categoryid ?? '',
+          barcode: draft.barcode ?? '',
+          description: draft.description ?? '',
+          purchaseledger: draft.purchaseledger ?? '',
+          salesledger: draft.salesledger ?? '',
+        });
+      }
       return;
     }
 
@@ -223,6 +243,27 @@ export class CreateItemComponent implements AfterViewInit {
 
   protected onCategoryQueryChange(event: unknown): void {
     this.categoryQuery.set(this.normalizeAutocompleteQuery(event));
+  }
+
+  protected createNewCategory(): void {
+    const m = this.itemModel();
+    // Clear any stale category selectedItem so we can distinguish "user just
+    // created a category" (selectedItem will be set by createItemCategory())
+    // from "user cancelled without creating" (selectedItem stays null).
+    this.itemCategoryStore.clearSelectedItem();
+    this.itemStore.setCreateDraft({
+      name: m.name,
+      code: m.code,
+      displayname: m.displayname,
+      categoryid: m.categoryId,
+      ...(m.barcode ? { barcode: m.barcode } : {}),
+      ...(m.description ? { description: m.description } : {}),
+      ...(m.purchaseledger ? { purchaseledger: m.purchaseledger } : {}),
+      ...(m.salesledger ? { salesledger: m.salesledger } : {}),
+    });
+    void this.router.navigate(['/app/trading/item-category/create'], {
+      queryParams: { burl: this.router.url },
+    });
   }
 
   protected async submitForm(event: SubmitEvent): Promise<void> {

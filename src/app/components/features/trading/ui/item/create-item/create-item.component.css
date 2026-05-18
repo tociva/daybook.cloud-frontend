@@ -92,6 +92,30 @@ tng-textarea {
   width: 100%;
 }
 
+.label-with-action {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.create-category-link {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--tng-semantic-accent-brand);
+  text-decoration: none;
+  white-space: nowrap;
+  line-height: 1.35;
+}
+
+.create-category-link:hover {
+  text-decoration: underline;
+}
+
 .field-error {
   color: var(--tng-semantic-accent-danger);
   font-size: 0.8rem;

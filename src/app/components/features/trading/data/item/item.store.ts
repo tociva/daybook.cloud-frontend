@@ -12,6 +12,7 @@ export const ItemStore = signalStore(
   withState(initialItemState),
   withComputed(({ item }) => ({
     count: computed(() => item().count),
+    createDraft: computed(() => item().createDraft),
     error: computed(() => item().error),
     isLoading: computed(() => item().isLoading),
     items: computed(() => item().items),
@@ -39,6 +40,16 @@ export const ItemStore = signalStore(
       setSelectedItem(item: Item): void {
         patchState(store, (state) => ({
           item: { ...state.item, selectedItem: item },
+        }));
+      },
+      clearCreateDraft(): void {
+        patchState(store, (state) => ({
+          item: { ...state.item, createDraft: null },
+        }));
+      },
+      setCreateDraft(draft: Item): void {
+        patchState(store, (state) => ({
+          item: { ...state.item, createDraft: draft },
         }));
       },
 
