@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, ViewChild, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
@@ -48,6 +48,8 @@ export class CreatePurchaseInvoiceComponent {
 
   protected readonly draft = inject(PurchaseInvoiceDraftStore);
 
+  @ViewChild(PiLineItemsComponent) private lineItemsRef?: PiLineItemsComponent;
+
   // ── Mode ──────────────────────────────────────────────────────────────────
 
   protected readonly id = signal<string | null>(null);
@@ -69,6 +71,7 @@ export class CreatePurchaseInvoiceComponent {
       this.taxGroupStore.loadTaxGroups({}),
       this.taxStore.loadTaxes({}),
     ]);
+    this.draft.markAllItemsLoaded();
 
     const id = this.route.snapshot.paramMap.get('id');
     this.id.set(id);
@@ -82,6 +85,12 @@ export class CreatePurchaseInvoiceComponent {
       });
       if (invoice) this.draft.patchFromInvoice(invoice);
     }
+  }
+
+  // ── Vendor selection ──────────────────────────────────────────────────────
+
+  protected onVendorSelected(): void {
+    this.lineItemsRef?.focusItemAutocomplete(0);
   }
 
   // ── Submit ────────────────────────────────────────────────────────────────
@@ -101,7 +110,7 @@ export class CreatePurchaseInvoiceComponent {
       ...(this.draft.vendorAddressCountry() ? { country: this.draft.vendorAddressCountry() } : {}),
     };
 
-    const items: PurchaseInvoiceItemRequest[] = this.draft.items().map((row, i) => {
+    const items: PurchaseInvoiceItemRequest[] = this.draft.items().filter((row) => !!row.itemid).map((row, i) => {
       const taxes: PurchaseInvoiceItemTaxRequest[] = row.taxes.map((t) => ({
         name: t.name,
         shortname: t.shortname,

@@ -1,5 +1,6 @@
 import { Component, ElementRef, computed, inject, input } from '@angular/core';
 import { form } from '@angular/forms/signals';
+import { Router } from '@angular/router';
 import {
   TngAutocompleteComponent,
   TngInputComponent,
@@ -8,7 +9,18 @@ import {
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import type { Item } from '../../../../data/item';
+import { ItemStore } from '../../../../data/item';
+import { InvoiceGrandTotalDisplayComponent } from '../../../../../../../shared/invoice-grand-total-display/invoice-grand-total-display.component';
 import { PurchaseInvoiceDraftStore, type ItemRow } from '../purchase-invoice-draft.store';
+
+/** Sentinel id used to represent the "Create new item" action inside the options list. */
+const CREATE_ITEM_SENTINEL_ID = '__create_item__';
+
+/** A fake Item object that acts as the "create" action option. */
+const CREATE_ITEM_SENTINEL: Item = {
+  id: CREATE_ITEM_SENTINEL_ID,
+  name: 'No items found — create one',
+} as Item;
 
 const INTERACTIVE_CLICK_TARGET_SELECTOR = [
   'a[href]',
@@ -30,12 +42,15 @@ const INTERACTIVE_CLICK_TARGET_SELECTOR = [
     TngSwitchComponent,
     TngTextareaComponent,
     TngIcon,
+    InvoiceGrandTotalDisplayComponent,
   ],
   templateUrl: './pi-line-items.component.html',
   styleUrl: './pi-line-items.component.css',
 })
 export class PiLineItemsComponent {
-  protected readonly draft = inject(PurchaseInvoiceDraftStore);
+  protected readonly draft      = inject(PurchaseInvoiceDraftStore);
+  private  readonly itemStore   = inject(ItemStore);
+  private  readonly router      = inject(Router);
   readonly readOnly = input(false);
   protected readonly lineItemsForm = form(this.draft.items);
   protected readonly rowCount = computed(() => this.lineItemsForm().value().length);
@@ -43,6 +58,9 @@ export class PiLineItemsComponent {
   protected readonly itemOptionLabel = (item: Item): string => item.displayname ?? item.name ?? '';
   protected readonly itemTrackBy = (_index: number, item: Item): unknown => item.id ?? item.name;
   private readonly hostElement = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  /** Expose sentinel id so the template can detect the create-action row. */
+  protected readonly createItemSentinelId = CREATE_ITEM_SENTINEL_ID;
 
   // ── Tax column visibility (derived from draft tax option) ──────────────
   // Intra State → CGST + SGST; Inter State → IGST only; Export / No Taxable → none
@@ -62,6 +80,12 @@ export class PiLineItemsComponent {
     const itemId = typeof value === 'string' ? value : '';
     if (!itemId) return;
 
+    // Intercept the sentinel — navigate to item create.
+    if (itemId === CREATE_ITEM_SENTINEL_ID) {
+      this.createNewItem(rowIndex);
+      return;
+    }
+
     const item = this.itemOptionsForRow(this.draft.items()[rowIndex]).find(
       (currentItem) => currentItem.id === itemId,
     );
@@ -76,8 +100,35 @@ export class PiLineItemsComponent {
     if (!row.item || options.some((item) => item.id === row.itemid)) {
       return options;
     }
-
     return [row.item, ...options];
+  }
+
+  /**
+   * Options list for a row passed to the autocomplete.
+   * Appends the sentinel "create" option when nothing matches the current search.
+   */
+  protected itemOptionsForRowWithCreate(row: ItemRow): readonly Item[] {
+    const options = this.itemOptionsForRow(row);
+    if (options.length === 0) {
+      return [CREATE_ITEM_SENTINEL];
+    }
+    return options;
+  }
+
+  protected onItemAutocompleteFocusin(rowIndex: number): void {
+    // `queryChange` only fires when the query *changes*. On first focus of a
+    // blank row the query is already '' so no event fires and the dropdown opens
+    // empty. Proactively calling onItemSearchInput('', …) seeds the list with
+    // all items and sets the active row, guaranteeing the dropdown is populated.
+    this.draft.onItemSearchInput('', rowIndex);
+  }
+
+  protected createNewItem(rowIndex: number): void {
+    // Clear stale selectedItem so we can distinguish "just created" vs "cancelled" on return.
+    this.itemStore.clearSelectedItem();
+    void this.router.navigate(['/app/trading/item/create'], {
+      queryParams: { burl: this.router.url },
+    });
   }
 
   protected focusNameAutocomplete(event: MouseEvent): void {
@@ -103,6 +154,15 @@ export class PiLineItemsComponent {
     if (interactiveTarget !== null && currentTarget.contains(interactiveTarget)) return;
 
     currentTarget.querySelector<HTMLElement>(selector)?.focus();
+  }
+
+  focusItemAutocomplete(rowIndex: number): void {
+    globalThis.setTimeout(() => {
+      const trigger = this.hostElement.nativeElement.querySelector<HTMLElement>(
+        `.pi-li-col-name[data-row-index="${rowIndex}"] [data-slot="autocomplete-trigger"]`,
+      );
+      trigger?.focus();
+    });
   }
 
   private focusPriceInputAfterSelection(rowIndex: number): void {

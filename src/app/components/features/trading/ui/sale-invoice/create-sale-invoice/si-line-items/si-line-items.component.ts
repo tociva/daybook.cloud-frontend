@@ -11,6 +11,7 @@ import { TngIcon } from '@tailng-ui/icons';
 import type { Item } from '../../../../data/item';
 import { ItemStore } from '../../../../data/item';
 import { UserSessionStore } from '../../../../../management/data/user-session/user-session.store';
+import { InvoiceGrandTotalDisplayComponent } from '../../../../../../../shared/invoice-grand-total-display/invoice-grand-total-display.component';
 import { SaleInvoiceDraftStore, type ItemRow } from '../sale-invoice-draft.store';
 
 /** Sentinel id used to represent the "Create new item" action inside the options list. */
@@ -42,6 +43,7 @@ const INTERACTIVE_CLICK_TARGET_SELECTOR = [
     TngSwitchComponent,
     TngTextareaComponent,
     TngIcon,
+    InvoiceGrandTotalDisplayComponent,
   ],
   templateUrl: './si-line-items.component.html',
   styleUrl: './si-line-items.component.css',
@@ -231,7 +233,7 @@ export class SiLineItemsComponent {
     return value === undefined || value === null ? '—' : value.toFixed(2);
   }
 
-  // ── Currency symbol ────────────────────────────────────────────────────────
+  // ── Currency symbol (kept here for the summary-table column) ──────────────
   readonly currencySymbol = computed(() => {
     const session = this.userSession.session();
     const code    = session?.fiscalyear?.currencycode
@@ -245,100 +247,4 @@ export class SiLineItemsComponent {
     };
     return symbols[code] ?? code;
   });
-
-  // ── Amount in words ────────────────────────────────────────────────────────
-  // Currency name  → fiscal year currencycode (falls back to branch currencycode)
-  // Number system  → branch countrycode: 'IN' = lakh/crore, else million/billion
-  readonly amountInWords = computed(() => {
-    const session      = this.userSession.session();
-    const currencycode = session?.fiscalyear?.currencycode
-                      ?? session?.branch?.currencycode
-                      ?? 'INR';
-    const countrycode  = session?.branch?.countrycode ?? 'IN';
-    return this.convertToWords(
-      parseFloat(String(this.draft.grandtotal())) || 0,
-      currencycode,
-      countrycode,
-    );
-  });
-
-  private convertToWords(amount: number, currencycode: string, countrycode: string): string {
-    const ones = [
-      '', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine',
-      'Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen',
-      'Seventeen', 'Eighteen', 'Nineteen',
-    ];
-    const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-
-    const numToWords = (n: number): string => {
-      if (n === 0) return '';
-      if (n < 20) return ones[n]! + ' ';
-      if (n < 100) return tens[Math.floor(n / 10)]! + (n % 10 ? ' ' + ones[n % 10]! : '') + ' ';
-      return ones[Math.floor(n / 100)]! + ' Hundred ' + numToWords(n % 100);
-    };
-
-    const { major, minor } = this.getCurrencyNames(currencycode);
-    const useIndianSystem  = countrycode === 'IN';
-
-    const wholeAmount = Math.floor(amount);
-    const subunit     = Math.round((amount - wholeAmount) * 100);
-
-    let result = '';
-    if (wholeAmount === 0) {
-      result = 'Zero';
-    } else if (useIndianSystem) {
-      // Indian system: Crore → Lakh → Thousand → remainder
-      const crore     = Math.floor(wholeAmount / 10_000_000);
-      const lakh      = Math.floor((wholeAmount % 10_000_000) / 100_000);
-      const thousand  = Math.floor((wholeAmount % 100_000) / 1_000);
-      const remainder = wholeAmount % 1_000;
-
-      if (crore)     result += numToWords(crore)    + 'Crore ';
-      if (lakh)      result += numToWords(lakh)     + 'Lakh ';
-      if (thousand)  result += numToWords(thousand) + 'Thousand ';
-      if (remainder) result += numToWords(remainder);
-    } else {
-      // International system: Billion → Million → Thousand → remainder
-      const billion   = Math.floor(wholeAmount / 1_000_000_000);
-      const million   = Math.floor((wholeAmount % 1_000_000_000) / 1_000_000);
-      const thousand  = Math.floor((wholeAmount % 1_000_000) / 1_000);
-      const remainder = wholeAmount % 1_000;
-
-      if (billion)   result += numToWords(billion)  + 'Billion ';
-      if (million)   result += numToWords(million)  + 'Million ';
-      if (thousand)  result += numToWords(thousand) + 'Thousand ';
-      if (remainder) result += numToWords(remainder);
-    }
-
-    result = result.trim() + ' ' + major;
-    if (subunit > 0) result += ' and ' + numToWords(subunit).trim() + ' ' + minor;
-    return result + ' Only';
-  }
-
-  /** Maps ISO 4217 currency codes to their spoken major/minor unit names. */
-  private getCurrencyNames(code: string): { major: string; minor: string } {
-    const map: Record<string, { major: string; minor: string }> = {
-      AED: { major: 'Dirhams',  minor: 'Fils' },
-      AUD: { major: 'Dollars',  minor: 'Cents' },
-      BDT: { major: 'Taka',     minor: 'Paisa' },
-      CAD: { major: 'Dollars',  minor: 'Cents' },
-      CHF: { major: 'Francs',   minor: 'Centimes' },
-      CNY: { major: 'Yuan',     minor: 'Jiao' },
-      EUR: { major: 'Euros',    minor: 'Cents' },
-      GBP: { major: 'Pounds',   minor: 'Pence' },
-      INR: { major: 'Rupees',   minor: 'Paise' },
-      JPY: { major: 'Yen',      minor: 'Sen' },
-      LKR: { major: 'Rupees',   minor: 'Cents' },
-      MYR: { major: 'Ringgit',  minor: 'Sen' },
-      NPR: { major: 'Rupees',   minor: 'Paisa' },
-      NZD: { major: 'Dollars',  minor: 'Cents' },
-      OMR: { major: 'Riyals',   minor: 'Baisa' },
-      PKR: { major: 'Rupees',   minor: 'Paisa' },
-      QAR: { major: 'Riyals',   minor: 'Dirhams' },
-      SAR: { major: 'Riyals',   minor: 'Halalah' },
-      SGD: { major: 'Dollars',  minor: 'Cents' },
-      USD: { major: 'Dollars',  minor: 'Cents' },
-    };
-    return map[code] ?? { major: code, minor: 'Cents' };
-  }
 }

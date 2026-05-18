@@ -34,16 +34,17 @@
       </dl>
     } @else {
       <div class="aside-fields">
-        <div class="field">
-          <tng-label forId="inv-number">Number</tng-label>
+        <tng-form-field labelPosition="outline" [invalid]="draft.numberError() !== null">
+          <tng-label forId="inv-number" required>Number</tng-label>
           <tng-input
             id="inv-number"
             [value]="draft.number()"
             (valueChange)="draft.number.set($any($event))"
           />
-        </div>
+          <tng-error [show]="draft.numberError() !== null">{{ draft.numberError() }}</tng-error>
+        </tng-form-field>
 
-        <div class="field">
+        <tng-form-field labelPosition="outline" [invalid]="draft.dateError() !== null">
           <tng-label forId="inv-date" required>Date</tng-label>
           <app-fiscal-year-datepicker
             id="inv-date"
@@ -51,12 +52,10 @@
             [invalid]="draft.dateError() !== null"
             (valueChange)="draft.onDateChange($event)"
           />
-          @if (draft.dateError()) {
-            <p class="field-error">{{ draft.dateError() }}</p>
-          }
-        </div>
+          <tng-error [show]="draft.dateError() !== null">{{ draft.dateError() }}</tng-error>
+        </tng-form-field>
 
-        <div class="field">
+        <tng-form-field labelPosition="outline">
           <tng-label forId="inv-duedate">Due Date</tng-label>
           <tng-datepicker
             id="inv-duedate"
@@ -65,9 +64,9 @@
             [minDate]="draft.date()"
             (valueChange)="draft.onDueDateChange($event)"
           />
-        </div>
+        </tng-form-field>
 
-        <div class="field">
+        <tng-form-field labelPosition="outline">
           <tng-label forId="inv-taxoption">Tax Option</tng-label>
           <tng-select
             id="inv-taxoption"
@@ -78,9 +77,9 @@
             [value]="draft.taxoption()"
             (valueChange)="draft.onTaxOptionChange($any($event))"
           />
-        </div>
+        </tng-form-field>
 
-        <div class="field">
+        <tng-form-field labelPosition="outline">
           <tng-label forId="inv-currency" required>Currency</tng-label>
           <tng-autocomplete
             id="inv-currency"
@@ -94,9 +93,9 @@
             (valueChange)="onCurrencyValueChange($event)"
             (queryChange)="onCurrencyQueryChange($event)"
           />
-        </div>
+        </tng-form-field>
 
-        <div class="field">
+        <tng-form-field labelPosition="outline">
           <tng-label forId="inv-description">Description</tng-label>
           <tng-textarea
             id="inv-description"
@@ -105,7 +104,7 @@
             [value]="draft.description()"
             (valueChange)="draft.description.set($any($event))"
           />
-        </div>
+        </tng-form-field>
       </div>
     }
   </tng-card-content>

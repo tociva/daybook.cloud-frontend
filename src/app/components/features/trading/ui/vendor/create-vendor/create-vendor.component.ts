@@ -1,4 +1,13 @@
-import { AfterViewInit, Component, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  ViewChild,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormField, form } from '@angular/forms/signals';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -25,6 +34,7 @@ import type { Country } from '../../../../management/data/country/country.model'
 import { CountryStore } from '../../../../management/data/country/country.store';
 import type { Currency } from '../../../../management/data/currency/currency.model';
 import { CurrencyStore } from '../../../../management/data/currency/currency.store';
+import { UserSessionStore } from '../../../../management/data/user-session/user-session.store';
 
 type VendorFormModel = {
   name: string;
@@ -75,6 +85,7 @@ export class CreateVendorComponent implements AfterViewInit {
   private readonly facade = inject(VendorFacade);
   private readonly countryStore = inject(CountryStore);
   private readonly currencyStore = inject(CurrencyStore);
+  private readonly userSessionStore = inject(UserSessionStore);
   protected readonly vendorStore = inject(VendorStore);
   protected readonly countries = this.countryStore.countries;
   protected readonly currencies = this.currencyStore.currencies;
@@ -123,6 +134,7 @@ export class CreateVendorComponent implements AfterViewInit {
 
   protected readonly id = signal<string | null>(null);
   protected readonly submitted = signal(false);
+  private readonly branchDefaultsApplied = signal(false);
   protected readonly mode = computed(() => (this.id() ? 'edit' : 'create'));
   protected readonly title = computed(() =>
     this.mode() === 'edit' ? 'Edit Vendor' : 'New Vendor',
@@ -188,6 +200,7 @@ export class CreateVendorComponent implements AfterViewInit {
     void this.countryStore.load();
     void this.currencyStore.load();
     void this.loadInitialState();
+    this.applyBranchDefaults();
   }
 
   ngAfterViewInit(): void {
@@ -246,6 +259,36 @@ export class CreateVendorComponent implements AfterViewInit {
         addressZip: vendor.address?.zip ?? '',
       });
     }
+  }
+
+  private applyBranchDefaults(): void {
+    effect(() => {
+      if (this.mode() !== 'create' || this.branchDefaultsApplied()) {
+        return;
+      }
+
+      const branch = this.userSessionStore.session()?.branch;
+      if (!branch?.countrycode && !branch?.currencycode) {
+        return;
+      }
+
+      this.vendorModel.update((current) => {
+        const countrycode = current.countrycode.trim()
+          ? current.countrycode
+          : (branch.countrycode ?? '');
+        const currencycode = current.currencycode.trim()
+          ? current.currencycode
+          : (branch.currencycode ?? '');
+
+        return {
+          ...current,
+          countrycode,
+          currencycode,
+        };
+      });
+
+      this.branchDefaultsApplied.set(true);
+    });
   }
 
   protected selectCountry(value: unknown): void {

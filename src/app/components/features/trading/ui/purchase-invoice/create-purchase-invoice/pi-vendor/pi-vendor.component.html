@@ -2,13 +2,16 @@
   <!-- Vendor search (hidden once a vendor is chosen) -->
   @if (!readOnly() && !draft.selectedVendor()) {
     <div class="field field--full">
-      <tng-form-field labelPosition="above" [invalid]="draft.vendorError() !== null">
+      <div class="label-with-action">
         <tng-label forId="vendor-search" required>Vendor</tng-label>
+        <button type="button" class="create-vendor-link" (click)="createNewVendor()">+ Create new Vendor</button>
+      </div>
+      <tng-form-field [invalid]="draft.vendorError() !== null" [requiredMarker]="false">
         <tng-autocomplete
           id="vendor-search"
           placeholder="Search by name, mobile or email…"
           ariaLabel="Vendor"
-          [options]="draft.filteredVendors()"
+          [options]="filteredVendorsWithCreate()"
           [value]="draft.vendorid()"
           [getOptionValue]="vendorOptionValue"
           [getOptionLabel]="vendorOptionLabel"
@@ -17,9 +20,16 @@
           (queryChange)="draft.onVendorSearchInput($any($event))"
         >
           <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
-            <span>{{ label }}</span>
-            @if (option.mobile) {
-              <span class="muted"> · {{ option.mobile }}</span>
+            @if (option.id === createSentinelId) {
+              <span class="create-option">
+                <span class="create-option__icon">＋</span>
+                <span class="create-option__text">No vendors found — <strong>create one</strong></span>
+              </span>
+            } @else {
+              <span>{{ label }}</span>
+              @if (option.mobile) {
+                <span class="muted"> · {{ option.mobile }}</span>
+              }
             }
           </ng-template>
         </tng-autocomplete>

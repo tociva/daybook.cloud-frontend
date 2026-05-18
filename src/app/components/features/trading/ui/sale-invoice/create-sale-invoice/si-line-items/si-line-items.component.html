@@ -327,15 +327,10 @@
 </div>
 
 <div class="si-li-summary-wrap">
-  <!-- Grand total in digits + amount in words — left side -->
-  <div class="si-li-grand-total-display" aria-label="Grand total">
-    <div class="si-li-grand-total-display-label">Total Amount</div>
-    <div class="si-li-grand-total-display-value">
-      <span class="si-li-grand-total-symbol">{{ currencySymbol() }}</span>
-      <span class="si-li-grand-total-amount">{{ draft.grandtotal() }}</span>
-    </div>
-    <div class="si-li-amount-words-value">{{ amountInWords() }}</div>
-  </div>
+  <!-- Grand total in digits + amount in words — left side (hidden when zero) -->
+  @if (+draft.grandtotal() !== 0) {
+    <app-invoice-grand-total-display [grandtotal]="draft.grandtotal()" />
+  }
 
   <table class="si-li-summary-table" aria-label="Invoice summary">
     <tbody>

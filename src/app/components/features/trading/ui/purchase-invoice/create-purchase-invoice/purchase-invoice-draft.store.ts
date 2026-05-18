@@ -1,4 +1,4 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 import dayjs from 'dayjs';
 import type { Vendor } from '../../../data/vendor';
 import { VendorStore } from '../../../data/vendor';
@@ -74,7 +74,7 @@ export class PurchaseInvoiceDraftStore {
 
   readonly number = signal('');
   readonly date = signal(this.fiscalYearDateRange.defaultDate());
-  readonly duedate = signal(dayjs().add(7, 'day').format(DEFAULT_NODE_DATE_FORMAT));
+  readonly duedate = signal(this.getDefaultDueDate(this.date()));
   readonly currencycode = signal('INR');
   readonly taxoption = signal('Intra State');
   readonly description = signal('');
@@ -101,6 +101,13 @@ export class PurchaseInvoiceDraftStore {
   readonly showDescription = signal(false);
   readonly activeItemRowIndex = signal(-1);
   readonly itemSearch = signal('');
+
+  /**
+   * True when the store currently holds the full, unfiltered item list
+   * (i.e. the last loadItems call used an empty query). Flipped to false
+   * whenever a non-empty search overwrites the store with filtered results.
+   */
+  private emptyItemsLoaded = false;
 
   // ── Tax-mode options ──────────────────────────────────────────────────────
 
@@ -188,10 +195,32 @@ export class PurchaseInvoiceDraftStore {
   readonly vendorError = computed(() =>
     this.submitted() && !this.vendorid() ? 'Vendor is required.' : null,
   );
+  readonly numberError = computed(() =>
+    this.submitted() && !this.number() ? 'Number is required.' : null,
+  );
   readonly dateError = computed(() => {
     if (!this.submitted()) return null;
     if (!this.date()) return 'Date is required.';
     return this.fiscalYearDateRange.errorMessage(this.date());
+  });
+
+  /**
+   * The date signal is initialised before the fiscal-year range may be available.
+   * Once it arrives, keep the invoice date inside the fiscal year and keep the
+   * initial due date aligned to invoice date + 14 days.
+   */
+  private readonly _fiscalYearDateEffect = effect(() => {
+    const range = this.fiscalYearDateRange.range();
+    if (!range) return;
+
+    untracked(() => {
+      const current = this.date();
+      const constrained = this.fiscalYearDateRange.defaultDate(current);
+      if (constrained !== current) {
+        this.date.set(constrained);
+        this.duedate.set(this.getDefaultDueDate(constrained));
+      }
+    });
   });
 
   // ── Patch from loaded invoice (edit / view mode) ──────────────────────────
@@ -283,22 +312,20 @@ export class PurchaseInvoiceDraftStore {
   onDateChange(value: unknown): void {
     let newDate = '';
     if (typeof value === 'string') newDate = value;
-    else if (dayjs.isDayjs(value) && value.isValid()) newDate = value.format(DEFAULT_NODE_DATE_FORMAT);
+    else if (dayjs.isDayjs(value) && value.isValid())
+      newDate = value.format(DEFAULT_NODE_DATE_FORMAT);
     else if (value instanceof Date && !Number.isNaN(value.getTime()))
       newDate = dayjs(value).format(DEFAULT_NODE_DATE_FORMAT);
 
     if (!newDate) return;
     this.date.set(newDate);
-
-    // If duedate is before the new invoice date, advance it to the invoice date
-    if (this.duedate() && dayjs(this.duedate()).isBefore(dayjs(newDate))) {
-      this.duedate.set(newDate);
-    }
+    this.duedate.set(this.getDefaultDueDate(newDate));
   }
 
   onDueDateChange(value: unknown): void {
     if (typeof value === 'string') this.duedate.set(value);
-    else if (dayjs.isDayjs(value) && value.isValid()) this.duedate.set(value.format(DEFAULT_NODE_DATE_FORMAT));
+    else if (dayjs.isDayjs(value) && value.isValid())
+      this.duedate.set(value.format(DEFAULT_NODE_DATE_FORMAT));
     else if (value instanceof Date && !Number.isNaN(value.getTime()))
       this.duedate.set(dayjs(value).format(DEFAULT_NODE_DATE_FORMAT));
   }
@@ -320,11 +347,27 @@ export class PurchaseInvoiceDraftStore {
     const q = value ?? '';
     this.itemSearch.set(q);
     this.activeItemRowIndex.set(rowIndex);
-    void this.itemStore.loadItems(
-      q
-        ? { where: { name: { ilike: `%${q}%` } }, includes: ['category'] }
-        : { includes: ['category'] },
-    );
+
+    if (q) {
+      // Typed search: hit the server with a filter and mark the cache as stale.
+      this.emptyItemsLoaded = false;
+      void this.itemStore.loadItems({ where: { name: { ilike: `%${q}%` } }, includes: ['category'] });
+    } else if (!this.emptyItemsLoaded) {
+      // Empty query and no cached full list yet: fetch all items and cache.
+      void this.itemStore.loadItems({ includes: ['category'] }).then(() => {
+        this.emptyItemsLoaded = true;
+      });
+    }
+    // else: empty query + full list already in store → no network call needed.
+  }
+
+  /**
+   * Signals that the full unfiltered item list has already been loaded into
+   * the ItemStore (e.g. by the parent component's initial load), so the first
+   * autocomplete focus does not trigger a redundant network request.
+   */
+  markAllItemsLoaded(): void {
+    this.emptyItemsLoaded = true;
   }
 
   async selectItem(item: Item, rowIndex: number): Promise<void> {
@@ -344,9 +387,17 @@ export class PurchaseInvoiceDraftStore {
     this.items.update((rows) =>
       rows.map((row, i) => {
         if (i !== rowIndex || row.itemid !== (item.id ?? '')) return row;
-        return this.calcRow({ ...row, item: enrichedItem, itemid: enrichedItem.id ?? '', name: enrichedItem.name, code: enrichedItem.code ?? '', taxes });
+        return this.calcRow({
+          ...row,
+          item: enrichedItem,
+          itemid: enrichedItem.id ?? '',
+          name: enrichedItem.name,
+          code: enrichedItem.code ?? '',
+          taxes,
+        });
       }),
     );
+    this.ensureTrailingEmptyRow();
   }
 
   closeItemDropdown(): void {
@@ -382,6 +433,7 @@ export class PurchaseInvoiceDraftStore {
     this.items.update((rows) =>
       rows.map((row, i) => (i === rowIndex ? this.calcRow({ ...row, [field]: num }) : row)),
     );
+    this.ensureTrailingEmptyRow();
   }
 
   updateItemDescription(rowIndex: number, value: string | null): void {
@@ -529,8 +581,47 @@ export class PurchaseInvoiceDraftStore {
     };
   }
 
+  /**
+   * Ensures exactly one trailing empty row exists whenever at least one row has
+   * a valid grand total. Collapses multiple trailing empty rows down to one,
+   * and appends one if the last row is filled.
+   */
+  private ensureTrailingEmptyRow(): void {
+    this.items.update((rows) => {
+      const isEmptyRow = (row: ItemRow) => !row.itemid && row.grandtotal === 0;
+
+      // Only act when at least one row has a valid grand total.
+      const hasValidTotal = rows.some((r) => r.grandtotal > 0);
+      if (!hasValidTotal) return rows;
+
+      // Count consecutive empty rows at the tail.
+      let trailingEmpty = 0;
+      for (let i = rows.length - 1; i >= 0; i--) {
+        if (isEmptyRow(rows[i])) trailingEmpty++;
+        else break;
+      }
+
+      // No trailing empty row → append one.
+      if (trailingEmpty === 0) {
+        return [...rows, this.emptyItemRow(this.taxColumnCount())];
+      }
+
+      // More than one trailing empty row → collapse to a single empty row.
+      if (trailingEmpty > 1) {
+        return rows.slice(0, rows.length - trailingEmpty + 1);
+      }
+
+      // Exactly one trailing empty row — nothing to change.
+      return rows;
+    });
+  }
+
   private emptyTaxRow(): TaxRow {
     return { taxid: '', name: '', shortname: '', rate: 0, appliedto: 100, amount: 0 };
+  }
+
+  private getDefaultDueDate(date: string): string {
+    return dayjs(date).add(14, 'day').format(DEFAULT_NODE_DATE_FORMAT);
   }
 
   private emptyItemRow(taxCount = 0): ItemRow {

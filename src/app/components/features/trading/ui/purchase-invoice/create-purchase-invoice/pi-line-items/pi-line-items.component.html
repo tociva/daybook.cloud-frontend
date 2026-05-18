@@ -91,8 +91,10 @@
           <td [attr.rowspan]="rowSpan()" class="pi-li-col-serial text-center">{{ i + 1 }}</td>
           <td
             [attr.rowspan]="rowSpan()"
+            [attr.data-row-index]="i"
             class="pi-li-col-name p-0"
             (click)="focusNameAutocomplete($event)"
+            (focusin)="onItemAutocompleteFocusin(i)"
           >
             @if (readOnly()) {
               <strong class="pi-li-read-value">
@@ -102,7 +104,7 @@
               <tng-autocomplete
                 ariaLabel="Item"
                 placeholder="Search item"
-                [options]="itemOptionsForRow(_row)"
+                [options]="itemOptionsForRowWithCreate(_row)"
                 [value]="_row.itemid"
                 [getOptionValue]="itemOptionValue"
                 [getOptionLabel]="itemOptionLabel"
@@ -111,9 +113,16 @@
                 (valueChange)="onItemValueChange($event, i)"
               >
                 <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
-                  <span>{{ label }}</span>
-                  @if (option.code) {
-                    <span class="pi-li-option-code"> - {{ option.code }}</span>
+                  @if (option.id === createItemSentinelId) {
+                    <span class="pi-li-create-option">
+                      <span class="pi-li-create-option__icon">＋</span>
+                      <span class="pi-li-create-option__text">No items found — <strong>create one</strong></span>
+                    </span>
+                  } @else {
+                    <span>{{ label }}</span>
+                    @if (option.code) {
+                      <span class="pi-li-option-code"> - {{ option.code }}</span>
+                    }
                   }
                 </ng-template>
               </tng-autocomplete>
@@ -318,6 +327,11 @@
 </div>
 
 <div class="pi-li-summary-wrap">
+  <!-- Grand total in digits + amount in words — left side (hidden when zero) -->
+  @if (+draft.grandtotal() !== 0) {
+    <app-invoice-grand-total-display [grandtotal]="draft.grandtotal()" />
+  }
+
   <table class="pi-li-summary-table" aria-label="Invoice summary">
     <tbody>
       <tr>

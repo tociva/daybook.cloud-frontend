@@ -10,7 +10,7 @@
   <div class="invoice-layout">
     <!-- ══ LEFT COLUMN ════════════════════════════════════════════════════ -->
     <div class="invoice-main">
-      <app-pi-vendor />
+      <app-pi-vendor (vendorSelected)="onVendorSelected()" />
       <app-pi-line-items />
     </div>
 

@@ -6,6 +6,8 @@ import {
   TngCardHeaderComponent,
   TngCardTitleComponent,
   TngDatepickerComponent,
+  TngError,
+  TngFormFieldComponent,
   TngInputComponent,
   TngLabelComponent,
   TngSelectComponent,
@@ -28,6 +30,8 @@ import { PurchaseInvoiceDraftStore, type SelectOption } from '../purchase-invoic
     TngCardHeaderComponent,
     TngCardTitleComponent,
     TngDatepickerComponent,
+    TngError,
+    TngFormFieldComponent,
     FiscalYearDatepickerComponent,
     TngInputComponent,
     TngLabelComponent,
@@ -56,8 +60,9 @@ export class PiInvoiceDetailsComponent {
     const q = this.currencyQuery();
     const currencies = this.currencyStore.currencies();
     if (!q) return [...currencies];
-    return currencies.filter((c) =>
-      `${c.name} (${c.symbol})`.toLowerCase().includes(q),
+    return currencies.filter(
+      (c) =>
+        `${c.name} (${c.symbol})`.toLowerCase().includes(q) || c.code.toLowerCase().includes(q),
     );
   });
 

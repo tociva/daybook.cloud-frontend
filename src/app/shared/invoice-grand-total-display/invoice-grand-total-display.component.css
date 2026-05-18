@@ -1,0 +1,52 @@
+:host {
+  display: block;
+  flex: 1;
+  min-width: 0;
+}
+
+.invoice-gtd {
+  background: var(--tng-semantic-background-canvas);
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 6px;
+  height: 100%;
+  padding: 14px 20px;
+}
+
+.invoice-gtd__label {
+  color: var(--tng-semantic-foreground-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.invoice-gtd__value {
+  align-items: baseline;
+  display: flex;
+  gap: 6px;
+}
+
+.invoice-gtd__symbol {
+  color: var(--tng-semantic-foreground-secondary);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.invoice-gtd__amount {
+  color: var(--tng-semantic-foreground-primary);
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.invoice-gtd__words {
+  color: var(--tng-semantic-foreground-secondary);
+  font-size: 12px;
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.5;
+  margin-top: 8px;
+}
