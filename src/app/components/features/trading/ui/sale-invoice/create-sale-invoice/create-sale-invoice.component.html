@@ -10,7 +10,7 @@
   <div class="invoice-layout">
     <!-- ══ LEFT COLUMN ══════════════════════════════════════════════════════ -->
     <div class="invoice-main">
-      <app-si-customer />
+      <app-si-customer (customerSelected)="onCustomerSelected()" />
       <app-si-line-items />
     </div>
 

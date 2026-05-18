@@ -126,6 +126,15 @@ export class SiLineItemsComponent {
     });
   }
 
+  protected onItemAutocompleteFocusin(rowIndex: number): void {
+    // `queryChange` is a model signal and only fires when the query *changes*.
+    // On first focus of a blank row the query is already '' so no event fires and
+    // the item dropdown opens empty.  Proactively calling onItemSearchInput('', …)
+    // seeds the list with all items and sets the active row, guaranteeing the
+    // dropdown is populated as soon as the field receives focus.
+    this.draft.onItemSearchInput('', rowIndex);
+  }
+
   protected focusNameAutocomplete(event: MouseEvent): void {
     this.focusTableControl(event, '[data-slot="autocomplete-trigger"]');
   }
@@ -221,6 +230,21 @@ export class SiLineItemsComponent {
   protected formatAmount(value: number | undefined | null): string {
     return value === undefined || value === null ? '—' : value.toFixed(2);
   }
+
+  // ── Currency symbol ────────────────────────────────────────────────────────
+  readonly currencySymbol = computed(() => {
+    const session = this.userSession.session();
+    const code    = session?.fiscalyear?.currencycode
+                 ?? session?.branch?.currencycode
+                 ?? 'INR';
+    const symbols: Record<string, string> = {
+      AED: 'د.إ', AUD: 'A$',  BDT: '৳',   CAD: 'C$',  CHF: 'Fr',
+      CNY: '¥',   EUR: '€',   GBP: '£',   INR: '₹',   JPY: '¥',
+      LKR: 'Rs',  MYR: 'RM',  NPR: '₨',   NZD: 'NZ$', OMR: 'ر.ع.',
+      PKR: '₨',   QAR: 'ر.ق', SAR: 'ر.س', SGD: 'S$',  USD: '$',
+    };
+    return symbols[code] ?? code;
+  });
 
   // ── Amount in words ────────────────────────────────────────────────────────
   // Currency name  → fiscal year currencycode (falls back to branch currencycode)

@@ -7,6 +7,7 @@ import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import updateLocale from 'dayjs/plugin/updateLocale';
 import { DEFAULT_DISPLAY_DATE_FORMAT } from './dayjs-date.utils';
+import { DEFAULT_NODE_DATE_FORMAT } from '../../util/constants';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(updateLocale);
@@ -46,7 +47,7 @@ export function createDayjsDatepickerDateAdapter(
     new Set([
       inputDateFormat,
       DEFAULT_DISPLAY_DATE_FORMAT,
-      'YYYY-MM-DD',
+      DEFAULT_NODE_DATE_FORMAT,
       'YYYY/MM/DD',
       'DD/MM/YYYY',
       'MM/DD/YYYY',

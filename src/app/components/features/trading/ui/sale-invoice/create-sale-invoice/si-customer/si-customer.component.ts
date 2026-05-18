@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, signal } from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   TngAutocompleteComponent,
@@ -38,6 +38,7 @@ export class SiCustomerComponent {
   private readonly customerStore = inject(CustomerStore);
   private readonly router = inject(Router);
   readonly readOnly = input(false);
+  readonly customerSelected = output<void>();
 
   protected readonly customerOptionValue = (c: Customer): string => c.id ?? '';
   protected readonly customerOptionLabel = (c: Customer): string => c.name ?? '';
@@ -99,6 +100,7 @@ export class SiCustomerComponent {
     if (customer) {
       this.draft.selectCustomer(customer);
       this.addressDialogOpen.set(false);
+      this.customerSelected.emit();
     }
   }
 

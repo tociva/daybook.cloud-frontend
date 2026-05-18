@@ -3,6 +3,7 @@ import dayjs from 'dayjs';
 import type { Dayjs } from 'dayjs';
 import { UserSessionStore } from '../../components/features/management/data/user-session/user-session.store';
 import { DEFAULT_DISPLAY_DATE_FORMAT, parseIsoDate } from '../../core/date/dayjs-date.utils';
+import { DEFAULT_NODE_DATE_FORMAT } from '../../util/constants';
 
 export type FiscalYearDateRange = Readonly<{
   enddate: string;
@@ -36,8 +37,8 @@ export class FiscalYearDateRangeService {
   readonly minDate = computed(() => this.range()?.startdate ?? null);
   readonly maxDate = computed(() => this.range()?.enddate ?? null);
 
-  defaultDate(fallback = dayjs().format('YYYY-MM-DD')): string {
-    const fallbackDate = this.toIsoDate(fallback) ?? dayjs().format('YYYY-MM-DD');
+  defaultDate(fallback = dayjs().format(DEFAULT_NODE_DATE_FORMAT)): string {
+    const fallbackDate = this.toIsoDate(fallback) ?? dayjs().format(DEFAULT_NODE_DATE_FORMAT);
     const range = this.range();
     if (!range) {
       return fallbackDate;
@@ -78,7 +79,7 @@ export class FiscalYearDateRangeService {
 
   toIsoDate(value: unknown): string | null {
     if (value instanceof Date && !Number.isNaN(value.getTime())) {
-      return dayjs(value).format('YYYY-MM-DD');
+      return dayjs(value).format(DEFAULT_NODE_DATE_FORMAT);
     }
 
     if (dayjs.isDayjs(value)) {
@@ -87,14 +88,14 @@ export class FiscalYearDateRangeService {
 
     if (typeof value === 'string') {
       const parsed = parseIsoDate(value);
-      return parsed?.format('YYYY-MM-DD') ?? null;
+      return parsed?.format(DEFAULT_NODE_DATE_FORMAT) ?? null;
     }
 
     return null;
   }
 
   private formatDayjs(value: Dayjs): string | null {
-    return value.isValid() ? value.format('YYYY-MM-DD') : null;
+    return value.isValid() ? value.format(DEFAULT_NODE_DATE_FORMAT) : null;
   }
 
   private formatForMessage(value: string): string {

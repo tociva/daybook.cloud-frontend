@@ -71,6 +71,9 @@ export class CreateSaleInvoiceComponent {
       this.taxGroupStore.loadTaxGroups({}),
       this.taxStore.loadTaxes({}),
     ]);
+    // The full item list is now in the store; tell the draft so that the first
+    // autocomplete focus doesn't trigger a redundant empty-query fetch.
+    this.draft.markAllItemsLoaded();
 
     const id = this.route.snapshot.paramMap.get('id');
     this.id.set(id);
@@ -116,6 +119,12 @@ export class CreateSaleInvoiceComponent {
     }
   }
 
+  // ── Customer selection ────────────────────────────────────────────────────
+
+  protected onCustomerSelected(): void {
+    this.lineItemsRef?.focusItemAutocomplete(0);
+  }
+
   // ── Submit ────────────────────────────────────────────────────────────────
 
   protected async submitForm(event: Event): Promise<void> {
@@ -145,7 +154,7 @@ export class CreateSaleInvoiceComponent {
           ...(this.draft.shippingCountry() ? { country: this.draft.shippingCountry() } : {}),
         };
 
-    const items: SaleInvoiceItemRequest[] = this.draft.items().map((row, i) => {
+    const items: SaleInvoiceItemRequest[] = this.draft.items().filter((row) => !!row.itemid).map((row, i) => {
       const taxes: SaleInvoiceItemTaxRequest[] = row.taxes.map((t) => ({
         name: t.name,
         shortname: t.shortname,

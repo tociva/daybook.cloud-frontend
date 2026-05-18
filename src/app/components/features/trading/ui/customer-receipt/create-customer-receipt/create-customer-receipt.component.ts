@@ -39,6 +39,7 @@ import {
   InvoiceRow,
   RcptInvoiceLinesComponent,
 } from './rcpt-invoice-lines/rcpt-invoice-lines.component';
+import { DEFAULT_NODE_DATE_FORMAT } from '../../../../../../util/constants';
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -404,9 +405,9 @@ export class CreateCustomerReceiptComponent {
 
   protected onDateChange(value: unknown): void {
     if (typeof value === 'string') this.rcptdate.set(value);
-    else if (dayjs.isDayjs(value) && value.isValid()) this.rcptdate.set(value.format('YYYY-MM-DD'));
+    else if (dayjs.isDayjs(value) && value.isValid()) this.rcptdate.set(value.format(DEFAULT_NODE_DATE_FORMAT));
     else if (value instanceof Date && !Number.isNaN(value.getTime()))
-      this.rcptdate.set(dayjs(value).format('YYYY-MM-DD'));
+      this.rcptdate.set(dayjs(value).format(DEFAULT_NODE_DATE_FORMAT));
   }
 
   // ── Submit ────────────────────────────────────────────────────────────────

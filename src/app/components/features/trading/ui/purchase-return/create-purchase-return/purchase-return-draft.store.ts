@@ -12,6 +12,7 @@ import { TaxStore } from '../../../data/tax';
 import type { TaxGroup } from '../../../data/tax-group';
 import { TaxGroupStore } from '../../../data/tax-group';
 import { FiscalYearDateRangeService } from '../../../../../../shared/fiscal-year-datepicker';
+import { DEFAULT_NODE_DATE_FORMAT } from '../../../../../../util/constants';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -70,7 +71,7 @@ export class PurchaseReturnDraftStore {
 
   readonly number = signal('');
   readonly date = signal(this.fiscalYearDateRange.defaultDate());
-  readonly duedate = signal(dayjs().add(7, 'day').format('YYYY-MM-DD'));
+  readonly duedate = signal(dayjs().add(7, 'day').format(DEFAULT_NODE_DATE_FORMAT));
   readonly taxoption = signal('Intra State');
   readonly description = signal('');
 
@@ -272,9 +273,9 @@ export class PurchaseReturnDraftStore {
   onDateChange(value: unknown): void {
     let newDate = '';
     if (typeof value === 'string') newDate = value;
-    else if (dayjs.isDayjs(value) && value.isValid()) newDate = value.format('YYYY-MM-DD');
+    else if (dayjs.isDayjs(value) && value.isValid()) newDate = value.format(DEFAULT_NODE_DATE_FORMAT);
     else if (value instanceof Date && !Number.isNaN(value.getTime()))
-      newDate = dayjs(value).format('YYYY-MM-DD');
+      newDate = dayjs(value).format(DEFAULT_NODE_DATE_FORMAT);
 
     if (!newDate) return;
     this.date.set(newDate);
@@ -286,9 +287,9 @@ export class PurchaseReturnDraftStore {
 
   onDueDateChange(value: unknown): void {
     if (typeof value === 'string') this.duedate.set(value);
-    else if (dayjs.isDayjs(value) && value.isValid()) this.duedate.set(value.format('YYYY-MM-DD'));
+    else if (dayjs.isDayjs(value) && value.isValid()) this.duedate.set(value.format(DEFAULT_NODE_DATE_FORMAT));
     else if (value instanceof Date && !Number.isNaN(value.getTime()))
-      this.duedate.set(dayjs(value).format('YYYY-MM-DD'));
+      this.duedate.set(dayjs(value).format(DEFAULT_NODE_DATE_FORMAT));
   }
 
   onTaxOptionChange(value: string | null): void {

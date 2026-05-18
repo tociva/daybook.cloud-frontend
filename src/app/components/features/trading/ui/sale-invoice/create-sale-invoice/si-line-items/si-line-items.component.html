@@ -94,6 +94,7 @@
             [attr.data-row-index]="i"
             class="si-li-col-name p-0"
             (click)="focusNameAutocomplete($event)"
+            (focusin)="onItemAutocompleteFocusin(i)"
           >
             @if (readOnly()) {
               <strong class="si-li-read-value">
@@ -326,28 +327,41 @@
 </div>
 
 <div class="si-li-summary-wrap">
-  <!-- Amount in words — left side -->
-  <div class="si-li-amount-words" aria-label="Amount in words">
-    <div class="si-li-amount-words-label">Amount in Words</div>
+  <!-- Grand total in digits + amount in words — left side -->
+  <div class="si-li-grand-total-display" aria-label="Grand total">
+    <div class="si-li-grand-total-display-label">Total Amount</div>
+    <div class="si-li-grand-total-display-value">
+      <span class="si-li-grand-total-symbol">{{ currencySymbol() }}</span>
+      <span class="si-li-grand-total-amount">{{ draft.grandtotal() }}</span>
+    </div>
     <div class="si-li-amount-words-value">{{ amountInWords() }}</div>
   </div>
 
   <table class="si-li-summary-table" aria-label="Invoice summary">
     <tbody>
       <tr>
-        <td class="si-li-summary-label">Item total</td>
-        <td class="si-li-summary-value">{{ draft.itemtotal() }}</td>
+        <td class="si-li-summary-label">Item Total</td>
+        <td class="si-li-summary-value">
+          <span class="si-li-summary-currency">{{ currencySymbol() }}</span>
+          {{ draft.itemtotal() }}
+        </td>
       </tr>
       @if (draft.showDiscount()) {
         <tr>
           <td class="si-li-summary-label">Discount Total</td>
-          <td class="si-li-summary-value">{{ draft.discount() }}</td>
+          <td class="si-li-summary-value">
+            <span class="si-li-summary-currency">{{ currencySymbol() }}</span>
+            {{ draft.discount() }}
+          </td>
         </tr>
       }
       @if (showIntraStateTax() || showIGST()) {
         <tr>
           <td class="si-li-summary-label">Tax Total</td>
-          <td class="si-li-summary-value">{{ draft.tax() }}</td>
+          <td class="si-li-summary-value">
+            <span class="si-li-summary-currency">{{ currencySymbol() }}</span>
+            {{ draft.tax() }}
+          </td>
         </tr>
       }
       <tr>
@@ -370,7 +384,10 @@
       </tr>
       <tr class="si-li-summary-total-row">
         <td class="si-li-summary-label">Grand Total</td>
-        <td class="si-li-summary-value">{{ draft.grandtotal() }}</td>
+        <td class="si-li-summary-value">
+          <span class="si-li-summary-currency">{{ currencySymbol() }}</span>
+          {{ draft.grandtotal() }}
+        </td>
       </tr>
     </tbody>
   </table>

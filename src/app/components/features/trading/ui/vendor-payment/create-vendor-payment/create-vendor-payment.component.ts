@@ -39,6 +39,7 @@ import {
   InvoiceRow,
   VpmtInvoiceLinesComponent,
 } from './vpmt-invoice-lines/vpmt-invoice-lines.component';
+import { DEFAULT_NODE_DATE_FORMAT } from '../../../../../../util/constants';
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -404,9 +405,9 @@ export class CreateVendorPaymentComponent {
 
   protected onDateChange(value: unknown): void {
     if (typeof value === 'string') this.pmtdate.set(value);
-    else if (dayjs.isDayjs(value) && value.isValid()) this.pmtdate.set(value.format('YYYY-MM-DD'));
+    else if (dayjs.isDayjs(value) && value.isValid()) this.pmtdate.set(value.format(DEFAULT_NODE_DATE_FORMAT));
     else if (value instanceof Date && !Number.isNaN(value.getTime()))
-      this.pmtdate.set(dayjs(value).format('YYYY-MM-DD'));
+      this.pmtdate.set(dayjs(value).format(DEFAULT_NODE_DATE_FORMAT));
   }
 
   // ── Submit ────────────────────────────────────────────────────────────────

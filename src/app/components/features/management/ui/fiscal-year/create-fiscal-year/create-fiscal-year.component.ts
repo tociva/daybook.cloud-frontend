@@ -41,6 +41,7 @@ import { FiscalYearFacade, FiscalYearStore } from '../../../data/fiscal-year';
 import type { FiscalYearPayload } from '../../../data/fiscal-year';
 import { AutoNumberingTemplateGeneratorComponent } from '../../../../../../shared/auto-numbering-template-generator/auto-numbering-template-generator.component';
 import { toDateRangeEnd } from '../../../../../../core/date/dayjs-date.utils';
+import { DEFAULT_NODE_DATE_FORMAT } from '../../../../../../util/constants';
 
 dayjs.extend(customParseFormat);
 
@@ -155,7 +156,7 @@ export class CreateFiscalYearComponent implements AfterViewInit {
     const year = this.startYear();
     const month = this.fiscalStartMonth(); // 1-indexed
     const day = this.fiscalStartDay();
-    return dayjs().year(year).month(month - 1).date(day).format('YYYY-MM-DD');
+    return dayjs().year(year).month(month - 1).date(day).format(DEFAULT_NODE_DATE_FORMAT);
   });
 
   protected readonly enddate = computed(() =>
@@ -265,7 +266,7 @@ export class CreateFiscalYearComponent implements AfterViewInit {
         this.name.set(fy.name ?? '');
         // Extract year from startdate for the year picker
         if (fy.startdate) {
-          const yr = dayjs(fy.startdate, 'YYYY-MM-DD').year();
+          const yr = dayjs(fy.startdate, DEFAULT_NODE_DATE_FORMAT).year();
           if (yr > 0) this.startYear.set(yr);
         }
         this.jnumber.set(fy.jnumber ?? '<<YYYY>>/<<SERIAL5>>');
@@ -293,7 +294,7 @@ export class CreateFiscalYearComponent implements AfterViewInit {
       return;
     }
     if (typeof value === 'string') this.freezetill.set(value);
-    else this.freezetill.set(dayjs(value as Date).format('YYYY-MM-DD'));
+    else this.freezetill.set(dayjs(value as Date).format(DEFAULT_NODE_DATE_FORMAT));
   }
 
   // ── Submit ────────────────────────────────────────────────────────────────

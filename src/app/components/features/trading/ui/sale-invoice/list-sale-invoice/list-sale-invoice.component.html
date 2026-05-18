@@ -101,7 +101,7 @@
         <ng-template tngTableCellTemplate="received" let-row="row">
           @if (totalReceived(row) === undefined) {
             <button type="button" class="link-button link-button--muted" (click)="createReceiptForInvoice(row)">
-              New Receipt
+              Create Receipt
             </button>
           } @else if (isPaid(row)) {
             <button type="button" class="link-button" (click)="viewReceiptForInvoice(row)">
