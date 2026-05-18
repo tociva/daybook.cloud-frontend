@@ -24,6 +24,15 @@ import type { ItemCategory } from '../../../data/item-category';
 import { ItemFacade, ItemStore } from '../../../data/item';
 import type { Item, ItemPayload } from '../../../data/item';
 
+/** Sentinel id used to represent the "Create new category" action inside the options list. */
+const CREATE_CATEGORY_SENTINEL_ID = '__create_category__';
+
+/** A fake ItemCategory object that acts as the "create" action option. */
+const CREATE_CATEGORY_SENTINEL: ItemCategory = {
+  id: CREATE_CATEGORY_SENTINEL_ID,
+  name: 'No categories found — create one',
+} as ItemCategory;
+
 type ItemFormModel = {
   name: string;
   code: string;
@@ -148,6 +157,10 @@ export class CreateItemComponent implements AfterViewInit {
   protected readonly categoryOptionValue = (cat: ItemCategory): string => cat.id ?? '';
   protected readonly categoryOptionLabel = (cat: ItemCategory): string => cat.name ?? '';
   protected readonly categoryTrackBy = (_index: number, cat: ItemCategory): string => cat.id ?? '';
+
+  /** Expose sentinel id so the template can detect the create-action row. */
+  protected readonly createCategorySentinelId = CREATE_CATEGORY_SENTINEL_ID;
+
   protected readonly filteredCategories = computed(() =>
     this.filterAutocompleteOptions(
       this.itemCategoryStore.items(),
@@ -155,6 +168,19 @@ export class CreateItemComponent implements AfterViewInit {
       this.categoryQuery(),
     ),
   );
+
+  /**
+   * Options list passed to the autocomplete.
+   * When the filtered list is empty, append the sentinel "create" option so
+   * there is always something actionable to show.
+   */
+  protected readonly filteredCategoriesWithCreate = computed(() => {
+    const categories = this.filteredCategories();
+    if (categories.length === 0) {
+      return [CREATE_CATEGORY_SENTINEL];
+    }
+    return categories;
+  });
 
   // ──────────────────────────────────────────────────────────────────────────
 
@@ -231,6 +257,12 @@ export class CreateItemComponent implements AfterViewInit {
   protected onCategoryChange(value: unknown): void {
     const categoryId = typeof value === 'string' ? value : '';
     if (!categoryId) return;
+
+    // Intercept the sentinel — treat as "navigate to create category".
+    if (categoryId === CREATE_CATEGORY_SENTINEL_ID) {
+      this.createNewCategory();
+      return;
+    }
 
     // Auto-fill code from the selected category if code field is empty
     const category = this.itemCategoryStore.items().find((c) => c.id === categoryId);

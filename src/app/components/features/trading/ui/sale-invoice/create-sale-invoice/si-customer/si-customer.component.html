@@ -2,13 +2,16 @@
   <!-- Customer search (hidden once a customer is chosen) -->
   @if (!readOnly() && !draft.selectedCustomer()) {
     <div class="field field--full">
-      <tng-form-field labelPosition="above" [invalid]="draft.customerError() !== null">
+      <div class="label-with-action">
         <tng-label forId="cust-search" required>Customer</tng-label>
+        <button type="button" class="create-customer-link" (click)="createNewCustomer()">+ Create new Customer</button>
+      </div>
+      <tng-form-field [invalid]="draft.customerError() !== null" [requiredMarker]="false">
         <tng-autocomplete
           id="cust-search"
           placeholder="Search by name, mobile or email…"
           ariaLabel="Customer"
-          [options]="draft.filteredCustomers()"
+          [options]="filteredCustomersWithCreate()"
           [value]="draft.customerid()"
           [getOptionValue]="customerOptionValue"
           [getOptionLabel]="customerOptionLabel"
@@ -17,9 +20,16 @@
           (queryChange)="draft.onCustomerSearchInput($any($event))"
         >
           <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
-            <span>{{ label }}</span>
-            @if (option.mobile) {
-              <span class="muted"> · {{ option.mobile }}</span>
+            @if (option.id === createSentinelId) {
+              <span class="create-option">
+                <span class="create-option__icon">＋</span>
+                <span class="create-option__text">No customers found — <strong>create one</strong></span>
+              </span>
+            } @else {
+              <span>{{ label }}</span>
+              @if (option.mobile) {
+                <span class="muted"> · {{ option.mobile }}</span>
+              }
             }
           </ng-template>
         </tng-autocomplete>

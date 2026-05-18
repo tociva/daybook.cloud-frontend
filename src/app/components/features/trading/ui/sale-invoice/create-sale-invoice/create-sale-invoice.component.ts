@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, ViewChild, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
@@ -48,6 +48,8 @@ export class CreateSaleInvoiceComponent {
 
   protected readonly draft = inject(SaleInvoiceDraftStore);
 
+  @ViewChild(SiLineItemsComponent) private lineItemsRef?: SiLineItemsComponent;
+
   // ── Mode ──────────────────────────────────────────────────────────────────
 
   protected readonly id = signal<string | null>(null);
@@ -72,6 +74,33 @@ export class CreateSaleInvoiceComponent {
 
     const id = this.route.snapshot.paramMap.get('id');
     this.id.set(id);
+
+    if (!id) {
+      const snapshot = this.draft.restoreAndClearDraft();
+      if (snapshot) {
+        this.draft.applySnapshot(snapshot);
+
+        // If the user just created a new customer, auto-select it and focus the
+        // first line-item autocomplete (customer field is now hidden).
+        const newCustomer = this.customerStore.selectedItem();
+        this.customerStore.clearSelectedItem();
+        if (newCustomer?.id) {
+          this.draft.selectCustomer(newCustomer);
+          this.lineItemsRef?.focusItemAutocomplete(0);
+        }
+
+        // If the user just created a new item, auto-select it into the pending row
+        // and focus that row's price input (same UX as normal item selection).
+        const newItem = this.itemStore.selectedItem();
+        this.itemStore.clearSelectedItem();
+        const pendingRow = snapshot.pendingItemRowIndex;
+        if (newItem?.id && pendingRow !== null && pendingRow !== undefined) {
+          await this.draft.selectItem(newItem, pendingRow);
+          this.lineItemsRef?.focusPriceInput(pendingRow);
+        }
+      }
+      return;
+    }
 
     if (id) {
       // Instant pre-fill: if the list set selectedItem before navigating, patch

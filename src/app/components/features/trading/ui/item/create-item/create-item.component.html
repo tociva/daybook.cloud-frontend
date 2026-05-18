@@ -55,14 +55,25 @@
                     id="item-category"
                     placeholder="Search for a category"
                     ariaLabel="Category"
-                    [options]="filteredCategories()"
+                    [options]="filteredCategoriesWithCreate()"
                     [formField]="itemForm.categoryId"
                     [getOptionValue]="categoryOptionValue"
                     [getOptionLabel]="categoryOptionLabel"
                     [trackBy]="categoryTrackBy"
                     (valueChange)="onCategoryChange($event)"
                     (queryChange)="onCategoryQueryChange($event)"
-                  />
+                  >
+                    <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
+                      @if (option.id === createCategorySentinelId) {
+                        <span class="create-option">
+                          <span class="create-option__icon">＋</span>
+                          <span class="create-option__text">No categories found — <strong>create one</strong></span>
+                        </span>
+                      } @else {
+                        <span>{{ label }}</span>
+                      }
+                    </ng-template>
+                  </tng-autocomplete>
                   <tng-error [show]="categoryError() !== null">{{ categoryError() }}</tng-error>
                 </tng-form-field>
               </div>

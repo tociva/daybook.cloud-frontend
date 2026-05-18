@@ -1,5 +1,6 @@
 import { Component, ElementRef, computed, inject, input } from '@angular/core';
 import { form } from '@angular/forms/signals';
+import { Router } from '@angular/router';
 import {
   TngAutocompleteComponent,
   TngInputComponent,
@@ -8,8 +9,18 @@ import {
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import type { Item } from '../../../../data/item';
+import { ItemStore } from '../../../../data/item';
 import { UserSessionStore } from '../../../../../management/data/user-session/user-session.store';
 import { SaleInvoiceDraftStore, type ItemRow } from '../sale-invoice-draft.store';
+
+/** Sentinel id used to represent the "Create new item" action inside the options list. */
+const CREATE_ITEM_SENTINEL_ID = '__create_item__';
+
+/** A fake Item object that acts as the "create" action option. */
+const CREATE_ITEM_SENTINEL: Item = {
+  id: CREATE_ITEM_SENTINEL_ID,
+  name: 'No items found — create one',
+} as Item;
 
 const INTERACTIVE_CLICK_TARGET_SELECTOR = [
   'a[href]',
@@ -38,6 +49,8 @@ const INTERACTIVE_CLICK_TARGET_SELECTOR = [
 export class SiLineItemsComponent {
   protected readonly draft        = inject(SaleInvoiceDraftStore);
   private  readonly userSession   = inject(UserSessionStore);
+  private  readonly itemStore     = inject(ItemStore);
+  private  readonly router        = inject(Router);
   readonly readOnly = input(false);
   protected readonly lineItemsForm = form(this.draft.items);
   protected readonly rowCount = computed(() => this.lineItemsForm().value().length);
@@ -45,6 +58,9 @@ export class SiLineItemsComponent {
   protected readonly itemOptionLabel = (item: Item): string => item.displayname ?? item.name ?? '';
   protected readonly itemTrackBy = (_index: number, item: Item): unknown => item.id ?? item.name;
   private readonly hostElement = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  /** Expose sentinel id so the template can detect the create-action row. */
+  protected readonly createItemSentinelId = CREATE_ITEM_SENTINEL_ID;
 
   // ── Tax column visibility (derived from draft tax option) ──────────────
   // Intra State → CGST + SGST; Inter State → IGST only; Export / No Taxable → none
@@ -64,6 +80,12 @@ export class SiLineItemsComponent {
     const itemId = typeof value === 'string' ? value : '';
     if (!itemId) return;
 
+    // Intercept the sentinel — save draft and navigate to item create.
+    if (itemId === CREATE_ITEM_SENTINEL_ID) {
+      this.createNewItem(rowIndex);
+      return;
+    }
+
     const item = this.itemOptionsForRow(this.draft.items()[rowIndex]).find(
       (currentItem) => currentItem.id === itemId,
     );
@@ -80,6 +102,28 @@ export class SiLineItemsComponent {
     }
 
     return [row.item, ...options];
+  }
+
+  /**
+   * Options list for a row passed to the autocomplete.
+   * Appends the sentinel "create" option when nothing matches the current search.
+   */
+  protected itemOptionsForRowWithCreate(row: ItemRow): readonly Item[] {
+    const options = this.itemOptionsForRow(row);
+    if (options.length === 0) {
+      return [CREATE_ITEM_SENTINEL];
+    }
+    return options;
+  }
+
+  protected createNewItem(rowIndex: number): void {
+    // Clear stale selectedItem so we can distinguish "just created" vs "cancelled" on return.
+    this.itemStore.clearSelectedItem();
+    // Save full draft state + the row index to restore on return.
+    this.draft.saveDraft(rowIndex);
+    void this.router.navigate(['/app/trading/item/create'], {
+      queryParams: { burl: this.router.url },
+    });
   }
 
   protected focusNameAutocomplete(event: MouseEvent): void {
@@ -107,15 +151,27 @@ export class SiLineItemsComponent {
     currentTarget.querySelector<HTMLElement>(selector)?.focus();
   }
 
-  private focusPriceInputAfterSelection(rowIndex: number): void {
+  focusPriceInput(rowIndex: number): void {
     globalThis.setTimeout(() => {
       const priceInput = this.hostElement.nativeElement.querySelector<HTMLInputElement>(
         `.si-li-col-price[data-row-index="${rowIndex}"] [data-slot="input"]`,
       );
-
       priceInput?.focus();
       priceInput?.select();
     });
+  }
+
+  focusItemAutocomplete(rowIndex: number): void {
+    globalThis.setTimeout(() => {
+      const trigger = this.hostElement.nativeElement.querySelector<HTMLElement>(
+        `.si-li-col-name[data-row-index="${rowIndex}"] [data-slot="autocomplete-trigger"]`,
+      );
+      trigger?.focus();
+    });
+  }
+
+  private focusPriceInputAfterSelection(rowIndex: number): void {
+    this.focusPriceInput(rowIndex);
   }
 
   // ── Width freed by hidden tax columns ──────────────────────────────────

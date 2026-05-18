@@ -55,6 +55,41 @@ export interface ItemRow {
 
 export type SelectOption = Readonly<{ label: string; value: string }>;
 
+interface SaleInvoiceDraftSnapshot {
+  autoNumbering: boolean;
+  numberEnabled: boolean;
+  number: string;
+  date: string;
+  duedate: string;
+  currencycode: string;
+  taxoption: string;
+  deliverystate: string;
+  customerid: string;
+  selectedCustomer: Customer | null;
+  customerSearch: string;
+  useBillingForShipping: boolean;
+  billingName: string;
+  billingLine1: string;
+  billingLine2: string;
+  billingCity: string;
+  billingState: string;
+  billingZip: string;
+  billingCountry: string;
+  shippingName: string;
+  shippingLine1: string;
+  shippingLine2: string;
+  shippingCity: string;
+  shippingState: string;
+  shippingZip: string;
+  shippingCountry: string;
+  roundoff: string;
+  showDiscount: boolean;
+  showDescription: boolean;
+  items: ItemRow[];
+  /** Row index into which a newly-created item should be auto-selected on return. */
+  pendingItemRowIndex: number | null;
+}
+
 // ── Draft Store ───────────────────────────────────────────────────────────────
 
 @Injectable()
@@ -487,6 +522,97 @@ export class SaleInvoiceDraftStore {
     if (this.items().length > 1) {
       this.items.update((rows) => rows.filter((_, i) => i !== index));
     }
+  }
+
+  // ── Create-customer navigation draft ─────────────────────────────────────
+
+  private static readonly DRAFT_KEY = 'sale-invoice-create-draft';
+
+  saveDraft(pendingItemRowIndex: number | null = null): void {
+    try {
+      const snapshot: SaleInvoiceDraftSnapshot = {
+        autoNumbering: this.autoNumbering(),
+        numberEnabled: this.numberEnabled(),
+        number: this.number(),
+        date: this.date(),
+        duedate: this.duedate(),
+        currencycode: this.currencycode(),
+        taxoption: this.taxoption(),
+        deliverystate: this.deliverystate(),
+        customerid: this.customerid(),
+        selectedCustomer: this.selectedCustomer(),
+        customerSearch: this.customerSearch(),
+        useBillingForShipping: this.useBillingForShipping(),
+        billingName: this.billingName(),
+        billingLine1: this.billingLine1(),
+        billingLine2: this.billingLine2(),
+        billingCity: this.billingCity(),
+        billingState: this.billingState(),
+        billingZip: this.billingZip(),
+        billingCountry: this.billingCountry(),
+        shippingName: this.shippingName(),
+        shippingLine1: this.shippingLine1(),
+        shippingLine2: this.shippingLine2(),
+        shippingCity: this.shippingCity(),
+        shippingState: this.shippingState(),
+        shippingZip: this.shippingZip(),
+        shippingCountry: this.shippingCountry(),
+        roundoff: this.roundoff(),
+        showDiscount: this.showDiscount(),
+        showDescription: this.showDescription(),
+        items: this.items(),
+        pendingItemRowIndex,
+      };
+      sessionStorage.setItem(SaleInvoiceDraftStore.DRAFT_KEY, JSON.stringify(snapshot));
+    } catch {
+      // sessionStorage may be unavailable (private browsing, quota, etc.)
+    }
+  }
+
+  restoreAndClearDraft(): SaleInvoiceDraftSnapshot | null {
+    try {
+      const raw = sessionStorage.getItem(SaleInvoiceDraftStore.DRAFT_KEY);
+      if (!raw) return null;
+      sessionStorage.removeItem(SaleInvoiceDraftStore.DRAFT_KEY);
+      return JSON.parse(raw) as SaleInvoiceDraftSnapshot;
+    } catch {
+      return null;
+    }
+  }
+
+  applySnapshot(snapshot: SaleInvoiceDraftSnapshot): void {
+    this.autoNumbering.set(snapshot.autoNumbering);
+    this.numberEnabled.set(snapshot.numberEnabled);
+    this.number.set(snapshot.number);
+    this.date.set(snapshot.date);
+    this.duedate.set(snapshot.duedate);
+    this.currencycode.set(snapshot.currencycode);
+    this.taxoption.set(snapshot.taxoption);
+    this.deliverystate.set(snapshot.deliverystate);
+    this.customerid.set(snapshot.customerid);
+    this.selectedCustomer.set(snapshot.selectedCustomer);
+    this.customerSearch.set(snapshot.customerSearch);
+    this.useBillingForShipping.set(snapshot.useBillingForShipping);
+    this.billingName.set(snapshot.billingName);
+    this.billingLine1.set(snapshot.billingLine1);
+    this.billingLine2.set(snapshot.billingLine2);
+    this.billingCity.set(snapshot.billingCity);
+    this.billingState.set(snapshot.billingState);
+    this.billingZip.set(snapshot.billingZip);
+    this.billingCountry.set(snapshot.billingCountry);
+    this.shippingName.set(snapshot.shippingName);
+    this.shippingLine1.set(snapshot.shippingLine1);
+    this.shippingLine2.set(snapshot.shippingLine2);
+    this.shippingCity.set(snapshot.shippingCity);
+    this.shippingState.set(snapshot.shippingState);
+    this.shippingZip.set(snapshot.shippingZip);
+    this.shippingCountry.set(snapshot.shippingCountry);
+    this.roundoff.set(snapshot.roundoff);
+    this.showDiscount.set(snapshot.showDiscount);
+    this.showDescription.set(snapshot.showDescription);
+    this.items.set(snapshot.items);
+    // pendingItemRowIndex is intentionally not restored as a signal — it is
+    // read once by the parent component during initialisation and then discarded.
   }
 
   // ── Private helpers ───────────────────────────────────────────────────────

@@ -91,6 +91,7 @@
           <td [attr.rowspan]="rowSpan()" class="si-li-col-serial text-center">{{ i + 1 }}</td>
           <td
             [attr.rowspan]="rowSpan()"
+            [attr.data-row-index]="i"
             class="si-li-col-name p-0"
             (click)="focusNameAutocomplete($event)"
           >
@@ -102,7 +103,7 @@
               <tng-autocomplete
                 ariaLabel="Item"
                 placeholder="Search item"
-                [options]="itemOptionsForRow(_row)"
+                [options]="itemOptionsForRowWithCreate(_row)"
                 [value]="_row.itemid"
                 [getOptionValue]="itemOptionValue"
                 [getOptionLabel]="itemOptionLabel"
@@ -111,9 +112,16 @@
                 (valueChange)="onItemValueChange($event, i)"
               >
                 <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
-                  <span>{{ label }}</span>
-                  @if (option.code) {
-                    <span class="si-li-option-code"> - {{ option.code }}</span>
+                  @if (option.id === createItemSentinelId) {
+                    <span class="si-li-create-option">
+                      <span class="si-li-create-option__icon">＋</span>
+                      <span class="si-li-create-option__text">No items found — <strong>create one</strong></span>
+                    </span>
+                  } @else {
+                    <span>{{ label }}</span>
+                    @if (option.code) {
+                      <span class="si-li-option-code"> - {{ option.code }}</span>
+                    }
                   }
                 </ng-template>
               </tng-autocomplete>

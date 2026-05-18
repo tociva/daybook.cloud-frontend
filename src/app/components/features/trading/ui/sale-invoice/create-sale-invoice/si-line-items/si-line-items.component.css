@@ -138,6 +138,27 @@
   color: var(--tng-semantic-foreground-secondary);
 }
 
+/* ── Create-item sentinel option ──────────────────────────────────────── */
+.si-li-create-option {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--tng-semantic-accent-brand);
+  font-size: 0.85rem;
+  padding-block: 0.1rem;
+}
+.si-li-create-option__icon {
+  font-size: 1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.si-li-create-option__text {
+  line-height: 1.3;
+}
+.si-li-create-option__text strong {
+  font-weight: 700;
+}
+
 .si-li-read-value {
   display: block;
   overflow: hidden;
