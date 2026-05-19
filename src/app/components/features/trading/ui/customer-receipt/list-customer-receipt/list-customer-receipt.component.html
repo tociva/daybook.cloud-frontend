@@ -64,7 +64,7 @@
         </ng-template>
 
         <ng-template tngTableCellTemplate="customer" let-row="row">
-          {{ row.customer?.name || '—' }}
+          {{ row.customer?.name || '' }}
         </ng-template>
 
         <ng-template tngTableCellTemplate="amount" let-row="row">
@@ -72,11 +72,11 @@
         </ng-template>
 
         <ng-template tngTableCellTemplate="bcash" let-row="row">
-          {{ row.bcash?.name || '—' }}
+          {{ row.bcash?.name || '' }}
         </ng-template>
 
         <ng-template tngTableCellTemplate="description" let-row="row">
-          {{ row.description || '—' }}
+          {{ row.description || '' }}
         </ng-template>
 
         <ng-template tngTableCellTemplate="actions" let-row="row">
