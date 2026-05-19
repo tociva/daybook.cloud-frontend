@@ -53,7 +53,12 @@ export class DeletePurchaseReturnComponent {
     if (this.purchaseReturnStore.selectedItem()?.id === id) return;
 
     await this.purchaseReturnStore.loadPurchaseReturnById(id, {
-      includes: [{ relation: 'purchaseinvoice', scope: { include: ['vendor'] } }],
+      includes: [
+        {
+          relation: 'purchaseinvoice',
+          scope: { include: [{ relation: 'vendor' }] },
+        },
+      ],
     });
   }
 

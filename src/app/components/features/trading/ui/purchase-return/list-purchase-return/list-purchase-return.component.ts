@@ -111,7 +111,12 @@ export class ListPurchaseReturnComponent {
       (filter) =>
         void this.purchaseReturnStore.loadPurchaseReturns({
           ...filter,
-          includes: [{ relation: 'purchaseinvoice', scope: { include: ['vendor'] } }],
+          includes: [
+            {
+              relation: 'purchaseinvoice',
+              scope: { include: [{ relation: 'vendor' }] },
+            },
+          ],
         }),
     );
   }

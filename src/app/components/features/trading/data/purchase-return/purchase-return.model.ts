@@ -122,7 +122,7 @@ export type PurchaseReturnGetQuery = Readonly<{
 export const PURCHASE_RETURN_DETAIL_INCLUDES = [
   {
     relation: 'purchaseinvoice',
-    scope: { include: ['vendor'] },
+    scope: { include: [{ relation: 'vendor' }] },
   },
   {
     relation: 'items',
@@ -134,14 +134,14 @@ export const PURCHASE_RETURN_DETAIL_INCLUDES = [
             include: [
               {
                 relation: 'category',
-                scope: { include: ['taxgroup'] },
+                scope: { include: [{ relation: 'taxgroup' }] },
               },
             ],
           },
         },
         {
           relation: 'taxes',
-          scope: { include: ['tax'] },
+          scope: { include: [{ relation: 'tax' }] },
         },
       ],
     },
