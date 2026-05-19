@@ -187,6 +187,8 @@ export class CreateItemCategoryComponent implements AfterViewInit {
   }
 
   private async loadInitialState(): Promise<void> {
+    this.itemCategoryStore.clearError();
+
     await Promise.all([
       this.itemCategoryStore.loadItemCategories({}),
       this.taxGroupStore.loadTaxGroups({}),

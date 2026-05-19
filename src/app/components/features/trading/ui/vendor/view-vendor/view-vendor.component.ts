@@ -59,6 +59,8 @@ export class ViewVendorComponent {
   }
 
   private async loadInitialState(): Promise<void> {
+    this.vendorStore.clearError();
+
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) return;
     const skipVendorFetch = this.vendorStore.selectedItem()?.id === id;

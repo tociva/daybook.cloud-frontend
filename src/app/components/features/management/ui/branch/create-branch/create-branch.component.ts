@@ -213,6 +213,8 @@ export class CreateBranchComponent implements AfterViewInit {
   }
 
   private async loadInitialState(): Promise<void> {
+    this.branchStore.clearError();
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.id.set(id);

@@ -39,6 +39,11 @@ export const TaxStore = signalStore(
     };
 
     return {
+      clearError(): void {
+        patchState(store, (state) => ({
+          tax: { ...state.tax, error: null },
+        }));
+      },
       clearSelectedItem(): void {
         patchState(store, (state) => ({
           tax: {

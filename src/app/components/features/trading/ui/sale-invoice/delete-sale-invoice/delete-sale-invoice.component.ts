@@ -45,6 +45,8 @@ export class DeleteSaleInvoiceComponent {
   }
 
   private async loadInitialState(): Promise<void> {
+    this.saleInvoiceStore.clearError();
+
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) return;
 

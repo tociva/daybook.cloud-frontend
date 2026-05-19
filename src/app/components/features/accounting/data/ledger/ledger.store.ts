@@ -31,6 +31,11 @@ export const LedgerStore = signalStore(
     };
 
     return {
+      clearError(): void {
+        patchState(store, (state) => ({
+          ledger: { ...state.ledger, error: null },
+        }));
+      },
       clearSelectedItem(): void {
         patchState(store, (state) => ({
           ledger: { ...state.ledger, selectedItem: null },

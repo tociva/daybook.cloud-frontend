@@ -49,6 +49,10 @@ export const OrganizationStore = signalStore(
         patchState(store, initialOrganizationState);
       },
 
+      clearError(): void {
+        patchState(store, { error: null });
+      },
+
       setSearch(search: string): void {
         patchState(store, { search });
       },

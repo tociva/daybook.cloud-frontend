@@ -51,6 +51,10 @@ export const FiscalYearStore = signalStore(
         patchState(store, initialFiscalYearState);
       },
 
+      clearError(): void {
+        patchState(store, { error: null });
+      },
+
       setBranchId(branchId: string | null): void {
         patchState(store, { branchId });
       },

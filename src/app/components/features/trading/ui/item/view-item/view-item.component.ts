@@ -42,6 +42,8 @@ export class ViewItemComponent {
   }
 
   private async loadInitialState(): Promise<void> {
+    this.itemStore.clearError();
+
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) return;
     if (this.itemStore.selectedItem()?.id === id) return;

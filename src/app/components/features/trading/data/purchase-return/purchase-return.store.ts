@@ -36,6 +36,12 @@ export const PurchaseReturnStore = signalStore(
     };
 
     return {
+      clearError(): void {
+        patchState(store, (state) => ({
+          purchaseReturn: { ...state.purchaseReturn, error: null },
+        }));
+      },
+
       clearSelectedItem(): void {
         patchState(store, (state) => ({
           purchaseReturn: { ...state.purchaseReturn, selectedItem: null },

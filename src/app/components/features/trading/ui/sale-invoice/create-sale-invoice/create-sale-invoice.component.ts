@@ -65,6 +65,8 @@ export class CreateSaleInvoiceComponent {
   }
 
   private async loadInitialState(): Promise<void> {
+    this.saleInvoiceStore.clearError();
+
     await Promise.all([
       this.customerStore.loadCustomers({}),
       this.itemStore.loadItems({ includes: ['category'] }),

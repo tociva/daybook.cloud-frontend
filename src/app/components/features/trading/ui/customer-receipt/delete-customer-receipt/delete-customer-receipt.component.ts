@@ -45,6 +45,8 @@ export class DeleteCustomerReceiptComponent {
   }
 
   private async loadInitialState(): Promise<void> {
+    this.customerReceiptStore.clearError();
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       await this.customerReceiptStore.loadCustomerReceiptById(id, {

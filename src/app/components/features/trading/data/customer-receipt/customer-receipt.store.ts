@@ -36,6 +36,11 @@ export const CustomerReceiptStore = signalStore(
     };
 
     return {
+      clearError(): void {
+        patchState(store, (state) => ({
+          customerReceipt: { ...state.customerReceipt, error: null },
+        }));
+      },
       clearSelectedItem(): void {
         patchState(store, (state) => ({
           customerReceipt: { ...state.customerReceipt, selectedItem: null },

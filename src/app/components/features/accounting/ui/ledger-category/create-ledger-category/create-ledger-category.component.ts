@@ -123,6 +123,8 @@ export class CreateLedgerCategoryComponent implements AfterViewInit {
   }
 
   private async loadInitialState(): Promise<void> {
+    this.ledgerCategoryStore.clearError();
+
     await this.ledgerCategoryStore.loadLedgerCategories({});
 
     const id = this.route.snapshot.paramMap.get('id');

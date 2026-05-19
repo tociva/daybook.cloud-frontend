@@ -45,6 +45,8 @@ export class ViewOrganizationComponent {
   }
 
   private async loadInitialState(): Promise<void> {
+    this.organizationStore.clearError();
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       await this.organizationStore.loadOrganizationById(id);

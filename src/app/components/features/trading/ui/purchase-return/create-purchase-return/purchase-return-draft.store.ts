@@ -192,34 +192,41 @@ export class PurchaseReturnDraftStore {
     this.showDescription.set(cprops?.showdescription ?? false);
 
     if (ret.purchaseinvoice) {
-      this.selectedPurchaseInvoice.set(ret.purchaseinvoice as PurchaseInvoice);
-      this.invoiceSearch.set(ret.purchaseinvoice.number ?? '');
+      const inv = ret.purchaseinvoice as PurchaseInvoice;
+      this.selectedPurchaseInvoice.set(inv);
+      this.invoiceSearch.set(inv.number ?? '');
     }
 
     this.roundoff.set(String(ret.roundoff ?? 0));
 
-    this.items.set(
-      (ret.items ?? []).map((ri) => ({
-        item: (ri.item as Item) ?? null,
-        itemid: ri.itemid ?? ri.item?.id ?? '',
-        name: ri.name,
-        code: ri.code,
-        description: ri.description ?? '',
-        price: ri.price,
-        quantity: ri.quantity,
-        itemtotal: ri.itemtotal,
-        taxamount: ri.taxamount ?? 0,
-        grandtotal: ri.grandtotal,
-        taxes: (ri.taxes ?? []).map((t) => ({
-          taxid: t.taxid ?? t.tax?.id ?? '',
-          name: t.name,
-          shortname: t.shortname,
-          rate: t.rate,
-          appliedto: t.appliedto,
-          amount: t.amount,
+    // Only update line items when they are explicitly included in the response.
+    // The list query omits items, so patching from a cached list entry must not
+    // clear the table to an empty array; the full detail response (which does
+    // include items) will populate it once the API call completes.
+    if (ret.items !== undefined) {
+      this.items.set(
+        ret.items.map((ri) => ({
+          item: (ri.item as Item) ?? null,
+          itemid: ri.itemid ?? ri.item?.id ?? '',
+          name: ri.name,
+          code: ri.code,
+          description: ri.description ?? '',
+          price: ri.price,
+          quantity: ri.quantity,
+          itemtotal: ri.itemtotal,
+          taxamount: ri.taxamount ?? 0,
+          grandtotal: ri.grandtotal,
+          taxes: (ri.taxes ?? []).map((t) => ({
+            taxid: t.taxid ?? t.tax?.id ?? '',
+            name: t.name,
+            shortname: t.shortname,
+            rate: t.rate,
+            appliedto: t.appliedto,
+            amount: t.amount,
+          })),
         })),
-      })),
-    );
+      );
+    }
   }
 
   // ── Invoice methods ───────────────────────────────────────────────────────

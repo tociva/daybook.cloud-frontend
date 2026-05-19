@@ -42,6 +42,8 @@ export class DeleteBankCashComponent {
   }
 
   private async loadInitialState(): Promise<void> {
+    this.bankCashStore.clearError();
+
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) return;
     if (this.bankCashStore.selectedItem()?.id === id) return;

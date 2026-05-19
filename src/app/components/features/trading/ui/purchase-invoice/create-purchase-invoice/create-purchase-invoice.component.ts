@@ -65,6 +65,8 @@ export class CreatePurchaseInvoiceComponent {
   }
 
   private async loadInitialState(): Promise<void> {
+    this.purchaseInvoiceStore.clearError();
+
     await Promise.all([
       this.vendorStore.loadVendors({}),
       this.itemStore.loadItems({ includes: ['category'] }),

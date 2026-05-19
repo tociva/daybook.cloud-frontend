@@ -36,6 +36,11 @@ export const SaleInvoiceStore = signalStore(
     };
 
     return {
+      clearError(): void {
+        patchState(store, (state) => ({
+          saleInvoice: { ...state.saleInvoice, error: null },
+        }));
+      },
       clearSelectedItem(): void {
         patchState(store, (state) => ({
           saleInvoice: { ...state.saleInvoice, selectedItem: null },

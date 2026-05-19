@@ -193,6 +193,8 @@ export class CreateItemComponent implements AfterViewInit {
   }
 
   private async loadInitialState(): Promise<void> {
+    this.itemStore.clearError();
+
     // Pre-load categories for the autocomplete
     await this.itemCategoryStore.loadItemCategories({});
 

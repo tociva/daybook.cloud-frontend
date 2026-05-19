@@ -230,6 +230,8 @@ export class CreateVendorPaymentComponent {
   }
 
   private async loadInitialState(): Promise<void> {
+    this.vendorPaymentStore.clearError();
+
     await Promise.all([
       this.vendorStore.loadVendors({}),
       this.bankCashStore.loadBankCashes({}),

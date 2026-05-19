@@ -230,6 +230,8 @@ export class CreateCustomerReceiptComponent {
   }
 
   private async loadInitialState(): Promise<void> {
+    this.customerReceiptStore.clearError();
+
     await Promise.all([
       this.customerStore.loadCustomers({}),
       this.bankCashStore.loadBankCashes({}),

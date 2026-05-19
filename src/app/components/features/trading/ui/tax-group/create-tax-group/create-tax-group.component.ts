@@ -189,6 +189,8 @@ export class CreateTaxGroupComponent implements AfterViewInit {
   }
 
   private async loadInitialState(): Promise<void> {
+    this.taxGroupStore.clearError();
+
     // Read routeId synchronously first so we can decide the tax load strategy.
     const routeId = this.route.snapshot.paramMap.get('id');
     this.id.set(routeId);

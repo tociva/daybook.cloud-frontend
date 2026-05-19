@@ -36,6 +36,11 @@ export const VendorPaymentStore = signalStore(
     };
 
     return {
+      clearError(): void {
+        patchState(store, (state) => ({
+          vendorPayment: { ...state.vendorPayment, error: null },
+        }));
+      },
       clearSelectedItem(): void {
         patchState(store, (state) => ({
           vendorPayment: { ...state.vendorPayment, selectedItem: null },

@@ -112,6 +112,8 @@ export class CreateLedgerComponent implements AfterViewInit {
   }
 
   private async loadInitialState(): Promise<void> {
+    this.ledgerStore.clearError();
+
     await this.ledgerCategoryStore.loadLedgerCategories({});
 
     const id = this.route.snapshot.paramMap.get('id');

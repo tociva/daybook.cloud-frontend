@@ -39,6 +39,11 @@ export const BankCashStore = signalStore(
     };
 
     return {
+      clearError(): void {
+        patchState(store, (state) => ({
+          bankCash: { ...state.bankCash, error: null },
+        }));
+      },
       clearSelectedItem(): void {
         patchState(store, (state) => ({
           bankCash: {

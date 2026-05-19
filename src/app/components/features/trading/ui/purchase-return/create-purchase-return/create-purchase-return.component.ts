@@ -62,6 +62,8 @@ export class CreatePurchaseReturnComponent {
   }
 
   private async loadInitialState(): Promise<void> {
+    this.purchaseReturnStore.clearError();
+
     await Promise.all([
       this.purchaseInvoiceStore.loadPurchaseInvoices({ includes: ['vendor'] }),
       this.itemStore.loadItems({ includes: ['category'] }),

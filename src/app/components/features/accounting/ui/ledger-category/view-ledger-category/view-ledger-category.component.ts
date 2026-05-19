@@ -45,6 +45,8 @@ export class ViewLedgerCategoryComponent {
   }
 
   private async loadInitialState(): Promise<void> {
+    this.ledgerCategoryStore.clearError();
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       await this.ledgerCategoryStore.loadLedgerCategoryById(id, { includes: ['parent'] });

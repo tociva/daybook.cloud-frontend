@@ -39,6 +39,11 @@ export const TaxGroupStore = signalStore(
     };
 
     return {
+      clearError(): void {
+        patchState(store, (state) => ({
+          taxGroup: { ...state.taxGroup, error: null },
+        }));
+      },
       getAvailableModes(): string[] {
         return Array.from(
           new Set(

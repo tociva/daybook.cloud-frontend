@@ -47,6 +47,10 @@ export const BranchStore = signalStore(
         patchState(store, initialBranchState);
       },
 
+      clearError(): void {
+        patchState(store, { error: null });
+      },
+
       setOrganizationId(organizationId: string | null): void {
         patchState(store, { organizationId });
       },

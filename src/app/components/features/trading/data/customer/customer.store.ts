@@ -36,6 +36,11 @@ export const CustomerStore = signalStore(
     };
 
     return {
+      clearError(): void {
+        patchState(store, (state) => ({
+          customer: { ...state.customer, error: null },
+        }));
+      },
       clearSelectedItem(): void {
         patchState(store, (state) => ({
           customer: { ...state.customer, selectedItem: null },

@@ -44,6 +44,8 @@ export class DeleteBranchComponent {
   }
 
   private async loadInitialState(): Promise<void> {
+    this.branchStore.clearError();
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       await this.branchStore.loadBranchById(id, { includes: ['organization'] });

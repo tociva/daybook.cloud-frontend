@@ -48,6 +48,8 @@ export class DeleteFiscalYearComponent {
   }
 
   private async loadInitialState(): Promise<void> {
+    this.fiscalYearStore.clearError();
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       await this.fiscalYearStore.loadFiscalYearById(id, { includes: ['branch'] });

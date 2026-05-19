@@ -32,6 +32,11 @@ export const ItemStore = signalStore(
     };
 
     return {
+      clearError(): void {
+        patchState(store, (state) => ({
+          item: { ...state.item, error: null },
+        }));
+      },
       clearSelectedItem(): void {
         patchState(store, (state) => ({
           item: { ...state.item, selectedItem: null },

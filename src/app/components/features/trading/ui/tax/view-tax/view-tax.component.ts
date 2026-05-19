@@ -48,6 +48,8 @@ export class ViewTaxComponent {
   }
 
   private async loadInitialState(): Promise<void> {
+    this.taxStore.clearError();
+
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) return;
     if (this.taxStore.selectedItem()?.id === id) return;

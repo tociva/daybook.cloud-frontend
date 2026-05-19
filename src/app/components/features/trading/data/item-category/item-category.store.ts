@@ -36,6 +36,11 @@ export const ItemCategoryStore = signalStore(
     };
 
     return {
+      clearError(): void {
+        patchState(store, (state) => ({
+          itemCategory: { ...state.itemCategory, error: null },
+        }));
+      },
       clearSelectedItem(): void {
         patchState(store, (state) => ({
           itemCategory: { ...state.itemCategory, selectedItem: null },

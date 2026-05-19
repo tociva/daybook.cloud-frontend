@@ -45,6 +45,8 @@ export class ViewLedgerComponent {
   }
 
   private async loadInitialState(): Promise<void> {
+    this.ledgerStore.clearError();
+
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) return;
     if (this.ledgerStore.selectedItem()?.id === id) return;

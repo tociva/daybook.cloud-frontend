@@ -43,6 +43,8 @@ export class DeleteVendorComponent {
   }
 
   private async loadInitialState(): Promise<void> {
+    this.vendorStore.clearError();
+
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) return;
     if (this.vendorStore.selectedItem()?.id === id) return;

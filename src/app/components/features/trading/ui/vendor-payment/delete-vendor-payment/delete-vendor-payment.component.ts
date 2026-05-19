@@ -45,6 +45,8 @@ export class DeleteVendorPaymentComponent {
   }
 
   private async loadInitialState(): Promise<void> {
+    this.vendorPaymentStore.clearError();
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       await this.vendorPaymentStore.loadVendorPaymentById(id, {

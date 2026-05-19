@@ -42,6 +42,8 @@ export class ViewItemCategoryComponent {
   }
 
   private async loadInitialState(): Promise<void> {
+    this.itemCategoryStore.clearError();
+
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) return;
     // Always fetch full detail — taxgroup is not included in the list response.

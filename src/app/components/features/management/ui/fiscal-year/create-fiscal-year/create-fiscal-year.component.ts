@@ -256,6 +256,8 @@ export class CreateFiscalYearComponent implements AfterViewInit {
   }
 
   private async loadInitialState(): Promise<void> {
+    this.fiscalYearStore.clearError();
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.id.set(id);
