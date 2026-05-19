@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import type { User } from 'oidc-client-ts';
+import type { User, UserManager } from 'oidc-client-ts';
 import { AuthConfig } from '../../../../core/config/app-config.model';
 import { OidcUserManagerFactory } from './oidc-user-manager.factory';
 
@@ -17,6 +17,7 @@ type OidcErrorResponseLike = Error & {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly oidcUserManagerFactory = inject(OidcUserManagerFactory);
+  private readonly inflightSilentRenewals = new Map<string, Promise<User | null>>();
 
   async hasActiveSession(authConfig: AuthConfig): Promise<boolean> {
     const manager = this.oidcUserManagerFactory.create(authConfig);
@@ -26,8 +27,39 @@ export class AuthService {
 
   async getAccessToken(authConfig: AuthConfig): Promise<string | null> {
     const manager = this.oidcUserManagerFactory.create(authConfig);
-    const user = await manager.getUser();
+    let user = await manager.getUser();
+
+    if (user && user.expired) {
+      user = await this.renewSilentlyOnce(authConfig, manager);
+    }
+
     return user && !user.expired ? user.access_token : null;
+  }
+
+  /**
+   * Triggers signinSilent() but de-duplicates concurrent calls for the same
+   * authority so a burst of requests hitting an expired token only fires one
+   * renewal. Resolves to null (rather than throwing) so callers can fall
+   * through to their existing 401 handling.
+   */
+  renewSilentlyOnce(authConfig: AuthConfig, manager?: UserManager): Promise<User | null> {
+    const key = authConfig.authority;
+    const existing = this.inflightSilentRenewals.get(key);
+    if (existing) {
+      return existing;
+    }
+
+    const userManager = manager ?? this.oidcUserManagerFactory.create(authConfig);
+    const renewal = userManager
+      .signinSilent()
+      .then((user) => user ?? null)
+      .catch(() => null)
+      .finally(() => {
+        this.inflightSilentRenewals.delete(key);
+      });
+
+    this.inflightSilentRenewals.set(key, renewal);
+    return renewal;
   }
 
   isLoginCallbackRoute(authConfig: AuthConfig): boolean {
