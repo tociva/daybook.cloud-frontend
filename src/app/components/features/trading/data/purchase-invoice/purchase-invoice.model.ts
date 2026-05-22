@@ -179,20 +179,20 @@ export const PURCHASE_INVOICE_DETAIL_INCLUDES = [
             include: [
               {
                 relation: 'category',
-                scope: { include: ['taxgroup'] },
+                scope: { include: [{ relation: 'taxgroup' }] },
               },
             ],
           },
         },
         {
           relation: 'taxes',
-          scope: { include: ['tax'] },
+          scope: { include: [{ relation: 'tax' }] },
         },
       ],
     },
   },
   {
     relation: 'payments',
-    scope: { include: ['vendorpayment'] },
+    scope: { include: [{ relation: 'vendorpayment' }] },
   },
 ] as const satisfies readonly Lb4Include[];

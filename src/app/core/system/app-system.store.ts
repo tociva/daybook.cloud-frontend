@@ -8,6 +8,7 @@ import { AppConfigStore } from '../config/app-config.store';
 import { UserSession } from '../../components/features/management/data/user-session/user-session.model';
 import { UserSessionService } from '../../components/features/management/data/user-session/user-session.service';
 import { UserSessionStore } from '../../components/features/management/data/user-session/user-session.store';
+import { getApiErrorMessage, isApiErrorStatus } from '../api/api-error.util';
 import { AppThemeStore } from '../theme/app-theme.store';
 import { AppStartupStatus, AppSystemModel } from './app-system.model';
 import { initialAppSystemState } from './app-system.state';
@@ -60,10 +61,14 @@ function resetStartup(system: AppSystemModel): AppSystemModel {
 }
 
 function asErrorMessage(error: unknown, fallbackMessage: string): string {
-  return error instanceof Error ? error.message : fallbackMessage;
+  return getApiErrorMessage(error, fallbackMessage);
 }
 
 function isUnauthorizedSessionError(error: unknown): boolean {
+  if (isApiErrorStatus(error, 401)) {
+    return true;
+  }
+
   const message =
     error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
   return (

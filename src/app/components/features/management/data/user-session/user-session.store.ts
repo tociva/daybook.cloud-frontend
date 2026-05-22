@@ -1,6 +1,7 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { ApiClientService } from '../../../../../core/api/api-client.service';
+import { normalizeApiError } from '../../../../../core/api/api-error.util';
 import { AppConfigStore } from '../../../../../core/config/app-config.store';
 import { UserSession } from './user-session.model';
 import { initialUserSessionState } from './user-session.state';
@@ -25,9 +26,6 @@ export const UserSessionStore = signalStore(
 
       return `${config.apiBaseUrl.replace(/\/$/, '')}/user/user-session`;
     };
-
-    const toErrorMessage = (error: unknown, fallback: string): string =>
-      error instanceof Error ? error.message : fallback;
 
     const resetSessionState = (): void => {
       patchState(store, initialUserSessionState);
@@ -63,6 +61,12 @@ export const UserSessionStore = signalStore(
       });
     };
 
+    const setAndThrowError = (error: unknown, fallbackMessage: string): never => {
+      const apiError = normalizeApiError(error, { fallbackMessage });
+      setErrorState(apiError.message);
+      throw apiError;
+    };
+
     return {
       resetSession(): void {
         resetSessionState();
@@ -84,9 +88,7 @@ export const UserSessionStore = signalStore(
           setSessionState(session);
           return session;
         } catch (error) {
-          const message = toErrorMessage(error, 'Failed to create user session.');
-          setErrorState(message);
-          throw new Error(message);
+          return setAndThrowError(error, 'Failed to create user session.');
         }
       },
       async selectOrganization(organizationid: UserSessionSelectionId): Promise<UserSession> {
@@ -100,9 +102,7 @@ export const UserSessionStore = signalStore(
           setSessionState(session);
           return session;
         } catch (error) {
-          const message = toErrorMessage(error, 'Failed to select organization.');
-          setErrorState(message);
-          throw new Error(message);
+          return setAndThrowError(error, 'Failed to select organization.');
         }
       },
       async selectBranch(branchid: UserSessionSelectionId): Promise<UserSession> {
@@ -116,9 +116,7 @@ export const UserSessionStore = signalStore(
           setSessionState(session);
           return session;
         } catch (error) {
-          const message = toErrorMessage(error, 'Failed to select branch.');
-          setErrorState(message);
-          throw new Error(message);
+          return setAndThrowError(error, 'Failed to select branch.');
         }
       },
       async selectFiscalYear(fiscalyearid: UserSessionSelectionId): Promise<UserSession> {
@@ -132,9 +130,7 @@ export const UserSessionStore = signalStore(
           setSessionState(session);
           return session;
         } catch (error) {
-          const message = toErrorMessage(error, 'Failed to select fiscal year.');
-          setErrorState(message);
-          throw new Error(message);
+          return setAndThrowError(error, 'Failed to select fiscal year.');
         }
       },
       async clearUserSession(): Promise<void> {
@@ -144,9 +140,7 @@ export const UserSessionStore = signalStore(
           await api.delete<void>(baseUrl);
           resetSessionState();
         } catch (error) {
-          const message = toErrorMessage(error, 'Failed to clear user session.');
-          setErrorState(message);
-          throw new Error(message);
+          setAndThrowError(error, 'Failed to clear user session.');
         }
       },
     };

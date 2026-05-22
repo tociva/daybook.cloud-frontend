@@ -28,17 +28,15 @@ export class PrInvoiceRefComponent {
 
   protected readonly invoiceOptionValue = (inv: PurchaseInvoice): string => inv.id ?? '';
   protected readonly invoiceOptionLabel = (inv: PurchaseInvoice): string =>
-    inv.number ? `${inv.number}${inv.vendor?.name ? ' — ' + inv.vendor.name : ''}` : inv.id ?? '';
+    inv.number ? `${inv.number}${inv.vendor?.name ? ' — ' + inv.vendor.name : ''}` : (inv.id ?? '');
   protected readonly invoiceTrackBy = (_index: number, inv: PurchaseInvoice): unknown =>
     inv.id ?? '';
 
-  protected onInvoiceValueChange(value: unknown): void {
+  protected async onInvoiceValueChange(value: unknown): Promise<void> {
     const id = typeof value === 'string' ? value : '';
     if (!id) return;
     const invoice = this.draft.filteredInvoices().find((inv) => inv.id === id) ?? null;
-    if (invoice) {
-      this.draft.selectInvoice(invoice);
-    }
+    await this.draft.selectInvoiceById(id, invoice);
   }
 
   protected clearInvoice(): void {

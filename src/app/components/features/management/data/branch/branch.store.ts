@@ -1,11 +1,9 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
 import type { Branch, BranchGetQuery, BranchListQuery, BranchPayload } from './branch.model';
 import { BranchService } from './branch.service';
 import { initialBranchState } from './branch.state';
-
-const getErrorMessage = (error: unknown, fallback: string): string =>
-  error instanceof Error ? error.message : fallback;
 
 export const BranchStore = signalStore(
   { providedIn: 'root' },
@@ -65,7 +63,7 @@ export const BranchStore = signalStore(
           const [branches, count] = await Promise.all([service.list(query), service.count(query)]);
           patchState(store, { branches, count, error: null, isLoading: false });
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load branches.'));
+          setError(getApiErrorMessage(error, 'Failed to load branches.'));
         }
       },
 
@@ -81,7 +79,7 @@ export const BranchStore = signalStore(
           });
           return branch;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load branch.'));
+          setError(getApiErrorMessage(error, 'Failed to load branch.'));
           return null;
         }
       },
@@ -100,7 +98,7 @@ export const BranchStore = signalStore(
           }));
           return branch;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to create branch.'));
+          setError(getApiErrorMessage(error, 'Failed to create branch.'));
           return null;
         }
       },
@@ -112,7 +110,7 @@ export const BranchStore = signalStore(
           patchState(store, { error: null, isLoading: false });
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to update branch.'));
+          setError(getApiErrorMessage(error, 'Failed to update branch.'));
           return false;
         }
       },
@@ -131,7 +129,7 @@ export const BranchStore = signalStore(
           }));
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to delete branch.'));
+          setError(getApiErrorMessage(error, 'Failed to delete branch.'));
           return false;
         }
       },

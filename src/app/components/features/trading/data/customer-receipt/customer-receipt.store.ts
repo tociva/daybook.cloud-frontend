@@ -1,5 +1,6 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
 import type {
   CustomerReceipt,
   CustomerReceiptGetQuery,
@@ -8,9 +9,6 @@ import type {
 } from './customer-receipt.model';
 import { CustomerReceiptService } from './customer-receipt.service';
 import { initialCustomerReceiptState } from './customer-receipt.state';
-
-const getErrorMessage = (error: unknown, fallback: string): string =>
-  error instanceof Error ? error.message : fallback;
 
 export const CustomerReceiptStore = signalStore(
   { providedIn: 'root' },
@@ -65,7 +63,7 @@ export const CustomerReceiptStore = signalStore(
           }));
           return receipt;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to create customer receipt.'));
+          setError(getApiErrorMessage(error, 'Failed to create customer receipt.'));
           return null;
         }
       },
@@ -89,7 +87,7 @@ export const CustomerReceiptStore = signalStore(
           }));
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to delete customer receipt.'));
+          setError(getApiErrorMessage(error, 'Failed to delete customer receipt.'));
           return false;
         }
       },
@@ -111,7 +109,7 @@ export const CustomerReceiptStore = signalStore(
           }));
           return receipt;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load customer receipt.'));
+          setError(getApiErrorMessage(error, 'Failed to load customer receipt.'));
           return null;
         }
       },
@@ -130,7 +128,7 @@ export const CustomerReceiptStore = signalStore(
             },
           }));
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load customer receipts.'));
+          setError(getApiErrorMessage(error, 'Failed to load customer receipts.'));
         }
       },
 
@@ -157,7 +155,7 @@ export const CustomerReceiptStore = signalStore(
           });
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to update customer receipt.'));
+          setError(getApiErrorMessage(error, 'Failed to update customer receipt.'));
           return false;
         }
       },

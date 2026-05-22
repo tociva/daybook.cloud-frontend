@@ -1,11 +1,9 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
 import type { Ledger, LedgerGetQuery, LedgerListQuery, LedgerPayload } from './ledger.model';
 import { LedgerService } from './ledger.service';
 import { initialLedgerState } from './ledger.state';
-
-const getErrorMessage = (error: unknown, fallback: string): string =>
-  error instanceof Error ? error.message : fallback;
 
 export const LedgerStore = signalStore(
   { providedIn: 'root' },
@@ -63,7 +61,7 @@ export const LedgerStore = signalStore(
           }));
           return item;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to create ledger.'));
+          setError(getApiErrorMessage(error, 'Failed to create ledger.'));
           return null;
         }
       },
@@ -84,7 +82,7 @@ export const LedgerStore = signalStore(
           }));
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to delete ledger.'));
+          setError(getApiErrorMessage(error, 'Failed to delete ledger.'));
           return false;
         }
       },
@@ -103,7 +101,7 @@ export const LedgerStore = signalStore(
           }));
           return item;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load ledger.'));
+          setError(getApiErrorMessage(error, 'Failed to load ledger.'));
           return null;
         }
       },
@@ -116,7 +114,7 @@ export const LedgerStore = signalStore(
             ledger: { ...state.ledger, count, error: null, isLoading: false, items },
           }));
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load ledgers.'));
+          setError(getApiErrorMessage(error, 'Failed to load ledgers.'));
         }
       },
 
@@ -133,7 +131,7 @@ export const LedgerStore = signalStore(
           }));
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to update ledger.'));
+          setError(getApiErrorMessage(error, 'Failed to update ledger.'));
           return false;
         }
       },

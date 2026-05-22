@@ -1,12 +1,26 @@
 /* ── Utility — text alignment ────────────────────────────────────────────── */
-.text-left   { text-align: left; }
-.text-center { text-align: center; }
-.text-right  { text-align: right; }
+.text-left {
+  text-align: left;
+}
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+}
 
 /* ── Utility — padding ───────────────────────────────────────────────────── */
-.p-0  { padding: 0; }
-.px-2 { padding-left: 2px;  padding-right: 2px; }
-.px-4 { padding-left: 4px;  padding-right: 4px; }
+.p-0 {
+  padding: 0;
+}
+.px-2 {
+  padding-left: 2px;
+  padding-right: 2px;
+}
+.px-4 {
+  padding-left: 4px;
+  padding-right: 4px;
+}
 
 /* ── Utility — rotated label ─────────────────────────────────────────────── */
 .rotate-270 {
@@ -21,10 +35,48 @@
 }
 
 /* ── Utility — column widths ─────────────────────────────────────────────── */
-.w-3  { width: 3%; }
-.w-6  { width: 6%; }
-.w-7  { width: 7%; }
-.w-8  { width: 8%; }
+.w-3 {
+  width: 3%;
+}
+.w-5 {
+  width: 5%;
+}
+.w-6 {
+  width: 6%;
+}
+.w-7 {
+  width: 7%;
+}
+.w-8 {
+  width: 8%;
+}
+.w-26 {
+  width: 26%;
+}
+.w-28 {
+  width: 28%;
+}
+.w-30 {
+  width: 30%;
+}
+.w-32 {
+  width: 32%;
+}
+.w-34 {
+  width: 34%;
+}
+.w-36 {
+  width: 36%;
+}
+.w-54 {
+  width: 54%;
+}
+.w-62 {
+  width: 62%;
+}
+.w-70 {
+  width: 70%;
+}
 
 /* ── Column visibility toolbar ──────────────────────────────────────────── */
 .pr-li-toolbar {
@@ -44,7 +96,6 @@
   user-select: none;
 }
 
-.pr-li-add-btn,
 .pr-li-remove-btn {
   align-items: center;
   appearance: none;
@@ -58,14 +109,6 @@
   line-height: 1;
 }
 
-.pr-li-add-btn {
-  border-radius: 6px;
-  gap: 6px;
-  margin-left: auto;
-  min-height: 32px;
-  padding: 0 10px;
-}
-
 .pr-li-remove-btn {
   border-color: transparent;
   border-radius: 6px;
@@ -75,19 +118,13 @@
   width: 28px;
 }
 
-.pr-li-add-btn:hover,
 .pr-li-remove-btn:hover {
   background: var(--tng-semantic-background-surface);
 }
 
-.pr-li-add-btn:disabled,
 .pr-li-remove-btn:disabled {
   cursor: not-allowed;
   opacity: 0.5;
-}
-
-.pr-li-option-code {
-  color: var(--tng-semantic-foreground-secondary);
 }
 
 .pr-li-read-value {
@@ -98,36 +135,43 @@
   white-space: nowrap;
 }
 
+.pr-li-item-detail {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding: 5px 8px;
+}
+
+.pr-li-item-detail__name {
+  color: var(--tng-semantic-foreground-primary);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pr-li-item-detail__meta {
+  color: var(--tng-semantic-foreground-secondary);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pr-li-item-detail__badge {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
 :host {
   --pr-li-cell-focus-border: var(--tng-semantic-accent-brand, var(--tng-semantic-focus-ring));
 }
 
-.pr-li-col-name > tng-autocomplete {
-  --tng-autocomplete-bg: var(--tng-semantic-background-canvas);
-  --tng-autocomplete-border-hover: transparent;
-  --tng-autocomplete-border-strong: transparent;
-  --tng-autocomplete-focus-ring: transparent;
-  --tng-autocomplete-radius: 0;
-  --tng-autocomplete-shadow: none;
-  --tng-autocomplete-shadow-focus: none;
-  --tng-autocomplete-surface: var(--tng-semantic-background-canvas);
-  --tng-autocomplete-trigger-container-min-height: 100%;
-  --tng-autocomplete-trigger-container-px: 0;
-  --tng-autocomplete-trigger-min-height: 100%;
-  --tng-autocomplete-trigger-px: 8px;
-  --tng-autocomplete-trigger-py: 0;
-
-  display: block;
-  height: 100%;
-  width: 100%;
-}
-
-:host ::ng-deep .pr-li-col-name > tng-autocomplete [data-slot='autocomplete-trigger'] {
-  background: var(--tng-semantic-background-canvas);
-}
-
 .pr-li-col-price > tng-input,
-.pr-li-col-qty > tng-input,
+.pr-li-col-qty1 > tng-input,
+.pr-li-col-qty2 > tng-input,
 .pr-li-summary-value > tng-input {
   --tng-input-bg: var(--tng-semantic-background-canvas);
   --tng-input-border: transparent;
@@ -152,9 +196,9 @@
 }
 
 :host ::ng-deep .pr-li-col-price > tng-input [data-slot='input-group'],
-:host ::ng-deep .pr-li-col-qty > tng-input [data-slot='input-group'],
-:host ::ng-deep .pr-li-summary-value > tng-input [data-slot='input-group'],
-:host ::ng-deep .pr-li-col-name > tng-autocomplete [data-slot='autocomplete-trigger-container'] {
+:host ::ng-deep .pr-li-col-qty1 > tng-input [data-slot='input-group'],
+:host ::ng-deep .pr-li-col-qty2 > tng-input [data-slot='input-group'],
+:host ::ng-deep .pr-li-summary-value > tng-input [data-slot='input-group'] {
   border-color: transparent;
   border-radius: 0;
   box-shadow: none;
@@ -171,9 +215,9 @@
 }
 
 :host ::ng-deep .pr-li-col-price > tng-input [data-slot='input-group'][data-focused],
-:host ::ng-deep .pr-li-col-qty > tng-input [data-slot='input-group'][data-focused],
-:host ::ng-deep .pr-li-summary-value > tng-input [data-slot='input-group'][data-focused],
-:host ::ng-deep .pr-li-col-name > tng-autocomplete [data-slot='autocomplete-trigger-container']:focus-within {
+:host ::ng-deep .pr-li-col-qty1 > tng-input [data-slot='input-group'][data-focused],
+:host ::ng-deep .pr-li-col-qty2 > tng-input [data-slot='input-group'][data-focused],
+:host ::ng-deep .pr-li-summary-value > tng-input [data-slot='input-group'][data-focused] {
   border-bottom-color: var(--pr-li-cell-focus-border);
 }
 
@@ -184,7 +228,8 @@
 }
 
 :host ::ng-deep .pr-li-col-price input[type='number'],
-:host ::ng-deep .pr-li-col-qty input[type='number'],
+:host ::ng-deep .pr-li-col-qty1 input[type='number'],
+:host ::ng-deep .pr-li-col-qty2 input[type='number'],
 :host ::ng-deep .pr-li-summary-value input[type='number'] {
   appearance: textfield;
   -moz-appearance: textfield;
@@ -192,8 +237,10 @@
 
 :host ::ng-deep .pr-li-col-price input[type='number']::-webkit-inner-spin-button,
 :host ::ng-deep .pr-li-col-price input[type='number']::-webkit-outer-spin-button,
-:host ::ng-deep .pr-li-col-qty input[type='number']::-webkit-inner-spin-button,
-:host ::ng-deep .pr-li-col-qty input[type='number']::-webkit-outer-spin-button,
+:host ::ng-deep .pr-li-col-qty1 input[type='number']::-webkit-inner-spin-button,
+:host ::ng-deep .pr-li-col-qty1 input[type='number']::-webkit-outer-spin-button,
+:host ::ng-deep .pr-li-col-qty2 input[type='number']::-webkit-inner-spin-button,
+:host ::ng-deep .pr-li-col-qty2 input[type='number']::-webkit-outer-spin-button,
 :host ::ng-deep .pr-li-summary-value input[type='number']::-webkit-inner-spin-button,
 :host ::ng-deep .pr-li-summary-value input[type='number']::-webkit-outer-spin-button {
   appearance: none;
@@ -291,13 +338,17 @@
 .pr-li-col-name,
 .pr-li-col-description,
 .pr-li-col-price,
-.pr-li-col-qty,
+.pr-li-col-qty1,
+.pr-li-col-qty2,
 .pr-li-col-item-total,
 .pr-li-col-cgst-label,
+.pr-li-col-cgst-pct,
 .pr-li-col-cgst-amt,
 .pr-li-col-sgst-label,
+.pr-li-col-sgst-pct,
 .pr-li-col-sgst-amt,
 .pr-li-col-igst-label,
+.pr-li-col-igst-pct,
 .pr-li-col-igst-amt,
 .pr-li-col-grand-total,
 .pr-li-col-actions {

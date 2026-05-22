@@ -17,10 +17,6 @@
           <dt>Due Date</dt>
           <dd>{{ formatDate(draft.duedate()) }}</dd>
         </div>
-        <div class="detail-field">
-          <dt>Tax Option</dt>
-          <dd>{{ draft.taxoption() || '—' }}</dd>
-        </div>
         @if (draft.description()) {
           <div class="detail-field detail-field--wide">
             <dt>Description</dt>
@@ -30,16 +26,16 @@
       </dl>
     } @else {
       <div class="aside-fields">
-        <div class="field">
+        <tng-form-field labelPosition="outline">
           <tng-label forId="ret-number">Number</tng-label>
           <tng-input
             id="ret-number"
             [value]="draft.number()"
             (valueChange)="draft.number.set($any($event))"
           />
-        </div>
+        </tng-form-field>
 
-        <div class="field">
+        <tng-form-field labelPosition="outline" [invalid]="draft.dateError() !== null">
           <tng-label forId="ret-date" required>Date</tng-label>
           <app-fiscal-year-datepicker
             id="ret-date"
@@ -47,12 +43,10 @@
             [invalid]="draft.dateError() !== null"
             (valueChange)="draft.onDateChange($event)"
           />
-          @if (draft.dateError()) {
-            <p class="field-error">{{ draft.dateError() }}</p>
-          }
-        </div>
+          <tng-error [show]="draft.dateError() !== null">{{ draft.dateError() }}</tng-error>
+        </tng-form-field>
 
-        <div class="field">
+        <tng-form-field labelPosition="outline">
           <tng-label forId="ret-duedate">Due Date</tng-label>
           <tng-datepicker
             id="ret-duedate"
@@ -61,22 +55,9 @@
             [minDate]="draft.date()"
             (valueChange)="draft.onDueDateChange($event)"
           />
-        </div>
+        </tng-form-field>
 
-        <div class="field">
-          <tng-label forId="ret-taxoption">Tax Option</tng-label>
-          <tng-select
-            id="ret-taxoption"
-            [options]="draft.taxModeOptions()"
-            [getOptionLabel]="getOptionLabel"
-            [getOptionValue]="getOptionValue"
-            [trackBy]="trackByValue"
-            [value]="draft.taxoption()"
-            (valueChange)="draft.onTaxOptionChange($any($event))"
-          />
-        </div>
-
-        <div class="field">
+        <tng-form-field labelPosition="outline">
           <tng-label forId="ret-description">Description</tng-label>
           <tng-textarea
             id="ret-description"
@@ -85,7 +66,7 @@
             [value]="draft.description()"
             (valueChange)="draft.description.set($any($event))"
           />
-        </div>
+        </tng-form-field>
       </div>
     }
   </tng-card-content>

@@ -1,5 +1,6 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
 import type {
   SaleInvoice,
   SaleInvoiceGetQuery,
@@ -8,9 +9,6 @@ import type {
 } from './sale-invoice.model';
 import { SaleInvoiceService } from './sale-invoice.service';
 import { initialSaleInvoiceState } from './sale-invoice.state';
-
-const getErrorMessage = (error: unknown, fallback: string): string =>
-  error instanceof Error ? error.message : fallback;
 
 export const SaleInvoiceStore = signalStore(
   { providedIn: 'root' },
@@ -69,7 +67,7 @@ export const SaleInvoiceStore = signalStore(
           }));
           return invoice;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to create sale invoice.'));
+          setError(getApiErrorMessage(error, 'Failed to create sale invoice.'));
           return null;
         }
       },
@@ -91,7 +89,7 @@ export const SaleInvoiceStore = signalStore(
           }));
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to delete sale invoice.'));
+          setError(getApiErrorMessage(error, 'Failed to delete sale invoice.'));
           return false;
         }
       },
@@ -113,7 +111,7 @@ export const SaleInvoiceStore = signalStore(
           }));
           return invoice;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load sale invoice.'));
+          setError(getApiErrorMessage(error, 'Failed to load sale invoice.'));
           return null;
         }
       },
@@ -132,7 +130,7 @@ export const SaleInvoiceStore = signalStore(
             },
           }));
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load sale invoices.'));
+          setError(getApiErrorMessage(error, 'Failed to load sale invoices.'));
         }
       },
 
@@ -149,7 +147,7 @@ export const SaleInvoiceStore = signalStore(
           }));
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to update sale invoice.'));
+          setError(getApiErrorMessage(error, 'Failed to update sale invoice.'));
           return false;
         }
       },

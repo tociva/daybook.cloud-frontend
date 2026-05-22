@@ -1,5 +1,6 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
 import type {
   FiscalYear,
   FiscalYearGetQuery,
@@ -8,9 +9,6 @@ import type {
 } from './fiscal-year.model';
 import { FiscalYearService } from './fiscal-year.service';
 import { initialFiscalYearState } from './fiscal-year.state';
-
-const getErrorMessage = (error: unknown, fallback: string): string =>
-  error instanceof Error ? error.message : fallback;
 
 export const FiscalYearStore = signalStore(
   { providedIn: 'root' },
@@ -72,7 +70,7 @@ export const FiscalYearStore = signalStore(
           ]);
           patchState(store, { fiscalYears, count, error: null, isLoading: false });
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load fiscal years.'));
+          setError(getApiErrorMessage(error, 'Failed to load fiscal years.'));
         }
       },
 
@@ -88,7 +86,7 @@ export const FiscalYearStore = signalStore(
           });
           return fiscalYear;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load fiscal year.'));
+          setError(getApiErrorMessage(error, 'Failed to load fiscal year.'));
           return null;
         }
       },
@@ -107,7 +105,7 @@ export const FiscalYearStore = signalStore(
           }));
           return fiscalYear;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to create fiscal year.'));
+          setError(getApiErrorMessage(error, 'Failed to create fiscal year.'));
           return null;
         }
       },
@@ -119,7 +117,7 @@ export const FiscalYearStore = signalStore(
           patchState(store, { error: null, isLoading: false });
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to update fiscal year.'));
+          setError(getApiErrorMessage(error, 'Failed to update fiscal year.'));
           return false;
         }
       },
@@ -140,7 +138,7 @@ export const FiscalYearStore = signalStore(
           }));
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to delete fiscal year.'));
+          setError(getApiErrorMessage(error, 'Failed to delete fiscal year.'));
           return false;
         }
       },

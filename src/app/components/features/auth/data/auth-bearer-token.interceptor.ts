@@ -13,6 +13,7 @@ import { AppConfigStore } from '../../../../core/config/app-config.store';
 import { AuthService } from './auth.service';
 
 const RETRIED_REQUEST_HEADER = 'X-Auth-Retry';
+let loginRedirectInProgress = false;
 
 const normalizeBaseUrl = (baseUrl: string): string => baseUrl.replace(/\/$/, '');
 
@@ -78,13 +79,19 @@ function sendWithToken(
         switchMap((user) => {
           const refreshedToken = user && !user.expired ? user.access_token : null;
           if (!refreshedToken) {
-            return throwError(() => error);
+            return redirectToLoginAfterAuthFailure(authService, authConfig, error);
           }
 
           const retried = withBearer(request, refreshedToken).clone({
             setHeaders: { [RETRIED_REQUEST_HEADER]: '1' },
           });
-          return next(retried);
+          return next(retried).pipe(
+            catchError((retryError: unknown) =>
+              retryError instanceof HttpErrorResponse && retryError.status === 401
+                ? redirectToLoginAfterAuthFailure(authService, authConfig, retryError)
+                : throwError(() => retryError),
+            ),
+          );
         }),
       );
     }),
@@ -106,4 +113,30 @@ function shouldAttemptRenewal(error: unknown, request: HttpRequest<unknown>): bo
 
   // Avoid infinite loops: only retry once per request.
   return !request.headers.has(RETRIED_REQUEST_HEADER);
+}
+
+function redirectToLoginAfterAuthFailure(
+  authService: AuthService,
+  authConfig: AuthConfig,
+  error: unknown,
+): Observable<never> {
+  return from(startLoginOnce(authService, authConfig)).pipe(
+    switchMap(() => throwError(() => error)),
+    catchError(() => throwError(() => error)),
+  );
+}
+
+async function startLoginOnce(authService: AuthService, authConfig: AuthConfig): Promise<void> {
+  if (loginRedirectInProgress) {
+    return;
+  }
+
+  loginRedirectInProgress = true;
+
+  try {
+    await authService.startLogin(authConfig);
+  } catch (error) {
+    loginRedirectInProgress = false;
+    throw error;
+  }
 }

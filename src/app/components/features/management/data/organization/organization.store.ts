@@ -1,5 +1,6 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
 import type {
   Organization,
   OrganizationListQuery,
@@ -7,9 +8,6 @@ import type {
 } from './organization.model';
 import { OrganizationService } from './organization.service';
 import { initialOrganizationState } from './organization.state';
-
-const getErrorMessage = (error: unknown, fallback: string): string =>
-  error instanceof Error ? error.message : fallback;
 
 export const OrganizationStore = signalStore(
   { providedIn: 'root' },
@@ -66,7 +64,7 @@ export const OrganizationStore = signalStore(
           ]);
           patchState(store, { organizations, count, error: null, isLoading: false });
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load organizations.'));
+          setError(getApiErrorMessage(error, 'Failed to load organizations.'));
         }
       },
 
@@ -82,7 +80,7 @@ export const OrganizationStore = signalStore(
           });
           return org;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load organization.'));
+          setError(getApiErrorMessage(error, 'Failed to load organization.'));
           return null;
         }
       },
@@ -101,7 +99,7 @@ export const OrganizationStore = signalStore(
           }));
           return org;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to create organization.'));
+          setError(getApiErrorMessage(error, 'Failed to create organization.'));
           return null;
         }
       },
@@ -113,7 +111,7 @@ export const OrganizationStore = signalStore(
           patchState(store, { error: null, isLoading: false });
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to update organization.'));
+          setError(getApiErrorMessage(error, 'Failed to update organization.'));
           return false;
         }
       },
@@ -134,7 +132,7 @@ export const OrganizationStore = signalStore(
           }));
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to delete organization.'));
+          setError(getApiErrorMessage(error, 'Failed to delete organization.'));
           return false;
         }
       },

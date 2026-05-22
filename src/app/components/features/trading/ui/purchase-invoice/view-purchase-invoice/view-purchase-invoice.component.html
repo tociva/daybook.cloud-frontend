@@ -36,7 +36,7 @@
             @for (pmt of purchaseInvoiceStore.selectedItem()?.payments ?? []; track pmt.id) {
               <tr>
                 <td>{{ pmt.vendorpaymentid || pmt.id || '—' }}</td>
-                <td class="text-right">{{ pmt.amount?.toFixed(2) ?? '—' }}</td>
+                <td class="text-right">{{ pmt.amount.toFixed(2) }}</td>
               </tr>
             }
           </tbody>

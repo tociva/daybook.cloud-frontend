@@ -1,11 +1,9 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
 import type { Tax, TaxListQuery, TaxPayload } from './tax.model';
 import { TaxService } from './tax.service';
 import { initialTaxState } from './tax.state';
-
-const getErrorMessage = (error: unknown, fallback: string): string =>
-  error instanceof Error ? error.message : fallback;
 
 export const TaxStore = signalStore(
   { providedIn: 'root' },
@@ -75,7 +73,7 @@ export const TaxStore = signalStore(
 
           return tax;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to create tax.'));
+          setError(getApiErrorMessage(error, 'Failed to create tax.'));
           return null;
         }
       },
@@ -97,7 +95,7 @@ export const TaxStore = signalStore(
 
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to delete tax.'));
+          setError(getApiErrorMessage(error, 'Failed to delete tax.'));
           return false;
         }
       },
@@ -117,7 +115,7 @@ export const TaxStore = signalStore(
 
           return tax;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load tax.'));
+          setError(getApiErrorMessage(error, 'Failed to load tax.'));
           return null;
         }
       },
@@ -136,7 +134,7 @@ export const TaxStore = signalStore(
             },
           }));
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load taxes.'));
+          setError(getApiErrorMessage(error, 'Failed to load taxes.'));
         }
       },
       async updateTax(id: string, payload: TaxPayload): Promise<boolean> {
@@ -162,7 +160,7 @@ export const TaxStore = signalStore(
 
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to update tax.'));
+          setError(getApiErrorMessage(error, 'Failed to update tax.'));
           return false;
         }
       },

@@ -129,19 +129,7 @@ export const PURCHASE_RETURN_DETAIL_INCLUDES = [
     scope: {
       include: [
         {
-          relation: 'item',
-          scope: {
-            include: [
-              {
-                relation: 'category',
-                scope: { include: [{ relation: 'taxgroup' }] },
-              },
-            ],
-          },
-        },
-        {
           relation: 'taxes',
-          scope: { include: [{ relation: 'tax' }] },
         },
       ],
     },

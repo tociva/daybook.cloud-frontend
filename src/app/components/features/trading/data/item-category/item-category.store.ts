@@ -1,5 +1,6 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
 import type {
   ItemCategory,
   ItemCategoryGetQuery,
@@ -8,9 +9,6 @@ import type {
 } from './item-category.model';
 import { ItemCategoryService } from './item-category.service';
 import { initialItemCategoryState } from './item-category.state';
-
-const getErrorMessage = (error: unknown, fallback: string): string =>
-  error instanceof Error ? error.message : fallback;
 
 export const ItemCategoryStore = signalStore(
   { providedIn: 'root' },
@@ -68,7 +66,7 @@ export const ItemCategoryStore = signalStore(
           }));
           return itemCategory;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to create item category.'));
+          setError(getApiErrorMessage(error, 'Failed to create item category.'));
           return null;
         }
       },
@@ -90,7 +88,7 @@ export const ItemCategoryStore = signalStore(
           }));
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to delete item category.'));
+          setError(getApiErrorMessage(error, 'Failed to delete item category.'));
           return false;
         }
       },
@@ -112,7 +110,7 @@ export const ItemCategoryStore = signalStore(
           }));
           return itemCategory;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load item category.'));
+          setError(getApiErrorMessage(error, 'Failed to load item category.'));
           return null;
         }
       },
@@ -125,7 +123,7 @@ export const ItemCategoryStore = signalStore(
             itemCategory: { ...state.itemCategory, count, error: null, isLoading: false, items },
           }));
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load item categories.'));
+          setError(getApiErrorMessage(error, 'Failed to load item categories.'));
         }
       },
 
@@ -152,7 +150,7 @@ export const ItemCategoryStore = signalStore(
           });
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to update item category.'));
+          setError(getApiErrorMessage(error, 'Failed to update item category.'));
           return false;
         }
       },

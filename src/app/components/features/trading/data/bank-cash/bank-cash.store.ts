@@ -1,11 +1,9 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
 import type { BankCash, BankCashListQuery, BankCashPayload } from './bank-cash.model';
 import { BankCashService } from './bank-cash.service';
 import { initialBankCashState } from './bank-cash.state';
-
-const getErrorMessage = (error: unknown, fallback: string): string =>
-  error instanceof Error ? error.message : fallback;
 
 export const BankCashStore = signalStore(
   { providedIn: 'root' },
@@ -75,7 +73,7 @@ export const BankCashStore = signalStore(
 
           return bankCash;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to create bank/cash account.'));
+          setError(getApiErrorMessage(error, 'Failed to create bank/cash account.'));
           return null;
         }
       },
@@ -98,7 +96,7 @@ export const BankCashStore = signalStore(
 
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to delete bank/cash account.'));
+          setError(getApiErrorMessage(error, 'Failed to delete bank/cash account.'));
           return false;
         }
       },
@@ -118,7 +116,7 @@ export const BankCashStore = signalStore(
 
           return bankCash;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load bank/cash account.'));
+          setError(getApiErrorMessage(error, 'Failed to load bank/cash account.'));
           return null;
         }
       },
@@ -137,7 +135,7 @@ export const BankCashStore = signalStore(
             },
           }));
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load bank/cash accounts.'));
+          setError(getApiErrorMessage(error, 'Failed to load bank/cash accounts.'));
         }
       },
       async updateBankCash(id: string, payload: BankCashPayload): Promise<boolean> {
@@ -163,7 +161,7 @@ export const BankCashStore = signalStore(
 
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to update bank/cash account.'));
+          setError(getApiErrorMessage(error, 'Failed to update bank/cash account.'));
           return false;
         }
       },

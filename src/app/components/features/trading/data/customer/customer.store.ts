@@ -1,5 +1,6 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
 import type {
   Customer,
   CustomerGetQuery,
@@ -8,9 +9,6 @@ import type {
 } from './customer.model';
 import { CustomerService } from './customer.service';
 import { initialCustomerState } from './customer.state';
-
-const getErrorMessage = (error: unknown, fallback: string): string =>
-  error instanceof Error ? error.message : fallback;
 
 export const CustomerStore = signalStore(
   { providedIn: 'root' },
@@ -68,7 +66,7 @@ export const CustomerStore = signalStore(
           }));
           return customer;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to create customer.'));
+          setError(getApiErrorMessage(error, 'Failed to create customer.'));
           return null;
         }
       },
@@ -90,7 +88,7 @@ export const CustomerStore = signalStore(
           }));
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to delete customer.'));
+          setError(getApiErrorMessage(error, 'Failed to delete customer.'));
           return false;
         }
       },
@@ -104,7 +102,7 @@ export const CustomerStore = signalStore(
           }));
           return customer;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load customer.'));
+          setError(getApiErrorMessage(error, 'Failed to load customer.'));
           return null;
         }
       },
@@ -117,7 +115,7 @@ export const CustomerStore = signalStore(
             customer: { ...state.customer, count, error: null, isLoading: false, items },
           }));
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load customers.'));
+          setError(getApiErrorMessage(error, 'Failed to load customers.'));
         }
       },
 
@@ -142,7 +140,7 @@ export const CustomerStore = signalStore(
           });
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to update customer.'));
+          setError(getApiErrorMessage(error, 'Failed to update customer.'));
           return false;
         }
       },

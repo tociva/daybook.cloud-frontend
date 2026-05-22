@@ -1,5 +1,6 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
 import { DateFormatService } from './date-format.service';
 import { initialDateFormatState } from './date-format.state';
 
@@ -24,7 +25,7 @@ export const DateFormatStore = signalStore(
         const dateFormats = await dateFormatService.loadDateFormats();
         patchState(store, { dateFormats, error: null, isLoading: false });
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Unable to load date formats.';
+        const message = getApiErrorMessage(error, 'Unable to load date formats.');
         patchState(store, { dateFormats: [], error: message, isLoading: false });
       }
     },

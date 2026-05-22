@@ -1,11 +1,9 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
 import type { TaxGroup, TaxGroupListQuery, TaxGroupPayload } from './tax-group.model';
 import { TaxGroupService } from './tax-group.service';
 import { initialTaxGroupState } from './tax-group.state';
-
-const getErrorMessage = (error: unknown, fallback: string): string =>
-  error instanceof Error ? error.message : fallback;
 
 export const TaxGroupStore = signalStore(
   { providedIn: 'root' },
@@ -86,7 +84,7 @@ export const TaxGroupStore = signalStore(
 
           return taxGroup;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to create tax group.'));
+          setError(getApiErrorMessage(error, 'Failed to create tax group.'));
           return null;
         }
       },
@@ -109,7 +107,7 @@ export const TaxGroupStore = signalStore(
 
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to delete tax group.'));
+          setError(getApiErrorMessage(error, 'Failed to delete tax group.'));
           return false;
         }
       },
@@ -129,7 +127,7 @@ export const TaxGroupStore = signalStore(
 
           return taxGroup;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load tax group.'));
+          setError(getApiErrorMessage(error, 'Failed to load tax group.'));
           return null;
         }
       },
@@ -148,7 +146,7 @@ export const TaxGroupStore = signalStore(
             },
           }));
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load tax groups.'));
+          setError(getApiErrorMessage(error, 'Failed to load tax groups.'));
         }
       },
       async updateTaxGroup(id: string, payload: TaxGroupPayload): Promise<boolean> {
@@ -174,7 +172,7 @@ export const TaxGroupStore = signalStore(
 
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to update tax group.'));
+          setError(getApiErrorMessage(error, 'Failed to update tax group.'));
           return false;
         }
       },

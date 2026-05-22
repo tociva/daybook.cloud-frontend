@@ -1,5 +1,6 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
 import type {
   LedgerCategory,
   LedgerCategoryGetQuery,
@@ -8,9 +9,6 @@ import type {
 } from './ledger-category.model';
 import { LedgerCategoryService } from './ledger-category.service';
 import { initialLedgerCategoryState } from './ledger-category.state';
-
-const getErrorMessage = (error: unknown, fallback: string): string =>
-  error instanceof Error ? error.message : fallback;
 
 export const LedgerCategoryStore = signalStore(
   { providedIn: 'root' },
@@ -63,7 +61,7 @@ export const LedgerCategoryStore = signalStore(
           }));
           return item;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to create ledger category.'));
+          setError(getApiErrorMessage(error, 'Failed to create ledger category.'));
           return null;
         }
       },
@@ -87,7 +85,7 @@ export const LedgerCategoryStore = signalStore(
           }));
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to delete ledger category.'));
+          setError(getApiErrorMessage(error, 'Failed to delete ledger category.'));
           return false;
         }
       },
@@ -109,7 +107,7 @@ export const LedgerCategoryStore = signalStore(
           }));
           return item;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load ledger category.'));
+          setError(getApiErrorMessage(error, 'Failed to load ledger category.'));
           return null;
         }
       },
@@ -128,7 +126,7 @@ export const LedgerCategoryStore = signalStore(
             },
           }));
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load ledger categories.'));
+          setError(getApiErrorMessage(error, 'Failed to load ledger categories.'));
         }
       },
 
@@ -145,7 +143,7 @@ export const LedgerCategoryStore = signalStore(
           }));
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to update ledger category.'));
+          setError(getApiErrorMessage(error, 'Failed to update ledger category.'));
           return false;
         }
       },

@@ -1,5 +1,6 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
 import { CountryService } from './country.service';
 import { initialCountryState } from './country.state';
 
@@ -24,7 +25,7 @@ export const CountryStore = signalStore(
         const countries = await countryService.loadCountries();
         patchState(store, { countries, error: null, isLoading: false });
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Unable to load countries.';
+        const message = getApiErrorMessage(error, 'Unable to load countries.');
         patchState(store, { countries: [], error: message, isLoading: false });
       }
     },

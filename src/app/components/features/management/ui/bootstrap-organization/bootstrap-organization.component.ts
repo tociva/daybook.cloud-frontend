@@ -33,6 +33,7 @@ import {
 import { TngInput, TngInputGroup, TngInputFieldSuffix } from '@tailng-ui/primitives';
 import { TngIcon } from '@tailng-ui/icons';
 import dayjs from 'dayjs';
+import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
 import { Country } from '../../data/country/country.model';
 import { CountryStore } from '../../data/country/country.store';
 import { Currency } from '../../data/currency/currency.model';
@@ -754,9 +755,9 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
       await this.router.navigateByUrl('/app/dashboard');
     } catch (error) {
       this.saved.set(false);
-      const message =
-        error instanceof Error ? error.message : 'Failed to create organization. Please try again.';
-      this.toastStore.danger(message);
+      this.toastStore.danger(
+        getApiErrorMessage(error, 'Failed to create organization. Please try again.'),
+      );
     } finally {
       this.isSubmitting.set(false);
     }

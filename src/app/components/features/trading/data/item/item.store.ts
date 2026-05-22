@@ -1,11 +1,9 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
 import type { Item, ItemGetQuery, ItemListQuery, ItemPayload } from './item.model';
 import { ItemService } from './item.service';
 import { initialItemState } from './item.state';
-
-const getErrorMessage = (error: unknown, fallback: string): string =>
-  error instanceof Error ? error.message : fallback;
 
 export const ItemStore = signalStore(
   { providedIn: 'root' },
@@ -74,7 +72,7 @@ export const ItemStore = signalStore(
           }));
           return item;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to create item.'));
+          setError(getApiErrorMessage(error, 'Failed to create item.'));
           return null;
         }
       },
@@ -95,7 +93,7 @@ export const ItemStore = signalStore(
           }));
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to delete item.'));
+          setError(getApiErrorMessage(error, 'Failed to delete item.'));
           return false;
         }
       },
@@ -109,7 +107,7 @@ export const ItemStore = signalStore(
           }));
           return item;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load item.'));
+          setError(getApiErrorMessage(error, 'Failed to load item.'));
           return null;
         }
       },
@@ -122,7 +120,7 @@ export const ItemStore = signalStore(
             item: { ...state.item, count, error: null, isLoading: false, items },
           }));
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load items.'));
+          setError(getApiErrorMessage(error, 'Failed to load items.'));
         }
       },
 
@@ -147,7 +145,7 @@ export const ItemStore = signalStore(
           });
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to update item.'));
+          setError(getApiErrorMessage(error, 'Failed to update item.'));
           return false;
         }
       },

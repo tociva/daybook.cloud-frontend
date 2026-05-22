@@ -1,5 +1,6 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
 import { CurrencyService } from './currency.service';
 import { initialCurrencyState } from './currency.state';
 
@@ -24,7 +25,7 @@ export const CurrencyStore = signalStore(
         const currencies = await currencyService.loadCurrencies();
         patchState(store, { currencies, error: null, isLoading: false });
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Unable to load currencies.';
+        const message = getApiErrorMessage(error, 'Unable to load currencies.');
         patchState(store, { currencies: [], error: message, isLoading: false });
       }
     },

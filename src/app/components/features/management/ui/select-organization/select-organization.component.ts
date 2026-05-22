@@ -12,6 +12,7 @@ import {
 } from '@tailng-ui/components';
 import type { TngTableColumn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
+import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
 import { PageHeadingComponent } from '../../../../../shared/page-heading/page-heading.component';
 import { DateManagementService } from '../../../../../core/date/date-management.service';
 import { UserSessionStore } from '../../data/user-session/user-session.store';
@@ -195,9 +196,9 @@ export class SelectOrganizationComponent {
       await this.userSessionStore.selectFiscalYear(row.fiscalYearId);
       void this.router.navigate(['/app/dashboard']);
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : 'Failed to apply selection. Please try again.';
-      this.errorMessage.set(message);
+      this.errorMessage.set(
+        getApiErrorMessage(error, 'Failed to apply selection. Please try again.'),
+      );
     } finally {
       this.applyingRowKey.set(null);
     }

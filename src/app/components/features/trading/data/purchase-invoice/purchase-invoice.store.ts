@@ -1,5 +1,6 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
 import type {
   PurchaseInvoice,
   PurchaseInvoiceGetQuery,
@@ -8,9 +9,6 @@ import type {
 } from './purchase-invoice.model';
 import { PurchaseInvoiceService } from './purchase-invoice.service';
 import { initialPurchaseInvoiceState } from './purchase-invoice.state';
-
-const getErrorMessage = (error: unknown, fallback: string): string =>
-  error instanceof Error ? error.message : fallback;
 
 export const PurchaseInvoiceStore = signalStore(
   { providedIn: 'root' },
@@ -53,7 +51,9 @@ export const PurchaseInvoiceStore = signalStore(
         }));
       },
 
-      async createPurchaseInvoice(payload: PurchaseInvoicePayload): Promise<PurchaseInvoice | null> {
+      async createPurchaseInvoice(
+        payload: PurchaseInvoicePayload,
+      ): Promise<PurchaseInvoice | null> {
         setLoading();
         try {
           const invoice = await service.create(payload);
@@ -69,7 +69,7 @@ export const PurchaseInvoiceStore = signalStore(
           }));
           return invoice;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to create purchase invoice.'));
+          setError(getApiErrorMessage(error, 'Failed to create purchase invoice.'));
           return null;
         }
       },
@@ -93,7 +93,7 @@ export const PurchaseInvoiceStore = signalStore(
           }));
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to delete purchase invoice.'));
+          setError(getApiErrorMessage(error, 'Failed to delete purchase invoice.'));
           return false;
         }
       },
@@ -115,7 +115,7 @@ export const PurchaseInvoiceStore = signalStore(
           }));
           return invoice;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load purchase invoice.'));
+          setError(getApiErrorMessage(error, 'Failed to load purchase invoice.'));
           return null;
         }
       },
@@ -134,7 +134,7 @@ export const PurchaseInvoiceStore = signalStore(
             },
           }));
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load purchase invoices.'));
+          setError(getApiErrorMessage(error, 'Failed to load purchase invoices.'));
         }
       },
 
@@ -151,7 +151,7 @@ export const PurchaseInvoiceStore = signalStore(
           }));
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to update purchase invoice.'));
+          setError(getApiErrorMessage(error, 'Failed to update purchase invoice.'));
           return false;
         }
       },

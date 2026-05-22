@@ -1,11 +1,9 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
 import type { Vendor, VendorGetQuery, VendorListQuery, VendorPayload } from './vendor.model';
 import { VendorService } from './vendor.service';
 import { initialVendorState } from './vendor.state';
-
-const getErrorMessage = (error: unknown, fallback: string): string =>
-  error instanceof Error ? error.message : fallback;
 
 export const VendorStore = signalStore(
   { providedIn: 'root' },
@@ -63,7 +61,7 @@ export const VendorStore = signalStore(
           }));
           return vendor;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to create vendor.'));
+          setError(getApiErrorMessage(error, 'Failed to create vendor.'));
           return null;
         }
       },
@@ -84,7 +82,7 @@ export const VendorStore = signalStore(
           }));
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to delete vendor.'));
+          setError(getApiErrorMessage(error, 'Failed to delete vendor.'));
           return false;
         }
       },
@@ -98,7 +96,7 @@ export const VendorStore = signalStore(
           }));
           return vendor;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load vendor.'));
+          setError(getApiErrorMessage(error, 'Failed to load vendor.'));
           return null;
         }
       },
@@ -111,7 +109,7 @@ export const VendorStore = signalStore(
             vendor: { ...state.vendor, count, error: null, isLoading: false, items },
           }));
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load vendors.'));
+          setError(getApiErrorMessage(error, 'Failed to load vendors.'));
         }
       },
 
@@ -136,7 +134,7 @@ export const VendorStore = signalStore(
           });
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to update vendor.'));
+          setError(getApiErrorMessage(error, 'Failed to update vendor.'));
           return false;
         }
       },

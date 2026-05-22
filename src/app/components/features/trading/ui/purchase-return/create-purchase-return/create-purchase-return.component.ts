@@ -2,7 +2,6 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
-import { ItemStore } from '../../../data/item';
 import { PurchaseInvoiceStore } from '../../../data/purchase-invoice';
 import type {
   PurchaseReturnItemRequest,
@@ -14,8 +13,6 @@ import {
   PurchaseReturnFacade,
   PurchaseReturnStore,
 } from '../../../data/purchase-return';
-import { TaxStore } from '../../../data/tax';
-import { TaxGroupStore } from '../../../data/tax-group';
 import { PurchaseReturnDraftStore, toNum } from './purchase-return-draft.store';
 import { PrInvoiceRefComponent } from './pr-invoice-ref/pr-invoice-ref.component';
 import { PrReturnDetailsComponent } from './pr-return-details/pr-return-details.component';
@@ -41,9 +38,6 @@ export class CreatePurchaseReturnComponent {
 
   protected readonly purchaseReturnStore = inject(PurchaseReturnStore);
   private readonly purchaseInvoiceStore = inject(PurchaseInvoiceStore);
-  private readonly itemStore = inject(ItemStore);
-  private readonly taxGroupStore = inject(TaxGroupStore);
-  private readonly taxStore = inject(TaxStore);
 
   protected readonly draft = inject(PurchaseReturnDraftStore);
 
@@ -64,12 +58,7 @@ export class CreatePurchaseReturnComponent {
   private async loadInitialState(): Promise<void> {
     this.purchaseReturnStore.clearError();
 
-    await Promise.all([
-      this.purchaseInvoiceStore.loadPurchaseInvoices({ includes: ['vendor'] }),
-      this.itemStore.loadItems({ includes: ['category'] }),
-      this.taxGroupStore.loadTaxGroups({}),
-      this.taxStore.loadTaxes({}),
-    ]);
+    await this.purchaseInvoiceStore.loadPurchaseInvoices({ includes: ['vendor'] });
 
     const id = this.route.snapshot.paramMap.get('id');
     this.id.set(id);
@@ -81,7 +70,11 @@ export class CreatePurchaseReturnComponent {
       const ret = await this.purchaseReturnStore.loadPurchaseReturnById(id, {
         includes: PURCHASE_RETURN_DETAIL_INCLUDES,
       });
-      if (ret) this.draft.patchFromReturn(ret);
+      if (ret) {
+        this.draft.patchFromReturn(ret);
+        const invoiceId = ret.purchaseinvoiceid ?? ret.purchaseinvoice?.id;
+        if (invoiceId) await this.draft.mergeInvoiceItemsForEdit(invoiceId);
+      }
     }
   }
 
@@ -92,7 +85,9 @@ export class CreatePurchaseReturnComponent {
     this.draft.submitted.set(true);
     if (!this.draft.purchaseinvoiceid() || this.draft.dateError() !== null) return;
 
-    const items: PurchaseReturnItemRequest[] = this.draft.items().map((row, i) => {
+    const returnRows = this.draft.items().filter((row) => row.itemid && toNum(row.quantity) > 0);
+
+    const items: PurchaseReturnItemRequest[] = returnRows.map((row, i) => {
       const taxes: PurchaseReturnItemTaxRequest[] = row.taxes.map((t) => ({
         name: t.name,
         shortname: t.shortname,
@@ -110,7 +105,7 @@ export class CreatePurchaseReturnComponent {
         code: row.code,
         order: i + 1,
         price: toNum(row.price),
-        quantity: Math.max(1, toNum(row.quantity)),
+        quantity: toNum(row.quantity),
         itemtotal: toNum(row.itemtotal),
         taxamount: toNum(row.taxamount),
         grandtotal: toNum(row.grandtotal),

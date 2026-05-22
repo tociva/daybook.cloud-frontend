@@ -1,6 +1,7 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { ApiClientService } from '../../../../../core/api/api-client.service';
+import { normalizeApiError } from '../../../../../core/api/api-error.util';
 import { initialBootstrapOrganizationState } from './bootstrap-organization.state';
 
 export type BootstrapOrganizationPayload = Readonly<{
@@ -53,12 +54,11 @@ export const BootstrapOrganizationStore = signalStore(
 
         patchState(store, { isLoading: false, error: null });
       } catch (error) {
-        const message =
-          error instanceof Error
-            ? error.message
-            : 'Failed to create organization. Please try again.';
-        patchState(store, { isLoading: false, error: message });
-        throw new Error(message);
+        const apiError = normalizeApiError(error, {
+          fallbackMessage: 'Failed to create organization. Please try again.',
+        });
+        patchState(store, { isLoading: false, error: apiError.message });
+        throw apiError;
       }
     },
   })),

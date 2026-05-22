@@ -1,5 +1,6 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
 import type {
   PurchaseReturn,
   PurchaseReturnGetQuery,
@@ -8,9 +9,6 @@ import type {
 } from './purchase-return.model';
 import { PurchaseReturnService } from './purchase-return.service';
 import { initialPurchaseReturnState } from './purchase-return.state';
-
-const getErrorMessage = (error: unknown, fallback: string): string =>
-  error instanceof Error ? error.message : fallback;
 
 export const PurchaseReturnStore = signalStore(
   { providedIn: 'root' },
@@ -70,7 +68,7 @@ export const PurchaseReturnStore = signalStore(
           }));
           return ret;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to create purchase return.'));
+          setError(getApiErrorMessage(error, 'Failed to create purchase return.'));
           return null;
         }
       },
@@ -94,7 +92,7 @@ export const PurchaseReturnStore = signalStore(
           }));
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to delete purchase return.'));
+          setError(getApiErrorMessage(error, 'Failed to delete purchase return.'));
           return false;
         }
       },
@@ -116,7 +114,7 @@ export const PurchaseReturnStore = signalStore(
           }));
           return ret;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load purchase return.'));
+          setError(getApiErrorMessage(error, 'Failed to load purchase return.'));
           return null;
         }
       },
@@ -135,7 +133,7 @@ export const PurchaseReturnStore = signalStore(
             },
           }));
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load purchase returns.'));
+          setError(getApiErrorMessage(error, 'Failed to load purchase returns.'));
         }
       },
 
@@ -152,7 +150,7 @@ export const PurchaseReturnStore = signalStore(
           }));
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to update purchase return.'));
+          setError(getApiErrorMessage(error, 'Failed to update purchase return.'));
           return false;
         }
       },

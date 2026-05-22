@@ -1,5 +1,6 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
 import type {
   VendorPayment,
   VendorPaymentGetQuery,
@@ -8,9 +9,6 @@ import type {
 } from './vendor-payment.model';
 import { VendorPaymentService } from './vendor-payment.service';
 import { initialVendorPaymentState } from './vendor-payment.state';
-
-const getErrorMessage = (error: unknown, fallback: string): string =>
-  error instanceof Error ? error.message : fallback;
 
 export const VendorPaymentStore = signalStore(
   { providedIn: 'root' },
@@ -63,7 +61,7 @@ export const VendorPaymentStore = signalStore(
           }));
           return payment;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to create vendor payment.'));
+          setError(getApiErrorMessage(error, 'Failed to create vendor payment.'));
           return null;
         }
       },
@@ -87,7 +85,7 @@ export const VendorPaymentStore = signalStore(
           }));
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to delete vendor payment.'));
+          setError(getApiErrorMessage(error, 'Failed to delete vendor payment.'));
           return false;
         }
       },
@@ -109,7 +107,7 @@ export const VendorPaymentStore = signalStore(
           }));
           return payment;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load vendor payment.'));
+          setError(getApiErrorMessage(error, 'Failed to load vendor payment.'));
           return null;
         }
       },
@@ -128,7 +126,7 @@ export const VendorPaymentStore = signalStore(
             },
           }));
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to load vendor payments.'));
+          setError(getApiErrorMessage(error, 'Failed to load vendor payments.'));
         }
       },
 
@@ -155,7 +153,7 @@ export const VendorPaymentStore = signalStore(
           });
           return true;
         } catch (error) {
-          setError(getErrorMessage(error, 'Failed to update vendor payment.'));
+          setError(getApiErrorMessage(error, 'Failed to update vendor payment.'));
           return false;
         }
       },
