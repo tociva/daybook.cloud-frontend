@@ -12,6 +12,7 @@ import {
   TngInputComponent,
   TngLabelComponent,
   TngStepperComponent,
+  TngSwitchComponent,
   TngTextareaComponent,
 } from '@tailng-ui/components';
 import dayjs from 'dayjs';
@@ -58,6 +59,7 @@ import { DEFAULT_NODE_DATE_FORMAT } from '../../../../../../util/constants';
     TngInputComponent,
     TngLabelComponent,
     TngStepperComponent,
+    TngSwitchComponent,
     TngTextareaComponent,
     FiscalYearDatepickerComponent,
     BurlBackButtonComponent,
@@ -99,9 +101,14 @@ export class CreateCustomerReceiptComponent {
   // ── Form signals ──────────────────────────────────────────────────────────
 
   protected readonly rcptdate = signal(this.fiscalYearDateRange.defaultDate());
+  protected readonly autoNumbering = signal(true);
+  protected readonly number = signal('Auto Number');
+  protected readonly receiptNumber = signal('');
   protected readonly amount = signal('');
   protected readonly currencycode = signal('');
   protected readonly description = signal('');
+  private readonly customProperties = signal<CustomerReceipt['cprops']>({});
+  protected readonly numberEnabled = computed(() => !this.autoNumbering());
 
   // ── Customer autocomplete ─────────────────────────────────────────────────
 
@@ -167,6 +174,11 @@ export class CreateCustomerReceiptComponent {
     if (!this.rcptdate()) return 'Date is required.';
     return this.fiscalYearDateRange.errorMessage(this.rcptdate(), 'Receipt date');
   });
+  protected readonly numberError = computed(() =>
+    this.submitted() && !this.autoNumbering() && this.number().trim() === ''
+      ? 'Receipt number is required.'
+      : null,
+  );
   protected readonly customerError = computed(() =>
     this.submitted() && !this.customerid() ? 'Customer is required.' : null,
   );
@@ -188,6 +200,7 @@ export class CreateCustomerReceiptComponent {
 
   protected readonly setupSteps = computed(() => {
     const basicCompleted =
+      (this.autoNumbering() || this.number().trim().length > 0) &&
       !!this.rcptdate() &&
       !!this.customerid() &&
       !!this.amount() &&
@@ -201,7 +214,7 @@ export class CreateCustomerReceiptComponent {
       {
         value: 'basic',
         label: 'Basic Details',
-        description: 'Date, customer, amount & bank',
+        description: 'Number, date, customer, amount & bank',
         completed: basicCompleted,
       },
       {
@@ -309,6 +322,11 @@ export class CreateCustomerReceiptComponent {
   // ── Patch signals from loaded receipt (edit mode) ─────────────────────────
 
   private patchFromReceipt(r: CustomerReceipt): void {
+    const auto = r.cprops?.autoNumbering ?? false;
+    this.customProperties.set(r.cprops ?? {});
+    this.receiptNumber.set(r.number ?? '');
+    this.autoNumbering.set(auto);
+    this.number.set(auto ? (r.number ?? 'Auto Number') : (r.number ?? ''));
     this.rcptdate.set(r.date ?? this.fiscalYearDateRange.defaultDate());
     this.amount.set(String(r.amount ?? ''));
     this.currencycode.set(r.currencycode ?? 'INR');
@@ -412,6 +430,18 @@ export class CreateCustomerReceiptComponent {
       this.rcptdate.set(dayjs(value).format(DEFAULT_NODE_DATE_FORMAT));
   }
 
+  protected toggleAutoNumbering(value: boolean): void {
+    this.autoNumbering.set(value);
+    if (value) {
+      this.number.set(this.receiptNumber() || 'Auto Number');
+      return;
+    }
+
+    if (this.number() === 'Auto Number') {
+      this.number.set('');
+    }
+  }
+
   // ── Submit ────────────────────────────────────────────────────────────────
 
   protected async submitForm(event: Event): Promise<void> {
@@ -420,6 +450,7 @@ export class CreateCustomerReceiptComponent {
 
     const amountVal = Number(this.amount());
     if (
+      this.numberError() !== null ||
       this.dateError() !== null ||
       !this.customerid() ||
       !this.amount() ||
@@ -438,11 +469,16 @@ export class CreateCustomerReceiptComponent {
       }));
 
     const payload: CustomerReceiptPayload = {
+      ...(!this.autoNumbering() && this.number().trim() ? { number: this.number().trim() } : {}),
       date: this.rcptdate(),
       amount: amountVal,
       currencycode: this.currencycode().trim(),
       customerid: this.customerid(),
       bcashid: this.bcashid(),
+      cprops: {
+        ...(this.customProperties() ?? {}),
+        autoNumbering: this.autoNumbering(),
+      },
       ...(this.description().trim() ? { description: this.description().trim() } : {}),
       ...(invoices.length ? { invoices } : {}),
     };

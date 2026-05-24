@@ -42,11 +42,11 @@
         <dl class="details-grid">
           <div>
             <dt>Country</dt>
-            <dd>{{ branch.countrycode || '—' }}</dd>
+            <dd>{{ countryLabel(branch) }}</dd>
           </div>
           <div>
             <dt>Currency</dt>
-            <dd>{{ branch.currencycode || '—' }}</dd>
+            <dd>{{ currencyLabel(branch) }}</dd>
           </div>
           <div>
             <dt>Date Format</dt>
@@ -63,6 +63,10 @@
           <div>
             <dt>Invoice Number Format</dt>
             <dd>{{ branch.invnumber || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Receipt Number Format</dt>
+            <dd>{{ branch.recnumber || '—' }}</dd>
           </div>
           @if (branch.gstin) {
             <div>

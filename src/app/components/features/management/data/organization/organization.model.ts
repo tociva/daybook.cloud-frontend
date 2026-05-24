@@ -22,7 +22,7 @@ export type OrganizationBootstrap = Readonly<{
   name: string;
   email: string;
   mobile?: string;
-  address: Address;
+  address: OrgAddress;
   description?: string;
   countrycode: string;
   state?: string;
@@ -32,6 +32,7 @@ export type OrganizationBootstrap = Readonly<{
   enddate: string;
   gstin?: string;
   invnumber: string;
+  recnumber: string;
   currencycode: string;
   jnumber: string;
   dateformat: string;
@@ -50,6 +51,7 @@ export type OrganizationBootstrapFormData = Readonly<{
   fiscaldaterange: readonly string[];
   gstin?: string;
   invnumber: string;
+  recnumber: string;
   currency: Currency;
   jnumber: string;
   dateformatForm?: DateFormat;

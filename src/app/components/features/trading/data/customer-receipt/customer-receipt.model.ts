@@ -20,12 +20,26 @@ export type CustomerReceiptInvoiceRequest = Readonly<{
   amount: number;
 }>;
 
+export type CustomerReceiptCustomProperties = Readonly<{
+  autoNumbering?: boolean;
+  fx?: number;
+  lamt?: number;
+  [key: string]: unknown;
+}>;
+
+export type CustomerReceiptSystemProperties = Readonly<{
+  [key: string]: unknown;
+}>;
+
 export type CustomerReceiptPayload = Readonly<{
+  number?: string;
   date: string;
   amount: number;
   currencycode: string;
   customerid: string;
   bcashid: string;
+  cprops?: CustomerReceiptCustomProperties;
+  sprops?: CustomerReceiptSystemProperties;
   description?: string;
   invoices?: readonly CustomerReceiptInvoiceRequest[];
 }>;
@@ -34,11 +48,14 @@ export type CustomerReceiptPayload = Readonly<{
 
 export type CustomerReceipt = Readonly<{
   id?: string;
+  number?: string;
   date: string;
   amount: number;
   currencycode?: string;
   customerid?: string;
   bcashid?: string;
+  cprops?: CustomerReceiptCustomProperties;
+  sprops?: CustomerReceiptSystemProperties;
   description?: string;
   customer?: Customer;
   bcash?: BankCash;

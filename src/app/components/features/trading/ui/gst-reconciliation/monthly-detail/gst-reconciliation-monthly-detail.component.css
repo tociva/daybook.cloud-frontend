@@ -1,0 +1,187 @@
+.trading-page,
+.party-stack {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.trading-page {
+  padding: 1.25rem;
+}
+
+.notice {
+  background: color-mix(in srgb, var(--notice-color, #64748b) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--notice-color, #64748b) 30%, transparent);
+  border-radius: 0.5rem;
+  color: var(--notice-color, var(--tng-semantic-foreground-secondary));
+  font-size: 0.85rem;
+  padding: 0.75rem 0.9rem;
+}
+
+.notice--danger {
+  --notice-color: var(--tng-semantic-accent-danger, #dc2626);
+}
+
+.summary-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.summary-tile {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.85rem;
+}
+
+.summary-tile small,
+.party-head p,
+.party-head span,
+.recon-table__row small {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.75rem;
+}
+
+.summary-tile strong,
+.party-head h2,
+.recon-table__row strong {
+  color: var(--tng-semantic-foreground-primary);
+}
+
+.summary-tile strong {
+  font-size: 1.2rem;
+}
+
+.summary-tile[data-status='matched'] strong {
+  color: var(--tng-semantic-accent-success, #16a34a);
+}
+
+.summary-tile[data-status='partial'] strong {
+  color: var(--tng-semantic-accent-warning, #d97706);
+}
+
+.summary-tile[data-status='notMatched'] strong,
+.summary-tile--danger strong,
+.amount-cell--danger {
+  color: var(--tng-semantic-accent-danger, #dc2626) !important;
+}
+
+.party-stack {
+  gap: 1rem;
+}
+
+.party-head {
+  align-items: flex-start;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.party-head h2,
+.party-head p {
+  margin: 0;
+}
+
+.party-head h2 {
+  font-size: 1rem;
+}
+
+.recon-table {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  overflow: auto;
+}
+
+.recon-table__head,
+.recon-table__row {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: 9rem 12rem minmax(15rem, 1fr) minmax(15rem, 1fr) 9rem minmax(14rem, 1fr);
+  min-width: 76rem;
+}
+
+.recon-table__head {
+  background: color-mix(in srgb, var(--tng-semantic-foreground-primary) 5%, transparent);
+  color: var(--tng-semantic-foreground-secondary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.65rem 0.75rem;
+  text-transform: uppercase;
+}
+
+.recon-table__row {
+  border-top: 1px solid var(--tng-semantic-border-subtle);
+  padding: 0.8rem 0.75rem;
+}
+
+.recon-table__row > span {
+  color: var(--tng-semantic-foreground-secondary);
+  font-size: 0.8rem;
+}
+
+.recon-table__row strong,
+.recon-table__row small {
+  display: block;
+}
+
+.status-pill {
+  --status-color: var(--tng-semantic-foreground-muted, #6b7280);
+  align-items: center;
+  align-self: start;
+  background: color-mix(in srgb, var(--status-color) 12%, transparent);
+  border-radius: 999px;
+  color: var(--status-color) !important;
+  display: inline-flex;
+  font-weight: 700;
+  gap: 0.3rem;
+  line-height: 1;
+  padding: 0.35rem 0.5rem;
+}
+
+.status-pill[data-status='matched'] {
+  --status-color: var(--tng-semantic-accent-success, #16a34a);
+}
+
+.status-pill[data-status='partial'] {
+  --status-color: var(--tng-semantic-accent-warning, #d97706);
+}
+
+.status-pill[data-status='notMatched'] {
+  --status-color: var(--tng-semantic-accent-danger, #dc2626);
+}
+
+.invoice-cell {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.invoice-cell--missing {
+  opacity: 0.55;
+}
+
+.amount-cell {
+  font-weight: 700;
+}
+
+.reason-cell {
+  line-height: 1.45;
+}
+
+.empty-copy {
+  color: var(--tng-semantic-foreground-muted);
+  margin: 0;
+}
+
+@media (max-width: 1100px) {
+  .summary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+}

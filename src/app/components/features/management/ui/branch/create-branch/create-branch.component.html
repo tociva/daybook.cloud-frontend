@@ -311,6 +311,20 @@
               <tng-error [show]="invnumberError() !== null">{{ invnumberError() }}</tng-error>
             </tng-form-field>
           </div>
+
+          <div class="field">
+            <tng-form-field labelPosition="above" [invalid]="recnumberError() !== null">
+              <tng-label forId="branch-recnumber" required>Receipt Number Format</tng-label>
+              <tng-input
+                id="branch-recnumber"
+                placeholder="e.g. <<YYYY>>/RCT/<<SERIAL3>>"
+                [value]="recnumber()"
+                [ariaInvalid]="recnumberError() !== null"
+                (input)="recnumber.set($any($event.target).value)"
+              />
+              <tng-error [show]="recnumberError() !== null">{{ recnumberError() }}</tng-error>
+            </tng-form-field>
+          </div>
         </div>
 
         <tng-card-footer>

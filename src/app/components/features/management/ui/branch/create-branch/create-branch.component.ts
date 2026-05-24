@@ -26,8 +26,10 @@ import { OrganizationStore } from '../../../data/organization/organization.store
 import type { Organization } from '../../../data/organization/organization.model';
 import { BranchFacade, BranchStore } from '../../../data/branch';
 import type { BranchPayload } from '../../../data/branch';
-
-const DEFAULT_INVOICE_NUMBER_FORMAT = '<<YYYY>>/<<SERIAL3>>';
+import {
+  DEFAULT_INVOICE_NUMBER_FORMAT,
+  DEFAULT_RECEIPT_NUMBER_FORMAT,
+} from '../../../../../../util/constants';
 
 @Component({
   selector: 'app-create-branch',
@@ -84,6 +86,7 @@ export class CreateBranchComponent implements AfterViewInit {
   protected readonly fiscalstart = signal('January-01');
   protected readonly timezone = signal('Asia/Kolkata');
   protected readonly invnumber = signal(DEFAULT_INVOICE_NUMBER_FORMAT);
+  protected readonly recnumber = signal(DEFAULT_RECEIPT_NUMBER_FORMAT);
 
   // ── Country autocomplete ──────────────────────────────────────────────────
   protected readonly selectedCountry = signal<Country | null>(null);
@@ -188,6 +191,11 @@ export class CreateBranchComponent implements AfterViewInit {
       ? 'Invoice number format is required.'
       : null,
   );
+  protected readonly recnumberError = computed(() =>
+    this.submitted() && this.recnumber().trim() === ''
+      ? 'Receipt number format is required.'
+      : null,
+  );
   protected readonly hasErrors = computed(
     () =>
       this.nameError() !== null ||
@@ -197,7 +205,8 @@ export class CreateBranchComponent implements AfterViewInit {
       this.dateFormatError() !== null ||
       this.organizationError() !== null ||
       this.fiscalstartError() !== null ||
-      this.invnumberError() !== null,
+      this.invnumberError() !== null ||
+      this.recnumberError() !== null,
   );
 
   constructor() {
@@ -231,6 +240,7 @@ export class CreateBranchComponent implements AfterViewInit {
         this.fiscalstart.set(branch.fiscalstart ?? 'January-01');
         this.timezone.set(branch.timezone ?? 'Asia/Kolkata');
         this.invnumber.set(branch.invnumber ?? DEFAULT_INVOICE_NUMBER_FORMAT);
+        this.recnumber.set(branch.recnumber ?? DEFAULT_RECEIPT_NUMBER_FORMAT);
 
         const addr = branch.address as
           | { line1?: string; line2?: string; city?: string; pincode?: string }
@@ -377,6 +387,7 @@ export class CreateBranchComponent implements AfterViewInit {
       fiscalstart: this.fiscalstart().trim(),
       timezone: this.timezone().trim(),
       invnumber: this.invnumber().trim(),
+      recnumber: this.recnumber().trim(),
       ...(this.mobile().trim() && { mobile: this.mobile().trim() }),
       ...(this.description().trim() && { description: this.description().trim() }),
       ...(this.state().trim() && { state: this.state().trim() }),

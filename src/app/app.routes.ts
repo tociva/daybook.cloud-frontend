@@ -105,6 +105,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'app/trading/gst-reconciliation',
+    loadChildren: () =>
+      import('./components/features/trading/ui/gst-reconciliation/gst-reconciliation.routes').then(
+        (m) => m.gstReconciliationRoutes,
+      ),
+  },
+  {
     path: 'app/management/organization',
     loadChildren: () =>
       import('./components/features/management/ui/organization/organization.routes').then(

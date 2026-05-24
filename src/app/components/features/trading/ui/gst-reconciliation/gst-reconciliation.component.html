@@ -1,0 +1,373 @@
+<main class="trading-page">
+  <app-page-heading
+    eyebrow="Trading"
+    title="GST Reconciliation"
+    [description]="headerContext()"
+  >
+    <div class="heading-actions">
+      <div class="recon-legend" role="list" aria-label="Status legend">
+        @for (entry of statusLegend; track entry.status) {
+          <span class="recon-legend__item" role="listitem">
+            <span class="recon-dot" [attr.data-status]="entry.status" aria-hidden="true"></span>
+            {{ entry.label }}
+          </span>
+        }
+      </div>
+    </div>
+  </app-page-heading>
+
+  @if (contextMessage()) {
+    <div class="notice notice--warning">{{ contextMessage() }}</div>
+  }
+  @if (!canImport()) {
+    <div class="notice notice--info">You can view reconciliation data, but import access is restricted.</div>
+  }
+  @if (store.error()) {
+    <div class="notice notice--danger">{{ store.error() }}</div>
+  }
+  @if (store.importResult()) {
+    <div class="notice notice--success" role="status">
+      Imported {{ store.importResult()?.savedCount }} invoices into
+      {{ lastImportedSection() === 'gstr1' ? 'GSTR-1' : 'GSTR-2B' }} successfully.
+    </div>
+  }
+  @if (isParsing()) {
+    <div class="parse-progress" role="status" aria-live="polite">
+      <div class="parse-progress__meta">
+        <tng-icon icon="fileSearch" aria-hidden="true" />
+        <span>Reading {{ pendingFile()?.name ?? 'file' }}</span>
+      </div>
+      <tng-progress-bar
+        [indeterminate]="true"
+        ariaLabel="Reading uploaded GST file"
+      ></tng-progress-bar>
+    </div>
+  }
+
+  <!-- Hidden shared file input -->
+  <input
+    id="gst-import-file"
+    class="import-file-input"
+    type="file"
+    accept=".json,application/json,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    [disabled]="store.isImporting() || isParsing()"
+    (change)="onBrowse($event)"
+  />
+
+  <!-- ── Confirmation dialog ──────────────────────────────────────────────── -->
+  <tng-dialog
+    [title]="confirmDialogTitle()"
+    size="lg"
+    [open]="confirmDialogOpen()"
+    [closeOnBackdrop]="false"
+    [closeOnEscape]="true"
+    (closed)="cancelConfirmation()"
+  >
+    <div class="confirm-body">
+
+      <!-- File strip -->
+      <div class="confirm-file-strip">
+        <tng-icon icon="fileText" aria-hidden="true" />
+        <div class="confirm-file-strip__info">
+          <strong>{{ pendingFile()?.name }}</strong>
+          <small>{{ formatFileSize(pendingFile()?.size ?? 0) }}</small>
+        </div>
+        @if (isParsing()) {
+          <tng-icon icon="loaderCircle" aria-hidden="true" class="spin" />
+        }
+      </div>
+
+      @if (parsedPreview(); as preview) {
+
+        <!-- Summary stats -->
+        <div class="confirm-summary">
+          <div class="confirm-stat">
+            <span class="confirm-stat__label">Period</span>
+            <span class="confirm-stat__value">{{ preview.period }}</span>
+          </div>
+          @if (preview.gstin) {
+            <div class="confirm-stat">
+              <span class="confirm-stat__label">GSTIN</span>
+              <span class="confirm-stat__value mono">{{ preview.gstin }}</span>
+            </div>
+          }
+          <div class="confirm-stat">
+            <span class="confirm-stat__label">Invoices</span>
+            <span class="confirm-stat__value">{{ preview.invoices.length }}</span>
+          </div>
+          <div class="confirm-stat">
+            <span class="confirm-stat__label">Invoice Value</span>
+            <span class="confirm-stat__value">{{ formatNum(preview.totalInvoiceValue) }}</span>
+          </div>
+          <div class="confirm-stat">
+            <span class="confirm-stat__label">Taxable Value</span>
+            <span class="confirm-stat__value">{{ formatNum(preview.totalTaxableValue) }}</span>
+          </div>
+          <div class="confirm-stat">
+            <span class="confirm-stat__label">Total Tax</span>
+            <span class="confirm-stat__value">{{ formatNum(totalTax(preview)) }}</span>
+          </div>
+        </div>
+
+        <!-- Invoice table — columns differ by return type -->
+        <div class="confirm-table-wrap">
+          <table class="confirm-table">
+
+            @if (preview.detectedReturnType === 'gstr2b') {
+              <!-- GSTR-2B: inward supplies from registered suppliers -->
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Supplier</th>
+                  <th>GSTIN</th>
+                  <th>Invoice No</th>
+                  <th>Date</th>
+                  <th class="num">Value (₹)</th>
+                  <th class="num">Taxable (₹)</th>
+                  <th class="num">IGST</th>
+                  <th class="num">CGST</th>
+                  <th class="num">SGST</th>
+                  <th>ITC</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (inv of preview.invoices; track inv.invoiceNo; let idx = $index) {
+                  <tr>
+                    <td class="row-num">{{ idx + 1 }}</td>
+                    <td class="supplier">{{ inv.supplierName }}</td>
+                    <td class="mono">{{ inv.gstin }}</td>
+                    <td class="mono">{{ inv.invoiceNo }}</td>
+                    <td class="date">{{ inv.invoiceDate }}</td>
+                    <td class="num">{{ formatNum(inv.invoiceValue) }}</td>
+                    <td class="num">{{ formatNum(inv.taxableValue) }}</td>
+                    <td class="num">{{ inv.igst ? formatNum(inv.igst) : '—' }}</td>
+                    <td class="num">{{ inv.cgst ? formatNum(inv.cgst) : '—' }}</td>
+                    <td class="num">{{ inv.sgst ? formatNum(inv.sgst) : '—' }}</td>
+                    <td>
+                      <span class="itc-badge" [class.itc-badge--yes]="inv.itcAvailable" [class.itc-badge--no]="!inv.itcAvailable">
+                        {{ inv.itcAvailable ? 'Yes' : 'No' }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr class="totals-row">
+                  <td colspan="5" class="totals-label">Totals</td>
+                  <td class="num">{{ formatNum(preview.totalInvoiceValue) }}</td>
+                  <td class="num">{{ formatNum(preview.totalTaxableValue) }}</td>
+                  <td class="num">{{ formatNum(preview.totalIgst) }}</td>
+                  <td class="num">{{ formatNum(preview.totalCgst) }}</td>
+                  <td class="num">{{ formatNum(preview.totalSgst) }}</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            }
+
+            @if (preview.detectedReturnType === 'gstr1') {
+              <!-- GSTR-1: outward supplies -->
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Type</th>
+                  <th>Invoice No</th>
+                  <th>Date</th>
+                  <th class="num">Rate %</th>
+                  <th class="num">Value (₹)</th>
+                  <th class="num">Taxable (₹)</th>
+                  <th class="num">IGST</th>
+                  <th class="num">CGST</th>
+                  <th class="num">SGST</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (inv of preview.invoices; track inv.invoiceNo; let idx = $index) {
+                  <tr>
+                    <td class="row-num">{{ idx + 1 }}</td>
+                    <td class="export-type">{{ inv.exportType ?? '—' }}</td>
+                    <td class="mono">{{ inv.invoiceNo }}</td>
+                    <td class="date">{{ inv.invoiceDate }}</td>
+                    <td class="num">{{ inv.taxRate ?? 0 }}</td>
+                    <td class="num">{{ formatNum(inv.invoiceValue) }}</td>
+                    <td class="num">{{ formatNum(inv.taxableValue) }}</td>
+                    <td class="num">{{ inv.igst ? formatNum(inv.igst) : '—' }}</td>
+                    <td class="num">{{ inv.cgst ? formatNum(inv.cgst) : '—' }}</td>
+                    <td class="num">{{ inv.sgst ? formatNum(inv.sgst) : '—' }}</td>
+                  </tr>
+                }
+              </tbody>
+              <tfoot>
+                <tr class="totals-row">
+                  <td colspan="4" class="totals-label">Totals</td>
+                  <td></td>
+                  <td class="num">{{ formatNum(preview.totalInvoiceValue) }}</td>
+                  <td class="num">{{ formatNum(preview.totalTaxableValue) }}</td>
+                  <td class="num">{{ formatNum(preview.totalIgst) }}</td>
+                  <td class="num">{{ formatNum(preview.totalCgst) }}</td>
+                  <td class="num">{{ formatNum(preview.totalSgst) }}</td>
+                </tr>
+              </tfoot>
+            }
+
+          </table>
+        </div>
+
+      } @else if (!isParsing()) {
+        <p class="confirm-no-preview">
+          Could not read invoice data from this file.
+        </p>
+      }
+
+      @if (pendingError()) {
+        <tng-error [show]="true">{{ pendingError() }}</tng-error>
+      }
+
+      <!-- Actions — single button for detected type, or error if unknown -->
+      <div class="confirm-actions">
+        @if (isParsing()) {
+          <span class="confirm-actions__label">Analysing file…</span>
+        } @else if (parsedPreview()?.detectedReturnType; as rtype) {
+          <span class="confirm-actions__label">
+            Detected: <strong>{{ returnTypeLabel(rtype) }}</strong>
+          </span>
+          <tng-button
+            type="button"
+            appearance="solid"
+            tone="primary"
+            [disabled]="store.isImporting()"
+            (click)="submitImportAs(rtype)"
+          >
+            @if (store.isImporting()) {
+              <tng-icon icon="loaderCircle" aria-hidden="true" class="spin" />
+              Importing…
+            } @else {
+              <tng-icon icon="upload" aria-hidden="true" />
+              Import {{ returnTypeLabel(rtype) }}
+            }
+          </tng-button>
+        } @else {
+          <tng-error [show]="true">
+            Unable to detect return type. Upload a valid GSTR-1 (JSON) or GSTR-2B (XLSX) file.
+          </tng-error>
+        }
+
+        <tng-button
+          type="button"
+          appearance="ghost"
+          tone="neutral"
+          [disabled]="store.isImporting()"
+          (click)="cancelConfirmation()"
+        >
+          Cancel
+        </tng-button>
+      </div>
+
+    </div><!-- /.confirm-body -->
+  </tng-dialog>
+
+  <!-- ── Overview — drag-and-drop zone ───────────────────────────────────── -->
+  <div
+    class="recon-overview"
+    [class.recon-overview--drag-active]="overviewDragActive()"
+    [attr.aria-busy]="store.isLoadingSummary()"
+    tngFileUpload
+    accept=".json,application/json,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    [maxSize]="maxFileSize"
+    [multiple]="false"
+    [disabled]="store.isImporting() || isParsing() || !canImport() || !context()"
+    (filesSelected)="onFilesSelected($event)"
+    (filesRejected)="onFilesRejected($event)"
+    (dragenter)="onOverviewDragEnter()"
+    (dragleave)="onOverviewDragLeave()"
+  >
+
+    @for (section of returnTypeSections(); track section.meta.value) {
+      <tng-card variant="outline" padding="lg">
+        <header class="recon-panel-head">
+          <div class="recon-section__title">
+            <tng-icon [icon]="section.meta.icon" aria-hidden="true" />
+            <div>
+              <h2>{{ section.meta.label }}</h2>
+              <p>{{ section.meta.description }}</p>
+            </div>
+          </div>
+
+          <tng-button
+            type="button"
+            appearance="ghost"
+            tone="neutral"
+            [disabled]="!context() || !canImport() || store.isImporting() || isParsing()"
+            [attr.aria-label]="'Import ' + section.meta.label + ' file'"
+            (click)="triggerImportForSection(section.meta.value)"
+          >
+            <tng-icon icon="upload" aria-hidden="true" />
+            Import
+          </tng-button>
+        </header>
+
+        <div class="recon-section__stats" [attr.aria-label]="section.meta.label + ' status summary'">
+          <span class="recon-stat" data-status="matched"    [attr.title]="'Matched: '     + totalByStatus(section.months, 'matched')">{{ totalByStatus(section.months, 'matched')    }}</span>
+          <span class="recon-stat" data-status="partial"    [attr.title]="'Partial: '     + totalByStatus(section.months, 'partial')">{{ totalByStatus(section.months, 'partial')    }}</span>
+          <span class="recon-stat" data-status="notMatched" [attr.title]="'Not matched: ' + totalByStatus(section.months, 'notMatched')">{{ totalByStatus(section.months, 'notMatched') }}</span>
+        </div>
+
+        <div class="recon-months">
+          @for (cell of section.months; track cell.returnType + '-' + cell.month) {
+            <button
+              type="button"
+              class="recon-month"
+              [attr.data-status]="cell.status"
+              [attr.aria-label]="section.meta.label + ' ' + cell.period + ', ' + statusLabel(cell.status)"
+              [disabled]="!context()"
+              (click)="openMonth(cell)"
+            >
+              <span class="recon-month__top">
+                <span>
+                  <strong>{{ cell.label }}</strong>
+                  <small>{{ cell.period }}</small>
+                </span>
+                <span class="recon-month__status" [attr.title]="statusLabel(cell.status)">
+                  <tng-icon [icon]="statusIcon(cell.status)" aria-hidden="true" />
+                </span>
+              </span>
+
+              @if (cell.status !== 'upcoming') {
+                <span class="recon-month__tags">
+                  @if (cell.gstInvoiceCount > 0) {
+                    <span class="recon-tag recon-tag--gst"  [attr.title]="'GST invoices: '  + cell.gstInvoiceCount">{{ cell.gstInvoiceCount   }}</span>
+                  }
+                  @if (cell.booksInvoiceCount > 0) {
+                    <span class="recon-tag recon-tag--books" [attr.title]="'Book invoices: ' + cell.booksInvoiceCount">{{ cell.booksInvoiceCount }}</span>
+                  }
+                  @if (cell.matchedCount > 0) {
+                    <span class="recon-tag" data-status="matched"    [attr.title]="'Matched: '  + cell.matchedCount">{{ cell.matchedCount  }}</span>
+                  }
+                  @if (cell.partialCount > 0) {
+                    <span class="recon-tag" data-status="partial"    [attr.title]="'Partial: '  + cell.partialCount">{{ cell.partialCount  }}</span>
+                  }
+                  @if (cell.mismatchCount > 0) {
+                    <span class="recon-tag" data-status="notMatched" [attr.title]="'Mismatch: ' + cell.mismatchCount">{{ cell.mismatchCount }}</span>
+                  }
+                </span>
+
+                <span class="recon-month__diff" [class.recon-month__diff--active]="cell.differenceAmount !== 0">
+                  {{ formatAmount(cell.differenceAmount) }}
+                </span>
+              }
+            </button>
+          }
+        </div>
+      </tng-card>
+    }
+
+    <!-- Drag-and-drop overlay -->
+    <div class="recon-drop-overlay" aria-hidden="true">
+      <div class="recon-drop-overlay__inner">
+        <tng-icon icon="upload" aria-hidden="true" />
+        <span>Drop file here</span>
+        <small>JSON or XLSX · max 10 MB</small>
+      </div>
+    </div>
+
+  </div><!-- /.recon-overview -->
+</main>

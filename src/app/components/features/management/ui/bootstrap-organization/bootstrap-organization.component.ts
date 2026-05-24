@@ -56,10 +56,12 @@ import { ToastStore } from '../../../../../core/toast/toast.store';
 import { UserSessionService } from '../../data/user-session/user-session.service';
 import { UserSessionStore } from '../../data/user-session/user-session.store';
 import { AutoNumberingTemplateGeneratorComponent } from '../../../../../shared/auto-numbering-template-generator/auto-numbering-template-generator.component';
-import { DEFAULT_NODE_DATE_FORMAT } from '../../../../../util/constants';
-
-const DEFAULT_INVOICE_NUMBER_FORMAT = '<<YYYY>>/<<SERIAL3>>';
-const DEFAULT_JOURNAL_NUMBER_FORMAT = '<<FISCAL_START_YY>>-<<FISCAL_END_YY>>/<<SERIAL1>>';
+import {
+  DEFAULT_INVOICE_NUMBER_FORMAT,
+  DEFAULT_JOURNAL_NUMBER_FORMAT,
+  DEFAULT_NODE_DATE_FORMAT,
+  DEFAULT_RECEIPT_NUMBER_FORMAT,
+} from '../../../../../util/constants';
 
 type OrgValidationFieldKey =
   | 'name'
@@ -70,6 +72,7 @@ type OrgValidationFieldKey =
   | 'gstin'
   | 'fiscalname'
   | 'invnumber'
+  | 'recnumber'
   | 'jnumber'
   | 'address.line1'
   | 'address.line2'
@@ -101,6 +104,7 @@ type OrganizationSignalFormModel = {
   fiscalstart: string;
   gstin: string;
   invnumber: string;
+  recnumber: string;
   jnumber: string;
   mobile: string;
   name: string;
@@ -124,6 +128,7 @@ type OrganizationFormPayload = Readonly<{
   fiscalstart: string;
   gstin: string;
   invnumber: string;
+  recnumber: string;
   jnumber: string;
   mobile: string;
   name: string;
@@ -198,6 +203,7 @@ const createInitialForm = (): OrganizationSignalFormModel => ({
   fiscalstart: 'January-01',
   gstin: '',
   invnumber: DEFAULT_INVOICE_NUMBER_FORMAT,
+  recnumber: DEFAULT_RECEIPT_NUMBER_FORMAT,
   jnumber: DEFAULT_JOURNAL_NUMBER_FORMAT,
   mobile: '',
   name: '',
@@ -263,6 +269,7 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
   protected readonly saved = signal(false);
   protected readonly isSubmitting = signal(false);
   protected readonly invoiceTemplateDialogOpen = signal(false);
+  protected readonly receiptTemplateDialogOpen = signal(false);
   protected readonly journalTemplateDialogOpen = signal(false);
   protected readonly touched = signal<Partial<Record<OrgValidationFieldKey, true>>>({});
 
@@ -332,6 +339,10 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
     buildNextNumberingSequences(this.organizationModel().invnumber, this.fiscalYearRange()),
   );
 
+  protected readonly receiptNextSequences = computed(() =>
+    buildNextNumberingSequences(this.organizationModel().recnumber, this.fiscalYearRange()),
+  );
+
   protected readonly journalNextSequences = computed(() =>
     buildNextNumberingSequences(this.organizationModel().jnumber, this.fiscalYearRange()),
   );
@@ -356,6 +367,7 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
       fiscalstart: model.fiscalstart,
       gstin: model.gstin,
       invnumber: model.invnumber,
+      recnumber: model.recnumber,
       jnumber: model.jnumber,
       mobile: model.mobile,
       name: model.name,
@@ -401,6 +413,10 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
       errors.invnumber = 'Invoice No. is required';
     }
 
+    if (!willPassRequiredStringValidation(model.recnumber)) {
+      errors.recnumber = 'Receipt No. is required';
+    }
+
     if (!willPassRequiredStringValidation(model.jnumber)) {
       errors.jnumber = 'Journal No. is required';
     }
@@ -436,6 +452,7 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
       willPassRequiredStringValidation(model.currencyCode) &&
       willPassRequiredStringValidation(model.dateFormatName) &&
       willPassRequiredStringValidation(model.invnumber) &&
+      willPassRequiredStringValidation(model.recnumber) &&
       willPassRequiredStringValidation(model.jnumber);
 
     return [
@@ -502,6 +519,13 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
     this.organizationModel.update((current) => ({ ...current, invnumber: template }));
     this.markTouched('invnumber');
     this.invoiceTemplateDialogOpen.set(false);
+  }
+
+  protected applyReceiptNumberTemplate(template: string): void {
+    this.saved.set(false);
+    this.organizationModel.update((current) => ({ ...current, recnumber: template }));
+    this.markTouched('recnumber');
+    this.receiptTemplateDialogOpen.set(false);
   }
 
   protected selectCountry(value: unknown): void {
@@ -660,6 +684,7 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
       'gstin',
       'fiscalname',
       'invnumber',
+      'recnumber',
       'jnumber',
       'address.line1',
       'address.line2',
@@ -738,6 +763,7 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
       fiscalname: payload.fiscalname,
       ...(payload.gstin && { gstin: payload.gstin }),
       invnumber: payload.invnumber,
+      recnumber: payload.recnumber,
       jnumber: payload.jnumber,
       dateformat: payload.dateformatForm?.name ?? '',
       startdate,

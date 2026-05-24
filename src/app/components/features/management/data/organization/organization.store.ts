@@ -3,6 +3,7 @@ import { patchState, signalStore, withComputed, withMethods, withState } from '@
 import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
 import type {
   Organization,
+  OrganizationBootstrap,
   OrganizationListQuery,
   OrganizationPayload,
 } from './organization.model';
@@ -100,6 +101,27 @@ export const OrganizationStore = signalStore(
           return org;
         } catch (error) {
           setError(getApiErrorMessage(error, 'Failed to create organization.'));
+          return null;
+        }
+      },
+
+      async createOrganizationWithDefaultBranch(
+        payload: OrganizationBootstrap,
+      ): Promise<Organization | null> {
+        setLoading();
+        try {
+          const org = await service.createWithDefaultBranch(payload);
+          patchState(store, (state) => ({
+            organizations: [org, ...state.organizations],
+            count: state.count + 1,
+            selectedOrganization: org,
+            selectedOrganizationId: org.id ?? null,
+            error: null,
+            isLoading: false,
+          }));
+          return org;
+        } catch (error) {
+          setError(getApiErrorMessage(error, 'Failed to create organization with default branch.'));
           return null;
         }
       },

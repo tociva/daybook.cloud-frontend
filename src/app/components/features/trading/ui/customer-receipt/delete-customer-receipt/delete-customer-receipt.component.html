@@ -15,6 +15,10 @@
       } @else if (customerReceiptStore.selectedItem(); as rcpt) {
         <dl class="details-grid">
           <div>
+            <dt>Number</dt>
+            <dd>{{ rcpt.number || '—' }}</dd>
+          </div>
+          <div>
             <dt>Date</dt>
             <dd>{{ formatDate(rcpt.date) }}</dd>
           </div>

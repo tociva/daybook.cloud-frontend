@@ -56,65 +56,6 @@
             </tng-form-field>
           </div>
 
-          <div class="field">
-            <tng-form-field labelPosition="above">
-              <tng-label forId="org-country">Country</tng-label>
-              <tng-autocomplete
-                id="org-country"
-                placeholder="Search for a country"
-                ariaLabel="Country"
-                [options]="filteredCountries()"
-                [formField]="countryCurrencyForm.countrycode"
-                [getOptionValue]="countryOptionValue"
-                [getOptionLabel]="countryOptionLabel"
-                [trackBy]="countryTrackBy"
-                (valueChange)="selectCountry($event)"
-                (queryChange)="onCountryQueryChange($event)"
-              >
-                <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
-                  <span class="country-option">
-                    <span [class]="getCountryFlagClass(option)" aria-hidden="true"></span>
-                    <span class="country-option-label">{{ label }}</span>
-                  </span>
-                </ng-template>
-
-                <ng-template #tngAutocompleteSelectedTpl let-option="option">
-                  <span [class]="getCountryFlagClass(option)" aria-hidden="true"></span>
-                </ng-template>
-              </tng-autocomplete>
-            </tng-form-field>
-          </div>
-
-          <div class="field">
-            <tng-form-field labelPosition="above">
-              <tng-label forId="org-currency">Currency</tng-label>
-              <tng-autocomplete
-                id="org-currency"
-                placeholder="Search for a currency"
-                ariaLabel="Currency"
-                [options]="filteredCurrencies()"
-                [formField]="countryCurrencyForm.currencycode"
-                [getOptionValue]="currencyOptionValue"
-                [getOptionLabel]="currencyOptionLabel"
-                [trackBy]="currencyTrackBy"
-                (valueChange)="selectCurrency($event)"
-                (queryChange)="onCurrencyQueryChange($event)"
-              />
-            </tng-form-field>
-          </div>
-
-          <div class="field">
-            <tng-form-field labelPosition="above">
-              <tng-label forId="org-create-state">State / Province</tng-label>
-              <tng-input
-                id="org-create-state"
-                placeholder="State"
-                [value]="state()"
-                (input)="state.set($any($event.target).value)"
-              />
-            </tng-form-field>
-          </div>
-
           <div class="field field--full">
             <tng-form-field labelPosition="above">
               <tng-label forId="org-create-description">Description</tng-label>
@@ -181,18 +122,204 @@
             </tng-form-field>
           </div>
 
-          <div class="field">
-            <tng-form-field labelPosition="above">
-              <tng-label forId="org-create-gstin">GSTIN</tng-label>
-              <tng-input
-                id="org-create-gstin"
-                placeholder="GST Identification Number"
-                [value]="gstin()"
-                (input)="gstin.set($any($event.target).value)"
-              />
-            </tng-form-field>
-          </div>
         </div>
+
+        @if (mode() === 'create') {
+          <!-- ── Default Branch ──────────────────────────────── -->
+          <p class="section-label">Default Branch</p>
+          <div class="fields-grid">
+            <div class="field">
+              <tng-form-field labelPosition="above" [invalid]="countryError() !== null">
+                <tng-label forId="org-country" required>Country</tng-label>
+                <tng-autocomplete
+                  id="org-country"
+                  placeholder="Search for a country"
+                  ariaLabel="Country"
+                  [options]="filteredCountries()"
+                  [formField]="countryCurrencyForm.countrycode"
+                  [getOptionValue]="countryOptionValue"
+                  [getOptionLabel]="countryOptionLabel"
+                  [trackBy]="countryTrackBy"
+                  (valueChange)="selectCountry($event)"
+                  (queryChange)="onCountryQueryChange($event)"
+                >
+                  <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
+                    <span class="country-option">
+                      <span [class]="getCountryFlagClass(option)" aria-hidden="true"></span>
+                      <span class="country-option-label">{{ label }}</span>
+                    </span>
+                  </ng-template>
+
+                  <ng-template #tngAutocompleteSelectedTpl let-option="option">
+                    <span [class]="getCountryFlagClass(option)" aria-hidden="true"></span>
+                  </ng-template>
+                </tng-autocomplete>
+                <tng-error [show]="countryError() !== null">{{ countryError() }}</tng-error>
+              </tng-form-field>
+            </div>
+
+            <div class="field">
+              <tng-form-field labelPosition="above" [invalid]="currencyError() !== null">
+                <tng-label forId="org-currency" required>Currency</tng-label>
+                <tng-autocomplete
+                  id="org-currency"
+                  placeholder="Search for a currency"
+                  ariaLabel="Currency"
+                  [options]="filteredCurrencies()"
+                  [formField]="countryCurrencyForm.currencycode"
+                  [getOptionValue]="currencyOptionValue"
+                  [getOptionLabel]="currencyOptionLabel"
+                  [trackBy]="currencyTrackBy"
+                  (valueChange)="selectCurrency($event)"
+                  (queryChange)="onCurrencyQueryChange($event)"
+                />
+                <tng-error [show]="currencyError() !== null">{{ currencyError() }}</tng-error>
+              </tng-form-field>
+            </div>
+
+            <div class="field">
+              <tng-form-field labelPosition="above" [invalid]="dateFormatError() !== null">
+                <tng-label forId="org-dateformat" required>Date Format</tng-label>
+                <tng-autocomplete
+                  id="org-dateformat"
+                  placeholder="Search for a date format"
+                  ariaLabel="Date format"
+                  [options]="filteredDateFormats()"
+                  [formField]="countryCurrencyForm.dateformat"
+                  [getOptionValue]="dateFormatOptionValue"
+                  [getOptionLabel]="dateFormatOptionLabel"
+                  [trackBy]="dateFormatTrackBy"
+                  (valueChange)="selectDateFormat($event)"
+                  (queryChange)="onDateFormatQueryChange($event)"
+                />
+                <tng-error [show]="dateFormatError() !== null">{{ dateFormatError() }}</tng-error>
+              </tng-form-field>
+            </div>
+
+            <div class="field">
+              <tng-form-field labelPosition="above">
+                <tng-label forId="org-create-state">State / Province</tng-label>
+                <tng-input
+                  id="org-create-state"
+                  placeholder="State"
+                  [value]="state()"
+                  (input)="state.set($any($event.target).value)"
+                />
+              </tng-form-field>
+            </div>
+
+            <div class="field">
+              <tng-form-field labelPosition="above">
+                <tng-label forId="org-create-gstin">GSTIN</tng-label>
+                <tng-input
+                  id="org-create-gstin"
+                  placeholder="GST Identification Number"
+                  [value]="gstin()"
+                  (input)="gstin.set($any($event.target).value)"
+                />
+              </tng-form-field>
+            </div>
+
+            <div class="field">
+              <tng-form-field labelPosition="above" [invalid]="fiscalstartError() !== null">
+                <tng-label forId="org-fiscalstart" required>Fiscal Start</tng-label>
+                <tng-input
+                  id="org-fiscalstart"
+                  placeholder="January-01"
+                  [value]="fiscalstart()"
+                  [ariaInvalid]="fiscalstartError() !== null"
+                  (input)="onFiscalStartInput($event)"
+                />
+                <tng-error [show]="fiscalstartError() !== null">{{ fiscalstartError() }}</tng-error>
+              </tng-form-field>
+            </div>
+
+            <div class="field">
+              <tng-form-field labelPosition="above" [invalid]="fiscalnameError() !== null">
+                <tng-label forId="org-fiscalname" required>Fiscal Name</tng-label>
+                <tng-input
+                  id="org-fiscalname"
+                  placeholder="2026 Financial Year"
+                  [value]="fiscalname()"
+                  [ariaInvalid]="fiscalnameError() !== null"
+                  (input)="fiscalname.set($any($event.target).value)"
+                />
+                <tng-error [show]="fiscalnameError() !== null">{{ fiscalnameError() }}</tng-error>
+              </tng-form-field>
+            </div>
+
+            <div class="field">
+              <tng-form-field labelPosition="above" [invalid]="fiscalYearStartError() !== null">
+                <tng-label forId="org-fiscal-year-start" required>Fiscal Year Start</tng-label>
+                <tng-input
+                  id="org-fiscal-year-start"
+                  placeholder="2026-01-01"
+                  [value]="fiscalYearStart()"
+                  [ariaInvalid]="fiscalYearStartError() !== null"
+                  (input)="onFiscalYearStartInput($event)"
+                />
+                <tng-error [show]="fiscalYearStartError() !== null">{{
+                  fiscalYearStartError()
+                }}</tng-error>
+              </tng-form-field>
+            </div>
+
+            <div class="field">
+              <tng-form-field labelPosition="above" [invalid]="fiscalYearEndError() !== null">
+                <tng-label forId="org-fiscal-year-end" required>Fiscal Year End</tng-label>
+                <tng-input
+                  id="org-fiscal-year-end"
+                  placeholder="2026-12-31"
+                  [value]="fiscalYearEnd()"
+                  [ariaInvalid]="fiscalYearEndError() !== null"
+                  (input)="fiscalYearEnd.set($any($event.target).value)"
+                />
+                <tng-error [show]="fiscalYearEndError() !== null">{{
+                  fiscalYearEndError()
+                }}</tng-error>
+              </tng-form-field>
+            </div>
+
+            <div class="field">
+              <tng-form-field labelPosition="above" [invalid]="invnumberError() !== null">
+                <tng-label forId="org-invnumber" required>Invoice Number Format</tng-label>
+                <tng-input
+                  id="org-invnumber"
+                  [value]="invnumber()"
+                  [ariaInvalid]="invnumberError() !== null"
+                  (input)="invnumber.set($any($event.target).value)"
+                />
+                <tng-error [show]="invnumberError() !== null">{{ invnumberError() }}</tng-error>
+              </tng-form-field>
+            </div>
+
+            <div class="field">
+              <tng-form-field labelPosition="above" [invalid]="recnumberError() !== null">
+                <tng-label forId="org-recnumber" required>Receipt Number Format</tng-label>
+                <tng-input
+                  id="org-recnumber"
+                  [value]="recnumber()"
+                  [ariaInvalid]="recnumberError() !== null"
+                  (input)="recnumber.set($any($event.target).value)"
+                />
+                <tng-error [show]="recnumberError() !== null">{{ recnumberError() }}</tng-error>
+              </tng-form-field>
+            </div>
+
+            <div class="field">
+              <tng-form-field labelPosition="above" [invalid]="jnumberError() !== null">
+                <tng-label forId="org-jnumber" required>Journal Number Format</tng-label>
+                <tng-input
+                  id="org-jnumber"
+                  [value]="jnumber()"
+                  [ariaInvalid]="jnumberError() !== null"
+                  (input)="jnumber.set($any($event.target).value)"
+                />
+                <tng-error [show]="jnumberError() !== null">{{ jnumberError() }}</tng-error>
+              </tng-form-field>
+            </div>
+          </div>
+        }
 
         <tng-card-footer>
           <tng-card-actions align="end">

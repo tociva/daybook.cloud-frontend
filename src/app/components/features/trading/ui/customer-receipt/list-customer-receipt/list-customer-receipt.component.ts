@@ -47,6 +47,7 @@ export class ListCustomerReceiptComponent {
   protected readonly hasError = computed(() => this.customerReceiptStore.error() !== null);
 
   protected readonly columns: readonly TngTableColumn<CustomerReceipt>[] = [
+    { id: 'number', label: 'Number', sortable: true, width: '12rem' },
     { id: 'date', label: 'Date', sortable: true, width: '10rem' },
     { id: 'customer', label: 'Customer', width: '14rem' },
     {
@@ -63,6 +64,7 @@ export class ListCustomerReceiptComponent {
   ];
 
   protected readonly filterFields: readonly CrudFilterField[] = [
+    { id: 'number', label: 'Number', placeholder: 'Search receipt number', type: 'text' },
     { id: 'description', label: 'Description', placeholder: 'Search description', type: 'text' },
   ];
 

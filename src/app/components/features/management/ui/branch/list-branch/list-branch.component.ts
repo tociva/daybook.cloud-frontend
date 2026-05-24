@@ -18,6 +18,8 @@ import { PageHeadingComponent } from '../../../../../../shared/page-heading/page
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { BranchStore } from '../../../data/branch';
 import type { Branch } from '../../../data/branch';
+import { CountryStore } from '../../../data/country/country.store';
+import { CurrencyStore } from '../../../data/currency/currency.store';
 
 @Component({
   selector: 'app-list-branch',
@@ -40,16 +42,29 @@ import type { Branch } from '../../../data/branch';
 })
 export class ListBranchComponent {
   private readonly router = inject(Router);
+  private readonly countryStore = inject(CountryStore);
+  private readonly currencyStore = inject(CurrencyStore);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly branchStore = inject(BranchStore);
   protected readonly hasError = computed(() => this.branchStore.error() !== null);
+  private readonly countriesByCode = computed(
+    () => new Map(this.countryStore.countries().map((country) => [country.code, country.name])),
+  );
+  private readonly currenciesByCode = computed(
+    () =>
+      new Map(
+        this.currencyStore
+          .currencies()
+          .map((currency) => [currency.code, `${currency.name} (${currency.symbol})`]),
+      ),
+  );
 
   protected readonly columns: readonly TngTableColumn<Branch>[] = [
     { id: 'name', label: 'Name', sortable: true, width: '14rem' },
     { id: 'email', label: 'Email', sortable: true, truncate: true },
     { id: 'mobile', label: 'Mobile', sortable: true, width: '10rem' },
-    { id: 'currencycode', label: 'Currency', sortable: true, width: '8rem' },
-    { id: 'countrycode', label: 'Country', sortable: true, width: '8rem' },
+    { id: 'currencycode', label: 'Currency', sortable: true, width: '14rem', truncate: true },
+    { id: 'countrycode', label: 'Country', sortable: true, width: '12rem', truncate: true },
     { id: 'description', label: 'Description', sortable: true, truncate: true },
     { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '8rem' },
   ];
@@ -62,7 +77,33 @@ export class ListBranchComponent {
   ];
 
   constructor() {
-    this.crudQuery.init((filter) => void this.branchStore.loadBranches(filter));
+    this.loadReferenceData();
+    this.crudQuery.init(
+      (filter) => void this.branchStore.loadBranches({ ...filter, includes: ['country'] }),
+    );
+  }
+
+  protected countryLabel(branch: Branch): string {
+    return (
+      branch.country?.name ??
+      this.countriesByCode().get(branch.countrycode) ??
+      branch.countrycode ??
+      '—'
+    );
+  }
+
+  protected currencyLabel(branch: Branch): string {
+    return this.currenciesByCode().get(branch.currencycode) ?? branch.currencycode ?? '—';
+  }
+
+  private loadReferenceData(): void {
+    if (!this.countryStore.hasCountries()) {
+      void this.countryStore.load();
+    }
+
+    if (!this.currencyStore.hasCurrencies()) {
+      void this.currencyStore.load();
+    }
   }
 
   protected createBranch(): void {

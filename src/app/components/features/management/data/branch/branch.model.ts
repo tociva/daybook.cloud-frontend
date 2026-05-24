@@ -18,6 +18,7 @@ export type Branch = Readonly<{
   timezone: string;
   gstin?: string;
   invnumber: string;
+  recnumber: string;
   organization: Organization;
   organizationid: string;
   currencycode: string;
@@ -45,6 +46,7 @@ export type BranchPayload = Readonly<{
   dateformat: string;
   timezone: string;
   invnumber: string;
+  recnumber: string;
   mobile?: string;
   description?: string;
   state?: string;

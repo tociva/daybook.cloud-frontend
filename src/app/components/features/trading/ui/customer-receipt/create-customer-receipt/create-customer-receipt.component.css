@@ -123,6 +123,20 @@
   grid-column: 1 / -1;
 }
 
+.field--compact {
+  align-content: end;
+}
+
+.toggle-row {
+  align-items: center;
+  color: var(--tng-semantic-foreground-primary);
+  display: flex;
+  font-size: 0.875rem;
+  font-weight: 600;
+  gap: 0.625rem;
+  min-height: 2.5rem;
+}
+
 tng-form-field,
 tng-autocomplete,
 tng-input,

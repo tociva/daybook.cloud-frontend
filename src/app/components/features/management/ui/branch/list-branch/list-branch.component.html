@@ -31,7 +31,12 @@
             title="No branches match your filter"
             description="Try adjusting or clearing your filter to find what you're looking for."
           >
-            <tng-button type="button" appearance="outline" tone="neutral" (click)="crudQuery.clearFilter()">
+            <tng-button
+              type="button"
+              appearance="outline"
+              tone="neutral"
+              (click)="crudQuery.clearFilter()"
+            >
               Clear filter
             </tng-button>
           </app-empty-state>
@@ -48,70 +53,78 @@
           </app-empty-state>
         }
       } @else {
-      <tng-table
-        ariaLabel="Branches"
-        density="comfortable"
-        [columns]="columns"
-        [items]="branchStore.items()"
-        [loading]="branchStore.isLoading()"
-        [error]="hasError()"
-        [sortActive]="crudQuery.sortActive()"
-        [sortDirection]="crudQuery.sortDirection()"
-        (sortChange)="crudQuery.applySort($event)"
-      >
-        <ng-template tngTableCellTemplate="name" let-row="row">
-          <button type="button" class="link-button" (click)="viewBranch(row)">
-            {{ row.name }}
-          </button>
-        </ng-template>
-
-        <ng-template tngTableCellTemplate="mobile" let-row="row">
-          {{ row.mobile || '—' }}
-        </ng-template>
-
-        <ng-template tngTableCellTemplate="description" let-row="row">
-          {{ row.description || '—' }}
-        </ng-template>
-
-        <ng-template tngTableCellTemplate="actions" let-row="row">
-          <div class="row-actions">
-            <button
-              type="button"
-              class="action-icon"
-              aria-label="View branch"
-              (click)="viewBranch(row)"
-            >
-              <tng-icon icon="eye" aria-hidden="true" />
+        <tng-table
+          ariaLabel="Branches"
+          density="comfortable"
+          [columns]="columns"
+          [items]="branchStore.items()"
+          [loading]="branchStore.isLoading()"
+          [error]="hasError()"
+          [sortActive]="crudQuery.sortActive()"
+          [sortDirection]="crudQuery.sortDirection()"
+          (sortChange)="crudQuery.applySort($event)"
+        >
+          <ng-template tngTableCellTemplate="name" let-row="row">
+            <button type="button" class="link-button" (click)="viewBranch(row)">
+              {{ row.name }}
             </button>
-            <button
-              type="button"
-              class="action-icon"
-              aria-label="Edit branch"
-              (click)="editBranch(row)"
-            >
-              <tng-icon icon="pencil" aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              class="action-icon action-icon--danger"
-              aria-label="Delete branch"
-              (click)="deleteBranch(row)"
-            >
-              <tng-icon icon="trash2" aria-hidden="true" />
-            </button>
-          </div>
-        </ng-template>
-      </tng-table>
+          </ng-template>
 
-      <div class="table-footer">
-        <app-crud-paginator
-          ariaLabel="Branch pagination"
-          [filter]="crudQuery.filter()"
-          [totalItems]="branchStore.count()"
-          [pageSizeOptions]="crudQuery.pageSizeOptions()"
-          syncUrl
-        />
-      </div>
+          <ng-template tngTableCellTemplate="mobile" let-row="row">
+            {{ row.mobile || '—' }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="currencycode" let-row="row">
+            {{ currencyLabel(row) }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="countrycode" let-row="row">
+            {{ countryLabel(row) }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="description" let-row="row">
+            {{ row.description || '—' }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="actions" let-row="row">
+            <div class="row-actions">
+              <button
+                type="button"
+                class="action-icon"
+                aria-label="View branch"
+                (click)="viewBranch(row)"
+              >
+                <tng-icon icon="eye" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                class="action-icon"
+                aria-label="Edit branch"
+                (click)="editBranch(row)"
+              >
+                <tng-icon icon="pencil" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                class="action-icon action-icon--danger"
+                aria-label="Delete branch"
+                (click)="deleteBranch(row)"
+              >
+                <tng-icon icon="trash2" aria-hidden="true" />
+              </button>
+            </div>
+          </ng-template>
+        </tng-table>
+
+        <div class="table-footer">
+          <app-crud-paginator
+            ariaLabel="Branch pagination"
+            [filter]="crudQuery.filter()"
+            [totalItems]="branchStore.count()"
+            [pageSizeOptions]="crudQuery.pageSizeOptions()"
+            syncUrl
+          />
+        </div>
       }
     </div>
   </tng-card>

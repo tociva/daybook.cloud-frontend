@@ -23,6 +23,7 @@ export type BootstrapOrganizationPayload = Readonly<{
   enddate: string;
   gstin?: string;
   invnumber: string;
+  recnumber: string;
   currencycode: string;
   jnumber: string;
   dateformat: string;

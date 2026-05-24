@@ -34,7 +34,7 @@ export const workspaceSidebarMenu: readonly MenuNode[] = [
       { path: 'vendor', name: 'Vendor' },
       { path: 'purchase-invoice', name: 'Purchase Invoice' },
       { path: 'vendor-payment', name: 'Payments' },
-      { path: 'gst/gstr2b', name: 'GST Reconciliation' },
+      { path: 'gst-reconciliation', name: 'GST Reconciliation' },
       { path: 'purchase-return', name: 'Purchase Return' },
     ],
   },

@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { CrudApiService } from '../../../../../shared/crud';
 import type {
   Organization,
+  OrganizationBootstrap,
   OrganizationListQuery,
   OrganizationPayload,
 } from './organization.model';
@@ -14,6 +15,13 @@ export class OrganizationService {
 
   async create(payload: OrganizationPayload): Promise<Organization> {
     return this.crudApi.create<Organization, OrganizationPayload>(ORG_ENDPOINT, payload);
+  }
+
+  async createWithDefaultBranch(payload: OrganizationBootstrap): Promise<Organization> {
+    return this.crudApi.create<Organization, OrganizationBootstrap>(
+      `${ORG_ENDPOINT}/bootstrap-with-data`,
+      payload,
+    );
   }
 
   async delete(id: string): Promise<void> {

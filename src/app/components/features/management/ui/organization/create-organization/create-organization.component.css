@@ -50,6 +50,21 @@ tng-card {
   margin: 0;
 }
 
+.country-option {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.55rem;
+  min-width: 0;
+  width: 100%;
+}
+
+.country-option-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 @media (max-width: 700px) {
   .fields-grid {
     grid-template-columns: 1fr;

@@ -1,0 +1,223 @@
+/* ── Page shell ─────────────────────────────────────────────────────────── */
+.trading-page{display:grid;gap:1rem;padding:1rem}
+.heading-actions,.recon-legend,.recon-panel-head,.recon-section__stats{align-items:center;display:flex;flex-wrap:wrap;gap:.6rem}
+.heading-actions,.recon-panel-head{justify-content:space-between}
+
+/* ── Status colour tokens ───────────────────────────────────────────────── */
+.recon-dot[data-status='matched'],.recon-stat[data-status='matched'],.recon-month[data-status='matched'],.recon-tag[data-status='matched']{--status-color:var(--tng-semantic-accent-success)}
+.recon-dot[data-status='partial'],.recon-stat[data-status='partial'],.recon-month[data-status='partial'],.recon-tag[data-status='partial']{--status-color:var(--tng-semantic-accent-warning)}
+.recon-dot[data-status='notMatched'],.recon-stat[data-status='notMatched'],.recon-month[data-status='notMatched'],.recon-tag[data-status='notMatched']{--status-color:var(--tng-semantic-accent-danger)}
+.recon-dot[data-status='pending'],.recon-stat[data-status='pending'],.recon-month[data-status='pending']{--status-color:var(--tng-semantic-foreground-muted)}
+.recon-dot[data-status='upcoming'],.recon-stat[data-status='upcoming'],.recon-month[data-status='upcoming']{--status-color:var(--tng-semantic-foreground-subtle)}
+
+/* ── Legend ─────────────────────────────────────────────────────────────── */
+.recon-legend__item{align-items:center;color:var(--tng-semantic-foreground-secondary);display:inline-flex;font-size:.78rem;gap:.35rem}
+.recon-dot{background:var(--status-color);border-radius:50%;height:.55rem;width:.55rem}
+
+/* ── Notices ────────────────────────────────────────────────────────────── */
+.notice{border:1px solid var(--notice-color);border-radius:.5rem;color:var(--notice-color);font-size:.85rem;padding:.7rem .85rem}
+.notice--danger {--notice-color:var(--tng-semantic-accent-danger)}
+.notice--success{--notice-color:var(--tng-semantic-accent-success)}
+.notice--warning{--notice-color:var(--tng-semantic-accent-warning)}
+.notice--info   {--notice-color:var(--tng-semantic-accent-brand)}
+
+/* ── File parsing progress ───────────────────────────────────────────────── */
+.parse-progress{border:1px solid var(--tng-semantic-border-subtle);border-radius:.5rem;display:grid;gap:.55rem;padding:.75rem .85rem}
+.parse-progress__meta{align-items:center;color:var(--tng-semantic-foreground-secondary);display:flex;font-size:.85rem;font-weight:600;gap:.45rem;min-width:0}
+.parse-progress__meta tng-icon{color:var(--tng-semantic-accent-brand);flex-shrink:0}
+.parse-progress__meta span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── Hidden shared file input ───────────────────────────────────────────── */
+.import-file-input{display:none}
+
+/* ── Confirmation dialog body ───────────────────────────────────────────── */
+.confirm-body{display:grid;gap:.9rem}
+
+.confirm-file-strip{
+  align-items:center;
+  background:var(--tng-semantic-surface-raised);
+  border:1px solid var(--tng-semantic-border-subtle);
+  border-left:3px solid var(--tng-semantic-accent-brand);
+  border-radius:.4rem;
+  display:flex;
+  gap:.65rem;
+  padding:.55rem .75rem;
+}
+.confirm-file-strip>tng-icon:first-child{color:var(--tng-semantic-accent-brand);flex-shrink:0;font-size:1.15rem}
+.confirm-file-strip__info{flex:1;min-width:0}
+.confirm-file-strip__info strong{color:var(--tng-semantic-foreground-primary);display:block;font-size:.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.confirm-file-strip__info small{color:var(--tng-semantic-foreground-muted);font-size:.72rem}
+
+/* ── Summary stat tiles ─────────────────────────────────────────────────── */
+.confirm-summary{display:flex;flex-wrap:wrap;gap:.5rem}
+.confirm-stat{
+  background:var(--tng-semantic-surface-raised);
+  border:1px solid var(--tng-semantic-border-subtle);
+  border-radius:.4rem;
+  display:flex;
+  flex:1;
+  flex-direction:column;
+  gap:.15rem;
+  min-width:90px;
+  padding:.5rem .75rem;
+}
+.confirm-stat__label{color:var(--tng-semantic-foreground-muted);font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.confirm-stat__value{color:var(--tng-semantic-foreground-primary);font-size:.95rem;font-weight:650;font-variant-numeric:tabular-nums}
+
+/* ── Invoice preview table ──────────────────────────────────────────────── */
+.confirm-table-wrap{
+  border:1px solid var(--tng-semantic-border-subtle);
+  border-radius:.4rem;
+  max-height:280px;
+  overflow:auto;
+}
+.confirm-table{
+  border-collapse:collapse;
+  font-size:.78rem;
+  min-width:100%;
+  width:max-content;
+}
+.confirm-table th{
+  background:var(--tng-semantic-surface-raised);
+  border-bottom:1px solid var(--tng-semantic-border-subtle);
+  color:var(--tng-semantic-foreground-muted);
+  font-size:.66rem;
+  font-weight:600;
+  letter-spacing:.04em;
+  padding:.4rem .6rem;
+  position:sticky;
+  text-align:left;
+  text-transform:uppercase;
+  top:0;
+  white-space:nowrap;
+  z-index:1;
+}
+.confirm-table th.num,.confirm-table td.num{text-align:right}
+.confirm-table td{
+  border-bottom:1px solid var(--tng-semantic-border-subtle);
+  color:var(--tng-semantic-foreground-primary);
+  padding:.4rem .6rem;
+  white-space:nowrap;
+}
+.confirm-table tbody tr:hover td{background:var(--tng-semantic-surface-raised)}
+.confirm-table tbody tr:last-child td{border-bottom:none}
+.confirm-table td.num{font-variant-numeric:tabular-nums}
+.confirm-table td.mono{color:var(--tng-semantic-foreground-secondary);font-family:ui-monospace,monospace;font-size:.72rem}
+.confirm-table td.row-num{color:var(--tng-semantic-foreground-muted);font-size:.7rem;text-align:right;user-select:none}
+.confirm-table td.supplier{max-width:180px;overflow:hidden;text-overflow:ellipsis}
+.confirm-table td.date{white-space:nowrap}
+
+/* Totals footer row */
+.confirm-table tfoot .totals-row td{
+  background:var(--tng-semantic-surface-raised);
+  border-top:2px solid var(--tng-semantic-border-subtle);
+  font-weight:700;
+  position:sticky;
+  bottom:0;
+}
+.totals-label{color:var(--tng-semantic-foreground-muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.04em}
+
+/* ITC badge */
+.itc-badge{border-radius:999px;font-size:.68rem;font-weight:700;padding:.15rem .45rem}
+.itc-badge--yes{background:color-mix(in srgb,var(--tng-semantic-accent-success) 12%,transparent);color:var(--tng-semantic-accent-success)}
+.itc-badge--no {background:color-mix(in srgb,var(--tng-semantic-accent-danger) 10%,transparent);color:var(--tng-semantic-accent-danger)}
+
+.confirm-no-preview{color:var(--tng-semantic-foreground-secondary);font-size:.85rem;margin:0}
+
+/* ── Confirm action bar ─────────────────────────────────────────────────── */
+.confirm-actions{align-items:center;border-top:1px solid var(--tng-semantic-border-subtle);display:flex;flex-wrap:wrap;gap:.55rem;justify-content:flex-end;padding-top:.75rem}
+.confirm-actions__label{color:var(--tng-semantic-foreground-secondary);font-size:.82rem;margin-right:.15rem}
+
+/* ── Overview grid ──────────────────────────────────────────────────────── */
+.recon-overview{
+  display:grid;
+  gap:1rem;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  position:relative;
+  border-radius:.5rem;
+  transition:box-shadow .18s ease, background-color .18s ease;
+}
+.recon-overview--drag-active{
+  box-shadow:0 0 0 2px var(--tng-semantic-accent-brand);
+  background-color:color-mix(in srgb, var(--tng-semantic-accent-brand) 3%, transparent);
+}
+.recon-overview--drag-active .recon-months{
+  filter:blur(1.5px);
+  opacity:.3;
+  pointer-events:none;
+  transition:filter .15s ease, opacity .15s ease;
+}
+
+/* ── Drag overlay ───────────────────────────────────────────────────────── */
+.recon-drop-overlay{
+  display:none;
+  align-items:center;
+  justify-content:center;
+  border-radius:.5rem;
+  border:2px dashed var(--tng-semantic-accent-brand);
+  inset:.35rem;
+  pointer-events:none;
+  position:absolute;
+  z-index:10;
+}
+.recon-overview--drag-active .recon-drop-overlay{
+  display:flex;
+  animation:drop-overlay-in .15s ease;
+}
+.recon-drop-overlay__inner{
+  align-items:center;
+  background:color-mix(in srgb, var(--tng-semantic-accent-brand) 10%, var(--tng-semantic-surface-base));
+  border-radius:.5rem;
+  color:var(--tng-semantic-accent-brand);
+  display:flex;
+  flex-direction:column;
+  font-size:.9rem;
+  font-weight:600;
+  gap:.4rem;
+  padding:1.4rem 3rem;
+}
+.recon-drop-overlay__inner tng-icon{font-size:2.2rem}
+.recon-drop-overlay__inner small{color:color-mix(in srgb, var(--tng-semantic-accent-brand) 70%, transparent);font-size:.75rem;font-weight:400}
+
+@keyframes drop-overlay-in{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+
+/* ── Section card header ────────────────────────────────────────────────── */
+.recon-panel-head{align-items:flex-start;margin-bottom:.75rem}
+.recon-section__title{align-items:center;display:flex;gap:.65rem}
+.recon-section__title>tng-icon{color:var(--tng-semantic-accent-brand);font-size:1.25rem}
+.recon-section__title h2{color:var(--tng-semantic-foreground-primary);font-size:1rem;font-weight:650;margin:0}
+
+.recon-section__title p{margin:0}
+
+/* ── Status stats row ───────────────────────────────────────────────────── */
+.recon-section__stats{gap:.35rem;margin-bottom:.75rem}
+.recon-stat{border:1px solid var(--status-color);border-radius:999px;color:var(--status-color);font-size:.7rem;font-weight:700;line-height:1;min-width:1.7rem;padding:.28rem .45rem;text-align:center}
+.recon-tag{background-color:var(--status-color);border-radius:999px;color:var(--tng-semantic-foreground-on-accent);font-size:.68rem;font-weight:700;line-height:1;min-width:1.6rem;padding:.28rem .45rem;text-align:center}
+
+/* ── Month grid ─────────────────────────────────────────────────────────── */
+.recon-months{display:grid;gap:.5rem;grid-template-columns:repeat(3,minmax(0,1fr))}
+.recon-month{border:1px solid var(--tng-semantic-border-subtle);border-left:3px solid var(--status-color);border-radius:.45rem;color:inherit;cursor:pointer;display:grid;gap:.45rem;min-height:6.8rem;padding:.55rem;text-align:left}
+.recon-month:disabled{opacity:.65}
+.recon-month__top{align-items:flex-start;display:flex;gap:.45rem;justify-content:space-between}
+.recon-month__top strong{color:var(--tng-semantic-foreground-primary);display:block;font-size:.9rem;font-weight:700}
+.recon-month small{color:var(--tng-semantic-foreground-muted);display:block;font-size:.66rem}
+.recon-month__status{color:var(--status-color);font-size:.95rem}
+.recon-month__tags{display:flex;flex-wrap:wrap;gap:.3rem}
+.recon-tag--gst  {--status-color:var(--tng-semantic-accent-brand)}
+.recon-tag--books{--status-color:var(--tng-semantic-foreground-secondary)}
+.recon-month__diff{color:var(--tng-semantic-foreground-secondary);font-size:.72rem;font-weight:650}
+.recon-month__diff--active{color:var(--tng-semantic-accent-danger)}
+
+/* ── Spinner ────────────────────────────────────────────────────────────── */
+.spin{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width:1120px){
+  .recon-overview{grid-template-columns:1fr}
+  .recon-months{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media (max-width:760px){
+  .recon-months{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .confirm-summary{flex-direction:column}
+}

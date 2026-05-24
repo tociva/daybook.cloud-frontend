@@ -140,7 +140,9 @@ export const CustomerReceiptStore = signalStore(
             const existing = state.customerReceipt.items.find((item) => item.id === id);
             const mergedItem = existing
               ? { ...existing, ...payload }
-              : state.customerReceipt.selectedItem;
+              : state.customerReceipt.selectedItem
+                ? { ...state.customerReceipt.selectedItem, ...payload }
+                : null;
             return {
               customerReceipt: {
                 ...state.customerReceipt,
