@@ -3,13 +3,8 @@ import { Router } from '@angular/router';
 import {
   TngButtonComponent,
   TngCardComponent,
-  TngDialogComponent,
-  TngError,
   TngProgressBarComponent,
-  TngTable,
-  TngTableCellTpl,
 } from '@tailng-ui/components';
-import type { TngTableColumn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import {
   TngFileUploadDirective,
@@ -28,18 +23,18 @@ import {
   type GstReconciliationReturnType,
   type GstReconciliationSourceFormat,
   type GstReconciliationStatus,
-} from '../../data/inventory/gst-reconciliation';
+} from '../../../trading/data/inventory/gst-reconciliation';
+import { GstImportConfirmDialogComponent } from './gst-import-confirm-dialog/gst-import-confirm-dialog.component';
+import {
+  RETURN_TYPES,
+  type ParsedFilePreview,
+  type ParsedInvoice,
+  type ReturnTypeMeta,
+} from './gst-reconciliation.types';
 
 // ── Domain types ──────────────────────────────────────────────────────────────
 
 type StatusMeta = Readonly<{ icon: string; label: string; status: GstReconciliationStatus }>;
-
-type ReturnTypeMeta = Readonly<{
-  description: string;
-  icon: string;
-  label: string;
-  value: GstReconciliationReturnType;
-}>;
 
 type ReturnTypeSection = Readonly<{
   meta: ReturnTypeMeta;
@@ -48,52 +43,15 @@ type ReturnTypeSection = Readonly<{
 
 type MonthCell = GstReconciliationMonthSummary & Readonly<{ label: string; period: string }>;
 
-// ── File preview types ────────────────────────────────────────────────────────
-
-export type ParsedInvoice = Readonly<{
-  invoiceNo: string;
-  invoiceDate: string;
-  invoiceValue: number;
-  taxableValue: number;
-  igst: number;
-  cgst: number;
-  sgst: number;
-  period: string;
-  // GSTR-2B (inward)
-  gstin?: string;
-  supplierName?: string;
-  itcAvailable?: boolean;
-  // GSTR-1 (outward)
-  exportType?: string;
-  taxRate?: number;
-}>;
-
-export type ParsedFilePreview = Readonly<{
-  detectedReturnType: GstReconciliationReturnType | null;
-  period: string;
-  gstin?: string;
-  invoices: readonly ParsedInvoice[];
-  totalInvoiceValue: number;
-  totalTaxableValue: number;
-  totalIgst: number;
-  totalCgst: number;
-  totalSgst: number;
-}>;
-
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const MONTH_OPTIONS: readonly { label: string; value: number }[] = [
-  { label: 'April', value: 4 },   { label: 'May', value: 5 },
-  { label: 'June', value: 6 },    { label: 'July', value: 7 },
-  { label: 'August', value: 8 },  { label: 'September', value: 9 },
-  { label: 'October', value: 10 },{ label: 'November', value: 11 },
+  { label: 'April', value: 4 },    { label: 'May', value: 5 },
+  { label: 'June', value: 6 },     { label: 'July', value: 7 },
+  { label: 'August', value: 8 },   { label: 'September', value: 9 },
+  { label: 'October', value: 10 }, { label: 'November', value: 11 },
   { label: 'December', value: 12 },{ label: 'January', value: 1 },
   { label: 'February', value: 2 }, { label: 'March', value: 3 },
-] as const;
-
-const RETURN_TYPES: readonly ReturnTypeMeta[] = [
-  { description: 'Portal GSTR-1 against book sale invoices',     icon: 'fileText',  label: 'GSTR-1',  value: 'gstr1'  },
-  { description: 'Portal GSTR-2B against book purchase invoices',icon: 'fileCheck', label: 'GSTR-2B', value: 'gstr2b' },
 ] as const;
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
@@ -115,13 +73,10 @@ const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct
     PageHeadingComponent,
     TngButtonComponent,
     TngCardComponent,
-    TngDialogComponent,
-    TngError,
     TngProgressBarComponent,
-    TngTable,
-    TngTableCellTpl,
     TngIcon,
     TngFileUploadDirective,
+    GstImportConfirmDialogComponent,
   ],
   templateUrl: './gst-reconciliation.component.html',
   styleUrl: './gst-reconciliation.component.css',
@@ -149,35 +104,8 @@ export class GstReconciliationComponent {
   private overviewDragCounter = 0;
 
   // ── Static data ───────────────────────────────────────────────────────────
-  protected readonly maxFileSize  = MAX_FILE_SIZE;
-  protected readonly returnTypes  = RETURN_TYPES;
-
-  protected readonly gstr2bPreviewColumns: readonly TngTableColumn<ParsedInvoice>[] = [
-    { id: 'rowNumber', label: '#', align: 'end', width: '3rem', accessor: (_row, index) => index + 1 },
-    { id: 'supplierName', label: 'Supplier', truncate: true, width: '12rem' },
-    { id: 'gstin', label: 'GSTIN', width: '11rem' },
-    { id: 'invoiceNo', label: 'Invoice No', width: '9rem' },
-    { id: 'invoiceDate', label: 'Date', width: '7rem' },
-    { id: 'invoiceValue', label: 'Value (₹)', align: 'end', width: '8rem', accessor: (row) => this.formatNum(row.invoiceValue) },
-    { id: 'taxableValue', label: 'Taxable (₹)', align: 'end', width: '8rem', accessor: (row) => this.formatNum(row.taxableValue) },
-    { id: 'igst', label: 'IGST', align: 'end', width: '7rem', accessor: (row) => this.formatOptionalAmount(row.igst) },
-    { id: 'cgst', label: 'CGST', align: 'end', width: '7rem', accessor: (row) => this.formatOptionalAmount(row.cgst) },
-    { id: 'sgst', label: 'SGST', align: 'end', width: '7rem', accessor: (row) => this.formatOptionalAmount(row.sgst) },
-    { id: 'itcAvailable', label: 'ITC', width: '5rem' },
-  ];
-
-  protected readonly gstr1PreviewColumns: readonly TngTableColumn<ParsedInvoice>[] = [
-    { id: 'rowNumber', label: '#', align: 'end', width: '3rem', accessor: (_row, index) => index + 1 },
-    { id: 'exportType', label: 'Type', width: '10rem', accessor: (row) => row.exportType ?? '—' },
-    { id: 'invoiceNo', label: 'Invoice No', width: '9rem' },
-    { id: 'invoiceDate', label: 'Date', width: '7rem' },
-    { id: 'taxRate', label: 'Rate %', align: 'end', width: '6rem', accessor: (row) => row.taxRate ?? 0 },
-    { id: 'invoiceValue', label: 'Value (₹)', align: 'end', width: '8rem', accessor: (row) => this.formatNum(row.invoiceValue) },
-    { id: 'taxableValue', label: 'Taxable (₹)', align: 'end', width: '8rem', accessor: (row) => this.formatNum(row.taxableValue) },
-    { id: 'igst', label: 'IGST', align: 'end', width: '7rem', accessor: (row) => this.formatOptionalAmount(row.igst) },
-    { id: 'cgst', label: 'CGST', align: 'end', width: '7rem', accessor: (row) => this.formatOptionalAmount(row.cgst) },
-    { id: 'sgst', label: 'SGST', align: 'end', width: '7rem', accessor: (row) => this.formatOptionalAmount(row.sgst) },
-  ];
+  protected readonly maxFileSize = MAX_FILE_SIZE;
+  protected readonly returnTypes = RETURN_TYPES;
 
   protected readonly statusLegend: readonly StatusMeta[] = [
     { status: 'matched',    label: 'Matched',     icon: 'circleCheck'  },
@@ -226,28 +154,6 @@ export class GstReconciliationComponent {
   );
 
   protected readonly headerContext = computed(() => this.context()?.branchName ?? 'Branch not selected');
-
-  protected readonly confirmDialogTitle = computed(() => {
-    const rt = this.parsedPreview()?.detectedReturnType;
-    if (rt === 'gstr1')  return 'Review & Confirm — GSTR-1';
-    if (rt === 'gstr2b') return 'Review & Confirm — GSTR-2B';
-    return 'Review & Confirm Import';
-  });
-
-  // ── Template helpers ──────────────────────────────────────────────────────
-  protected totalTax(p: ParsedFilePreview): number {
-    return p.totalIgst + p.totalCgst + p.totalSgst;
-  }
-
-  protected returnTypeLabel(rt: GstReconciliationReturnType): string {
-    return this.returnTypes.find((t) => t.value === rt)?.label ?? rt;
-  }
-
-  protected previewColumns(preview: ParsedFilePreview): readonly TngTableColumn<ParsedInvoice>[] {
-    return preview.detectedReturnType === 'gstr1'
-      ? this.gstr1PreviewColumns
-      : this.gstr2bPreviewColumns;
-  }
 
   // ── Constructor ───────────────────────────────────────────────────────────
   constructor() {
@@ -371,23 +277,6 @@ export class GstReconciliationComponent {
     return formatAmountWithCurrency(value ?? 0, this.currencyCode());
   }
 
-  protected formatFileSize(bytes: number): string {
-    if (bytes < 1024)        return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  }
-
-  protected formatNum(value: number): string {
-    return new Intl.NumberFormat('en-IN', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
-  }
-
-  protected formatOptionalAmount(value: number): string {
-    return value ? this.formatNum(value) : '—';
-  }
-
   // ── Private: file routing ─────────────────────────────────────────────────
   private async receiveFile(file: File): Promise<void> {
     this.store.clearImportResult();
@@ -426,13 +315,11 @@ export class GstReconciliationComponent {
     try {
       const rows = await this.xlsxFileReader.readFirstSheetRows(file);
 
-      // Detect return type from title row
       const title = String(rows[0]?.[0] ?? '').toLowerCase();
       let detectedReturnType: GstReconciliationReturnType | null = null;
       if      (title.includes('gstr-2b') || title.includes('gstr2b')) detectedReturnType = 'gstr2b';
       else if (title.includes('gstr-1')  || title.includes('gstr1'))  detectedReturnType = 'gstr1';
 
-      // Find first data row by GSTIN pattern
       let dataStart = rows.length;
       for (let i = 0; i < rows.length; i++) {
         if (GSTIN_RE.test(String(rows[i]?.[0] ?? ''))) { dataStart = i; break; }
@@ -475,20 +362,17 @@ export class GstReconciliationComponent {
   // ── Private: JSON → GSTR-1 parser ────────────────────────────────────────
   private async parseJsonGstr(file: File): Promise<ParsedFilePreview | null> {
     try {
-      const text   = await file.text();
-      const data   = JSON.parse(text) as Record<string, unknown>;
+      const text = await file.text();
+      const data = JSON.parse(text) as Record<string, unknown>;
 
-      // A GSTR JSON must at least have gstin + fp (filing period)
       if (!data['gstin'] || !data['fp']) return null;
 
-      // JSON format = GSTR-1 (GSTR-2B is always XLSX)
       const detectedReturnType: GstReconciliationReturnType = 'gstr1';
       const period = this.parseFiscalPeriod(String(data['fp'] ?? ''));
       const gstin  = String(data['gstin'] ?? '');
 
       const invoices: ParsedInvoice[] = [];
 
-      // ── Exports (exp) ───────────────────────────────────────────────────
       const expArr = this.asList<Record<string, unknown>>(data['exp']);
       for (const exp of expArr) {
         const rawType = String(exp['exp_typ'] ?? '');
@@ -513,7 +397,6 @@ export class GstReconciliationComponent {
         }
       }
 
-      // ── B2B invoices (b2b) ──────────────────────────────────────────────
       for (const supplier of this.asList<Record<string, unknown>>(data['b2b'])) {
         const ctin = String(supplier['ctin'] ?? '');
         const name = String(supplier['trdnm'] ?? supplier['lgnm'] ?? '');
@@ -551,16 +434,14 @@ export class GstReconciliationComponent {
     }
   }
 
-  /** Safely cast an unknown value to a typed array, or return []. */
   private asList<T>(val: unknown): T[] {
     return Array.isArray(val) ? (val as T[]) : [];
   }
 
-  /** Convert GSTR filing-period code (e.g. "042026") → "Apr'26". */
   private parseFiscalPeriod(fp: string): string {
     if (fp.length < 6) return fp;
     const month = parseInt(fp.slice(0, 2), 10);
-    const year  = fp.slice(4); // last 2 digits
+    const year  = fp.slice(4);
     return `${MONTH_LABELS[(month - 1) % 12]}'${year}`;
   }
 

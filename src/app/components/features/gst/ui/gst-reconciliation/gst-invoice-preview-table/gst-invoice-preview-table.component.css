@@ -1,0 +1,58 @@
+/* ── Host fills all space given by the dialog ───────────────────────────── */
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ── Table wrap: flex column so tng-table grows and totals stay fixed ────── */
+.confirm-table-wrap {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  gap: .5rem;
+  overflow: hidden;
+}
+
+/* ── Make tng-table itself a flex column so its scroll container can grow ── */
+:host ::ng-deep tng-table {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ── The actual scroll container inside tng-table ───────────────────────── */
+:host ::ng-deep .tng-table__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* min-width keeps the table readable in the lg dialog (≈48rem / 768px) */
+.confirm-table-wrap tng-table { min-width: 700px; }
+
+/* ── Totals row: always visible below the table ─────────────────────────── */
+.confirm-table-totals {
+  flex-shrink: 0;
+  align-items: center;
+  background: var(--tng-semantic-surface-raised);
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: .4rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem .9rem;
+  padding: .4rem .6rem;
+}
+.confirm-table-totals span { color: var(--tng-semantic-foreground-secondary); font-size: .72rem; }
+.confirm-table-totals strong { color: var(--tng-semantic-foreground-primary); font-variant-numeric: tabular-nums; }
+.totals-label { color: var(--tng-semantic-foreground-muted); font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; }
+.mono { color: var(--tng-semantic-foreground-secondary); font-family: ui-monospace, monospace; font-size: .78rem; }
+
+/* ── ITC badge ──────────────────────────────────────────────────────────── */
+.itc-badge { border-radius: 999px; font-size: .68rem; font-weight: 700; padding: .15rem .45rem; }
+.itc-badge--yes { background: color-mix(in srgb, var(--tng-semantic-accent-success) 12%, transparent); color: var(--tng-semantic-accent-success); }
+.itc-badge--no  { background: color-mix(in srgb, var(--tng-semantic-accent-danger)  10%, transparent); color: var(--tng-semantic-accent-danger); }

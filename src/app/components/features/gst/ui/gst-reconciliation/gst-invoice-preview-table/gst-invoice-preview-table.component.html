@@ -1,0 +1,37 @@
+<div class="confirm-table-wrap">
+  <tng-table
+    ariaLabel="GST invoice preview"
+    density="compact"
+    layout="fixed"
+    [columns]="columns()"
+    [items]="preview().invoices"
+    [stickyHeader]="true"
+  >
+    <ng-template tngTableCellTemplate="gstin" let-row="row">
+      <span class="mono">{{ row.gstin }}</span>
+    </ng-template>
+
+    <ng-template tngTableCellTemplate="invoiceNo" let-row="row">
+      <span class="mono">{{ row.invoiceNo }}</span>
+    </ng-template>
+
+    <ng-template tngTableCellTemplate="itcAvailable" let-row="row">
+      <span
+        class="itc-badge"
+        [class.itc-badge--yes]="row.itcAvailable"
+        [class.itc-badge--no]="!row.itcAvailable"
+      >
+        {{ row.itcAvailable ? 'Yes' : 'No' }}
+      </span>
+    </ng-template>
+  </tng-table>
+
+  <div class="confirm-table-totals" aria-label="GST invoice preview totals">
+    <span class="totals-label">Totals</span>
+    <span>Value <strong>{{ formatNum(preview().totalInvoiceValue) }}</strong></span>
+    <span>Taxable <strong>{{ formatNum(preview().totalTaxableValue) }}</strong></span>
+    <span>IGST <strong>{{ formatNum(preview().totalIgst) }}</strong></span>
+    <span>CGST <strong>{{ formatNum(preview().totalCgst) }}</strong></span>
+    <span>SGST <strong>{{ formatNum(preview().totalSgst) }}</strong></span>
+  </div>
+</div>

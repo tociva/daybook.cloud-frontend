@@ -55,151 +55,16 @@
   />
 
   <!-- ── Confirmation dialog ──────────────────────────────────────────────── -->
-  <tng-dialog
-    [title]="confirmDialogTitle()"
-    size="lg"
+  <app-gst-import-confirm-dialog
     [open]="confirmDialogOpen()"
-    [closeOnBackdrop]="false"
-    [closeOnEscape]="true"
-    (closed)="cancelConfirmation()"
-  >
-    <div class="confirm-body">
-
-      <!-- File strip -->
-      <div class="confirm-file-strip">
-        <tng-icon icon="fileText" aria-hidden="true" />
-        <div class="confirm-file-strip__info">
-          <strong>{{ pendingFile()?.name }}</strong>
-          <small>{{ formatFileSize(pendingFile()?.size ?? 0) }}</small>
-        </div>
-        @if (isParsing()) {
-          <tng-icon icon="loaderCircle" aria-hidden="true" class="spin" />
-        }
-      </div>
-
-      @if (parsedPreview(); as preview) {
-
-        <!-- Summary stats -->
-        <div class="confirm-summary">
-          <div class="confirm-stat">
-            <span class="confirm-stat__label">Period</span>
-            <span class="confirm-stat__value">{{ preview.period }}</span>
-          </div>
-          @if (preview.gstin) {
-            <div class="confirm-stat">
-              <span class="confirm-stat__label">GSTIN</span>
-              <span class="confirm-stat__value mono">{{ preview.gstin }}</span>
-            </div>
-          }
-          <div class="confirm-stat">
-            <span class="confirm-stat__label">Invoices</span>
-            <span class="confirm-stat__value">{{ preview.invoices.length }}</span>
-          </div>
-          <div class="confirm-stat">
-            <span class="confirm-stat__label">Invoice Value</span>
-            <span class="confirm-stat__value">{{ formatNum(preview.totalInvoiceValue) }}</span>
-          </div>
-          <div class="confirm-stat">
-            <span class="confirm-stat__label">Taxable Value</span>
-            <span class="confirm-stat__value">{{ formatNum(preview.totalTaxableValue) }}</span>
-          </div>
-          <div class="confirm-stat">
-            <span class="confirm-stat__label">Total Tax</span>
-            <span class="confirm-stat__value">{{ formatNum(totalTax(preview)) }}</span>
-          </div>
-        </div>
-
-        <!-- Invoice table — columns differ by return type -->
-        <div class="confirm-table-wrap">
-          <tng-table
-            ariaLabel="GST invoice preview"
-            density="compact"
-            layout="fixed"
-            [columns]="previewColumns(preview)"
-            [items]="preview.invoices"
-            [stickyHeader]="true"
-          >
-            <ng-template tngTableCellTemplate="gstin" let-row="row">
-              <span class="mono">{{ row.gstin }}</span>
-            </ng-template>
-
-            <ng-template tngTableCellTemplate="invoiceNo" let-row="row">
-              <span class="mono">{{ row.invoiceNo }}</span>
-            </ng-template>
-
-            <ng-template tngTableCellTemplate="itcAvailable" let-row="row">
-              <span
-                class="itc-badge"
-                [class.itc-badge--yes]="row.itcAvailable"
-                [class.itc-badge--no]="!row.itcAvailable"
-              >
-                {{ row.itcAvailable ? 'Yes' : 'No' }}
-              </span>
-            </ng-template>
-          </tng-table>
-
-          <div class="confirm-table-totals" aria-label="GST invoice preview totals">
-            <span class="totals-label">Totals</span>
-            <span>Value <strong>{{ formatNum(preview.totalInvoiceValue) }}</strong></span>
-            <span>Taxable <strong>{{ formatNum(preview.totalTaxableValue) }}</strong></span>
-            <span>IGST <strong>{{ formatNum(preview.totalIgst) }}</strong></span>
-            <span>CGST <strong>{{ formatNum(preview.totalCgst) }}</strong></span>
-            <span>SGST <strong>{{ formatNum(preview.totalSgst) }}</strong></span>
-          </div>
-        </div>
-
-      } @else if (!isParsing()) {
-        <p class="confirm-no-preview">
-          Could not read invoice data from this file.
-        </p>
-      }
-
-      @if (pendingError()) {
-        <tng-error [show]="true">{{ pendingError() }}</tng-error>
-      }
-
-      <!-- Actions — single button for detected type, or error if unknown -->
-      <div class="confirm-actions">
-        @if (isParsing()) {
-          <span class="confirm-actions__label">Analysing file…</span>
-        } @else if (parsedPreview()?.detectedReturnType; as rtype) {
-          <span class="confirm-actions__label">
-            Detected: <strong>{{ returnTypeLabel(rtype) }}</strong>
-          </span>
-          <tng-button
-            type="button"
-            appearance="solid"
-            tone="primary"
-            [disabled]="store.isImporting()"
-            (click)="submitImportAs(rtype)"
-          >
-            @if (store.isImporting()) {
-              <tng-icon icon="loaderCircle" aria-hidden="true" class="spin" />
-              Importing…
-            } @else {
-              <tng-icon icon="upload" aria-hidden="true" />
-              Import {{ returnTypeLabel(rtype) }}
-            }
-          </tng-button>
-        } @else {
-          <tng-error [show]="true">
-            Unable to detect return type. Upload a valid GSTR-1 (JSON) or GSTR-2B (XLSX) file.
-          </tng-error>
-        }
-
-        <tng-button
-          type="button"
-          appearance="ghost"
-          tone="neutral"
-          [disabled]="store.isImporting()"
-          (click)="cancelConfirmation()"
-        >
-          Cancel
-        </tng-button>
-      </div>
-
-    </div><!-- /.confirm-body -->
-  </tng-dialog>
+    [pendingFile]="pendingFile()"
+    [parsedPreview]="parsedPreview()"
+    [isParsing]="isParsing()"
+    [pendingError]="pendingError()"
+    [isImporting]="store.isImporting()"
+    (confirmed)="submitImportAs($event)"
+    (cancelled)="cancelConfirmation()"
+  />
 
   <!-- ── Overview — drag-and-drop zone ───────────────────────────────────── -->
   <div
@@ -270,7 +135,7 @@
               @if (cell.status !== 'upcoming') {
                 <span class="recon-month__tags">
                   @if (cell.gstInvoiceCount > 0) {
-                    <span class="recon-tag recon-tag--gst"  [attr.title]="'GST invoices: '  + cell.gstInvoiceCount">{{ cell.gstInvoiceCount   }}</span>
+                    <span class="recon-tag recon-tag--gst"   [attr.title]="'GST invoices: '  + cell.gstInvoiceCount">{{ cell.gstInvoiceCount   }}</span>
                   }
                   @if (cell.booksInvoiceCount > 0) {
                     <span class="recon-tag recon-tag--books" [attr.title]="'Book invoices: ' + cell.booksInvoiceCount">{{ cell.booksInvoiceCount }}</span>

@@ -30,60 +30,6 @@
 /* ── Hidden shared file input ───────────────────────────────────────────── */
 .import-file-input{display:none}
 
-/* ── Confirmation dialog body ───────────────────────────────────────────── */
-.confirm-body{display:grid;gap:.9rem}
-
-.confirm-file-strip{
-  align-items:center;
-  background:var(--tng-semantic-surface-raised);
-  border:1px solid var(--tng-semantic-border-subtle);
-  border-left:3px solid var(--tng-semantic-accent-brand);
-  border-radius:.4rem;
-  display:flex;
-  gap:.65rem;
-  padding:.55rem .75rem;
-}
-.confirm-file-strip>tng-icon:first-child{color:var(--tng-semantic-accent-brand);flex-shrink:0;font-size:1.15rem}
-.confirm-file-strip__info{flex:1;min-width:0}
-.confirm-file-strip__info strong{color:var(--tng-semantic-foreground-primary);display:block;font-size:.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.confirm-file-strip__info small{color:var(--tng-semantic-foreground-muted);font-size:.72rem}
-
-/* ── Summary stat tiles ─────────────────────────────────────────────────── */
-.confirm-summary{display:flex;flex-wrap:wrap;gap:.5rem}
-.confirm-stat{
-  background:var(--tng-semantic-surface-raised);
-  border:1px solid var(--tng-semantic-border-subtle);
-  border-radius:.4rem;
-  display:flex;
-  flex:1;
-  flex-direction:column;
-  gap:.15rem;
-  min-width:90px;
-  padding:.5rem .75rem;
-}
-.confirm-stat__label{color:var(--tng-semantic-foreground-muted);font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
-.confirm-stat__value{color:var(--tng-semantic-foreground-primary);font-size:.95rem;font-weight:650;font-variant-numeric:tabular-nums}
-
-/* ── Invoice preview table ──────────────────────────────────────────────── */
-.confirm-table-wrap{display:grid;gap:.5rem}
-.confirm-table-wrap tng-table{min-width:760px}
-.confirm-table-totals{align-items:center;background:var(--tng-semantic-surface-raised);border:1px solid var(--tng-semantic-border-subtle);border-radius:.4rem;display:flex;flex-wrap:wrap;gap:.5rem .9rem;padding:.45rem .6rem}
-.confirm-table-totals span{color:var(--tng-semantic-foreground-secondary);font-size:.72rem}
-.confirm-table-totals strong{color:var(--tng-semantic-foreground-primary);font-variant-numeric:tabular-nums}
-.totals-label{color:var(--tng-semantic-foreground-muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.04em}
-.mono{color:var(--tng-semantic-foreground-secondary);font-family:ui-monospace,monospace;font-size:.78rem}
-
-/* ITC badge */
-.itc-badge{border-radius:999px;font-size:.68rem;font-weight:700;padding:.15rem .45rem}
-.itc-badge--yes{background:color-mix(in srgb,var(--tng-semantic-accent-success) 12%,transparent);color:var(--tng-semantic-accent-success)}
-.itc-badge--no {background:color-mix(in srgb,var(--tng-semantic-accent-danger) 10%,transparent);color:var(--tng-semantic-accent-danger)}
-
-.confirm-no-preview{color:var(--tng-semantic-foreground-secondary);font-size:.85rem;margin:0}
-
-/* ── Confirm action bar ─────────────────────────────────────────────────── */
-.confirm-actions{align-items:center;border-top:1px solid var(--tng-semantic-border-subtle);display:flex;flex-wrap:wrap;gap:.55rem;justify-content:flex-end;padding-top:.75rem}
-.confirm-actions__label{color:var(--tng-semantic-foreground-secondary);font-size:.82rem;margin-right:.15rem}
-
 /* ── Overview grid ──────────────────────────────────────────────────────── */
 .recon-overview{
   display:grid;
@@ -142,7 +88,6 @@
 .recon-section__title{align-items:center;display:flex;gap:.65rem}
 .recon-section__title>tng-icon{color:var(--tng-semantic-accent-brand);font-size:1.25rem}
 .recon-section__title h2{color:var(--tng-semantic-foreground-primary);font-size:1rem;font-weight:650;margin:0}
-
 .recon-section__title p{margin:0}
 
 /* ── Status stats row ───────────────────────────────────────────────────── */
@@ -175,5 +120,4 @@
 }
 @media (max-width:760px){
   .recon-months{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .confirm-summary{flex-direction:column}
 }

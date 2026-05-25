@@ -1,0 +1,110 @@
+<tng-dialog
+  [title]="dialogTitle()"
+  size="lg"
+  [open]="open()"
+  [closeOnBackdrop]="false"
+  [closeOnEscape]="true"
+  (closed)="cancelled.emit()"
+>
+  <div class="confirm-body">
+
+    <!-- File strip -->
+    <div class="confirm-file-strip">
+      <tng-icon icon="fileText" aria-hidden="true" />
+      <div class="confirm-file-strip__info">
+        <strong>{{ pendingFile()?.name }}</strong>
+        <small>{{ formatFileSize(pendingFile()?.size ?? 0) }}</small>
+      </div>
+      @if (isParsing()) {
+        <tng-icon icon="loaderCircle" aria-hidden="true" class="spin" />
+      }
+    </div>
+
+    @if (parsedPreview(); as preview) {
+
+      <!-- Summary stats -->
+      <div class="confirm-summary">
+        <div class="confirm-stat">
+          <span class="confirm-stat__label">Period</span>
+          <span class="confirm-stat__value">{{ preview.period }}</span>
+        </div>
+        @if (preview.gstin) {
+          <div class="confirm-stat">
+            <span class="confirm-stat__label">GSTIN</span>
+            <span class="confirm-stat__value mono">{{ preview.gstin }}</span>
+          </div>
+        }
+        <div class="confirm-stat">
+          <span class="confirm-stat__label">Invoices</span>
+          <span class="confirm-stat__value">{{ preview.invoices.length }}</span>
+        </div>
+        <div class="confirm-stat">
+          <span class="confirm-stat__label">Invoice Value</span>
+          <span class="confirm-stat__value">{{ formatNum(preview.totalInvoiceValue) }}</span>
+        </div>
+        <div class="confirm-stat">
+          <span class="confirm-stat__label">Taxable Value</span>
+          <span class="confirm-stat__value">{{ formatNum(preview.totalTaxableValue) }}</span>
+        </div>
+        <div class="confirm-stat">
+          <span class="confirm-stat__label">Total Tax</span>
+          <span class="confirm-stat__value">{{ formatNum(totalTax(preview)) }}</span>
+        </div>
+      </div>
+
+      <!-- Invoice preview table -->
+      <app-gst-invoice-preview-table
+        [preview]="preview"
+        [columns]="previewColumns(preview)"
+      />
+
+    } @else if (!isParsing()) {
+      <p class="confirm-no-preview">Could not read invoice data from this file.</p>
+    }
+
+    @if (pendingError()) {
+      <tng-error [show]="true">{{ pendingError() }}</tng-error>
+    }
+
+    <!-- Actions -->
+    <div class="confirm-actions">
+      @if (isParsing()) {
+        <span class="confirm-actions__label">Analysing file…</span>
+      } @else if (parsedPreview()?.detectedReturnType; as rtype) {
+        <span class="confirm-actions__label">
+          Detected: <strong>{{ returnTypeLabel(rtype) }}</strong>
+        </span>
+        <tng-button
+          type="button"
+          appearance="solid"
+          tone="primary"
+          [disabled]="isImporting()"
+          (click)="confirmed.emit(rtype)"
+        >
+          @if (isImporting()) {
+            <tng-icon icon="loaderCircle" aria-hidden="true" class="spin" />
+            Importing…
+          } @else {
+            <tng-icon icon="upload" aria-hidden="true" />
+            Import {{ returnTypeLabel(rtype) }}
+          }
+        </tng-button>
+      } @else {
+        <tng-error [show]="true">
+          Unable to detect return type. Upload a valid GSTR-1 (JSON) or GSTR-2B (XLSX) file.
+        </tng-error>
+      }
+
+      <tng-button
+        type="button"
+        appearance="ghost"
+        tone="neutral"
+        [disabled]="isImporting()"
+        (click)="cancelled.emit()"
+      >
+        Cancel
+      </tng-button>
+    </div>
+
+  </div><!-- /.confirm-body -->
+</tng-dialog>

@@ -12,7 +12,7 @@ import {
   type GstReconciliationInvoice,
   type GstReconciliationReturnType,
   type GstReconciliationStatus,
-} from '../../../data/inventory/gst-reconciliation';
+} from '../../../../trading/data/inventory/gst-reconciliation';
 
 type StatusMeta = Readonly<{
   icon: string;

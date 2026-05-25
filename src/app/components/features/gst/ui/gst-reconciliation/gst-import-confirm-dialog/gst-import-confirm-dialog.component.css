@@ -1,0 +1,87 @@
+/* ── Override tng-dialog internals: flex column so only the table scrolls ── */
+:host ::ng-deep .tng-dialog-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+:host ::ng-deep .tng-dialog-header { flex-shrink: 0; }
+:host ::ng-deep .tng-dialog-content {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Confirmation dialog body ───────────────────────────────────────────── */
+.confirm-body {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Fixed-height rows — must not grow */
+.confirm-file-strip,
+.confirm-summary,
+.confirm-no-preview,
+.confirm-actions { flex-shrink: 0; }
+
+/* Table component fills all remaining space */
+app-gst-invoice-preview-table {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.confirm-file-strip {
+  align-items: center;
+  background: var(--tng-semantic-surface-raised);
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-left: 3px solid var(--tng-semantic-accent-brand);
+  border-radius: .4rem;
+  display: flex;
+  gap: .65rem;
+  padding: .45rem .7rem;
+}
+.confirm-file-strip > tng-icon:first-child { color: var(--tng-semantic-accent-brand); flex-shrink: 0; font-size: 1.1rem; }
+.confirm-file-strip__info { flex: 1; min-width: 0; }
+.confirm-file-strip__info strong { color: var(--tng-semantic-foreground-primary); display: block; font-size: .85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.confirm-file-strip__info small { color: var(--tng-semantic-foreground-muted); font-size: .72rem; }
+
+/* ── Summary stat tiles ─────────────────────────────────────────────────── */
+.confirm-summary { display: flex; flex-wrap: wrap; gap: .4rem; }
+.confirm-stat {
+  background: var(--tng-semantic-surface-raised);
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: .4rem;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: .1rem;
+  min-width: 80px;
+  padding: .4rem .65rem;
+}
+.confirm-stat__label { color: var(--tng-semantic-foreground-muted); font-size: .67rem; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; }
+.confirm-stat__value { color: var(--tng-semantic-foreground-primary); font-size: .9rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+
+.mono { color: var(--tng-semantic-foreground-secondary); font-family: ui-monospace, monospace; font-size: .78rem; }
+
+.confirm-no-preview { color: var(--tng-semantic-foreground-secondary); font-size: .85rem; margin: 0; }
+
+/* ── Confirm action bar ─────────────────────────────────────────────────── */
+.confirm-actions { align-items: center; border-top: 1px solid var(--tng-semantic-border-subtle); display: flex; flex-wrap: wrap; gap: .5rem; justify-content: flex-end; padding-top: .65rem; }
+.confirm-actions__label { color: var(--tng-semantic-foreground-secondary); font-size: .82rem; margin-right: .15rem; }
+
+/* ── Spinner ────────────────────────────────────────────────────────────── */
+.spin { animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width: 760px) {
+  .confirm-summary { flex-direction: column; }
+}

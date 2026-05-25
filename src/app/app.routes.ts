@@ -107,7 +107,7 @@ export const routes: Routes = [
   {
     path: 'app/trading/gst-reconciliation',
     loadChildren: () =>
-      import('./components/features/trading/ui/gst-reconciliation/gst-reconciliation.routes').then(
+      import('./components/features/gst/ui/gst-reconciliation/gst-reconciliation.routes').then(
         (m) => m.gstReconciliationRoutes,
       ),
   },
