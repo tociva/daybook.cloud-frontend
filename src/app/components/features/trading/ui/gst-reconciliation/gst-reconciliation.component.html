@@ -111,105 +111,41 @@
 
         <!-- Invoice table — columns differ by return type -->
         <div class="confirm-table-wrap">
-          <table class="confirm-table">
+          <tng-table
+            ariaLabel="GST invoice preview"
+            density="compact"
+            layout="fixed"
+            [columns]="previewColumns(preview)"
+            [items]="preview.invoices"
+            [stickyHeader]="true"
+          >
+            <ng-template tngTableCellTemplate="gstin" let-row="row">
+              <span class="mono">{{ row.gstin }}</span>
+            </ng-template>
 
-            @if (preview.detectedReturnType === 'gstr2b') {
-              <!-- GSTR-2B: inward supplies from registered suppliers -->
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Supplier</th>
-                  <th>GSTIN</th>
-                  <th>Invoice No</th>
-                  <th>Date</th>
-                  <th class="num">Value (₹)</th>
-                  <th class="num">Taxable (₹)</th>
-                  <th class="num">IGST</th>
-                  <th class="num">CGST</th>
-                  <th class="num">SGST</th>
-                  <th>ITC</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (inv of preview.invoices; track inv.invoiceNo; let idx = $index) {
-                  <tr>
-                    <td class="row-num">{{ idx + 1 }}</td>
-                    <td class="supplier">{{ inv.supplierName }}</td>
-                    <td class="mono">{{ inv.gstin }}</td>
-                    <td class="mono">{{ inv.invoiceNo }}</td>
-                    <td class="date">{{ inv.invoiceDate }}</td>
-                    <td class="num">{{ formatNum(inv.invoiceValue) }}</td>
-                    <td class="num">{{ formatNum(inv.taxableValue) }}</td>
-                    <td class="num">{{ inv.igst ? formatNum(inv.igst) : '—' }}</td>
-                    <td class="num">{{ inv.cgst ? formatNum(inv.cgst) : '—' }}</td>
-                    <td class="num">{{ inv.sgst ? formatNum(inv.sgst) : '—' }}</td>
-                    <td>
-                      <span class="itc-badge" [class.itc-badge--yes]="inv.itcAvailable" [class.itc-badge--no]="!inv.itcAvailable">
-                        {{ inv.itcAvailable ? 'Yes' : 'No' }}
-                      </span>
-                    </td>
-                  </tr>
-                }
-              </tbody>
-              <tfoot>
-                <tr class="totals-row">
-                  <td colspan="5" class="totals-label">Totals</td>
-                  <td class="num">{{ formatNum(preview.totalInvoiceValue) }}</td>
-                  <td class="num">{{ formatNum(preview.totalTaxableValue) }}</td>
-                  <td class="num">{{ formatNum(preview.totalIgst) }}</td>
-                  <td class="num">{{ formatNum(preview.totalCgst) }}</td>
-                  <td class="num">{{ formatNum(preview.totalSgst) }}</td>
-                  <td></td>
-                </tr>
-              </tfoot>
-            }
+            <ng-template tngTableCellTemplate="invoiceNo" let-row="row">
+              <span class="mono">{{ row.invoiceNo }}</span>
+            </ng-template>
 
-            @if (preview.detectedReturnType === 'gstr1') {
-              <!-- GSTR-1: outward supplies -->
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Type</th>
-                  <th>Invoice No</th>
-                  <th>Date</th>
-                  <th class="num">Rate %</th>
-                  <th class="num">Value (₹)</th>
-                  <th class="num">Taxable (₹)</th>
-                  <th class="num">IGST</th>
-                  <th class="num">CGST</th>
-                  <th class="num">SGST</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (inv of preview.invoices; track inv.invoiceNo; let idx = $index) {
-                  <tr>
-                    <td class="row-num">{{ idx + 1 }}</td>
-                    <td class="export-type">{{ inv.exportType ?? '—' }}</td>
-                    <td class="mono">{{ inv.invoiceNo }}</td>
-                    <td class="date">{{ inv.invoiceDate }}</td>
-                    <td class="num">{{ inv.taxRate ?? 0 }}</td>
-                    <td class="num">{{ formatNum(inv.invoiceValue) }}</td>
-                    <td class="num">{{ formatNum(inv.taxableValue) }}</td>
-                    <td class="num">{{ inv.igst ? formatNum(inv.igst) : '—' }}</td>
-                    <td class="num">{{ inv.cgst ? formatNum(inv.cgst) : '—' }}</td>
-                    <td class="num">{{ inv.sgst ? formatNum(inv.sgst) : '—' }}</td>
-                  </tr>
-                }
-              </tbody>
-              <tfoot>
-                <tr class="totals-row">
-                  <td colspan="4" class="totals-label">Totals</td>
-                  <td></td>
-                  <td class="num">{{ formatNum(preview.totalInvoiceValue) }}</td>
-                  <td class="num">{{ formatNum(preview.totalTaxableValue) }}</td>
-                  <td class="num">{{ formatNum(preview.totalIgst) }}</td>
-                  <td class="num">{{ formatNum(preview.totalCgst) }}</td>
-                  <td class="num">{{ formatNum(preview.totalSgst) }}</td>
-                </tr>
-              </tfoot>
-            }
+            <ng-template tngTableCellTemplate="itcAvailable" let-row="row">
+              <span
+                class="itc-badge"
+                [class.itc-badge--yes]="row.itcAvailable"
+                [class.itc-badge--no]="!row.itcAvailable"
+              >
+                {{ row.itcAvailable ? 'Yes' : 'No' }}
+              </span>
+            </ng-template>
+          </tng-table>
 
-          </table>
+          <div class="confirm-table-totals" aria-label="GST invoice preview totals">
+            <span class="totals-label">Totals</span>
+            <span>Value <strong>{{ formatNum(preview.totalInvoiceValue) }}</strong></span>
+            <span>Taxable <strong>{{ formatNum(preview.totalTaxableValue) }}</strong></span>
+            <span>IGST <strong>{{ formatNum(preview.totalIgst) }}</strong></span>
+            <span>CGST <strong>{{ formatNum(preview.totalCgst) }}</strong></span>
+            <span>SGST <strong>{{ formatNum(preview.totalSgst) }}</strong></span>
+          </div>
         </div>
 
       } @else if (!isParsing()) {

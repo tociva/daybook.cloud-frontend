@@ -65,57 +65,13 @@
 .confirm-stat__value{color:var(--tng-semantic-foreground-primary);font-size:.95rem;font-weight:650;font-variant-numeric:tabular-nums}
 
 /* ── Invoice preview table ──────────────────────────────────────────────── */
-.confirm-table-wrap{
-  border:1px solid var(--tng-semantic-border-subtle);
-  border-radius:.4rem;
-  max-height:280px;
-  overflow:auto;
-}
-.confirm-table{
-  border-collapse:collapse;
-  font-size:.78rem;
-  min-width:100%;
-  width:max-content;
-}
-.confirm-table th{
-  background:var(--tng-semantic-surface-raised);
-  border-bottom:1px solid var(--tng-semantic-border-subtle);
-  color:var(--tng-semantic-foreground-muted);
-  font-size:.66rem;
-  font-weight:600;
-  letter-spacing:.04em;
-  padding:.4rem .6rem;
-  position:sticky;
-  text-align:left;
-  text-transform:uppercase;
-  top:0;
-  white-space:nowrap;
-  z-index:1;
-}
-.confirm-table th.num,.confirm-table td.num{text-align:right}
-.confirm-table td{
-  border-bottom:1px solid var(--tng-semantic-border-subtle);
-  color:var(--tng-semantic-foreground-primary);
-  padding:.4rem .6rem;
-  white-space:nowrap;
-}
-.confirm-table tbody tr:hover td{background:var(--tng-semantic-surface-raised)}
-.confirm-table tbody tr:last-child td{border-bottom:none}
-.confirm-table td.num{font-variant-numeric:tabular-nums}
-.confirm-table td.mono{color:var(--tng-semantic-foreground-secondary);font-family:ui-monospace,monospace;font-size:.72rem}
-.confirm-table td.row-num{color:var(--tng-semantic-foreground-muted);font-size:.7rem;text-align:right;user-select:none}
-.confirm-table td.supplier{max-width:180px;overflow:hidden;text-overflow:ellipsis}
-.confirm-table td.date{white-space:nowrap}
-
-/* Totals footer row */
-.confirm-table tfoot .totals-row td{
-  background:var(--tng-semantic-surface-raised);
-  border-top:2px solid var(--tng-semantic-border-subtle);
-  font-weight:700;
-  position:sticky;
-  bottom:0;
-}
+.confirm-table-wrap{display:grid;gap:.5rem}
+.confirm-table-wrap tng-table{min-width:760px}
+.confirm-table-totals{align-items:center;background:var(--tng-semantic-surface-raised);border:1px solid var(--tng-semantic-border-subtle);border-radius:.4rem;display:flex;flex-wrap:wrap;gap:.5rem .9rem;padding:.45rem .6rem}
+.confirm-table-totals span{color:var(--tng-semantic-foreground-secondary);font-size:.72rem}
+.confirm-table-totals strong{color:var(--tng-semantic-foreground-primary);font-variant-numeric:tabular-nums}
 .totals-label{color:var(--tng-semantic-foreground-muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.04em}
+.mono{color:var(--tng-semantic-foreground-secondary);font-family:ui-monospace,monospace;font-size:.78rem}
 
 /* ITC badge */
 .itc-badge{border-radius:999px;font-size:.68rem;font-weight:700;padding:.15rem .45rem}

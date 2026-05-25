@@ -6,7 +6,10 @@ import {
   TngDialogComponent,
   TngError,
   TngProgressBarComponent,
+  TngTable,
+  TngTableCellTpl,
 } from '@tailng-ui/components';
+import type { TngTableColumn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import {
   TngFileUploadDirective,
@@ -115,6 +118,8 @@ const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct
     TngDialogComponent,
     TngError,
     TngProgressBarComponent,
+    TngTable,
+    TngTableCellTpl,
     TngIcon,
     TngFileUploadDirective,
   ],
@@ -146,6 +151,33 @@ export class GstReconciliationComponent {
   // ── Static data ───────────────────────────────────────────────────────────
   protected readonly maxFileSize  = MAX_FILE_SIZE;
   protected readonly returnTypes  = RETURN_TYPES;
+
+  protected readonly gstr2bPreviewColumns: readonly TngTableColumn<ParsedInvoice>[] = [
+    { id: 'rowNumber', label: '#', align: 'end', width: '3rem', accessor: (_row, index) => index + 1 },
+    { id: 'supplierName', label: 'Supplier', truncate: true, width: '12rem' },
+    { id: 'gstin', label: 'GSTIN', width: '11rem' },
+    { id: 'invoiceNo', label: 'Invoice No', width: '9rem' },
+    { id: 'invoiceDate', label: 'Date', width: '7rem' },
+    { id: 'invoiceValue', label: 'Value (₹)', align: 'end', width: '8rem', accessor: (row) => this.formatNum(row.invoiceValue) },
+    { id: 'taxableValue', label: 'Taxable (₹)', align: 'end', width: '8rem', accessor: (row) => this.formatNum(row.taxableValue) },
+    { id: 'igst', label: 'IGST', align: 'end', width: '7rem', accessor: (row) => this.formatOptionalAmount(row.igst) },
+    { id: 'cgst', label: 'CGST', align: 'end', width: '7rem', accessor: (row) => this.formatOptionalAmount(row.cgst) },
+    { id: 'sgst', label: 'SGST', align: 'end', width: '7rem', accessor: (row) => this.formatOptionalAmount(row.sgst) },
+    { id: 'itcAvailable', label: 'ITC', width: '5rem' },
+  ];
+
+  protected readonly gstr1PreviewColumns: readonly TngTableColumn<ParsedInvoice>[] = [
+    { id: 'rowNumber', label: '#', align: 'end', width: '3rem', accessor: (_row, index) => index + 1 },
+    { id: 'exportType', label: 'Type', width: '10rem', accessor: (row) => row.exportType ?? '—' },
+    { id: 'invoiceNo', label: 'Invoice No', width: '9rem' },
+    { id: 'invoiceDate', label: 'Date', width: '7rem' },
+    { id: 'taxRate', label: 'Rate %', align: 'end', width: '6rem', accessor: (row) => row.taxRate ?? 0 },
+    { id: 'invoiceValue', label: 'Value (₹)', align: 'end', width: '8rem', accessor: (row) => this.formatNum(row.invoiceValue) },
+    { id: 'taxableValue', label: 'Taxable (₹)', align: 'end', width: '8rem', accessor: (row) => this.formatNum(row.taxableValue) },
+    { id: 'igst', label: 'IGST', align: 'end', width: '7rem', accessor: (row) => this.formatOptionalAmount(row.igst) },
+    { id: 'cgst', label: 'CGST', align: 'end', width: '7rem', accessor: (row) => this.formatOptionalAmount(row.cgst) },
+    { id: 'sgst', label: 'SGST', align: 'end', width: '7rem', accessor: (row) => this.formatOptionalAmount(row.sgst) },
+  ];
 
   protected readonly statusLegend: readonly StatusMeta[] = [
     { status: 'matched',    label: 'Matched',     icon: 'circleCheck'  },
@@ -209,6 +241,12 @@ export class GstReconciliationComponent {
 
   protected returnTypeLabel(rt: GstReconciliationReturnType): string {
     return this.returnTypes.find((t) => t.value === rt)?.label ?? rt;
+  }
+
+  protected previewColumns(preview: ParsedFilePreview): readonly TngTableColumn<ParsedInvoice>[] {
+    return preview.detectedReturnType === 'gstr1'
+      ? this.gstr1PreviewColumns
+      : this.gstr2bPreviewColumns;
   }
 
   // ── Constructor ───────────────────────────────────────────────────────────
@@ -344,6 +382,10 @@ export class GstReconciliationComponent {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(value);
+  }
+
+  protected formatOptionalAmount(value: number): string {
+    return value ? this.formatNum(value) : '—';
   }
 
   // ── Private: file routing ─────────────────────────────────────────────────
