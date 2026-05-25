@@ -4,11 +4,12 @@
 .heading-actions,.recon-panel-head{justify-content:space-between}
 
 /* ── Status colour tokens ───────────────────────────────────────────────── */
-.recon-dot[data-status='matched'],.recon-stat[data-status='matched'],.recon-month[data-status='matched'],.recon-tag[data-status='matched']{--status-color:var(--tng-semantic-accent-success)}
-.recon-dot[data-status='partial'],.recon-stat[data-status='partial'],.recon-month[data-status='partial'],.recon-tag[data-status='partial']{--status-color:var(--tng-semantic-accent-warning)}
-.recon-dot[data-status='notMatched'],.recon-stat[data-status='notMatched'],.recon-month[data-status='notMatched'],.recon-tag[data-status='notMatched']{--status-color:var(--tng-semantic-accent-danger)}
-.recon-dot[data-status='pending'],.recon-stat[data-status='pending'],.recon-month[data-status='pending']{--status-color:var(--tng-semantic-foreground-muted)}
-.recon-dot[data-status='upcoming'],.recon-stat[data-status='upcoming'],.recon-month[data-status='upcoming']{--status-color:var(--tng-semantic-foreground-subtle)}
+.recon-dot[data-status='matched'],.recon-month[data-status='matched']{--status-color:var(--tng-semantic-accent-success)}
+.recon-dot[data-status='partialMatch'],.recon-month[data-status='partialMatch']{--status-color:var(--tng-semantic-accent-warning)}
+.recon-dot[data-status='noMatch'],.recon-month[data-status='noMatch']{--status-color:var(--tng-semantic-accent-danger)}
+.recon-dot[data-status='inProgress'],.recon-month[data-status='inProgress']{--status-color:var(--tng-semantic-accent-brand)}
+.recon-dot[data-status='pending'],.recon-month[data-status='pending']{--status-color:var(--tng-semantic-foreground-muted)}
+.recon-dot[data-status='upcoming'],.recon-month[data-status='upcoming']{--status-color:color-mix(in srgb, var(--tng-semantic-foreground-muted) 82%, var(--tng-semantic-accent-brand))}
 
 /* ── Legend ─────────────────────────────────────────────────────────────── */
 .recon-legend__item{align-items:center;color:var(--tng-semantic-foreground-secondary);display:inline-flex;font-size:.78rem;gap:.35rem}
@@ -92,12 +93,13 @@
 
 /* ── Status stats row ───────────────────────────────────────────────────── */
 .recon-section__stats{gap:.35rem;margin-bottom:.75rem}
-.recon-stat{border:1px solid var(--status-color);border-radius:999px;color:var(--status-color);font-size:.7rem;font-weight:700;line-height:1;min-width:1.7rem;padding:.28rem .45rem;text-align:center}
-.recon-tag{background-color:var(--status-color);border-radius:999px;color:var(--tng-semantic-foreground-on-accent);font-size:.68rem;font-weight:700;line-height:1;min-width:1.6rem;padding:.28rem .45rem;text-align:center}
+.recon-stat__label{margin-right:.25rem}
+.recon-stat__count{font:inherit}
 
 /* ── Month grid ─────────────────────────────────────────────────────────── */
 .recon-months{display:grid;gap:.5rem;grid-template-columns:repeat(3,minmax(0,1fr))}
-.recon-month{border:1px solid var(--tng-semantic-border-subtle);border-left:3px solid var(--status-color);border-radius:.45rem;color:inherit;cursor:pointer;display:grid;gap:.45rem;min-height:6.8rem;padding:.55rem;text-align:left}
+.recon-month{color:inherit;cursor:pointer;display:block;text-align:left}
+:host ::ng-deep .recon-month>.tng-card{border-color:var(--tng-semantic-border-subtle);border-left:3px solid var(--status-color);border-radius:.45rem;gap:.45rem;min-height:6.8rem;padding:.55rem}
 .recon-month--disabled{cursor:not-allowed;opacity:.65;pointer-events:none}
 .recon-month__top{align-items:flex-start;display:flex;gap:.45rem;justify-content:space-between}
 .recon-month__top strong{color:var(--tng-semantic-foreground-primary);display:block;font-size:.9rem;font-weight:700}
@@ -109,8 +111,6 @@
 .recon-month__refresh:hover{color:var(--tng-semantic-foreground-primary)}
 .recon-month__refresh:disabled{cursor:not-allowed;opacity:.35 !important}
 .recon-month__tags{display:flex;flex-wrap:wrap;gap:.3rem}
-.recon-tag--gst  {--status-color:var(--tng-semantic-accent-brand)}
-.recon-tag--books{--status-color:var(--tng-semantic-foreground-secondary)}
 .recon-month__diff{color:var(--tng-semantic-foreground-secondary);font-size:.72rem;font-weight:650}
 .recon-month__diff--active{color:var(--tng-semantic-accent-danger)}
 

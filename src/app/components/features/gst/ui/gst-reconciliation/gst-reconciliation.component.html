@@ -106,15 +106,32 @@
         </header>
 
         <div class="recon-section__stats" [attr.aria-label]="section.meta.label + ' status summary'">
-          <span class="recon-stat" data-status="matched"    [attr.title]="'Matched: '     + totalByStatus(section.months, 'matched')">{{ totalByStatus(section.months, 'matched')    }}</span>
-          <span class="recon-stat" data-status="partial"    [attr.title]="'Partial: '     + totalByStatus(section.months, 'partial')">{{ totalByStatus(section.months, 'partial')    }}</span>
-          <span class="recon-stat" data-status="notMatched" [attr.title]="'Not matched: ' + totalByStatus(section.months, 'notMatched')">{{ totalByStatus(section.months, 'notMatched') }}</span>
+          @for (entry of statusLegend; track entry.status) {
+            @let count = totalByStatus(section.months, entry.status);
+            @if (count > 0) {
+              <tng-tag
+                class="recon-stat"
+                appearance="soft"
+                size="sm"
+                [tone]="statusTone(entry.status)"
+                [label]="entry.label + ': ' + count"
+                [attr.data-status]="entry.status"
+                [attr.title]="entry.label + ': ' + count"
+              >
+                <span class="recon-stat__label">{{ entry.label }}</span>
+                <strong class="recon-stat__count">{{ count }}</strong>
+              </tng-tag>
+            }
+          }
         </div>
 
         <div class="recon-months">
           @for (cell of section.months; track cell.returnType + '-' + cell.month) {
-            <div
+            <tng-card
               class="recon-month"
+              variant="outline"
+              padding="sm"
+              interactive
               role="button"
               tabindex="0"
               [attr.data-status]="cell.status"
@@ -152,27 +169,67 @@
               @if (cell.status !== 'upcoming') {
                 <span class="recon-month__tags">
                   @if (cell.gstInvoiceCount > 0) {
-                    <span class="recon-tag recon-tag--gst"   [attr.title]="'GST invoices: '  + cell.gstInvoiceCount">{{ cell.gstInvoiceCount   }}</span>
+                    <tng-tag
+                      appearance="soft"
+                      size="sm"
+                      tone="info"
+                      [label]="'GST invoices: ' + cell.gstInvoiceCount"
+                      [attr.title]="'GST invoices: ' + cell.gstInvoiceCount"
+                    >
+                      GST {{ cell.gstInvoiceCount }}
+                    </tng-tag>
                   }
                   @if (cell.booksInvoiceCount > 0) {
-                    <span class="recon-tag recon-tag--books" [attr.title]="'Book invoices: ' + cell.booksInvoiceCount">{{ cell.booksInvoiceCount }}</span>
+                    <tng-tag
+                      appearance="soft"
+                      size="sm"
+                      tone="neutral"
+                      [label]="'Book invoices: ' + cell.booksInvoiceCount"
+                      [attr.title]="'Book invoices: ' + cell.booksInvoiceCount"
+                    >
+                      Books {{ cell.booksInvoiceCount }}
+                    </tng-tag>
                   }
                   @if (cell.matchedCount > 0) {
-                    <span class="recon-tag" data-status="matched"    [attr.title]="'Matched: '  + cell.matchedCount">{{ cell.matchedCount  }}</span>
+                    <tng-tag
+                      appearance="soft"
+                      size="sm"
+                      tone="success"
+                      [label]="'Matched: ' + cell.matchedCount"
+                      [attr.title]="'Matched: ' + cell.matchedCount"
+                    >
+                      Matched {{ cell.matchedCount }}
+                    </tng-tag>
                   }
                   @if (cell.partialCount > 0) {
-                    <span class="recon-tag" data-status="partial"    [attr.title]="'Partial: '  + cell.partialCount">{{ cell.partialCount  }}</span>
+                    <tng-tag
+                      appearance="soft"
+                      size="sm"
+                      tone="warning"
+                      [label]="'Partial match: ' + cell.partialCount"
+                      [attr.title]="'Partial match: ' + cell.partialCount"
+                    >
+                      Partial {{ cell.partialCount }}
+                    </tng-tag>
                   }
                   @if (cell.mismatchCount > 0) {
-                    <span class="recon-tag" data-status="notMatched" [attr.title]="'Mismatch: ' + cell.mismatchCount">{{ cell.mismatchCount }}</span>
+                    <tng-tag
+                      appearance="soft"
+                      size="sm"
+                      tone="danger"
+                      [label]="'No match: ' + cell.mismatchCount"
+                      [attr.title]="'No match: ' + cell.mismatchCount"
+                    >
+                      No match {{ cell.mismatchCount }}
+                    </tng-tag>
                   }
                 </span>
 
-                <span class="recon-month__diff" [class.recon-month__diff--active]="cell.differenceAmount !== 0">
-                  {{ formatAmount(cell.differenceAmount) }}
+                <span class="recon-month__diff" [class.recon-month__diff--active]="hasMonthDifference(cell)">
+                  {{ formatAmount(monthDifferenceAmount(cell)) }}
                 </span>
               }
-            </div>
+            </tng-card>
           }
         </div>
       </tng-card>

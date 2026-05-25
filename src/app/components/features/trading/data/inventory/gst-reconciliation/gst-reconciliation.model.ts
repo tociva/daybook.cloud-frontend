@@ -1,8 +1,24 @@
-export type GstReconciliationReturnType = 'gstr1' | 'gstr2b';
+export type GstReturnType = 'gstr1' | 'gstr2b';
 
-export type GstReconciliationSourceFormat = 'json' | 'xlsx';
+export type GstReconciliationReturnType = GstReturnType;
 
-export type GstReconciliationStatus = 'upcoming' | 'pending' | 'matched' | 'partial' | 'notMatched';
+export type GstSourceFormat = 'json' | 'xlsx';
+
+export type GstReconciliationSourceFormat = GstSourceFormat;
+
+export type GstComputedStatus = 'upcoming' | 'matched' | 'partial' | 'notMatched';
+
+export type GstReconciliationStatus =
+  | 'pending'
+  | 'upcoming'
+  | 'inProgress'
+  | 'matched'
+  | 'partialMatch'
+  | 'noMatch';
+
+export type GstMonthStatus = GstReconciliationStatus;
+
+export type GstItcEligibility = 'eligible' | 'ineligible' | 'partial' | 'unknown';
 
 export type GstReconciliationImportPayload = Readonly<{
   branchid: string;
@@ -30,7 +46,7 @@ export type GstReconciliationSummaryQuery = GstReconciliationQuery;
 export type GstReconciliationMonthSummary = Readonly<{
   returnType: GstReconciliationReturnType;
   month: number;
-  status: GstReconciliationStatus;
+  status: GstMonthStatus;
   gstInvoiceCount: number;
   booksInvoiceCount: number;
   matchedCount: number;
@@ -58,7 +74,7 @@ export type GstReconciliationInvoice = Readonly<{
 
 export type GstReconciliationDetailRow = Readonly<{
   status?: GstReconciliationStatus;
-  computedStatus?: GstReconciliationStatus;
+  computedStatus?: GstComputedStatus;
   reconciliationStatus?: GstReconciliationStatus;
   partyGstin?: string;
   partyName?: string;

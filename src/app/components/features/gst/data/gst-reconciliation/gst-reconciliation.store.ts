@@ -105,13 +105,16 @@ export const GstReconciliationStore = signalStore(
 
       try {
         // Step 1 – obtain signed upload URL
-        const { uploadUrl } = await service.createUploadUrl({
+        const { putUrl } = await service.createUploadUrl({
           returnType: payload.returnType,
           month: payload.month,
         });
+        if (!putUrl) {
+          throw new Error('Upload URL response did not include putUrl.');
+        }
 
         // Step 2 – stream file directly to storage
-        await service.uploadFileToSignedUrl(uploadUrl, payload.file);
+        await service.uploadFileToSignedUrl(putUrl, payload.file);
 
         patchState(store, (s) => ({
           gstReconciliation: { ...s.gstReconciliation, isUploading: false, isRefreshing: true },
@@ -200,6 +203,9 @@ export const GstReconciliationStore = signalStore(
 
 // Re-export types so UI components can import from a single path.
 export type {
+  GstComputedStatus,
+  GstItcEligibility,
+  GstMonthStatus,
   GstReconciliationDetailRow,
   GstReconciliationDetailSummary,
   GstReconciliationInvoice,
@@ -211,4 +217,6 @@ export type {
   GstReconciliationStatus,
   GstReconciliationSummaryResponse,
   GstReconciliationUploadUrlPayload,
+  GstReturnType,
+  GstSourceFormat,
 } from './gst-reconciliation.model';

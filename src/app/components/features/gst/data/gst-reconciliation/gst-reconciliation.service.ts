@@ -31,10 +31,10 @@ export class GstReconciliationService {
   /**
    * Step 2: Upload the file directly to the signed URL via a plain HTTP PUT.
    * We use fetch() here because HttpClient would add the auth header to the
-   * pre-signed S3/GCS URL which would cause a signature mismatch.
+   * pre-signed S3 URL which would cause a signature mismatch.
    */
-  async uploadFileToSignedUrl(uploadUrl: string, file: File): Promise<void> {
-    const response = await fetch(uploadUrl, {
+  async uploadFileToSignedUrl(putUrl: string, file: File): Promise<void> {
+    const response = await fetch(putUrl, {
       method: 'PUT',
       body: file,
       headers: { 'Content-Type': file.type || 'application/octet-stream' },

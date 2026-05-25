@@ -215,6 +215,7 @@ export class CreateVendorComponent implements AfterViewInit {
 
     if (!id) {
       this.vendorStore.clearSelectedItem();
+      this.applyQueryDefaults();
       return;
     }
 
@@ -291,6 +292,23 @@ export class CreateVendorComponent implements AfterViewInit {
 
       this.branchDefaultsApplied.set(true);
     });
+  }
+
+  private applyQueryDefaults(): void {
+    const query = this.route.snapshot.queryParamMap;
+    const name = query.get('name')?.trim() ?? '';
+    const gstin = query.get('gstin')?.trim() ?? '';
+
+    if (!name && !gstin) {
+      return;
+    }
+
+    this.vendorModel.update((current) => ({
+      ...current,
+      name: name || current.name,
+      gstin: gstin || current.gstin,
+      addressName: name || current.addressName,
+    }));
   }
 
   protected selectCountry(value: unknown): void {

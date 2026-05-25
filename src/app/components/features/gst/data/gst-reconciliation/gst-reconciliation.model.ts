@@ -1,6 +1,22 @@
-export type GstReconciliationReturnType = 'gstr1' | 'gstr2b';
+export type GstReturnType = 'gstr1' | 'gstr2b';
 
-export type GstReconciliationStatus = 'upcoming' | 'pending' | 'matched' | 'partial' | 'notMatched';
+export type GstReconciliationReturnType = GstReturnType;
+
+export type GstSourceFormat = 'json' | 'xlsx';
+
+export type GstComputedStatus = 'upcoming' | 'matched' | 'partial' | 'notMatched';
+
+export type GstReconciliationStatus =
+  | 'pending'
+  | 'upcoming'
+  | 'inProgress'
+  | 'matched'
+  | 'partialMatch'
+  | 'noMatch';
+
+export type GstMonthStatus = GstReconciliationStatus;
+
+export type GstItcEligibility = 'eligible' | 'ineligible' | 'partial' | 'unknown';
 
 // ── Upload / refresh ──────────────────────────────────────────────────────────
 
@@ -10,7 +26,15 @@ export type GstReconciliationUploadUrlPayload = Readonly<{
 }>;
 
 export type GstReconciliationUploadUrlResponse = Readonly<{
-  uploadUrl: string;
+  id: string;
+  documentid: string;
+  putUrl: string;
+  returnType: GstReconciliationReturnType;
+  sourceFormat: GstSourceFormat;
+  month: number;
+  fiscalyearid?: string;
+  path?: string;
+  status?: GstReconciliationStatus;
   /** Additional fields the backend may return (e.g. key, expiry). */
   [key: string]: unknown;
 }>;
@@ -27,7 +51,7 @@ export type GstReconciliationRefreshResponse = Readonly<Record<string, unknown>>
 export type GstReconciliationMonthSummary = Readonly<{
   returnType: GstReconciliationReturnType;
   month: number;
-  status: GstReconciliationStatus;
+  status: GstMonthStatus;
   gstInvoiceCount: number;
   booksInvoiceCount: number;
   matchedCount: number;
@@ -57,7 +81,7 @@ export type GstReconciliationInvoice = Readonly<{
 
 export type GstReconciliationDetailRow = Readonly<{
   status?: GstReconciliationStatus;
-  computedStatus?: GstReconciliationStatus;
+  computedStatus?: GstComputedStatus;
   reconciliationStatus?: GstReconciliationStatus;
   partyGstin?: string;
   partyName?: string;
