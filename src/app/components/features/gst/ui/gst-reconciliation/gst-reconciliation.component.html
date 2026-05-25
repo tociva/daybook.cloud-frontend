@@ -25,10 +25,9 @@
   @if (store.error()) {
     <div class="notice notice--danger">{{ store.error() }}</div>
   }
-  @if (store.importResult()) {
+  @if (store.refreshResult()) {
     <div class="notice notice--success" role="status">
-      Imported {{ store.importResult()?.savedCount }} invoices into
-      {{ lastImportedSection() === 'gstr1' ? 'GSTR-1' : 'GSTR-2B' }} successfully.
+      {{ lastImportedSection() === 'gstr1' ? 'GSTR-1' : 'GSTR-2B' }} uploaded and reconciliation triggered successfully.
     </div>
   }
   @if (isParsing()) {
@@ -50,7 +49,7 @@
     class="import-file-input"
     type="file"
     accept=".json,application/json,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    [disabled]="store.isImporting() || isParsing()"
+    [disabled]="store.isBusy() || isParsing()"
     (change)="onBrowse($event)"
   />
 
@@ -61,7 +60,7 @@
     [parsedPreview]="parsedPreview()"
     [isParsing]="isParsing()"
     [pendingError]="pendingError()"
-    [isImporting]="store.isImporting()"
+    [isImporting]="store.isBusy()"
     (confirmed)="submitImportAs($event)"
     (cancelled)="cancelConfirmation()"
   />
@@ -75,7 +74,7 @@
     accept=".json,application/json,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     [maxSize]="maxFileSize"
     [multiple]="false"
-    [disabled]="store.isImporting() || isParsing() || !canImport() || !context()"
+    [disabled]="store.isBusy() || isParsing() || !canImport() || !context()"
     (filesSelected)="onFilesSelected($event)"
     (filesRejected)="onFilesRejected($event)"
     (dragenter)="onOverviewDragEnter()"
@@ -97,7 +96,7 @@
             type="button"
             appearance="ghost"
             tone="neutral"
-            [disabled]="!context() || !canImport() || store.isImporting() || isParsing()"
+            [disabled]="!context() || !canImport() || store.isBusy() || isParsing()"
             [attr.aria-label]="'Import ' + section.meta.label + ' file'"
             (click)="triggerImportForSection(section.meta.value)"
           >
@@ -114,21 +113,39 @@
 
         <div class="recon-months">
           @for (cell of section.months; track cell.returnType + '-' + cell.month) {
-            <button
-              type="button"
+            <div
               class="recon-month"
+              role="button"
+              tabindex="0"
               [attr.data-status]="cell.status"
               [attr.aria-label]="section.meta.label + ' ' + cell.period + ', ' + statusLabel(cell.status)"
-              [disabled]="!context()"
+              [class.recon-month--disabled]="!context()"
               (click)="openMonth(cell)"
+              (keydown.enter)="openMonth(cell)"
+              (keydown.space.prevent)="openMonth(cell)"
             >
               <span class="recon-month__top">
                 <span>
                   <strong>{{ cell.label }}</strong>
                   <small>{{ cell.period }}</small>
                 </span>
-                <span class="recon-month__status" [attr.title]="statusLabel(cell.status)">
-                  <tng-icon [icon]="statusIcon(cell.status)" aria-hidden="true" />
+                <span class="recon-month__actions">
+                  <button
+                    type="button"
+                    class="recon-month__refresh"
+                    [attr.aria-label]="'Refresh ' + section.meta.label + ' ' + cell.period"
+                    [disabled]="store.isUploading() || isRefreshingCell(cell)"
+                    (click)="refreshMonth($event, cell)"
+                  >
+                    <tng-icon
+                      icon="refreshCw"
+                      [class.spin]="isRefreshingCell(cell)"
+                      aria-hidden="true"
+                    />
+                  </button>
+                  <span class="recon-month__status" [attr.title]="statusLabel(cell.status)">
+                    <tng-icon [icon]="statusIcon(cell.status)" aria-hidden="true" />
+                  </span>
                 </span>
               </span>
 
@@ -155,7 +172,7 @@
                   {{ formatAmount(cell.differenceAmount) }}
                 </span>
               }
-            </button>
+            </div>
           }
         </div>
       </tng-card>

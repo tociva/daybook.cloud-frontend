@@ -1,4 +1,4 @@
-import type { GstReconciliationReturnType } from '../../../trading/data/inventory/gst-reconciliation';
+import type { GstReconciliationReturnType } from '../../data/gst-reconciliation/gst-reconciliation.model';
 
 export type ParsedInvoice = Readonly<{
   invoiceNo: string;

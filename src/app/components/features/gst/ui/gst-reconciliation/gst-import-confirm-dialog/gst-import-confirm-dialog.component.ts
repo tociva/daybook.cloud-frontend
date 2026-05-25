@@ -6,7 +6,7 @@ import {
 } from '@tailng-ui/components';
 import type { TngTableColumn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
-import type { GstReconciliationReturnType } from '../../../../trading/data/inventory/gst-reconciliation';
+import type { GstReconciliationReturnType } from '../../../data/gst-reconciliation/gst-reconciliation.model';
 import { GstInvoicePreviewTableComponent } from '../gst-invoice-preview-table/gst-invoice-preview-table.component';
 import {
   RETURN_TYPES,

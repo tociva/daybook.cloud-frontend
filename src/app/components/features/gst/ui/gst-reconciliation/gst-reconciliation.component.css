@@ -98,11 +98,16 @@
 /* ── Month grid ─────────────────────────────────────────────────────────── */
 .recon-months{display:grid;gap:.5rem;grid-template-columns:repeat(3,minmax(0,1fr))}
 .recon-month{border:1px solid var(--tng-semantic-border-subtle);border-left:3px solid var(--status-color);border-radius:.45rem;color:inherit;cursor:pointer;display:grid;gap:.45rem;min-height:6.8rem;padding:.55rem;text-align:left}
-.recon-month:disabled{opacity:.65}
+.recon-month--disabled{cursor:not-allowed;opacity:.65;pointer-events:none}
 .recon-month__top{align-items:flex-start;display:flex;gap:.45rem;justify-content:space-between}
 .recon-month__top strong{color:var(--tng-semantic-foreground-primary);display:block;font-size:.9rem;font-weight:700}
 .recon-month small{color:var(--tng-semantic-foreground-muted);display:block;font-size:.66rem}
+.recon-month__actions{align-items:center;display:flex;gap:.15rem}
 .recon-month__status{color:var(--status-color);font-size:.95rem}
+.recon-month__refresh{align-items:center;background:none;border:none;border-radius:.3rem;color:var(--tng-semantic-foreground-muted);cursor:pointer;display:flex;font-size:.85rem;opacity:0;padding:.15rem;transition:opacity .15s,color .15s}
+.recon-month:hover .recon-month__refresh,.recon-month__refresh:focus-visible{opacity:1}
+.recon-month__refresh:hover{color:var(--tng-semantic-foreground-primary)}
+.recon-month__refresh:disabled{cursor:not-allowed;opacity:.35 !important}
 .recon-month__tags{display:flex;flex-wrap:wrap;gap:.3rem}
 .recon-tag--gst  {--status-color:var(--tng-semantic-accent-brand)}
 .recon-tag--books{--status-color:var(--tng-semantic-foreground-secondary)}

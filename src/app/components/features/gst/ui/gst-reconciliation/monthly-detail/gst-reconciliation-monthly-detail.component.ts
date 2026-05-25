@@ -12,7 +12,7 @@ import {
   type GstReconciliationInvoice,
   type GstReconciliationReturnType,
   type GstReconciliationStatus,
-} from '../../../../trading/data/inventory/gst-reconciliation';
+} from '../../../data/gst-reconciliation/gst-reconciliation.store';
 
 type StatusMeta = Readonly<{
   icon: string;
@@ -138,13 +138,8 @@ export class GstReconciliationMonthlyDetailComponent {
 
   private async loadDetail(): Promise<void> {
     const session = this.sessionStore.session();
-    const branchid = session?.branch?.id;
-
-    if (!branchid) return;
-
-    await this.store.loadDetail(this.returnType(), this.month(), {
-      branchid,
-    });
+    if (!session?.branch?.id) return;
+    await this.store.loadDetail(this.returnType(), this.month());
   }
 
   private returnTypeLabel(returnType: GstReconciliationReturnType): string {

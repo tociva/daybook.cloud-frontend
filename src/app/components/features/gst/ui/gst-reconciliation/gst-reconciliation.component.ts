@@ -18,12 +18,10 @@ import { PageHeadingComponent } from '../../../../../shared/page-heading/page-he
 import { UserSessionStore } from '../../../management/data/user-session/user-session.store';
 import {
   GstReconciliationStore,
-  type GstReconciliationImportPayload,
   type GstReconciliationMonthSummary,
   type GstReconciliationReturnType,
-  type GstReconciliationSourceFormat,
   type GstReconciliationStatus,
-} from '../../../trading/data/inventory/gst-reconciliation';
+} from '../../data/gst-reconciliation/gst-reconciliation.store';
 import { GstImportConfirmDialogComponent } from './gst-import-confirm-dialog/gst-import-confirm-dialog.component';
 import {
   RETURN_TYPES,
@@ -87,6 +85,10 @@ export class GstReconciliationComponent {
   private readonly sessionStore = inject(UserSessionStore);
   private readonly xlsxFileReader = inject(XlsxFileReaderService);
   protected readonly store = inject(GstReconciliationStore);
+
+  // ── Per-cell refresh state ────────────────────────────────────────────────
+  /** Tracks which cell is currently being refreshed, e.g. 'gstr1-4'. */
+  protected readonly refreshingCell = signal<string | null>(null);
 
   // ── File state ────────────────────────────────────────────────────────────
   protected readonly pendingFile    = signal<File | null>(null);
@@ -160,7 +162,7 @@ export class GstReconciliationComponent {
     effect(() => {
       const ctx = this.context();
       if (!ctx) return;
-      void this.store.loadSummary({ branchid: ctx.branchid });
+      void this.store.loadSummary();
     });
   }
 
@@ -214,12 +216,12 @@ export class GstReconciliationComponent {
     this.pendingFile.set(null);
     this.pendingError.set(null);
     this.sectionHint.set(null);
-    this.store.clearImportResult();
+    this.store.clearRefreshResult();
   }
 
   // ── Import submission ─────────────────────────────────────────────────────
   protected async submitImportAs(returnType: GstReconciliationReturnType): Promise<void> {
-    if (this.store.isImporting()) return;
+    if (this.store.isBusy()) return;
 
     const ctx = this.context();
     if (!ctx) { this.pendingError.set(this.contextMessage() || 'Context missing.'); return; }
@@ -232,23 +234,19 @@ export class GstReconciliationComponent {
       return;
     }
 
-    const payload: GstReconciliationImportPayload = {
-      branchid:     ctx.branchid,
-      month:        this.currentFiscalMonth(),
-      returnType,
-      sourceFormat: this.detectSourceFormat(file),
-      file,
-    };
-
     this.lastImportedSection.set(returnType);
-    const imported = await this.store.importUploadedFile(payload);
-    if (!imported) return;
+    const success = await this.store.uploadAndRefresh({
+      returnType,
+      month: this.currentFiscalMonth(),
+      file,
+    });
+    if (!success) return;
 
     this.confirmDialogOpen.set(false);
     this.parsedPreview.set(null);
     this.pendingFile.set(null);
     this.sectionHint.set(null);
-    await this.store.loadSummary({ branchid: ctx.branchid });
+    await this.store.loadSummary();
   }
 
   // ── Navigation ────────────────────────────────────────────────────────────
@@ -259,6 +257,31 @@ export class GstReconciliationComponent {
       ['/app/trading/gst-reconciliation/detail', cell.returnType, cell.month],
       { queryParams: { burl: this.router.url } },
     );
+  }
+
+  // ── Per-cell refresh ──────────────────────────────────────────────────────
+  protected cellKey(cell: MonthCell): string {
+    return `${cell.returnType}-${cell.month}`;
+  }
+
+  protected isRefreshingCell(cell: MonthCell): boolean {
+    return this.refreshingCell() === this.cellKey(cell);
+  }
+
+  protected async refreshMonth(event: Event, cell: MonthCell): Promise<void> {
+    event.stopPropagation();
+    if (this.store.isBusy() || this.refreshingCell()) return;
+
+    const key = this.cellKey(cell);
+    this.refreshingCell.set(key);
+    this.store.clearRefreshResult();
+
+    try {
+      await this.store.refresh({ returnType: cell.returnType, month: cell.month });
+      await this.store.loadSummary();
+    } finally {
+      this.refreshingCell.set(null);
+    }
   }
 
   // ── Status helpers ────────────────────────────────────────────────────────
@@ -279,7 +302,7 @@ export class GstReconciliationComponent {
 
   // ── Private: file routing ─────────────────────────────────────────────────
   private async receiveFile(file: File): Promise<void> {
-    this.store.clearImportResult();
+    this.store.clearRefreshResult();
     this.pendingError.set(null);
     this.pendingFile.set(file);
     this.isParsing.set(true);
@@ -449,14 +472,6 @@ export class GstReconciliationComponent {
   private currentFiscalMonth(): number {
     const m = new Date().getMonth() + 1;
     return MONTH_OPTIONS.some((o) => o.value === m) ? m : 4;
-  }
-
-  private detectSourceFormat(file: File): GstReconciliationSourceFormat {
-    if (
-      file.name.toLowerCase().endsWith('.xlsx') ||
-      file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    ) return 'xlsx';
-    return 'json';
   }
 
   private buildMonthCells(returnType: GstReconciliationReturnType): readonly MonthCell[] {
