@@ -91,6 +91,22 @@
   font-size: 1rem;
 }
 
+.missing-party {
+  align-items: center;
+  color: var(--tng-semantic-foreground-muted);
+  display: inline-flex;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+  gap: 0.25rem;
+  margin-right: auto;
+  padding-top: 0.1rem;
+}
+
+.party-head .missing-party__message {
+  color: var(--tng-semantic-accent-danger, #dc2626);
+  font-weight: 700;
+}
+
 .create-vendor-link {
   align-items: center;
   background: transparent;
@@ -154,14 +170,9 @@
   );
 }
 
-.party-cell,
 .invoice-cell {
   display: grid;
   gap: 0.1rem;
-}
-
-.party-cell--missing strong {
-  color: var(--tng-semantic-accent-danger, #dc2626);
 }
 
 .invoice-cell--missing {

@@ -86,7 +86,10 @@ export class CreatePurchaseInvoiceComponent {
         includes: PURCHASE_INVOICE_DETAIL_INCLUDES,
       });
       if (invoice) this.draft.patchFromInvoice(invoice);
+      return;
     }
+
+    this.draft.patchFromGstReconciliation(this.route.snapshot.queryParamMap);
   }
 
   // ── Vendor selection ──────────────────────────────────────────────────────

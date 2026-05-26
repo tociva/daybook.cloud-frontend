@@ -213,6 +213,7 @@ export class CreateCustomerComponent implements AfterViewInit {
 
     if (!id) {
       this.customerStore.clearSelectedItem();
+      this.applyQueryDefaults();
       return;
     }
 
@@ -287,6 +288,23 @@ export class CreateCustomerComponent implements AfterViewInit {
 
       this.branchDefaultsApplied.set(true);
     });
+  }
+
+  private applyQueryDefaults(): void {
+    const query = this.route.snapshot.queryParamMap;
+    const name = query.get('name')?.trim() ?? '';
+    const gstin = query.get('gstin')?.trim() ?? '';
+
+    if (!name && !gstin) {
+      return;
+    }
+
+    this.customerModel.update((current) => ({
+      ...current,
+      name: name || current.name,
+      gstin: gstin || current.gstin,
+      addressName: name || current.addressName,
+    }));
   }
 
   protected async submitForm(event: SubmitEvent): Promise<void> {

@@ -1,4 +1,5 @@
 import { Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
+import type { ParamMap } from '@angular/router';
 import dayjs from 'dayjs';
 import type { Vendor } from '../../../data/vendor';
 import { VendorStore } from '../../../data/vendor';
@@ -281,6 +282,73 @@ export class PurchaseInvoiceDraftStore {
     );
   }
 
+  patchFromGstReconciliation(query: ParamMap): void {
+    const invoiceNumber = query.get('invoiceNumber')?.trim() ?? '';
+    const invoiceDate = this.normalizeInvoiceDate(query.get('invoiceDate'));
+    const partyName = query.get('partyName')?.trim() ?? '';
+    const partyGstin = query.get('partyGstin')?.trim() ?? '';
+    const taxableValue = this.queryNumber(query, 'taxableValue');
+    const totalTax = this.queryNumber(query, 'totalTax');
+    const invoiceValue = this.queryNumber(query, 'invoiceValue');
+    const igst = this.queryNumber(query, 'igst');
+    const cgst = this.queryNumber(query, 'cgst');
+    const sgst = this.queryNumber(query, 'sgst');
+
+    if (!invoiceNumber && !invoiceDate && !partyName && !partyGstin && invoiceValue === 0) {
+      return;
+    }
+
+    this.number.set(invoiceNumber || this.number());
+    if (invoiceDate) {
+      this.date.set(invoiceDate);
+      this.duedate.set(this.getDefaultDueDate(invoiceDate));
+    }
+
+    const vendor = this.findVendorForGstParty(partyGstin, partyName);
+    if (vendor) {
+      this.selectVendor(vendor);
+    } else if (partyName || partyGstin) {
+      this.selectedVendor.set(null);
+      this.vendorid.set('');
+      this.vendorSearch.set(partyName || partyGstin);
+      this.vendorAddressName.set(partyName || this.vendorAddressName());
+    }
+
+    const descriptionParts = [
+      'Created from GST reconciliation.',
+      partyName ? `Party: ${partyName}.` : '',
+      partyGstin ? `GSTIN: ${partyGstin}.` : '',
+    ].filter(Boolean);
+    this.description.set(descriptionParts.join(' '));
+    this.showDescription.set(false);
+
+    if (taxableValue || totalTax || invoiceValue) {
+      const taxableBase = taxableValue || Math.max(invoiceValue - totalTax, 0) || invoiceValue;
+      const taxes = this.buildGstReconciliationTaxes({
+        taxableValue: taxableBase,
+        totalTax,
+        igst,
+        cgst,
+        sgst,
+      });
+      this.taxoption.set(igst > 0 ? 'Inter State' : 'Intra State');
+      this.items.set([
+        {
+          ...this.emptyItemRow(taxes.length),
+          name: invoiceNumber ? `GST invoice ${invoiceNumber}` : 'GST invoice',
+          description: '',
+          price: taxableBase,
+          quantity: 1,
+          itemtotal: taxableBase,
+          subtotal: taxableBase,
+          taxamount: totalTax,
+          grandtotal: invoiceValue || taxableBase + totalTax,
+          taxes,
+        },
+      ]);
+    }
+  }
+
   // ── Vendor methods ────────────────────────────────────────────────────────
 
   onVendorSearchInput(value: string | null): void {
@@ -553,6 +621,98 @@ export class PurchaseInvoiceDraftStore {
   private taxIdsForMode(taxGroup: TaxGroup, taxOption: string): readonly string[] {
     const group = taxGroup.groups?.find((g) => g.mode === taxOption);
     return group?.taxids ?? group?.taxes ?? [];
+  }
+
+  private findVendorForGstParty(gstin: string, name: string): Vendor | null {
+    const normalizedGstin = this.normalizeComparable(gstin);
+    const normalizedName = this.normalizeComparable(name);
+
+    return (
+      (this.vendorStore.items() as Vendor[]).find((vendor) => {
+        const vendorGstin = this.normalizeComparable(vendor.gstin ?? '');
+        const vendorName = this.normalizeComparable(vendor.name ?? '');
+        return (
+          (normalizedGstin && vendorGstin === normalizedGstin) ||
+          (!normalizedGstin && normalizedName && vendorName === normalizedName)
+        );
+      }) ?? null
+    );
+  }
+
+  private normalizeComparable(value: string): string {
+    return value.trim().toLowerCase();
+  }
+
+  private queryNumber(query: ParamMap, key: string): number {
+    return toNum(query.get(key));
+  }
+
+  private buildGstReconciliationTaxes(values: {
+    taxableValue: number;
+    totalTax: number;
+    igst: number;
+    cgst: number;
+    sgst: number;
+  }): TaxRow[] {
+    const taxableValue = values.taxableValue || 0;
+    if (!taxableValue) return [];
+
+    if (values.igst > 0) {
+      return [
+        {
+          taxid: '',
+          name: 'IGST',
+          shortname: 'IGST',
+          rate: this.taxRate(values.igst, taxableValue),
+          appliedto: taxableValue,
+          amount: values.igst,
+        },
+      ];
+    }
+
+    const splitTax = values.totalTax > 0 ? values.totalTax / 2 : 0;
+    const cgst = splitTax || values.cgst;
+    const sgst = splitTax || values.sgst;
+    return [
+      {
+        taxid: '',
+        name: 'CGST',
+        shortname: 'CGST',
+        rate: this.taxRate(cgst, taxableValue),
+        appliedto: taxableValue,
+        amount: cgst,
+      },
+      {
+        taxid: '',
+        name: 'SGST',
+        shortname: 'SGST',
+        rate: this.taxRate(sgst, taxableValue),
+        appliedto: taxableValue,
+        amount: sgst,
+      },
+    ].filter((tax) => tax.amount > 0);
+  }
+
+  private taxRate(amount: number, taxableValue: number): number {
+    if (!taxableValue) return 0;
+    return Number(((amount / taxableValue) * 100).toFixed(2));
+  }
+
+  private normalizeInvoiceDate(value: string | null): string {
+    const date = value?.trim();
+    if (!date) return '';
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) return date;
+
+    const slashOrDash = date.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{2,4})$/);
+    if (slashOrDash) {
+      const [, dd, mm, rawYear] = slashOrDash;
+      const year = rawYear.length === 2 ? `20${rawYear}` : rawYear;
+      return `${year}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
+    }
+
+    const parsed = dayjs(date);
+    return parsed.isValid() ? parsed.format(DEFAULT_NODE_DATE_FORMAT) : '';
   }
 
   private calcRow(row: ItemRow): ItemRow {

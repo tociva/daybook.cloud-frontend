@@ -48,13 +48,22 @@
     </section>
 
     <div class="party-stack">
-      @for (group of detail.groups; track group.partyGstin || group.partyName || $index) {
+      @for (group of groupedPartyGroups(detail.groups); track group.partyGstin || group.partyName || $index) {
         <tng-card variant="outline" padding="lg">
           <header class="party-head">
             <div class="party-details">
               <h2>{{ group.partyName || 'Unknown Party' }}</h2>
               <p>{{ group.partyGstin || 'GSTIN not available' }}</p>
             </div>
+            @if (showCreatePartyLink(group)) {
+              <div class="missing-party">
+                <span class="missing-party__message">{{ missingPartyMessage() }}</span>
+                <button type="button" class="create-vendor-link" (click)="createParty(group)">
+                  <tng-icon icon="plus" aria-hidden="true" />
+                  {{ createPartyLabel() }}
+                </button>
+              </div>
+            }
             <span>{{ group.rows.length }} rows</span>
           </header>
 
@@ -71,25 +80,6 @@
                 <tng-icon [icon]="statusIcon(status(row))" aria-hidden="true" />
                 {{ statusLabel(status(row)) }}
               </span>
-            </ng-template>
-
-            <ng-template tngTableCellTemplate="party" let-row="row">
-              @if (showCreateVendorLink(group)) {
-                <span class="party-cell party-cell--missing">
-                  <strong>Party not exist</strong>
-                  <button type="button" class="create-vendor-link" (click)="createVendor(group)">
-                    <tng-icon icon="plus" aria-hidden="true" />
-                    Create new vendor
-                  </button>
-                </span>
-              } @else {
-                <span class="party-cell">
-                  <strong>{{ rowParty(row) }}</strong>
-                  @if (row.partyName && row.partyGstin) {
-                    <small>{{ row.partyGstin }}</small>
-                  }
-                </span>
-              }
             </ng-template>
 
             <ng-template tngTableCellTemplate="booksInvoice" let-row="row">
