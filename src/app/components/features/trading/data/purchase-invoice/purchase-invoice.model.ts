@@ -1,4 +1,5 @@
 import type { Lb4Include, Lb4ListQuery } from '../../../../../shared/crud';
+import type { StoredDocument } from '../invoice-document';
 import type { Vendor } from '../vendor/vendor.model';
 import type { Item } from '../item/item.model';
 import type { Tax } from '../tax/tax.model';
@@ -155,6 +156,8 @@ export type PurchaseInvoice = Readonly<{
   vendor?: Vendor;
   items?: readonly PurchaseItem[];
   payments?: readonly PurchaseInvoicePaymentLink[];
+  documentids?: readonly string[];
+  documents?: readonly StoredDocument[];
   branchid?: string;
 }>;
 
@@ -195,4 +198,5 @@ export const PURCHASE_INVOICE_DETAIL_INCLUDES = [
     relation: 'payments',
     scope: { include: [{ relation: 'vendorpayment' }] },
   },
+  'documents',
 ] as const satisfies readonly Lb4Include[];

@@ -96,6 +96,10 @@
   user-select: none;
 }
 
+.pr-li-document-picker {
+  margin-left: auto;
+}
+
 .pr-li-remove-btn {
   align-items: center;
   appearance: none;

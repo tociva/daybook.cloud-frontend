@@ -1,15 +1,15 @@
 /* ── Page shell ─────────────────────────────────────────────────────────── */
 .trading-page{display:grid;gap:1rem;padding:1rem}
-.heading-actions,.recon-legend,.recon-panel-head,.recon-section__stats{align-items:center;display:flex;flex-wrap:wrap;gap:.6rem}
-.heading-actions,.recon-panel-head{justify-content:space-between}
+.heading-actions,.recon-legend{align-items:center;display:flex;flex-wrap:wrap;gap:.6rem}
+.heading-actions{justify-content:space-between}
 
 /* ── Status colour tokens ───────────────────────────────────────────────── */
-.recon-dot[data-status='matched'],.recon-month[data-status='matched']{--status-color:var(--tng-semantic-accent-success)}
-.recon-dot[data-status='partialMatch'],.recon-month[data-status='partialMatch']{--status-color:var(--tng-semantic-accent-warning)}
-.recon-dot[data-status='noMatch'],.recon-month[data-status='noMatch']{--status-color:var(--tng-semantic-accent-danger)}
-.recon-dot[data-status='inProgress'],.recon-month[data-status='inProgress']{--status-color:var(--tng-semantic-accent-brand)}
-.recon-dot[data-status='pending'],.recon-month[data-status='pending']{--status-color:var(--tng-semantic-foreground-muted)}
-.recon-dot[data-status='upcoming'],.recon-month[data-status='upcoming']{--status-color:color-mix(in srgb, var(--tng-semantic-foreground-muted) 82%, var(--tng-semantic-accent-brand))}
+.recon-dot[data-status='matched']{--status-color:var(--tng-semantic-accent-success)}
+.recon-dot[data-status='partialMatch']{--status-color:var(--tng-semantic-accent-warning)}
+.recon-dot[data-status='noMatch']{--status-color:var(--tng-semantic-accent-danger)}
+.recon-dot[data-status='inProgress']{--status-color:var(--tng-semantic-accent-brand)}
+.recon-dot[data-status='pending']{--status-color:var(--tng-semantic-foreground-muted)}
+.recon-dot[data-status='upcoming']{--status-color:color-mix(in srgb, var(--tng-semantic-foreground-muted) 82%, var(--tng-semantic-accent-brand))}
 
 /* ── Legend ─────────────────────────────────────────────────────────────── */
 .recon-legend__item{align-items:center;color:var(--tng-semantic-foreground-secondary);display:inline-flex;font-size:.78rem;gap:.35rem}
@@ -44,7 +44,8 @@
   box-shadow:0 0 0 2px var(--tng-semantic-accent-brand);
   background-color:color-mix(in srgb, var(--tng-semantic-accent-brand) 3%, transparent);
 }
-.recon-overview--drag-active .recon-months{
+.recon-overview--drag-active app-gstr1-reconciliation,
+.recon-overview--drag-active app-gstr2b-reconciliation{
   filter:blur(1.5px);
   opacity:.3;
   pointer-events:none;
@@ -84,45 +85,7 @@
 
 @keyframes drop-overlay-in{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
 
-/* ── Section card header ────────────────────────────────────────────────── */
-.recon-panel-head{align-items:flex-start;margin-bottom:.75rem}
-.recon-section__title{align-items:center;display:flex;gap:.65rem}
-.recon-section__title>tng-icon{color:var(--tng-semantic-accent-brand);font-size:1.25rem}
-.recon-section__title h2{color:var(--tng-semantic-foreground-primary);font-size:1rem;font-weight:650;margin:0}
-.recon-section__title p{margin:0}
-
-/* ── Status stats row ───────────────────────────────────────────────────── */
-.recon-section__stats{gap:.35rem;margin-bottom:.75rem}
-.recon-stat__label{margin-right:.25rem}
-.recon-stat__count{font:inherit}
-
-/* ── Month grid ─────────────────────────────────────────────────────────── */
-.recon-months{display:grid;gap:.5rem;grid-template-columns:repeat(3,minmax(0,1fr))}
-.recon-month{color:inherit;cursor:pointer;display:block;text-align:left}
-:host ::ng-deep .recon-month>.tng-card{border-color:var(--tng-semantic-border-subtle);border-left:3px solid var(--status-color);border-radius:.45rem;gap:.45rem;min-height:6.8rem;padding:.55rem}
-.recon-month--disabled{cursor:not-allowed;opacity:.65;pointer-events:none}
-.recon-month__top{align-items:flex-start;display:flex;gap:.45rem;justify-content:space-between}
-.recon-month__top strong{color:var(--tng-semantic-foreground-primary);display:block;font-size:.9rem;font-weight:700}
-.recon-month small{color:var(--tng-semantic-foreground-muted);display:block;font-size:.66rem}
-.recon-month__actions{align-items:center;display:flex;gap:.15rem}
-.recon-month__status{color:var(--status-color);font-size:.95rem}
-.recon-month__refresh{align-items:center;background:none;border:none;border-radius:.3rem;color:var(--tng-semantic-foreground-muted);cursor:pointer;display:flex;font-size:.85rem;opacity:0;padding:.15rem;transition:opacity .15s,color .15s}
-.recon-month:hover .recon-month__refresh,.recon-month__refresh:focus-visible{opacity:1}
-.recon-month__refresh:hover{color:var(--tng-semantic-foreground-primary)}
-.recon-month__refresh:disabled{cursor:not-allowed;opacity:.35 !important}
-.recon-month__tags{display:flex;flex-wrap:wrap;gap:.3rem}
-.recon-month__diff{color:var(--tng-semantic-foreground-secondary);font-size:.72rem;font-weight:650}
-.recon-month__diff--active{color:var(--tng-semantic-accent-danger)}
-
-/* ── Spinner ────────────────────────────────────────────────────────────── */
-.spin{animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-
 /* ── Responsive ─────────────────────────────────────────────────────────── */
 @media (max-width:1120px){
   .recon-overview{grid-template-columns:1fr}
-  .recon-months{grid-template-columns:repeat(4,minmax(0,1fr))}
-}
-@media (max-width:760px){
-  .recon-months{grid-template-columns:repeat(2,minmax(0,1fr))}
 }

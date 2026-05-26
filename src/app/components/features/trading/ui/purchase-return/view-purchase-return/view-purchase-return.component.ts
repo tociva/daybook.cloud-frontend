@@ -7,6 +7,9 @@ import {
   PURCHASE_RETURN_DETAIL_INCLUDES,
   PurchaseReturnStore,
 } from '../../../data/purchase-return';
+import type { PurchaseReturn } from '../../../data/purchase-return';
+import type { StoredDocument } from '../../../data/invoice-document';
+import { InvoiceAttachmentsComponent } from '../../shared/invoice-attachments/invoice-attachments.component';
 import { PurchaseReturnDraftStore } from '../create-purchase-return/purchase-return-draft.store';
 import { PrInvoiceRefComponent } from '../create-purchase-return/pr-invoice-ref/pr-invoice-ref.component';
 import { PrReturnDetailsComponent } from '../create-purchase-return/pr-return-details/pr-return-details.component';
@@ -20,6 +23,7 @@ import { PrLineItemsComponent } from '../create-purchase-return/pr-line-items/pr
     BurlBackButtonComponent,
     BurlDeleteButtonComponent,
     BurlEditButtonComponent,
+    InvoiceAttachmentsComponent,
     PrInvoiceRefComponent,
     PrLineItemsComponent,
     PrReturnDetailsComponent,
@@ -68,5 +72,15 @@ export class ViewPurchaseReturnComponent {
         queryParams: { burl: this.router.url },
       });
     }
+  }
+
+  protected onDocumentsChanged(documents: readonly StoredDocument[]): void {
+    const purchaseReturn = this.purchaseReturnStore.selectedItem();
+    if (!purchaseReturn) return;
+    this.purchaseReturnStore.setSelectedItem({
+      ...purchaseReturn,
+      documentids: documents.map((document) => document.id).filter((id): id is string => !!id),
+      documents,
+    } satisfies PurchaseReturn);
   }
 }

@@ -8,6 +8,14 @@
       />
       Show Description
     </label>
+
+    <app-invoice-document-picker
+      class="pr-li-document-picker"
+      [files]="documentFiles()"
+      [disabled]="documentsDisabled()"
+      [uploading]="documentsUploading()"
+      (filesChange)="documentFilesChange.emit($event)"
+    />
   </div>
 }
 

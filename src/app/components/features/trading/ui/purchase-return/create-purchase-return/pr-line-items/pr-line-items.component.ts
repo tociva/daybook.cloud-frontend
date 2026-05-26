@@ -1,7 +1,8 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, input, output } from '@angular/core';
 import { form } from '@angular/forms/signals';
 import { TngInputComponent, TngSwitchComponent, TngTextareaComponent } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
+import { InvoiceDocumentPickerComponent } from '../../../shared/invoice-document-picker/invoice-document-picker.component';
 import { PurchaseReturnDraftStore } from '../purchase-return-draft.store';
 
 const INTERACTIVE_CLICK_TARGET_SELECTOR = [
@@ -18,13 +19,23 @@ const INTERACTIVE_CLICK_TARGET_SELECTOR = [
 @Component({
   selector: 'app-pr-line-items',
   standalone: true,
-  imports: [TngInputComponent, TngSwitchComponent, TngTextareaComponent, TngIcon],
+  imports: [
+    TngInputComponent,
+    TngSwitchComponent,
+    TngTextareaComponent,
+    TngIcon,
+    InvoiceDocumentPickerComponent,
+  ],
   templateUrl: './pr-line-items.component.html',
   styleUrl: './pr-line-items.component.css',
 })
 export class PrLineItemsComponent {
   protected readonly draft = inject(PurchaseReturnDraftStore);
   readonly readOnly = input(false);
+  readonly documentFiles = input<readonly File[]>([]);
+  readonly documentsDisabled = input(false);
+  readonly documentsUploading = input(false);
+  readonly documentFilesChange = output<readonly File[]>();
   protected readonly lineItemsForm = form(this.draft.items);
   protected readonly rowCount = computed(() => this.lineItemsForm().value().length);
 

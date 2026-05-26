@@ -7,6 +7,9 @@ import {
   PURCHASE_INVOICE_DETAIL_INCLUDES,
   PurchaseInvoiceStore,
 } from '../../../data/purchase-invoice';
+import type { PurchaseInvoice } from '../../../data/purchase-invoice';
+import type { StoredDocument } from '../../../data/invoice-document';
+import { InvoiceAttachmentsComponent } from '../../shared/invoice-attachments/invoice-attachments.component';
 import { PurchaseInvoiceDraftStore } from '../create-purchase-invoice/purchase-invoice-draft.store';
 import { PiVendorComponent } from '../create-purchase-invoice/pi-vendor/pi-vendor.component';
 import { PiInvoiceDetailsComponent } from '../create-purchase-invoice/pi-invoice-details/pi-invoice-details.component';
@@ -20,6 +23,7 @@ import { PiLineItemsComponent } from '../create-purchase-invoice/pi-line-items/p
     BurlBackButtonComponent,
     BurlDeleteButtonComponent,
     BurlEditButtonComponent,
+    InvoiceAttachmentsComponent,
     PiVendorComponent,
     PiLineItemsComponent,
     PiInvoiceDetailsComponent,
@@ -68,5 +72,15 @@ export class ViewPurchaseInvoiceComponent {
         queryParams: { burl: this.router.url },
       });
     }
+  }
+
+  protected onDocumentsChanged(documents: readonly StoredDocument[]): void {
+    const invoice = this.purchaseInvoiceStore.selectedItem();
+    if (!invoice) return;
+    this.purchaseInvoiceStore.setSelectedItem({
+      ...invoice,
+      documentids: documents.map((document) => document.id).filter((id): id is string => !!id),
+      documents,
+    } satisfies PurchaseInvoice);
   }
 }

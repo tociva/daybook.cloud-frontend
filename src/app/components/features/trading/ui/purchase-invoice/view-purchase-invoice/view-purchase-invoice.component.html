@@ -14,6 +14,12 @@
       <div class="invoice-main">
         <app-pi-vendor [readOnly]="true" />
         <app-pi-line-items [readOnly]="true" />
+        <app-invoice-attachments
+          resourceType="purchaseInvoice"
+          [parentId]="purchaseInvoiceStore.selectedItem()?.id ?? ''"
+          [documents]="purchaseInvoiceStore.selectedItem()?.documents ?? []"
+          (documentsChanged)="onDocumentsChanged($event)"
+        />
       </div>
 
       <aside class="invoice-aside">

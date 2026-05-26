@@ -1,0 +1,15 @@
+<app-gst-reconciliation-return-panel
+  [meta]="meta"
+  [months]="months()"
+  [canImport]="canImport()"
+  [contextAvailable]="contextAvailable()"
+  [isBusy]="store.isBusy()"
+  [isUploading]="store.isUploading()"
+  [isParsing]="isParsing()"
+  [refreshingCellKey]="refreshingCell()"
+  [monthDifferenceAmounts]="monthDifferenceAmounts()"
+  [currencyCode]="currencyCode()"
+  (importRequested)="requestImport($event)"
+  (monthOpened)="openMonth($event)"
+  (refreshRequested)="refreshMonth($event)"
+/>

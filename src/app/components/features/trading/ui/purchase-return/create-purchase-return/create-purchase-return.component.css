@@ -31,13 +31,74 @@
 }
 
 .invoice-main {
+  border-radius: 0.5rem;
   display: grid;
   gap: 1.25rem;
+  position: relative;
+  transition: box-shadow 0.18s ease, background-color 0.18s ease;
 }
 
 .invoice-aside {
   position: sticky;
   top: 1.25rem;
+}
+
+.invoice-main[data-dragging] {
+  background-color: color-mix(in srgb, var(--tng-semantic-accent-brand) 3%, transparent);
+  box-shadow: 0 0 0 2px var(--tng-semantic-accent-brand);
+}
+
+.invoice-main[data-dragging] > :not(.invoice-drop-overlay) {
+  filter: blur(1.5px);
+  opacity: 0.3;
+  pointer-events: none;
+  transition: filter 0.15s ease, opacity 0.15s ease;
+}
+
+.invoice-drop-overlay {
+  align-items: center;
+  border: 2px dashed var(--tng-semantic-accent-brand);
+  border-radius: 0.5rem;
+  display: none;
+  inset: 0.35rem;
+  justify-content: center;
+  pointer-events: none;
+  position: absolute;
+  z-index: 10;
+}
+
+.invoice-main[data-dragging] .invoice-drop-overlay {
+  animation: drop-overlay-in 0.15s ease;
+  display: flex;
+}
+
+.invoice-drop-overlay__inner {
+  align-items: center;
+  background: color-mix(in srgb, var(--tng-semantic-accent-brand) 10%, var(--tng-semantic-surface-base));
+  border-radius: 0.5rem;
+  color: var(--tng-semantic-accent-brand);
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
+  font-weight: 600;
+  gap: 0.4rem;
+  padding: 1.4rem 3rem;
+}
+
+.invoice-drop-overlay__inner tng-icon {
+  font-size: 2.2rem;
+}
+
+@keyframes drop-overlay-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* ── Footer ────────────────────────────────────────────────────────────── */

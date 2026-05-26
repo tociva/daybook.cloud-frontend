@@ -1,10 +1,6 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
 import {
-  TngButtonComponent,
-  TngCardComponent,
   TngProgressBarComponent,
-  TngTag,
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import {
@@ -14,54 +10,25 @@ import {
 } from '@tailng-ui/primitives';
 import { PermissionsStore } from '../../../../../core/permissions/permissions.store';
 import { XlsxFileReaderService } from '../../../../../shared/file/xlsx-file-reader.service';
-import { formatAmountWithCurrency } from '../../../../../shared/format/currency';
 import { PageHeadingComponent } from '../../../../../shared/page-heading/page-heading.component';
 import { UserSessionStore } from '../../../management/data/user-session/user-session.store';
 import {
   GstReconciliationStore,
-  type GstReconciliationDetailRow,
-  type GstReconciliationMonthSummary,
   type GstReconciliationReturnType,
-  type GstReconciliationStatus,
 } from '../../data/gst-reconciliation/gst-reconciliation.store';
-import { GstReconciliationService } from '../../data/gst-reconciliation/gst-reconciliation.service';
 import { GstImportConfirmDialogComponent } from './gst-import-confirm-dialog/gst-import-confirm-dialog.component';
+import { Gstr1ReconciliationComponent } from './gstr1-reconciliation/gstr1-reconciliation.component';
+import { Gstr2bReconciliationComponent } from './gstr2b-reconciliation/gstr2b-reconciliation.component';
 import {
-  RETURN_TYPES,
   type ParsedFilePreview,
   type ParsedInvoice,
-  type ReturnTypeMeta,
 } from './gst-reconciliation.types';
-
-// ── Domain types ──────────────────────────────────────────────────────────────
-
-type StatusMeta = Readonly<{ icon: string; label: string; status: GstReconciliationStatus }>;
-type StatusTagTone = 'danger' | 'info' | 'neutral' | 'success' | 'warning';
-
-type ReturnTypeSection = Readonly<{
-  meta: ReturnTypeMeta;
-  months: readonly MonthCell[];
-}>;
-
-type MonthCell = GstReconciliationMonthSummary & Readonly<{ label: string; period: string }>;
+import { GST_RECONCILIATION_MONTH_OPTIONS } from './shared/gst-reconciliation-months.util';
+import { GST_RECONCILIATION_STATUS_LEGEND } from './shared/gst-reconciliation-status.util';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const MONTH_OPTIONS: readonly { label: string; value: number }[] = [
-  { label: 'April', value: 4 },    { label: 'May', value: 5 },
-  { label: 'June', value: 6 },     { label: 'July', value: 7 },
-  { label: 'August', value: 8 },   { label: 'September', value: 9 },
-  { label: 'October', value: 10 }, { label: 'November', value: 11 },
-  { label: 'December', value: 12 },{ label: 'January', value: 1 },
-  { label: 'February', value: 2 }, { label: 'March', value: 3 },
-] as const;
-
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
-
-const EMPTY_MONTH = {
-  booksInvoiceCount: 0, differenceAmount: 0, gstInvoiceCount: 0,
-  matchedCount: 0, mismatchCount: 0, partialCount: 0,
-} as const;
 
 /** 15-char GSTIN pattern */
 const GSTIN_RE = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/;
@@ -73,28 +40,21 @@ const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct
   standalone: true,
   imports: [
     PageHeadingComponent,
-    TngButtonComponent,
-    TngCardComponent,
     TngProgressBarComponent,
-    TngTag,
     TngIcon,
     TngFileUploadDirective,
     GstImportConfirmDialogComponent,
+    Gstr1ReconciliationComponent,
+    Gstr2bReconciliationComponent,
   ],
   templateUrl: './gst-reconciliation.component.html',
   styleUrl: './gst-reconciliation.component.css',
 })
 export class GstReconciliationComponent {
-  private readonly router = inject(Router);
   private readonly permissionsStore = inject(PermissionsStore);
   private readonly sessionStore = inject(UserSessionStore);
   private readonly xlsxFileReader = inject(XlsxFileReaderService);
-  private readonly reconciliationService = inject(GstReconciliationService);
   protected readonly store = inject(GstReconciliationStore);
-
-  // ── Per-cell refresh state ────────────────────────────────────────────────
-  /** Tracks which cell is currently being refreshed, e.g. 'gstr1-4'. */
-  protected readonly refreshingCell = signal<string | null>(null);
 
   // ── File state ────────────────────────────────────────────────────────────
   protected readonly pendingFile    = signal<File | null>(null);
@@ -110,21 +70,10 @@ export class GstReconciliationComponent {
   // ── Drag state ────────────────────────────────────────────────────────────
   protected readonly overviewDragActive = signal(false);
   private overviewDragCounter = 0;
-  private readonly loadingDifferenceKeys = new Set<string>();
 
   // ── Static data ───────────────────────────────────────────────────────────
   protected readonly maxFileSize = MAX_FILE_SIZE;
-  protected readonly returnTypes = RETURN_TYPES;
-  protected readonly monthDifferenceAmounts = signal<Readonly<Record<string, number>>>({});
-
-  protected readonly statusLegend: readonly StatusMeta[] = [
-    { status: 'matched',      label: 'Matched',       icon: 'circleCheck'  },
-    { status: 'partialMatch', label: 'Partial match', icon: 'circleAlert'  },
-    { status: 'noMatch',      label: 'No match',      icon: 'circleX'      },
-    { status: 'inProgress',   label: 'In progress',   icon: 'loaderCircle' },
-    { status: 'pending',      label: 'Pending',       icon: 'circleDashed' },
-    { status: 'upcoming',     label: 'Upcoming',      icon: 'clock'        },
-  ];
+  protected readonly statusLegend = GST_RECONCILIATION_STATUS_LEGEND;
 
   // ── Computed ──────────────────────────────────────────────────────────────
   protected readonly context = computed(() => {
@@ -154,16 +103,6 @@ export class GstReconciliationComponent {
     });
   });
 
-  protected readonly gstr1Months  = computed(() => this.buildMonthCells('gstr1'));
-  protected readonly gstr2bMonths = computed(() => this.buildMonthCells('gstr2b'));
-
-  protected readonly returnTypeSections = computed<readonly ReturnTypeSection[]>(() =>
-    this.returnTypes.map((meta) => ({
-      meta,
-      months: meta.value === 'gstr1' ? this.gstr1Months() : this.gstr2bMonths(),
-    })),
-  );
-
   protected readonly headerContext = computed(() => this.context()?.branchName ?? 'Branch not selected');
 
   // ── Constructor ───────────────────────────────────────────────────────────
@@ -174,11 +113,6 @@ export class GstReconciliationComponent {
       void this.store.loadSummary();
     });
 
-    effect(() => {
-      const summary = this.store.summary();
-      if (!summary) return;
-      void this.hydrateMonthDifferences([...summary.gstr1, ...summary.gstr2b]);
-    });
   }
 
   // ── Import button on each card ────────────────────────────────────────────
@@ -267,86 +201,7 @@ export class GstReconciliationComponent {
     this.parsedPreview.set(null);
     this.pendingFile.set(null);
     this.sectionHint.set(null);
-    this.monthDifferenceAmounts.set({});
     await this.store.loadSummary();
-  }
-
-  // ── Navigation ────────────────────────────────────────────────────────────
-  protected openMonth(cell: MonthCell): void {
-    const ctx = this.context();
-    if (!ctx) return;
-    void this.router.navigate(
-      ['/app/trading/gst-reconciliation/detail', cell.returnType, cell.month],
-      { queryParams: { burl: this.router.url } },
-    );
-  }
-
-  // ── Per-cell refresh ──────────────────────────────────────────────────────
-  protected cellKey(cell: MonthCell): string {
-    return `${cell.returnType}-${cell.month}`;
-  }
-
-  protected isRefreshingCell(cell: MonthCell): boolean {
-    return this.refreshingCell() === this.cellKey(cell);
-  }
-
-  protected async refreshMonth(event: Event, cell: MonthCell): Promise<void> {
-    event.stopPropagation();
-    if (this.store.isBusy() || this.refreshingCell()) return;
-
-    const key = this.cellKey(cell);
-    this.refreshingCell.set(key);
-    this.store.clearRefreshResult();
-    this.monthDifferenceAmounts.update((current) => {
-      const { [key]: _removed, ...remaining } = current;
-      return remaining;
-    });
-
-    try {
-      await this.store.refresh({ returnType: cell.returnType, month: cell.month });
-      await this.store.loadSummary();
-    } finally {
-      this.refreshingCell.set(null);
-    }
-  }
-
-  // ── Status helpers ────────────────────────────────────────────────────────
-  protected statusLabel(status: GstReconciliationStatus): string {
-    return this.statusLegend.find((e) => e.status === status)?.label ?? status;
-  }
-  protected statusIcon(status: GstReconciliationStatus): string {
-    return this.statusLegend.find((e) => e.status === status)?.icon ?? 'circle';
-  }
-  protected statusTone(status: GstReconciliationStatus): StatusTagTone {
-    switch (status) {
-      case 'matched':
-        return 'success';
-      case 'partialMatch':
-        return 'warning';
-      case 'noMatch':
-        return 'danger';
-      case 'inProgress':
-        return 'info';
-      case 'pending':
-      case 'upcoming':
-        return 'neutral';
-    }
-  }
-  protected totalByStatus(months: readonly MonthCell[], status: GstReconciliationStatus): number {
-    return months.filter((m) => m.status === status).length;
-  }
-
-  // ── Formatting ────────────────────────────────────────────────────────────
-  protected formatAmount(value: number | null | undefined): string {
-    return formatAmountWithCurrency(value ?? 0, this.currencyCode());
-  }
-
-  protected monthDifferenceAmount(cell: MonthCell): number {
-    return this.monthDifferenceAmounts()[this.monthDifferenceKey(cell)] ?? cell.differenceAmount ?? 0;
-  }
-
-  protected hasMonthDifference(cell: MonthCell): boolean {
-    return this.monthDifferenceAmount(cell) !== 0;
   }
 
   // ── Private: file routing ─────────────────────────────────────────────────
@@ -536,7 +391,7 @@ export class GstReconciliationComponent {
     if (numericMonth) return Number(numericMonth);
 
     const normalized = period.toLowerCase();
-    const match = MONTH_OPTIONS.find((option) => {
+    const match = GST_RECONCILIATION_MONTH_OPTIONS.find((option) => {
       const full = option.label.toLowerCase();
       return normalized.includes(full) || normalized.includes(full.slice(0, 3));
     });
@@ -557,94 +412,5 @@ export class GstReconciliationComponent {
     if (!Number.isNaN(parsed.getTime())) return parsed.getMonth() + 1;
 
     return null;
-  }
-
-  private buildMonthCells(returnType: GstReconciliationReturnType): readonly MonthCell[] {
-    const summary   = this.store.summary();
-    const months    = summary?.[returnType] ?? [];
-    const startYear = this.fiscalYearStartYear();
-
-    return MONTH_OPTIONS.map((option) => {
-      const existing = months.find((m) => m.month === option.value);
-      const year     = option.value >= 4 ? startYear : startYear + 1;
-      return {
-        ...EMPTY_MONTH, ...existing,
-        returnType,
-        month:  option.value,
-        status: existing?.status ?? this.missingMonthStatus(option.value),
-        label:  option.label.slice(0, 3),
-        period: `${option.label.slice(0, 3)} ${year}`,
-      };
-    });
-  }
-
-  private async hydrateMonthDifferences(
-    months: readonly GstReconciliationMonthSummary[],
-  ): Promise<void> {
-    const cached = this.monthDifferenceAmounts();
-    const candidates = months.filter(
-      (month) =>
-        month.status !== 'upcoming' &&
-        (month.booksInvoiceCount > 0 || month.gstInvoiceCount > 0) &&
-        cached[this.monthDifferenceKey(month)] === undefined &&
-        !this.loadingDifferenceKeys.has(this.monthDifferenceKey(month)),
-    );
-
-    await Promise.all(
-      candidates.map(async (month) => {
-        const key = this.monthDifferenceKey(month);
-        this.loadingDifferenceKeys.add(key);
-        try {
-          const detail = await this.reconciliationService.loadDetail(month.returnType, month.month);
-          const differenceAmount = detail.groups.reduce(
-            (total, group) =>
-              total +
-              group.rows.reduce((groupTotal, row) => groupTotal + this.rowDifferenceAmount(row), 0),
-            0,
-          );
-          this.monthDifferenceAmounts.update((current) => ({ ...current, [key]: differenceAmount }));
-        } catch {
-          this.monthDifferenceAmounts.update((current) => ({
-            ...current,
-            [key]: month.differenceAmount ?? 0,
-          }));
-        } finally {
-          this.loadingDifferenceKeys.delete(key);
-        }
-      }),
-    );
-  }
-
-  private monthDifferenceKey(cell: Pick<MonthCell, 'month' | 'returnType'>): string {
-    return `${cell.returnType}-${cell.month}`;
-  }
-
-  private rowDifferenceAmount(row: GstReconciliationDetailRow): number {
-    return Math.abs(
-      (row.booksInvoice?.invoiceValue ?? 0) - (row.gstInvoice?.invoiceValue ?? 0),
-    );
-  }
-
-  private missingMonthStatus(month: number): GstReconciliationStatus {
-    const fy = this.sessionStore.session()?.fiscalyear;
-    if (!fy?.startdate) return 'pending';
-    const startYear = this.fiscalYearStartYear();
-    return new Date(month >= 4 ? startYear : startYear + 1, month - 1, 1) > new Date()
-      ? 'upcoming' : 'pending';
-  }
-
-  private fiscalYearStartYear(): number {
-    const fy = this.sessionStore.session()?.fiscalyear;
-    const fromDate = fy?.startdate ? new Date(fy.startdate).getFullYear() : NaN;
-    if (Number.isFinite(fromDate)) return fromDate;
-    const fromName = fy?.name?.match(/\d{4}/)?.[0];
-    return fromName ? Number(fromName) : new Date().getFullYear();
-  }
-
-  private currencyCode(): string | undefined {
-    return (
-      this.sessionStore.session()?.fiscalyear?.currencycode ??
-      this.sessionStore.session()?.branch?.currencycode
-    );
   }
 }

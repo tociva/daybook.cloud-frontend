@@ -9,9 +9,27 @@
 
   <div class="invoice-layout">
     <!-- ══ LEFT COLUMN ════════════════════════════════════════════════════ -->
-    <div class="invoice-main">
+    <div
+      class="invoice-main"
+      tngFileUpload
+      [multiple]="true"
+      [disabled]="isSaving()"
+      (filesSelected)="onDocumentFilesSelected($event)"
+      (filesRejected)="onDocumentFilesRejected($event)"
+    >
       <app-pi-vendor (vendorSelected)="onVendorSelected()" />
-      <app-pi-line-items />
+      <app-pi-line-items
+        [documentFiles]="pendingDocumentFiles()"
+        [documentsDisabled]="purchaseInvoiceStore.isLoading()"
+        [documentsUploading]="isUploadingDocuments()"
+        (documentFilesChange)="pendingDocumentFiles.set($event)"
+      />
+      <div class="invoice-drop-overlay" aria-hidden="true">
+        <div class="invoice-drop-overlay__inner">
+          <tng-icon icon="upload" aria-hidden="true" />
+          <span>Drop files here</span>
+        </div>
+      </div>
     </div>
 
     <!-- ══ RIGHT COLUMN ══════════════════════════════════════════════════ -->
@@ -26,7 +44,7 @@
     <app-burl-create-button
       [type]="'button'"
       [label]="mode() === 'edit' ? 'Update Invoice' : 'Create Invoice'"
-      [disabled]="purchaseInvoiceStore.isLoading()"
+      [disabled]="isSaving()"
       (clicked)="submitForm($event)"
     />
   </div>

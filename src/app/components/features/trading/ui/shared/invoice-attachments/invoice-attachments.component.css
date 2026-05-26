@@ -1,0 +1,147 @@
+.attachments {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.attachments[data-dragging] {
+  border-color: var(--tng-semantic-accent-brand);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--tng-semantic-accent-brand) 18%, transparent);
+}
+
+.attachments__header {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.attachments__header h2 {
+  color: var(--tng-semantic-foreground-primary);
+  font-size: 1rem;
+  line-height: 1.25;
+  margin: 0;
+}
+
+.attachments__header p {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.8rem;
+  margin: 0.2rem 0 0;
+}
+
+.attachments__input {
+  display: none;
+}
+
+.attachments__empty {
+  align-items: center;
+  border: 1px dashed var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  display: grid;
+  gap: 0.75rem;
+  justify-items: center;
+  padding: 1rem;
+}
+
+.attachments__list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.attachment-row {
+  align-items: center;
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  min-height: 4rem;
+  padding: 0.75rem;
+}
+
+.attachment-row__icon {
+  align-items: center;
+  background: var(--tng-semantic-background-surface);
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.45rem;
+  color: var(--tng-semantic-foreground-secondary);
+  display: inline-flex;
+  height: 2.4rem;
+  justify-content: center;
+  width: 2.4rem;
+}
+
+.attachment-row__body {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.attachment-row__body strong {
+  color: var(--tng-semantic-foreground-primary);
+  font-size: 0.9rem;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachment-row__body small {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.75rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.attachment-row--upload {
+  background: var(--tng-semantic-background-surface);
+}
+
+.attachment-progress {
+  background: var(--tng-semantic-border-subtle);
+  border-radius: 999px;
+  height: 0.35rem;
+  overflow: hidden;
+}
+
+.attachment-progress span {
+  background: var(--tng-semantic-accent-brand);
+  display: block;
+  height: 100%;
+  transition: width 160ms ease;
+}
+
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+
+.sr-only {
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .attachments__header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .attachment-row {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+}

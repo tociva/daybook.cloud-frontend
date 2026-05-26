@@ -17,10 +17,24 @@
       Show Description
     </label>
 
-    <button type="button" class="si-li-add-btn" (click)="draft.addItemRow()">
+    <app-invoice-document-picker
+      class="si-li-document-picker"
+      [files]="documentFiles()"
+      [disabled]="documentsDisabled()"
+      [uploading]="documentsUploading()"
+      (filesChange)="documentFilesChange.emit($event)"
+    />
+
+    <tng-button
+      type="button"
+      class="si-li-add-btn"
+      appearance="outline"
+      tone="neutral"
+      (click)="draft.addItemRow()"
+    >
       <tng-icon icon="plus" aria-hidden="true" />
       Add Row
-    </button>
+    </tng-button>
   </div>
 }
 

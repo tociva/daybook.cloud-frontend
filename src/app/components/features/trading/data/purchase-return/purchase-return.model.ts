@@ -1,4 +1,5 @@
 import type { Lb4Include, Lb4ListQuery } from '../../../../../shared/crud';
+import type { StoredDocument } from '../invoice-document';
 import type { PurchaseInvoice } from '../purchase-invoice/purchase-invoice.model';
 import type { Item } from '../item/item.model';
 import type { Tax } from '../tax/tax.model';
@@ -108,6 +109,8 @@ export type PurchaseReturn = Readonly<{
   purchaseinvoiceid?: string;
   purchaseinvoice?: PurchaseInvoice;
   items?: readonly PurchaseReturnItem[];
+  documentids?: readonly string[];
+  documents?: readonly StoredDocument[];
   branchid?: string;
 }>;
 
@@ -134,4 +137,5 @@ export const PURCHASE_RETURN_DETAIL_INCLUDES = [
       ],
     },
   },
+  'documents',
 ] as const satisfies readonly Lb4Include[];

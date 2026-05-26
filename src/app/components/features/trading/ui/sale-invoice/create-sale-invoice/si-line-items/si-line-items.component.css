@@ -92,7 +92,10 @@
   user-select: none;
 }
 
-.si-li-add-btn,
+.si-li-document-picker {
+  margin-left: auto;
+}
+
 .si-li-remove-btn {
   align-items: center;
   appearance: none;
@@ -107,11 +110,7 @@
 }
 
 .si-li-add-btn {
-  border-radius: 6px;
-  gap: 6px;
-  margin-left: auto;
-  min-height: 32px;
-  padding: 0 10px;
+  flex-shrink: 0;
 }
 
 .si-li-remove-btn {
@@ -123,12 +122,10 @@
   width: 28px;
 }
 
-.si-li-add-btn:hover,
 .si-li-remove-btn:hover {
   background: var(--tng-semantic-background-surface);
 }
 
-.si-li-add-btn:disabled,
 .si-li-remove-btn:disabled {
   cursor: not-allowed;
   opacity: 0.5;

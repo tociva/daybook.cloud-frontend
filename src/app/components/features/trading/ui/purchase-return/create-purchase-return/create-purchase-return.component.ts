@@ -1,7 +1,17 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
+import { ToastStore } from '../../../../../../core/toast/toast.store';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
+import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
 import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
+import {
+  TngFileUploadDirective,
+  type TngFileUploadRejectedEvent,
+  type TngFileUploadSelectedEvent,
+} from '@tailng-ui/primitives';
+import { TngIcon } from '@tailng-ui/icons';
+import { InvoiceDocumentService } from '../../../data/invoice-document';
 import { PurchaseInvoiceStore } from '../../../data/purchase-invoice';
 import type {
   PurchaseReturnItemRequest,
@@ -25,6 +35,8 @@ import { PrLineItemsComponent } from './pr-line-items/pr-line-items.component';
   imports: [
     BurlBackButtonComponent,
     BurlCreateButtonComponent,
+    TngIcon,
+    TngFileUploadDirective,
     PrInvoiceRefComponent,
     PrLineItemsComponent,
     PrReturnDetailsComponent,
@@ -35,6 +47,9 @@ import { PrLineItemsComponent } from './pr-line-items/pr-line-items.component';
 export class CreatePurchaseReturnComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(PurchaseReturnFacade);
+  private readonly invoiceDocumentService = inject(InvoiceDocumentService);
+  private readonly navigation = inject(BurlNavigationService);
+  private readonly toastStore = inject(ToastStore);
 
   protected readonly purchaseReturnStore = inject(PurchaseReturnStore);
   private readonly purchaseInvoiceStore = inject(PurchaseInvoiceStore);
@@ -44,7 +59,12 @@ export class CreatePurchaseReturnComponent {
   // ── Mode ──────────────────────────────────────────────────────────────────
 
   protected readonly id = signal<string | null>(null);
+  protected readonly pendingDocumentFiles = signal<readonly File[]>([]);
+  protected readonly isUploadingDocuments = signal(false);
   protected readonly mode = computed(() => (this.id() ? 'edit' : 'create'));
+  protected readonly isSaving = computed(
+    () => this.purchaseReturnStore.isLoading() || this.isUploadingDocuments(),
+  );
   protected readonly title = computed(() =>
     this.mode() === 'edit' ? 'Edit Purchase Return' : 'New Purchase Return',
   );
@@ -53,6 +73,34 @@ export class CreatePurchaseReturnComponent {
 
   constructor() {
     void this.loadInitialState();
+  }
+
+  protected onDocumentFilesSelected(event: TngFileUploadSelectedEvent): void {
+    this.addPendingDocumentFiles(event.files);
+  }
+
+  protected onDocumentFilesRejected(event: TngFileUploadRejectedEvent): void {
+    const first = event.rejected[0];
+    this.toastStore.warning(first?.message ?? 'Some files could not be attached.');
+    if (event.accepted.length) {
+      this.addPendingDocumentFiles(event.accepted);
+    }
+  }
+
+  protected addPendingDocumentFiles(files: readonly File[]): void {
+    const existing = this.pendingDocumentFiles();
+    const merged = [...existing];
+    for (const file of files) {
+      if (file.size <= 0) continue;
+      const duplicate = merged.some(
+        (item) =>
+          item.name === file.name &&
+          item.size === file.size &&
+          item.lastModified === file.lastModified,
+      );
+      if (!duplicate) merged.push(file);
+    }
+    this.pendingDocumentFiles.set(merged);
   }
 
   private async loadInitialState(): Promise<void> {
@@ -132,10 +180,43 @@ export class CreatePurchaseReturnComponent {
     };
 
     const id = this.id();
+    let savedId = id;
+    let saved = false;
     if (id) {
-      await this.facade.update(id, payload);
+      saved = await this.facade.update(id, payload, { navigateBack: false });
     } else {
-      await this.facade.create(payload);
+      const purchaseReturn = await this.facade.create(payload, { navigateBack: false });
+      savedId = purchaseReturn?.id ?? null;
+      saved = !!purchaseReturn;
+      if (savedId) this.id.set(savedId);
+    }
+
+    if (!saved) return;
+    if (!(await this.attachPendingDocuments(savedId))) return;
+    await this.navigation.navigateBack();
+  }
+
+  private async attachPendingDocuments(parentId: string | null): Promise<boolean> {
+    const files = this.pendingDocumentFiles();
+    if (!files.length) return true;
+    if (!parentId) {
+      this.toastStore.danger('Purchase return saved, but documents could not be attached.');
+      return false;
+    }
+
+    this.isUploadingDocuments.set(true);
+    try {
+      await this.invoiceDocumentService.attachInvoiceDocuments('purchaseReturn', parentId, files);
+      this.pendingDocumentFiles.set([]);
+      this.toastStore.success(files.length === 1 ? 'Document attached.' : 'Documents attached.');
+      return true;
+    } catch (error) {
+      this.toastStore.danger(
+        getApiErrorMessage(error, 'Purchase return saved, but documents could not be attached.'),
+      );
+      return false;
+    } finally {
+      this.isUploadingDocuments.set(false);
     }
   }
 }

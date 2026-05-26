@@ -92,7 +92,10 @@
   user-select: none;
 }
 
-.pi-li-add-btn,
+.pi-li-document-picker {
+  margin-left: auto;
+}
+
 .pi-li-remove-btn {
   align-items: center;
   appearance: none;
@@ -107,11 +110,7 @@
 }
 
 .pi-li-add-btn {
-  border-radius: 6px;
-  gap: 6px;
-  margin-left: auto;
-  min-height: 32px;
-  padding: 0 10px;
+  flex-shrink: 0;
 }
 
 .pi-li-remove-btn {
@@ -123,12 +122,10 @@
   width: 28px;
 }
 
-.pi-li-add-btn:hover,
 .pi-li-remove-btn:hover {
   background: var(--tng-semantic-background-surface);
 }
 
-.pi-li-add-btn:disabled,
 .pi-li-remove-btn:disabled {
   cursor: not-allowed;
   opacity: 0.5;

@@ -1,0 +1,122 @@
+<section
+  class="attachments"
+  aria-labelledby="invoice-attachments-title"
+  tngFileUpload
+  [multiple]="true"
+  [disabled]="isBusy() || !canAttach() || !parentId()"
+  (filesSelected)="onFilesSelected($event)"
+  (filesRejected)="onFilesRejected($event)"
+>
+  <div class="attachments__header">
+    <div>
+      <h2 id="invoice-attachments-title">Attachments</h2>
+      <p>{{ localDocuments().length }} document{{ localDocuments().length === 1 ? '' : 's' }}</p>
+    </div>
+
+    @if (canAttach()) {
+      <tng-button
+        type="button"
+        appearance="solid"
+        tone="primary"
+        [disabled]="isBusy() || !parentId()"
+        (click)="chooseFiles()"
+      >
+        <tng-icon icon="paperclip" aria-hidden="true" />
+        Attach
+      </tng-button>
+    }
+  </div>
+
+  <input
+    [id]="inputId"
+    class="attachments__input"
+    type="file"
+    multiple
+    [disabled]="isBusy() || !canAttach() || !parentId()"
+    (change)="onBrowse($event)"
+  />
+
+  @if (!localDocuments().length && !uploadEntries().length) {
+    <div class="attachments__empty">
+      <app-empty-state
+        icon="paperclip"
+        title="No attachments yet"
+        [description]="
+          canAttach()
+            ? 'Attach vendor bills, invoice copies, delivery proofs, or supporting files.'
+            : 'No documents have been attached to this invoice.'
+        "
+      />
+      @if (canAttach()) {
+        <tng-button
+          type="button"
+          appearance="outline"
+          tone="neutral"
+          [disabled]="isBusy() || !parentId()"
+          (click)="chooseFiles()"
+        >
+          <tng-icon icon="upload" aria-hidden="true" />
+          Select files
+        </tng-button>
+      }
+    </div>
+  } @else {
+    <div class="attachments__list" role="list">
+      @for (document of localDocuments(); track trackDocument($index, document)) {
+        <article class="attachment-row" role="listitem">
+          <div class="attachment-row__icon">
+            <tng-icon [icon]="fileIcon(document)" aria-hidden="true" />
+          </div>
+          <div class="attachment-row__body">
+            <strong [title]="document.name">{{ document.name }}</strong>
+            <small>
+              {{ formatFileSize(document.size) }} &middot; {{ documentType(document) }} &middot;
+              {{ formatDate(document.createdat) }}
+            </small>
+          </div>
+          @if (canDelete()) {
+            <tng-button
+              type="button"
+              appearance="ghost"
+              tone="danger"
+              [disabled]="isBusy() || !document.id"
+              (click)="deleteDocument(document)"
+            >
+              @if (deletingDocumentId() === document.id) {
+                <tng-icon icon="loaderCircle" aria-hidden="true" class="spin" />
+              } @else {
+                <tng-icon icon="trash2" aria-hidden="true" />
+              }
+              <span class="sr-only">Delete {{ document.name }}</span>
+            </tng-button>
+          }
+        </article>
+      }
+
+      @for (entry of uploadEntries(); track trackUpload($index, entry)) {
+        <article class="attachment-row attachment-row--upload" role="listitem">
+          <div class="attachment-row__icon">
+            <tng-icon icon="upload" aria-hidden="true" />
+          </div>
+          <div class="attachment-row__body">
+            <strong [title]="entry.file.name">{{ entry.file.name }}</strong>
+            <small>
+              @if (entry.status === 'failed') {
+                {{ entry.message }}
+              } @else if (entry.status === 'creating') {
+                Preparing document...
+              } @else {
+                Uploading {{ entry.progress }}%
+              }
+            </small>
+            @if (entry.status !== 'failed') {
+              <div class="attachment-progress" aria-hidden="true">
+                <span [style.width.%]="entry.progress"></span>
+              </div>
+            }
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>

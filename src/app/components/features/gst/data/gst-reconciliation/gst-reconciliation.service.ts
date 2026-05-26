@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { ApiClientService } from '../../../../../core/api/api-client.service';
 import { AppConfigStore } from '../../../../../core/config/app-config.store';
+import { SignedUrlUploadService } from '../../../../../shared/file/signed-url-upload.service';
 import type {
   GstReconciliationDetailResponse,
   GstReconciliationRefreshPayload,
@@ -17,6 +18,7 @@ const ENDPOINT = '/gst-reconciliation';
 export class GstReconciliationService {
   private readonly api = inject(ApiClientService);
   private readonly appConfigStore = inject(AppConfigStore);
+  private readonly signedUrlUpload = inject(SignedUrlUploadService);
 
   /** Step 1: Obtain a signed upload URL for the GST return file. */
   async createUploadUrl(
@@ -34,14 +36,7 @@ export class GstReconciliationService {
    * pre-signed S3 URL which would cause a signature mismatch.
    */
   async uploadFileToSignedUrl(putUrl: string, file: File): Promise<void> {
-    const response = await fetch(putUrl, {
-      method: 'PUT',
-      body: file,
-      headers: { 'Content-Type': file.type || 'application/octet-stream' },
-    });
-    if (!response.ok) {
-      throw new Error(`File upload failed: ${response.status} ${response.statusText}`);
-    }
+    await this.signedUrlUpload.uploadFileToSignedUrl(putUrl, file);
   }
 
   /** Step 3: Trigger reconciliation refresh after the file has been uploaded. */

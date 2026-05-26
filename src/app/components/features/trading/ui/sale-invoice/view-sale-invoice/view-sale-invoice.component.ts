@@ -4,6 +4,9 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 import { BurlDeleteButtonComponent } from '../../../../../../shared/burl-delete-button/burl-delete-button.component';
 import { BurlEditButtonComponent } from '../../../../../../shared/burl-edit-button/burl-edit-button.component';
 import { SALE_INVOICE_DETAIL_INCLUDES, SaleInvoiceStore } from '../../../data/sale-invoice';
+import type { SaleInvoice } from '../../../data/sale-invoice';
+import type { StoredDocument } from '../../../data/invoice-document';
+import { InvoiceAttachmentsComponent } from '../../shared/invoice-attachments/invoice-attachments.component';
 import { SaleInvoiceDraftStore } from '../create-sale-invoice/sale-invoice-draft.store';
 import { SiCustomerComponent } from '../create-sale-invoice/si-customer/si-customer.component';
 import { SiInvoiceDetailsComponent } from '../create-sale-invoice/si-invoice-details/si-invoice-details.component';
@@ -17,6 +20,7 @@ import { SiLineItemsComponent } from '../create-sale-invoice/si-line-items/si-li
     BurlBackButtonComponent,
     BurlDeleteButtonComponent,
     BurlEditButtonComponent,
+    InvoiceAttachmentsComponent,
     SiCustomerComponent,
     SiLineItemsComponent,
     SiInvoiceDetailsComponent,
@@ -68,5 +72,15 @@ export class ViewSaleInvoiceComponent {
         queryParams: { burl: this.router.url },
       });
     }
+  }
+
+  protected onDocumentsChanged(documents: readonly StoredDocument[]): void {
+    const invoice = this.saleInvoiceStore.selectedItem();
+    if (!invoice) return;
+    this.saleInvoiceStore.setSelectedItem({
+      ...invoice,
+      documentids: documents.map((document) => document.id).filter((id): id is string => !!id),
+      documents,
+    } satisfies SaleInvoice);
   }
 }

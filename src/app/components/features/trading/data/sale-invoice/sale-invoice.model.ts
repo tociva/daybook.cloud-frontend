@@ -1,5 +1,6 @@
 import type { Lb4Include, Lb4ListQuery } from '../../../../../shared/crud';
 import type { Customer } from '../customer/customer.model';
+import type { StoredDocument } from '../invoice-document';
 import type { Item } from '../item/item.model';
 import type { Tax } from '../tax/tax.model';
 
@@ -163,6 +164,8 @@ export type SaleInvoice = Readonly<{
   customer?: Customer;
   items?: readonly SaleItem[];
   receipts?: readonly SaleInvoiceReceiptLink[];
+  documentids?: readonly string[];
+  documents?: readonly StoredDocument[];
   branchid?: string;
 }>;
 
@@ -199,4 +202,5 @@ export const SALE_INVOICE_DETAIL_INCLUDES = [
       ],
     },
   },
+  'documents',
 ] as const satisfies readonly Lb4Include[];

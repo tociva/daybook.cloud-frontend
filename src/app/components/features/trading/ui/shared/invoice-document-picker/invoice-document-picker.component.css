@@ -1,0 +1,98 @@
+.document-picker {
+  align-items: center;
+  display: flex;
+  gap: 0.4rem;
+  justify-content: flex-end;
+  max-width: min(100%, 34rem);
+}
+
+.document-picker__input {
+  display: none;
+}
+
+.document-picker__files {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  justify-content: flex-end;
+  max-width: 100%;
+  padding: 0;
+}
+
+.document-picker__files:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.document-chip {
+  gap: 0.3rem;
+  max-width: 13rem;
+}
+
+.document-chip__name {
+  color: var(--tng-semantic-foreground-primary);
+  font-size: 0.78rem;
+  max-width: 7rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.document-chip__size {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.document-chip__remove {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: var(--tng-semantic-foreground-muted);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  padding: 0.15rem;
+}
+
+.document-chip-tooltip__content {
+  display: grid;
+  gap: 0.15rem;
+  max-width: 18rem;
+}
+
+.document-chip-tooltip__content strong,
+.document-chip-tooltip__content span {
+  overflow-wrap: anywhere;
+}
+
+.document-chip__remove:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 720px) {
+  .document-picker {
+    justify-content: flex-start;
+    max-width: 100%;
+  }
+
+  .document-picker__files {
+    justify-content: flex-start;
+  }
+}

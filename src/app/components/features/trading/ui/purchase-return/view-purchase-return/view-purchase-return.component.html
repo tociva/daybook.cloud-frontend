@@ -14,6 +14,12 @@
       <div class="invoice-main">
         <app-pr-invoice-ref [readOnly]="true" />
         <app-pr-line-items [readOnly]="true" />
+        <app-invoice-attachments
+          resourceType="purchaseReturn"
+          [parentId]="purchaseReturnStore.selectedItem()?.id ?? ''"
+          [documents]="purchaseReturnStore.selectedItem()?.documents ?? []"
+          (documentsChanged)="onDocumentsChanged($event)"
+        />
       </div>
 
       <aside class="invoice-aside">

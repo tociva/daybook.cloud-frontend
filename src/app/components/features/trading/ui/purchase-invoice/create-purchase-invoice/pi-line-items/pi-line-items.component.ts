@@ -1,8 +1,9 @@
-import { Component, ElementRef, computed, inject, input } from '@angular/core';
+import { Component, ElementRef, computed, inject, input, output } from '@angular/core';
 import { form } from '@angular/forms/signals';
 import { Router } from '@angular/router';
 import {
   TngAutocompleteComponent,
+  TngButtonComponent,
   TngInputComponent,
   TngSwitchComponent,
   TngTextareaComponent,
@@ -11,6 +12,7 @@ import { TngIcon } from '@tailng-ui/icons';
 import type { Item } from '../../../../data/item';
 import { ItemStore } from '../../../../data/item';
 import { InvoiceGrandTotalDisplayComponent } from '../../../../../../../shared/invoice-grand-total-display/invoice-grand-total-display.component';
+import { InvoiceDocumentPickerComponent } from '../../../shared/invoice-document-picker/invoice-document-picker.component';
 import { PurchaseInvoiceDraftStore, type ItemRow } from '../purchase-invoice-draft.store';
 
 /** Sentinel id used to represent the "Create new item" action inside the options list. */
@@ -38,11 +40,13 @@ const INTERACTIVE_CLICK_TARGET_SELECTOR = [
   standalone: true,
   imports: [
     TngAutocompleteComponent,
+    TngButtonComponent,
     TngInputComponent,
     TngSwitchComponent,
     TngTextareaComponent,
     TngIcon,
     InvoiceGrandTotalDisplayComponent,
+    InvoiceDocumentPickerComponent,
   ],
   templateUrl: './pi-line-items.component.html',
   styleUrl: './pi-line-items.component.css',
@@ -52,6 +56,10 @@ export class PiLineItemsComponent {
   private  readonly itemStore   = inject(ItemStore);
   private  readonly router      = inject(Router);
   readonly readOnly = input(false);
+  readonly documentFiles = input<readonly File[]>([]);
+  readonly documentsDisabled = input(false);
+  readonly documentsUploading = input(false);
+  readonly documentFilesChange = output<readonly File[]>();
   protected readonly lineItemsForm = form(this.draft.items);
   protected readonly rowCount = computed(() => this.lineItemsForm().value().length);
   protected readonly itemOptionValue = (item: Item): string => item.id ?? '';
