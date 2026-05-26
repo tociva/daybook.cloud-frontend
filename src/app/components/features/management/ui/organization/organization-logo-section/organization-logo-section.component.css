@@ -1,0 +1,180 @@
+.logo-section {
+  display: grid;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.logo-section__header {
+  align-items: start;
+  display: flex;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.section-label {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.section-description {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.85rem;
+  line-height: 1.45;
+  margin: 0.25rem 0 0;
+}
+
+.logo-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.logo-card {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: 6rem minmax(0, 1fr);
+  min-width: 0;
+  padding: 0.85rem;
+}
+
+.logo-input {
+  display: none;
+}
+
+.logo-preview {
+  align-items: center;
+  aspect-ratio: 1;
+  background: var(--tng-semantic-background-muted);
+  border: 1px dashed var(--tng-semantic-border-subtle);
+  border-radius: 0.45rem;
+  color: var(--tng-semantic-foreground-muted);
+  display: grid;
+  justify-items: center;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.logo-preview img {
+  display: block;
+  height: 100%;
+  object-fit: contain;
+  width: 100%;
+}
+
+.logo-preview tng-icon {
+  height: 1.75rem;
+  width: 1.75rem;
+}
+
+.logo-card__content {
+  align-content: start;
+  display: grid;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.logo-card h3 {
+  font-size: 0.95rem;
+  font-weight: 750;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.logo-card p {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.8rem;
+  line-height: 1.35;
+  margin: 0.25rem 0 0;
+}
+
+.logo-meta {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+  min-width: 0;
+}
+
+.logo-meta div {
+  align-items: baseline;
+  display: grid;
+  gap: 0.4rem;
+  grid-template-columns: 4.2rem minmax(0, 1fr);
+  min-width: 0;
+}
+
+.logo-meta dt {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.logo-meta dd {
+  font-size: 0.82rem;
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.logo-status {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.82rem;
+  margin: 0;
+}
+
+.logo-progress {
+  background: var(--tng-semantic-background-muted);
+  border-radius: 999px;
+  height: 0.35rem;
+  overflow: hidden;
+}
+
+.logo-progress span {
+  background: var(--tng-semantic-accent-brand);
+  display: block;
+  height: 100%;
+  transition: width 160ms ease;
+}
+
+.logo-error {
+  color: var(--tng-semantic-accent-danger);
+  font-size: 0.78rem;
+  font-weight: 650;
+  margin: 0;
+}
+
+.logo-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.logo-actions tng-icon {
+  height: 1rem;
+  width: 1rem;
+}
+
+@media (max-width: 900px) {
+  .logo-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .logo-card {
+    grid-template-columns: 1fr;
+  }
+
+  .logo-preview {
+    max-width: 8rem;
+  }
+}

@@ -124,6 +124,11 @@
 
         </div>
 
+        <app-organization-logo-section
+          [smallDocumentId]="mode() === 'edit' ? organizationStore.selectedItem()?.smalllogodocumentid ?? null : null"
+          [normalDocumentId]="mode() === 'edit' ? organizationStore.selectedItem()?.normallogodocumentid ?? null : null"
+        />
+
         @if (mode() === 'create') {
           <!-- ── Default Branch ──────────────────────────────── -->
           <p class="section-label">Default Branch</p>

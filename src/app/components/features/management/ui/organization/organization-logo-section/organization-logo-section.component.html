@@ -1,0 +1,108 @@
+<section class="logo-section" aria-labelledby="organization-logo-section-title">
+  <div class="logo-section__header">
+    <div>
+      <p class="section-label" id="organization-logo-section-title">Logos</p>
+      <p class="section-description">Upload brand images for compact and standard placements.</p>
+    </div>
+  </div>
+
+  <div class="logo-grid">
+    @for (variant of variants; track variant) {
+      <article class="logo-card">
+        <input
+          class="logo-input"
+          type="file"
+          [id]="inputId(variant)"
+          [accept]="accept"
+          [disabled]="!editable() || isUploading()"
+          (change)="onLogoSelected(variant, $event)"
+        />
+
+        <div class="logo-preview">
+          @if (selectionFor(variant); as selection) {
+            <img [src]="selection.previewUrl" [alt]="slots[variant].title + ' preview'" />
+          } @else {
+            <tng-icon icon="image" aria-hidden="true" />
+          }
+        </div>
+
+        <div class="logo-card__content">
+          <div>
+            <h3>{{ slots[variant].title }}</h3>
+            <p>{{ slots[variant].description }}</p>
+          </div>
+
+          @if (selectionFor(variant); as selection) {
+            <dl class="logo-meta">
+              <div>
+                <dt>Selected</dt>
+                <dd>{{ selection.file.name }}</dd>
+              </div>
+              <div>
+                <dt>Size</dt>
+                <dd>{{ formatFileSize(selection.file.size) }}</dd>
+              </div>
+            </dl>
+          } @else if (loadingFor(variant)) {
+            <p class="logo-status">Loading logo...</p>
+          } @else if (documentFor(variant); as logo) {
+            <dl class="logo-meta">
+              <div>
+                <dt>Current</dt>
+                <dd>{{ logo.name }}</dd>
+              </div>
+              <div>
+                <dt>Size</dt>
+                <dd>{{ formatFileSize(logo.size) }}</dd>
+              </div>
+              <div>
+                <dt>Status</dt>
+                <dd>{{ logo.status || 'Ready' }}</dd>
+              </div>
+            </dl>
+          } @else {
+            <p class="logo-status">No logo uploaded.</p>
+          }
+
+          @if (isUploading() && selectionFor(variant)) {
+            <div class="logo-progress" aria-label="Logo upload progress">
+              <span [style.width.%]="progressFor(variant)"></span>
+            </div>
+          }
+
+          @if (errorFor(variant); as error) {
+            <p class="logo-error">{{ error }}</p>
+          }
+
+          @if (editable()) {
+            <div class="logo-actions">
+              <tng-button
+                appearance="outline"
+                tone="neutral"
+                type="button"
+                [disabled]="isUploading()"
+                (click)="chooseLogo(variant)"
+              >
+                <tng-icon icon="upload" aria-hidden="true" />
+                Choose
+              </tng-button>
+
+              @if (selectionFor(variant)) {
+                <tng-button
+                  appearance="ghost"
+                  tone="danger"
+                  type="button"
+                  [disabled]="isUploading()"
+                  (click)="removeSelection(variant)"
+                >
+                  <tng-icon icon="x" aria-hidden="true" />
+                  Remove
+                </tng-button>
+              }
+            </div>
+          }
+        </div>
+      </article>
+    }
+  </div>
+</section>

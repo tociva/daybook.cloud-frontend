@@ -33,6 +33,12 @@
           </div>
         </dl>
 
+        <app-organization-logo-section
+          [editable]="false"
+          [smallDocumentId]="org.smalllogodocumentid ?? null"
+          [normalDocumentId]="org.normallogodocumentid ?? null"
+        />
+
         <!-- Address -->
         @if (org.address) {
           <div class="section-title">Address</div>

@@ -62,6 +62,7 @@ import {
   DEFAULT_NODE_DATE_FORMAT,
   DEFAULT_RECEIPT_NUMBER_FORMAT,
 } from '../../../../../util/constants';
+import { OrganizationLogoSectionComponent } from '../organization/organization-logo-section/organization-logo-section.component';
 
 type OrgValidationFieldKey =
   | 'name'
@@ -237,6 +238,7 @@ const createInitialForm = (): OrganizationSignalFormModel => ({
     TngIcon,
     TngTextareaComponent,
     AutoNumberingTemplateGeneratorComponent,
+    OrganizationLogoSectionComponent,
   ],
   templateUrl: './bootstrap-organization.component.html',
   styleUrls: ['./bootstrap-organization.component.css', '../../../../../../styles/flags.css'],
@@ -244,6 +246,8 @@ const createInitialForm = (): OrganizationSignalFormModel => ({
 })
 export class BootstrapOrganizationComponent implements AfterViewInit {
   @ViewChild('nameInputRef', { read: ElementRef }) private nameInputRef!: ElementRef;
+  @ViewChild(OrganizationLogoSectionComponent)
+  private logoSection?: OrganizationLogoSectionComponent;
   private readonly countryStore = inject(CountryStore);
   private readonly currencyStore = inject(CurrencyStore);
   private readonly dateFormatStore = inject(DateFormatStore);
@@ -664,6 +668,11 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
       return;
     }
 
+    if (this.logoSection?.hasErrors()) {
+      this.saved.set(false);
+      return;
+    }
+
     void this.createOrganization();
   }
 
@@ -672,6 +681,7 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
     this.submitted.set(false);
     this.touched.set({});
     this.saved.set(false);
+    this.logoSection?.clearPending();
   }
 
   private markAllTouched(): void {
@@ -773,7 +783,24 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
     this.isSubmitting.set(true);
 
     try {
-      await this.bootstrapOrganizationStore.bootstrapOrganization(appConfig.apiBaseUrl, request);
+      const organization = await this.bootstrapOrganizationStore.bootstrapOrganization(
+        appConfig.apiBaseUrl,
+        request,
+      );
+      if (organization?.id) {
+        try {
+          await this.logoSection?.uploadPending(organization.id);
+        } catch (error) {
+          this.toastStore.danger(
+            getApiErrorMessage(
+              error,
+              'Organization created, but logos could not be uploaded. You can add them later.',
+            ),
+          );
+        }
+      } else if (this.logoSection?.hasPendingUploads()) {
+        this.toastStore.warning('Organization created, but logos could not be uploaded yet.');
+      }
       const session = await this.userSessionService.createUserSession(appConfig.apiBaseUrl);
       this.userSessionStore.setSession(session);
       this.saved.set(true);

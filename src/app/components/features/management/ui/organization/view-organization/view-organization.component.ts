@@ -14,6 +14,7 @@ import { BurlDeleteButtonComponent } from '../../../../../../shared/burl-delete-
 import { BurlEditButtonComponent } from '../../../../../../shared/burl-edit-button/burl-edit-button.component';
 import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
 import { OrganizationStore } from '../../../data/organization';
+import { OrganizationLogoSectionComponent } from '../organization-logo-section/organization-logo-section.component';
 
 @Component({
   selector: 'app-view-organization',
@@ -29,6 +30,7 @@ import { OrganizationStore } from '../../../data/organization';
     BurlBackButtonComponent,
     BurlDeleteButtonComponent,
     BurlEditButtonComponent,
+    OrganizationLogoSectionComponent,
   ],
   templateUrl: './view-organization.component.html',
   styleUrl: './view-organization.component.css',

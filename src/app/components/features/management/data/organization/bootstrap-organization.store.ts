@@ -3,6 +3,7 @@ import { patchState, signalStore, withComputed, withMethods, withState } from '@
 import { ApiClientService } from '../../../../../core/api/api-client.service';
 import { normalizeApiError } from '../../../../../core/api/api-error.util';
 import { initialBootstrapOrganizationState } from './bootstrap-organization.state';
+import type { Organization } from './organization.model';
 
 export type BootstrapOrganizationPayload = Readonly<{
   name: string;
@@ -40,20 +41,21 @@ export const BootstrapOrganizationStore = signalStore(
     async bootstrapOrganization(
       apiBaseUrl: string,
       payload: BootstrapOrganizationPayload,
-    ): Promise<void> {
+    ): Promise<Organization | null> {
       if (store.isLoading()) {
-        return;
+        return null;
       }
 
       patchState(store, { isLoading: true, error: null });
 
       try {
-        await api.post<unknown, BootstrapOrganizationPayload>(
+        const organization = await api.post<Organization, BootstrapOrganizationPayload>(
           `${apiBaseUrl.replace(/\/$/, '')}/organization/organization/bootstrap-with-data`,
           payload,
         );
 
         patchState(store, { isLoading: false, error: null });
+        return organization;
       } catch (error) {
         const apiError = normalizeApiError(error, {
           fallbackMessage: 'Failed to create organization. Please try again.',

@@ -6,6 +6,11 @@ tng-card {
   max-width: 56rem;
 }
 
+app-organization-logo-section {
+  display: block;
+  margin-top: 1.25rem;
+}
+
 .notice {
   border: 1px solid var(--tng-semantic-border-subtle);
   border-radius: 0.5rem;

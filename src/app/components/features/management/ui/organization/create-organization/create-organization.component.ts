@@ -26,6 +26,7 @@ import {
   TngTextareaComponent,
 } from '@tailng-ui/components';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
+import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
 import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
 import { CountryStore } from '../../../data/country/country.store';
 import type { Country } from '../../../data/country/country.model';
@@ -44,6 +45,7 @@ import {
   DEFAULT_JOURNAL_NUMBER_FORMAT,
   DEFAULT_RECEIPT_NUMBER_FORMAT,
 } from '../../../../../../util/constants';
+import { OrganizationLogoSectionComponent } from '../organization-logo-section/organization-logo-section.component';
 
 const getCurrentFiscalYearRange = (): Readonly<{ start: string; end: string }> => {
   const year = new Date().getFullYear();
@@ -76,6 +78,7 @@ const isDateInputValue = (value: string): boolean => /^\d{4}-\d{2}-\d{2}$/.test(
     TngTextareaComponent,
     BurlBackButtonComponent,
     BurlCreateButtonComponent,
+    OrganizationLogoSectionComponent,
   ],
   templateUrl: './create-organization.component.html',
   styleUrls: ['./create-organization.component.css', '../../../../../../../styles/flags.css'],
@@ -83,8 +86,11 @@ const isDateInputValue = (value: string): boolean => /^\d{4}-\d{2}-\d{2}$/.test(
 })
 export class CreateOrganizationComponent implements AfterViewInit {
   @ViewChild('nameInputRef', { read: ElementRef }) private nameInputRef!: ElementRef;
+  @ViewChild(OrganizationLogoSectionComponent)
+  private logoSection?: OrganizationLogoSectionComponent;
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(OrganizationFacade);
+  private readonly burlNavigation = inject(BurlNavigationService);
   protected readonly organizationStore = inject(OrganizationStore);
   protected readonly countryStore = inject(CountryStore);
   protected readonly currencyStore = inject(CurrencyStore);
@@ -374,17 +380,28 @@ export class CreateOrganizationComponent implements AfterViewInit {
     if (this.isSubmitting()) return;
 
     this.submitted.set(true);
-    if (this.hasErrors()) return;
+    if (this.hasErrors() || this.logoSection?.hasErrors()) return;
 
     this.isSubmitting.set(true);
 
     try {
       const id = this.id();
       if (id) {
-        await this.facade.update(id, this.buildOrganizationPayload());
+        const updated = await this.facade.update(id, this.buildOrganizationPayload(), {
+          navigateBack: false,
+        });
+        if (!updated) return;
+        await this.logoSection?.uploadPending(id);
       } else {
-        await this.facade.createWithDefaultBranch(this.buildBootstrapPayload());
+        const org = await this.facade.createWithDefaultBranch(this.buildBootstrapPayload(), {
+          navigateBack: false,
+        });
+        if (!org?.id) return;
+        await this.logoSection?.uploadPending(org.id);
       }
+      await this.burlNavigation.navigateBack();
+    } catch {
+      // The logo section displays upload errors inline.
     } finally {
       this.isSubmitting.set(false);
     }

@@ -12,10 +12,35 @@ export type Organization = Readonly<{
   mobile?: string;
   address?: Address;
   description?: string;
+  smalllogodocumentid?: string | null;
+  normallogodocumentid?: string | null;
   createdat?: Date;
   updatedat?: Date;
   userid: string;
   branches: readonly Branch[];
+}>;
+
+export type OrganizationLogoVariant = 'small' | 'normal';
+
+export type OrganizationLogoDocument = Readonly<{
+  id?: string;
+  name: string;
+  path?: string;
+  size: number;
+  type?: string;
+  category?: string;
+  status?: string;
+  addedbyid?: string;
+  organizationid?: string;
+  createdat?: string;
+  updatedat?: string;
+  putUrl?: string;
+}>;
+
+export type OrganizationLogoUploadPayload = Readonly<{
+  name: string;
+  type: string;
+  size: number;
 }>;
 
 export type OrganizationBootstrap = Readonly<{
