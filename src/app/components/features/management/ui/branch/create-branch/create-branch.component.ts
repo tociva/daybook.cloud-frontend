@@ -30,6 +30,7 @@ import {
   DEFAULT_INVOICE_NUMBER_FORMAT,
   DEFAULT_RECEIPT_NUMBER_FORMAT,
 } from '../../../../../../util/constants';
+import { BranchSaleInvoiceTemplatesComponent } from '../branch-sale-invoice-templates/branch-sale-invoice-templates.component';
 
 @Component({
   selector: 'app-create-branch',
@@ -47,6 +48,7 @@ import {
     TngInputComponent,
     TngLabelComponent,
     TngTextareaComponent,
+    BranchSaleInvoiceTemplatesComponent,
     BurlBackButtonComponent,
     BurlCreateButtonComponent,
   ],

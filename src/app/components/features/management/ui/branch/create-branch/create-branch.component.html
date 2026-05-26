@@ -338,6 +338,10 @@
           </tng-card-actions>
         </tng-card-footer>
       </form>
+
+      <app-branch-sale-invoice-templates
+        [branch]="mode() === 'edit' ? branchStore.selectedBranch() : null"
+      />
     </tng-card-content>
   </tng-card>
 </main>

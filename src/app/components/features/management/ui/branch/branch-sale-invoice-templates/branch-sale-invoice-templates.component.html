@@ -1,0 +1,118 @@
+<section class="template-section" aria-labelledby="sale-invoice-templates-title">
+  <div class="template-section__header">
+    <div>
+      <p class="section-label" id="sale-invoice-templates-title">Sale Invoice Templates</p>
+      <p class="section-description">Manage branch-level HTML layouts for sale invoices.</p>
+    </div>
+
+    @if (isLoading()) {
+      <span class="status-pill">
+        <tng-icon icon="loaderCircle" aria-hidden="true" class="spin" />
+        Loading
+      </span>
+    }
+  </div>
+
+  @if (error()) {
+    <div class="notice notice--danger">{{ error() }}</div>
+  }
+
+  @if (!branch()?.id) {
+    <div class="notice">Save the branch before adding sale invoice templates.</div>
+  } @else {
+    <div class="template-list" role="list">
+      @for (definition of templateDefinitions; track definition.type) {
+        @let metadata = metadataFor(definition.type);
+        <article class="template-row" role="listitem">
+          <input
+            class="template-input"
+            type="file"
+            [id]="inputId(definition.type)"
+            [accept]="accept"
+            [disabled]="uploadingType() !== null"
+            (change)="onFileSelected(definition.type, $event)"
+          />
+
+          <div class="template-row__icon">
+            <tng-icon icon="fileText" aria-hidden="true" />
+          </div>
+
+          <div class="template-row__body">
+            <div class="template-row__title">
+              <h3>{{ definition.title }}</h3>
+              <span [class.status-pill--custom]="sourceLabel(metadata) === 'Custom'" class="status-pill">
+                {{ sourceLabel(metadata) }}
+              </span>
+            </div>
+            <p>{{ definition.description }}</p>
+            <dl>
+              <div>
+                <dt>Current</dt>
+                <dd>{{ templateName(metadata) }}</dd>
+              </div>
+              @if (templateSize(metadata)) {
+                <div>
+                  <dt>Size</dt>
+                  <dd>{{ templateSize(metadata) }}</dd>
+                </div>
+              }
+              @if (templatePath(metadata)) {
+                <div>
+                  <dt>Path</dt>
+                  <dd [title]="templatePath(metadata)">{{ templatePath(metadata) }}</dd>
+                </div>
+              }
+            </dl>
+
+            @if (uploadingType() === definition.type) {
+              <div class="template-progress" aria-label="Template upload progress">
+                <span [style.width.%]="progressFor(definition.type)"></span>
+              </div>
+            }
+          </div>
+
+          <div class="template-row__actions">
+            <tng-button
+              appearance="outline"
+              tone="neutral"
+              type="button"
+              [disabled]="uploadingType() !== null"
+              (click)="chooseFile(definition.type)"
+            >
+              <tng-icon icon="upload" aria-hidden="true" />
+              {{ sourceLabel(metadata) === 'Custom' ? 'Update' : 'Upload' }}
+            </tng-button>
+
+            <tng-button
+              appearance="ghost"
+              tone="neutral"
+              type="button"
+              [disabled]="previewLoadingType() !== null || uploadingType() !== null"
+              (click)="loadPreview(definition.type)"
+            >
+              @if (previewLoadingType() === definition.type) {
+                <tng-icon icon="loaderCircle" aria-hidden="true" class="spin" />
+              } @else {
+                <tng-icon icon="eye" aria-hidden="true" />
+              }
+              View HTML
+            </tng-button>
+          </div>
+        </article>
+      }
+    </div>
+
+    @if (previewType()) {
+      <div class="template-preview">
+        <div class="template-preview__header">
+          <h3>{{ previewTitle() }} effective HTML</h3>
+          <tng-button appearance="ghost" tone="neutral" type="button" (click)="closePreview()">
+            <tng-icon icon="x" aria-hidden="true" />
+            Close
+          </tng-button>
+        </div>
+        <textarea readonly [value]="previewHtml()" aria-label="Sale invoice template HTML"></textarea>
+      </div>
+    }
+  }
+</section>
