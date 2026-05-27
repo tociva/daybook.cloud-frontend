@@ -72,6 +72,15 @@ export class WorkspaceShellComponent {
     const session = this.userSessionStore.session();
     return this.readString(session?.organization?.name) ?? 'Not set';
   });
+  protected readonly activeOrganizationId = computed(() => {
+    const session = this.userSessionStore.session();
+
+    return (
+      this.readString(session?.branch?.organizationid) ??
+      this.readString(session?.branch?.organization?.id) ??
+      this.readString(session?.organization?.id)
+    );
+  });
   protected readonly activeBranchName = computed(() => {
     const session = this.userSessionStore.session();
     return this.readString(session?.branch?.name) ?? 'Not set';

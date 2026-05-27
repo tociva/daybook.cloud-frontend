@@ -168,6 +168,13 @@
   min-width: 0;
 }
 
+.workspace-org-logo {
+  display: block;
+  height: 1.25rem;
+  max-width: 8rem;
+  object-fit: contain;
+}
+
 .workspace-org-tooltip-panel {
   display: grid;
   gap: 0.55rem;

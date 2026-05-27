@@ -6,6 +6,7 @@ export type {
   Organization,
   OrganizationBootstrap,
   OrganizationLogoDocument,
+  OrganizationLogoReadUrl,
   OrganizationLogoUploadPayload,
   OrganizationLogoVariant,
   OrganizationListQuery,

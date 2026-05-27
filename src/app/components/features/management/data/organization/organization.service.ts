@@ -7,6 +7,7 @@ import type {
   Organization,
   OrganizationBootstrap,
   OrganizationLogoDocument,
+  OrganizationLogoReadUrl,
   OrganizationLogoUploadPayload,
   OrganizationLogoVariant,
   OrganizationListQuery,
@@ -56,6 +57,15 @@ export class OrganizationService {
   async getLogoDocument(documentId: string): Promise<OrganizationLogoDocument> {
     return this.api.get<OrganizationLogoDocument>(
       `${await this.baseUrl()}/storage/stored-document/${documentId}`,
+    );
+  }
+
+  async getLogoReadUrl(
+    organizationId: string,
+    variant: OrganizationLogoVariant,
+  ): Promise<OrganizationLogoReadUrl> {
+    return this.api.get<OrganizationLogoReadUrl>(
+      `${await this.baseUrl()}${ORG_ENDPOINT}/${organizationId}/logo/${variant}/url`,
     );
   }
 

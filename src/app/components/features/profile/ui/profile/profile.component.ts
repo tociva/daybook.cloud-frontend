@@ -87,10 +87,26 @@ export class ProfileComponent implements OnDestroy {
   }
 
   protected onThemeChange(value: unknown): void {
-    const themeName = value as AppThemeName;
+    const themeName = this.resolveThemeName(value);
+    if (themeName === null) {
+      this.saveError.set('Select a valid theme.');
+      return;
+    }
+
     this.appearanceModel.update((m) => ({ ...m, themeName }));
     this.themeStore.setThemeName(themeName);
     this.saveError.set(null);
+  }
+
+  private resolveThemeName(value: unknown): AppThemeName | null {
+    const rawValue =
+      typeof value === 'string'
+        ? value
+        : value !== null && typeof value === 'object' && 'value' in value
+          ? (value as { value: unknown }).value
+          : null;
+
+    return this.themeOptions.find((option) => option.value === rawValue)?.value ?? null;
   }
 
   // ── Submit — persist to API ───────────────────────────────────────────────

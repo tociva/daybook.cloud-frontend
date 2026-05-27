@@ -35,8 +35,18 @@
       (click)="onOrgTooltipTriggerClick($event)"
     >
       <span trigger class="workspace-org-button">
-        <tng-icon icon="building" aria-hidden="true" />
-        <span class="workspace-org-button-label">{{ activeOrganizationName() }}</span>
+        @if (activeOrganizationLogoSource(); as logoSource) {
+          <img
+            class="workspace-org-logo"
+            [src]="logoSource"
+            [alt]="activeOrganizationLabel()"
+            (error)="onActiveOrganizationLogoError()"
+            (load)="onActiveOrganizationLogoLoad()"
+          />
+        } @else {
+          <tng-icon icon="building" aria-hidden="true" />
+          <span class="workspace-org-button-label">{{ activeOrganizationName() }}</span>
+        }
       </span>
 
       <div class="workspace-org-tooltip-panel">

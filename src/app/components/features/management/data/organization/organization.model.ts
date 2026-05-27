@@ -37,6 +37,12 @@ export type OrganizationLogoDocument = Readonly<{
   putUrl?: string;
 }>;
 
+export type OrganizationLogoReadUrl = OrganizationLogoDocument &
+  Readonly<{
+    getUrl: string;
+    expiresIn: number;
+  }>;
+
 export type OrganizationLogoUploadPayload = Readonly<{
   name: string;
   type: string;
