@@ -12,7 +12,10 @@ import { TaxStore } from '../../../data/tax';
 import type { TaxGroup } from '../../../data/tax-group';
 import { TaxGroupStore } from '../../../data/tax-group';
 import { FiscalYearDateRangeService } from '../../../../../../shared/fiscal-year-datepicker';
-import { DEFAULT_NODE_DATE_FORMAT } from '../../../../../../util/constants';
+import {
+  DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS,
+  DEFAULT_NODE_DATE_FORMAT,
+} from '../../../../../../util/constants';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -95,6 +98,8 @@ interface SaleInvoiceDraftSnapshot {
 
 @Injectable()
 export class SaleInvoiceDraftStore {
+  private customerSearchTimer: ReturnType<typeof setTimeout> | null = null;
+  private itemSearchTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly customerStore = inject(CustomerStore);
   private readonly itemStore = inject(ItemStore);
   private readonly itemCategoryStore = inject(ItemCategoryStore);
@@ -172,33 +177,13 @@ export class SaleInvoiceDraftStore {
   // ── Filtered lists ────────────────────────────────────────────────────────
 
   readonly filteredCustomers = computed<Customer[]>(() => {
-    const q = this.customerSearch().toLowerCase();
     const list = this.customerStore.items() as Customer[];
-    return (
-      q
-        ? list.filter(
-            (c) =>
-              c.name?.toLowerCase().includes(q) ||
-              c.mobile?.toLowerCase().includes(q) ||
-              c.email?.toLowerCase().includes(q),
-          )
-        : list
-    ).slice(0, 15);
+    return list.slice(0, 15);
   });
 
   readonly filteredItems = computed<Item[]>(() => {
-    const q = this.itemSearch().toLowerCase();
     const list = this.itemStore.items() as Item[];
-    return (
-      q
-        ? list.filter(
-            (it) =>
-              it.name?.toLowerCase().includes(q) ||
-              it.code?.toLowerCase().includes(q) ||
-              it.displayname?.toLowerCase().includes(q),
-          )
-        : list
-    ).slice(0, 15);
+    return list.slice(0, 15);
   });
 
   // ── Tax column computed ───────────────────────────────────────────────────
@@ -360,14 +345,29 @@ export class SaleInvoiceDraftStore {
   // ── Customer methods ──────────────────────────────────────────────────────
 
   onCustomerSearchInput(value: string | null): void {
-    const q = value ?? '';
+    const q = (value ?? '').trim();
     this.customerSearch.set(q);
     this.showCustomerDropdown.set(true);
     if (!q) {
       this.selectedCustomer.set(null);
       this.customerid.set('');
     }
-    void this.customerStore.loadCustomers(q ? { where: { name: { ilike: `%${q}%` } } } : {});
+    if (this.customerSearchTimer) clearTimeout(this.customerSearchTimer);
+    this.customerSearchTimer = setTimeout(() => {
+      void this.customerStore.loadCustomers(
+        q
+          ? {
+              where: {
+                or: [
+                  { name: { ilike: `%${q}%` } },
+                  { mobile: { ilike: `%${q}%` } },
+                  { email: { ilike: `%${q}%` } },
+                ],
+              },
+            }
+          : {},
+      );
+    }, DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS);
   }
 
   selectCustomer(customer: Customer): void {
@@ -456,22 +456,34 @@ export class SaleInvoiceDraftStore {
   // ── Item methods ──────────────────────────────────────────────────────────
 
   onItemSearchInput(value: string | null, rowIndex: number): void {
-    const q = value ?? '';
+    const q = (value ?? '').trim();
     this.itemSearch.set(q);
     this.activeItemRowIndex.set(rowIndex);
 
-    if (q) {
-      // Typed search: hit the server with a filter and mark the cache as stale
-      // (the store will hold filtered results after this, not the full list).
-      this.emptyItemsLoaded = false;
-      void this.itemStore.loadItems({ where: { name: { ilike: `%${q}%` } }, includes: ['category'] });
-    } else if (!this.emptyItemsLoaded) {
-      // Empty query and no cached full list yet: fetch all items and cache the result.
-      void this.itemStore.loadItems({ includes: ['category'] }).then(() => {
-        this.emptyItemsLoaded = true;
-      });
-    }
-    // else: empty query + full list already in store → no network call needed.
+    if (this.itemSearchTimer) clearTimeout(this.itemSearchTimer);
+    this.itemSearchTimer = setTimeout(() => {
+      if (q) {
+        // Typed search: hit the server with a filter and mark the cache as stale
+        // (the store will hold filtered results after this, not the full list).
+        this.emptyItemsLoaded = false;
+        void this.itemStore.loadItems({
+          where: {
+            or: [
+              { name: { ilike: `%${q}%` } },
+              { code: { ilike: `%${q}%` } },
+              { displayname: { ilike: `%${q}%` } },
+            ],
+          },
+          includes: ['category'],
+        });
+      } else if (!this.emptyItemsLoaded) {
+        // Empty query and no cached full list yet: fetch all items and cache the result.
+        void this.itemStore.loadItems({ includes: ['category'] }).then(() => {
+          this.emptyItemsLoaded = true;
+        });
+      }
+      // else: empty query + full list already in store → no network call needed.
+    }, DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS);
   }
 
   /**

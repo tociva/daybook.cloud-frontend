@@ -28,6 +28,7 @@ import type {
   LedgerCategoryPayload,
   LedgerCategoryType,
 } from '../../../data/ledger-category';
+import { DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS } from '../../../../../../util/constants';
 
 type LedgerCategoryFormModel = {
   name: string;
@@ -68,6 +69,7 @@ export class CreateLedgerCategoryComponent implements AfterViewInit {
   protected readonly ledgerCategoryStore = inject(LedgerCategoryStore);
   protected readonly typeQuery = signal('');
   protected readonly parentQuery = signal('');
+  private parentSearchTimer: ReturnType<typeof setTimeout> | null = null;
 
   protected readonly id = signal<string | null>(null);
   protected readonly submitted = signal(false);
@@ -99,11 +101,7 @@ export class CreateLedgerCategoryComponent implements AfterViewInit {
     this.ledgerCategoryStore.items().filter((c) => c.id !== this.id()),
   );
   protected readonly filteredParentOptions = computed(() =>
-    this.filterAutocompleteOptions(
-      this.parentOptions(),
-      this.parentOptionLabel,
-      this.parentQuery(),
-    ),
+    this.parentOptions(),
   );
   protected readonly parentOptionValue = (cat: LedgerCategory): string => cat.id ?? '';
   protected readonly parentOptionLabel = (cat: LedgerCategory): string => cat.name ?? '';
@@ -163,7 +161,18 @@ export class CreateLedgerCategoryComponent implements AfterViewInit {
   }
 
   protected onParentQueryChange(event: unknown): void {
-    this.parentQuery.set(this.normalizeAutocompleteQuery(event));
+    const q = this.normalizeAutocompleteQuery(event);
+    this.parentQuery.set(q);
+    if (this.parentSearchTimer) clearTimeout(this.parentSearchTimer);
+    this.parentSearchTimer = setTimeout(() => {
+      void this.ledgerCategoryStore.loadLedgerCategories(
+        q
+          ? {
+              where: { name: { ilike: `%${q}%` } },
+            }
+          : {},
+      );
+    }, DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS);
   }
 
   protected async submitForm(event: SubmitEvent): Promise<void> {

@@ -23,6 +23,7 @@ import { ItemCategoryStore } from '../../../data/item-category';
 import type { ItemCategory } from '../../../data/item-category';
 import { ItemFacade, ItemStore } from '../../../data/item';
 import type { Item, ItemPayload } from '../../../data/item';
+import { DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS } from '../../../../../../util/constants';
 
 /** Sentinel id used to represent the "Create new category" action inside the options list. */
 const CREATE_CATEGORY_SENTINEL_ID = '__create_category__';
@@ -77,6 +78,7 @@ export class CreateItemComponent implements AfterViewInit {
   protected readonly itemStore = inject(ItemStore);
   protected readonly itemCategoryStore = inject(ItemCategoryStore);
   protected readonly categoryQuery = signal('');
+  private categorySearchTimer: ReturnType<typeof setTimeout> | null = null;
 
   protected readonly itemModel = signal<ItemFormModel>({
     name: '',
@@ -162,11 +164,7 @@ export class CreateItemComponent implements AfterViewInit {
   protected readonly createCategorySentinelId = CREATE_CATEGORY_SENTINEL_ID;
 
   protected readonly filteredCategories = computed(() =>
-    this.filterAutocompleteOptions(
-      this.itemCategoryStore.items(),
-      this.categoryOptionLabel,
-      this.categoryQuery(),
-    ),
+    this.itemCategoryStore.items(),
   );
 
   /**
@@ -276,7 +274,20 @@ export class CreateItemComponent implements AfterViewInit {
   }
 
   protected onCategoryQueryChange(event: unknown): void {
-    this.categoryQuery.set(this.normalizeAutocompleteQuery(event));
+    const q = this.normalizeAutocompleteQuery(event);
+    this.categoryQuery.set(q);
+    if (this.categorySearchTimer) clearTimeout(this.categorySearchTimer);
+    this.categorySearchTimer = setTimeout(() => {
+      void this.itemCategoryStore.loadItemCategories(
+        q
+          ? {
+              where: {
+                name: { ilike: `%${q}%` },
+              },
+            }
+          : {},
+      );
+    }, DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS);
   }
 
   protected createNewCategory(): void {
@@ -332,15 +343,4 @@ export class CreateItemComponent implements AfterViewInit {
     return typeof event === 'string' ? event.trim().toLowerCase() : '';
   }
 
-  private filterAutocompleteOptions<T>(
-    options: readonly T[],
-    getLabel: (option: T) => string,
-    query: string,
-  ): T[] {
-    if (!query) {
-      return [...options];
-    }
-
-    return options.filter((option) => getLabel(option).toLowerCase().includes(query));
-  }
 }

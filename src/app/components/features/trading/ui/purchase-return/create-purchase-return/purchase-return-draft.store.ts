@@ -8,7 +8,10 @@ import {
   PurchaseInvoiceStore,
 } from '../../../data/purchase-invoice';
 import { FiscalYearDateRangeService } from '../../../../../../shared/fiscal-year-datepicker';
-import { DEFAULT_NODE_DATE_FORMAT } from '../../../../../../util/constants';
+import {
+  DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS,
+  DEFAULT_NODE_DATE_FORMAT,
+} from '../../../../../../util/constants';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -53,6 +56,7 @@ export class PurchaseReturnDraftStore {
   private readonly purchaseInvoiceStore = inject(PurchaseInvoiceStore);
   private readonly fiscalYearDateRange = inject(FiscalYearDateRangeService);
   private loadingInvoiceId: string | null = null;
+  private invoiceSearchTimer: ReturnType<typeof setTimeout> | null = null;
 
   // ── Submission flag ───────────────────────────────────────────────────────
 
@@ -81,16 +85,8 @@ export class PurchaseReturnDraftStore {
   // ── Filtered lists ────────────────────────────────────────────────────────
 
   readonly filteredInvoices = computed<PurchaseInvoice[]>(() => {
-    const q = this.invoiceSearch().toLowerCase();
     const list = this.purchaseInvoiceStore.items() as PurchaseInvoice[];
-    return (
-      q
-        ? list.filter(
-            (inv) =>
-              inv.number?.toLowerCase().includes(q) || inv.vendor?.name?.toLowerCase().includes(q),
-          )
-        : list
-    ).slice(0, 15);
+    return list.slice(0, 15);
   });
 
   // ── Computed summary ──────────────────────────────────────────────────────
@@ -184,7 +180,7 @@ export class PurchaseReturnDraftStore {
   // ── Invoice methods ───────────────────────────────────────────────────────
 
   onInvoiceSearchInput(value: string | null): void {
-    const q = value ?? '';
+    const q = (value ?? '').trim();
     const selectedInvoice = this.selectedPurchaseInvoice();
     if (selectedInvoice && this.isSelectedInvoiceLabel(q, selectedInvoice)) return;
 
@@ -202,11 +198,17 @@ export class PurchaseReturnDraftStore {
       this.selectedPurchaseInvoice.set(null);
       this.purchaseinvoiceid.set('');
     }
-    void this.purchaseInvoiceStore.loadPurchaseInvoices(
-      q
-        ? { where: { number: { ilike: `%${q}%` } }, includes: ['vendor'] }
-        : { includes: ['vendor'] },
-    );
+    if (this.invoiceSearchTimer) clearTimeout(this.invoiceSearchTimer);
+    this.invoiceSearchTimer = setTimeout(() => {
+      void this.purchaseInvoiceStore.loadPurchaseInvoices(
+        q
+          ? {
+              where: { number: { ilike: `%${q}%` } },
+              includes: ['vendor'],
+            }
+          : { includes: ['vendor'] },
+      );
+    }, DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS);
   }
 
   async selectInvoiceById(id: string, fallback?: PurchaseInvoice | null): Promise<void> {

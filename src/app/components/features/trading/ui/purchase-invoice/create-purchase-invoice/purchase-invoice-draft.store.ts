@@ -13,7 +13,10 @@ import { TaxStore } from '../../../data/tax';
 import type { TaxGroup } from '../../../data/tax-group';
 import { TaxGroupStore } from '../../../data/tax-group';
 import { FiscalYearDateRangeService } from '../../../../../../shared/fiscal-year-datepicker';
-import { DEFAULT_NODE_DATE_FORMAT } from '../../../../../../util/constants';
+import {
+  DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS,
+  DEFAULT_NODE_DATE_FORMAT,
+} from '../../../../../../util/constants';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -60,6 +63,8 @@ export type SelectOption = Readonly<{ label: string; value: string }>;
 
 @Injectable()
 export class PurchaseInvoiceDraftStore {
+  private vendorSearchTimer: ReturnType<typeof setTimeout> | null = null;
+  private itemSearchTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly vendorStore = inject(VendorStore);
   private readonly itemStore = inject(ItemStore);
   private readonly itemCategoryStore = inject(ItemCategoryStore);
@@ -125,33 +130,13 @@ export class PurchaseInvoiceDraftStore {
   // ── Filtered lists ────────────────────────────────────────────────────────
 
   readonly filteredVendors = computed<Vendor[]>(() => {
-    const q = this.vendorSearch().toLowerCase();
     const list = this.vendorStore.items() as Vendor[];
-    return (
-      q
-        ? list.filter(
-            (v) =>
-              v.name?.toLowerCase().includes(q) ||
-              v.mobile?.toLowerCase().includes(q) ||
-              v.email?.toLowerCase().includes(q),
-          )
-        : list
-    ).slice(0, 15);
+    return list.slice(0, 15);
   });
 
   readonly filteredItems = computed<Item[]>(() => {
-    const q = this.itemSearch().toLowerCase();
     const list = this.itemStore.items() as Item[];
-    return (
-      q
-        ? list.filter(
-            (it) =>
-              it.name?.toLowerCase().includes(q) ||
-              it.code?.toLowerCase().includes(q) ||
-              it.displayname?.toLowerCase().includes(q),
-          )
-        : list
-    ).slice(0, 15);
+    return list.slice(0, 15);
   });
 
   // ── Tax column computed ───────────────────────────────────────────────────
@@ -352,13 +337,28 @@ export class PurchaseInvoiceDraftStore {
   // ── Vendor methods ────────────────────────────────────────────────────────
 
   onVendorSearchInput(value: string | null): void {
-    const q = value ?? '';
+    const q = (value ?? '').trim();
     this.vendorSearch.set(q);
     if (!q) {
       this.selectedVendor.set(null);
       this.vendorid.set('');
     }
-    void this.vendorStore.loadVendors(q ? { where: { name: { ilike: `%${q}%` } } } : {});
+    if (this.vendorSearchTimer) clearTimeout(this.vendorSearchTimer);
+    this.vendorSearchTimer = setTimeout(() => {
+      void this.vendorStore.loadVendors(
+        q
+          ? {
+              where: {
+                or: [
+                  { name: { ilike: `%${q}%` } },
+                  { mobile: { ilike: `%${q}%` } },
+                  { email: { ilike: `%${q}%` } },
+                ],
+              },
+            }
+          : {},
+      );
+    }, DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS);
   }
 
   selectVendor(vendor: Vendor): void {
@@ -412,21 +412,33 @@ export class PurchaseInvoiceDraftStore {
   // ── Item methods ──────────────────────────────────────────────────────────
 
   onItemSearchInput(value: string | null, rowIndex: number): void {
-    const q = value ?? '';
+    const q = (value ?? '').trim();
     this.itemSearch.set(q);
     this.activeItemRowIndex.set(rowIndex);
 
-    if (q) {
-      // Typed search: hit the server with a filter and mark the cache as stale.
-      this.emptyItemsLoaded = false;
-      void this.itemStore.loadItems({ where: { name: { ilike: `%${q}%` } }, includes: ['category'] });
-    } else if (!this.emptyItemsLoaded) {
-      // Empty query and no cached full list yet: fetch all items and cache.
-      void this.itemStore.loadItems({ includes: ['category'] }).then(() => {
-        this.emptyItemsLoaded = true;
-      });
-    }
-    // else: empty query + full list already in store → no network call needed.
+    if (this.itemSearchTimer) clearTimeout(this.itemSearchTimer);
+    this.itemSearchTimer = setTimeout(() => {
+      if (q) {
+        // Typed search: hit the server with a filter and mark the cache as stale.
+        this.emptyItemsLoaded = false;
+        void this.itemStore.loadItems({
+          where: {
+            or: [
+              { name: { ilike: `%${q}%` } },
+              { code: { ilike: `%${q}%` } },
+              { displayname: { ilike: `%${q}%` } },
+            ],
+          },
+          includes: ['category'],
+        });
+      } else if (!this.emptyItemsLoaded) {
+        // Empty query and no cached full list yet: fetch all items and cache.
+        void this.itemStore.loadItems({ includes: ['category'] }).then(() => {
+          this.emptyItemsLoaded = true;
+        });
+      }
+      // else: empty query + full list already in store → no network call needed.
+    }, DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS);
   }
 
   /**

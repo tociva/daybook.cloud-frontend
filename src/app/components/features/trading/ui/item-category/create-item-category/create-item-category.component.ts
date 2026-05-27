@@ -23,6 +23,7 @@ import { ItemCategoryFacade, ItemCategoryStore } from '../../../data/item-catego
 import type { ItemCategory, ItemCategoryPayload, ItemType } from '../../../data/item-category';
 import { TaxGroupStore } from '../../../data/tax-group';
 import type { TaxGroup } from '../../../data/tax-group';
+import { DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS } from '../../../../../../util/constants';
 
 const ITEM_TYPES: ItemType[] = ['Product', 'Service'];
 
@@ -69,6 +70,8 @@ export class CreateItemCategoryComponent implements AfterViewInit {
   protected readonly typeQuery = signal('');
   protected readonly parentQuery = signal('');
   protected readonly taxGroupQuery = signal('');
+  private parentSearchTimer: ReturnType<typeof setTimeout> | null = null;
+  private taxGroupSearchTimer: ReturnType<typeof setTimeout> | null = null;
 
   protected readonly categoryModel = signal<ItemCategoryFormModel>({
     name: '',
@@ -108,11 +111,7 @@ export class CreateItemCategoryComponent implements AfterViewInit {
     this.itemCategoryStore.items().filter((c) => c.id !== this.id()),
   );
   protected readonly filteredParentOptions = computed(() =>
-    this.filterAutocompleteOptions(
-      this.parentOptions(),
-      this.parentOptionLabel,
-      this.parentQuery(),
-    ),
+    this.parentOptions(),
   );
 
   // ── Tax group autocomplete helpers ────────────────────────────────────────
@@ -121,11 +120,7 @@ export class CreateItemCategoryComponent implements AfterViewInit {
   protected readonly taxGroupOptionLabel = (tg: TaxGroup): string => tg.name ?? '';
   protected readonly taxGroupTrackBy = (_index: number, tg: TaxGroup): string => tg.id ?? '';
   protected readonly filteredTaxGroupOptions = computed(() =>
-    this.filterAutocompleteOptions(
-      this.taxGroupStore.items(),
-      this.taxGroupOptionLabel,
-      this.taxGroupQuery(),
-    ),
+    this.taxGroupStore.items(),
   );
 
   // ── Validation ────────────────────────────────────────────────────────────
@@ -253,11 +248,33 @@ export class CreateItemCategoryComponent implements AfterViewInit {
   }
 
   protected onParentQueryChange(event: unknown): void {
-    this.parentQuery.set(this.normalizeAutocompleteQuery(event));
+    const q = this.normalizeAutocompleteQuery(event);
+    this.parentQuery.set(q);
+    if (this.parentSearchTimer) clearTimeout(this.parentSearchTimer);
+    this.parentSearchTimer = setTimeout(() => {
+      void this.itemCategoryStore.loadItemCategories(
+        q
+          ? {
+              where: { name: { ilike: `%${q}%` } },
+            }
+          : {},
+      );
+    }, DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS);
   }
 
   protected onTaxGroupQueryChange(event: unknown): void {
-    this.taxGroupQuery.set(this.normalizeAutocompleteQuery(event));
+    const q = this.normalizeAutocompleteQuery(event);
+    this.taxGroupQuery.set(q);
+    if (this.taxGroupSearchTimer) clearTimeout(this.taxGroupSearchTimer);
+    this.taxGroupSearchTimer = setTimeout(() => {
+      void this.taxGroupStore.loadTaxGroups(
+        q
+          ? {
+              where: { name: { ilike: `%${q}%` } },
+            }
+          : {},
+      );
+    }, DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS);
   }
 
   protected async submitForm(event: SubmitEvent): Promise<void> {

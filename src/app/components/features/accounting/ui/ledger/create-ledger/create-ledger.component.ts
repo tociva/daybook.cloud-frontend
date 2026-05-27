@@ -22,6 +22,7 @@ import { LedgerCategoryStore } from '../../../data/ledger-category';
 import type { LedgerCategory } from '../../../data/ledger-category';
 import { LedgerFacade, LedgerStore } from '../../../data/ledger';
 import type { LedgerPayload } from '../../../data/ledger';
+import { DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS } from '../../../../../../util/constants';
 
 type LedgerFormModel = {
   name: string;
@@ -63,6 +64,7 @@ export class CreateLedgerComponent implements AfterViewInit {
   protected readonly ledgerStore = inject(LedgerStore);
   protected readonly ledgerCategoryStore = inject(LedgerCategoryStore);
   protected readonly categoryQuery = signal('');
+  private categorySearchTimer: ReturnType<typeof setTimeout> | null = null;
 
   protected readonly id = signal<string | null>(null);
   protected readonly submitted = signal(false);
@@ -86,11 +88,7 @@ export class CreateLedgerComponent implements AfterViewInit {
   protected readonly categoryOptionLabel = (cat: LedgerCategory): string => cat.name ?? '';
   protected readonly categoryTrackBy = (_i: number, cat: LedgerCategory): string => cat.id ?? '';
   protected readonly filteredCategories = computed(() =>
-    this.filterAutocompleteOptions(
-      this.ledgerCategoryStore.items(),
-      this.categoryOptionLabel,
-      this.categoryQuery(),
-    ),
+    this.ledgerCategoryStore.items(),
   );
 
   // ── Validation ────────────────────────────────────────────────────────────
@@ -163,7 +161,20 @@ export class CreateLedgerComponent implements AfterViewInit {
   }
 
   protected onCategoryQueryChange(event: unknown): void {
-    this.categoryQuery.set(this.normalizeAutocompleteQuery(event));
+    const q = this.normalizeAutocompleteQuery(event);
+    this.categoryQuery.set(q);
+    if (this.categorySearchTimer) clearTimeout(this.categorySearchTimer);
+    this.categorySearchTimer = setTimeout(() => {
+      void this.ledgerCategoryStore.loadLedgerCategories(
+        q
+          ? {
+              where: {
+                name: { ilike: `%${q}%` },
+              },
+            }
+          : {},
+      );
+    }, DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS);
   }
 
   protected onOpeningDrChange(value: unknown): void {
@@ -225,15 +236,4 @@ export class CreateLedgerComponent implements AfterViewInit {
     return Number.isFinite(amount) ? amount : 0;
   }
 
-  private filterAutocompleteOptions<T>(
-    options: readonly T[],
-    getLabel: (option: T) => string,
-    query: string,
-  ): T[] {
-    if (!query) {
-      return [...options];
-    }
-
-    return options.filter((option) => getLabel(option).toLowerCase().includes(query));
-  }
 }

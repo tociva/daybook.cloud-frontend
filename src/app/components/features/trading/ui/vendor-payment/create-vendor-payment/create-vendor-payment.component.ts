@@ -39,7 +39,10 @@ import {
   InvoiceRow,
   VpmtInvoiceLinesComponent,
 } from './vpmt-invoice-lines/vpmt-invoice-lines.component';
-import { DEFAULT_NODE_DATE_FORMAT } from '../../../../../../util/constants';
+import {
+  DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS,
+  DEFAULT_NODE_DATE_FORMAT,
+} from '../../../../../../util/constants';
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -77,6 +80,8 @@ export class CreateVendorPaymentComponent {
   protected readonly bankCashStore = inject(BankCashStore);
   private readonly currencyStore = inject(CurrencyStore);
   private readonly purchaseInvoiceStore = inject(PurchaseInvoiceStore);
+  private vendorSearchTimer: ReturnType<typeof setTimeout> | null = null;
+  private bankCashSearchTimer: ReturnType<typeof setTimeout> | null = null;
 
   // ── Mode ──────────────────────────────────────────────────────────────────
 
@@ -110,18 +115,8 @@ export class CreateVendorPaymentComponent {
   protected readonly vendorQuery = signal('');
 
   protected readonly filteredVendors = computed<Vendor[]>(() => {
-    const q = this.vendorQuery().toLowerCase();
     const list = this.vendorStore.items() as Vendor[];
-    return (
-      q
-        ? list.filter(
-            (v) =>
-              v.name?.toLowerCase().includes(q) ||
-              v.mobile?.toLowerCase().includes(q) ||
-              v.email?.toLowerCase().includes(q),
-          )
-        : list
-    ).slice(0, 15);
+    return list.slice(0, 15);
   });
 
   protected readonly vendorOptionValue = (v: Vendor): string => v.id ?? '';
@@ -135,9 +130,8 @@ export class CreateVendorPaymentComponent {
   protected readonly bankCashQuery = signal('');
 
   protected readonly filteredBankCashes = computed<BankCash[]>(() => {
-    const q = this.bankCashQuery().toLowerCase();
     const list = this.bankCashStore.items() as BankCash[];
-    return (q ? list.filter((b) => b.name?.toLowerCase().includes(q)) : list).slice(0, 15);
+    return list.slice(0, 15);
   });
 
   protected readonly bankCashOptionValue = (b: BankCash): string => b.id ?? '';
@@ -340,14 +334,29 @@ export class CreateVendorPaymentComponent {
   // ── Vendor autocomplete ───────────────────────────────────────────────────
 
   protected onVendorQueryChange(event: unknown): void {
-    const q = typeof event === 'string' ? event : '';
+    const q = typeof event === 'string' ? event.trim() : '';
     this.vendorQuery.set(q);
     if (!q) {
       this.selectedVendor.set(null);
       this.vendorid.set('');
       this.invoiceRows.set([]);
     }
-    void this.vendorStore.loadVendors(q ? { where: { name: { ilike: `%${q}%` } } } : {});
+    if (this.vendorSearchTimer) clearTimeout(this.vendorSearchTimer);
+    this.vendorSearchTimer = setTimeout(() => {
+      void this.vendorStore.loadVendors(
+        q
+          ? {
+              where: {
+                or: [
+                  { name: { ilike: `%${q}%` } },
+                  { mobile: { ilike: `%${q}%` } },
+                  { email: { ilike: `%${q}%` } },
+                ],
+              },
+            }
+          : {},
+      );
+    }, DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS);
   }
 
   protected onVendorValueChange(value: unknown): void {
@@ -380,13 +389,16 @@ export class CreateVendorPaymentComponent {
   // ── Bank/Cash autocomplete ────────────────────────────────────────────────
 
   protected onBankCashQueryChange(event: unknown): void {
-    const q = typeof event === 'string' ? event : '';
+    const q = typeof event === 'string' ? event.trim() : '';
     this.bankCashQuery.set(q);
     if (!q) {
       this.selectedBankCash.set(null);
       this.bcashid.set('');
     }
-    void this.bankCashStore.loadBankCashes(q ? { where: { name: { ilike: `%${q}%` } } } : {});
+    if (this.bankCashSearchTimer) clearTimeout(this.bankCashSearchTimer);
+    this.bankCashSearchTimer = setTimeout(() => {
+      void this.bankCashStore.loadBankCashes(q ? { where: { name: { ilike: `%${q}%` } } } : {});
+    }, DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS);
   }
 
   protected onBankCashValueChange(value: unknown): void {

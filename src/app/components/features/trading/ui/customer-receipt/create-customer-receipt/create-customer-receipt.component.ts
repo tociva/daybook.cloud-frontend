@@ -40,7 +40,10 @@ import {
   InvoiceRow,
   RcptInvoiceLinesComponent,
 } from './rcpt-invoice-lines/rcpt-invoice-lines.component';
-import { DEFAULT_NODE_DATE_FORMAT } from '../../../../../../util/constants';
+import {
+  DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS,
+  DEFAULT_NODE_DATE_FORMAT,
+} from '../../../../../../util/constants';
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -79,6 +82,8 @@ export class CreateCustomerReceiptComponent {
   protected readonly bankCashStore = inject(BankCashStore);
   private readonly currencyStore = inject(CurrencyStore);
   private readonly saleInvoiceStore = inject(SaleInvoiceStore);
+  private customerSearchTimer: ReturnType<typeof setTimeout> | null = null;
+  private bankCashSearchTimer: ReturnType<typeof setTimeout> | null = null;
 
   // ── Mode ──────────────────────────────────────────────────────────────────
 
@@ -117,18 +122,8 @@ export class CreateCustomerReceiptComponent {
   protected readonly customerQuery = signal('');
 
   protected readonly filteredCustomers = computed<Customer[]>(() => {
-    const q = this.customerQuery().toLowerCase();
     const list = this.customerStore.items() as Customer[];
-    return (
-      q
-        ? list.filter(
-            (c) =>
-              c.name?.toLowerCase().includes(q) ||
-              c.mobile?.toLowerCase().includes(q) ||
-              c.email?.toLowerCase().includes(q),
-          )
-        : list
-    ).slice(0, 15);
+    return list.slice(0, 15);
   });
 
   protected readonly customerOptionValue = (c: Customer): string => c.id ?? '';
@@ -142,9 +137,8 @@ export class CreateCustomerReceiptComponent {
   protected readonly bankCashQuery = signal('');
 
   protected readonly filteredBankCashes = computed<BankCash[]>(() => {
-    const q = this.bankCashQuery().toLowerCase();
     const list = this.bankCashStore.items() as BankCash[];
-    return (q ? list.filter((b) => b.name?.toLowerCase().includes(q)) : list).slice(0, 15);
+    return list.slice(0, 15);
   });
 
   protected readonly bankCashOptionValue = (b: BankCash): string => b.id ?? '';
@@ -360,14 +354,29 @@ export class CreateCustomerReceiptComponent {
   // ── Customer autocomplete ─────────────────────────────────────────────────
 
   protected onCustomerQueryChange(event: unknown): void {
-    const q = typeof event === 'string' ? event : '';
+    const q = typeof event === 'string' ? event.trim() : '';
     this.customerQuery.set(q);
     if (!q) {
       this.selectedCustomer.set(null);
       this.customerid.set('');
       this.invoiceRows.set([]);
     }
-    void this.customerStore.loadCustomers(q ? { where: { name: { ilike: `%${q}%` } } } : {});
+    if (this.customerSearchTimer) clearTimeout(this.customerSearchTimer);
+    this.customerSearchTimer = setTimeout(() => {
+      void this.customerStore.loadCustomers(
+        q
+          ? {
+              where: {
+                or: [
+                  { name: { ilike: `%${q}%` } },
+                  { mobile: { ilike: `%${q}%` } },
+                  { email: { ilike: `%${q}%` } },
+                ],
+              },
+            }
+          : {},
+      );
+    }, DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS);
   }
 
   protected onCustomerValueChange(value: unknown): void {
@@ -398,13 +407,16 @@ export class CreateCustomerReceiptComponent {
   }
 
   protected onBankCashQueryChange(event: unknown): void {
-    const q = typeof event === 'string' ? event : '';
+    const q = typeof event === 'string' ? event.trim() : '';
     this.bankCashQuery.set(q);
     if (!q) {
       this.selectedBankCash.set(null);
       this.bcashid.set('');
     }
-    void this.bankCashStore.loadBankCashes(q ? { where: { name: { ilike: `%${q}%` } } } : {});
+    if (this.bankCashSearchTimer) clearTimeout(this.bankCashSearchTimer);
+    this.bankCashSearchTimer = setTimeout(() => {
+      void this.bankCashStore.loadBankCashes(q ? { where: { name: { ilike: `%${q}%` } } } : {});
+    }, DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS);
   }
 
   protected onBankCashValueChange(value: unknown): void {
