@@ -13,7 +13,7 @@ import {
 } from '@tailng-ui/primitives';
 import { TngIcon } from '@tailng-ui/icons';
 import { CustomerStore } from '../../../data/customer';
-import { InvoiceDocumentService } from '../../../data/invoice-document';
+import { InvoiceDocumentService, type StoredDocument } from '../../../data/invoice-document';
 import { ItemStore } from '../../../data/item';
 import type {
   InvoiceAddress,
@@ -75,9 +75,13 @@ export class CreateSaleInvoiceComponent {
   protected readonly pendingDocumentFiles = signal<readonly File[]>([]);
   protected readonly isPreviewingPdf = signal(false);
   protected readonly isUploadingDocuments = signal(false);
+  protected readonly deletingDocumentId = signal<string | null>(null);
   protected readonly mode = computed(() => (this.id() ? 'edit' : 'create'));
   protected readonly isSaving = computed(
-    () => this.saleInvoiceStore.isLoading() || this.isUploadingDocuments(),
+    () =>
+      this.saleInvoiceStore.isLoading() ||
+      this.isUploadingDocuments() ||
+      this.deletingDocumentId() !== null,
   );
   protected readonly title = computed(() =>
     this.mode() === 'edit' ? 'Edit Sale Invoice' : 'New Sale Invoice',
@@ -191,6 +195,32 @@ export class CreateSaleInvoiceComponent {
       this.toastStore.danger(getApiErrorMessage(error, 'Failed to prepare invoice PDF.'));
     } finally {
       this.isPreviewingPdf.set(false);
+    }
+  }
+
+  protected async deleteDocument(document: StoredDocument): Promise<void> {
+    const parentId = this.id();
+    const documentId = document.id;
+    if (!parentId || !documentId || this.deletingDocumentId()) return;
+    if (!window.confirm(`Remove ${document.name}?`)) return;
+
+    this.deletingDocumentId.set(documentId);
+    try {
+      await this.invoiceDocumentService.deleteInvoiceDocument('saleInvoice', parentId, documentId);
+      const invoice = this.saleInvoiceStore.selectedItem();
+      if (invoice) {
+        const documents = (invoice.documents ?? []).filter((item) => item.id !== documentId);
+        this.saleInvoiceStore.setSelectedItem({
+          ...invoice,
+          documentids: documents.map((item) => item.id).filter((id): id is string => !!id),
+          documents,
+        });
+      }
+      this.toastStore.success('Document removed.');
+    } catch (error) {
+      this.toastStore.danger(getApiErrorMessage(error, 'Failed to remove document.'));
+    } finally {
+      this.deletingDocumentId.set(null);
     }
   }
 

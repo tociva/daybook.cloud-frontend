@@ -12,9 +12,6 @@ import {
   SaleInvoicePrintService,
   SaleInvoiceStore,
 } from '../../../data/sale-invoice';
-import type { SaleInvoice } from '../../../data/sale-invoice';
-import type { StoredDocument } from '../../../data/invoice-document';
-import { InvoiceAttachmentsComponent } from '../../shared/invoice-attachments/invoice-attachments.component';
 import { SaleInvoiceDraftStore } from '../create-sale-invoice/sale-invoice-draft.store';
 import { SiCustomerComponent } from '../create-sale-invoice/si-customer/si-customer.component';
 import { SiInvoiceDetailsComponent } from '../create-sale-invoice/si-invoice-details/si-invoice-details.component';
@@ -28,7 +25,6 @@ import { SiLineItemsComponent } from '../create-sale-invoice/si-line-items/si-li
     BurlBackButtonComponent,
     BurlDeleteButtonComponent,
     BurlEditButtonComponent,
-    InvoiceAttachmentsComponent,
     TngButtonComponent,
     TngIcon,
     SiCustomerComponent,
@@ -100,15 +96,5 @@ export class ViewSaleInvoiceComponent {
     } finally {
       this.isPreviewingPdf.set(false);
     }
-  }
-
-  protected onDocumentsChanged(documents: readonly StoredDocument[]): void {
-    const invoice = this.saleInvoiceStore.selectedItem();
-    if (!invoice) return;
-    this.saleInvoiceStore.setSelectedItem({
-      ...invoice,
-      documentids: documents.map((document) => document.id).filter((id): id is string => !!id),
-      documents,
-    } satisfies SaleInvoice);
   }
 }

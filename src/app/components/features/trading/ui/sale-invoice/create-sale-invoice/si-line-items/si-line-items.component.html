@@ -17,12 +17,15 @@
       Show Description
     </label>
 
-    <app-invoice-document-picker
+    <app-invoice-document-tags
       class="si-li-document-picker"
+      [editable]="true"
+      [documents]="documents()"
       [files]="documentFiles()"
       [disabled]="documentsDisabled()"
       [uploading]="documentsUploading()"
       (filesChange)="documentFilesChange.emit($event)"
+      (documentRemove)="documentRemove.emit($event)"
     />
 
     <tng-button
@@ -36,6 +39,10 @@
       Add Row
     </tng-button>
   </div>
+}
+
+@if (readOnly() && documents().length) {
+  <app-invoice-document-tags [documents]="documents()" />
 }
 
 <!-- ── Table ─────────────────────────────────────────────────────────────── -->

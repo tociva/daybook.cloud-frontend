@@ -13,12 +13,9 @@
     <div class="invoice-layout">
       <div class="invoice-main">
         <app-si-customer [readOnly]="true" />
-        <app-si-line-items [readOnly]="true" />
-        <app-invoice-attachments
-          resourceType="saleInvoice"
-          [parentId]="saleInvoiceStore.selectedItem()?.id ?? ''"
+        <app-si-line-items
+          [readOnly]="true"
           [documents]="saleInvoiceStore.selectedItem()?.documents ?? []"
-          (documentsChanged)="onDocumentsChanged($event)"
         />
       </div>
 

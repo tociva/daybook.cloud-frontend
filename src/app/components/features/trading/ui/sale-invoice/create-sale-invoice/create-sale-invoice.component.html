@@ -20,9 +20,15 @@
       <app-si-customer (customerSelected)="onCustomerSelected()" />
       <app-si-line-items
         [documentFiles]="pendingDocumentFiles()"
-        [documentsDisabled]="saleInvoiceStore.isLoading()"
+        [documents]="
+          saleInvoiceStore.selectedItem()?.id === id()
+            ? (saleInvoiceStore.selectedItem()?.documents ?? [])
+            : []
+        "
+        [documentsDisabled]="isSaving()"
         [documentsUploading]="isUploadingDocuments()"
         (documentFilesChange)="pendingDocumentFiles.set($event)"
+        (documentRemove)="deleteDocument($event)"
       />
       <div class="invoice-drop-overlay" aria-hidden="true">
         <div class="invoice-drop-overlay__inner">

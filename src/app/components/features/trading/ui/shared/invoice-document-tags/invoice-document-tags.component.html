@@ -1,0 +1,116 @@
+@if (editable()) {
+  <input
+    [id]="inputId"
+    class="document-tags__input"
+    type="file"
+    multiple
+    [disabled]="isDisabled()"
+    (change)="onBrowse($event)"
+  />
+}
+
+@if (hasAttachments()) {
+  <div
+    class="document-tags"
+    [class.document-tags--clickable]="editable()"
+    [class.document-tags--disabled]="isDisabled()"
+    aria-label="Attachments"
+    [attr.role]="editable() ? 'button' : null"
+    [attr.tabindex]="editable() && !isDisabled() ? 0 : null"
+    (click)="browse()"
+    (keydown)="onPanelKeydown($event)"
+  >
+    @for (document of documents(); track trackDocument($index, document)) {
+      <tng-tooltip
+        class="document-chip-tooltip"
+        side="top"
+        [openDelay]="150"
+        [ariaLabel]="documentDetails(document)"
+      >
+        <tng-tag
+          trigger
+          class="document-chip"
+          appearance="soft"
+          tone="neutral"
+          size="sm"
+          [label]="document.name"
+        >
+          <tng-icon icon="paperclip" aria-hidden="true" />
+          <span class="document-chip__name">{{ document.name }}</span>
+          <span class="document-chip__size">{{ formatFileSize(document.size) }}</span>
+          @if (editable()) {
+            <button
+              type="button"
+              class="document-chip__remove"
+              [disabled]="isDisabled()"
+              (click)="removeDocument(document, $event)"
+              [attr.aria-label]="'Remove ' + document.name"
+            >
+              <tng-icon icon="x" aria-hidden="true" />
+            </button>
+          }
+        </tng-tag>
+
+        <div class="document-chip-tooltip__content">
+          <strong>{{ document.name }}</strong>
+          <span>{{ formatFileSize(document.size) }}</span>
+          <span>{{ documentType(document) }}</span>
+        </div>
+      </tng-tooltip>
+    }
+
+    @for (file of files(); track trackFile($index, file)) {
+      <tng-tooltip
+        class="document-chip-tooltip"
+        side="top"
+        [openDelay]="150"
+        [ariaLabel]="fileDetails(file)"
+      >
+        <tng-tag
+          trigger
+          class="document-chip"
+          appearance="soft"
+          tone="neutral"
+          size="sm"
+          [label]="file.name"
+        >
+          <tng-icon icon="paperclip" aria-hidden="true" />
+          <span class="document-chip__name">{{ file.name }}</span>
+          <span class="document-chip__size">{{ formatFileSize(file.size) }}</span>
+          @if (editable()) {
+            <button
+              type="button"
+              class="document-chip__remove"
+              [disabled]="isDisabled()"
+              (click)="removeFile(file, $event)"
+              [attr.aria-label]="'Remove ' + file.name"
+            >
+              <tng-icon icon="x" aria-hidden="true" />
+            </button>
+          }
+        </tng-tag>
+
+        <div class="document-chip-tooltip__content">
+          <strong>{{ file.name }}</strong>
+          <span>{{ formatFileSize(file.size) }}</span>
+          <span>{{ file.type || 'Unknown type' }}</span>
+        </div>
+      </tng-tooltip>
+    }
+  </div>
+} @else if (editable() && canAttach()) {
+  <tng-button
+    type="button"
+    appearance="outline"
+    tone="neutral"
+    [disabled]="isDisabled()"
+    (click)="browse()"
+  >
+    @if (uploading()) {
+      <tng-icon icon="loaderCircle" aria-hidden="true" class="spin" />
+    } @else {
+      <tng-icon icon="paperclip" aria-hidden="true" />
+    }
+    Attach Documents
+  </tng-button>
+}

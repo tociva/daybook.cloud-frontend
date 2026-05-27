@@ -11,9 +11,10 @@ import {
 import { TngIcon } from '@tailng-ui/icons';
 import type { Item } from '../../../../data/item';
 import { ItemStore } from '../../../../data/item';
+import type { StoredDocument } from '../../../../data/invoice-document';
 import { UserSessionStore } from '../../../../../management/data/user-session/user-session.store';
 import { InvoiceGrandTotalDisplayComponent } from '../../../../../../../shared/invoice-grand-total-display/invoice-grand-total-display.component';
-import { InvoiceDocumentPickerComponent } from '../../../shared/invoice-document-picker/invoice-document-picker.component';
+import { InvoiceDocumentTagsComponent } from '../../../shared/invoice-document-tags/invoice-document-tags.component';
 import { SaleInvoiceDraftStore, type ItemRow } from '../sale-invoice-draft.store';
 
 /** Sentinel id used to represent the "Create new item" action inside the options list. */
@@ -47,7 +48,7 @@ const INTERACTIVE_CLICK_TARGET_SELECTOR = [
     TngTextareaComponent,
     TngIcon,
     InvoiceGrandTotalDisplayComponent,
-    InvoiceDocumentPickerComponent,
+    InvoiceDocumentTagsComponent,
   ],
   templateUrl: './si-line-items.component.html',
   styleUrl: './si-line-items.component.css',
@@ -59,9 +60,11 @@ export class SiLineItemsComponent {
   private  readonly router        = inject(Router);
   readonly readOnly = input(false);
   readonly documentFiles = input<readonly File[]>([]);
+  readonly documents = input<readonly StoredDocument[]>([]);
   readonly documentsDisabled = input(false);
   readonly documentsUploading = input(false);
   readonly documentFilesChange = output<readonly File[]>();
+  readonly documentRemove = output<StoredDocument>();
   protected readonly lineItemsForm = form(this.draft.items);
   protected readonly rowCount = computed(() => this.lineItemsForm().value().length);
   protected readonly itemOptionValue = (item: Item): string => item.id ?? '';
