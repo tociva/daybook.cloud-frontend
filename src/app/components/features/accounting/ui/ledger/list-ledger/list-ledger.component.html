@@ -66,24 +66,24 @@
       >
         <ng-template tngTableCellTemplate="name" let-row="row">
           <button type="button" class="link-button" (click)="viewLedger(row)">
-            {{ row.name || '—' }}
+            {{ row.name }}
           </button>
         </ng-template>
 
         <ng-template tngTableCellTemplate="category" let-row="row">
-          {{ row.category?.name || '—' }}
+          {{ row.category?.name }}
         </ng-template>
 
         <ng-template tngTableCellTemplate="openingdr" let-row="row">
-          {{ row.openingdr != null ? row.openingdr : '—' }}
+          {{ row.openingdr }}
         </ng-template>
 
         <ng-template tngTableCellTemplate="openingcr" let-row="row">
-          {{ row.openingcr != null ? row.openingcr : '—' }}
+          {{ row.openingcr }}
         </ng-template>
 
         <ng-template tngTableCellTemplate="description" let-row="row">
-          {{ row.description || '—' }}
+          {{ row.description }}
         </ng-template>
 
         <ng-template tngTableCellTemplate="actions" let-row="row">

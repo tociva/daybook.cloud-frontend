@@ -66,20 +66,20 @@
       >
         <ng-template tngTableCellTemplate="name" let-row="row">
           <button type="button" class="link-button" (click)="viewLedgerCategory(row)">
-            {{ row.name || '—' }}
+            {{ row.name }}
           </button>
         </ng-template>
 
         <ng-template tngTableCellTemplate="type" let-row="row">
-          {{ row.props?.type || '—' }}
+          {{ row.props?.type }}
         </ng-template>
 
         <ng-template tngTableCellTemplate="parent" let-row="row">
-          {{ row.parent?.name || '—' }}
+          {{ row.parent?.name }}
         </ng-template>
 
         <ng-template tngTableCellTemplate="description" let-row="row">
-          {{ row.description || '—' }}
+          {{ row.description }}
         </ng-template>
 
         <ng-template tngTableCellTemplate="actions" let-row="row">
