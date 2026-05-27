@@ -162,10 +162,16 @@
     "url": "/app/accounting/ledger-category/create"
   },
   {
-    "title": "Journal",
-    "description": "Record accounting journal entries.",
-    "keywords": ["journal", "entries", "accounting", "voucher"],
+    "title": "List Journal",
+    "description": "View and manage accounting journal entries.",
+    "keywords": ["list journal", "journal", "entries", "accounting", "voucher"],
     "url": "/app/accounting/journal"
+  },
+  {
+    "title": "Create Journal",
+    "description": "Add a new accounting journal entry.",
+    "keywords": ["create journal", "journal", "entries", "accounting", "voucher", "new journal"],
+    "url": "/app/accounting/journal/create"
   },
   {
     "title": "Documents",

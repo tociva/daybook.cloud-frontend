@@ -1,0 +1,62 @@
+.accounting-page {
+  padding: 1.25rem;
+}
+
+tng-card {
+  max-width: 48rem;
+}
+
+.details-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0 0 1.25rem;
+}
+
+.details-grid > div {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  padding: 0.85rem;
+}
+
+.wide {
+  grid-column: 1 / -1;
+}
+
+dt {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+  text-transform: uppercase;
+}
+
+dd {
+  color: var(--tng-semantic-foreground-primary);
+  margin: 0;
+  word-break: break-word;
+}
+
+.notice {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+}
+
+.notice--danger {
+  border-color: var(--tng-semantic-accent-danger);
+  color: var(--tng-semantic-accent-danger);
+}
+
+.confirm-row {
+  align-items: flex-start;
+  cursor: pointer;
+  display: flex;
+  gap: 0.65rem;
+  margin-top: 0.5rem;
+}
+
+.confirm-row span {
+  line-height: 1.45;
+}

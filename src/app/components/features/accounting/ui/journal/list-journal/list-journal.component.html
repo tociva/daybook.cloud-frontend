@@ -1,0 +1,131 @@
+<main class="management-page">
+  <app-page-heading
+    eyebrow="Accounting"
+    title="Journals"
+    description="View and manage general journal vouchers for the current fiscal year."
+  >
+    <app-crud-filter-popover
+      ariaLabel="Journal filters"
+      title="Filter journals"
+      [fields]="filterFields"
+      [filter]="crudQuery.filter()"
+      syncUrl
+    />
+
+    <tng-button type="button" appearance="outline" tone="neutral" (click)="openLedgers()">
+      <tng-icon icon="bookOpen" aria-hidden="true" />
+      Ledgers
+    </tng-button>
+
+    <tng-button type="button" appearance="solid" tone="primary" (click)="createJournal()">
+      <tng-icon icon="plus" aria-hidden="true" />
+      New journal
+    </tng-button>
+  </app-page-heading>
+
+  <tng-card variant="outline" padding="lg">
+    @if (journalStore.error()) {
+      <div class="notice notice--danger">{{ journalStore.error() }}</div>
+    }
+
+    <div class="table-stack">
+      @if (!journalStore.isLoading() && !hasError() && journalStore.items().length === 0) {
+        @if (crudQuery.hasActiveFilter()) {
+          <app-empty-state
+            icon="searchX"
+            title="No journals match your filter"
+            description="Try adjusting or clearing your filter to find what you're looking for."
+          >
+            <tng-button type="button" appearance="outline" tone="neutral" (click)="crudQuery.clearFilter()">
+              Clear filter
+            </tng-button>
+          </app-empty-state>
+        } @else {
+          <app-empty-state
+            icon="bookOpen"
+            title="No journals yet"
+            description="Create a journal entry to record debits and credits across ledgers."
+          >
+            <tng-button type="button" appearance="solid" tone="primary" (click)="createJournal()">
+              <tng-icon icon="plus" aria-hidden="true" />
+              New journal
+            </tng-button>
+          </app-empty-state>
+        }
+      } @else {
+        <tng-table
+          ariaLabel="Journals"
+          density="comfortable"
+          [columns]="columns"
+          [items]="journalStore.items()"
+          [loading]="journalStore.isLoading()"
+          [error]="hasError()"
+          [sortActive]="crudQuery.sortActive()"
+          [sortDirection]="crudQuery.sortDirection()"
+          (sortChange)="crudQuery.applySort($event)"
+        >
+          <ng-template tngTableCellTemplate="number" let-row="row">
+            <button type="button" class="link-button" (click)="viewJournal(row)">
+              {{ row.number }}
+            </button>
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="date" let-row="row">
+            {{ row.date }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="description" let-row="row">
+            {{ row.description }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="debit" let-row="row">
+            {{ sumDebit(row) }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="credit" let-row="row">
+            {{ sumCredit(row) }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="actions" let-row="row">
+            <div class="row-actions">
+              <button
+                type="button"
+                class="action-icon"
+                aria-label="View journal"
+                (click)="viewJournal(row)"
+              >
+                <tng-icon icon="eye" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                class="action-icon"
+                aria-label="Edit journal"
+                (click)="editJournal(row)"
+              >
+                <tng-icon icon="pencil" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                class="action-icon action-icon--danger"
+                aria-label="Delete journal"
+                (click)="deleteJournal(row)"
+              >
+                <tng-icon icon="trash2" aria-hidden="true" />
+              </button>
+            </div>
+          </ng-template>
+        </tng-table>
+
+        <div class="table-footer">
+          <app-crud-paginator
+            ariaLabel="Journal pagination"
+            [filter]="crudQuery.filter()"
+            [totalItems]="journalStore.count()"
+            [pageSizeOptions]="crudQuery.pageSizeOptions()"
+            syncUrl
+          />
+        </div>
+      }
+    </div>
+  </tng-card>
+</main>

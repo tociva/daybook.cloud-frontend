@@ -1,0 +1,180 @@
+<main class="accounting-page">
+  <section class="setup-layout" aria-labelledby="journal-setup-title">
+    <form class="journal-form" (submit)="submitForm($event)" novalidate>
+      <tng-card variant="outline" padding="lg">
+        <tng-card-header>
+          <tng-card-title>{{ title() }}</tng-card-title>
+          <tng-card-description
+            >Record balanced debit and credit transactions across ledgers for the current fiscal year.</tng-card-description
+          >
+        </tng-card-header>
+
+        <tng-card-content>
+          @if (journalStore.error()) {
+            <div class="notice notice--danger">{{ journalStore.error() }}</div>
+          }
+
+          @if (journalStore.isLoading() && mode() === 'edit' && !journalStore.selectedItem()) {
+            <div class="notice">Loading journal...</div>
+          } @else {
+            <div class="field-grid">
+              <div class="field">
+                <tng-form-field labelPosition="above" [invalid]="dateError() !== null">
+                  <tng-label forId="j-date" required>Date</tng-label>
+                  <app-fiscal-year-datepicker
+                    id="j-date"
+                    [value]="journalDateForPicker()"
+                    [invalid]="dateError() !== null"
+                    (valueChange)="onDateChange($event)"
+                  />
+                  <tng-error [show]="dateError() !== null">{{ dateError() }}</tng-error>
+                </tng-form-field>
+              </div>
+
+              <div class="field">
+                <tng-form-field labelPosition="above">
+                  <tng-label forId="j-number">Number</tng-label>
+                  <tng-input
+                    id="j-number"
+                    placeholder="Leave blank to auto-generate"
+                    [value]="journalNumber()"
+                    (valueChange)="journalNumber.set($any($event) ?? '')"
+                  />
+                </tng-form-field>
+              </div>
+
+              <div class="field field--wide">
+                <tng-form-field labelPosition="above">
+                  <tng-label forId="j-description">Description</tng-label>
+                  <tng-textarea
+                    id="j-description"
+                    placeholder="Optional narration"
+                    rows="2"
+                    [value]="journalDescription()"
+                    (valueChange)="journalDescription.set($any($event) ?? '')"
+                  />
+                </tng-form-field>
+              </div>
+            </div>
+
+            <p class="section-label">Transactions</p>
+
+            @if (entryErrors().length > 0) {
+              <div class="notice notice--danger">
+                <ul class="error-list">
+                  @for (err of entryErrors(); track err) {
+                    <li>{{ err }}</li>
+                  }
+                </ul>
+              </div>
+            }
+
+            <div class="lines-header" aria-hidden="true">
+              <span class="lines-header__ledger">Ledger</span>
+              <span class="lines-header__debit">Debit</span>
+              <span class="lines-header__credit">Credit</span>
+              <span class="lines-header__act"></span>
+            </div>
+
+            @for (row of rows(); track row.uid) {
+              <div class="line-row">
+                <div class="line-row__ledger-wrap" (focusin)="onLedgerAutocompleteFocus()">
+                  <tng-autocomplete
+                    class="line-row__ledger"
+                    [attr.id]="'j-ledger-' + row.uid"
+                    placeholder="Search ledger..."
+                    ariaLabel="Ledger"
+                    [options]="ledgerAutocompleteOptions()"
+                    [value]="row.ledgerId"
+                    [getOptionValue]="ledgerOptionValue"
+                    [getOptionLabel]="ledgerOptionLabel"
+                    [trackBy]="ledgerTrackBy"
+                    (valueChange)="onLedgerPick(row.uid, $event)"
+                    (queryChange)="onLedgerQueryChange($event)"
+                  />
+                </div>
+
+                <tng-input
+                  class="line-row__debit"
+                  type="number"
+                  placeholder="0.00"
+                  [value]="row.debit"
+                  (valueChange)="onDebitChange(row.uid, $event)"
+                />
+
+                <tng-input
+                  class="line-row__credit"
+                  type="number"
+                  placeholder="0.00"
+                  [value]="row.credit"
+                  (valueChange)="onCreditChange(row.uid, $event)"
+                />
+
+                <div class="line-row__act">
+                  <tng-button
+                    type="button"
+                    appearance="ghost"
+                    tone="danger"
+                    [disabled]="rows().length <= 2"
+                    (click)="removeLine(row.uid)"
+                    aria-label="Remove transaction"
+                  >
+                    <tng-icon icon="trash2" aria-hidden="true" />
+                  </tng-button>
+                </div>
+              </div>
+            }
+
+            <div class="lines-toolbar">
+              <tng-button type="button" appearance="outline" tone="neutral" (click)="addLine()">
+                <tng-icon icon="plus" aria-hidden="true" />
+                Add transaction
+              </tng-button>
+            </div>
+
+            <div class="totals-bar" aria-live="polite">
+              <span
+                >Debit total: <strong>{{ totalsPreview().debit }}</strong></span
+              >
+              <span
+                >Credit total: <strong>{{ totalsPreview().credit }}</strong></span
+              >
+              <span [class.totals-bar__diff]="!totalsPreview().balanced && (totalsPreview().debit > 0 || totalsPreview().credit > 0)">
+                Difference: <strong>{{ totalsPreview().diff }}</strong>
+              </span>
+            </div>
+
+            <tng-card-footer>
+              <tng-card-actions align="end">
+                <app-burl-back-button label="Cancel" />
+                <app-burl-create-button
+                  [icon]="mode() === 'edit' ? 'save' : 'plus'"
+                  [label]="mode() === 'edit' ? 'Save changes' : 'Create journal'"
+                  [disabled]="journalStore.isLoading()"
+                />
+              </tng-card-actions>
+            </tng-card-footer>
+          }
+        </tng-card-content>
+      </tng-card>
+    </form>
+
+    <aside class="setup-overview" aria-labelledby="journal-setup-title">
+      <div class="setup-copy">
+        <p class="eyebrow">Journal setup</p>
+        <h1 id="journal-setup-title">{{ title() }}</h1>
+        <p>
+          Set the journal date within the fiscal year, then post balanced debit and credit transactions to
+          the correct ledgers before saving.
+        </p>
+        <tng-stepper
+          class="setup-stepper"
+          ariaLabel="Journal setup progress"
+          [ordered]="true"
+          [steps]="setupSteps()"
+          [value]="activeSetupStep()"
+        />
+      </div>
+    </aside>
+  </section>
+</main>

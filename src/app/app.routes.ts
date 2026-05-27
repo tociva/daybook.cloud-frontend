@@ -146,5 +146,12 @@ export const routes: Routes = [
         (m) => m.ledgerRoutes,
       ),
   },
+  {
+    path: 'app/accounting/journal',
+    loadChildren: () =>
+      import('./components/features/accounting/ui/journal/journal.routes').then(
+        (m) => m.journalRoutes,
+      ),
+  },
   { path: 'bootstrap/bootstrap-organization', component: BootstrapOrganizationComponent },
 ];

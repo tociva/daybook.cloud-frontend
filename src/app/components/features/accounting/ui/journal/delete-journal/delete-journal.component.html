@@ -1,0 +1,56 @@
+<main class="accounting-page">
+  <tng-card variant="outline" tone="danger" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Delete journal</tng-card-title>
+      <tng-card-description>This action cannot be undone.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (journalStore.error()) {
+        <div class="notice notice--danger">{{ journalStore.error() }}</div>
+      }
+
+      @if (journalStore.isLoading() && !journalStore.selectedItem()) {
+        <div class="notice">Loading journal...</div>
+      } @else if (journalStore.selectedItem(); as journal) {
+        <dl class="details-grid">
+          <div>
+            <dt>Number</dt>
+            <dd>{{ journal.number }}</dd>
+          </div>
+          <div>
+            <dt>Date</dt>
+            <dd>{{ journal.date }}</dd>
+          </div>
+          @if (journal.description) {
+            <div class="wide">
+              <dt>Description</dt>
+              <dd>{{ journal.description }}</dd>
+            </div>
+          }
+        </dl>
+
+        <label class="confirm-row">
+          <tng-checkbox [checked]="confirmed()" (checkedChange)="confirmed.set(!!$event)" />
+          <span
+            >I understand that journal <strong>{{ journal.number }}</strong> will be permanently
+            deleted.</span
+          >
+        </label>
+      } @else {
+        <div class="notice">Journal not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button label="Cancel" />
+        <app-burl-delete-button
+          [label]="journalStore.isLoading() ? 'Deleting…' : 'Delete journal'"
+          [disabled]="!confirmed() || journalStore.isLoading()"
+          (clicked)="deleteJournal()"
+        />
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>
