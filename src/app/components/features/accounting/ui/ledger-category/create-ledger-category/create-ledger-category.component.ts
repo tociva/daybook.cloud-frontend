@@ -17,6 +17,7 @@ import {
   TngStepperComponent,
   TngTextareaComponent,
 } from '@tailng-ui/components';
+import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
 import {
@@ -57,6 +58,7 @@ type LedgerCategoryFormModel = {
     TngLabelComponent,
     TngStepperComponent,
     TngTextareaComponent,
+    TngIcon,
     BurlBackButtonComponent,
     BurlCreateButtonComponent,
   ],
@@ -109,6 +111,19 @@ export class CreateLedgerCategoryComponent implements AfterViewInit {
   protected readonly parentOptionLabel = (cat: LedgerCategory): string => cat.name ?? '';
   protected readonly parentTrackBy = (_i: number, cat: LedgerCategory): string => cat.id ?? '';
 
+  protected readonly parentClearDisabled = computed(
+    () => this.categoryModel().parentId.trim() === '',
+  );
+
+  /** Type is only for root-level categories (no parent). */
+  protected readonly typeFieldDisabled = computed(
+    () => this.categoryModel().parentId.trim() !== '',
+  );
+
+  protected readonly typeAutocompletePlaceholder = computed(() =>
+    this.typeFieldDisabled() ? 'Clear parent to set type' : 'Select a type',
+  );
+
   // ── Validation ────────────────────────────────────────────────────────────
   protected readonly nameError = computed(() =>
     this.submitted() && this.categoryModel().name.trim() === '' ? 'Name is required.' : null,
@@ -132,7 +147,7 @@ export class CreateLedgerCategoryComponent implements AfterViewInit {
       {
         value: 'classification',
         label: 'Type & hierarchy',
-        description: 'Optional type and parent category',
+        description: 'Root type or parent category (one at a time)',
         completed: classificationCompleted,
       },
       {
@@ -174,23 +189,40 @@ export class CreateLedgerCategoryComponent implements AfterViewInit {
       includes: ['parent'],
     });
     if (cat) {
+      const parentId = cat.parent?.id ?? cat.parentid ?? '';
+      const hasParent = parentId.trim() !== '';
       this.categoryModel.set({
         name: cat.name ?? '',
-        type: cat.props?.type ?? '',
-        parentId: cat.parent?.id ?? cat.parentid ?? '',
+        type: hasParent ? '' : (cat.props?.type ?? ''),
+        parentId,
         description: cat.description ?? '',
       });
     }
   }
 
   protected onTypeChange(value: unknown): void {
+    if (this.categoryModel().parentId.trim() !== '') return;
     const type = typeof value === 'string' ? value : '';
     this.categoryModel.update((m) => ({ ...m, type }));
   }
 
   protected onParentChange(value: unknown): void {
-    const parentId = typeof value === 'string' ? value : '';
-    this.categoryModel.update((m) => ({ ...m, parentId }));
+    const parentId =
+      value == null || value === '' ? '' : typeof value === 'string' ? value : String(value);
+    const hasParent = parentId.trim() !== '';
+    this.categoryModel.update((m) => ({
+      ...m,
+      parentId,
+      ...(hasParent ? { type: '' } : {}),
+    }));
+    if (hasParent) {
+      this.typeQuery.set('');
+    }
+  }
+
+  protected clearParent(): void {
+    this.parentQuery.set('');
+    this.categoryModel.update((m) => ({ ...m, parentId: '' }));
   }
 
   protected onTypeQueryChange(event: unknown): void {
@@ -218,10 +250,11 @@ export class CreateLedgerCategoryComponent implements AfterViewInit {
     if (this.nameError()) return;
 
     const m = this.categoryModel();
+    const parentid = m.parentId.trim() === '' ? null : m.parentId.trim();
     const payload: LedgerCategoryPayload = {
       name: m.name.trim(),
+      parentid,
       ...(m.description.trim() ? { description: m.description.trim() } : {}),
-      ...(m.parentId ? { parentid: m.parentId } : {}),
       ...(m.type ? { props: { type: m.type as LedgerCategoryType } } : {}),
     };
 

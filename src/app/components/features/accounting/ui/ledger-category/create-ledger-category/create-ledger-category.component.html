@@ -5,7 +5,8 @@
         <tng-card-header>
           <tng-card-title>{{ title() }}</tng-card-title>
           <tng-card-description
-            >Define the category name, type, and optional parent hierarchy.</tng-card-description
+            >Define the category name, then either a root-level type or a parent category (not
+            both).</tng-card-description
           >
         </tng-card-header>
 
@@ -36,37 +37,55 @@
 
               <div class="field">
                 <tng-form-field labelPosition="above">
-                  <tng-label forId="lc-type">Type</tng-label>
-                  <tng-autocomplete
-                    id="lc-type"
-                    placeholder="Select a type"
-                    ariaLabel="Category type"
-                    [options]="filteredTypeOptions()"
-                    [formField]="categoryForm.type"
-                    [getOptionValue]="typeOptionValue"
-                    [getOptionLabel]="typeOptionLabel"
-                    [trackBy]="typeTrackBy"
-                    (valueChange)="onTypeChange($event)"
-                    (queryChange)="onTypeQueryChange($event)"
-                  />
+                  <tng-label forId="lc-parent">Parent Category</tng-label>
+                  <div class="parent-autocomplete-row">
+                    <tng-autocomplete
+                      class="parent-autocomplete"
+                      id="lc-parent"
+                      placeholder="Search parent category..."
+                      ariaLabel="Parent category"
+                      [options]="filteredParentOptions()"
+                      [formField]="categoryForm.parentId"
+                      [getOptionValue]="parentOptionValue"
+                      [getOptionLabel]="parentOptionLabel"
+                      [trackBy]="parentTrackBy"
+                      (valueChange)="onParentChange($event)"
+                      (queryChange)="onParentQueryChange($event)"
+                    />
+                    <button
+                      type="button"
+                      class="parent-clear-btn"
+                      [disabled]="parentClearDisabled()"
+                      (click)="clearParent()"
+                      aria-label="Clear parent category"
+                    >
+                      <tng-icon icon="x" aria-hidden="true" />
+                    </button>
+                  </div>
                 </tng-form-field>
               </div>
 
               <div class="field">
                 <tng-form-field labelPosition="above">
-                  <tng-label forId="lc-parent">Parent Category</tng-label>
-                  <tng-autocomplete
-                    id="lc-parent"
-                    placeholder="Search parent category..."
-                    ariaLabel="Parent category"
-                    [options]="filteredParentOptions()"
-                    [formField]="categoryForm.parentId"
-                    [getOptionValue]="parentOptionValue"
-                    [getOptionLabel]="parentOptionLabel"
-                    [trackBy]="parentTrackBy"
-                    (valueChange)="onParentChange($event)"
-                    (queryChange)="onParentQueryChange($event)"
-                  />
+                  <tng-label forId="lc-type">Type</tng-label>
+                  <div
+                    class="type-autocomplete-wrap"
+                    [class.type-autocomplete-wrap--disabled]="typeFieldDisabled()"
+                    [attr.inert]="typeFieldDisabled() ? '' : null"
+                  >
+                    <tng-autocomplete
+                      id="lc-type"
+                      [placeholder]="typeAutocompletePlaceholder()"
+                      ariaLabel="Category type"
+                      [options]="filteredTypeOptions()"
+                      [formField]="categoryForm.type"
+                      [getOptionValue]="typeOptionValue"
+                      [getOptionLabel]="typeOptionLabel"
+                      [trackBy]="typeTrackBy"
+                      (valueChange)="onTypeChange($event)"
+                      (queryChange)="onTypeQueryChange($event)"
+                    />
+                  </div>
                 </tng-form-field>
               </div>
 
@@ -103,8 +122,8 @@
         <p class="eyebrow">Category setup</p>
         <h1 id="ledger-category-setup-title">{{ title() }}</h1>
         <p>
-          Give the ledger category a clear name, optionally set its type and parent for hierarchy, so
-          ledgers and reports stay organized in Daybook Cloud.
+          Name the category, then either pick a root-level type or nest it under a parent — not both.
+          Add an optional description when needed.
         </p>
         <tng-stepper
           class="setup-stepper"

@@ -18,7 +18,7 @@ export type LedgerCategoryPayload = Readonly<{
   name: string;
   description?: string;
   props?: LedgerCategoryProps;
-  parentid?: string;
+  parentid?: string | null;
 }>;
 
 export type LedgerCategory = LedgerCategoryPayload &
