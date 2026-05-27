@@ -1,9 +1,12 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
 import { DateManagementService } from '../../../../../core/date/date-management.service';
 import { BranchSaleInvoiceTemplateService } from '../../../management/data/branch';
 import type { SaleInvoiceTemplateType } from '../../../management/data/branch';
 import { OrganizationService } from '../../../management/data/organization';
+import type { OrganizationLogoVariant } from '../../../management/data/organization';
 import { UserSessionStore } from '../../../management/data/user-session/user-session.store';
 import type { SaleInvoice, SaleItem, SaleItemTax } from './sale-invoice.model';
 import { SALE_INVOICE_DETAIL_INCLUDES } from './sale-invoice.model';
@@ -23,12 +26,18 @@ type TemplateAddress = Readonly<{
   name?: string;
 }>;
 
+const LOGO_CACHE_SUFFIX_BY_VARIANT: Record<OrganizationLogoVariant, string> = {
+  normal: '-normal-logo',
+  small: '-small-logo',
+};
+
 @Injectable({ providedIn: 'root' })
 export class SaleInvoicePrintService {
   private static readonly itemsStartToken = '[[items_start]]';
   private static readonly itemsEndToken = '[[items_end]]';
 
   private readonly dateManagement = inject(DateManagementService);
+  private readonly http = inject(HttpClient);
   private readonly organizationService = inject(OrganizationService);
   private readonly saleInvoiceService = inject(SaleInvoiceService);
   private readonly templateService = inject(BranchSaleInvoiceTemplateService);
@@ -42,7 +51,7 @@ export class SaleInvoicePrintService {
       const invoice = await this.resolveInvoice(source);
       const templateType = this.resolveTemplateType(invoice);
       const templateHtml = await this.templateService.getEffectiveTemplateHtml(templateType);
-      const logoSources = await this.resolveLogoSources();
+      const logoSources = await this.resolveLogoSources(templateHtml);
       const html = this.fillTemplate(templateHtml, invoice, logoSources);
       const fileName = `invoice-${this.safeFileName(invoice.number || invoice.id || 'download')}`;
 
@@ -79,6 +88,7 @@ export class SaleInvoicePrintService {
     const shippingAddress = (invoice.shippingaddress ?? null) as TemplateAddress | null;
     const currencyCode =
       invoice.currencycode ?? invoice.currency?.code ?? branch?.currencycode ?? 'INR';
+    const taxTotals = this.taxTotals(invoice);
 
     let filledHtml = this.fillRepeatingBlock(
       html,
@@ -134,6 +144,9 @@ export class SaleInvoicePrintService {
       subtotal: this.formatAmount(invoice.subtotal),
       tax_amount: this.formatAmount(invoice.tax),
       tax: this.formatAmount(invoice.tax),
+      cgst_total: this.formatAmount(taxTotals.cgst),
+      sgst_total: this.formatAmount(taxTotals.sgst),
+      igst_total: this.formatAmount(taxTotals.igst),
       roundoff: this.formatAmount(invoice.roundoff),
       round_off: this.formatAmount(invoice.roundoff),
       grand_total: this.formatAmount(invoice.grandtotal),
@@ -145,8 +158,8 @@ export class SaleInvoicePrintService {
       ),
       description: invoice.description,
 
-      logo_small_src: logoSources.small,
-      logo_large_src: logoSources.normal,
+      logo_small: logoSources.small,
+      logo_normal: logoSources.normal,
     });
 
     return filledHtml;
@@ -209,6 +222,31 @@ export class SaleInvoicePrintService {
     if (maxTaxColumns >= 2) return 'two-tax';
     if (maxTaxColumns === 1 || (invoice.tax ?? 0) > 0) return 'one-tax';
     return 'no-tax';
+  }
+
+  private taxTotals(invoice: SaleInvoice): Record<'cgst' | 'sgst' | 'igst', number> {
+    return (invoice.items ?? []).reduce(
+      (totals, item) => {
+        for (const tax of item.taxes ?? []) {
+          const key = this.taxKey(tax);
+          if (key) {
+            totals[key] += tax.amount ?? 0;
+          }
+        }
+
+        return totals;
+      },
+      { cgst: 0, sgst: 0, igst: 0 },
+    );
+  }
+
+  private taxKey(tax: SaleItemTax): 'cgst' | 'sgst' | 'igst' | null {
+    const name = `${tax.shortname ?? ''} ${tax.name ?? ''}`.toLowerCase();
+
+    if (name.includes('cgst')) return 'cgst';
+    if (name.includes('sgst')) return 'sgst';
+    if (name.includes('igst')) return 'igst';
+    return null;
   }
 
   private fillRepeatingBlock(
@@ -412,27 +450,97 @@ export class SaleInvoicePrintService {
     return this.dateManagement.formatDisplayDate(value, '');
   }
 
-  private async resolveLogoSources(): Promise<Record<'normal' | 'small', string>> {
+  private async resolveLogoSources(
+    templateHtml: string,
+  ): Promise<Record<'normal' | 'small', string>> {
+    const needsSmallLogo = this.hasAnyPlaceholder(templateHtml, ['logo_small']);
+    const needsNormalLogo = this.hasAnyPlaceholder(templateHtml, ['logo_normal']);
+
+    if (!needsSmallLogo && !needsNormalLogo) {
+      return { small: '', normal: '' };
+    }
+
     const session = this.userSessionStore.session();
     const organization = session?.branch?.organization ?? session?.organization ?? null;
+    const organizationId = organization?.id ?? session?.branch?.organizationid ?? null;
 
     const [small, normal] = await Promise.all([
-      this.logoSource(organization?.smalllogodocumentid),
-      this.logoSource(organization?.normallogodocumentid),
+      needsSmallLogo ? this.logoSource(organizationId, 'small') : '',
+      needsNormalLogo ? this.logoSource(organizationId, 'normal') : '',
     ]);
 
     return { small, normal };
   }
 
-  private async logoSource(documentId: string | null | undefined): Promise<string> {
-    if (!documentId) return '';
+  private hasAnyPlaceholder(html: string, placeholders: readonly string[]): boolean {
+    return placeholders.some((placeholder) => html.includes(`[[${placeholder}]]`));
+  }
+
+  private async logoSource(
+    organizationId: string | null,
+    variant: OrganizationLogoVariant,
+  ): Promise<string> {
+    if (!organizationId) return '';
+
+    const cachedLogo = this.readCachedLogo(organizationId, variant);
+    if (cachedLogo) return cachedLogo;
 
     try {
-      const document = await this.organizationService.getLogoDocument(documentId);
-      return document.path ?? '';
+      const document = await this.organizationService.getLogoReadUrl(organizationId, variant);
+      const url = document.getUrl || document.path || '';
+      if (!url) return '';
+
+      const logo = await this.imageUrlToDataUrl(url);
+      if (logo) {
+        this.writeCachedLogo(organizationId, variant, logo);
+      }
+
+      return logo;
     } catch {
       return '';
     }
+  }
+
+  private readCachedLogo(organizationId: string, variant: OrganizationLogoVariant): string | null {
+    try {
+      return (
+        this.readString(localStorage.getItem(this.logoCacheKey(organizationId, variant))) ??
+        this.readString(localStorage.getItem(this.legacyLogoCacheKey(organizationId, variant)))
+      );
+    } catch {
+      return null;
+    }
+  }
+
+  private writeCachedLogo(
+    organizationId: string,
+    variant: OrganizationLogoVariant,
+    logo: string,
+  ): void {
+    try {
+      localStorage.setItem(this.logoCacheKey(organizationId, variant), logo);
+    } catch {
+      // localStorage may be unavailable or over quota.
+    }
+  }
+
+  private logoCacheKey(organizationId: string, variant: OrganizationLogoVariant): string {
+    return `${organizationId}${LOGO_CACHE_SUFFIX_BY_VARIANT[variant]}`;
+  }
+
+  private legacyLogoCacheKey(organizationId: string, variant: OrganizationLogoVariant): string {
+    return `${organizationId}-${variant}`;
+  }
+
+  private async imageUrlToDataUrl(url: string): Promise<string> {
+    const blob = await firstValueFrom(this.http.get(url, { responseType: 'blob' }));
+
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : '');
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(blob);
+    });
   }
 
   private escapeHtml(value: unknown): string {
@@ -456,6 +564,10 @@ export class SaleInvoicePrintService {
       .slice(0, 120);
 
     return fileName || 'download';
+  }
+
+  private readString(value: unknown): string | null {
+    return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null;
   }
 
   private convertAmountToWords(amount: number, currencyCode: string, countryCode = 'IN'): string {
