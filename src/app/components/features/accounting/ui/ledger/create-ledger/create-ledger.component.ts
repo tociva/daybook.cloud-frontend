@@ -14,6 +14,7 @@ import {
   TngFormFieldComponent,
   TngInputComponent,
   TngLabelComponent,
+  TngStepperComponent,
   TngTextareaComponent,
 } from '@tailng-ui/components';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
@@ -49,6 +50,7 @@ type LedgerFormModel = {
     TngFormFieldComponent,
     TngInputComponent,
     TngLabelComponent,
+    TngStepperComponent,
     TngTextareaComponent,
     BurlBackButtonComponent,
     BurlCreateButtonComponent,
@@ -107,6 +109,37 @@ export class CreateLedgerComponent implements AfterViewInit {
     return openingdr !== 0 && openingcr !== 0
       ? 'Enter either Opening DR or Opening CR, not both.'
       : null;
+  });
+
+  // ── Stepper ───────────────────────────────────────────────────────────────
+
+  protected readonly setupSteps = computed(() => {
+    const m = this.ledgerModel();
+    const basicsCompleted = m.name.trim().length > 0 && m.categoryId.trim().length > 0;
+    const openingDr = this.parseOpeningAmount(m.openingdr);
+    const openingCr = this.parseOpeningAmount(m.openingcr);
+    const additionalCompleted =
+      openingDr !== 0 || openingCr !== 0 || m.description.trim().length > 0;
+
+    return [
+      {
+        value: 'basics',
+        label: 'Basics',
+        description: 'Name and ledger category',
+        completed: basicsCompleted,
+      },
+      {
+        value: 'additional',
+        label: 'Balances & notes',
+        description: 'Opening DR or CR, and optional description',
+        completed: additionalCompleted,
+      },
+    ] as const;
+  });
+
+  protected readonly activeSetupStep = computed(() => {
+    const firstPending = this.setupSteps().find((step) => !step.completed);
+    return firstPending?.value ?? 'additional';
   });
 
   constructor() {

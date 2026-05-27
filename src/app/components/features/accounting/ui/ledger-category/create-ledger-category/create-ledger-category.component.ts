@@ -14,6 +14,7 @@ import {
   TngFormFieldComponent,
   TngInputComponent,
   TngLabelComponent,
+  TngStepperComponent,
   TngTextareaComponent,
 } from '@tailng-ui/components';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
@@ -54,6 +55,7 @@ type LedgerCategoryFormModel = {
     TngFormFieldComponent,
     TngInputComponent,
     TngLabelComponent,
+    TngStepperComponent,
     TngTextareaComponent,
     BurlBackButtonComponent,
     BurlCreateButtonComponent,
@@ -111,6 +113,41 @@ export class CreateLedgerCategoryComponent implements AfterViewInit {
   protected readonly nameError = computed(() =>
     this.submitted() && this.categoryModel().name.trim() === '' ? 'Name is required.' : null,
   );
+
+  // ── Stepper ───────────────────────────────────────────────────────────────
+
+  protected readonly setupSteps = computed(() => {
+    const m = this.categoryModel();
+    const nameCompleted = m.name.trim().length > 0;
+    const classificationCompleted = m.type.trim().length > 0 || m.parentId.trim().length > 0;
+    const notesCompleted = m.description.trim().length > 0;
+
+    return [
+      {
+        value: 'name',
+        label: 'Name',
+        description: 'How the category appears in lists',
+        completed: nameCompleted,
+      },
+      {
+        value: 'classification',
+        label: 'Type & hierarchy',
+        description: 'Optional type and parent category',
+        completed: classificationCompleted,
+      },
+      {
+        value: 'notes',
+        label: 'Notes',
+        description: 'Optional internal description',
+        completed: notesCompleted,
+      },
+    ] as const;
+  });
+
+  protected readonly activeSetupStep = computed(() => {
+    const firstPending = this.setupSteps().find((step) => !step.completed);
+    return firstPending?.value ?? 'notes';
+  });
 
   constructor() {
     void this.loadInitialState();

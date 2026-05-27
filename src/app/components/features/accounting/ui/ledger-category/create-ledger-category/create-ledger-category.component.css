@@ -1,9 +1,76 @@
-.accounting-page {
-  padding: 1.25rem;
+:host {
+  display: block;
+  color: var(--tng-semantic-foreground-primary);
 }
 
-tng-card {
-  max-width: 60rem;
+.accounting-page {
+  padding: 1.25rem;
+  min-height: 0;
+  overflow: visible;
+}
+
+.setup-layout {
+  display: grid;
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+  grid-template-columns: minmax(0, 1.4fr) minmax(18rem, 0.6fr);
+  margin: 0 auto;
+  max-width: 76rem;
+  overflow: visible;
+}
+
+.category-form {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+  align-content: start;
+}
+
+.setup-overview {
+  align-self: start;
+  min-width: 0;
+  overflow: visible;
+  position: sticky;
+  top: 1rem;
+  z-index: 1;
+}
+
+.setup-copy {
+  min-width: 0;
+  padding: 1rem 0;
+}
+
+.eyebrow {
+  color: var(--tng-semantic-accent-brand);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  margin: 0 0 0.75rem;
+  text-transform: uppercase;
+}
+
+.setup-copy h1 {
+  font-size: clamp(2rem, 3.5vw, 3.25rem);
+  letter-spacing: -0.06em;
+  line-height: 0.95;
+  margin: 0;
+  max-width: 12ch;
+}
+
+.setup-copy p:last-of-type {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-top: 0.75rem;
+  max-width: 28rem;
+}
+
+.setup-stepper {
+  margin-top: 1rem;
+}
+
+.category-form tng-card {
+  max-width: none;
+  width: 100%;
 }
 
 .notice {
@@ -49,6 +116,21 @@ tng-textarea {
 
 .field-error--empty {
   color: transparent;
+}
+
+@media (max-width: 900px) {
+  .setup-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .setup-overview {
+    order: -1;
+    position: static;
+  }
+
+  .setup-copy h1 {
+    max-width: 16ch;
+  }
 }
 
 @media (max-width: 700px) {

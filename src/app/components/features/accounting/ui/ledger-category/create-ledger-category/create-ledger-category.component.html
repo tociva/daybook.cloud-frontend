@@ -1,99 +1,119 @@
 <main class="accounting-page">
-  <tng-card variant="outline" padding="lg">
-    <tng-card-header>
-      <tng-card-title>{{ title() }}</tng-card-title>
-      <tng-card-description
-        >Define the category name, type, and optional parent hierarchy.</tng-card-description
-      >
-    </tng-card-header>
+  <section class="setup-layout" aria-labelledby="ledger-category-setup-title">
+    <form class="category-form" (submit)="submitForm($event)" novalidate>
+      <tng-card variant="outline" padding="lg">
+        <tng-card-header>
+          <tng-card-title>{{ title() }}</tng-card-title>
+          <tng-card-description
+            >Define the category name, type, and optional parent hierarchy.</tng-card-description
+          >
+        </tng-card-header>
 
-    <tng-card-content>
-      @if (ledgerCategoryStore.error()) {
-        <div class="notice notice--danger">{{ ledgerCategoryStore.error() }}</div>
-      }
+        <tng-card-content>
+          @if (ledgerCategoryStore.error()) {
+            <div class="notice notice--danger">{{ ledgerCategoryStore.error() }}</div>
+          }
 
-      @if (
-        ledgerCategoryStore.isLoading() && mode() === 'edit' && !ledgerCategoryStore.selectedItem()
-      ) {
-        <div class="notice">Loading category...</div>
-      } @else {
-        <form (submit)="submitForm($event)" novalidate>
-          <div class="field-grid">
-            <div class="field field--wide">
-              <tng-form-field labelPosition="above" [invalid]="nameError() !== null">
-                <tng-label forId="lc-name" required>Name</tng-label>
-                <tng-input
-                  #nameInputRef
-                  id="lc-name"
-                  placeholder="e.g. Current Assets"
-                  [formField]="categoryForm.name"
-                  [ariaInvalid]="nameError() !== null"
-                />
-                <tng-error [show]="nameError() !== null">{{ nameError() }}</tng-error>
-              </tng-form-field>
+          @if (
+            ledgerCategoryStore.isLoading() && mode() === 'edit' && !ledgerCategoryStore.selectedItem()
+          ) {
+            <div class="notice">Loading category...</div>
+          } @else {
+            <div class="field-grid">
+              <div class="field field--wide">
+                <tng-form-field labelPosition="above" [invalid]="nameError() !== null">
+                  <tng-label forId="lc-name" required>Name</tng-label>
+                  <tng-input
+                    #nameInputRef
+                    id="lc-name"
+                    placeholder="e.g. Current Assets"
+                    [formField]="categoryForm.name"
+                    [ariaInvalid]="nameError() !== null"
+                  />
+                  <tng-error [show]="nameError() !== null">{{ nameError() }}</tng-error>
+                </tng-form-field>
+              </div>
+
+              <div class="field">
+                <tng-form-field labelPosition="above">
+                  <tng-label forId="lc-type">Type</tng-label>
+                  <tng-autocomplete
+                    id="lc-type"
+                    placeholder="Select a type"
+                    ariaLabel="Category type"
+                    [options]="filteredTypeOptions()"
+                    [formField]="categoryForm.type"
+                    [getOptionValue]="typeOptionValue"
+                    [getOptionLabel]="typeOptionLabel"
+                    [trackBy]="typeTrackBy"
+                    (valueChange)="onTypeChange($event)"
+                    (queryChange)="onTypeQueryChange($event)"
+                  />
+                </tng-form-field>
+              </div>
+
+              <div class="field">
+                <tng-form-field labelPosition="above">
+                  <tng-label forId="lc-parent">Parent Category</tng-label>
+                  <tng-autocomplete
+                    id="lc-parent"
+                    placeholder="Search parent category..."
+                    ariaLabel="Parent category"
+                    [options]="filteredParentOptions()"
+                    [formField]="categoryForm.parentId"
+                    [getOptionValue]="parentOptionValue"
+                    [getOptionLabel]="parentOptionLabel"
+                    [trackBy]="parentTrackBy"
+                    (valueChange)="onParentChange($event)"
+                    (queryChange)="onParentQueryChange($event)"
+                  />
+                </tng-form-field>
+              </div>
+
+              <div class="field field--wide">
+                <tng-form-field labelPosition="above">
+                  <tng-label forId="lc-description">Description</tng-label>
+                  <tng-textarea
+                    id="lc-description"
+                    placeholder="Optional notes about this category"
+                    rows="3"
+                    [formField]="categoryForm.description"
+                  />
+                </tng-form-field>
+              </div>
             </div>
 
-            <div class="field">
-              <tng-form-field labelPosition="above">
-                <tng-label forId="lc-type">Type</tng-label>
-                <tng-autocomplete
-                  id="lc-type"
-                  placeholder="Select a type"
-                  ariaLabel="Category type"
-                  [options]="filteredTypeOptions()"
-                  [formField]="categoryForm.type"
-                  [getOptionValue]="typeOptionValue"
-                  [getOptionLabel]="typeOptionLabel"
-                  [trackBy]="typeTrackBy"
-                  (valueChange)="onTypeChange($event)"
-                  (queryChange)="onTypeQueryChange($event)"
+            <tng-card-footer>
+              <tng-card-actions align="end">
+                <app-burl-back-button label="Cancel" />
+                <app-burl-create-button
+                  [icon]="mode() === 'edit' ? 'save' : 'plus'"
+                  [label]="mode() === 'edit' ? 'Save changes' : 'Create category'"
+                  [disabled]="ledgerCategoryStore.isLoading()"
                 />
-              </tng-form-field>
-            </div>
+              </tng-card-actions>
+            </tng-card-footer>
+          }
+        </tng-card-content>
+      </tng-card>
+    </form>
 
-            <div class="field">
-              <tng-form-field labelPosition="above">
-                <tng-label forId="lc-parent">Parent Category</tng-label>
-                <tng-autocomplete
-                  id="lc-parent"
-                  placeholder="Search parent category..."
-                  ariaLabel="Parent category"
-                  [options]="filteredParentOptions()"
-                  [formField]="categoryForm.parentId"
-                  [getOptionValue]="parentOptionValue"
-                  [getOptionLabel]="parentOptionLabel"
-                  [trackBy]="parentTrackBy"
-                  (valueChange)="onParentChange($event)"
-                  (queryChange)="onParentQueryChange($event)"
-                />
-              </tng-form-field>
-            </div>
-
-            <div class="field field--wide">
-              <tng-form-field labelPosition="above">
-                <tng-label forId="lc-description">Description</tng-label>
-                <tng-textarea
-                  id="lc-description"
-                  placeholder="Optional notes about this category"
-                  rows="3"
-                  [formField]="categoryForm.description"
-                />
-              </tng-form-field>
-            </div>
-          </div>
-
-          <tng-card-footer>
-            <tng-card-actions align="end">
-              <app-burl-back-button label="Cancel" />
-              <app-burl-create-button
-                [icon]="mode() === 'edit' ? 'save' : 'plus'"
-                [label]="mode() === 'edit' ? 'Save changes' : 'Create category'"
-                [disabled]="ledgerCategoryStore.isLoading()"
-              />
-            </tng-card-actions>
-          </tng-card-footer>
-        </form>
-      }
-    </tng-card-content>
-  </tng-card>
+    <aside class="setup-overview" aria-labelledby="ledger-category-setup-title">
+      <div class="setup-copy">
+        <p class="eyebrow">Category setup</p>
+        <h1 id="ledger-category-setup-title">{{ title() }}</h1>
+        <p>
+          Give the ledger category a clear name, optionally set its type and parent for hierarchy, so
+          ledgers and reports stay organized in Daybook Cloud.
+        </p>
+        <tng-stepper
+          class="setup-stepper"
+          ariaLabel="Ledger category setup progress"
+          [ordered]="true"
+          [steps]="setupSteps()"
+          [value]="activeSetupStep()"
+        />
+      </div>
+    </aside>
+  </section>
 </main>
