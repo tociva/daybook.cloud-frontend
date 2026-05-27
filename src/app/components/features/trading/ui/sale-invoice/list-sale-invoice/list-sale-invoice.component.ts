@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   TngButtonComponent,
@@ -18,9 +18,11 @@ import { PageHeadingComponent } from '../../../../../../shared/page-heading/page
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { CustomerStore } from '../../../data/customer';
 import type { Customer } from '../../../data/customer';
-import { SaleInvoiceStore } from '../../../data/sale-invoice';
+import { SaleInvoicePrintService, SaleInvoiceStore } from '../../../data/sale-invoice';
 import type { SaleInvoice } from '../../../data/sale-invoice';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
+import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
+import { ToastStore } from '../../../../../../core/toast/toast.store';
 import { formatAmountWithCurrency } from '../../../../../../shared/format/currency';
 
 @Component({
@@ -44,10 +46,13 @@ import { formatAmountWithCurrency } from '../../../../../../shared/format/curren
 export class ListSaleInvoiceComponent {
   private readonly router = inject(Router);
   private readonly dateManagement = inject(DateManagementService);
+  private readonly printService = inject(SaleInvoicePrintService);
+  private readonly toastStore = inject(ToastStore);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly customerStore = inject(CustomerStore);
   protected readonly saleInvoiceStore = inject(SaleInvoiceStore);
   protected readonly hasError = computed(() => this.saleInvoiceStore.error() !== null);
+  protected readonly previewingInvoiceId = signal<string | null>(null);
   protected readonly customerOptionValue = (option: unknown): string =>
     (option as Customer).id ?? '';
   protected readonly customerOptionLabel = (option: unknown): string =>
@@ -74,7 +79,7 @@ export class ListSaleInvoiceComponent {
       width: '10rem',
     },
     { id: 'received', label: 'Received', align: 'end', headerAlign: 'end', width: '10rem' },
-    { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '8rem' },
+    { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '10rem' },
   ];
 
   protected readonly filterFields: readonly CrudFilterField[] = [
@@ -215,6 +220,19 @@ export class ListSaleInvoiceComponent {
       void this.router.navigate(['/app/trading/sale-invoice', item.id, 'delete'], {
         queryParams: { burl: this.router.url },
       });
+    }
+  }
+
+  protected async previewInvoicePdf(item: SaleInvoice): Promise<void> {
+    if (!item.id || this.previewingInvoiceId() === item.id) return;
+
+    this.previewingInvoiceId.set(item.id);
+    try {
+      await this.printService.previewInvoicePdf(item);
+    } catch (error) {
+      this.toastStore.danger(getApiErrorMessage(error, 'Failed to prepare invoice PDF.'));
+    } finally {
+      this.previewingInvoiceId.set(null);
     }
   }
 }

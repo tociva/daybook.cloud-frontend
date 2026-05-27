@@ -32,6 +32,16 @@
 
   <div class="invoice-actions">
     <app-burl-back-button label="Back" />
+    <tng-button
+      type="button"
+      appearance="outline"
+      tone="neutral"
+      [disabled]="isPreviewingPdf() || !saleInvoiceStore.selectedItem()?.id"
+      (click)="previewInvoicePdf()"
+    >
+      <tng-icon icon="download" aria-hidden="true" />
+      Download PDF
+    </tng-button>
     <app-burl-edit-button (clicked)="editInvoice()" />
     <app-burl-delete-button (clicked)="deleteInvoice()" />
   </div>

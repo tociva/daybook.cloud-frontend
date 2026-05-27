@@ -5,6 +5,7 @@ import { ToastStore } from '../../../../../../core/toast/toast.store';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
 import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
+import { TngButtonComponent } from '@tailng-ui/components';
 import {
   TngFileUploadDirective,
   type TngFileUploadRejectedEvent,
@@ -23,6 +24,7 @@ import type {
 import {
   SALE_INVOICE_DETAIL_INCLUDES,
   SaleInvoiceFacade,
+  SaleInvoicePrintService,
   SaleInvoiceStore,
 } from '../../../data/sale-invoice';
 import { TaxStore } from '../../../data/tax';
@@ -39,6 +41,7 @@ import { SiLineItemsComponent } from './si-line-items/si-line-items.component';
   imports: [
     BurlBackButtonComponent,
     BurlCreateButtonComponent,
+    TngButtonComponent,
     TngIcon,
     TngFileUploadDirective,
     SiCustomerComponent,
@@ -53,6 +56,7 @@ export class CreateSaleInvoiceComponent {
   private readonly facade = inject(SaleInvoiceFacade);
   private readonly invoiceDocumentService = inject(InvoiceDocumentService);
   private readonly navigation = inject(BurlNavigationService);
+  private readonly printService = inject(SaleInvoicePrintService);
   private readonly toastStore = inject(ToastStore);
 
   protected readonly saleInvoiceStore = inject(SaleInvoiceStore);
@@ -69,6 +73,7 @@ export class CreateSaleInvoiceComponent {
 
   protected readonly id = signal<string | null>(null);
   protected readonly pendingDocumentFiles = signal<readonly File[]>([]);
+  protected readonly isPreviewingPdf = signal(false);
   protected readonly isUploadingDocuments = signal(false);
   protected readonly mode = computed(() => (this.id() ? 'edit' : 'create'));
   protected readonly isSaving = computed(
@@ -175,6 +180,20 @@ export class CreateSaleInvoiceComponent {
     this.pendingDocumentFiles.set(merged);
   }
 
+  protected async previewInvoicePdf(): Promise<void> {
+    const id = this.id();
+    if (!id || this.isPreviewingPdf()) return;
+
+    this.isPreviewingPdf.set(true);
+    try {
+      await this.printService.previewInvoicePdf(this.saleInvoiceStore.selectedItem() ?? id);
+    } catch (error) {
+      this.toastStore.danger(getApiErrorMessage(error, 'Failed to prepare invoice PDF.'));
+    } finally {
+      this.isPreviewingPdf.set(false);
+    }
+  }
+
   // ── Submit ────────────────────────────────────────────────────────────────
 
   protected async submitForm(event: Event): Promise<void> {
@@ -204,35 +223,38 @@ export class CreateSaleInvoiceComponent {
           ...(this.draft.shippingCountry() ? { country: this.draft.shippingCountry() } : {}),
         };
 
-    const items: SaleInvoiceItemRequest[] = this.draft.items().filter((row) => !!row.itemid).map((row, i) => {
-      const taxes: SaleInvoiceItemTaxRequest[] = row.taxes.map((t) => ({
-        name: t.name,
-        shortname: t.shortname,
-        rate: toNum(t.rate),
-        appliedto: toNum(t.appliedto),
-        amount: toNum(t.amount),
-        ...(t.taxid ? { taxid: t.taxid } : {}),
-      }));
-      const displayname = row.item?.displayname ?? row.item?.name ?? row.name ?? '';
+    const items: SaleInvoiceItemRequest[] = this.draft
+      .items()
+      .filter((row) => !!row.itemid)
+      .map((row, i) => {
+        const taxes: SaleInvoiceItemTaxRequest[] = row.taxes.map((t) => ({
+          name: t.name,
+          shortname: t.shortname,
+          rate: toNum(t.rate),
+          appliedto: toNum(t.appliedto),
+          amount: toNum(t.amount),
+          ...(t.taxid ? { taxid: t.taxid } : {}),
+        }));
+        const displayname = row.item?.displayname ?? row.item?.name ?? row.name ?? '';
 
-      return {
-        name: row.name,
-        displayname,
-        description: row.description,
-        code: row.code,
-        order: i + 1,
-        price: toNum(row.price),
-        quantity: Math.max(1, toNum(this.draft.quantityForRow(row))),
-        itemtotal: toNum(row.itemtotal),
-        discpercent: toNum(row.discpercent),
-        discamount: toNum(row.discamount),
-        subtotal: toNum(row.subtotal),
-        taxamount: toNum(row.taxamount),
-        grandtotal: toNum(row.grandtotal),
-        itemid: row.itemid,
-        taxes,
-      };
-    });
+        return {
+          name: row.name,
+          displayname,
+          description: row.description,
+          code: row.code,
+          order: i + 1,
+          price: toNum(row.price),
+          quantity: Math.max(1, toNum(this.draft.quantityForRow(row))),
+          itemtotal: toNum(row.itemtotal),
+          discpercent: toNum(row.discpercent),
+          discamount: toNum(row.discamount),
+          subtotal: toNum(row.subtotal),
+          taxamount: toNum(row.taxamount),
+          grandtotal: toNum(row.grandtotal),
+          itemid: row.itemid,
+          taxes,
+        };
+      });
 
     const payload: SaleInvoicePayload = {
       ...(!this.draft.autoNumbering() && this.draft.number()

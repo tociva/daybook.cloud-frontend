@@ -41,6 +41,18 @@
   <!-- ── Footer ─────────────────────────────────────────────────────────── -->
   <div class="invoice-actions">
     <app-burl-back-button label="Cancel" />
+    @if (mode() === 'edit') {
+      <tng-button
+        type="button"
+        appearance="outline"
+        tone="neutral"
+        [disabled]="isSaving() || isPreviewingPdf() || !id()"
+        (click)="previewInvoicePdf()"
+      >
+        <tng-icon icon="download" aria-hidden="true" />
+        Download PDF
+      </tng-button>
+    }
     <app-burl-create-button
       [type]="'button'"
       [label]="mode() === 'edit' ? 'Update Invoice' : 'Create Invoice'"

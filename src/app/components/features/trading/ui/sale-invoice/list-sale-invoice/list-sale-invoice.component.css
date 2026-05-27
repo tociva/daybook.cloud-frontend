@@ -53,6 +53,11 @@
   outline-offset: 2px;
 }
 
+.action-icon:disabled {
+  cursor: wait;
+  opacity: 0.45;
+}
+
 .action-icon--danger {
   color: var(--tng-semantic-accent-danger);
 }

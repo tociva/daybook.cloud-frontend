@@ -31,7 +31,12 @@
             title="No sale invoices match your filter"
             description="Try adjusting or clearing your filter to find what you're looking for."
           >
-            <tng-button type="button" appearance="outline" tone="neutral" (click)="crudQuery.clearFilter()">
+            <tng-button
+              type="button"
+              appearance="outline"
+              tone="neutral"
+              (click)="crudQuery.clearFilter()"
+            >
               Clear filter
             </tng-button>
           </app-empty-state>
@@ -41,116 +46,134 @@
             title="No sale invoices yet"
             description="Get started by creating your first sale invoice."
           >
-            <tng-button type="button" appearance="solid" tone="primary" (click)="createSaleInvoice()">
+            <tng-button
+              type="button"
+              appearance="solid"
+              tone="primary"
+              (click)="createSaleInvoice()"
+            >
               <tng-icon icon="plus" aria-hidden="true" />
               New sale invoice
             </tng-button>
           </app-empty-state>
         }
       } @else {
-      <tng-table
-        ariaLabel="Sale invoices"
-        density="comfortable"
-        [columns]="columns"
-        [items]="saleInvoiceStore.items()"
-        [loading]="saleInvoiceStore.isLoading()"
-        [error]="hasError()"
-        [sortActive]="crudQuery.sortActive()"
-        [sortDirection]="crudQuery.sortDirection()"
-        (sortChange)="crudQuery.applySort($event)"
-      >
-        <ng-template tngTableCellTemplate="number" let-row="row">
-          <div class="number-cell">
-            <button type="button" class="link-button" (click)="viewSaleInvoice(row)">
-              {{ row.number || '—' }}
-            </button>
-            @if (isPaid(row)) {
-              <span class="status-badge status-badge--paid" title="Paid in full">
-                <tng-icon icon="check" aria-hidden="true" />
-              </span>
-            } @else if (isOverdue(row)) {
-              <span class="status-badge status-badge--overdue" title="Overdue">!</span>
-            }
-          </div>
-        </ng-template>
+        <tng-table
+          ariaLabel="Sale invoices"
+          density="comfortable"
+          [columns]="columns"
+          [items]="saleInvoiceStore.items()"
+          [loading]="saleInvoiceStore.isLoading()"
+          [error]="hasError()"
+          [sortActive]="crudQuery.sortActive()"
+          [sortDirection]="crudQuery.sortDirection()"
+          (sortChange)="crudQuery.applySort($event)"
+        >
+          <ng-template tngTableCellTemplate="number" let-row="row">
+            <div class="number-cell">
+              <button type="button" class="link-button" (click)="viewSaleInvoice(row)">
+                {{ row.number || '—' }}
+              </button>
+              @if (isPaid(row)) {
+                <span class="status-badge status-badge--paid" title="Paid in full">
+                  <tng-icon icon="check" aria-hidden="true" />
+                </span>
+              } @else if (isOverdue(row)) {
+                <span class="status-badge status-badge--overdue" title="Overdue">!</span>
+              }
+            </div>
+          </ng-template>
 
-        <ng-template tngTableCellTemplate="customer" let-row="row">
-          {{ row.customer?.name || '—' }}
-        </ng-template>
+          <ng-template tngTableCellTemplate="customer" let-row="row">
+            {{ row.customer?.name || '—' }}
+          </ng-template>
 
-        <ng-template tngTableCellTemplate="date" let-row="row">
-          {{ formatDate(row.date) }}
-        </ng-template>
+          <ng-template tngTableCellTemplate="date" let-row="row">
+            {{ formatDate(row.date) }}
+          </ng-template>
 
-        <ng-template tngTableCellTemplate="itemtotal" let-row="row">
-          {{ formatAmount(row.itemtotal) }}
-        </ng-template>
+          <ng-template tngTableCellTemplate="itemtotal" let-row="row">
+            {{ formatAmount(row.itemtotal) }}
+          </ng-template>
 
-        <ng-template tngTableCellTemplate="discount" let-row="row">
-          {{ formatOptionalAmount(row.discount) }}
-        </ng-template>
+          <ng-template tngTableCellTemplate="discount" let-row="row">
+            {{ formatOptionalAmount(row.discount) }}
+          </ng-template>
 
-        <ng-template tngTableCellTemplate="tax" let-row="row">
-          {{ formatOptionalAmount(row.tax) }}
-        </ng-template>
+          <ng-template tngTableCellTemplate="tax" let-row="row">
+            {{ formatOptionalAmount(row.tax) }}
+          </ng-template>
 
-        <ng-template tngTableCellTemplate="grandtotal" let-row="row">
-          {{ formatAmountWithCurrency(row.grandtotal, row.currencycode) }}
-        </ng-template>
+          <ng-template tngTableCellTemplate="grandtotal" let-row="row">
+            {{ formatAmountWithCurrency(row.grandtotal, row.currencycode) }}
+          </ng-template>
 
-        <ng-template tngTableCellTemplate="received" let-row="row">
-          @if (totalReceived(row) === undefined) {
-            <button type="button" class="link-button link-button--muted" (click)="createReceiptForInvoice(row)">
-              Create Receipt
-            </button>
-          } @else if (isPaid(row)) {
-            <button type="button" class="link-button" (click)="viewReceiptForInvoice(row)">
+          <ng-template tngTableCellTemplate="received" let-row="row">
+            @if (totalReceived(row) === undefined) {
+              <button
+                type="button"
+                class="link-button link-button--muted"
+                (click)="createReceiptForInvoice(row)"
+              >
+                Create Receipt
+              </button>
+            } @else if (isPaid(row)) {
+              <button type="button" class="link-button" (click)="viewReceiptForInvoice(row)">
+                {{ formatAmountWithCurrency(totalReceived(row), row.currencycode) }}
+              </button>
+            } @else {
               {{ formatAmountWithCurrency(totalReceived(row), row.currencycode) }}
-            </button>
-          } @else {
-            {{ formatAmountWithCurrency(totalReceived(row), row.currencycode) }}
-          }
-        </ng-template>
+            }
+          </ng-template>
 
-        <ng-template tngTableCellTemplate="actions" let-row="row">
-          <div class="row-actions">
-            <button
-              type="button"
-              class="action-icon"
-              aria-label="View sale invoice"
-              (click)="viewSaleInvoice(row)"
-            >
-              <tng-icon icon="eye" aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              class="action-icon"
-              aria-label="Edit sale invoice"
-              (click)="editSaleInvoice(row)"
-            >
-              <tng-icon icon="pencil" aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              class="action-icon action-icon--danger"
-              aria-label="Delete sale invoice"
-              (click)="deleteSaleInvoice(row)"
-            >
-              <tng-icon icon="trash2" aria-hidden="true" />
-            </button>
-          </div>
-        </ng-template>
-      </tng-table>
+          <ng-template tngTableCellTemplate="actions" let-row="row">
+            <div class="row-actions">
+              <button
+                type="button"
+                class="action-icon"
+                aria-label="View sale invoice"
+                (click)="viewSaleInvoice(row)"
+              >
+                <tng-icon icon="eye" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                class="action-icon"
+                aria-label="Edit sale invoice"
+                (click)="editSaleInvoice(row)"
+              >
+                <tng-icon icon="pencil" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                class="action-icon"
+                aria-label="Download sale invoice PDF"
+                [disabled]="previewingInvoiceId() === row.id"
+                (click)="previewInvoicePdf(row)"
+              >
+                <tng-icon icon="download" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                class="action-icon action-icon--danger"
+                aria-label="Delete sale invoice"
+                (click)="deleteSaleInvoice(row)"
+              >
+                <tng-icon icon="trash2" aria-hidden="true" />
+              </button>
+            </div>
+          </ng-template>
+        </tng-table>
 
-      <div class="table-footer">
-        <app-crud-paginator
-          ariaLabel="Sale invoice pagination"
-          [filter]="crudQuery.filter()"
-          [totalItems]="saleInvoiceStore.count()"
-          [pageSizeOptions]="crudQuery.pageSizeOptions()"
-          syncUrl
-        />
-      </div>
+        <div class="table-footer">
+          <app-crud-paginator
+            ariaLabel="Sale invoice pagination"
+            [filter]="crudQuery.filter()"
+            [totalItems]="saleInvoiceStore.count()"
+            [pageSizeOptions]="crudQuery.pageSizeOptions()"
+            syncUrl
+          />
+        </div>
       }
     </div>
   </tng-card>

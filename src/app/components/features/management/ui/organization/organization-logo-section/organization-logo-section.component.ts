@@ -10,6 +10,11 @@ import {
 } from '@angular/core';
 import { TngButtonComponent } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
+import {
+  TngFileUploadDirective,
+  type TngFileUploadRejectedEvent,
+  type TngFileUploadSelectedEvent,
+} from '@tailng-ui/primitives';
 import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
 import {
   OrganizationService,
@@ -47,7 +52,7 @@ const ALLOWED_MIME_TYPES = ['image/png', 'image/jpg', 'image/jpeg', 'image/webp'
 @Component({
   selector: 'app-organization-logo-section',
   standalone: true,
-  imports: [TngButtonComponent, TngIcon],
+  imports: [TngButtonComponent, TngIcon, TngFileUploadDirective],
   templateUrl: './organization-logo-section.component.html',
   styleUrl: './organization-logo-section.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -146,6 +151,29 @@ export class OrganizationLogoSectionComponent implements OnDestroy {
     inputEl.value = '';
     if (!file) return;
 
+    this.receiveLogoFile(variant, file);
+  }
+
+  protected onLogoFilesSelected(
+    variant: OrganizationLogoVariant,
+    event: TngFileUploadSelectedEvent,
+  ): void {
+    const file = event.files[0];
+    if (file) {
+      this.receiveLogoFile(variant, file);
+    }
+  }
+
+  protected onLogoFilesRejected(
+    variant: OrganizationLogoVariant,
+    event: TngFileUploadRejectedEvent,
+  ): void {
+    const first = event.rejected[0];
+    this.patchError(variant, first?.message ?? 'Use a PNG, JPG, JPEG, or WEBP image.');
+    this.clearSelection(variant);
+  }
+
+  private receiveLogoFile(variant: OrganizationLogoVariant, file: File): void {
     const error = this.validateFile(variant, file);
     if (error) {
       this.patchError(variant, error);

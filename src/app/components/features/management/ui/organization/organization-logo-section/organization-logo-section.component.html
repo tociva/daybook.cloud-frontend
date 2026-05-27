@@ -8,7 +8,16 @@
 
   <div class="logo-grid">
     @for (variant of variants; track variant) {
-      <article class="logo-card">
+      <article
+        class="logo-card"
+        tngFileUpload
+        [accept]="accept"
+        [maxSize]="slots[variant].maxSize"
+        [multiple]="false"
+        [disabled]="!editable() || isUploading()"
+        (filesSelected)="onLogoFilesSelected(variant, $event)"
+        (filesRejected)="onLogoFilesRejected(variant, $event)"
+      >
         <input
           class="logo-input"
           type="file"
@@ -17,6 +26,13 @@
           [disabled]="!editable() || isUploading()"
           (change)="onLogoSelected(variant, $event)"
         />
+
+        <div class="logo-drop-overlay" aria-hidden="true">
+          <div class="logo-drop-overlay__inner">
+            <tng-icon icon="upload" />
+            <span>Drop logo here</span>
+          </div>
+        </div>
 
         <div class="logo-preview">
           @if (selectionFor(variant); as selection) {

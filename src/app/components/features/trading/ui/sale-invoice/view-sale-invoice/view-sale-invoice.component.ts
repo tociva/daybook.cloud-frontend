@@ -1,9 +1,17 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { TngButtonComponent } from '@tailng-ui/components';
+import { TngIcon } from '@tailng-ui/icons';
+import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
+import { ToastStore } from '../../../../../../core/toast/toast.store';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 import { BurlDeleteButtonComponent } from '../../../../../../shared/burl-delete-button/burl-delete-button.component';
 import { BurlEditButtonComponent } from '../../../../../../shared/burl-edit-button/burl-edit-button.component';
-import { SALE_INVOICE_DETAIL_INCLUDES, SaleInvoiceStore } from '../../../data/sale-invoice';
+import {
+  SALE_INVOICE_DETAIL_INCLUDES,
+  SaleInvoicePrintService,
+  SaleInvoiceStore,
+} from '../../../data/sale-invoice';
 import type { SaleInvoice } from '../../../data/sale-invoice';
 import type { StoredDocument } from '../../../data/invoice-document';
 import { InvoiceAttachmentsComponent } from '../../shared/invoice-attachments/invoice-attachments.component';
@@ -21,6 +29,8 @@ import { SiLineItemsComponent } from '../create-sale-invoice/si-line-items/si-li
     BurlDeleteButtonComponent,
     BurlEditButtonComponent,
     InvoiceAttachmentsComponent,
+    TngButtonComponent,
+    TngIcon,
     SiCustomerComponent,
     SiLineItemsComponent,
     SiInvoiceDetailsComponent,
@@ -31,8 +41,11 @@ import { SiLineItemsComponent } from '../create-sale-invoice/si-line-items/si-li
 export class ViewSaleInvoiceComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly printService = inject(SaleInvoicePrintService);
+  private readonly toastStore = inject(ToastStore);
   protected readonly saleInvoiceStore = inject(SaleInvoiceStore);
   protected readonly draft = inject(SaleInvoiceDraftStore);
+  protected readonly isPreviewingPdf = signal(false);
 
   constructor() {
     void this.loadInitialState();
@@ -71,6 +84,21 @@ export class ViewSaleInvoiceComponent {
       void this.router.navigate(['/app/trading/sale-invoice', id, 'delete'], {
         queryParams: { burl: this.router.url },
       });
+    }
+  }
+
+  protected async previewInvoicePdf(): Promise<void> {
+    const invoice = this.saleInvoiceStore.selectedItem();
+    const id = invoice?.id ?? this.route.snapshot.paramMap.get('id');
+    if (!id || this.isPreviewingPdf()) return;
+
+    this.isPreviewingPdf.set(true);
+    try {
+      await this.printService.previewInvoicePdf(invoice ?? id);
+    } catch (error) {
+      this.toastStore.danger(getApiErrorMessage(error, 'Failed to prepare invoice PDF.'));
+    } finally {
+      this.isPreviewingPdf.set(false);
     }
   }
 
