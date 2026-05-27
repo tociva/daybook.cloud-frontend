@@ -61,6 +61,7 @@
                   type="number"
                   placeholder="0.00"
                   [formField]="ledgerForm.openingdr"
+                  (valueChange)="onOpeningDrChange($event)"
                 />
               </tng-form-field>
             </div>
@@ -73,9 +74,16 @@
                   type="number"
                   placeholder="0.00"
                   [formField]="ledgerForm.openingcr"
+                  (valueChange)="onOpeningCrChange($event)"
                 />
               </tng-form-field>
             </div>
+
+            @if (openingBalanceError()) {
+              <div class="field field--wide">
+                <div class="notice notice--danger">{{ openingBalanceError() }}</div>
+              </div>
+            }
 
             <div class="field field--wide">
               <tng-form-field labelPosition="above">

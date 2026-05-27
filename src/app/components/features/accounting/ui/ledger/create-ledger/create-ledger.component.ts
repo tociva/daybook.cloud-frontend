@@ -102,6 +102,14 @@ export class CreateLedgerComponent implements AfterViewInit {
       ? 'Category is required.'
       : null,
   );
+  protected readonly openingBalanceError = computed(() => {
+    if (!this.submitted()) return null;
+    const openingdr = this.parseOpeningAmount(this.ledgerModel().openingdr);
+    const openingcr = this.parseOpeningAmount(this.ledgerModel().openingcr);
+    return openingdr !== 0 && openingcr !== 0
+      ? 'Enter either Opening DR or Opening CR, not both.'
+      : null;
+  });
 
   constructor() {
     void this.loadInitialState();
@@ -158,10 +166,28 @@ export class CreateLedgerComponent implements AfterViewInit {
     this.categoryQuery.set(this.normalizeAutocompleteQuery(event));
   }
 
+  protected onOpeningDrChange(value: unknown): void {
+    const openingdr = this.normalizeInputValue(value);
+    this.ledgerModel.update((m) => ({
+      ...m,
+      openingdr,
+      openingcr: this.parseOpeningAmount(openingdr) !== 0 ? '' : m.openingcr,
+    }));
+  }
+
+  protected onOpeningCrChange(value: unknown): void {
+    const openingcr = this.normalizeInputValue(value);
+    this.ledgerModel.update((m) => ({
+      ...m,
+      openingcr,
+      openingdr: this.parseOpeningAmount(openingcr) !== 0 ? '' : m.openingdr,
+    }));
+  }
+
   protected async submitForm(event: SubmitEvent): Promise<void> {
     event.preventDefault();
     this.submitted.set(true);
-    if (this.nameError() || this.categoryError()) return;
+    if (this.nameError() || this.categoryError() || this.openingBalanceError()) return;
 
     const m = this.ledgerModel();
     const openingdr = m.openingdr.trim() ? parseFloat(m.openingdr) : undefined;
@@ -185,6 +211,18 @@ export class CreateLedgerComponent implements AfterViewInit {
 
   private normalizeAutocompleteQuery(event: unknown): string {
     return typeof event === 'string' ? event.trim().toLowerCase() : '';
+  }
+
+  private normalizeInputValue(value: unknown): string {
+    if (value == null) return '';
+    return String(value);
+  }
+
+  private parseOpeningAmount(value: string): number {
+    const normalized = value.trim();
+    if (!normalized) return 0;
+    const amount = Number.parseFloat(normalized);
+    return Number.isFinite(amount) ? amount : 0;
   }
 
   private filterAutocompleteOptions<T>(
