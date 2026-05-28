@@ -9,6 +9,7 @@ import { UserSession } from '../../components/features/management/data/user-sess
 import { UserSessionService } from '../../components/features/management/data/user-session/user-session.service';
 import { UserSessionStore } from '../../components/features/management/data/user-session/user-session.store';
 import { getApiErrorMessage, isApiErrorStatus } from '../api/api-error.util';
+import { LedgerCachePreferencesStore } from '../preferences/ledger-cache-preferences.store';
 import { AppThemeStore } from '../theme/app-theme.store';
 import { AppStartupStatus, AppSystemModel } from './app-system.model';
 import { initialAppSystemState } from './app-system.state';
@@ -105,6 +106,7 @@ export const AppSystemStore = signalStore(
       userSessionService = inject(UserSessionService),
       userSessionStore = inject(UserSessionStore),
       appThemeStore = inject(AppThemeStore),
+      ledgerCachePrefsStore = inject(LedgerCachePreferencesStore),
     ) => {
       function updateStartupStatus(
         status: AppStartupStatus,
@@ -159,6 +161,7 @@ export const AppSystemStore = signalStore(
           const session = await userSessionService.createUserSession(config.apiBaseUrl);
           userSessionStore.setSession(session);
           appThemeStore.initFromSession(session);
+          ledgerCachePrefsStore.initFromSession(session);
 
           const returnUri = resolveSessionReturnUri(config, strategy);
           const hasOrganizationAccess =
@@ -179,6 +182,7 @@ export const AppSystemStore = signalStore(
               const renewedSession = await userSessionService.createUserSession(config.apiBaseUrl);
               userSessionStore.setSession(renewedSession);
               appThemeStore.initFromSession(renewedSession);
+              ledgerCachePrefsStore.initFromSession(renewedSession);
 
               const returnUri = resolveSessionReturnUri(config, strategy);
               const hasOrganizationAccess =

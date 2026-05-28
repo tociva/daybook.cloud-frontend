@@ -8,14 +8,17 @@ import {
   TngFormFieldComponent,
   TngLabelComponent,
   TngSelectComponent,
+  TngSwitchComponent,
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
+import { LedgerCachePreferencesStore } from '../../../../../core/preferences/ledger-cache-preferences.store';
 import type { AppThemeName, ThemeOption } from '../../../../../core/theme/app-theme.store';
 import { AppThemeStore, THEME_OPTIONS } from '../../../../../core/theme/app-theme.store';
 import { UserSessionStore } from '../../../management/data/user-session/user-session.store';
 import { UserProfileService } from '../../data/user-profile.service';
 
 type AppearanceFormModel = {
+  ledgerCacheEnabled: boolean;
   mode: 'light' | 'dark';
   themeName: AppThemeName;
 };
@@ -30,6 +33,7 @@ type AppearanceFormModel = {
     TngFormFieldComponent,
     TngLabelComponent,
     TngSelectComponent,
+    TngSwitchComponent,
     TngIcon,
   ],
   templateUrl: './profile.component.html',
@@ -37,6 +41,7 @@ type AppearanceFormModel = {
 })
 export class ProfileComponent implements OnDestroy {
   private readonly themeStore = inject(AppThemeStore);
+  private readonly ledgerCachePrefs = inject(LedgerCachePreferencesStore);
   private readonly userSessionStore = inject(UserSessionStore);
   private readonly userProfileService = inject(UserProfileService);
 
@@ -53,13 +58,13 @@ export class ProfileComponent implements OnDestroy {
 
   protected readonly userEmail = computed(() => this.userSessionStore.session()?.email ?? '');
 
-  // ── Snapshot of persisted values (used to revert preview on destroy) ─────
   private readonly savedMode: 'light' | 'dark' = this.themeStore.darkMode() ? 'dark' : 'light';
   private readonly savedThemeName: AppThemeName = this.themeStore.themeName();
+  private readonly savedLedgerCacheEnabled = this.ledgerCachePrefs.enabled();
   private committed = false;
 
-  // ── Appearance form ───────────────────────────────────────────────────────
   protected readonly appearanceModel = signal<AppearanceFormModel>({
+    ledgerCacheEnabled: this.savedLedgerCacheEnabled,
     mode: this.savedMode,
     themeName: this.savedThemeName,
   });
@@ -67,18 +72,17 @@ export class ProfileComponent implements OnDestroy {
 
   protected readonly draftMode = computed(() => this.appearanceModel().mode);
   protected readonly draftThemeName = computed(() => this.appearanceModel().themeName);
+  protected readonly draftLedgerCacheEnabled = computed(() => this.appearanceModel().ledgerCacheEnabled);
 
   protected readonly isSaving = signal(false);
   protected readonly saveSuccess = signal(false);
   protected readonly saveError = signal<string | null>(null);
 
-  // ── Theme select helpers ──────────────────────────────────────────────────
   protected readonly themeOptions: ThemeOption[] = THEME_OPTIONS;
   protected readonly getThemeLabel = (opt: ThemeOption) => opt.label;
   protected readonly getThemeValue = (opt: ThemeOption) => opt.value;
   protected readonly trackThemeBy = (_i: number, opt: ThemeOption) => opt.value;
 
-  // ── Form change handlers — preview immediately, don't persist ─────────────
   protected onModeChange(value: unknown): void {
     const mode = value === 'dark' ? 'dark' : 'light';
     this.appearanceModel.update((m) => ({ ...m, mode }));
@@ -98,6 +102,13 @@ export class ProfileComponent implements OnDestroy {
     this.saveError.set(null);
   }
 
+  protected onLedgerCacheChange(value: unknown): void {
+    const enabled = !!value;
+    this.appearanceModel.update((m) => ({ ...m, ledgerCacheEnabled: enabled }));
+    this.ledgerCachePrefs.setEnabled(enabled);
+    this.saveError.set(null);
+  }
+
   private resolveThemeName(value: unknown): AppThemeName | null {
     const rawValue =
       typeof value === 'string'
@@ -109,24 +120,25 @@ export class ProfileComponent implements OnDestroy {
     return this.themeOptions.find((option) => option.value === rawValue)?.value ?? null;
   }
 
-  // ── Submit — persist to API ───────────────────────────────────────────────
   protected async submitAppearance(event: SubmitEvent): Promise<void> {
     event.preventDefault();
     if (this.isSaving()) return;
 
-    const { mode, themeName } = this.appearanceModel();
+    const { mode, themeName, ledgerCacheEnabled } = this.appearanceModel();
 
     this.isSaving.set(true);
     this.saveSuccess.set(false);
     this.saveError.set(null);
 
     try {
-      await this.userProfileService.updateProfile({ mode, theme: themeName });
+      await this.userProfileService.updateProfile({
+        mode,
+        theme: themeName,
+        ledgerCache: ledgerCacheEnabled,
+      });
 
-      // Persist to localStorage so the theme survives the next page load
       this.themeStore.commitTheme();
-
-      // Mark as committed so we don't revert the preview on destroy
+      this.ledgerCachePrefs.commit();
       this.committed = true;
 
       this.saveSuccess.set(true);
@@ -138,11 +150,11 @@ export class ProfileComponent implements OnDestroy {
     }
   }
 
-  // ── Revert preview if user leaves without saving ──────────────────────────
   ngOnDestroy(): void {
     if (!this.committed) {
       this.themeStore.setDarkMode(this.savedMode === 'dark');
       this.themeStore.setThemeName(this.savedThemeName);
+      this.ledgerCachePrefs.setEnabled(this.savedLedgerCacheEnabled);
     }
   }
 }

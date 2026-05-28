@@ -3,6 +3,7 @@ import { ApiClientService } from '../../../../core/api/api-client.service';
 import { AppConfigStore } from '../../../../core/config/app-config.store';
 
 export interface UserProfilePayload {
+  ledgerCache: boolean;
   mode: string;
   theme: string;
 }

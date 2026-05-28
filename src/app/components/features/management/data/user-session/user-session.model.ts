@@ -5,6 +5,7 @@ import type { Organization } from '../organization/organization.model';
 import type { Subscription } from '../subscription/subscription.model';
 
 export type UserProps = {
+  ledgerCache?: boolean;
   mode?: string;
   theme?: string;
 } & Record<string, unknown>;

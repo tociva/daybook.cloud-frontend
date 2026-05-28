@@ -63,6 +63,22 @@
           </tng-select>
         </tng-form-field>
 
+        <tng-form-field labelPosition="above">
+          <label class="toggle-row">
+            <tng-switch
+              [checked]="draftLedgerCacheEnabled()"
+              (checkedChange)="onLedgerCacheChange($event)"
+            />
+            <span class="toggle-copy">
+              <span class="toggle-label">Cache ledgers in memory</span>
+              <span class="toggle-description">
+                Load all ledgers once per session for faster lists and journals. Turn off to always
+                fetch from the server.
+              </span>
+            </span>
+          </label>
+        </tng-form-field>
+
         <!-- Error -->
         @if (saveError()) {
           <p class="form-error" role="alert">
