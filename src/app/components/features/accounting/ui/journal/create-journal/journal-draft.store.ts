@@ -2,10 +2,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import dayjs from 'dayjs';
 import { FiscalYearDateRangeService } from '../../../../../../shared/fiscal-year-datepicker/fiscal-year-date-range.service';
 import { toIsoDate } from '../../../../../../core/date/dayjs-date.utils';
-import {
-  DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS,
-  DEFAULT_NODE_DATE_FORMAT,
-} from '../../../../../../util/constants';
+import { DEFAULT_NODE_DATE_FORMAT } from '../../../../../../util/constants';
 import {
   isJournalFormRowComplete,
   isJournalFormRowEmpty,
@@ -36,34 +33,42 @@ const newRow = (): JournalLineRow => ({
 export class JournalDraftStore {
   private readonly fiscalYearDateRange = inject(FiscalYearDateRangeService);
   private readonly ledgerStore = inject(LedgerStore);
-  private ledgerSearchTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly ledgerSearchVersions = new Map<string, number>();
 
   readonly submitted = signal(false);
   readonly journalDateModel = signal(this.fiscalYearDateRange.defaultDate());
   readonly journalNumber = signal('');
   readonly journalDescription = signal('');
   readonly rows = signal<readonly JournalLineRow[]>([newRow(), newRow()]);
+  private readonly ledgerDefaultOptions = signal<readonly Ledger[]>([]);
+  private readonly ledgerOptionsByRow = signal<Readonly<Record<string, readonly Ledger[]>>>({});
 
   readonly ledgerOptionValue = (ledger: Ledger): string => ledger.id ?? '';
   readonly ledgerOptionLabel = (ledger: Ledger): string => ledger.name ?? '';
   readonly ledgerTrackBy = (_i: number, ledger: Ledger): string => ledger.id ?? '';
 
-  readonly ledgerAutocompleteOptions = computed(() => {
+  readonly ledgerAutocompleteOptions = (uid: string): readonly Ledger[] => {
+    return this.mergeSelectedLedgerOptions(
+      uid,
+      this.ledgerOptionsByRow()[uid] ?? this.ledgerFallbackOptions(),
+    );
+  };
+
+  private mergeSelectedLedgerOptions(uid: string, options: readonly Ledger[]): readonly Ledger[] {
     const map = new Map<string, Ledger>();
-    for (const ledger of this.ledgerStore.items()) {
+    for (const ledger of options) {
       if (ledger.id) map.set(ledger.id, ledger);
     }
-    for (const row of this.rows()) {
-      if (row.ledgerId && row.ledgerName && !map.has(row.ledgerId)) {
-        map.set(row.ledgerId, {
-          id: row.ledgerId,
-          name: row.ledgerName,
-          categoryid: '',
-        });
-      }
+    const row = this.rows().find((entry) => entry.uid === uid);
+    if (row?.ledgerId && row.ledgerName && !map.has(row.ledgerId)) {
+      map.set(row.ledgerId, {
+        id: row.ledgerId,
+        name: row.ledgerName,
+        categoryid: '',
+      });
     }
     return [...map.values()];
-  });
+  }
 
   readonly journalDateForPicker = computed(() => {
     const s = this.journalDateModel();
@@ -114,9 +119,11 @@ export class JournalDraftStore {
     description?: string;
     entries?: readonly JournalEntry[];
   }): Promise<void> {
+    this.clearLedgerSearchState();
     this.journalDateModel.set(journal.date);
     this.journalNumber.set(journal.number ?? '');
     this.journalDescription.set(journal.description ?? '');
+    this.ledgerDefaultOptions.set(this.ledgerStore.items());
 
     const entries = journal.entries ?? [];
     if (entries.length === 0) {
@@ -153,30 +160,22 @@ export class JournalDraftStore {
     this.journalDateModel.set(toIsoDate(value, this.journalDateModel()));
   }
 
-  onLedgerAutocompleteFocus(): void {
-    if (this.ledgerSearchTimer) {
-      clearTimeout(this.ledgerSearchTimer);
-      this.ledgerSearchTimer = null;
-    }
-    void this.loadLedgersForSearch('');
+  onLedgerAutocompleteFocus(uid: string): void {
+    this.ensureLedgerOptionsForRow(uid);
+    const version = this.nextLedgerSearchVersion(uid);
+    void this.loadLedgersForSearch(uid, '', version);
   }
 
-  onLedgerQueryChange(event: unknown): void {
+  onLedgerQueryChange(uid: string, event: unknown): void {
     const q = typeof event === 'string' ? event.trim().toLowerCase() : '';
-    if (this.ledgerSearchTimer) clearTimeout(this.ledgerSearchTimer);
-    if (!q) {
-      void this.loadLedgersForSearch('');
-      return;
-    }
-    this.ledgerSearchTimer = setTimeout(() => {
-      void this.loadLedgersForSearch(q);
-    }, DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS);
+    const version = this.nextLedgerSearchVersion(uid);
+    void this.loadLedgersForSearch(uid, q, version);
   }
 
   onLedgerPick(uid: string, value: unknown): void {
     const ledgerId = typeof value === 'string' ? value : '';
     const ledger =
-      this.ledgerAutocompleteOptions().find((l) => l.id === ledgerId) ??
+      this.ledgerAutocompleteOptions(uid).find((l) => l.id === ledgerId) ??
       this.ledgerStore.items().find((l) => l.id === ledgerId);
     this.patchRow(uid, {
       ledgerId,
@@ -208,6 +207,11 @@ export class JournalDraftStore {
   }
 
   removeLine(uid: string): void {
+    this.ledgerSearchVersions.delete(uid);
+    this.ledgerOptionsByRow.update((optionsByRow) => {
+      const { [uid]: _removed, ...remaining } = optionsByRow;
+      return remaining;
+    });
     this.rows.update((r) => {
       if (r.length <= 2) return r;
       return r.filter((row) => row.uid !== uid);
@@ -219,8 +223,8 @@ export class JournalDraftStore {
     return validateJournalEntriesForSubmit(this.formRowInputs());
   }
 
-  private loadLedgersForSearch(q: string): Promise<void> {
-    return this.ledgerStore.loadLedgers(
+  private async loadLedgersForSearch(uid: string, q: string, version: number): Promise<void> {
+    await this.ledgerStore.loadLedgers(
       q
         ? {
             where: { name: { ilike: `%${q}%` } },
@@ -229,6 +233,42 @@ export class JournalDraftStore {
           }
         : { limit: 50, includes: ['category'] },
     );
+    if (this.ledgerSearchVersions.get(uid) !== version) return;
+
+    const options = this.ledgerStore.items();
+    if (!q) {
+      this.ledgerDefaultOptions.set(options);
+    }
+    this.ledgerOptionsByRow.update((optionsByRow) => ({
+      ...optionsByRow,
+      [uid]: options,
+    }));
+  }
+
+  private ensureLedgerOptionsForRow(uid: string): void {
+    if (this.ledgerOptionsByRow()[uid]) return;
+
+    this.ledgerOptionsByRow.update((optionsByRow) => ({
+      ...optionsByRow,
+      [uid]: this.ledgerFallbackOptions(),
+    }));
+  }
+
+  private ledgerFallbackOptions(): readonly Ledger[] {
+    return this.ledgerDefaultOptions().length > 0
+      ? this.ledgerDefaultOptions()
+      : this.ledgerStore.items();
+  }
+
+  private nextLedgerSearchVersion(uid: string): number {
+    const next = (this.ledgerSearchVersions.get(uid) ?? 0) + 1;
+    this.ledgerSearchVersions.set(uid, next);
+    return next;
+  }
+
+  private clearLedgerSearchState(): void {
+    this.ledgerSearchVersions.clear();
+    this.ledgerOptionsByRow.set({});
   }
 
   private patchRow(

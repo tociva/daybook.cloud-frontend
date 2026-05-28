@@ -45,18 +45,18 @@
         <tbody>
           @for (row of draft.rows(); track row.uid) {
             <tr>
-              <td class="je-col-ledger" (focusin)="draft.onLedgerAutocompleteFocus()">
+              <td class="je-col-ledger" (focusin)="draft.onLedgerAutocompleteFocus(row.uid)">
                 <tng-autocomplete
                   [attr.id]="'j-ledger-' + row.uid"
                   placeholder="Search ledger..."
                   ariaLabel="Ledger"
-                  [options]="draft.ledgerAutocompleteOptions()"
+                  [options]="draft.ledgerAutocompleteOptions(row.uid)"
                   [value]="row.ledgerId"
                   [getOptionValue]="draft.ledgerOptionValue"
                   [getOptionLabel]="draft.ledgerOptionLabel"
                   [trackBy]="draft.ledgerTrackBy"
                   (valueChange)="draft.onLedgerPick(row.uid, $event)"
-                  (queryChange)="draft.onLedgerQueryChange($event)"
+                  (queryChange)="draft.onLedgerQueryChange(row.uid, $event)"
                 />
               </td>
               <td class="je-col-debit">
