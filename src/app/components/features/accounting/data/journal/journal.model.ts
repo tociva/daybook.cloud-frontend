@@ -1,4 +1,5 @@
 import type { Lb4ListQuery } from '../../../../../shared/crud';
+import type { StoredDocument } from '../../../trading/data/invoice-document';
 
 /** Full journal as returned by GET / list when included. */
 export type JournalEntry = Readonly<{
@@ -18,6 +19,7 @@ export type Journal = Readonly<{
   props?: Record<string, unknown>;
   fiscalyearid: string;
   documentids?: readonly string[];
+  documents?: readonly StoredDocument[];
   entries?: readonly JournalEntry[];
   createdat?: string;
   updatedat?: string;

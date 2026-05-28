@@ -12,6 +12,7 @@ const INVOICE_DOCUMENT_ENDPOINTS: Record<InvoiceDocumentResourceType, string> = 
   saleInvoice: '/inventory/sale-invoice',
   purchaseInvoice: '/inventory/purchase-invoice',
   purchaseReturn: '/inventory/purchase-return',
+  journal: '/accounting/journal',
 };
 
 @Injectable({ providedIn: 'root' })

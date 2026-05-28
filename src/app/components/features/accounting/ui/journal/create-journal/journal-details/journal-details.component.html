@@ -1,0 +1,40 @@
+<tng-card variant="outline" padding="lg">
+  <tng-card-header>
+    <tng-card-title>Journal Details</tng-card-title>
+  </tng-card-header>
+  <tng-card-content>
+    <div class="aside-fields">
+      <tng-form-field labelPosition="outline" [invalid]="draft.dateError() !== null">
+        <tng-label forId="j-date" required>Date</tng-label>
+        <app-fiscal-year-datepicker
+          id="j-date"
+          [value]="draft.journalDateForPicker()"
+          [invalid]="draft.dateError() !== null"
+          (valueChange)="draft.onDateChange($event)"
+        />
+        <tng-error [show]="draft.dateError() !== null">{{ draft.dateError() }}</tng-error>
+      </tng-form-field>
+
+      <tng-form-field labelPosition="outline">
+        <tng-label forId="j-number">Number</tng-label>
+        <tng-input
+          id="j-number"
+          placeholder="Leave blank to auto-generate"
+          [value]="draft.journalNumber()"
+          (valueChange)="draft.journalNumber.set($any($event) ?? '')"
+        />
+      </tng-form-field>
+
+      <tng-form-field labelPosition="outline">
+        <tng-label forId="j-description">Description</tng-label>
+        <tng-textarea
+          id="j-description"
+          rows="3"
+          placeholder="Optional narration"
+          [value]="draft.journalDescription()"
+          (valueChange)="draft.journalDescription.set($any($event) ?? '')"
+        />
+      </tng-form-field>
+    </div>
+  </tng-card-content>
+</tng-card>

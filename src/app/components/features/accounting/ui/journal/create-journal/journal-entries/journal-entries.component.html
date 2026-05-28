@@ -1,0 +1,113 @@
+<tng-card variant="outline" padding="lg">
+  <tng-card-header>
+    <tng-card-title>Journal Entries</tng-card-title>
+  </tng-card-header>
+  <tng-card-content>
+    <div class="entries-toolbar">
+      <div class="entries-toolbar__actions">
+        <app-invoice-document-tags
+          class="entries-document-picker"
+          [editable]="true"
+          [documents]="documents()"
+          [files]="pendingFiles()"
+          [disabled]="documentsDisabled()"
+          [uploading]="documentsUploading()"
+          (filesChange)="pendingFilesChange.emit($event)"
+          (documentRemove)="documentRemove.emit($event)"
+        />
+        <tng-button type="button" appearance="outline" tone="neutral" (click)="draft.addLine()">
+          <tng-icon icon="plus" aria-hidden="true" />
+          New Entry
+        </tng-button>
+      </div>
+    </div>
+
+    @if (draft.entryErrors().length > 0) {
+      <div class="notice notice--danger">
+        <ul class="error-list">
+          @for (err of draft.entryErrors(); track err) {
+            <li>{{ err }}</li>
+          }
+        </ul>
+      </div>
+    }
+
+    <div class="journal-entries-scroll">
+      <table class="journal-entries-table">
+        <thead>
+          <tr>
+            <th class="je-col-ledger">Ledger</th>
+            <th class="je-col-debit">Debit</th>
+            <th class="je-col-credit">Credit</th>
+            <th class="je-col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of draft.rows(); track row.uid) {
+            <tr>
+              <td class="je-col-ledger" (focusin)="draft.onLedgerAutocompleteFocus()">
+                <tng-autocomplete
+                  [attr.id]="'j-ledger-' + row.uid"
+                  placeholder="Search ledger..."
+                  ariaLabel="Ledger"
+                  [options]="draft.ledgerAutocompleteOptions()"
+                  [value]="row.ledgerId"
+                  [getOptionValue]="draft.ledgerOptionValue"
+                  [getOptionLabel]="draft.ledgerOptionLabel"
+                  [trackBy]="draft.ledgerTrackBy"
+                  (valueChange)="draft.onLedgerPick(row.uid, $event)"
+                  (queryChange)="draft.onLedgerQueryChange($event)"
+                />
+              </td>
+              <td class="je-col-debit">
+                <tng-input
+                  type="number"
+                  placeholder="0.00"
+                  [value]="row.debit"
+                  (valueChange)="draft.onDebitChange(row.uid, $event)"
+                />
+              </td>
+              <td class="je-col-credit">
+                <tng-input
+                  type="number"
+                  placeholder="0.00"
+                  [value]="row.credit"
+                  (valueChange)="draft.onCreditChange(row.uid, $event)"
+                />
+              </td>
+              <td class="je-col-actions">
+                <button
+                  type="button"
+                  class="je-remove-btn"
+                  [disabled]="draft.rows().length <= 2"
+                  (click)="draft.removeLine(row.uid)"
+                  aria-label="Remove transaction"
+                  title="Remove transaction"
+                >
+                  <tng-icon icon="trash2" aria-hidden="true" />
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="totals-bar" aria-live="polite">
+      <span
+        >Debit total: <strong>{{ draft.totalsPreview().debit }}</strong></span
+      >
+      <span
+        >Credit total: <strong>{{ draft.totalsPreview().credit }}</strong></span
+      >
+      <span
+        [class.totals-bar__diff]="
+          !draft.totalsPreview().balanced &&
+          (draft.totalsPreview().debit > 0 || draft.totalsPreview().credit > 0)
+        "
+      >
+        Difference: <strong>{{ draft.totalsPreview().diff }}</strong>
+      </span>
+    </div>
+  </tng-card-content>
+</tng-card>

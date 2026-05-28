@@ -1,4 +1,8 @@
-export type InvoiceDocumentResourceType = 'saleInvoice' | 'purchaseInvoice' | 'purchaseReturn';
+export type InvoiceDocumentResourceType =
+  | 'saleInvoice'
+  | 'purchaseInvoice'
+  | 'purchaseReturn'
+  | 'journal';
 
 export type StoredDocumentProps = Readonly<{
   mimeType?: string;

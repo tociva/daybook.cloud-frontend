@@ -1,0 +1,217 @@
+:host {
+  display: block;
+}
+
+.entries-toolbar {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.entries-toolbar__actions {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.65rem;
+}
+
+.entries-document-picker {
+  margin-left: 0;
+}
+
+.notice {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+}
+
+.notice--danger {
+  border-color: var(--tng-semantic-accent-danger);
+  color: var(--tng-semantic-accent-danger);
+}
+
+.error-list {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+:host {
+  --je-cell-focus-border: var(--tng-semantic-accent-brand, var(--tng-semantic-focus-ring));
+}
+
+.journal-entries-scroll {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  width: 100%;
+}
+
+.journal-entries-table {
+  background: var(--tng-semantic-background-canvas);
+  border-collapse: collapse;
+  color: var(--tng-semantic-foreground-primary);
+  font-family: 'Roboto', system-ui, sans-serif;
+  font-size: 13px;
+  min-width: 100%;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.journal-entries-table th,
+.journal-entries-table td {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  vertical-align: middle;
+}
+
+.journal-entries-table th {
+  background: var(--tng-semantic-background-surface);
+  color: var(--tng-semantic-foreground-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  height: 34px;
+  line-height: 1;
+  min-height: 34px;
+  text-align: center;
+}
+
+.journal-entries-table td {
+  background: var(--tng-semantic-background-canvas);
+  color: var(--tng-semantic-foreground-primary);
+  height: 38px;
+  padding: 0;
+}
+
+.je-col-ledger {
+  width: auto;
+}
+
+.je-col-debit,
+.je-col-credit {
+  width: 8rem;
+}
+
+.je-col-actions {
+  border-right-color: var(--tng-semantic-border-strong);
+  text-align: center;
+  width: 3.5rem;
+}
+
+.je-remove-btn {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--tng-semantic-accent-danger);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  height: 28px;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+  width: 28px;
+}
+
+.je-remove-btn:hover {
+  background: var(--tng-semantic-background-surface);
+}
+
+.je-remove-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.je-col-ledger > tng-autocomplete {
+  --tng-autocomplete-bg: var(--tng-semantic-background-canvas);
+  --tng-autocomplete-border-hover: transparent;
+  --tng-autocomplete-border-strong: transparent;
+  --tng-autocomplete-focus-ring: transparent;
+  --tng-autocomplete-radius: 0;
+  --tng-autocomplete-shadow: none;
+  --tng-autocomplete-shadow-focus: none;
+  --tng-autocomplete-surface: var(--tng-semantic-background-canvas);
+  --tng-autocomplete-trigger-container-min-height: 100%;
+  --tng-autocomplete-trigger-container-px: 0;
+  --tng-autocomplete-trigger-min-height: 100%;
+  --tng-autocomplete-trigger-px: 8px;
+  --tng-autocomplete-trigger-py: 0;
+
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+.je-col-debit > tng-input,
+.je-col-credit > tng-input {
+  --tng-input-bg: var(--tng-semantic-background-canvas);
+  --tng-input-border: transparent;
+  --tng-input-focus-ring: transparent;
+  --tng-input-min-height: 100%;
+  --tng-input-number-controls-display: none;
+  --tng-input-px: 0;
+  --tng-input-radius: 0;
+
+  display: block;
+  width: 100%;
+}
+
+:host ::ng-deep .je-col-ledger > tng-autocomplete [data-slot='autocomplete-trigger'] {
+  background: var(--tng-semantic-background-canvas);
+}
+
+:host ::ng-deep .je-col-debit > tng-input [data-slot='input-group'],
+:host ::ng-deep .je-col-credit > tng-input [data-slot='input-group'],
+:host ::ng-deep .je-col-ledger > tng-autocomplete [data-slot='autocomplete-trigger-container'] {
+  border-color: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+:host ::ng-deep .je-col-debit > tng-input [data-slot='input-group'][data-focused],
+:host ::ng-deep .je-col-credit > tng-input [data-slot='input-group'][data-focused],
+:host
+  ::ng-deep
+  .je-col-ledger
+  > tng-autocomplete
+  [data-slot='autocomplete-trigger-container']:focus-within {
+  border-bottom-color: var(--je-cell-focus-border);
+}
+
+:host ::ng-deep .je-col-debit input[type='number'],
+:host ::ng-deep .je-col-credit input[type='number'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+:host ::ng-deep .je-col-debit input[type='number']::-webkit-inner-spin-button,
+:host ::ng-deep .je-col-debit input[type='number']::-webkit-outer-spin-button,
+:host ::ng-deep .je-col-credit input[type='number']::-webkit-inner-spin-button,
+:host ::ng-deep .je-col-credit input[type='number']::-webkit-outer-spin-button {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.totals-bar {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  color: var(--tng-semantic-foreground-muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+  gap: 1rem 1.5rem;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+}
+
+.totals-bar strong {
+  color: var(--tng-semantic-foreground-primary);
+}
+
+.totals-bar__diff strong {
+  color: var(--tng-semantic-accent-danger);
+}
