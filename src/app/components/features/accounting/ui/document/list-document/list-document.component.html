@@ -2,7 +2,7 @@
   <app-page-heading
     eyebrow="Accounting"
     title="Documents"
-    description="Manage organization documents and upload status."
+    description="Browse and review organization documents."
   >
     <app-crud-filter-popover
       ariaLabel="Document filters"
@@ -11,11 +11,6 @@
       [filter]="crudQuery.filter()"
       syncUrl
     />
-
-    <tng-button type="button" appearance="solid" tone="primary" (click)="createDocument()">
-      <tng-icon icon="plus" aria-hidden="true" />
-      New document
-    </tng-button>
   </app-page-heading>
 
   <tng-card variant="outline" padding="lg">
@@ -39,13 +34,8 @@
           <app-empty-state
             icon="paperclip"
             title="No documents yet"
-            description="Add your first stored document for this organization."
-          >
-            <tng-button type="button" appearance="solid" tone="primary" (click)="createDocument()">
-              <tng-icon icon="plus" aria-hidden="true" />
-              New document
-            </tng-button>
-          </app-empty-state>
+            description="No documents are available for this organization yet."
+          />
         }
       } @else {
         <tng-table
@@ -81,38 +71,14 @@
             {{ row.status || '—' }}
           </ng-template>
 
+          <ng-template tngTableCellTemplate="addedby" let-row="row">
+            {{ resolveAddedByName(row) }}
+          </ng-template>
+
           <ng-template tngTableCellTemplate="createdat" let-row="row">
             {{ formatDate(row.createdat) }}
           </ng-template>
 
-          <ng-template tngTableCellTemplate="actions" let-row="row">
-            <div class="row-actions">
-              <button
-                type="button"
-                class="action-icon"
-                aria-label="View document"
-                (click)="viewDocument(row)"
-              >
-                <tng-icon icon="eye" aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                class="action-icon"
-                aria-label="Edit document"
-                (click)="editDocument(row)"
-              >
-                <tng-icon icon="pencil" aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                class="action-icon action-icon--danger"
-                aria-label="Delete document"
-                (click)="deleteDocument(row)"
-              >
-                <tng-icon icon="trash2" aria-hidden="true" />
-              </button>
-            </div>
-          </ng-template>
         </tng-table>
 
         <div class="table-footer">

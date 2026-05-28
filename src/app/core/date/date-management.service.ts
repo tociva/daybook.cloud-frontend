@@ -37,4 +37,18 @@ export class DateManagementService {
 
     return parsed.format(this.displayDateFormat());
   }
+
+  formatDisplayDateTime(value: string | null | undefined, fallback = '-'): string {
+    if (!value) {
+      return fallback;
+    }
+
+    const parsed = parseIsoDate(value);
+    if (!parsed) {
+      return fallback;
+    }
+
+    // Date follows session format; time uses a common 12-hour format.
+    return `${parsed.format(this.displayDateFormat())}, ${parsed.format('hh:mm A')}`;
+  }
 }

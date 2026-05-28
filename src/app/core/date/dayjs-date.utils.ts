@@ -54,6 +54,13 @@ export const toDateRangeEnd = (start: string, fallback: string): string => {
 };
 
 export const parseIsoDate = (value: string): dayjs.Dayjs | null => {
-  const parsed = dayjs(value, DEFAULT_NODE_DATE_FORMAT, true);
-  return parsed.isValid() ? parsed : null;
+  // Prefer strict date-only parsing first to keep existing behavior stable.
+  const parsedDateOnly = dayjs(value, DEFAULT_NODE_DATE_FORMAT, true);
+  if (parsedDateOnly.isValid()) {
+    return parsedDateOnly;
+  }
+
+  // Fallback for full ISO timestamps like 2026-05-28T06:47:46.671Z.
+  const parsedDateTime = dayjs(value);
+  return parsedDateTime.isValid() ? parsedDateTime : null;
 };

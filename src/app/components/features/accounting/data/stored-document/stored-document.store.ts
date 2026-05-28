@@ -6,7 +6,7 @@ import type {
   StoredDocumentCreatePayload,
   StoredDocumentGetQuery,
   StoredDocumentListQuery,
-  StoredDocumentWritePayload,
+  StoredDocumentUpdatePayload,
 } from './stored-document.model';
 import { StoredDocumentService } from './stored-document.service';
 import { initialStoredDocumentState } from './stored-document.state';
@@ -127,10 +127,10 @@ export const StoredDocumentStore = signalStore(
         }
       },
 
-      async updateDocument(id: string, payload: StoredDocumentWritePayload): Promise<boolean> {
+      async updateDocument(id: string, payload: StoredDocumentUpdatePayload): Promise<boolean> {
         setLoading();
         try {
-          await service.update(id, { name: payload.name });
+          await service.update(id, payload);
           const item = await service.getById(id);
           patchState(store, (state) => ({
             storedDocument: {

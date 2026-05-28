@@ -1,6 +1,7 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
+import { ApiClientService } from '../../../../../core/api/api-client.service';
 import { AppConfigStore } from '../../../../../core/config/app-config.store';
 import { CrudApiService } from '../../../../../shared/crud';
 import type {
@@ -13,12 +14,9 @@ import type {
 
 const ENDPOINT = '/storage/stored-document';
 
-type StoredDocumentCountResponse = Readonly<{
-  count: number;
-}>;
-
 @Injectable({ providedIn: 'root' })
 export class StoredDocumentService {
+  private readonly api = inject(ApiClientService);
   private readonly crudApi = inject(CrudApiService);
   private readonly http = inject(HttpClient);
   private readonly appConfigStore = inject(AppConfigStore);
@@ -35,18 +33,19 @@ export class StoredDocumentService {
     return this.crudApi.list<StoredDocument>(ENDPOINT, query);
   }
 
-  /**
-   * Count endpoint expects `filter` query param as per spec:
-   * GET /storage/stored-document/count?filter=...
-   */
   async count(query: StoredDocumentListQuery = {}): Promise<number> {
-    const params = new HttpParams().set('filter', JSON.stringify(query));
-    const response = await this.http.get<StoredDocumentCountResponse>(
-      `${await this.collectionUrl()}/count`,
-      { params },
+    return this.crudApi.count(ENDPOINT, query);
+  }
+
+  async getDownloadUrl(id: string): Promise<string> {
+    const response = await this.api.get<Record<string, unknown> | string>(
+      `${await this.collectionUrl()}/${id}/download-url`,
     );
-    const result = await firstValueFrom(response);
-    return result.count;
+    const url = this.extractSignedUrl(response);
+    if (!url) {
+      throw new Error('Download URL is missing from response.');
+    }
+    return url;
   }
 
   /** Backend returns 204 No Content. */
@@ -81,5 +80,22 @@ export class StoredDocumentService {
     }
 
     return `${config.apiBaseUrl.replace(/\/$/, '')}/${ENDPOINT.replace(/^\/+/, '')}`;
+  }
+
+  private extractSignedUrl(payload: Record<string, unknown> | string): string | null {
+    if (typeof payload === 'string') {
+      const normalized = payload.trim();
+      return normalized.length ? normalized : null;
+    }
+
+    const candidate =
+      payload['downloadUrl'] ??
+      payload['signedUrl'] ??
+      payload['url'] ??
+      payload['getUrl'] ??
+      payload['href'];
+    if (typeof candidate !== 'string') return null;
+    const normalized = candidate.trim();
+    return normalized.length ? normalized : null;
   }
 }

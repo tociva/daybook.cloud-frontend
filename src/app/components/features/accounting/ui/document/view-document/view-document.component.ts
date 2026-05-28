@@ -1,34 +1,28 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import {
-  TngCardActionsComponent,
-  TngCardComponent,
-  TngCardContentComponent,
-  TngCardDescriptionComponent,
-  TngCardFooterComponent,
-  TngCardHeaderComponent,
-  TngCardTitleComponent,
-} from '@tailng-ui/components';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { TngTable, TngTableCellTpl } from '@tailng-ui/components';
+import type { TngTableColumn } from '@tailng-ui/components';
+import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
+import { DateManagementService } from '../../../../../../core/date/date-management.service';
+import { ToastStore } from '../../../../../../core/toast/toast.store';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
-import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
-import { BurlDeleteButtonComponent } from '../../../../../../shared/burl-delete-button/burl-delete-button.component';
-import { BurlEditButtonComponent } from '../../../../../../shared/burl-edit-button/burl-edit-button.component';
-import { StoredDocumentStore } from '../../../data/stored-document';
+import { UserSessionStore } from '../../../../management/data/user-session/user-session.store';
+import { StoredDocumentService, StoredDocumentStore } from '../../../data/stored-document';
+import type { StoredDocument, StoredDocumentAddedBy } from '../../../data/stored-document';
+
+type DocumentDetailRow = Readonly<{
+  id: string;
+  label: string;
+  value: string;
+}>;
 
 @Component({
   selector: 'app-view-document',
   standalone: true,
   imports: [
-    TngCardActionsComponent,
-    TngCardComponent,
-    TngCardContentComponent,
-    TngCardDescriptionComponent,
-    TngCardFooterComponent,
-    TngCardHeaderComponent,
-    TngCardTitleComponent,
+    TngTable,
+    TngTableCellTpl,
     BurlBackButtonComponent,
-    BurlDeleteButtonComponent,
-    BurlEditButtonComponent,
   ],
   templateUrl: './view-document.component.html',
   styleUrl: './view-document.component.css',
@@ -36,9 +30,43 @@ import { StoredDocumentStore } from '../../../data/stored-document';
 })
 export class ViewDocumentComponent {
   private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
-  private readonly burlNavigation = inject(BurlNavigationService);
+  private readonly dateManagement = inject(DateManagementService);
+  private readonly userSessionStore = inject(UserSessionStore);
+  private readonly toastStore = inject(ToastStore);
+  private readonly documentService = inject(StoredDocumentService);
   protected readonly documentStore = inject(StoredDocumentStore);
+  protected readonly isDownloading = signal(false);
+  protected readonly columns: readonly TngTableColumn<DocumentDetailRow>[] = [
+    { id: 'label', label: 'Field', width: '16rem' },
+    { id: 'value', label: 'Value' },
+  ];
+  protected readonly detailsRows = computed<readonly DocumentDetailRow[]>(() => {
+    const item = this.documentStore.selectedItem();
+    if (!item) return [];
+    return [
+      { id: 'name', label: 'Name', value: item.name || '—' },
+      { id: 'category', label: 'Category', value: item.category || '—' },
+      { id: 'type', label: 'Type', value: item.type || '—' },
+      { id: 'status', label: 'Status', value: item.status || '—' },
+      { id: 'size', label: 'Size', value: this.formatFileSize(item.size) },
+      {
+        id: 'download',
+        label: 'Download',
+        value: item.id ? 'Download file' : '—',
+      },
+      {
+        id: 'createdat',
+        label: 'Created At',
+        value: this.dateManagement.formatDisplayDateTime(item.createdat, '—'),
+      },
+      {
+        id: 'updatedat',
+        label: 'Updated At',
+        value: this.dateManagement.formatDisplayDateTime(item.updatedat, '—'),
+      },
+      { id: 'addedby', label: 'Added By', value: this.resolveUserName(item) },
+    ];
+  });
 
   constructor() {
     void this.loadInitialState();
@@ -49,24 +77,9 @@ export class ViewDocumentComponent {
 
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) return;
-    if (this.documentStore.selectedItem()?.id === id) return;
-    await this.documentStore.loadDocumentById(id);
-  }
-
-  protected edit(): void {
-    const id = this.documentStore.selectedItem()?.id;
-    if (!id) return;
-    void this.router.navigate(['/app/accounting/documents', id, 'edit'], {
-      queryParams: { burl: this.burlNavigation.getBackUrl() },
-    });
-  }
-
-  protected delete(): void {
-    const id = this.documentStore.selectedItem()?.id;
-    if (!id) return;
-    void this.router.navigate(['/app/accounting/documents', id, 'delete'], {
-      queryParams: { burl: this.burlNavigation.getBackUrl() },
-    });
+    const cached = this.documentStore.selectedItem();
+    if (cached?.id === id && cached.addedby) return;
+    await this.documentStore.loadDocumentById(id, { includes: ['addedby'] });
   }
 
   protected formatFileSize(bytes: number): string {
@@ -79,5 +92,44 @@ export class ViewDocumentComponent {
       unitIndex++;
     }
     return `${value >= 10 || unitIndex === 0 ? value.toFixed(0) : value.toFixed(1)} ${units[unitIndex]}`;
+  }
+
+  private resolveUserName(item: StoredDocument): string {
+    const relationName = this.relationUserName(item.addedby);
+    if (relationName) {
+      return relationName;
+    }
+
+    if (item.createdby?.trim()) {
+      return item.createdby.trim();
+    }
+
+    const session = this.userSessionStore.session();
+    if (item.addedbyid && session?.userid === item.addedbyid) {
+      return session.displayname ?? session.displayName ?? session.username ?? session.name ?? '—';
+    }
+
+    return '—';
+  }
+
+  private relationUserName(addedBy?: StoredDocumentAddedBy): string | null {
+    if (!addedBy) return null;
+    const value = addedBy.displayname ?? addedBy.displayName ?? addedBy.name ?? addedBy.username ?? '';
+    const normalized = value.trim();
+    return normalized.length ? normalized : null;
+  }
+
+  protected async downloadDocument(): Promise<void> {
+    const item = this.documentStore.selectedItem();
+    if (!item?.id || this.isDownloading()) return;
+    this.isDownloading.set(true);
+    try {
+      const downloadUrl = await this.documentService.getDownloadUrl(item.id);
+      window.open(downloadUrl, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      this.toastStore.danger(getApiErrorMessage(error, 'Failed to generate download link.'));
+    } finally {
+      this.isDownloading.set(false);
+    }
   }
 }

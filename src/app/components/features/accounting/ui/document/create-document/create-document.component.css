@@ -6,8 +6,72 @@
   padding: 1.25rem;
 }
 
+.setup-layout {
+  display: grid;
+  gap: clamp(1.25rem, 3vw, 2.5rem);
+  grid-template-columns: minmax(0, 1.4fr) minmax(18rem, 0.6fr);
+  margin: 0 auto;
+  max-width: 76rem;
+}
+
+.document-form {
+  min-width: 0;
+  border-radius: 0.75rem;
+}
+
+.document-form[data-dragging] tng-card {
+  border-color: var(--tng-semantic-accent-brand);
+  border-style: dashed;
+}
+
+.document-form[data-dragging] {
+  outline: 2px dashed var(--tng-semantic-accent-brand);
+  outline-offset: 0.25rem;
+}
+
 .document-form tng-card {
-  max-width: 58rem;
+  width: 100%;
+}
+
+.setup-overview {
+  align-self: start;
+  min-width: 0;
+  position: sticky;
+  top: 1rem;
+}
+
+.setup-copy {
+  min-width: 0;
+  padding: 1rem 0;
+}
+
+.eyebrow {
+  color: var(--tng-semantic-accent-brand);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  margin: 0 0 0.75rem;
+  text-transform: uppercase;
+}
+
+.setup-copy h1 {
+  font-size: clamp(2rem, 3.5vw, 3.25rem);
+  letter-spacing: -0.06em;
+  line-height: 0.95;
+  margin: 0;
+  max-width: 12ch;
+}
+
+.setup-copy p:last-of-type {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-top: 0.75rem;
+  max-width: 28rem;
+}
+
+.setup-stepper {
+  margin-top: 1rem;
 }
 
 .notice {
@@ -49,6 +113,9 @@
 
 .upload-block {
   margin-top: 0.75rem;
+  border: 1px dashed var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  padding: 0.85rem;
 }
 
 .file-input {
@@ -58,19 +125,6 @@
 .upload-actions {
   display: flex;
   gap: 0.5rem;
-}
-
-.select-file-btn,
-.clear-file-btn {
-  appearance: none;
-  background: transparent;
-  border: 1px solid var(--tng-semantic-border-subtle);
-  border-radius: 0.5rem;
-  color: var(--tng-semantic-foreground-primary);
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.9rem;
-  padding: 0.45rem 0.8rem;
 }
 
 .file-name {
@@ -94,5 +148,16 @@
 @media (max-width: 700px) {
   .field-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .setup-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .setup-overview {
+    order: -1;
+    position: static;
   }
 }

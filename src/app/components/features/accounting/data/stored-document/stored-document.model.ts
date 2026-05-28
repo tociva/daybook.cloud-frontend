@@ -5,6 +5,28 @@ export enum DocumentStatus {
   UPLOADED = 'UPLOADED',
 }
 
+export enum DocumentCategory {
+  ORGANIZATION_LEVEL_DOCUMENT = 'ORGANIZATION_LEVEL_DOCUMENT',
+  ORGANIZATION_LOGO = 'ORGANIZATION_LOGO',
+  BRANCH_LEVEL_DOCUMENT = 'BRANCH_LEVEL_DOCUMENT',
+  USER_LEVEL_DOCUMENT = 'USER_LEVEL_DOCUMENT',
+  FISCAL_YEAR_LEVEL_DOCUMENT = 'FISCAL_YEAR_LEVEL_DOCUMENT',
+  INVOICE_DOCUMENT = 'INVOICE_DOCUMENT',
+  RECEIPT_DOCUMENT = 'RECEIPT_DOCUMENT',
+  JOURNAL_SUPPORTING_DOCUMENT = 'JOURNAL_SUPPORTING_DOCUMENT',
+  GST_RECONCILIATION_FILE = 'GST_RECONCILIATION_FILE',
+  EMPLOYEE_DOCUMENT = 'EMPLOYEE_DOCUMENT',
+  OTHER_DOCUMENT = 'OTHER_DOCUMENT',
+}
+
+export type StoredDocumentAddedBy = Readonly<{
+  id?: string;
+  name?: string;
+  displayname?: string;
+  displayName?: string;
+  username?: string;
+}>;
+
 export type StoredDocument = Readonly<{
   createdat?: string;
   createdby?: string;
@@ -18,6 +40,7 @@ export type StoredDocument = Readonly<{
   category: string;
   status?: DocumentStatus | string;
   props?: Record<string, unknown>;
+  addedby?: StoredDocumentAddedBy;
   addedbyid: string;
   organizationid: string;
   putUrl?: string;
@@ -32,11 +55,7 @@ export type StoredDocumentCreatePayload = Readonly<{
   path?: string;
   size: number;
   type?: string;
-  category?: string;
-  status?: DocumentStatus | string;
   props?: Record<string, unknown>;
-  addedbyid?: string;
-  organizationid?: string;
 }>;
 
 /** PATCH /storage/stored-document/{id} accepts only name in current spec. */
@@ -49,9 +68,3 @@ export type StoredDocumentListQuery = Lb4ListQuery;
 export type StoredDocumentGetQuery = Readonly<{
   includes?: readonly Lb4Include[];
 }>;
-
-export type StoredDocumentWritePayload = Readonly<
-  {
-    name: string;
-  } & Partial<Omit<StoredDocumentCreatePayload, 'name'>>
->;

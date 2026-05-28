@@ -1,28 +1,70 @@
 import { Injectable, inject } from '@angular/core';
-import type { CudMessages } from '../../../../../shared/crud';
-import { CrudFacadeBase } from '../../../../../shared/crud';
-import type { StoredDocument, StoredDocumentWritePayload } from './stored-document.model';
+import { ToastStore } from '../../../../../core/toast/toast.store';
+import { BurlNavigationService } from '../../../../../shared/burl-back-button/burl-navigation.service';
+import type { CudMessages, CudOptions } from '../../../../../shared/crud';
+import type {
+  StoredDocument,
+  StoredDocumentCreatePayload,
+  StoredDocumentUpdatePayload,
+} from './stored-document.model';
 import { StoredDocumentStore } from './stored-document.store';
 
-@Injectable({ providedIn: 'root' })
-export class StoredDocumentFacade extends CrudFacadeBase<StoredDocument, StoredDocumentWritePayload> {
-  private readonly store = inject(StoredDocumentStore);
+const DEFAULT_OPTIONS: Required<CudOptions> = { navigateBack: true };
 
-  protected readonly messages: CudMessages = {
+@Injectable({ providedIn: 'root' })
+export class StoredDocumentFacade {
+  private readonly store = inject(StoredDocumentStore);
+  private readonly toast = inject(ToastStore);
+  private readonly navigation = inject(BurlNavigationService);
+
+  private readonly messages: CudMessages = {
     created: 'Document created.',
     updated: 'Document updated.',
     deleted: 'Document deleted.',
   };
 
-  protected doCreate(payload: StoredDocumentWritePayload): Promise<StoredDocument | null> {
-    return this.store.createDocument(payload);
+  async create(
+    payload: StoredDocumentCreatePayload,
+    options: CudOptions = {},
+  ): Promise<StoredDocument | null> {
+    const { navigateBack } = { ...DEFAULT_OPTIONS, ...options };
+    const result = await this.store.createDocument(payload);
+
+    if (result) {
+      this.toast.success(this.messages.created);
+      if (navigateBack) {
+        await this.navigation.navigateBack();
+      }
+    }
+
+    return result;
   }
 
-  protected doUpdate(id: string, payload: StoredDocumentWritePayload): Promise<boolean> {
-    return this.store.updateDocument(id, payload);
+  async update(id: string, payload: StoredDocumentUpdatePayload, options: CudOptions = {}): Promise<boolean> {
+    const { navigateBack } = { ...DEFAULT_OPTIONS, ...options };
+    const result = await this.store.updateDocument(id, payload);
+
+    if (result) {
+      this.toast.success(this.messages.updated);
+      if (navigateBack) {
+        await this.navigation.navigateBack();
+      }
+    }
+
+    return result;
   }
 
-  protected doDelete(id: string): Promise<boolean> {
-    return this.store.deleteDocument(id);
+  async delete(id: string, options: CudOptions = {}): Promise<boolean> {
+    const { navigateBack } = { ...DEFAULT_OPTIONS, ...options };
+    const result = await this.store.deleteDocument(id);
+
+    if (result) {
+      this.toast.success(this.messages.deleted);
+      if (navigateBack) {
+        await this.navigation.navigateBack();
+      }
+    }
+
+    return result;
   }
 }

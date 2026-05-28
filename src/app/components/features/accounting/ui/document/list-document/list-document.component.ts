@@ -1,13 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import {
-  TngButtonComponent,
-  TngCardComponent,
-  TngTable,
-  TngTableCellTpl,
-} from '@tailng-ui/components';
+import { TngButtonComponent, TngCardComponent, TngTable, TngTableCellTpl } from '@tailng-ui/components';
 import type { TngTableColumn } from '@tailng-ui/components';
-import { TngIcon } from '@tailng-ui/icons';
 import {
   CrudFilterPopoverComponent,
   CrudListQueryService,
@@ -16,6 +10,8 @@ import {
 import type { CrudFilterField } from '../../../../../../shared/crud';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
+import { DateManagementService } from '../../../../../../core/date/date-management.service';
+import { UserSessionStore } from '../../../../management/data/user-session/user-session.store';
 import { StoredDocumentStore } from '../../../data/stored-document';
 import type { StoredDocument } from '../../../data/stored-document';
 
@@ -28,7 +24,6 @@ import type { StoredDocument } from '../../../data/stored-document';
     TngCardComponent,
     CrudFilterPopoverComponent,
     CrudPaginatorComponent,
-    TngIcon,
     EmptyStateComponent,
     TngTable,
     TngTableCellTpl,
@@ -42,6 +37,8 @@ export class ListDocumentComponent {
   private readonly router = inject(Router);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly documentStore = inject(StoredDocumentStore);
+  private readonly userSessionStore = inject(UserSessionStore);
+  private readonly dateManagement = inject(DateManagementService);
   protected readonly hasError = computed(() => this.documentStore.error() !== null);
 
   protected readonly columns: readonly TngTableColumn<StoredDocument>[] = [
@@ -50,8 +47,8 @@ export class ListDocumentComponent {
     { id: 'type', label: 'Type', sortable: true, width: '8rem' },
     { id: 'size', label: 'Size', sortable: true, align: 'end', headerAlign: 'end', width: '8rem' },
     { id: 'status', label: 'Status', sortable: true, width: '9rem' },
+    { id: 'addedby', label: 'Added By', sortable: true, width: '12rem' },
     { id: 'createdat', label: 'Created', sortable: true, width: '10rem' },
-    { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '8rem' },
   ];
 
   protected readonly filterFields: readonly CrudFilterField[] = [
@@ -65,14 +62,9 @@ export class ListDocumentComponent {
     this.crudQuery.init((filter) => {
       void this.documentStore.loadDocuments({
         ...filter,
+        includes: ['addedby'],
         order: filter.order?.length ? filter.order : ['createdat DESC'],
       });
-    });
-  }
-
-  protected createDocument(): void {
-    void this.router.navigate(['/app/accounting/documents/create'], {
-      queryParams: { burl: this.router.url },
     });
   }
 
@@ -80,22 +72,6 @@ export class ListDocumentComponent {
     if (!item.id) return;
     this.documentStore.setSelectedItem(item);
     void this.router.navigate(['/app/accounting/documents', item.id], {
-      queryParams: { burl: this.router.url },
-    });
-  }
-
-  protected editDocument(item: StoredDocument): void {
-    if (!item.id) return;
-    this.documentStore.setSelectedItem(item);
-    void this.router.navigate(['/app/accounting/documents', item.id, 'edit'], {
-      queryParams: { burl: this.router.url },
-    });
-  }
-
-  protected deleteDocument(item: StoredDocument): void {
-    if (!item.id) return;
-    this.documentStore.setSelectedItem(item);
-    void this.router.navigate(['/app/accounting/documents', item.id, 'delete'], {
       queryParams: { burl: this.router.url },
     });
   }
@@ -113,13 +89,28 @@ export class ListDocumentComponent {
   }
 
   protected formatDate(value?: string): string {
-    if (!value) return '—';
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return '—';
-    return new Intl.DateTimeFormat(undefined, {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    }).format(date);
+    return this.dateManagement.formatDisplayDateTime(value, '—');
+  }
+
+  protected resolveAddedByName(item: StoredDocument): string {
+    const addedBy = item.addedby;
+    if (addedBy) {
+      const relationName =
+        addedBy.displayname ?? addedBy.displayName ?? addedBy.name ?? addedBy.username ?? '';
+      if (relationName.trim()) {
+        return relationName.trim();
+      }
+    }
+
+    if (item.createdby?.trim()) {
+      return item.createdby.trim();
+    }
+
+    const session = this.userSessionStore.session();
+    if (item.addedbyid && session?.userid === item.addedbyid) {
+      return session.displayname ?? session.displayName ?? session.username ?? session.name ?? '—';
+    }
+
+    return '—';
   }
 }

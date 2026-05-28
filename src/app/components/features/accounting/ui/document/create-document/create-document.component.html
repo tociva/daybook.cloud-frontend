@@ -1,113 +1,164 @@
 <main class="accounting-page">
-  <form class="document-form" (submit)="submitForm($event)" novalidate>
-    <tng-card variant="outline" padding="lg">
-      <tng-card-header>
-        <tng-card-title>{{ title() }}</tng-card-title>
-        <tng-card-description>
-          Add document metadata and upload file content to storage.
-        </tng-card-description>
-      </tng-card-header>
+  <section class="setup-layout">
+    <form
+      class="document-form"
+      (submit)="submitForm($event)"
+      novalidate
+      tngFileUpload
+      [multiple]="false"
+      [disabled]="mode() === 'edit' || documentStore.isLoading() || isUploading()"
+      (filesSelected)="onFilesSelected($event)"
+      (filesRejected)="onFilesRejected($event)"
+    >
+      <tng-card variant="outline" padding="lg">
+        <tng-card-header>
+          <tng-card-title>{{ title() }}</tng-card-title>
+          <tng-card-description>
+            Add document metadata and upload file content to storage.
+          </tng-card-description>
+        </tng-card-header>
 
-      <tng-card-content>
-        @if (documentStore.error()) {
-          <div class="notice notice--danger">{{ documentStore.error() }}</div>
-        }
-        @if (uploadError()) {
-          <div class="notice notice--danger">{{ uploadError() }}</div>
-        }
+        <tng-card-content>
+          @if (documentStore.error()) {
+            <div class="notice notice--danger">{{ documentStore.error() }}</div>
+          }
+          @if (uploadError()) {
+            <div class="notice notice--danger">{{ uploadError() }}</div>
+          }
 
-        @if (documentStore.isLoading() && mode() === 'edit' && !documentStore.selectedItem()) {
-          <div class="notice">Loading document...</div>
-        } @else {
-          <div class="field-grid">
-            <div class="field field--wide">
-              <tng-form-field labelPosition="above" [invalid]="nameError() !== null">
-                <tng-label forId="d-name" required>Name</tng-label>
-                <tng-input
-                  #nameInputRef
-                  id="d-name"
-                  placeholder="e.g. Purchase bill Apr-2026"
-                  [formField]="documentForm.name"
-                  [ariaInvalid]="nameError() !== null"
+          @if (documentStore.isLoading() && mode() === 'edit' && !documentStore.selectedItem()) {
+            <div class="notice">Loading document...</div>
+          } @else {
+            @if (mode() === 'create') {
+              <div class="upload-block">
+                <p class="section-label">File</p>
+                <input
+                  #fileInputRef
+                  class="file-input"
+                  type="file"
+                  (change)="onFilePicked($event)"
                 />
-                <tng-error [show]="nameError() !== null">{{ nameError() }}</tng-error>
-              </tng-form-field>
-            </div>
-
-            <div class="field">
-              <tng-form-field labelPosition="above" [invalid]="categoryError() !== null">
-                <tng-label forId="d-category" required>Category</tng-label>
-                <tng-input
-                  id="d-category"
-                  placeholder="e.g. ACCOUNTING"
-                  [formField]="documentForm.category"
-                  [ariaInvalid]="categoryError() !== null"
-                />
-                <tng-error [show]="categoryError() !== null">{{ categoryError() }}</tng-error>
-              </tng-form-field>
-            </div>
-
-            <div class="field">
-              <tng-form-field labelPosition="above">
-                <tng-label forId="d-type">Type</tng-label>
-                <tng-input id="d-type" placeholder="pdf, jpg, png..." [formField]="documentForm.type" />
-              </tng-form-field>
-            </div>
-
-            <div class="field field--wide">
-              <tng-form-field labelPosition="above">
-                <tng-label forId="d-notes">Notes</tng-label>
-                <tng-textarea
-                  id="d-notes"
-                  rows="3"
-                  placeholder="Optional metadata or remarks"
-                  [formField]="documentForm.notes"
-                />
-              </tng-form-field>
-            </div>
-          </div>
-
-          @if (mode() === 'create') {
-            <div class="upload-block">
-              <p class="section-label">File</p>
-              <input
-                #fileInputRef
-                class="file-input"
-                type="file"
-                (change)="onFilePicked($event)"
-              />
-              <div class="upload-actions">
-                <button type="button" class="select-file-btn" (click)="chooseFile()">Select file</button>
-                @if (selectedFile()) {
-                  <button type="button" class="clear-file-btn" (click)="clearFile()">Clear</button>
+                <div class="upload-actions">
+                  <tng-button type="button" appearance="solid" tone="primary" (click)="chooseFile()">
+                    Choose file
+                  </tng-button>
+                  @if (selectedFile()) {
+                    <tng-button type="button" appearance="outline" tone="neutral" (click)="clearFile()">
+                      Clear
+                    </tng-button>
+                  }
+                </div>
+                @if (selectedFile(); as file) {
+                  <p class="file-name">{{ file.name }} ({{ file.size }} bytes)</p>
+                } @else {
+                  <p class="file-name">Drag and drop a file here, or choose one to continue.</p>
+                }
+                @if (fileError()) {
+                  <p class="field-error">{{ fileError() }}</p>
+                }
+                @if (isUploading()) {
+                  <p class="upload-progress">Uploading... {{ uploadProgress() }}%</p>
                 }
               </div>
-              @if (selectedFile(); as file) {
-                <p class="file-name">{{ file.name }} ({{ file.size }} bytes)</p>
-              } @else {
-                <p class="file-name">No file selected.</p>
-              }
-              @if (fileError()) {
-                <p class="field-error">{{ fileError() }}</p>
-              }
-              @if (isUploading()) {
-                <p class="upload-progress">Uploading... {{ uploadProgress() }}%</p>
-              }
-            </div>
-          }
-        }
-      </tng-card-content>
+            }
 
-      <tng-card-footer>
-        <tng-card-actions align="end">
-          <app-burl-back-button label="Cancel" />
-          <app-burl-create-button
-            [icon]="mode() === 'edit' ? 'save' : 'plus'"
-            [label]="mode() === 'edit' ? 'Save changes' : 'Create document'"
-            [disabled]="documentStore.isLoading() || isUploading()"
-          />
-        </tng-card-actions>
-      </tng-card-footer>
-    </tng-card>
-  </form>
+            <div class="field-grid">
+              <div class="field field--wide">
+                <tng-form-field labelPosition="above" [invalid]="nameError() !== null">
+                  <tng-label forId="d-name" required>Name</tng-label>
+                  @if (canEditNameAndType()) {
+                    <tng-input
+                      #nameInputRef
+                      id="d-name"
+                      placeholder="e.g. Purchase bill Apr-2026"
+                      [formField]="documentForm.name"
+                      [ariaInvalid]="nameError() !== null"
+                    />
+                  } @else {
+                    <tng-input
+                      #nameInputRef
+                      id="d-name"
+                      placeholder="e.g. Purchase bill Apr-2026"
+                      [value]="model().name"
+                      [disabled]="true"
+                    />
+                  }
+                  <tng-error [show]="nameError() !== null">{{ nameError() }}</tng-error>
+                </tng-form-field>
+              </div>
+
+              <div class="field">
+                <tng-form-field labelPosition="above" [invalid]="categoryError() !== null">
+                  <tng-label forId="d-category" required>Category</tng-label>
+                  <tng-select
+                    id="d-category"
+                    [options]="documentCategoryOptions()"
+                    [getOptionLabel]="categoryOptionLabel"
+                    [getOptionValue]="categoryOptionValue"
+                    [trackBy]="categoryTrackBy"
+                    [value]="model().category"
+                    (valueChange)="onCategoryChange($event)"
+                  />
+                  <tng-error [show]="categoryError() !== null">{{ categoryError() }}</tng-error>
+                </tng-form-field>
+              </div>
+
+              <div class="field">
+                <tng-form-field labelPosition="above">
+                  <tng-label forId="d-type">Type</tng-label>
+                  @if (canEditNameAndType()) {
+                    <tng-input id="d-type" placeholder="pdf, jpg, png..." [formField]="documentForm.type" />
+                  } @else {
+                    <tng-input id="d-type" placeholder="pdf, jpg, png..." [value]="model().type" [disabled]="true" />
+                  }
+                </tng-form-field>
+              </div>
+
+              <div class="field field--wide">
+                <tng-form-field labelPosition="above">
+                  <tng-label forId="d-notes">Notes</tng-label>
+                  <tng-textarea
+                    id="d-notes"
+                    rows="3"
+                    placeholder="Optional metadata or remarks"
+                    [formField]="documentForm.notes"
+                  />
+                </tng-form-field>
+              </div>
+            </div>
+
+          }
+        </tng-card-content>
+
+        <tng-card-footer>
+          <tng-card-actions align="end">
+            <app-burl-back-button label="Cancel" />
+            <app-burl-create-button
+              [icon]="mode() === 'edit' ? 'save' : 'plus'"
+              [label]="mode() === 'edit' ? 'Save changes' : 'Create document'"
+              [disabled]="documentStore.isLoading() || isUploading()"
+            />
+          </tng-card-actions>
+        </tng-card-footer>
+      </tng-card>
+    </form>
+
+    <aside class="setup-overview" aria-labelledby="document-setup-title">
+      <div class="setup-copy">
+        <p class="eyebrow">Document setup</p>
+        <h1 id="document-setup-title">{{ title() }}</h1>
+        <p>
+          Capture document metadata and complete file upload to keep accounting records organized
+          and searchable.
+        </p>
+        <tng-stepper
+          class="setup-stepper"
+          ariaLabel="Document setup progress"
+          [ordered]="true"
+          [steps]="setupSteps()"
+          [value]="activeSetupStep()"
+        />
+      </div>
+    </aside>
+  </section>
 </main>
