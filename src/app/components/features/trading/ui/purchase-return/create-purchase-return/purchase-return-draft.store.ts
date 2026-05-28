@@ -7,7 +7,7 @@ import {
   PURCHASE_INVOICE_DETAIL_INCLUDES,
   PurchaseInvoiceStore,
 } from '../../../data/purchase-invoice';
-import { FiscalYearDateRangeService } from '../../../../../../shared/fiscal-year-datepicker';
+import { FiscalYearDateRangeService } from '../../../../../../shared/fiscal-year-date-range-picker';
 import {
   DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS,
   DEFAULT_NODE_DATE_FORMAT,

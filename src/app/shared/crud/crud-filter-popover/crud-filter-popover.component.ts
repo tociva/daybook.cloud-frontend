@@ -43,10 +43,8 @@ import {
 } from '../lb4-query';
 import { CrudUrlService } from '../crud-url.service';
 import { DatepickerDateAdapterService } from '../../../core/date/datepicker-date-adapter.service';
-import {
-  FiscalYearDateRangePickerComponent,
-  FiscalYearDatepickerComponent,
-} from '../../fiscal-year-datepicker';
+import { FiscalYearDatepickerComponent } from '../../fiscal-year-datepicker';
+import { FiscalYearDateRangePickerComponent } from '../../fiscal-year-date-range-picker';
 
 export type CrudFilterOption<T = unknown> = Readonly<{
   label: string;

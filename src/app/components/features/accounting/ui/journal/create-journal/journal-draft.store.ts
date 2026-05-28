@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import dayjs from 'dayjs';
-import { FiscalYearDateRangeService } from '../../../../../../shared/fiscal-year-datepicker/fiscal-year-date-range.service';
+import { FiscalYearDateRangeService } from '../../../../../../shared/fiscal-year-date-range-picker/fiscal-year-date-range.service';
 import { toIsoDate } from '../../../../../../core/date/dayjs-date.utils';
 import { DEFAULT_NODE_DATE_FORMAT } from '../../../../../../util/constants';
 import {

@@ -32,10 +32,8 @@ import type {
 import { CustomerReceiptFacade, CustomerReceiptStore } from '../../../data/customer-receipt';
 import type { SaleInvoice } from '../../../data/sale-invoice/sale-invoice.model';
 import { SaleInvoiceStore } from '../../../data/sale-invoice';
-import {
-  FiscalYearDatepickerComponent,
-  FiscalYearDateRangeService,
-} from '../../../../../../shared/fiscal-year-datepicker';
+import { FiscalYearDatepickerComponent } from '../../../../../../shared/fiscal-year-datepicker';
+import { FiscalYearDateRangeService } from '../../../../../../shared/fiscal-year-date-range-picker';
 import {
   InvoiceRow,
   RcptInvoiceLinesComponent,

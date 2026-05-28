@@ -160,5 +160,12 @@ export const routes: Routes = [
         (m) => m.documentRoutes,
       ),
   },
+  {
+    path: 'app/accounting/reports/trial-balance',
+    loadChildren: () =>
+      import('./components/features/accounting/ui/reports/trial-balance/trial-balance.routes').then(
+        (m) => m.trialBalanceRoutes,
+      ),
+  },
   { path: 'bootstrap/bootstrap-organization', component: BootstrapOrganizationComponent },
 ];

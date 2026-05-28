@@ -10,7 +10,7 @@ import {
 import { TngDatepickerComponent } from '@tailng-ui/components';
 import type { TngDateInputValue, TngDateSelectionInput, TngDateValue } from '@tailng-ui/primitives';
 import { DatepickerDateAdapterService } from '../../core/date/datepicker-date-adapter.service';
-import { FiscalYearDateRangeService } from '../fiscal-year-date-range-picker/fiscal-year-date-range.service';
+import { FiscalYearDateRangeService } from './fiscal-year-date-range.service';
 
 @Component({
   selector: 'app-fiscal-year-datepicker',
