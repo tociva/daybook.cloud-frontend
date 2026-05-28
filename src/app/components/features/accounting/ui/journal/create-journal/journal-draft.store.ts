@@ -184,6 +184,14 @@ export class JournalDraftStore {
     this.ensureTrailingEmptyRow();
   }
 
+  isDebitDisabled(row: JournalLineRow): boolean {
+    return this.parseAmount(row.credit) != null;
+  }
+
+  isCreditDisabled(row: JournalLineRow): boolean {
+    return this.parseAmount(row.debit) != null;
+  }
+
   onDebitChange(uid: string, value: unknown): void {
     const debit = this.normalizeInputValue(value);
     this.patchRow(uid, (row) => ({

@@ -64,6 +64,7 @@
                   type="number"
                   placeholder="0.00"
                   [value]="row.debit"
+                  [disabled]="draft.isDebitDisabled(row)"
                   (valueChange)="draft.onDebitChange(row.uid, $event)"
                 />
               </td>
@@ -72,6 +73,7 @@
                   type="number"
                   placeholder="0.00"
                   [value]="row.credit"
+                  [disabled]="draft.isCreditDisabled(row)"
                   (valueChange)="draft.onCreditChange(row.uid, $event)"
                 />
               </td>

@@ -88,6 +88,13 @@
   width: auto;
 }
 
+.journal-entries-table th.je-col-debit,
+.journal-entries-table th.je-col-credit,
+.je-col-debit,
+.je-col-credit {
+  text-align: right;
+}
+
 .je-col-debit,
 .je-col-credit {
   width: 8rem;
@@ -152,7 +159,7 @@
   --tng-input-focus-ring: transparent;
   --tng-input-min-height: 100%;
   --tng-input-number-controls-display: none;
-  --tng-input-px: 0;
+  --tng-input-px: 8px;
   --tng-input-radius: 0;
 
   display: block;
@@ -185,6 +192,7 @@
 :host ::ng-deep .je-col-credit input[type='number'] {
   appearance: textfield;
   -moz-appearance: textfield;
+  text-align: right;
 }
 
 :host ::ng-deep .je-col-debit input[type='number']::-webkit-inner-spin-button,
