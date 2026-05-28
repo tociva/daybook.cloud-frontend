@@ -1,0 +1,98 @@
+:host {
+  display: block;
+}
+
+.accounting-page {
+  padding: 1.25rem;
+}
+
+.document-form tng-card {
+  max-width: 58rem;
+}
+
+.notice {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+}
+
+.notice--danger {
+  border-color: var(--tng-semantic-accent-danger);
+  color: var(--tng-semantic-accent-danger);
+}
+
+.field-grid {
+  display: grid;
+  gap: 0.25rem 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.field {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.field--wide {
+  grid-column: 1 / -1;
+}
+
+.section-label {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  margin: 1.25rem 0 0.25rem;
+  text-transform: uppercase;
+}
+
+.upload-block {
+  margin-top: 0.75rem;
+}
+
+.file-input {
+  display: none;
+}
+
+.upload-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.select-file-btn,
+.clear-file-btn {
+  appearance: none;
+  background: transparent;
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  color: var(--tng-semantic-foreground-primary);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.9rem;
+  padding: 0.45rem 0.8rem;
+}
+
+.file-name {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.9rem;
+  margin: 0.6rem 0 0;
+}
+
+.field-error {
+  color: var(--tng-semantic-accent-danger);
+  font-size: 0.8rem;
+  margin: 0.45rem 0 0;
+}
+
+.upload-progress {
+  color: var(--tng-semantic-accent-brand);
+  font-size: 0.9rem;
+  margin: 0.45rem 0 0;
+}
+
+@media (max-width: 700px) {
+  .field-grid {
+    grid-template-columns: 1fr;
+  }
+}

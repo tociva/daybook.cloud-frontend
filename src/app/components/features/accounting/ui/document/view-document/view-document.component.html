@@ -1,0 +1,71 @@
+<main class="accounting-page">
+  <tng-card variant="outline" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Document Details</tng-card-title>
+      <tng-card-description>Review file metadata and storage details.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (documentStore.error()) {
+        <div class="notice notice--danger">{{ documentStore.error() }}</div>
+      }
+
+      @if (documentStore.isLoading() && !documentStore.selectedItem()) {
+        <div class="notice">Loading document...</div>
+      } @else if (documentStore.selectedItem(); as item) {
+        <dl class="details-grid">
+          <div class="wide">
+            <dt>Name</dt>
+            <dd>{{ item.name }}</dd>
+          </div>
+          <div>
+            <dt>Category</dt>
+            <dd>{{ item.category || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Type</dt>
+            <dd>{{ item.type || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Status</dt>
+            <dd>{{ item.status || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Size</dt>
+            <dd>{{ formatFileSize(item.size) }}</dd>
+          </div>
+          <div>
+            <dt>Path</dt>
+            <dd>{{ item.path || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Created At</dt>
+            <dd>{{ item.createdat || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Updated At</dt>
+            <dd>{{ item.updatedat || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Organization</dt>
+            <dd>{{ item.organizationid || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Added By</dt>
+            <dd>{{ item.addedbyid || '—' }}</dd>
+          </div>
+        </dl>
+      } @else {
+        <div class="notice">Document not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button />
+        <app-burl-edit-button (clicked)="edit()" />
+        <app-burl-delete-button (clicked)="delete()" />
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>

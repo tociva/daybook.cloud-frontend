@@ -1,0 +1,68 @@
+.management-page {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.25rem;
+}
+
+.notice {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  color: var(--tng-semantic-foreground-primary);
+  padding: 1rem;
+}
+
+.notice--danger {
+  border-color: var(--tng-semantic-accent-danger);
+}
+
+.table-stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.table-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.row-actions {
+  align-items: center;
+  display: flex;
+  gap: 0.35rem;
+}
+
+.action-icon {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 0.4rem;
+  color: var(--tng-semantic-foreground-muted);
+  cursor: pointer;
+  display: inline-flex;
+  height: 1.35rem;
+  justify-content: center;
+  padding: 0.2rem;
+  width: 1.35rem;
+}
+
+.action-icon:hover,
+.action-icon:focus-visible {
+  color: var(--tng-semantic-foreground-primary);
+  outline: 2px solid var(--tng-semantic-focus-ring);
+  outline-offset: 2px;
+}
+
+.action-icon--danger {
+  color: var(--tng-semantic-accent-danger);
+}
+
+.link-button {
+  background: transparent;
+  border: 0;
+  color: var(--tng-semantic-accent-brand);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  padding: 0;
+}

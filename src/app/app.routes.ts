@@ -153,5 +153,12 @@ export const routes: Routes = [
         (m) => m.journalRoutes,
       ),
   },
+  {
+    path: 'app/accounting/documents',
+    loadChildren: () =>
+      import('./components/features/accounting/ui/document/document.routes').then(
+        (m) => m.documentRoutes,
+      ),
+  },
   { path: 'bootstrap/bootstrap-organization', component: BootstrapOrganizationComponent },
 ];

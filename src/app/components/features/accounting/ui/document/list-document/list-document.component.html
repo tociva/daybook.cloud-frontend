@@ -1,0 +1,130 @@
+<main class="management-page">
+  <app-page-heading
+    eyebrow="Accounting"
+    title="Documents"
+    description="Manage organization documents and upload status."
+  >
+    <app-crud-filter-popover
+      ariaLabel="Document filters"
+      title="Filter documents"
+      [fields]="filterFields"
+      [filter]="crudQuery.filter()"
+      syncUrl
+    />
+
+    <tng-button type="button" appearance="solid" tone="primary" (click)="createDocument()">
+      <tng-icon icon="plus" aria-hidden="true" />
+      New document
+    </tng-button>
+  </app-page-heading>
+
+  <tng-card variant="outline" padding="lg">
+    @if (documentStore.error()) {
+      <div class="notice notice--danger">{{ documentStore.error() }}</div>
+    }
+
+    <div class="table-stack">
+      @if (!documentStore.isLoading() && !hasError() && documentStore.items().length === 0) {
+        @if (crudQuery.hasActiveFilter()) {
+          <app-empty-state
+            icon="searchX"
+            title="No documents match your filter"
+            description="Try adjusting or clearing your filter to find what you're looking for."
+          >
+            <tng-button type="button" appearance="outline" tone="neutral" (click)="crudQuery.clearFilter()">
+              Clear filter
+            </tng-button>
+          </app-empty-state>
+        } @else {
+          <app-empty-state
+            icon="paperclip"
+            title="No documents yet"
+            description="Add your first stored document for this organization."
+          >
+            <tng-button type="button" appearance="solid" tone="primary" (click)="createDocument()">
+              <tng-icon icon="plus" aria-hidden="true" />
+              New document
+            </tng-button>
+          </app-empty-state>
+        }
+      } @else {
+        <tng-table
+          ariaLabel="Documents"
+          density="comfortable"
+          [columns]="columns"
+          [items]="documentStore.items()"
+          [loading]="documentStore.isLoading()"
+          [error]="hasError()"
+          [sortActive]="crudQuery.sortActive()"
+          [sortDirection]="crudQuery.sortDirection()"
+          (sortChange)="crudQuery.applySort($event)"
+        >
+          <ng-template tngTableCellTemplate="name" let-row="row">
+            <button type="button" class="link-button" (click)="viewDocument(row)">
+              {{ row.name }}
+            </button>
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="category" let-row="row">
+            {{ row.category || '—' }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="type" let-row="row">
+            {{ row.type || '—' }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="size" let-row="row">
+            {{ formatFileSize(row.size) }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="status" let-row="row">
+            {{ row.status || '—' }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="createdat" let-row="row">
+            {{ formatDate(row.createdat) }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="actions" let-row="row">
+            <div class="row-actions">
+              <button
+                type="button"
+                class="action-icon"
+                aria-label="View document"
+                (click)="viewDocument(row)"
+              >
+                <tng-icon icon="eye" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                class="action-icon"
+                aria-label="Edit document"
+                (click)="editDocument(row)"
+              >
+                <tng-icon icon="pencil" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                class="action-icon action-icon--danger"
+                aria-label="Delete document"
+                (click)="deleteDocument(row)"
+              >
+                <tng-icon icon="trash2" aria-hidden="true" />
+              </button>
+            </div>
+          </ng-template>
+        </tng-table>
+
+        <div class="table-footer">
+          <app-crud-paginator
+            ariaLabel="Document pagination"
+            [filter]="crudQuery.filter()"
+            [totalItems]="documentStore.count()"
+            [pageSizeOptions]="crudQuery.pageSizeOptions()"
+            syncUrl
+          />
+        </div>
+      }
+    </div>
+  </tng-card>
+</main>

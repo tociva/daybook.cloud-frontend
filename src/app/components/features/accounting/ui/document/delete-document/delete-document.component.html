@@ -1,0 +1,55 @@
+<main class="accounting-page">
+  <tng-card variant="outline" tone="danger" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Delete Document</tng-card-title>
+      <tng-card-description>This action cannot be undone.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (documentStore.error()) {
+        <div class="notice notice--danger">{{ documentStore.error() }}</div>
+      }
+
+      @if (documentStore.isLoading() && !documentStore.selectedItem()) {
+        <div class="notice">Loading document...</div>
+      } @else if (documentStore.selectedItem(); as item) {
+        <dl class="details-grid">
+          <div class="wide">
+            <dt>Name</dt>
+            <dd>{{ item.name }}</dd>
+          </div>
+          <div>
+            <dt>Category</dt>
+            <dd>{{ item.category || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Type</dt>
+            <dd>{{ item.type || '—' }}</dd>
+          </div>
+          <div>
+            <dt>Status</dt>
+            <dd>{{ item.status || '—' }}</dd>
+          </div>
+        </dl>
+
+        <label class="confirm-row">
+          <tng-checkbox [checked]="confirmed()" (checkedChange)="confirmed.set(!!$event)" />
+          <span>I understand that <strong>{{ item.name }}</strong> will be permanently deleted.</span>
+        </label>
+      } @else {
+        <div class="notice">Document not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button label="Cancel" />
+        <app-burl-delete-button
+          [label]="documentStore.isLoading() ? 'Deleting…' : 'Delete document'"
+          [disabled]="!confirmed() || documentStore.isLoading()"
+          (clicked)="deleteDocument()"
+        />
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>
