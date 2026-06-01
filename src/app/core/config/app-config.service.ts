@@ -32,6 +32,7 @@ function parseAuthConfig(value: unknown, key: string): AuthConfig {
     postLoginRedirect: asOptionalString(value['postLoginRedirect'], `${key}.postLoginRedirect`),
     scope: asString(value['scope'], `${key}.scope`),
     postLogoutRedirect: asString(value['postLogoutRedirect'], `${key}.postLogoutRedirect`),
+    audience: asOptionalString(value['audience'], `${key}.audience`),
   };
 }
 

@@ -5,6 +5,7 @@ export interface AuthConfig {
   postLoginRedirect: string | null;
   scope: string;
   postLogoutRedirect: string;
+  audience: string | null;
 }
 
 export interface AppConfig {

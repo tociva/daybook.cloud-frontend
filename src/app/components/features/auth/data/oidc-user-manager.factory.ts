@@ -14,6 +14,14 @@ export class OidcUserManagerFactory {
 
     const silentRedirectUri = `${window.location.origin}/auth/silent-renew`;
 
+    // Hydra only stamps an `aud` claim on the access token when the authorize
+    // request explicitly asks for it. Passing `audience` as an extra query param
+    // (carried through to both the authorize and silent-renew requests) ensures
+    // the issued token carries the audience the resource server validates.
+    const extraQueryParams = authConfig.audience
+      ? { audience: authConfig.audience }
+      : undefined;
+
     const manager = new UserManager({
       authority: authConfig.authority,
       client_id: authConfig.clientId,
@@ -26,6 +34,7 @@ export class OidcUserManagerFactory {
       loadUserInfo: false,
       monitorSession: false,
       requestTimeoutInSeconds: 8,
+      ...(extraQueryParams ? { extraQueryParams } : {}),
       userStore: new WebStorageStateStore({ store: window.localStorage }),
     });
 
