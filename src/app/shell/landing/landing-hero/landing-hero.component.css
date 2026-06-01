@@ -5,12 +5,34 @@
 }
 
 .wordmark {
+  --daybook-logo-title: var(--tng-semantic-foreground-primary);
   margin: 0;
-  font-family: 'Lobster', cursive;
-  font-size: clamp(2rem, 7vw, 5rem);
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  display: flex;
+  justify-content: center;
   line-height: 1;
+}
+
+.wordmark-label {
+  width: 1px;
+  height: 1px;
+  position: absolute;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.wordmark-logo {
+  display: block;
+  line-height: 0;
+}
+
+.wordmark-logo-image,
+:host ::ng-deep .wordmark-logo svg {
+  display: block;
+  width: clamp(14rem, 54vw, 28rem);
+  max-width: calc(100vw - 2rem);
+  height: auto;
 }
 
 .subcaption {

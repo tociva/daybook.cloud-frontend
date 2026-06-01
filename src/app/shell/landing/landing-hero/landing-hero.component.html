@@ -1,4 +1,16 @@
-<h1 class="wordmark">Daybook.Cloud</h1>
+<h1 class="wordmark">
+  <span class="wordmark-label">Daybook.Cloud</span>
+  @if (wordmarkLogoSvg(); as logoSvg) {
+    <span class="wordmark-logo" aria-hidden="true" [innerHTML]="logoSvg"></span>
+  } @else {
+    <img
+      class="wordmark-logo-image"
+      src="/assets/logo/daybook-cloud-logo-wordmark.svg"
+      alt=""
+      aria-hidden="true"
+    />
+  }
+</h1>
 <p class="subcaption" aria-label="Dive into Simplicity">
   <span class="char" style="--i: 0">D</span><span class="char" style="--i: 1">I</span
   ><span class="char" style="--i: 2">V</span><span class="char" style="--i: 3">E</span

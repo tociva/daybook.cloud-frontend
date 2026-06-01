@@ -40,6 +40,7 @@ function getTextPath(element, className) {
 const textPaths = {
   mark: getTextPath(logoElements.markText, cssClasses.markText),
   title: getTextPath(logoElements.titleText, cssClasses.title),
+  wordmark: getTextPath(logoElements.wordmarkText, cssClasses.title),
   caption: getTextPath(logoElements.captionText, cssClasses.caption),
 };
 
@@ -117,13 +118,29 @@ function renderMark(filterId) {
   ${textPaths.mark}`;
 }
 
+function renderMarkDefs(filterId) {
+  return `  <defs>
+    <filter id="${filterId}" x="-60%" y="-60%" width="220%" height="220%">
+      <feDropShadow
+        class="${cssClasses.shadow}"
+        dx="${logoElements.shadow.dx}"
+        dy="${logoElements.shadow.dy}"
+        stdDeviation="${logoElements.shadow.stdDeviation}"
+      />
+    </filter>
+  </defs>`;
+}
+
 function renderVariant(variant) {
   const filterId = `daybookLogoShadow-${variant.id}`;
   const titleId = `daybookLogoTitle-${variant.id}`;
   const descId = `daybookLogoDesc-${variant.id}`;
+  const defs = variant.includeMark ? `\n${renderMarkDefs(filterId)}\n` : '';
+  const titlePath =
+    variant.titleElement === 'wordmarkText' ? textPaths.wordmark : textPaths.title;
   const body = [
-    renderMark(filterId),
-    variant.includeTitle ? `  ${textPaths.title}` : null,
+    variant.includeMark ? renderMark(filterId) : null,
+    variant.includeTitle ? `  ${titlePath}` : null,
     variant.includeCaption ? `  ${textPaths.caption}` : null,
   ]
     .filter(Boolean)
@@ -142,17 +159,7 @@ function renderVariant(variant) {
   <desc id="${descId}">${variant.description}</desc>
 
 ${renderThemeStyle()}
-
-  <defs>
-    <filter id="${filterId}" x="-60%" y="-60%" width="220%" height="220%">
-      <feDropShadow
-        class="${cssClasses.shadow}"
-        dx="${logoElements.shadow.dx}"
-        dy="${logoElements.shadow.dy}"
-        stdDeviation="${logoElements.shadow.stdDeviation}"
-      />
-    </filter>
-  </defs>
+${defs}
 
 ${body}
 </svg>

@@ -11,10 +11,11 @@ Run the generator from the project root:
 node scripts/logo-util/create-daybook-logo-svg.mjs
 ```
 
-The generator writes three theme-compatible SVG assets:
+The generator writes four theme-compatible SVG assets:
 
 - `public/assets/logo/daybook-cloud-logo.svg`: full logo with caption.
 - `public/assets/logo/daybook-cloud-logo-small.svg`: small D.C mark.
 - `public/assets/logo/daybook-cloud-logo-full.svg`: full logo without caption.
+- `public/assets/logo/daybook-cloud-logo-wordmark.svg`: Daybook.Cloud wordmark only.
 
 The generated SVGs use CSS classes and custom properties such as `--daybook-logo-title` and `--daybook-logo-caption`, with built-in light and dark fallbacks via `prefers-color-scheme`. The fallback chain also reads the app's Tailng semantic tokens, so inline consumers inherit the active theme while still being able to override the logo-specific custom properties directly.
