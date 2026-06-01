@@ -1,0 +1,98 @@
+:host {
+  display: inline-flex;
+}
+
+.bulk-upload-area {
+  border: 1px dotted transparent;
+  border-radius: 0.5rem;
+  display: inline-flex;
+  outline: 2px dotted transparent;
+  outline-offset: 0;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    outline-color 160ms ease,
+    outline-offset 160ms ease,
+    transform 160ms ease;
+}
+
+.bulk-upload-area[data-dragging] {
+  border-color: var(--tng-semantic-accent-brand);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--tng-semantic-accent-brand) 18%, transparent);
+  outline-color: var(--tng-semantic-accent-brand);
+  outline-offset: 0.18rem;
+  transform: translateY(-1px);
+}
+
+.bulk-upload-area[data-rejected] {
+  border-color: var(--tng-semantic-accent-danger);
+  outline-color: var(--tng-semantic-accent-danger);
+}
+
+.bulk-upload-preview {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.bulk-upload-meta {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  display: grid;
+  gap: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+.bulk-upload-meta div {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: 6rem minmax(0, 1fr);
+  padding: 0.65rem 0.75rem;
+}
+
+.bulk-upload-meta div + div {
+  border-top: 1px solid var(--tng-semantic-border-subtle);
+}
+
+.bulk-upload-meta dt {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.bulk-upload-meta dd {
+  color: var(--tng-semantic-foreground-primary);
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.bulk-upload-table {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  max-height: min(28rem, 55vh);
+  overflow: auto;
+}
+
+.bulk-upload-table tng-table {
+  min-width: 54rem;
+}
+
+.dialog-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+@media (max-width: 640px) {
+  .bulk-upload-meta div {
+    grid-template-columns: 1fr;
+  }
+
+  .dialog-actions {
+    flex-direction: column-reverse;
+  }
+}

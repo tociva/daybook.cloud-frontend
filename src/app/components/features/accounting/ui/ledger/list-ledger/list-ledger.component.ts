@@ -14,6 +14,7 @@ import {
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
+import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { LedgerStore } from '../../../data/ledger';
@@ -32,6 +33,7 @@ import type { Ledger } from '../../../data/ledger';
     EmptyStateComponent,
     TngTable,
     TngTableCellTpl,
+    BulkUploadButtonComponent,
   ],
   templateUrl: './list-ledger.component.html',
   styleUrl: './list-ledger.component.css',
@@ -115,5 +117,9 @@ export class ListLedgerComponent {
     void this.router.navigate(['/app/accounting/ledger-category'], {
       queryParams: { burl: this.router.url },
     });
+  }
+
+  protected reloadLedgers(): void {
+    void this.ledgerStore.loadLedgers({ ...this.crudQuery.filter(), includes: ['category'] });
   }
 }

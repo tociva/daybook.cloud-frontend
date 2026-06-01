@@ -14,6 +14,7 @@ import {
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
+import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { ItemStore } from '../../../data/item';
@@ -31,6 +32,7 @@ import type { Item } from '../../../data/item';
     TngIcon,
     TngTable,
     TngTableCellTpl,
+    BulkUploadButtonComponent,
   ],
   templateUrl: './list-item.component.html',
   styleUrl: './list-item.component.css',
@@ -74,6 +76,10 @@ export class ListItemComponent {
 
   protected openItemCategories(): void {
     void this.router.navigate(['/app/trading/item-category']);
+  }
+
+  protected reloadItems(): void {
+    void this.itemStore.loadItems({ ...this.crudQuery.filter(), includes: ['category'] });
   }
 
   protected viewItem(item: Item): void {

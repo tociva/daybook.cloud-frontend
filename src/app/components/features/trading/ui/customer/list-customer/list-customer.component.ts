@@ -14,6 +14,7 @@ import {
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
+import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { CustomerStore } from '../../../data/customer';
@@ -32,6 +33,7 @@ import type { Customer } from '../../../data/customer';
     EmptyStateComponent,
     TngTable,
     TngTableCellTpl,
+    BulkUploadButtonComponent,
   ],
   templateUrl: './list-customer.component.html',
   styleUrl: './list-customer.component.css',
@@ -70,6 +72,10 @@ export class ListCustomerComponent {
     void this.router.navigate(['/app/trading/customer/create'], {
       queryParams: { burl: this.router.url },
     });
+  }
+
+  protected reloadCustomers(): void {
+    void this.customerStore.loadCustomers(this.crudQuery.filter());
   }
 
   protected viewCustomer(item: Customer): void {

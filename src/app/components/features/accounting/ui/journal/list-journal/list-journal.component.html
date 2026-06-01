@@ -17,6 +17,8 @@
       Ledgers
     </tng-button>
 
+    <app-bulk-upload-button endpoint="/accounting/journal/bulk-upload" (uploaded)="reloadJournals()" />
+
     <tng-button type="button" appearance="solid" tone="primary" (click)="createJournal()">
       <tng-icon icon="plus" aria-hidden="true" />
       New journal

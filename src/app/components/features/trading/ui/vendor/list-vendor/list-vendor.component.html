@@ -12,6 +12,8 @@
       syncUrl
     />
 
+    <app-bulk-upload-button endpoint="/inventory/vendor/bulk-upload" (uploaded)="reloadVendors()" />
+
     <tng-button type="button" appearance="solid" tone="primary" (click)="createVendor()">
       <tng-icon icon="plus" aria-hidden="true" />
       New vendor

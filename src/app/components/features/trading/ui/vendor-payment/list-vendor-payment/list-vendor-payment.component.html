@@ -12,6 +12,11 @@
       syncUrl
     />
 
+    <app-bulk-upload-button
+      endpoint="/inventory/vendor-payment/bulk-upload"
+      (uploaded)="reloadVendorPayments()"
+    />
+
     <tng-button type="button" appearance="solid" tone="primary" (click)="createPayment()">
       <tng-icon icon="plus" aria-hidden="true" />
       New Payment

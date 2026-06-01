@@ -1,0 +1,100 @@
+<span
+  class="bulk-upload-area"
+  tngFileUpload
+  [accept]="accept()"
+  [disabled]="isDisabled()"
+  [maxSize]="maxSize()"
+  [multiple]="false"
+  (filesRejected)="onFilesRejected($event)"
+  (filesSelected)="onFilesSelected($event)"
+>
+  <tng-button
+    type="button"
+    appearance="outline"
+    tone="neutral"
+    [disabled]="isDisabled()"
+    (click)="chooseFile(fileInput)"
+  >
+    <tng-icon [icon]="isUploading() ? 'loaderCircle' : 'upload'" aria-hidden="true" />
+    {{ isUploading() ? 'Uploading...' : label() }}
+  </tng-button>
+</span>
+
+<input
+  #fileInput
+  type="file"
+  hidden
+  [accept]="accept()"
+  [disabled]="isDisabled()"
+  (change)="onFileInputChange($event)"
+/>
+
+@if (pendingUpload(); as preview) {
+  <tng-dialog
+    title="Confirm bulk upload"
+    size="lg"
+    description="Review the selected JSON before sending it to the server."
+    [open]="isPreviewOpen()"
+    [closeOnBackdrop]="!isUploading()"
+    [closeOnEscape]="!isUploading()"
+    (closed)="onPreviewClosed()"
+  >
+    <div class="bulk-upload-preview">
+      <dl class="bulk-upload-meta">
+        <div>
+          <dt>Model</dt>
+          <dd>{{ preview.modelName }}</dd>
+        </div>
+        <div>
+          <dt>File</dt>
+          <dd>{{ preview.file.name }}</dd>
+        </div>
+        <div>
+          <dt>Size</dt>
+          <dd>{{ preview.fileSize }}</dd>
+        </div>
+        <div>
+          <dt>Records</dt>
+          <dd>{{ preview.rowCount }}</dd>
+        </div>
+        <div>
+          <dt>Root key</dt>
+          <dd>{{ preview.rootKey }}</dd>
+        </div>
+      </dl>
+
+      <div class="bulk-upload-table">
+        <tng-table
+          ariaLabel="Bulk upload data preview"
+          density="compact"
+          [columns]="preview.columns"
+          [items]="preview.rows"
+          [stickyHeader]="true"
+        />
+      </div>
+    </div>
+
+    <div class="dialog-actions">
+      <tng-button
+        type="button"
+        appearance="outline"
+        tone="neutral"
+        [disabled]="isUploading()"
+        (click)="cancelPreview()"
+      >
+        Cancel
+      </tng-button>
+
+      <tng-button
+        type="button"
+        appearance="solid"
+        tone="primary"
+        [disabled]="isUploading()"
+        (click)="confirmUpload()"
+      >
+        <tng-icon [icon]="isUploading() ? 'loaderCircle' : 'upload'" aria-hidden="true" />
+        {{ isUploading() ? 'Uploading...' : 'Confirm upload' }}
+      </tng-button>
+    </div>
+  </tng-dialog>
+}

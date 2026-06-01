@@ -12,6 +12,11 @@
       syncUrl
     />
 
+    <app-bulk-upload-button
+      endpoint="/inventory/customer-receipt/bulk-upload"
+      (uploaded)="reloadCustomerReceipts()"
+    />
+
     <tng-button type="button" appearance="solid" tone="primary" (click)="createReceipt()">
       <tng-icon icon="plus" aria-hidden="true" />
       New Receipt

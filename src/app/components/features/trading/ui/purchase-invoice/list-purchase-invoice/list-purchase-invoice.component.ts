@@ -14,6 +14,7 @@ import {
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
+import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { VendorStore } from '../../../data/vendor';
@@ -36,6 +37,7 @@ import { formatAmountWithCurrency } from '../../../../../../shared/format/curren
     EmptyStateComponent,
     TngTable,
     TngTableCellTpl,
+    BulkUploadButtonComponent,
   ],
   templateUrl: './list-purchase-invoice.component.html',
   styleUrl: './list-purchase-invoice.component.css',
@@ -167,6 +169,13 @@ export class ListPurchaseInvoiceComponent {
   protected createPurchaseInvoice(): void {
     void this.router.navigate(['/app/trading/purchase-invoice/create'], {
       queryParams: { burl: this.router.url },
+    });
+  }
+
+  protected reloadPurchaseInvoices(): void {
+    void this.purchaseInvoiceStore.loadPurchaseInvoices({
+      ...this.crudQuery.filter(),
+      includes: ['vendor', 'payments'],
     });
   }
 

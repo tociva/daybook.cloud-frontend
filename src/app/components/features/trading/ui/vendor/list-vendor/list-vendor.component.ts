@@ -14,6 +14,7 @@ import {
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
+import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { VendorStore } from '../../../data/vendor';
@@ -32,6 +33,7 @@ import type { Vendor } from '../../../data/vendor';
     EmptyStateComponent,
     TngTable,
     TngTableCellTpl,
+    BulkUploadButtonComponent,
   ],
   templateUrl: './list-vendor.component.html',
   styleUrl: './list-vendor.component.css',
@@ -72,6 +74,10 @@ export class ListVendorComponent {
     void this.router.navigate(['/app/trading/vendor/create'], {
       queryParams: { burl: this.router.url },
     });
+  }
+
+  protected reloadVendors(): void {
+    void this.vendorStore.loadVendors(this.crudQuery.filter());
   }
 
   protected viewVendor(item: Vendor): void {

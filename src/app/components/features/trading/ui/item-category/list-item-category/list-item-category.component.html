@@ -17,6 +17,11 @@
       Items
     </tng-button>
 
+    <app-bulk-upload-button
+      endpoint="/inventory/item-category/bulk-upload"
+      (uploaded)="reloadItemCategories()"
+    />
+
     <tng-button type="button" appearance="solid" tone="primary" (click)="createItemCategory()">
       <tng-icon icon="plus" aria-hidden="true" />
       New category

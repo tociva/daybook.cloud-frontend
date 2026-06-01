@@ -12,6 +12,8 @@
       syncUrl
     />
 
+    <app-bulk-upload-button endpoint="/inventory/bank-cash/bulk-upload" (uploaded)="reloadBankCashes()" />
+
     <tng-button type="button" appearance="solid" tone="primary" (click)="createBankCash()">
       <tng-icon icon="plus" aria-hidden="true" />
       New account

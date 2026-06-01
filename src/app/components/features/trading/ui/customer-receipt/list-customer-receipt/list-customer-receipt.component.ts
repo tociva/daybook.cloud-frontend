@@ -14,6 +14,7 @@ import {
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
+import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
@@ -34,6 +35,7 @@ import type { CustomerReceipt } from '../../../data/customer-receipt';
     EmptyStateComponent,
     TngTable,
     TngTableCellTpl,
+    BulkUploadButtonComponent,
   ],
   templateUrl: './list-customer-receipt.component.html',
   styleUrl: './list-customer-receipt.component.css',
@@ -87,6 +89,13 @@ export class ListCustomerReceiptComponent {
   protected createReceipt(): void {
     void this.router.navigate(['/app/trading/customer-receipt/create'], {
       queryParams: { burl: this.router.url },
+    });
+  }
+
+  protected reloadCustomerReceipts(): void {
+    void this.customerReceiptStore.loadCustomerReceipts({
+      ...this.crudQuery.filter(),
+      includes: ['customer', 'bcash'],
     });
   }
 

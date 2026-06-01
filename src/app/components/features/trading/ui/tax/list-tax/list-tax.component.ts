@@ -15,6 +15,7 @@ import {
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
+import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { Status, TaxStore } from '../../../data/tax';
@@ -37,6 +38,7 @@ type StatusTagTone = 'danger' | 'success' | 'warning';
     EmptyStateComponent,
     TngTable,
     TngTableCellTpl,
+    BulkUploadButtonComponent,
   ],
   templateUrl: './list-tax.component.html',
   styleUrl: './list-tax.component.css',
@@ -85,6 +87,10 @@ export class ListTaxComponent {
 
   protected openTaxGroups(): void {
     void this.router.navigate(['/app/trading/tax-group']);
+  }
+
+  protected reloadTaxes(): void {
+    void this.taxStore.loadTaxes(this.crudQuery.filter());
   }
 
   protected viewTax(item: Tax): void {

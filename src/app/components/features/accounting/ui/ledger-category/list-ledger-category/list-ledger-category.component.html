@@ -17,6 +17,11 @@
       Ledgers
     </tng-button>
 
+    <app-bulk-upload-button
+      endpoint="/accounting/ledger-category/bulk-upload"
+      (uploaded)="reloadLedgerCategories()"
+    />
+
     <tng-button type="button" appearance="solid" tone="primary" (click)="createLedgerCategory()">
       <tng-icon icon="plus" aria-hidden="true" />
       New category

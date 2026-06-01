@@ -12,6 +12,11 @@
       syncUrl
     />
 
+    <app-bulk-upload-button
+      endpoint="/inventory/sale-invoice/bulk-upload"
+      (uploaded)="reloadSaleInvoices()"
+    />
+
     <tng-button type="button" appearance="solid" tone="primary" (click)="createSaleInvoice()">
       <tng-icon icon="plus" aria-hidden="true" />
       New Invoice

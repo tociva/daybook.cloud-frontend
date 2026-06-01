@@ -14,6 +14,7 @@ import {
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
+import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { JournalStore } from '../../../data/journal';
@@ -32,6 +33,7 @@ import type { Journal } from '../../../data/journal';
     EmptyStateComponent,
     TngTable,
     TngTableCellTpl,
+    BulkUploadButtonComponent,
   ],
   templateUrl: './list-journal.component.html',
   styleUrl: './list-journal.component.css',
@@ -87,6 +89,15 @@ export class ListJournalComponent {
   protected createJournal(): void {
     void this.router.navigate(['/app/accounting/journal/create'], {
       queryParams: { burl: this.router.url },
+    });
+  }
+
+  protected reloadJournals(): void {
+    const filter = this.crudQuery.filter();
+    void this.journalStore.loadJournals({
+      ...filter,
+      includes: ['entries'],
+      order: filter.order?.length ? filter.order : ['date DESC'],
     });
   }
 

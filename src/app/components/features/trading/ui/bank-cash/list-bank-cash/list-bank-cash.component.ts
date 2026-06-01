@@ -15,6 +15,7 @@ import {
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
+import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { BankCashStore, Status } from '../../../data/bank-cash';
@@ -37,6 +38,7 @@ type StatusBadgeTone = 'danger' | 'success' | 'warning';
     EmptyStateComponent,
     TngTable,
     TngTableCellTpl,
+    BulkUploadButtonComponent,
   ],
   templateUrl: './list-bank-cash.component.html',
   styleUrl: './list-bank-cash.component.css',
@@ -87,6 +89,10 @@ export class ListBankCashComponent {
     void this.router.navigate(['/app/trading/bank-cash/create'], {
       queryParams: { burl: this.router.url },
     });
+  }
+
+  protected reloadBankCashes(): void {
+    void this.bankCashStore.loadBankCashes(this.crudQuery.filter());
   }
 
   protected viewBankCash(item: BankCash): void {
