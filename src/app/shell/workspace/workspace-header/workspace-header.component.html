@@ -1,11 +1,35 @@
 <header class="workspace-header">
   <div class="workspace-header-leading">
-    <div class="header-logo">
-      <div class="header-logo-mark" aria-hidden="true">D.C</div>
-      <div class="header-logo-copy">
-        <span class="header-logo-title">Daybook.Cloud</span>
-        <span class="header-logo-caption">Dive into simplicity</span>
-      </div>
+    <div class="header-logo" role="img" aria-label="Daybook.Cloud">
+      @if (brandLogoSvg(); as logoSvg) {
+        <span
+          class="header-logo-inline header-logo-inline--full"
+          aria-hidden="true"
+          [innerHTML]="logoSvg"
+        ></span>
+      } @else {
+        <img
+          class="header-logo-image header-logo-inline--full"
+          src="/assets/logo/daybook-cloud-logo.svg"
+          alt=""
+          aria-hidden="true"
+        />
+      }
+
+      @if (brandSmallLogoSvg(); as smallLogoSvg) {
+        <span
+          class="header-logo-inline header-logo-inline--small"
+          aria-hidden="true"
+          [innerHTML]="smallLogoSvg"
+        ></span>
+      } @else {
+        <img
+          class="header-logo-image header-logo-inline--small"
+          src="/assets/logo/daybook-cloud-logo-small.svg"
+          alt=""
+          aria-hidden="true"
+        />
+      }
     </div>
 
     <div class="workspace-header-copy">

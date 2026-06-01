@@ -1,4 +1,5 @@
 import { Component, effect, inject, input, output, signal } from '@angular/core';
+import { DomSanitizer, type SafeHtml } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import {
   TngAvatarComponent,
@@ -20,6 +21,8 @@ import { BreadcrumbItem } from '../workspace-nav.model';
 import { WorkspaceSearchButtonComponent } from '../workspace-search-button/workspace-search-button.component';
 
 const NORMAL_LOGO_CACHE_SUFFIX = '-normal-logo';
+const BRAND_LOGO_SOURCE = '/assets/logo/daybook-cloud-logo.svg';
+const BRAND_SMALL_LOGO_SOURCE = '/assets/logo/daybook-cloud-logo-small.svg';
 
 @Component({
   selector: 'app-workspace-header',
@@ -42,6 +45,7 @@ export class WorkspaceHeaderComponent {
   private readonly router = inject(Router);
   private readonly themeStore = inject(AppThemeStore);
   private readonly organizationService = inject(OrganizationService);
+  private readonly sanitizer = inject(DomSanitizer);
   private activeOrganizationLogoRequestId = 0;
   private activeOrganizationLogoOrganizationId: string | null = null;
   private activeOrganizationLogoErrorRefreshCount = 0;
@@ -59,12 +63,16 @@ export class WorkspaceHeaderComponent {
   readonly organizations = input<readonly Organization[]>([]);
   readonly userDisplayName = input('Daybook User');
   readonly logoutRequested = output<void>();
+  protected readonly brandLogoSvg = signal<SafeHtml | null>(null);
+  protected readonly brandSmallLogoSvg = signal<SafeHtml | null>(null);
   protected readonly activeOrganizationLogoSource = signal<string | null>(null);
 
   constructor() {
     effect(() => {
       void this.loadActiveOrganizationLogo(this.activeOrganizationId());
     });
+
+    void this.loadBrandLogos();
   }
 
   public goToSelectOrganization(): void {
@@ -197,6 +205,29 @@ export class WorkspaceHeaderComponent {
     }
 
     return null;
+  }
+
+  private async loadBrandLogos(): Promise<void> {
+    try {
+      const [logoSvg, smallLogoSvg] = await Promise.all([
+        this.readTrustedLocalSvg(BRAND_LOGO_SOURCE),
+        this.readTrustedLocalSvg(BRAND_SMALL_LOGO_SOURCE),
+      ]);
+
+      this.brandLogoSvg.set(logoSvg);
+      this.brandSmallLogoSvg.set(smallLogoSvg);
+    } catch {
+      // Keep the static image fallback visible if the SVG cannot be loaded.
+    }
+  }
+
+  private async readTrustedLocalSvg(source: string): Promise<SafeHtml> {
+    const response = await fetch(source, { cache: 'force-cache' });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch brand logo (${response.status}).`);
+    }
+
+    return this.sanitizer.bypassSecurityTrustHtml(await response.text());
   }
 
   private async readImageAsDataUrl(source: string): Promise<string> {
