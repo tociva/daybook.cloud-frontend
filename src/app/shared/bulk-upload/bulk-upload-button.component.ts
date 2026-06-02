@@ -20,6 +20,12 @@ import {
 } from '@tailng-ui/primitives';
 import { getApiErrorMessage } from '../../core/api/api-error.util';
 import { ToastStore } from '../../core/toast/toast.store';
+import type {
+  BulkUploadPayload,
+  BulkUploadPreviewConfig,
+  BulkUploadPreviewRow,
+  BulkUploadXlsxColumn,
+} from './bulk-upload-preview-config';
 import { BulkUploadService } from './bulk-upload.service';
 
 const DEFAULT_ACCEPT =
@@ -30,8 +36,6 @@ const XLSX_MIME_TYPE = 'application/vnd.openxmlformats-officedocument.spreadshee
 const ACCEPTED_XLSX_MIME_TYPES = new Set([XLSX_MIME_TYPE, 'application/vnd.ms-excel']);
 
 type BulkUploadFormat = 'json' | 'xlsx';
-type BulkUploadPreviewRow = Record<string, unknown>;
-type BulkUploadPayload = Record<string, unknown>;
 type XlsxCellParseResult =
   | Readonly<{ ok: true; value: unknown }>
   | Readonly<{ ok: false; message: string }>;
@@ -46,21 +50,6 @@ type BulkUploadPreview = Readonly<{
   rootKeys: readonly string[];
   rows: readonly BulkUploadPreviewRow[];
   uploadFile: File;
-}>;
-
-type BulkUploadXlsxColumn = Readonly<{
-  header: string;
-  path: string;
-}>;
-
-type BulkUploadPreviewConfig = Readonly<{
-  columns: readonly TngTableColumn<BulkUploadPreviewRow>[];
-  modelName: string;
-  requiredPaths: readonly string[];
-  rootKey: string;
-  sampleRows: readonly BulkUploadPreviewRow[];
-  xlsxColumns?: readonly BulkUploadXlsxColumn[];
-  xlsxSheetName?: string;
 }>;
 
 type BulkUploadInfo = Readonly<{
@@ -638,27 +627,6 @@ const BULK_UPLOAD_PREVIEW_CONFIGS: Record<string, BulkUploadPreviewConfig> = {
       namesColumn('description', 'Description', 'description'),
     ],
   },
-  '/accounting/ledger/bulk-upload': {
-    modelName: 'Ledgers',
-    requiredPaths: ['name', 'category'],
-    rootKey: 'ledgers',
-    sampleRows: [
-      {
-        name: 'HDFC Bank Ledger',
-        description: 'Ledger for HDFC current account',
-        openingdr: 0,
-        openingcr: 0,
-        category: 'Bank Accounts',
-      },
-    ],
-    columns: [
-      textColumn('name', 'Name', 'name', '14rem'),
-      textColumn('category', 'Category', 'category', '14rem'),
-      numberColumn('openingdr', 'Opening DR', 'openingdr', '10rem'),
-      numberColumn('openingcr', 'Opening CR', 'openingcr', '10rem'),
-      namesColumn('description', 'Description', 'description'),
-    ],
-  },
   '/accounting/bank-txn/bulk-upload': {
     modelName: 'Bank Transactions',
     requiredPaths: ['bankname', 'txndate'],
@@ -830,10 +798,15 @@ function requiredXlsxHeaders(config: BulkUploadPreviewConfig): readonly string[]
   );
 }
 
-function xlsxPathForHeader(config: BulkUploadPreviewConfig, header: string): string | null {
-  if (!config.xlsxColumns) return header;
+function normalizeXlsxHeader(header: string): string {
+  return header.trim().toLowerCase();
+}
 
-  return config.xlsxColumns.find((column) => column.header === header)?.path ?? null;
+function xlsxPathForHeader(config: BulkUploadPreviewConfig, header: string): string | null {
+  const normalizedHeader = normalizeXlsxHeader(header);
+  if (!config.xlsxColumns) return normalizedHeader;
+
+  return config.xlsxColumns.find((column) => normalizeXlsxHeader(column.header) === normalizedHeader)?.path ?? null;
 }
 
 function valueIsEmpty(value: unknown): boolean {
@@ -984,6 +957,7 @@ export class BulkUploadButtonComponent {
   readonly accept = input(DEFAULT_ACCEPT);
   readonly disabled = input(false);
   readonly endpoint = input.required<string>();
+  readonly config = input<BulkUploadPreviewConfig | null>(null);
   readonly label = input('Bulk upload');
   readonly maxSize = input(DEFAULT_MAX_SIZE);
   readonly uploaded = output<readonly unknown[]>();
@@ -1241,13 +1215,18 @@ export class BulkUploadButtonComponent {
       return 'XLSX header row is empty. Download the sample XLSX and keep the header row unchanged.';
     }
 
-    const duplicateHeaders = nonEmptyHeaders.filter((header, index) => nonEmptyHeaders.indexOf(header) !== index);
+    const normalizedHeaders = nonEmptyHeaders.map(normalizeXlsxHeader);
+    const duplicateHeaders = nonEmptyHeaders.filter(
+      (_header, index) => normalizedHeaders.indexOf(normalizedHeaders[index]) !== index,
+    );
     if (duplicateHeaders.length) {
       return `XLSX has duplicate columns: ${[...new Set(duplicateHeaders)].join(', ')}.`;
     }
 
-    const headerSet = new Set(nonEmptyHeaders);
-    const missingHeaders = requiredXlsxHeaders(config).filter((header) => !headerSet.has(header));
+    const headerSet = new Set(normalizedHeaders);
+    const missingHeaders = requiredXlsxHeaders(config).filter(
+      (header) => !headerSet.has(normalizeXlsxHeader(header)),
+    );
     if (missingHeaders.length) {
       return `XLSX is missing required columns: ${missingHeaders.join(', ')}. Download the sample XLSX and keep the header row unchanged.`;
     }
@@ -1326,7 +1305,7 @@ export class BulkUploadButtonComponent {
   }
 
   private previewConfig(): BulkUploadPreviewConfig | null {
-    return BULK_UPLOAD_PREVIEW_CONFIGS[normalizeEndpointPath(this.endpoint())] ?? null;
+    return this.config() ?? BULK_UPLOAD_PREVIEW_CONFIGS[normalizeEndpointPath(this.endpoint())] ?? null;
   }
 
   private isAcceptedFile(file: File): boolean {

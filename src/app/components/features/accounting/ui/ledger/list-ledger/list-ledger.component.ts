@@ -14,7 +14,13 @@ import {
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
-import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload';
+import {
+  bulkUploadNamesColumn,
+  bulkUploadNumberColumn,
+  BulkUploadButtonComponent,
+  bulkUploadTextColumn,
+} from '../../../../../../shared/bulk-upload';
+import type { BulkUploadPreviewConfig } from '../../../../../../shared/bulk-upload';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { LedgerStore } from '../../../data/ledger';
@@ -45,6 +51,36 @@ export class ListLedgerComponent {
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly ledgerStore = inject(LedgerStore);
   protected readonly hasError = computed(() => this.ledgerStore.error() !== null);
+
+  protected readonly bulkUploadConfig: BulkUploadPreviewConfig = {
+    modelName: 'Ledgers',
+    requiredPaths: ['name', 'category'],
+    rootKey: 'ledgers',
+    sampleRows: [
+      {
+        name: 'HDFC Bank Ledger',
+        category: 'Bank Accounts',
+        openingdr: 0,
+        openingcr: 0,
+        description: 'Ledger for HDFC current account',
+      },
+    ],
+    xlsxColumns: [
+      { header: 'Name', path: 'name' },
+      { header: 'Category', path: 'category' },
+      { header: 'OpeningDr', path: 'openingdr' },
+      { header: 'OpeningCr', path: 'openingcr' },
+      { header: 'Description', path: 'description' },
+    ],
+    xlsxSheetName: 'Ledgers',
+    columns: [
+      bulkUploadTextColumn('name', 'Name', 'name', '14rem'),
+      bulkUploadTextColumn('category', 'Category', 'category', '14rem'),
+      bulkUploadNumberColumn('openingdr', 'Opening DR', 'openingdr', '10rem'),
+      bulkUploadNumberColumn('openingcr', 'Opening CR', 'openingcr', '10rem'),
+      bulkUploadNamesColumn('description', 'Description', 'description'),
+    ],
+  };
 
   protected readonly columns: readonly TngTableColumn<Ledger>[] = [
     { id: 'name', label: 'Name', sortable: true, width: '14rem' },
