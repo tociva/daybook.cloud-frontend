@@ -31,7 +31,7 @@
     }
 
     <div class="table-stack">
-      @if (!itemStore.isLoading() && !hasError() && itemStore.items().length === 0) {
+      @if (!itemStore.isLoading() && !hasError() && crudQuery.shouldShowEmptyState(itemStore.items().length, itemStore.count())) {
         @if (crudQuery.hasActiveFilter()) {
           <app-empty-state
             icon="searchX"

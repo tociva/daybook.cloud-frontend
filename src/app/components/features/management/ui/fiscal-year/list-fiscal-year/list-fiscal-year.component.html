@@ -24,7 +24,7 @@
     }
 
     <div class="table-stack">
-      @if (!fiscalYearStore.isLoading() && !hasError() && fiscalYearStore.items().length === 0) {
+      @if (!fiscalYearStore.isLoading() && !hasError() && crudQuery.shouldShowEmptyState(fiscalYearStore.items().length, fiscalYearStore.count())) {
         @if (crudQuery.hasActiveFilter()) {
           <app-empty-state
             icon="searchX"

@@ -26,7 +26,7 @@
     }
 
     <div class="table-stack">
-      @if (!bankCashStore.isLoading() && !hasError() && bankCashStore.items().length === 0) {
+      @if (!bankCashStore.isLoading() && !hasError() && crudQuery.shouldShowEmptyState(bankCashStore.items().length, bankCashStore.count())) {
         @if (crudQuery.hasActiveFilter()) {
           <app-empty-state
             icon="searchX"

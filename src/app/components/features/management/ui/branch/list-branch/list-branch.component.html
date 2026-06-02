@@ -24,7 +24,7 @@
     }
 
     <div class="table-stack">
-      @if (!branchStore.isLoading() && !hasError() && branchStore.items().length === 0) {
+      @if (!branchStore.isLoading() && !hasError() && crudQuery.shouldShowEmptyState(branchStore.items().length, branchStore.count())) {
         @if (crudQuery.hasActiveFilter()) {
           <app-empty-state
             icon="searchX"

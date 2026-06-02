@@ -31,7 +31,7 @@
     }
 
     <div class="table-stack">
-      @if (!ledgerStore.isLoading() && !hasError() && ledgerStore.items().length === 0) {
+      @if (!ledgerStore.isLoading() && !hasError() && crudQuery.shouldShowEmptyState(ledgerStore.items().length, ledgerStore.count())) {
         @if (crudQuery.hasActiveFilter()) {
           <app-empty-state
             icon="searchX"

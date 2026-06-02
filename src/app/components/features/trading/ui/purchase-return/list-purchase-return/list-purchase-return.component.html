@@ -24,7 +24,7 @@
     }
 
     <div class="table-stack">
-      @if (!purchaseReturnStore.isLoading() && !hasError() && purchaseReturnStore.items().length === 0) {
+      @if (!purchaseReturnStore.isLoading() && !hasError() && crudQuery.shouldShowEmptyState(purchaseReturnStore.items().length, purchaseReturnStore.count())) {
         @if (crudQuery.hasActiveFilter()) {
           <app-empty-state
             icon="searchX"

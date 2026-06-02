@@ -10,6 +10,7 @@ import {
 } from './lb4-query';
 import type { Lb4ListQuery, Lb4SortChange } from './lb4-query';
 import { CrudUrlService } from './crud-url.service';
+import { shouldShowCrudEmptyState } from './crud-list-state';
 
 export type CrudListQueryOptions = Readonly<{
   defaultPageSize?: number;
@@ -66,6 +67,10 @@ export class CrudListQueryService {
       queryParamName: this.queryParamName,
       route: this.route,
     });
+  }
+
+  shouldShowEmptyState(pageItemCount: number, totalItems: number): boolean {
+    return shouldShowCrudEmptyState(pageItemCount, totalItems);
   }
 
   private getCurrentFilter(): Lb4ListQuery {

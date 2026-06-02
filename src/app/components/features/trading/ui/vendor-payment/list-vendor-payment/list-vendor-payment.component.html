@@ -29,7 +29,7 @@
     }
 
     <div class="table-stack">
-      @if (!vendorPaymentStore.isLoading() && !hasError() && vendorPaymentStore.items().length === 0) {
+      @if (!vendorPaymentStore.isLoading() && !hasError() && crudQuery.shouldShowEmptyState(vendorPaymentStore.items().length, vendorPaymentStore.count())) {
         @if (crudQuery.hasActiveFilter()) {
           <app-empty-state
             icon="searchX"

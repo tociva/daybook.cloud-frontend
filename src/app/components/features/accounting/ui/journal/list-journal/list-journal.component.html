@@ -31,7 +31,7 @@
     }
 
     <div class="table-stack">
-      @if (!journalStore.isLoading() && !hasError() && journalStore.items().length === 0) {
+      @if (!journalStore.isLoading() && !hasError() && crudQuery.shouldShowEmptyState(journalStore.items().length, journalStore.count())) {
         @if (crudQuery.hasActiveFilter()) {
           <app-empty-state
             icon="searchX"
