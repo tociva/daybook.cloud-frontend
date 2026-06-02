@@ -2,10 +2,13 @@
   display: inline-flex;
 }
 
-.bulk-upload-area {
-  border: 1px dotted transparent;
-  border-radius: 0.5rem;
+.bulk-upload-control {
+  align-items: stretch;
+  border: 1px solid var(--tng-semantic-border-strong);
+  border-radius: 0.6rem;
+  box-shadow: none;
   display: inline-flex;
+  gap: 0;
   outline: 2px dotted transparent;
   outline-offset: 0;
   transition:
@@ -16,7 +19,7 @@
     transform 160ms ease;
 }
 
-.bulk-upload-area[data-dragging] {
+.bulk-upload-control[data-dragging] {
   border-color: var(--tng-semantic-accent-brand);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--tng-semantic-accent-brand) 18%, transparent);
   outline-color: var(--tng-semantic-accent-brand);
@@ -24,9 +27,141 @@
   transform: translateY(-1px);
 }
 
-.bulk-upload-area[data-rejected] {
+.bulk-upload-control[data-rejected] {
   border-color: var(--tng-semantic-accent-danger);
   outline-color: var(--tng-semantic-accent-danger);
+}
+
+.bulk-upload-area {
+  display: inline-flex;
+}
+
+.bulk-upload-main-button {
+  --tng-button-padding-inline-md: 0.85rem;
+}
+
+.bulk-upload-info-popover {
+  align-items: stretch;
+  border-left: 1px solid var(--tng-semantic-border-strong);
+  display: inline-flex;
+  position: relative;
+}
+
+.bulk-upload-control[data-dragging] .bulk-upload-info-popover {
+  border-left-color: color-mix(
+    in srgb,
+    var(--tng-semantic-accent-brand) 55%,
+    var(--tng-semantic-border-strong)
+  );
+}
+
+.bulk-upload-control[data-rejected] .bulk-upload-info-popover {
+  border-left-color: color-mix(
+    in srgb,
+    var(--tng-semantic-accent-danger) 55%,
+    var(--tng-semantic-border-strong)
+  );
+}
+
+.bulk-upload-info-trigger {
+  --tng-button-gap: 0;
+  --tng-button-padding-inline-md: 0.65rem;
+}
+
+.bulk-upload-info-panel {
+  background: var(--tng-semantic-background-surface);
+  border: 1px solid var(--tng-semantic-border-strong);
+  border-radius: 0.5rem;
+  box-shadow: 0 18px 28px
+    color-mix(in srgb, var(--tng-semantic-foreground-primary) 18%, transparent);
+  color: var(--tng-semantic-foreground-primary);
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.45rem;
+  max-width: min(24rem, calc(100vw - 2rem));
+  padding: 0.85rem;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  width: 24rem;
+  z-index: var(--tng-z-popover, 60);
+}
+
+.bulk-upload-info-panel[hidden] {
+  display: none !important;
+}
+
+.bulk-upload-info-header,
+.bulk-upload-info-actions {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.bulk-upload-info-header {
+  color: var(--tng-semantic-foreground-primary);
+}
+
+.bulk-upload-info-panel p,
+.bulk-upload-info-list,
+.bulk-upload-required {
+  margin: 0;
+}
+
+.bulk-upload-info-panel p,
+.bulk-upload-info-list dd,
+.bulk-upload-required span {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.bulk-upload-info-list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.bulk-upload-info-list div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.bulk-upload-info-list dt,
+.bulk-upload-required span {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.bulk-upload-info-list dd {
+  margin: 0;
+}
+
+.bulk-upload-info-panel code {
+  background: var(--tng-semantic-background-base);
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.3rem;
+  color: var(--tng-semantic-foreground-primary);
+  font-size: 0.78rem;
+  padding: 0.08rem 0.3rem;
+}
+
+.bulk-upload-required {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.bulk-upload-required-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  max-height: 8.5rem;
+  overflow: auto;
+}
+
+.bulk-upload-info-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .bulk-upload-preview {
@@ -80,6 +215,20 @@
   min-width: 54rem;
 }
 
+.bulk-upload-error {
+  color: var(--tng-semantic-foreground-primary);
+  display: grid;
+  gap: 0.75rem;
+}
+
+.bulk-upload-error p {
+  margin: 0;
+}
+
+.bulk-upload-error p + p {
+  color: var(--tng-semantic-foreground-muted);
+}
+
 .dialog-actions {
   display: flex;
   gap: 0.5rem;
@@ -87,7 +236,20 @@
   margin-top: 1rem;
 }
 
+.sample-actions {
+  flex-wrap: wrap;
+}
+
 @media (max-width: 640px) {
+  .bulk-upload-control {
+    flex-wrap: wrap;
+  }
+
+  .bulk-upload-info-panel {
+    right: auto;
+    width: min(24rem, calc(100vw - 2rem));
+  }
+
   .bulk-upload-meta div {
     grid-template-columns: 1fr;
   }

@@ -1,5 +1,5 @@
-<span
-  class="bulk-upload-area"
+<div
+  class="bulk-upload-control"
   tngFileUpload
   [accept]="accept()"
   [disabled]="isDisabled()"
@@ -8,17 +8,106 @@
   (filesRejected)="onFilesRejected($event)"
   (filesSelected)="onFilesSelected($event)"
 >
-  <tng-button
-    type="button"
-    appearance="outline"
-    tone="neutral"
-    [disabled]="isDisabled()"
-    (click)="chooseFile(fileInput)"
+  <span class="bulk-upload-area">
+    <tng-button
+      class="bulk-upload-main-button"
+      type="button"
+      appearance="ghost"
+      tone="neutral"
+      [disabled]="isDisabled()"
+      (click)="chooseFile(fileInput)"
+    >
+      <tng-icon [icon]="isUploading() ? 'loaderCircle' : 'upload'" aria-hidden="true" />
+      {{ isUploading() ? 'Uploading...' : label() }}
+    </tng-button>
+  </span>
+
+  <div
+    class="bulk-upload-info-popover"
+    tngPopover
+    #uploadInfoPopover="tngPopover"
+    [align]="'end'"
+    [side]="'bottom'"
+    ariaLabel="Bulk upload help"
+    [open]="isInfoOpen()"
+    (openChange)="onInfoOpenChange($event)"
   >
-    <tng-icon [icon]="isUploading() ? 'loaderCircle' : 'upload'" aria-hidden="true" />
-    {{ isUploading() ? 'Uploading...' : label() }}
-  </tng-button>
-</span>
+    <tng-button
+      class="bulk-upload-info-trigger"
+      type="button"
+      appearance="ghost"
+      tone="neutral"
+      [tngPopoverTrigger]="uploadInfoPopover"
+      aria-label="Bulk upload help"
+    >
+      <tng-icon icon="info" aria-hidden="true" />
+    </tng-button>
+
+    <section tngPopoverPanel class="bulk-upload-info-panel">
+      <div class="bulk-upload-info-header">
+        <tng-icon icon="info" aria-hidden="true" />
+        <strong>Bulk upload</strong>
+      </div>
+
+      @if (uploadInfo(); as info) {
+        <p>
+          Upload JSON or XLSX files for {{ info.modelName }}. XLSX uploads use the first sheet,
+          convert it to JSON, and show the same confirmation table before sending to the server.
+        </p>
+
+        <dl class="bulk-upload-info-list">
+          <div>
+            <dt>JSON root key</dt>
+            <dd>{{ info.rootKey }}</dd>
+          </div>
+          <div>
+            <dt>XLSX headers</dt>
+            <dd>
+              @if (info.usesFieldPathHeaders) {
+                Use field paths as column headers. Nested fields use dot notation like
+                <code>address.city</code>. Array or object cells should contain JSON text.
+              } @else {
+                Use the sample column names exactly. Array or object cells should contain JSON text.
+              }
+            </dd>
+          </div>
+        </dl>
+
+        <div class="bulk-upload-required">
+          <span>Required columns</span>
+          <div class="bulk-upload-required-list">
+            @for (column of info.requiredColumns; track column) {
+              <code>{{ column }}</code>
+            }
+          </div>
+        </div>
+      } @else {
+        <p>Bulk upload help is not configured for this model.</p>
+      }
+
+      <div class="bulk-upload-info-actions">
+        <tng-button
+          type="button"
+          appearance="outline"
+          tone="neutral"
+          [disabled]="!hasSampleConfig()"
+          (click)="downloadSampleJson()"
+        >
+          Sample JSON
+        </tng-button>
+        <tng-button
+          type="button"
+          appearance="outline"
+          tone="neutral"
+          [disabled]="!hasSampleConfig()"
+          (click)="downloadSampleXlsx()"
+        >
+          Sample XLSX
+        </tng-button>
+      </div>
+    </section>
+  </div>
+</div>
 
 <input
   #fileInput
@@ -33,7 +122,7 @@
   <tng-dialog
     title="Confirm bulk upload"
     size="lg"
-    description="Review the selected JSON before sending it to the server."
+    description="Review the selected data before sending it to the server."
     [open]="isPreviewOpen()"
     [closeOnBackdrop]="!isUploading()"
     [closeOnEscape]="!isUploading()"
@@ -94,6 +183,52 @@
       >
         <tng-icon [icon]="isUploading() ? 'loaderCircle' : 'upload'" aria-hidden="true" />
         {{ isUploading() ? 'Uploading...' : 'Confirm upload' }}
+      </tng-button>
+    </div>
+  </tng-dialog>
+}
+
+@if (formatError(); as message) {
+  <tng-dialog
+    title="Invalid bulk upload file"
+    size="md"
+    description="Use the sample files below to match the required upload format."
+    [open]="isFormatErrorOpen()"
+    (closed)="onFormatErrorClosed()"
+  >
+    <div class="bulk-upload-error">
+      <p>{{ message }}</p>
+      <p>
+        JSON files must use the expected root key. XLSX files must keep the sample header row;
+        array or object columns should contain valid JSON text.
+      </p>
+    </div>
+
+    <div class="dialog-actions sample-actions">
+      <tng-button
+        type="button"
+        appearance="outline"
+        tone="neutral"
+        [disabled]="!hasSampleConfig()"
+        (click)="downloadSampleJson()"
+      >
+        <tng-icon icon="download" aria-hidden="true" />
+        Sample JSON
+      </tng-button>
+
+      <tng-button
+        type="button"
+        appearance="outline"
+        tone="neutral"
+        [disabled]="!hasSampleConfig()"
+        (click)="downloadSampleXlsx()"
+      >
+        <tng-icon icon="download" aria-hidden="true" />
+        Sample XLSX
+      </tng-button>
+
+      <tng-button type="button" appearance="solid" tone="primary" (click)="onFormatErrorClosed()">
+        Close
       </tng-button>
     </div>
   </tng-dialog>

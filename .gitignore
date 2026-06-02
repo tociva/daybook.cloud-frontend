@@ -44,3 +44,4 @@ __screenshots__/
 Thumbs.db
 
 public/config/config.json
+.env
