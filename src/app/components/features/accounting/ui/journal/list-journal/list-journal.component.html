@@ -55,68 +55,127 @@
           </app-empty-state>
         }
       } @else {
-        <tng-table
-          ariaLabel="Journals"
-          density="comfortable"
-          [columns]="columns"
-          [items]="journalStore.items()"
-          [loading]="journalStore.isLoading()"
-          [error]="hasError()"
-          [sortActive]="crudQuery.sortActive()"
-          [sortDirection]="crudQuery.sortDirection()"
-          (sortChange)="crudQuery.applySort($event)"
-        >
-          <ng-template tngTableCellTemplate="number" let-row="row">
-            <button type="button" class="link-button" (click)="viewJournal(row)">
-              {{ row.number }}
-            </button>
-          </ng-template>
-
-          <ng-template tngTableCellTemplate="date" let-row="row">
-            {{ row.date }}
-          </ng-template>
-
-          <ng-template tngTableCellTemplate="description" let-row="row">
-            {{ row.description }}
-          </ng-template>
-
-          <ng-template tngTableCellTemplate="debit" let-row="row">
-            {{ sumDebit(row) }}
-          </ng-template>
-
-          <ng-template tngTableCellTemplate="credit" let-row="row">
-            {{ sumCredit(row) }}
-          </ng-template>
-
-          <ng-template tngTableCellTemplate="actions" let-row="row">
-            <div class="row-actions">
-              <button
-                type="button"
-                class="action-icon"
-                aria-label="View journal"
-                (click)="viewJournal(row)"
-              >
-                <tng-icon icon="eye" aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                class="action-icon"
-                aria-label="Edit journal"
-                (click)="editJournal(row)"
-              >
-                <tng-icon icon="pencil" aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                class="action-icon action-icon--danger"
-                aria-label="Delete journal"
-                (click)="deleteJournal(row)"
-              >
-                <tng-icon icon="trash2" aria-hidden="true" />
-              </button>
-            </div>
-          </ng-template>
-        </tng-table>
+        <div class="table-wrap">
+          <table class="journal-table" aria-label="Journals">
+            <colgroup>
+              <col class="col-number" />
+              <col class="col-date" />
+              <col class="col-ledger" />
+              <col class="col-amount" />
+              <col class="col-amount" />
+              <col class="col-description" />
+              <col class="col-actions" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th scope="col">Number</th>
+                <th scope="col">Date</th>
+                <th scope="col">Ledger</th>
+                <th scope="col" class="align-end">Debit</th>
+                <th scope="col" class="align-end">Credit</th>
+                <th scope="col">Description</th>
+                <th scope="col" class="align-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (journalStore.isLoading()) {
+                @for (n of loadingRows; track n) {
+                  <tr class="loading-row">
+                    <td><div class="skeleton"></div></td>
+                    <td><div class="skeleton"></div></td>
+                    <td><div class="skeleton"></div></td>
+                    <td><div class="skeleton"></div></td>
+                    <td><div class="skeleton"></div></td>
+                    <td><div class="skeleton"></div></td>
+                    <td></td>
+                  </tr>
+                }
+              } @else {
+                @for (journal of journalStore.items(); track journal.id) {
+                  @let entries = sortedEntries(journal.entries);
+                  @if (entries.length === 0) {
+                    <tr>
+                      <td>
+                        <button type="button" class="link-button" (click)="viewJournal(journal)">
+                          {{ journal.number }}
+                        </button>
+                      </td>
+                      <td>{{ journal.date }}</td>
+                      <td>—</td>
+                      <td class="align-end"></td>
+                      <td class="align-end"></td>
+                      <td>
+                        @if (journal.description) {
+                          <span class="truncate" [title]="journal.description">{{ journal.description }}</span>
+                        }
+                      </td>
+                      <td class="align-end">
+                        <div class="row-actions">
+                          <button type="button" class="action-icon" aria-label="View journal" (click)="viewJournal(journal)">
+                            <tng-icon icon="eye" aria-hidden="true" />
+                          </button>
+                          <button type="button" class="action-icon" aria-label="Edit journal" (click)="editJournal(journal)">
+                            <tng-icon icon="pencil" aria-hidden="true" />
+                          </button>
+                          <button type="button" class="action-icon action-icon--danger" aria-label="Delete journal" (click)="deleteJournal(journal)">
+                            <tng-icon icon="trash2" aria-hidden="true" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  } @else {
+                    @for (entry of entries; track entry.id ?? entry.ledgerid + (entry.order ?? ''); let i = $index) {
+                      <tr>
+                        <td>
+                          @if (i === 0) {
+                            <button type="button" class="link-button" (click)="viewJournal(journal)">
+                              {{ journal.number }}
+                            </button>
+                          }
+                        </td>
+                        <td>
+                          @if (i === 0) {
+                            {{ journal.date }}
+                          }
+                        </td>
+                        <td>{{ getLedgerName(entry.ledgerid) }}</td>
+                        <td class="align-end num">
+                          {{ entry.debit != null && entry.debit > 0 ? entry.debit : '' }}
+                        </td>
+                        <td class="align-end num">
+                          {{ entry.credit != null && entry.credit > 0 ? entry.credit : '' }}
+                        </td>
+                        <td>
+                          @if (i === 0 && journal.description) {
+                            <span class="truncate" [title]="journal.description">{{ journal.description }}</span>
+                          }
+                        </td>
+                        <td class="align-end">
+                          @if (i === 0) {
+                            <div class="row-actions">
+                              <button type="button" class="action-icon" aria-label="View journal" (click)="viewJournal(journal)">
+                                <tng-icon icon="eye" aria-hidden="true" />
+                              </button>
+                              <button type="button" class="action-icon" aria-label="Edit journal" (click)="editJournal(journal)">
+                                <tng-icon icon="pencil" aria-hidden="true" />
+                              </button>
+                              <button type="button" class="action-icon action-icon--danger" aria-label="Delete journal" (click)="deleteJournal(journal)">
+                                <tng-icon icon="trash2" aria-hidden="true" />
+                              </button>
+                            </div>
+                          }
+                        </td>
+                      </tr>
+                    }
+                  }
+                  <tr class="spacer-row" aria-hidden="true">
+                    <td colspan="7"></td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
 
         <div class="table-footer">
           <app-crud-paginator

@@ -95,6 +95,93 @@ h1 {
   padding: 0;
 }
 
+/* ── Journal table ─────────────────────────────────────── */
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.journal-table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  min-width: 52rem;
+}
+
+.col-number    { width: 11rem; }
+.col-date      { width: 9rem; }
+.col-ledger    { width: 15rem; }
+.col-amount    { width: 9rem; }
+/* col-description takes remaining space */
+.col-actions   { width: 8rem; }
+
+.journal-table th,
+.journal-table td {
+  border-bottom: 1px solid var(--tng-semantic-border-subtle);
+  padding: 0.55rem 0.75rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.journal-table th {
+  background: var(--tng-semantic-background-muted);
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.align-end {
+  text-align: end;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.truncate {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Blank separator row between journals */
+.spacer-row td {
+  border-bottom: none;
+  height: 0.65rem;
+  padding: 0;
+}
+
+/* Loading skeleton */
+.loading-row td {
+  padding: 0.65rem 0.75rem;
+}
+
+.skeleton {
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  background: linear-gradient(
+    90deg,
+    var(--tng-semantic-background-muted) 25%,
+    var(--tng-semantic-border-subtle) 50%,
+    var(--tng-semantic-background-muted) 75%
+  );
+  background-size: 200% 100%;
+  border-radius: 0.25rem;
+  height: 0.85rem;
+  width: 70%;
+}
+
+@keyframes skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Responsive ────────────────────────────────────────── */
+
 @media (max-width: 700px) {
   .page-heading,
   .page-actions {

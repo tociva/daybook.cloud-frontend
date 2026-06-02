@@ -1,12 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   TngButtonComponent,
   TngCardComponent,
-  TngTable,
-  TngTableCellTpl,
 } from '@tailng-ui/components';
-import type { TngTableColumn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import {
   CrudFilterPopoverComponent,
@@ -18,7 +15,8 @@ import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload'
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { JournalStore } from '../../../data/journal';
-import type { Journal } from '../../../data/journal';
+import type { Journal, JournalEntry } from '../../../data/journal';
+import { LedgerStore } from '../../../data/ledger';
 
 @Component({
   selector: 'app-list-journal',
@@ -31,8 +29,6 @@ import type { Journal } from '../../../data/journal';
     CrudPaginatorComponent,
     TngIcon,
     EmptyStateComponent,
-    TngTable,
-    TngTableCellTpl,
     BulkUploadButtonComponent,
   ],
   templateUrl: './list-journal.component.html',
@@ -44,16 +40,18 @@ export class ListJournalComponent {
   private readonly router = inject(Router);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly journalStore = inject(JournalStore);
+  private readonly ledgerStore = inject(LedgerStore);
   protected readonly hasError = computed(() => this.journalStore.error() !== null);
 
-  protected readonly columns: readonly TngTableColumn<Journal>[] = [
-    { id: 'number', label: 'Number', sortable: true, width: '11rem' },
-    { id: 'date', label: 'Date', sortable: true, width: '9rem' },
-    { id: 'description', label: 'Description', sortable: true, truncate: true },
-    { id: 'debit', label: 'Debit', align: 'end', headerAlign: 'end', width: '9rem' },
-    { id: 'credit', label: 'Credit', align: 'end', headerAlign: 'end', width: '9rem' },
-    { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '8rem' },
-  ];
+  protected readonly ledgerById = computed(() => {
+    const map = new Map<string, string>();
+    for (const l of this.ledgerStore.items()) {
+      if (l.id) map.set(l.id, l.name ?? l.id);
+    }
+    return map;
+  });
+
+  protected readonly loadingRows = [1, 2, 3, 4, 5];
 
   protected readonly filterFields: readonly CrudFilterField[] = [
     { id: 'number', label: 'Number', placeholder: 'Journal number', type: 'text' },
@@ -76,14 +74,25 @@ export class ListJournalComponent {
       };
       void this.journalStore.loadJournals(query);
     });
+
+    effect(() => {
+      const items = this.journalStore.items();
+      if (!items.length) return;
+      const ids = [...new Set(items.flatMap((j) => (j.entries ?? []).map((e) => e.ledgerid)))];
+      if (!ids.length) return;
+      void this.ledgerStore.loadLedgers({
+        where: { id: { inq: ids } },
+        limit: ids.length + 10,
+      });
+    });
   }
 
-  protected sumDebit(j: Journal): number {
-    return (j.entries ?? []).reduce((s, e) => s + (e.debit ?? 0), 0);
+  protected getLedgerName(ledgerid: string): string {
+    return this.ledgerById().get(ledgerid) ?? ledgerid;
   }
 
-  protected sumCredit(j: Journal): number {
-    return (j.entries ?? []).reduce((s, e) => s + (e.credit ?? 0), 0);
+  protected sortedEntries(entries: readonly JournalEntry[] | undefined): readonly JournalEntry[] {
+    return [...(entries ?? [])].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   }
 
   protected createJournal(): void {
