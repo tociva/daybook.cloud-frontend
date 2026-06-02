@@ -40,7 +40,9 @@
                   "maximumError": "3MB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "baseHref": "/",
+              "deployUrl": "/"
             },
             "development": {
               "optimization": false,

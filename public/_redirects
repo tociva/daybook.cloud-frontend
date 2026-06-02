@@ -1,0 +1,9 @@
+# Cloudflare Pages routing
+# First-match-wins. Real asset misses 404 cleanly instead of being masked as
+# the SPA shell (text/html), which previously broke module loading.
+# Navigation requests still fall back to the SPA shell.
+/*.js     /404-asset    404
+/*.mjs    /404-asset    404
+/*.css    /404-asset    404
+/*.map    /404-asset    404
+/*        /index.html   200
