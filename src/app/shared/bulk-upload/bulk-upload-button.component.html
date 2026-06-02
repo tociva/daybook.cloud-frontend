@@ -63,11 +63,19 @@
           <div>
             <dt>XLSX headers</dt>
             <dd>
-              @if (info.usesFieldPathHeaders) {
+              @if (info.xlsxHelpText) {
+                {{ info.xlsxHelpText }}
+              } @else if (info.usesFieldPathHeaders) {
                 Use field paths as column headers. Nested fields use dot notation like
-                <code>address.city</code>. Array or object cells should contain JSON text.
+                <code>address.city</code>.
+                @if (info.usesJsonXlsxCells) {
+                  Array or object cells should contain JSON text.
+                }
               } @else {
-                Use the sample column names exactly. Array or object cells should contain JSON text.
+                Use the sample column names exactly.
+                @if (info.usesJsonXlsxCells) {
+                  Array or object cells should contain JSON text.
+                }
               }
             </dd>
           </div>
@@ -152,6 +160,17 @@
         </div>
       </dl>
 
+      @if (preview.details.length) {
+        <dl class="bulk-upload-meta">
+          @for (detail of preview.details; track detail.label) {
+            <div>
+              <dt>{{ detail.label }}</dt>
+              <dd>{{ detail.value }}</dd>
+            </div>
+          }
+        </dl>
+      }
+
       <div class="bulk-upload-table">
         <tng-table
           ariaLabel="Bulk upload data preview"
@@ -199,8 +218,10 @@
     <div class="bulk-upload-error">
       <p>{{ message }}</p>
       <p>
-        JSON files must use the expected root key. XLSX files must keep the sample header row;
-        array or object columns should contain valid JSON text.
+        JSON files must use the expected root key. XLSX files must keep the sample header row.
+        @if (uploadInfo()?.usesJsonXlsxCells) {
+          Array or object columns should contain valid JSON text.
+        }
       </p>
     </div>
 

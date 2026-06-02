@@ -22,9 +22,12 @@ import { getApiErrorMessage } from '../../core/api/api-error.util';
 import { ToastStore } from '../../core/toast/toast.store';
 import type {
   BulkUploadPayload,
+  BulkUploadPreviewDetail,
   BulkUploadPreviewConfig,
   BulkUploadPreviewRow,
   BulkUploadXlsxColumn,
+  BulkUploadXlsxDateColumn,
+  BulkUploadXlsxParsedRow,
 } from './bulk-upload-preview-config';
 import { BulkUploadService } from './bulk-upload.service';
 
@@ -39,9 +42,41 @@ type BulkUploadFormat = 'json' | 'xlsx';
 type XlsxCellParseResult =
   | Readonly<{ ok: true; value: unknown }>
   | Readonly<{ ok: false; message: string }>;
+type BulkUploadReadResult = Readonly<{
+  payload: BulkUploadPayload;
+  previewDetails?: readonly BulkUploadPreviewDetail[];
+}>;
+type DetectedXlsxDateFormat = Readonly<{
+  label: string;
+  order: 'date-cell' | 'dmy' | 'mdy' | 'ymd';
+  separator?: '-' | '.' | '/';
+  yearDigits?: 2 | 4;
+}>;
+type XlsxDateFormatDetection =
+  | Readonly<{ ok: true; format: DetectedXlsxDateFormat }>
+  | Readonly<{ ok: false; message: string }>;
+type XlsxDateColumnValue = Readonly<{
+  rowNumber: number;
+  value: unknown;
+}>;
+type ParsedDateTextParts = Readonly<
+  | {
+      kind: 'ymd';
+      separator: '-' | '.' | '/';
+      yearDigits: 4;
+    }
+  | {
+      first: number;
+      kind: 'numeric';
+      second: number;
+      separator: '-' | '.' | '/';
+      yearDigits: 2 | 4;
+    }
+>;
 
 type BulkUploadPreview = Readonly<{
   columns: readonly TngTableColumn<BulkUploadPreviewRow>[];
+  details: readonly BulkUploadPreviewDetail[];
   file: File;
   fileSize: string;
   modelName: string;
@@ -56,7 +91,9 @@ type BulkUploadInfo = Readonly<{
   modelName: string;
   requiredColumns: readonly string[];
   rootKey: string;
+  usesJsonXlsxCells: boolean;
   usesFieldPathHeaders: boolean;
+  xlsxHelpText: string | null;
 }>;
 
 const textColumn = (
@@ -665,6 +702,38 @@ const BULK_UPLOAD_PREVIEW_CONFIGS: Record<string, BulkUploadPreviewConfig> = {
         ],
       },
     ],
+    xlsxColumns: [
+      { header: 'Number', path: 'number' },
+      { header: 'Date', path: 'date' },
+      { header: 'Ledger', path: 'ledger' },
+      { header: 'Debit', path: 'debit' },
+      { header: 'Credit', path: 'credit' },
+      { header: 'Description', path: 'description' },
+    ],
+    xlsxDateColumns: [{ header: 'Date', path: 'date', label: 'Date format' }],
+    xlsxHelpText:
+      'Use one row per journal transaction. Put Number, Date, and Description only on the first row for a journal; leave them blank on continuation rows.',
+    xlsxRequiredHeaders: ['Number', 'Date', 'Ledger', 'Debit', 'Credit', 'Description'],
+    xlsxRowsToPayloadRows: journalXlsxRowsToPayloadRows,
+    xlsxSampleRows: [
+      {
+        number: 'JV-001',
+        date: '2026-04-10',
+        ledger: 'Cash in Hand',
+        debit: 11800,
+        credit: '',
+        description: 'Sales accrual',
+      },
+      {
+        number: '',
+        date: '',
+        ledger: 'Software Sales',
+        debit: '',
+        credit: 11800,
+        description: '',
+      },
+    ],
+    xlsxSheetName: 'Journals',
     columns: [
       textColumn('number', 'Number', 'number', '10rem'),
       textColumn('date', 'Date', 'date', '9rem'),
@@ -689,6 +758,98 @@ const BULK_UPLOAD_PREVIEW_CONFIGS: Record<string, BulkUploadPreviewConfig> = {
     ],
   },
 };
+
+function journalXlsxRowsToPayloadRows(
+  parsedRows: readonly BulkUploadXlsxParsedRow[],
+): readonly BulkUploadPreviewRow[] | string {
+  const journals: BulkUploadPreviewRow[] = [];
+  let currentJournal: BulkUploadPreviewRow | null = null;
+  let currentStartRow = 0;
+
+  for (const { row, rowNumber } of parsedRows) {
+    const number = readPath(row, 'number');
+    const date = readPath(row, 'date');
+    const description = readPath(row, 'description');
+    const ledger = readPath(row, 'ledger');
+    const debit = readPath(row, 'debit');
+    const credit = readPath(row, 'credit');
+    const startsJournal = !valueIsEmpty(date);
+
+    if (startsJournal) {
+      const previousError = validateJournalXlsxPayloadRow(currentJournal, currentStartRow);
+      if (previousError) return previousError;
+
+      currentJournal = {
+        ...(valueIsEmpty(number) ? {} : { number }),
+        date,
+        ...(valueIsEmpty(description) ? {} : { description }),
+        entries: [],
+      };
+      currentStartRow = rowNumber;
+      journals.push(currentJournal);
+    } else if (!valueIsEmpty(number) || !valueIsEmpty(description)) {
+      return `Row ${rowNumber} has journal header values but no Date. Put Date on the first row for each journal.`;
+    }
+
+    if (!currentJournal) {
+      return `Row ${rowNumber} must start a journal with a Date before adding transaction rows.`;
+    }
+
+    if (valueIsEmpty(ledger)) {
+      return `Row ${rowNumber} is missing required value: Ledger.`;
+    }
+
+    const hasDebit = !valueIsEmpty(debit);
+    const hasCredit = !valueIsEmpty(credit);
+    if (hasDebit === hasCredit) {
+      return `Row ${rowNumber} must contain either Debit or Credit, but not both.`;
+    }
+
+    const entry: BulkUploadPreviewRow = { ledger };
+    if (hasDebit) {
+      entry['debit'] = debit;
+    } else {
+      entry['credit'] = credit;
+    }
+
+    (currentJournal['entries'] as BulkUploadPreviewRow[]).push(entry);
+  }
+
+  const finalError = validateJournalXlsxPayloadRow(currentJournal, currentStartRow);
+  if (finalError) return finalError;
+
+  return journals;
+}
+
+function validateJournalXlsxPayloadRow(
+  journal: BulkUploadPreviewRow | null,
+  rowNumber: number,
+): string | null {
+  if (!journal) return null;
+
+  const date = readPath(journal, 'date');
+  if (typeof date !== 'string' || !isIsoDateString(date)) {
+    return `Journal starting at row ${rowNumber} must have Date formatted as YYYY-MM-DD.`;
+  }
+
+  const entries = readPath(journal, 'entries');
+  if (!Array.isArray(entries) || entries.length < 2) {
+    return `Journal starting at row ${rowNumber} must include at least 2 transaction rows.`;
+  }
+
+  return null;
+}
+
+function isIsoDateString(value: string): boolean {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return false;
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const date = new Date(year, month - 1, day);
+  return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
+}
 
 function normalizeEndpointPath(endpointPath: string): string {
   let pathname = endpointPath.trim();
@@ -792,6 +953,8 @@ function xlsxColumnsForConfig(config: BulkUploadPreviewConfig): readonly BulkUpl
 }
 
 function requiredXlsxHeaders(config: BulkUploadPreviewConfig): readonly string[] {
+  if (config.xlsxRequiredHeaders) return config.xlsxRequiredHeaders;
+
   const columns = xlsxColumnsForConfig(config);
   return config.requiredPaths.map(
     (path) => columns.find((column) => column.path === path)?.header ?? path,
@@ -807,6 +970,226 @@ function xlsxPathForHeader(config: BulkUploadPreviewConfig, header: string): str
   if (!config.xlsxColumns) return normalizedHeader;
 
   return config.xlsxColumns.find((column) => normalizeXlsxHeader(column.header) === normalizedHeader)?.path ?? null;
+}
+
+function xlsxDateColumnsForConfig(config: BulkUploadPreviewConfig): readonly BulkUploadXlsxDateColumn[] {
+  return config.xlsxDateColumns ?? [];
+}
+
+function usesJsonXlsxCells(config: BulkUploadPreviewConfig): boolean {
+  return xlsxColumnsForConfig(config).some((column) => {
+    const value = sampleValueForPath(config, column.path);
+    return Array.isArray(value) || isRecord(value);
+  });
+}
+
+function detectXlsxDateFormat(
+  values: readonly XlsxDateColumnValue[],
+  header: string,
+): XlsxDateFormatDetection {
+  const filledValues = values.filter(({ value }) => !valueIsEmpty(value));
+  if (!filledValues.length) {
+    return { ok: false, message: `XLSX column "${header}" does not contain any date values.` };
+  }
+
+  const textParts: ParsedDateTextParts[] = [];
+  let hasDateCells = false;
+
+  for (const { rowNumber, value } of filledValues) {
+    if (value instanceof Date) {
+      hasDateCells = true;
+      continue;
+    }
+
+    if (typeof value !== 'string') {
+      return { ok: false, message: `Row ${rowNumber} column "${header}" must be a date or date text.` };
+    }
+
+    const parts = parseDateTextParts(value.trim());
+    if (!parts) {
+      return {
+        ok: false,
+        message: `Row ${rowNumber} column "${header}" has an unsupported date format.`,
+      };
+    }
+    textParts.push(parts);
+  }
+
+  if (hasDateCells && textParts.length) {
+    return { ok: false, message: `XLSX column "${header}" has mixed date cell and text formats.` };
+  }
+
+  if (hasDateCells) {
+    return { ok: true, format: { label: 'Excel date cells', order: 'date-cell' } };
+  }
+
+  return detectTextDateFormat(textParts, header);
+}
+
+function parseDateTextParts(value: string): ParsedDateTextParts | null {
+  const ymd = /^(\d{4})([-/.])(\d{1,2})\2(\d{1,2})$/.exec(value);
+  if (ymd) {
+    return {
+      kind: 'ymd',
+      separator: ymd[2] as '-' | '.' | '/',
+      yearDigits: 4,
+    };
+  }
+
+  const numeric = /^(\d{1,2})([-/.])(\d{1,2})\2(\d{2}|\d{4})$/.exec(value);
+  if (!numeric) return null;
+
+  return {
+    first: Number(numeric[1]),
+    kind: 'numeric',
+    second: Number(numeric[3]),
+    separator: numeric[2] as '-' | '.' | '/',
+    yearDigits: numeric[4].length === 2 ? 2 : 4,
+  };
+}
+
+function detectTextDateFormat(
+  parts: readonly ParsedDateTextParts[],
+  header: string,
+): XlsxDateFormatDetection {
+  const first = parts[0];
+  if (!first) {
+    return { ok: false, message: `XLSX column "${header}" does not contain any date values.` };
+  }
+
+  if (first.kind === 'ymd') {
+    const hasMixedFormat = parts.some(
+      (part) => part.kind !== 'ymd' || part.separator !== first.separator,
+    );
+    if (hasMixedFormat) {
+      return { ok: false, message: `XLSX column "${header}" has mixed date formats.` };
+    }
+
+    return {
+      ok: true,
+      format: {
+        label: `YYYY${first.separator}MM${first.separator}DD`,
+        order: 'ymd',
+        separator: first.separator,
+        yearDigits: 4,
+      },
+    };
+  }
+
+  const numericParts = parts.filter(
+    (part): part is Extract<ParsedDateTextParts, { kind: 'numeric' }> => part.kind === 'numeric',
+  );
+  if (numericParts.length !== parts.length) {
+    return { ok: false, message: `XLSX column "${header}" has mixed date formats.` };
+  }
+
+  const hasMixedSeparator = numericParts.some((part) => part.separator !== first.separator);
+  if (hasMixedSeparator) {
+    return { ok: false, message: `XLSX column "${header}" has mixed date separators.` };
+  }
+
+  const yearDigits = numericParts.some((part) => part.yearDigits === 4) ? 4 : 2;
+  const hasDayFirstEvidence = numericParts.some((part) => part.first > 12);
+  const hasMonthFirstEvidence = numericParts.some((part) => part.second > 12);
+  if (hasDayFirstEvidence && hasMonthFirstEvidence) {
+    return { ok: false, message: `XLSX column "${header}" has mixed day/month ordering.` };
+  }
+
+  const order = hasMonthFirstEvidence ? 'mdy' : 'dmy';
+  const separator = first.separator;
+  const yearLabel = yearDigits === 2 ? 'YY' : 'YYYY';
+  const label =
+    order === 'mdy'
+      ? `MM${separator}DD${separator}${yearLabel}`
+      : `DD${separator}MM${separator}${yearLabel}`;
+
+  return {
+    ok: true,
+    format: {
+      label:
+        !hasDayFirstEvidence && !hasMonthFirstEvidence
+          ? `${label} (ambiguous values, assuming day first)`
+          : label,
+      order,
+      separator,
+      yearDigits,
+    },
+  };
+}
+
+function parseXlsxDateCell(
+  value: unknown,
+  format: DetectedXlsxDateFormat,
+  rowNumber: number,
+  header: string,
+): XlsxCellParseResult {
+  if (value instanceof Date) {
+    return { ok: true, value: formatDateForPayload(value) };
+  }
+
+  if (typeof value !== 'string') {
+    return { ok: false, message: `Row ${rowNumber} column "${header}" must be a date or date text.` };
+  }
+
+  const parsed = parseXlsxDateText(value.trim(), format);
+  if (!parsed) {
+    return {
+      ok: false,
+      message: `Row ${rowNumber} column "${header}" must match ${format.label}.`,
+    };
+  }
+
+  return { ok: true, value: parsed };
+}
+
+function parseXlsxDateText(value: string, format: DetectedXlsxDateFormat): string | null {
+  if (format.order === 'date-cell') return null;
+
+  const separator = format.separator ?? '-';
+  const escapedSeparator = separator.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const yearPattern = format.yearDigits === 2 ? '\\d{2}' : '\\d{4}';
+  const ymdPattern = new RegExp(`^(\\d{4})${escapedSeparator}(\\d{1,2})${escapedSeparator}(\\d{1,2})$`);
+  const numericPattern = new RegExp(
+    `^(\\d{1,2})${escapedSeparator}(\\d{1,2})${escapedSeparator}(${yearPattern})$`,
+  );
+
+  let year: number;
+  let month: number;
+  let day: number;
+
+  if (format.order === 'ymd') {
+    const match = ymdPattern.exec(value);
+    if (!match) return null;
+    year = Number(match[1]);
+    month = Number(match[2]);
+    day = Number(match[3]);
+  } else {
+    const match = numericPattern.exec(value);
+    if (!match) return null;
+    const first = Number(match[1]);
+    const second = Number(match[2]);
+    year = normalizeXlsxYear(Number(match[3]), match[3].length);
+    month = format.order === 'mdy' ? first : second;
+    day = format.order === 'mdy' ? second : first;
+  }
+
+  return formatDatePartsForPayload(year, month, day);
+}
+
+function normalizeXlsxYear(year: number, digits: number): number {
+  if (digits !== 2) return year;
+  return year >= 70 ? 1900 + year : 2000 + year;
+}
+
+function formatDatePartsForPayload(year: number, month: number, day: number): string | null {
+  const date = new Date(year, month - 1, day);
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+    return null;
+  }
+
+  const monthText = String(month).padStart(2, '0');
+  const dayText = String(day).padStart(2, '0');
+  return `${year}-${monthText}-${dayText}`;
 }
 
 function valueIsEmpty(value: unknown): boolean {
@@ -867,8 +1250,13 @@ function parseXlsxCellValue(
   path: string,
   rowNumber: number,
   header: string,
+  dateFormat?: DetectedXlsxDateFormat,
 ): XlsxCellParseResult {
   if (valueIsEmpty(value)) return { ok: true, value: undefined };
+
+  if (dateFormat) {
+    return parseXlsxDateCell(value, dateFormat, rowNumber, header);
+  }
 
   const sampleValue = sampleValueForPath(config, path);
   if (Array.isArray(sampleValue) || isRecord(sampleValue)) {
@@ -978,7 +1366,9 @@ export class BulkUploadButtonComponent {
       modelName: config.modelName,
       requiredColumns: requiredXlsxHeaders(config),
       rootKey: config.rootKey,
+      usesJsonXlsxCells: usesJsonXlsxCells(config),
       usesFieldPathHeaders: !config.xlsxColumns,
+      xlsxHelpText: config.xlsxHelpText ?? null,
     };
   });
 
@@ -1072,9 +1462,10 @@ export class BulkUploadButtonComponent {
       const xlsx = await import('xlsx');
       const columns = [...xlsxColumnsForConfig(config)];
       const headers = columns.map((column) => column.header);
+      const sampleRows = config.xlsxSampleRows ?? config.sampleRows;
       const data: unknown[][] = [
         headers,
-        ...config.sampleRows.map((row) =>
+        ...sampleRows.map((row) =>
           columns.map((column) => sampleCellValue(readPath(row, column.path))),
         ),
       ];
@@ -1128,30 +1519,31 @@ export class BulkUploadButtonComponent {
       return 'Bulk upload preview is not configured for this model.';
     }
 
-    const payload = await this.readPayload(file, config);
-    if (typeof payload === 'string') {
-      return payload;
+    const readResult = await this.readPayload(file, config);
+    if (typeof readResult === 'string') {
+      return readResult;
     }
 
-    const rows = this.validatePayloadRows(payload, config);
+    const rows = this.validatePayloadRows(readResult.payload, config);
     if (typeof rows === 'string') {
       return rows;
     }
 
     return {
       columns: config.columns,
+      details: readResult.previewDetails ?? [],
       file,
       fileSize: this.formatFileSize(file.size),
       modelName: config.modelName,
       rowCount: rows.length,
       rootKey: config.rootKey,
-      rootKeys: Object.keys(payload),
+      rootKeys: Object.keys(readResult.payload),
       rows,
-      uploadFile: this.toUploadFile(file, payload),
+      uploadFile: this.toUploadFile(file, readResult.payload),
     };
   }
 
-  private async readPayload(file: File, config: BulkUploadPreviewConfig): Promise<BulkUploadPayload | string> {
+  private async readPayload(file: File, config: BulkUploadPreviewConfig): Promise<BulkUploadReadResult | string> {
     const format = this.fileFormat(file);
     if (format === 'xlsx') {
       return this.readXlsxPayload(file, config);
@@ -1160,7 +1552,7 @@ export class BulkUploadButtonComponent {
     return this.readJsonPayload(file);
   }
 
-  private async readJsonPayload(file: File): Promise<BulkUploadPayload | string> {
+  private async readJsonPayload(file: File): Promise<BulkUploadReadResult | string> {
     let content: string;
     try {
       content = await file.text();
@@ -1174,13 +1566,13 @@ export class BulkUploadButtonComponent {
         return 'Bulk upload JSON root must be an object.';
       }
 
-      return parsed;
+      return { payload: parsed };
     } catch {
       return 'File must contain valid JSON.';
     }
   }
 
-  private async readXlsxPayload(file: File, config: BulkUploadPreviewConfig): Promise<BulkUploadPayload | string> {
+  private async readXlsxPayload(file: File, config: BulkUploadPreviewConfig): Promise<BulkUploadReadResult | string> {
     let rows: unknown[][];
     try {
       const xlsx = await import('xlsx');
@@ -1231,8 +1623,33 @@ export class BulkUploadButtonComponent {
       return `XLSX is missing required columns: ${missingHeaders.join(', ')}. Download the sample XLSX and keep the header row unchanged.`;
     }
 
-    const payloadRows: BulkUploadPreviewRow[] = [];
+    const dateFormatByPath = new Map<string, DetectedXlsxDateFormat>();
+    const previewDetails: BulkUploadPreviewDetail[] = [];
     const dataRows = rows.slice(headerIndex + 1);
+
+    for (const dateColumn of xlsxDateColumnsForConfig(config)) {
+      const columnIndex = headers.findIndex(
+        (header) => normalizeXlsxHeader(header) === normalizeXlsxHeader(dateColumn.header),
+      );
+      if (columnIndex < 0) continue;
+
+      const values = dataRows
+        .map((row, dataIndex) => ({
+          rowNumber: headerIndex + dataIndex + 2,
+          value: Array.isArray(row) ? row[columnIndex] : undefined,
+        }))
+        .filter(({ value }) => !valueIsEmpty(value));
+      const detected = detectXlsxDateFormat(values, dateColumn.header);
+      if (!detected.ok) return detected.message;
+
+      dateFormatByPath.set(dateColumn.path, detected.format);
+      previewDetails.push({
+        label: dateColumn.label ?? `${dateColumn.header} format`,
+        value: detected.format.label,
+      });
+    }
+
+    const parsedRows: BulkUploadXlsxParsedRow[] = [];
 
     for (const [dataIndex, row] of dataRows.entries()) {
       if (!Array.isArray(row) || row.every(valueIsEmpty)) continue;
@@ -1246,7 +1663,14 @@ export class BulkUploadButtonComponent {
         const path = xlsxPathForHeader(config, header);
         if (!path) continue;
 
-        const parsed = parseXlsxCellValue(row[columnIndex], config, path, spreadsheetRowNumber, header);
+        const parsed = parseXlsxCellValue(
+          row[columnIndex],
+          config,
+          path,
+          spreadsheetRowNumber,
+          header,
+          dateFormatByPath.get(path),
+        );
         if (!parsed.ok) {
           return parsed.message;
         }
@@ -1256,21 +1680,33 @@ export class BulkUploadButtonComponent {
         }
       }
 
-      const missingValues = config.requiredPaths.filter((path) =>
-        isMissingRequiredValue(readPath(outputRow, path)),
-      );
-      if (missingValues.length) {
-        return `Row ${spreadsheetRowNumber} is missing required values: ${missingValues.join(', ')}.`;
-      }
-
-      payloadRows.push(outputRow);
+      parsedRows.push({ row: outputRow, rowNumber: spreadsheetRowNumber });
     }
 
-    if (!payloadRows.length) {
+    if (!parsedRows.length) {
       return 'XLSX does not contain any data rows. Add records below the header row.';
     }
 
-    return { [config.rootKey]: payloadRows };
+    if (config.xlsxRowsToPayloadRows) {
+      const payloadRows = config.xlsxRowsToPayloadRows(parsedRows);
+      if (typeof payloadRows === 'string') return payloadRows;
+
+      return { payload: { [config.rootKey]: payloadRows }, previewDetails };
+    }
+
+    const payloadRows: BulkUploadPreviewRow[] = [];
+    for (const { row, rowNumber } of parsedRows) {
+      const missingValues = config.requiredPaths.filter((path) =>
+        isMissingRequiredValue(readPath(row, path)),
+      );
+      if (missingValues.length) {
+        return `Row ${rowNumber} is missing required values: ${missingValues.join(', ')}.`;
+      }
+
+      payloadRows.push(row);
+    }
+
+    return { payload: { [config.rootKey]: payloadRows }, previewDetails };
   }
 
   private validatePayloadRows(

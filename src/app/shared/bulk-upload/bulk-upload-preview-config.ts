@@ -8,6 +8,22 @@ export type BulkUploadXlsxColumn = Readonly<{
   path: string;
 }>;
 
+export type BulkUploadPreviewDetail = Readonly<{
+  label: string;
+  value: string;
+}>;
+
+export type BulkUploadXlsxDateColumn = Readonly<{
+  header: string;
+  path: string;
+  label?: string;
+}>;
+
+export type BulkUploadXlsxParsedRow = Readonly<{
+  row: BulkUploadPreviewRow;
+  rowNumber: number;
+}>;
+
 export type BulkUploadPreviewConfig = Readonly<{
   columns: readonly TngTableColumn<BulkUploadPreviewRow>[];
   modelName: string;
@@ -15,6 +31,13 @@ export type BulkUploadPreviewConfig = Readonly<{
   rootKey: string;
   sampleRows: readonly BulkUploadPreviewRow[];
   xlsxColumns?: readonly BulkUploadXlsxColumn[];
+  xlsxDateColumns?: readonly BulkUploadXlsxDateColumn[];
+  xlsxHelpText?: string;
+  xlsxRequiredHeaders?: readonly string[];
+  xlsxRowsToPayloadRows?: (
+    rows: readonly BulkUploadXlsxParsedRow[],
+  ) => readonly BulkUploadPreviewRow[] | string;
+  xlsxSampleRows?: readonly BulkUploadPreviewRow[];
   xlsxSheetName?: string;
 }>;
 
