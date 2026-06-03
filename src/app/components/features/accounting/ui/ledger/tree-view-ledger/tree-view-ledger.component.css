@@ -1,0 +1,60 @@
+.management-page {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.25rem;
+}
+
+.notice {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  color: var(--tng-semantic-foreground-primary);
+  padding: 1rem;
+}
+
+.notice--danger {
+  border-color: var(--tng-semantic-accent-danger);
+}
+
+.table-stack {
+  display: grid;
+  gap: 1rem;
+}
+
+:host ::ng-deep .tng-tree-table {
+  table-layout: fixed;
+}
+
+:host ::ng-deep .ledger-tree-name-cell {
+  color: var(--color-text-primary);
+  min-width: 0;
+}
+
+:host ::ng-deep .ledger-tree-name-cell .tng-tree-table__cell-content {
+  overflow-wrap: anywhere;
+}
+
+:host ::ng-deep .ledger-tree-category-cell {
+  font-weight: 650;
+}
+
+:host ::ng-deep .ledger-tree-ledger-cell {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+:host ::ng-deep .ledger-tree-amount-cell {
+  color: var(--color-text-primary);
+  font-family: 'Menlo', 'Monaco', monospace;
+  font-size: 0.875rem;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+:host ::ng-deep .ledger-tree-amount-cell .tng-tree-table__cell-content {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:host ::ng-deep .ledger-tree-ledger-cell.ledger-tree-amount-cell {
+  color: var(--color-text-secondary);
+}

@@ -159,6 +159,10 @@ export class ListLedgerComponent {
     });
   }
 
+  protected showAllLedgers(): void {
+    void this.router.navigate(['/app/accounting/ledger/tree-view']);
+  }
+
   protected viewLedger(item: Ledger): void {
     if (item.id) {
       this.ledgerStore.setSelectedItem(item);

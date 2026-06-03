@@ -1,0 +1,303 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
+import { Router } from '@angular/router';
+import {
+  TngButtonComponent,
+  TngCardComponent,
+  TngTreeTable,
+} from '@tailng-ui/components';
+import type { TngTreeTableColumn } from '@tailng-ui/components';
+import { TngIcon } from '@tailng-ui/icons';
+import { EmptyStateComponent } from '../../../../../../shared/empty-state';
+import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
+import { LedgerStore } from '../../../data/ledger';
+import type { Ledger } from '../../../data/ledger';
+import { LedgerCategoryStore } from '../../../data/ledger-category';
+import type { LedgerCategory } from '../../../data/ledger-category';
+
+type LedgerTreeRow = {
+  children: LedgerTreeRow[];
+  description: string;
+  key: string;
+  kind: 'category' | 'ledger';
+  name: string;
+  openingcr: number;
+  openingdr: number;
+};
+
+const catalogPageSize = 1000;
+const softColumnBorder =
+  '1px solid color-mix(in srgb, var(--tng-semantic-border-subtle) 72%, var(--tng-semantic-foreground-muted) 28%)';
+
+const amountFormatter = new Intl.NumberFormat('en-IN', {
+  maximumFractionDigits: 2,
+  minimumFractionDigits: 2,
+});
+
+const toAmount = (value: number | null | undefined): number =>
+  typeof value === 'number' && Number.isFinite(value) ? value : 0;
+
+const formatAmount = (value: number | null | undefined): string => {
+  const amount = toAmount(value);
+  return amount === 0 ? '' : amountFormatter.format(amount);
+};
+
+const rowNameClass = (row: LedgerTreeRow): string =>
+  `ledger-tree-name-cell ledger-tree-${row.kind}-cell`;
+
+const amountCellClass = (row: LedgerTreeRow): string =>
+  `ledger-tree-amount-cell ledger-tree-${row.kind}-cell`;
+
+@Component({
+  selector: 'app-tree-view-ledger',
+  standalone: true,
+  imports: [
+    PageHeadingComponent,
+    TngButtonComponent,
+    TngCardComponent,
+    TngIcon,
+    TngTreeTable,
+    EmptyStateComponent,
+  ],
+  templateUrl: './tree-view-ledger.component.html',
+  styleUrl: './tree-view-ledger.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class TreeViewLedgerComponent implements OnInit {
+  private readonly router = inject(Router);
+  protected readonly ledgerStore = inject(LedgerStore);
+  protected readonly ledgerCategoryStore = inject(LedgerCategoryStore);
+
+  protected readonly expandedKeys = signal<readonly string[]>([]);
+  protected readonly displayError = computed(
+    () => this.ledgerCategoryStore.error() ?? this.ledgerStore.error(),
+  );
+  protected readonly hasError = computed(() => this.displayError() !== null);
+  protected readonly isLoading = computed(
+    () => this.ledgerCategoryStore.isLoading() || this.ledgerStore.isLoading(),
+  );
+
+  protected readonly treeData = computed<readonly LedgerTreeRow[]>(() => {
+    const categories = this.ledgerCategoryStore.items();
+    const ledgers = this.ledgerStore.items();
+    const categoryNodes = new Map<string, LedgerTreeRow>();
+    const categoriesById = new Map<string, LedgerCategory>();
+    const rootRows: LedgerTreeRow[] = [];
+
+    for (const category of categories) {
+      if (!category.id) continue;
+      categoriesById.set(category.id, category);
+      categoryNodes.set(category.id, this.createCategoryRow(category));
+    }
+
+    for (const category of categories) {
+      if (!category.id) continue;
+      const node = categoryNodes.get(category.id);
+      if (!node) continue;
+
+      const parentId = category.parentid ?? category.parent?.id ?? null;
+      const parent = parentId && parentId !== category.id ? categoryNodes.get(parentId) : null;
+      if (parent) {
+        parent.children.push(node);
+      } else {
+        rootRows.push(node);
+      }
+    }
+
+    const uncategorizedLedgers: LedgerTreeRow[] = [];
+    for (const ledger of ledgers) {
+      if (!ledger.id) continue;
+      const categoryId = ledger.categoryid ?? ledger.category?.id ?? null;
+      const category = categoryId ? categoriesById.get(categoryId) ?? ledger.category : undefined;
+      const categoryNode = category?.id ? categoryNodes.get(category.id) : null;
+      const row = this.createLedgerRow(ledger);
+
+      if (categoryNode) {
+        categoryNode.children.push(row);
+      } else {
+        uncategorizedLedgers.push(row);
+      }
+    }
+
+    if (uncategorizedLedgers.length > 0) {
+      rootRows.push({
+        children: uncategorizedLedgers,
+        description: '',
+        key: 'category:uncategorized',
+        kind: 'category',
+        name: 'Uncategorized',
+        openingcr: 0,
+        openingdr: 0,
+      });
+    }
+
+    return rootRows;
+  });
+
+  private readonly expandableTreeKeys = computed(() => {
+    const keys: string[] = [];
+    const collect = (rows: readonly LedgerTreeRow[]): void => {
+      for (const row of rows) {
+        if (row.kind === 'category' && row.children.length > 0) {
+          keys.push(row.key);
+          collect(row.children);
+        }
+      }
+    };
+    collect(this.treeData());
+    return keys;
+  });
+
+  protected readonly columns: readonly TngTreeTableColumn<LedgerTreeRow>[] = [
+    {
+      key: 'name',
+      label: 'Ledger Category / Ledger',
+      treeToggle: true,
+      width: '26rem',
+      cellClass: rowNameClass,
+      headerStyle: {
+        'border-inline-end': softColumnBorder,
+      },
+      cellStyle: {
+        'border-inline-end': softColumnBorder,
+      },
+    },
+    {
+      key: 'opening',
+      label: 'Opening',
+      headerStyle: {
+        'border-inline-end': softColumnBorder,
+      },
+      children: [
+        {
+          key: 'openingdr',
+          label: 'Debit',
+          accessor: (row) => formatAmount(row.openingdr),
+          align: 'end',
+          width: '10rem',
+          cellClass: amountCellClass,
+        },
+        {
+          key: 'openingcr',
+          label: 'Credit',
+          accessor: (row) => formatAmount(row.openingcr),
+          align: 'end',
+          width: '10rem',
+          cellClass: amountCellClass,
+          headerStyle: {
+            'border-inline-end': softColumnBorder,
+          },
+          cellStyle: {
+            'border-inline-end': softColumnBorder,
+          },
+        },
+      ],
+    },
+    {
+      key: 'description',
+      label: 'Description',
+      minWidth: '16rem',
+    },
+  ];
+
+  constructor() {
+    effect(() => {
+      this.expandedKeys.set(this.expandableTreeKeys());
+    });
+  }
+
+  ngOnInit(): void {
+    void this.loadReferenceData();
+  }
+
+  protected createLedger(): void {
+    void this.router.navigate(['/app/accounting/ledger/create'], {
+      queryParams: { burl: this.router.url },
+    });
+  }
+
+  protected createLedgerCategory(): void {
+    void this.router.navigate(['/app/accounting/ledger-category/create'], {
+      queryParams: { burl: this.router.url },
+    });
+  }
+
+  protected onRefresh(): void {
+    void this.loadReferenceData();
+  }
+
+  protected readonly getTreeRowKey = (row: LedgerTreeRow): string => row.key;
+
+  protected readonly getTreeRowChildren = (row: LedgerTreeRow): readonly LedgerTreeRow[] =>
+    row.children;
+
+  protected readonly getTreeRowClass = (row: LedgerTreeRow): string =>
+    `ledger-tree-${row.kind}-row`;
+
+  protected onExpandedKeysChange(keys: readonly unknown[]): void {
+    this.expandedKeys.set(keys.filter((key): key is string => typeof key === 'string'));
+  }
+
+  private createCategoryRow(category: LedgerCategory): LedgerTreeRow {
+    return {
+      children: [],
+      description: category.description ?? '',
+      key: `category:${category.id}`,
+      kind: 'category',
+      name: category.name,
+      openingcr: 0,
+      openingdr: 0,
+    };
+  }
+
+  private createLedgerRow(ledger: Ledger): LedgerTreeRow {
+    return {
+      children: [],
+      description: ledger.description ?? '',
+      key: `ledger:${ledger.id}`,
+      kind: 'ledger',
+      name: ledger.name,
+      openingcr: toAmount(ledger.openingcr),
+      openingdr: toAmount(ledger.openingdr),
+    };
+  }
+
+  private async loadReferenceData(): Promise<void> {
+    await Promise.all([this.loadLedgerCategories(), this.loadLedgers()]);
+  }
+
+  private async loadLedgerCategories(): Promise<void> {
+    const query = {
+      includes: ['parent'],
+      limit: catalogPageSize,
+      offset: 0,
+    };
+
+    await this.ledgerCategoryStore.loadLedgerCategories(query);
+    const count = this.ledgerCategoryStore.count();
+    if (count > this.ledgerCategoryStore.items().length) {
+      await this.ledgerCategoryStore.loadLedgerCategories({ ...query, limit: count });
+    }
+  }
+
+  private async loadLedgers(): Promise<void> {
+    const query = {
+      includes: ['category'],
+      limit: catalogPageSize,
+      offset: 0,
+    };
+
+    await this.ledgerStore.loadLedgers(query);
+    const count = this.ledgerStore.count();
+    if (count > this.ledgerStore.items().length) {
+      await this.ledgerStore.loadLedgers({ ...query, limit: count });
+    }
+  }
+}

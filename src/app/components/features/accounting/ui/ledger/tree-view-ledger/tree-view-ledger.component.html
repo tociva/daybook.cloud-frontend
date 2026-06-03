@@ -1,0 +1,68 @@
+<main class="management-page">
+  <app-page-heading
+    eyebrow="Accounting"
+    title="Ledger Tree View"
+    description="Browse ledgers within their category hierarchy."
+  >
+    <tng-button
+      type="button"
+      appearance="outline"
+      tone="neutral"
+      (click)="onRefresh()"
+      [disabled]="isLoading()"
+    >
+      <tng-icon icon="refresh-cw" aria-hidden="true" />
+      Refresh
+    </tng-button>
+
+    <tng-button type="button" appearance="outline" tone="neutral" (click)="createLedgerCategory()">
+      <tng-icon icon="layers" aria-hidden="true" />
+      New Ledger Category
+    </tng-button>
+
+    <tng-button type="button" appearance="solid" tone="primary" (click)="createLedger()">
+      <tng-icon icon="plus" aria-hidden="true" />
+      New Ledger
+    </tng-button>
+  </app-page-heading>
+
+  <tng-card variant="outline" padding="lg">
+    @if (hasError()) {
+      <div class="notice notice--danger">{{ displayError() }}</div>
+    }
+
+    @if (!hasError()) {
+      @if (!isLoading() && treeData().length === 0) {
+        <app-empty-state
+          icon="bookOpen"
+          title="No ledgers or categories yet"
+          description="Get started by creating a ledger category or ledger."
+        >
+          <tng-button type="button" appearance="solid" tone="primary" (click)="createLedger()">
+            <tng-icon icon="plus" aria-hidden="true" />
+            New Ledger
+          </tng-button>
+        </app-empty-state>
+      } @else {
+        <div class="table-stack">
+          <tng-tree-table
+            ariaLabel="Ledger tree view"
+            density="comfortable"
+            [columns]="columns"
+            [data]="treeData()"
+            [loading]="isLoading()"
+            loadingText="Loading ledgers..."
+            emptyText="No ledgers or categories found."
+            treeColumnKey="name"
+            [expandOnRowClick]="true"
+            [expandedKeys]="expandedKeys()"
+            [getKey]="getTreeRowKey"
+            [getChildren]="getTreeRowChildren"
+            [rowClass]="getTreeRowClass"
+            (expandedKeysChange)="onExpandedKeysChange($event)"
+          />
+        </div>
+      }
+    }
+  </tng-card>
+</main>

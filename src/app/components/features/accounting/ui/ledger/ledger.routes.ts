@@ -12,6 +12,13 @@ export const ledgerRoutes: Routes = [
       import('./create-ledger/create-ledger.component').then((m) => m.CreateLedgerComponent),
   },
   {
+    path: 'tree-view',
+    loadComponent: () =>
+      import('./tree-view-ledger/tree-view-ledger.component').then(
+        (m) => m.TreeViewLedgerComponent,
+      ),
+  },
+  {
     path: ':id',
     loadComponent: () =>
       import('./view-ledger/view-ledger.component').then((m) => m.ViewLedgerComponent),

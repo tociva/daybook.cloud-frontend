@@ -17,6 +17,11 @@
       Ledger Categories
     </tng-button>
 
+    <tng-button type="button" appearance="outline" tone="neutral" (click)="showAllLedgers()">
+      <tng-icon icon="list-tree" aria-hidden="true" />
+      Show All
+    </tng-button>
+
     <app-bulk-upload-button
       endpoint="/accounting/ledger/bulk-upload"
       [config]="bulkUploadConfig"
