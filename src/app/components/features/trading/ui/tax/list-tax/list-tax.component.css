@@ -6,8 +6,9 @@
 
 .row-actions {
   align-items: center;
-  display: flex;
+  display: inline-flex;
   gap: 0.35rem;
+  justify-content: flex-end;
 }
 
 .notice {
@@ -31,31 +32,6 @@
   justify-content: flex-end;
 }
 
-.action-icon {
-  align-items: center;
-  appearance: none;
-  background: transparent;
-  border: 0;
-  border-radius: 0.4rem;
-  color: var(--tng-semantic-foreground-muted);
-  cursor: pointer;
-  display: inline-flex;
-  height: 1.35rem;
-  justify-content: center;
-  padding: 0.2rem;
-  width: 1.35rem;
-}
-
-.action-icon:hover,
-.action-icon:focus-visible {
-  color: var(--tng-semantic-foreground-primary);
-  outline: 2px solid var(--tng-semantic-focus-ring);
-  outline-offset: 2px;
-}
-
-.action-icon--danger {
-  color: var(--tng-semantic-accent-danger);
-}
 
 .link-button {
   background: transparent;

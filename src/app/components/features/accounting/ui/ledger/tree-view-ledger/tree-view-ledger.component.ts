@@ -17,6 +17,7 @@ import {
 import type { TngTreeTableColumn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
+import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { LedgerStore } from '../../../data/ledger';
 import type { Ledger } from '../../../data/ledger';
@@ -67,6 +68,7 @@ const amountCellClass = (row: LedgerTreeRow): string =>
     TngTreeTable,
     TngTreeTableCellTpl,
     EmptyStateComponent,
+    TableRowIconButtonComponent,
   ],
   templateUrl: './tree-view-ledger.component.html',
   styleUrl: './tree-view-ledger.component.css',

@@ -18,6 +18,7 @@ import type { CrudFilterField } from '../../../../../../shared/crud';
 import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
+import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import { Status, TaxStore } from '../../../data/tax';
 import type { Tax } from '../../../data/tax';
 import { TngTagIcon } from '../../bank-cash/tng-tag-icon.directive';
@@ -38,6 +39,7 @@ type StatusTagTone = 'danger' | 'success' | 'warning';
     EmptyStateComponent,
     TngTable,
     TngTableCellTpl,
+    TableRowIconButtonComponent,
     BulkUploadButtonComponent,
   ],
   templateUrl: './list-tax.component.html',

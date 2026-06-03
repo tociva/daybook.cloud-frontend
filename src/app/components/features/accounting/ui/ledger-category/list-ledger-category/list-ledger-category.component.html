@@ -89,30 +89,22 @@
 
         <ng-template tngTableCellTemplate="actions" let-row="row">
           <div class="row-actions">
-            <button
-              type="button"
-              class="action-icon"
-              aria-label="View ledger category"
-              (click)="viewLedgerCategory(row)"
-            >
-              <tng-icon icon="eye" aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              class="action-icon"
-              aria-label="Edit ledger category"
-              (click)="editLedgerCategory(row)"
-            >
-              <tng-icon icon="pencil" aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              class="action-icon action-icon--danger"
-              aria-label="Delete ledger category"
-              (click)="deleteLedgerCategory(row)"
-            >
-              <tng-icon icon="trash2" aria-hidden="true" />
-            </button>
+            <app-table-row-icon-button
+              icon="eye"
+              ariaLabel="View ledger category"
+              (action)="viewLedgerCategory(row)"
+            />
+            <app-table-row-icon-button
+              icon="pencil"
+              ariaLabel="Edit ledger category"
+              (action)="editLedgerCategory(row)"
+            />
+            <app-table-row-icon-button
+              icon="trash2"
+              ariaLabel="Delete ledger category"
+              tone="danger"
+              (action)="deleteLedgerCategory(row)"
+            />
           </div>
         </ng-template>
       </tng-table>

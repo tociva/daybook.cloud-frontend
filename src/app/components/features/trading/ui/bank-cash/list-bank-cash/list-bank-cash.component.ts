@@ -18,6 +18,7 @@ import type { CrudFilterField } from '../../../../../../shared/crud';
 import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
+import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import { BankCashStore, Status } from '../../../data/bank-cash';
 import type { BankCash } from '../../../data/bank-cash';
 import { TngTagIcon } from '../tng-tag-icon.directive';
@@ -38,6 +39,7 @@ type StatusBadgeTone = 'danger' | 'success' | 'warning';
     EmptyStateComponent,
     TngTable,
     TngTableCellTpl,
+    TableRowIconButtonComponent,
     BulkUploadButtonComponent,
   ],
   templateUrl: './list-bank-cash.component.html',

@@ -16,6 +16,7 @@ import {
 import type { CrudFilterField } from '../../../../../../shared/crud';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
+import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import { BranchStore } from '../../../data/branch';
 import type { Branch } from '../../../data/branch';
 import { CountryStore } from '../../../data/country/country.store';
@@ -34,6 +35,7 @@ import { CurrencyStore } from '../../../data/currency/currency.store';
     EmptyStateComponent,
     TngTable,
     TngTableCellTpl,
+    TableRowIconButtonComponent,
   ],
   templateUrl: './list-branch.component.html',
   styleUrl: './list-branch.component.css',

@@ -16,6 +16,7 @@ import {
 import type { CrudFilterField } from '../../../../../../shared/crud';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
+import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import { FiscalYearStore } from '../../../data/fiscal-year';
 import type { FiscalYear } from '../../../data/fiscal-year';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
@@ -33,6 +34,7 @@ import { DateManagementService } from '../../../../../../core/date/date-manageme
     EmptyStateComponent,
     TngTable,
     TngTableCellTpl,
+    TableRowIconButtonComponent,
   ],
   templateUrl: './list-fiscal-year.component.html',
   styleUrl: './list-fiscal-year.component.css',

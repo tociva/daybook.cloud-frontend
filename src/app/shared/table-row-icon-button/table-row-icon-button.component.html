@@ -1,0 +1,12 @@
+<tng-button
+  class="row-action-btn"
+  type="button"
+  appearance="ghost"
+  [tone]="tone()"
+  size="sm"
+  [attr.aria-label]="ariaLabel()"
+  [disabled]="disabled()"
+  (click)="onAction()"
+>
+  <tng-icon [icon]="icon()" aria-hidden="true" />
+</tng-button>

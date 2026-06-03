@@ -25,6 +25,7 @@ import type { CrudFilterField } from '../../../../../../shared/crud';
 import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
+import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import { JournalService, JournalStore } from '../../../data/journal';
 import type { Journal, JournalEntry } from '../../../data/journal';
 import { LedgerStore } from '../../../data/ledger';
@@ -58,6 +59,7 @@ type JournalTableRow = Readonly<{
     BulkUploadButtonComponent,
     TngTable,
     TngTableCellTpl,
+    TableRowIconButtonComponent,
   ],
   templateUrl: './list-journal.component.html',
   styleUrl: './list-journal.component.css',

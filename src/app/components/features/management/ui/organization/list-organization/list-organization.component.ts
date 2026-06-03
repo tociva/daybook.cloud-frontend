@@ -16,6 +16,7 @@ import {
 import type { CrudFilterField } from '../../../../../../shared/crud';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
+import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import { OrganizationStore } from '../../../data/organization';
 import type { Organization } from '../../../data/organization';
 
@@ -32,6 +33,7 @@ import type { Organization } from '../../../data/organization';
     EmptyStateComponent,
     TngTable,
     TngTableCellTpl,
+    TableRowIconButtonComponent,
   ],
   templateUrl: './list-organization.component.html',
   styleUrl: './list-organization.component.css',

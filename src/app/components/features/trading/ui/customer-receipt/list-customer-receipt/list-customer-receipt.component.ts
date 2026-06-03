@@ -17,6 +17,7 @@ import type { CrudFilterField } from '../../../../../../shared/crud';
 import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
+import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { formatAmountWithCurrency } from '../../../../../../shared/format/currency';
 import { CustomerReceiptStore } from '../../../data/customer-receipt';
@@ -35,6 +36,7 @@ import type { CustomerReceipt } from '../../../data/customer-receipt';
     EmptyStateComponent,
     TngTable,
     TngTableCellTpl,
+    TableRowIconButtonComponent,
     BulkUploadButtonComponent,
   ],
   templateUrl: './list-customer-receipt.component.html',

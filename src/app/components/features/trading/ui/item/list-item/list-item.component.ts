@@ -16,6 +16,7 @@ import {
 import type { CrudFilterField } from '../../../../../../shared/crud';
 import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
+import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { ItemStore } from '../../../data/item';
 import type { Item } from '../../../data/item';
@@ -32,6 +33,7 @@ import type { Item } from '../../../data/item';
     TngIcon,
     TngTable,
     TngTableCellTpl,
+    TableRowIconButtonComponent,
     BulkUploadButtonComponent,
   ],
   templateUrl: './list-item.component.html',

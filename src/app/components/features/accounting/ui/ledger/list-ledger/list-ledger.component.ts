@@ -23,6 +23,7 @@ import {
 import type { BulkUploadPreviewConfig } from '../../../../../../shared/bulk-upload';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
+import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import { LedgerStore } from '../../../data/ledger';
 import type { Ledger } from '../../../data/ledger';
 
@@ -43,6 +44,7 @@ const openingHeaderBorder =
     TngTable,
     TngTableCellTpl,
     BulkUploadButtonComponent,
+    TableRowIconButtonComponent,
   ],
   templateUrl: './list-ledger.component.html',
   styleUrl: './list-ledger.component.css',

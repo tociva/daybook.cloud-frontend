@@ -90,20 +90,22 @@
 
         <ng-template tngTableCellTemplate="actions" let-row="row">
           <div class="row-actions">
-            <button type="button" class="action-icon" aria-label="View tax" (click)="viewTax(row)">
-              <tng-icon icon="eye" aria-hidden="true" />
-            </button>
-            <button type="button" class="action-icon" aria-label="Edit tax" (click)="editTax(row)">
-              <tng-icon icon="pencil" aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              class="action-icon action-icon--danger"
-              aria-label="Delete tax"
-              (click)="deleteTax(row)"
-            >
-              <tng-icon icon="trash2" aria-hidden="true" />
-            </button>
+            <app-table-row-icon-button
+              icon="eye"
+              ariaLabel="View tax"
+              (action)="viewTax(row)"
+            />
+            <app-table-row-icon-button
+              icon="pencil"
+              ariaLabel="Edit tax"
+              (action)="editTax(row)"
+            />
+            <app-table-row-icon-button
+              icon="trash2"
+              ariaLabel="Delete tax"
+              tone="danger"
+              (action)="deleteTax(row)"
+            />
           </div>
         </ng-template>
       </tng-table>

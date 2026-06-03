@@ -133,39 +133,28 @@
 
           <ng-template tngTableCellTemplate="actions" let-row="row">
             <div class="row-actions">
-              <button
-                type="button"
-                class="action-icon"
-                aria-label="View sale invoice"
-                (click)="viewSaleInvoice(row)"
-              >
-                <tng-icon icon="eye" aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                class="action-icon"
-                aria-label="Edit sale invoice"
-                (click)="editSaleInvoice(row)"
-              >
-                <tng-icon icon="pencil" aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                class="action-icon"
-                aria-label="Download sale invoice PDF"
+              <app-table-row-icon-button
+                icon="eye"
+                ariaLabel="View sale invoice"
+                (action)="viewSaleInvoice(row)"
+              />
+              <app-table-row-icon-button
+                icon="pencil"
+                ariaLabel="Edit sale invoice"
+                (action)="editSaleInvoice(row)"
+              />
+              <app-table-row-icon-button
+                icon="download"
+                ariaLabel="Download sale invoice PDF"
                 [disabled]="previewingInvoiceId() === row.id"
-                (click)="previewInvoicePdf(row)"
-              >
-                <tng-icon icon="download" aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                class="action-icon action-icon--danger"
-                aria-label="Delete sale invoice"
-                (click)="deleteSaleInvoice(row)"
-              >
-                <tng-icon icon="trash2" aria-hidden="true" />
-              </button>
+                (action)="previewInvoicePdf(row)"
+              />
+              <app-table-row-icon-button
+                icon="trash2"
+                ariaLabel="Delete sale invoice"
+                tone="danger"
+                (action)="deleteSaleInvoice(row)"
+              />
             </div>
           </ng-template>
         </tng-table>
