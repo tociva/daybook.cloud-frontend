@@ -21,7 +21,7 @@
         <tng-button
           type="button"
           (click)="onRefresh()"
-          [disabled]="isLoading()"
+          [disabled]="isReportLoading()"
           kind="secondary"
         >
           <tng-icon icon="refresh-cw" />
@@ -36,85 +36,37 @@
     @if (hasError()) {
       <div class="error-message">
         <tng-icon icon="alert-circle" />
-        {{ error() }}
+        {{ displayError() }}
       </div>
     }
 
-    @if (isLoading()) {
-      <div class="loading-message">
-        <tng-icon icon="loader" class="spinning" />
-        Loading trial balance...
-      </div>
-    }
-
-    @if (!isLoading() && !hasError() && trialBalanceData().length > 0) {
+    @if (!hasError()) {
       <div class="table-wrapper">
-        <tng-table
+        <tng-tree-table
           ariaLabel="Trial Balance Report"
           density="comfortable"
           [columns]="columns"
-          [items]="trialBalanceData()"
-          [loading]="isLoading()"
-          [error]="hasError()"
-          [sortActive]="sortActive()"
-          [sortDirection]="sortDirection()"
-          (sortChange)="onSortChange($event)"
-        >
-          <ng-template tngTableCellTemplate="name" let-row="row">
-            <span class="ledger-name">{{ row.name }}</span>
-          </ng-template>
-
-          <ng-template tngTableCellTemplate="openingDebit" let-row="row">
-            <span class="amount" [class.positive]="row.openingDebit">
-              {{ formatAmount(row.openingDebit) }}
-            </span>
-          </ng-template>
-
-          <ng-template tngTableCellTemplate="openingCredit" let-row="row">
-            <span class="amount" [class.positive]="row.openingCredit">
-              {{ formatAmount(row.openingCredit) }}
-            </span>
-          </ng-template>
-
-          <ng-template tngTableCellTemplate="runningDebit" let-row="row">
-            <span class="amount" [class.positive]="row.runningDebit">
-              {{ formatAmount(row.runningDebit) }}
-            </span>
-          </ng-template>
-
-          <ng-template tngTableCellTemplate="runningCredit" let-row="row">
-            <span class="amount" [class.positive]="row.runningCredit">
-              {{ formatAmount(row.runningCredit) }}
-            </span>
-          </ng-template>
-
-          <ng-template tngTableCellTemplate="closingDebit" let-row="row">
-            <span class="amount" [class.positive]="row.closingDebit">
-              {{ formatAmount(row.closingDebit) }}
-            </span>
-          </ng-template>
-
-          <ng-template tngTableCellTemplate="closingCredit" let-row="row">
-            <span class="amount" [class.positive]="row.closingCredit">
-              {{ formatAmount(row.closingCredit) }}
-            </span>
-          </ng-template>
-        </tng-table>
+          [data]="trialBalanceTreeData()"
+          [loading]="isReportLoading()"
+          loadingText="Loading trial balance..."
+          emptyText="No ledger categories found."
+          treeColumnKey="name"
+          [expandOnRowClick]="true"
+          [expandedKeys]="expandedKeys()"
+          [getKey]="getTreeRowKey"
+          [getChildren]="getTreeRowChildren"
+          [rowClass]="getTreeRowClass"
+          (expandedKeysChange)="onExpandedKeysChange($event)"
+        />
       </div>
 
-      <div class="report-footer">
-        <div class="updated-info">
-          Last updated: {{ updatedAt() | date: 'short' }}
+      @if (!isReportLoading() && updatedAt()) {
+        <div class="report-footer">
+          <div class="updated-info">
+            Last updated: {{ updatedAt() | date: 'short' }}
+          </div>
         </div>
-      </div>
-    }
-
-    @if (!isLoading() && !hasError() && trialBalanceData().length === 0) {
-      <app-empty-state
-        icon="fileText"
-        title="No Trial Balance Data"
-        description="No ledger entries found for the selected period."
-      />
+      }
     }
   </tng-card>
 </div>

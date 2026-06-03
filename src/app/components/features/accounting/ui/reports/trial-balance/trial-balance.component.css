@@ -61,53 +61,46 @@
   font-size: 0.875rem;
 }
 
-.loading-message {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  padding: 2rem;
-  color: var(--color-text-secondary);
-  font-size: 0.875rem;
-}
-
-.spinning {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .table-wrapper {
   overflow-x: auto;
   margin: 0 -1rem;
 }
 
-.trial-balance-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.ledger-name {
-  font-weight: 500;
+:host ::ng-deep .trial-balance-name-cell {
   color: var(--color-text-primary);
+  min-width: 18rem;
 }
 
-.amount {
+:host ::ng-deep .trial-balance-category-cell {
+  font-weight: 650;
+}
+
+:host ::ng-deep .trial-balance-ledger-cell {
   color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+:host ::ng-deep .trial-balance-total-row .tng-tree-table__cell,
+:host ::ng-deep .trial-balance-total-cell {
+  background: color-mix(
+    in srgb,
+    var(--tng-semantic-background-surface) 70%,
+    var(--tng-semantic-background-base) 30%
+  );
+  border-top: 1px solid var(--tng-semantic-border-subtle);
+  color: var(--color-text-primary);
+  font-weight: 700;
+}
+
+:host ::ng-deep .trial-balance-amount-cell {
+  color: var(--color-text-primary);
   font-family: 'Menlo', 'Monaco', monospace;
   font-size: 0.875rem;
+  min-width: 10rem;
 }
 
-.amount.positive {
-  color: var(--color-text-primary);
-  font-weight: 500;
+:host ::ng-deep .trial-balance-ledger-cell.trial-balance-amount-cell {
+  color: var(--color-text-secondary);
 }
 
 .report-footer {
