@@ -1,15 +1,21 @@
-<tng-paginator
-  class="compact-paginator"
-  size="sm"
-  [ariaLabel]="ariaLabel()"
-  [pageIndex]="pageIndex()"
-  [pageSize]="pageSize()"
-  [totalItems]="totalItems()"
-  [pageSizeOptions]="pageSizeOptions()"
-  [showFirstLast]="showFirstLast()"
-  [showPageSize]="showPageSize()"
-  [showRange]="showRange()"
-  [maxPageButtons]="maxPageButtons()"
-  (pageIndexChange)="onPageIndexChange($event)"
-  (pageSizeChange)="onPageSizeChange($event)"
-/>
+<div class="compact-paginator-shell">
+  @if (showRange()) {
+    <span class="crud-paginator__range">{{ rangeLabel() }}</span>
+  }
+
+  <tng-paginator
+    class="compact-paginator"
+    size="sm"
+    [ariaLabel]="ariaLabel()"
+    [pageIndex]="pageIndex()"
+    [pageSize]="pageSize()"
+    [totalItems]="totalItems()"
+    [pageSizeOptions]="pageSizeOptions()"
+    [showFirstLast]="showFirstLast()"
+    [showPageSize]="showPageSize()"
+    [showRange]="false"
+    [maxPageButtons]="maxPageButtons()"
+    (pageIndexChange)="onPageIndexChange($event)"
+    (pageSizeChange)="onPageSizeChange($event)"
+  />
+</div>

@@ -1,6 +1,23 @@
 :host {
   display: flex;
   justify-content: flex-end;
+  width: 100%;
+}
+
+.compact-paginator-shell {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.crud-paginator__range {
+  color: var(--tng-semantic-foreground-secondary);
+  font-size: 0.875rem;
+  line-height: 1.25;
+  min-width: max-content;
 }
 
 .compact-paginator {

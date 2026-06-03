@@ -52,7 +52,9 @@ export class CrudApiService {
   async count(endpointPath: string, query: Lb4ListQuery = {}): Promise<number> {
     const where = query.where;
     const params =
-      where === undefined ? undefined : new HttpParams().set('where', JSON.stringify(where));
+      where === undefined
+        ? undefined
+        : new HttpParams().set('filter', JSON.stringify({ where }));
     const result = await this.api.get<Lb4Count>(`${await this.collectionUrl(endpointPath)}/count`, {
       ...(params ? { params } : {}),
     });

@@ -15,3 +15,7 @@ body {
     'Segoe UI',
     sans-serif;
 }
+
+tng-table .tng-table__cell[data-align='end'] > .row-actions {
+  justify-content: flex-end;
+}

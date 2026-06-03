@@ -158,6 +158,7 @@
             ariaLabel="Journal pagination"
             [filter]="crudQuery.filter()"
             [totalItems]="journalStore.count()"
+            [unfilteredTotalItems]="unfilteredJournalCount()"
             [pageSizeOptions]="crudQuery.pageSizeOptions()"
             syncUrl
           />

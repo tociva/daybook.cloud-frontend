@@ -25,7 +25,7 @@ import type { CrudFilterField } from '../../../../../../shared/crud';
 import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
-import { JournalStore } from '../../../data/journal';
+import { JournalService, JournalStore } from '../../../data/journal';
 import type { Journal, JournalEntry } from '../../../data/journal';
 import { LedgerStore } from '../../../data/ledger';
 import type { Ledger } from '../../../data/ledger';
@@ -67,14 +67,17 @@ type JournalTableRow = Readonly<{
 export class ListJournalComponent {
   private readonly router = inject(Router);
   protected readonly crudQuery = inject(CrudListQueryService);
+  private readonly journalService = inject(JournalService);
   protected readonly journalStore = inject(JournalStore);
   private readonly ledgerService = inject(LedgerService);
   private readonly ledgerStore = inject(LedgerStore);
   protected readonly hasError = computed(() => this.journalStore.error() !== null);
+  protected readonly unfilteredJournalCount = signal<number | null>(null);
 
   /** Local map of ledger id → name, populated after each journal page load. */
   private readonly ledgerNames = signal(new Map<string, string>());
   private ledgerNameFetchVersion = 0;
+  private unfilteredJournalCountFetchVersion = 0;
 
   protected readonly columns: readonly TngTableColumn<JournalTableRow>[] = [
     {
@@ -155,6 +158,7 @@ export class ListJournalComponent {
         order: filter.order?.length ? filter.order : (['date DESC'] as const),
       };
       void this.journalStore.loadJournals(query);
+      void this.refreshUnfilteredJournalCount(filter);
     });
 
     // After journals load, fetch only the specific ledger IDs visible on this page.
@@ -167,6 +171,27 @@ export class ListJournalComponent {
       if (!ids.length) return;
       void untracked(() => this.fetchLedgerNames(ids));
     });
+  }
+
+  private async refreshUnfilteredJournalCount(
+    filter: { where?: Record<string, unknown> },
+  ): Promise<void> {
+    const fetchVersion = ++this.unfilteredJournalCountFetchVersion;
+    const hasActiveFilter = Object.keys(filter.where ?? {}).length > 0;
+
+    if (!hasActiveFilter) {
+      this.unfilteredJournalCount.set(null);
+      return;
+    }
+
+    try {
+      const count = await this.journalService.count({});
+      if (fetchVersion !== this.unfilteredJournalCountFetchVersion) return;
+      this.unfilteredJournalCount.set(count);
+    } catch {
+      if (fetchVersion !== this.unfilteredJournalCountFetchVersion) return;
+      this.unfilteredJournalCount.set(null);
+    }
   }
 
   private async fetchLedgerNames(ids: readonly string[]): Promise<void> {
