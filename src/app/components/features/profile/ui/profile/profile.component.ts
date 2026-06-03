@@ -1,5 +1,4 @@
 import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
-import { form } from '@angular/forms/signals';
 import {
   TngAvatarComponent,
   TngButtonComponent,
@@ -18,7 +17,6 @@ import { UserSessionStore } from '../../../management/data/user-session/user-ses
 import { UserProfileService } from '../../data/user-profile.service';
 
 type AppearanceFormModel = {
-  ledgerCacheEnabled: boolean;
   mode: 'light' | 'dark';
   themeName: AppThemeName;
 };
@@ -58,25 +56,26 @@ export class ProfileComponent implements OnDestroy {
 
   protected readonly userEmail = computed(() => this.userSessionStore.session()?.email ?? '');
 
-  private readonly savedMode: 'light' | 'dark' = this.themeStore.darkMode() ? 'dark' : 'light';
-  private readonly savedThemeName: AppThemeName = this.themeStore.themeName();
-  private readonly savedLedgerCacheEnabled = this.ledgerCachePrefs.enabled();
-  private committed = false;
+  private savedMode: 'light' | 'dark' = this.themeStore.darkMode() ? 'dark' : 'light';
+  private savedThemeName: AppThemeName = this.themeStore.themeName();
+  private savedLedgerCacheEnabled = this.ledgerCachePrefs.enabled();
 
   protected readonly appearanceModel = signal<AppearanceFormModel>({
-    ledgerCacheEnabled: this.savedLedgerCacheEnabled,
     mode: this.savedMode,
     themeName: this.savedThemeName,
   });
-  protected readonly appearanceForm = form(this.appearanceModel);
+  protected readonly ledgerCacheEnabled = signal(this.savedLedgerCacheEnabled);
 
   protected readonly draftMode = computed(() => this.appearanceModel().mode);
   protected readonly draftThemeName = computed(() => this.appearanceModel().themeName);
-  protected readonly draftLedgerCacheEnabled = computed(() => this.appearanceModel().ledgerCacheEnabled);
+  protected readonly draftLedgerCacheEnabled = computed(() => this.ledgerCacheEnabled());
 
-  protected readonly isSaving = signal(false);
-  protected readonly saveSuccess = signal(false);
-  protected readonly saveError = signal<string | null>(null);
+  protected readonly isSavingAppearance = signal(false);
+  protected readonly appearanceSaveSuccess = signal(false);
+  protected readonly appearanceSaveError = signal<string | null>(null);
+  protected readonly isSavingLedgerCache = signal(false);
+  protected readonly ledgerCacheSaveSuccess = signal(false);
+  protected readonly ledgerCacheSaveError = signal<string | null>(null);
 
   protected readonly themeOptions: ThemeOption[] = THEME_OPTIONS;
   protected readonly getThemeLabel = (opt: ThemeOption) => opt.label;
@@ -87,26 +86,47 @@ export class ProfileComponent implements OnDestroy {
     const mode = value === 'dark' ? 'dark' : 'light';
     this.appearanceModel.update((m) => ({ ...m, mode }));
     this.themeStore.setDarkMode(mode === 'dark');
-    this.saveError.set(null);
+    this.appearanceSaveError.set(null);
   }
 
   protected onThemeChange(value: unknown): void {
     const themeName = this.resolveThemeName(value);
     if (themeName === null) {
-      this.saveError.set('Select a valid theme.');
+      this.appearanceSaveError.set('Select a valid theme.');
       return;
     }
 
     this.appearanceModel.update((m) => ({ ...m, themeName }));
     this.themeStore.setThemeName(themeName);
-    this.saveError.set(null);
+    this.appearanceSaveError.set(null);
   }
 
-  protected onLedgerCacheChange(value: unknown): void {
+  protected async onLedgerCacheChange(value: unknown): Promise<void> {
     const enabled = !!value;
-    this.appearanceModel.update((m) => ({ ...m, ledgerCacheEnabled: enabled }));
+    if (enabled === this.ledgerCacheEnabled() || this.isSavingLedgerCache()) return;
+
+    const previousValue = this.ledgerCacheEnabled();
+    this.ledgerCacheEnabled.set(enabled);
     this.ledgerCachePrefs.setEnabled(enabled);
-    this.saveError.set(null);
+    this.isSavingLedgerCache.set(true);
+    this.ledgerCacheSaveSuccess.set(false);
+    this.ledgerCacheSaveError.set(null);
+
+    try {
+      await this.userProfileService.updateProfile({ ledgerCache: enabled });
+      this.ledgerCachePrefs.commit();
+      this.savedLedgerCacheEnabled = enabled;
+      this.ledgerCacheSaveSuccess.set(true);
+      setTimeout(() => this.ledgerCacheSaveSuccess.set(false), 2500);
+    } catch (err) {
+      this.ledgerCacheEnabled.set(previousValue);
+      this.ledgerCachePrefs.setEnabled(previousValue);
+      this.ledgerCacheSaveError.set(
+        err instanceof Error ? err.message : 'Failed to save cache settings.',
+      );
+    } finally {
+      this.isSavingLedgerCache.set(false);
+    }
   }
 
   private resolveThemeName(value: unknown): AppThemeName | null {
@@ -122,39 +142,36 @@ export class ProfileComponent implements OnDestroy {
 
   protected async submitAppearance(event: SubmitEvent): Promise<void> {
     event.preventDefault();
-    if (this.isSaving()) return;
+    if (this.isSavingAppearance()) return;
 
-    const { mode, themeName, ledgerCacheEnabled } = this.appearanceModel();
+    const { mode, themeName } = this.appearanceModel();
 
-    this.isSaving.set(true);
-    this.saveSuccess.set(false);
-    this.saveError.set(null);
+    this.isSavingAppearance.set(true);
+    this.appearanceSaveSuccess.set(false);
+    this.appearanceSaveError.set(null);
 
     try {
       await this.userProfileService.updateProfile({
         mode,
         theme: themeName,
-        ledgerCache: ledgerCacheEnabled,
       });
 
       this.themeStore.commitTheme();
-      this.ledgerCachePrefs.commit();
-      this.committed = true;
+      this.savedMode = mode;
+      this.savedThemeName = themeName;
 
-      this.saveSuccess.set(true);
-      setTimeout(() => this.saveSuccess.set(false), 2500);
+      this.appearanceSaveSuccess.set(true);
+      setTimeout(() => this.appearanceSaveSuccess.set(false), 2500);
     } catch (err) {
-      this.saveError.set(err instanceof Error ? err.message : 'Failed to save appearance.');
+      this.appearanceSaveError.set(err instanceof Error ? err.message : 'Failed to save appearance.');
     } finally {
-      this.isSaving.set(false);
+      this.isSavingAppearance.set(false);
     }
   }
 
   ngOnDestroy(): void {
-    if (!this.committed) {
-      this.themeStore.setDarkMode(this.savedMode === 'dark');
-      this.themeStore.setThemeName(this.savedThemeName);
-      this.ledgerCachePrefs.setEnabled(this.savedLedgerCacheEnabled);
-    }
+    this.themeStore.setDarkMode(this.savedMode === 'dark');
+    this.themeStore.setThemeName(this.savedThemeName);
+    this.ledgerCachePrefs.setEnabled(this.savedLedgerCacheEnabled);
   }
 }

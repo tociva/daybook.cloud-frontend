@@ -80,16 +80,35 @@
         </tng-form-field>
 
         <!-- Error -->
-        @if (saveError()) {
+        @if (appearanceSaveError()) {
           <p class="form-error" role="alert">
             <tng-icon icon="circle-alert" aria-hidden="true" />
-            {{ saveError() }}
+            {{ appearanceSaveError() }}
+          </p>
+        }
+
+        @if (ledgerCacheSaveError()) {
+          <p class="form-error" role="alert">
+            <tng-icon icon="circle-alert" aria-hidden="true" />
+            {{ ledgerCacheSaveError() }}
           </p>
         }
 
         <!-- Actions -->
         <div class="form-actions">
-          @if (saveSuccess()) {
+          @if (ledgerCacheSaveSuccess()) {
+            <span class="save-feedback" role="status">
+              <tng-icon icon="check" aria-hidden="true" />
+              Cache updated
+            </span>
+          }
+          @if (isSavingLedgerCache()) {
+            <span class="save-feedback" role="status">
+              <tng-icon icon="loader-circle" aria-hidden="true" class="spin" />
+              Saving cache
+            </span>
+          }
+          @if (appearanceSaveSuccess()) {
             <span class="save-feedback" role="status">
               <tng-icon icon="check" aria-hidden="true" />
               Appearance updated
@@ -99,14 +118,14 @@
             type="submit"
             appearance="solid"
             tone="primary"
-            [disabled]="isSaving()"
+            [disabled]="isSavingAppearance()"
           >
-            @if (isSaving()) {
+            @if (isSavingAppearance()) {
               <tng-icon icon="loader-circle" aria-hidden="true" class="spin" />
               Saving…
             } @else {
               <tng-icon icon="save" aria-hidden="true" />
-              Update
+              Update appearance
             }
           </tng-button>
         </div>

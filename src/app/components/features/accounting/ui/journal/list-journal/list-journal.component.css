@@ -95,46 +95,28 @@ h1 {
   padding: 0;
 }
 
-/* ── Journal table ─────────────────────────────────────── */
-
-.table-wrap {
-  overflow-x: auto;
-}
-
 .journal-table {
-  border-collapse: collapse;
-  table-layout: fixed;
-  width: 100%;
-  min-width: 52rem;
+  display: block;
+  --journal-row-hover-bg: color-mix(in srgb, var(--tng-semantic-accent-brand) 10%, var(--tng-semantic-background-surface));
+  --journal-row-alt-bg: color-mix(in srgb, var(--tng-semantic-background-base) 35%, var(--tng-semantic-background-surface));
+  --journal-row-alt-hover-bg: color-mix(in srgb, var(--tng-semantic-accent-brand) 10%, var(--journal-row-alt-bg));
+  --tng-table-row-hover-bg: var(--journal-row-hover-bg);
 }
 
-.col-number    { width: 11rem; }
-.col-date      { width: 9rem; }
-.col-ledger    { width: 15rem; }
-.col-amount    { width: 9rem; }
-/* col-description takes remaining space */
-.col-actions   { width: 8rem; }
-
-.journal-table th,
-.journal-table td {
-  border-bottom: 1px solid var(--tng-semantic-border-subtle);
-  padding: 0.55rem 0.75rem;
-  text-align: left;
-  vertical-align: top;
+/* Set CSS variables on the <tr> so they inherit into the cells via the
+   tng-table built-in rules (--tng-table-row-bg / --tng-table-row-hover-bg). */
+:host ::ng-deep .journal-table tr.journal-row--alt {
+  --tng-table-row-bg: var(--journal-row-alt-bg);
+  --tng-table-row-hover-bg: var(--journal-row-alt-hover-bg);
 }
 
-.journal-table th {
-  background: var(--tng-semantic-background-muted);
-  color: var(--tng-semantic-foreground-muted);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  white-space: nowrap;
+.journal-cell {
+  display: block;
+  min-height: 1.35em;
 }
 
-.align-end {
-  text-align: end;
+.row-actions.journal-cell {
+  display: flex;
 }
 
 .num {
@@ -147,37 +129,6 @@ h1 {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-/* Blank separator row between journals */
-.spacer-row td {
-  border-bottom: none;
-  height: 0.65rem;
-  padding: 0;
-}
-
-/* Loading skeleton */
-.loading-row td {
-  padding: 0.65rem 0.75rem;
-}
-
-.skeleton {
-  animation: skeleton-shimmer 1.4s ease-in-out infinite;
-  background: linear-gradient(
-    90deg,
-    var(--tng-semantic-background-muted) 25%,
-    var(--tng-semantic-border-subtle) 50%,
-    var(--tng-semantic-background-muted) 75%
-  );
-  background-size: 200% 100%;
-  border-radius: 0.25rem;
-  height: 0.85rem;
-  width: 70%;
-}
-
-@keyframes skeleton-shimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
 }
 
 /* ── Responsive ────────────────────────────────────────── */
