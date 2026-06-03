@@ -12,6 +12,7 @@ import {
   TngButtonComponent,
   TngCardComponent,
   TngTreeTable,
+  TngTreeTableCellTpl,
 } from '@tailng-ui/components';
 import type { TngTreeTableColumn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
@@ -64,6 +65,7 @@ const amountCellClass = (row: LedgerTreeRow): string =>
     TngCardComponent,
     TngIcon,
     TngTreeTable,
+    TngTreeTableCellTpl,
     EmptyStateComponent,
   ],
   templateUrl: './tree-view-ledger.component.html',
@@ -76,6 +78,7 @@ export class TreeViewLedgerComponent implements OnInit {
   protected readonly ledgerCategoryStore = inject(LedgerCategoryStore);
 
   protected readonly expandedKeys = signal<readonly string[]>([]);
+  private readonly expandedKeySet = computed(() => new Set(this.expandedKeys()));
   protected readonly displayError = computed(
     () => this.ledgerCategoryStore.error() ?? this.ledgerStore.error(),
   );
@@ -138,6 +141,10 @@ export class TreeViewLedgerComponent implements OnInit {
       });
     }
 
+    for (const row of rootRows) {
+      this.rollUpOpeningAmounts(row);
+    }
+
     return rootRows;
   });
 
@@ -179,7 +186,8 @@ export class TreeViewLedgerComponent implements OnInit {
         {
           key: 'openingdr',
           label: 'Debit',
-          accessor: (row) => formatAmount(row.openingdr),
+          accessor: (row) =>
+            this.shouldHideBranchOpening(row) ? '' : formatAmount(row.openingdr),
           align: 'end',
           width: '10rem',
           cellClass: amountCellClass,
@@ -187,7 +195,8 @@ export class TreeViewLedgerComponent implements OnInit {
         {
           key: 'openingcr',
           label: 'Credit',
-          accessor: (row) => formatAmount(row.openingcr),
+          accessor: (row) =>
+            this.shouldHideBranchOpening(row) ? '' : formatAmount(row.openingcr),
           align: 'end',
           width: '10rem',
           cellClass: amountCellClass,
@@ -204,6 +213,18 @@ export class TreeViewLedgerComponent implements OnInit {
       key: 'description',
       label: 'Description',
       minWidth: '16rem',
+      headerStyle: {
+        'border-inline-end': softColumnBorder,
+      },
+      cellStyle: {
+        'border-inline-end': softColumnBorder,
+      },
+    },
+    {
+      key: 'actions',
+      label: 'Actions',
+      align: 'end',
+      width: '8rem',
     },
   ];
 
@@ -231,6 +252,61 @@ export class TreeViewLedgerComponent implements OnInit {
 
   protected onRefresh(): void {
     void this.loadReferenceData();
+  }
+
+  protected shouldShowRowActions(row: LedgerTreeRow): boolean {
+    return row.key !== 'category:uncategorized';
+  }
+
+  protected viewLedger(row: LedgerTreeRow): void {
+    const ledger = this.findLedger(row);
+    if (!ledger?.id) return;
+    this.ledgerStore.setSelectedItem(ledger);
+    void this.router.navigate(['/app/accounting/ledger', ledger.id], {
+      queryParams: { burl: this.router.url },
+    });
+  }
+
+  protected editLedger(row: LedgerTreeRow): void {
+    const ledger = this.findLedger(row);
+    if (!ledger?.id) return;
+    this.ledgerStore.setSelectedItem(ledger);
+    void this.router.navigate(['/app/accounting/ledger', ledger.id, 'edit'], {
+      queryParams: { burl: this.router.url },
+    });
+  }
+
+  protected deleteLedger(row: LedgerTreeRow): void {
+    const ledger = this.findLedger(row);
+    if (!ledger?.id) return;
+    this.ledgerStore.setSelectedItem(ledger);
+    void this.router.navigate(['/app/accounting/ledger', ledger.id, 'delete'], {
+      queryParams: { burl: this.router.url },
+    });
+  }
+
+  protected viewLedgerCategory(row: LedgerTreeRow): void {
+    const categoryId = this.categoryIdFromRow(row);
+    if (!categoryId) return;
+    void this.router.navigate(['/app/accounting/ledger-category', categoryId], {
+      queryParams: { burl: this.router.url },
+    });
+  }
+
+  protected editLedgerCategory(row: LedgerTreeRow): void {
+    const categoryId = this.categoryIdFromRow(row);
+    if (!categoryId) return;
+    void this.router.navigate(['/app/accounting/ledger-category', categoryId, 'edit'], {
+      queryParams: { burl: this.router.url },
+    });
+  }
+
+  protected deleteLedgerCategory(row: LedgerTreeRow): void {
+    const categoryId = this.categoryIdFromRow(row);
+    if (!categoryId) return;
+    void this.router.navigate(['/app/accounting/ledger-category', categoryId, 'delete'], {
+      queryParams: { burl: this.router.url },
+    });
   }
 
   protected readonly getTreeRowKey = (row: LedgerTreeRow): string => row.key;
@@ -267,6 +343,42 @@ export class TreeViewLedgerComponent implements OnInit {
       openingcr: toAmount(ledger.openingcr),
       openingdr: toAmount(ledger.openingdr),
     };
+  }
+
+  private findLedger(row: LedgerTreeRow): Ledger | undefined {
+    if (row.kind !== 'ledger') return undefined;
+    const ledgerId = row.key.startsWith('ledger:') ? row.key.slice('ledger:'.length) : null;
+    if (!ledgerId) return undefined;
+    return this.ledgerStore.items().find((ledger) => ledger.id === ledgerId);
+  }
+
+  private categoryIdFromRow(row: LedgerTreeRow): string | null {
+    if (row.kind !== 'category') return null;
+    if (!row.key.startsWith('category:')) return null;
+    const categoryId = row.key.slice('category:'.length);
+    return categoryId && categoryId !== 'uncategorized' ? categoryId : null;
+  }
+
+  private shouldHideBranchOpening(row: LedgerTreeRow): boolean {
+    return row.kind === 'category' && row.children.length > 0 && this.expandedKeySet().has(row.key);
+  }
+
+  private rollUpOpeningAmounts(row: LedgerTreeRow): { openingcr: number; openingdr: number } {
+    if (row.kind === 'ledger') {
+      return { openingcr: row.openingcr, openingdr: row.openingdr };
+    }
+
+    let openingcr = 0;
+    let openingdr = 0;
+    for (const child of row.children) {
+      const childTotals = this.rollUpOpeningAmounts(child);
+      openingcr += childTotals.openingcr;
+      openingdr += childTotals.openingdr;
+    }
+
+    row.openingcr = openingcr;
+    row.openingdr = openingdr;
+    return { openingcr, openingdr };
   }
 
   private async loadReferenceData(): Promise<void> {

@@ -15,8 +15,8 @@
       Refresh
     </tng-button>
 
-    <tng-button type="button" appearance="outline" tone="neutral" (click)="createLedgerCategory()">
-      <tng-icon icon="layers" aria-hidden="true" />
+    <tng-button type="button" appearance="solid" tone="primary" (click)="createLedgerCategory()">
+      <tng-icon icon="plus" aria-hidden="true" />
       New Ledger Category
     </tng-button>
 
@@ -60,7 +60,83 @@
             [getChildren]="getTreeRowChildren"
             [rowClass]="getTreeRowClass"
             (expandedKeysChange)="onExpandedKeysChange($event)"
-          />
+          >
+            <ng-template tngTreeTableCellTemplate="actions" let-row="row">
+              @if (shouldShowRowActions(row)) {
+                <div class="row-actions" (click)="$event.stopPropagation()">
+                  @if (row.kind === 'ledger') {
+                    <tng-button
+                      class="row-action-btn"
+                      type="button"
+                      appearance="ghost"
+                      tone="neutral"
+                      size="sm"
+                      aria-label="View ledger"
+                      (click)="viewLedger(row)"
+                    >
+                      <tng-icon icon="eye" aria-hidden="true" />
+                    </tng-button>
+                    <tng-button
+                      class="row-action-btn"
+                      type="button"
+                      appearance="ghost"
+                      tone="neutral"
+                      size="sm"
+                      aria-label="Edit ledger"
+                      (click)="editLedger(row)"
+                    >
+                      <tng-icon icon="pencil" aria-hidden="true" />
+                    </tng-button>
+                    <tng-button
+                      class="row-action-btn"
+                      type="button"
+                      appearance="ghost"
+                      tone="danger"
+                      size="sm"
+                      aria-label="Delete ledger"
+                      (click)="deleteLedger(row)"
+                    >
+                      <tng-icon icon="trash2" aria-hidden="true" />
+                    </tng-button>
+                  } @else {
+                    <tng-button
+                      class="row-action-btn"
+                      type="button"
+                      appearance="ghost"
+                      tone="neutral"
+                      size="sm"
+                      aria-label="View ledger category"
+                      (click)="viewLedgerCategory(row)"
+                    >
+                      <tng-icon icon="eye" aria-hidden="true" />
+                    </tng-button>
+                    <tng-button
+                      class="row-action-btn"
+                      type="button"
+                      appearance="ghost"
+                      tone="neutral"
+                      size="sm"
+                      aria-label="Edit ledger category"
+                      (click)="editLedgerCategory(row)"
+                    >
+                      <tng-icon icon="pencil" aria-hidden="true" />
+                    </tng-button>
+                    <tng-button
+                      class="row-action-btn"
+                      type="button"
+                      appearance="ghost"
+                      tone="danger"
+                      size="sm"
+                      aria-label="Delete ledger category"
+                      (click)="deleteLedgerCategory(row)"
+                    >
+                      <tng-icon icon="trash2" aria-hidden="true" />
+                    </tng-button>
+                  }
+                </div>
+              }
+            </ng-template>
+          </tng-tree-table>
         </div>
       }
     }
