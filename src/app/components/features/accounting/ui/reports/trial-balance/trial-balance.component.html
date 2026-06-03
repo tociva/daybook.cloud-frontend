@@ -1,47 +1,42 @@
-<div class="trial-balance-container">
-  <div class="page-header-row">
-    <app-page-heading
-      title="Trial Balance Report"
-      subtitle="Ledger balances for the selected period"
-    >
-    </app-page-heading>
-
-    <div class="filter-section">
-      <div class="filter-controls">
-        <div class="date-filter">
-          <app-fiscal-year-date-range-picker
-            id="date-range"
-            placeholder="Select report period"
-            [fullWidth]="false"
-            [value]="pickerValue()"
-            (valueChange)="onDateRangeChange($event)"
-            (closed)="onPickerClosed()"
-          />
-        </div>
-        <tng-button
-          type="button"
-          (click)="onRefresh()"
-          [disabled]="isReportLoading()"
-          kind="secondary"
-        >
-          <tng-icon icon="refresh-cw" />
-          Refresh
-        </tng-button>
-      </div>
+<main class="management-page">
+  <app-page-heading
+    eyebrow="Accounting"
+    title="Trial Balance Report"
+    description="Ledger balances for the selected period"
+  >
+    <div class="date-filter">
+      <app-fiscal-year-date-range-picker
+        id="date-range"
+        placeholder="Select report period"
+        [fullWidth]="false"
+        [value]="pickerValue()"
+        (valueChange)="onDateRangeChange($event)"
+        (closed)="onPickerClosed()"
+      />
     </div>
-  </div>
 
-  <tng-card class="trial-balance-card">
+    <tng-button
+      type="button"
+      appearance="outline"
+      tone="neutral"
+      (click)="onRefresh()"
+      [disabled]="isReportLoading()"
+    >
+      <tng-icon icon="refresh-cw" aria-hidden="true" />
+      Refresh
+    </tng-button>
+  </app-page-heading>
+
+  <tng-card variant="outline" padding="lg">
 
     @if (hasError()) {
-      <div class="error-message">
-        <tng-icon icon="alert-circle" />
+      <div class="notice notice--danger">
         {{ displayError() }}
       </div>
     }
 
     @if (!hasError()) {
-      <div class="table-wrapper">
+      <div class="table-stack">
         <tng-tree-table
           ariaLabel="Trial Balance Report"
           density="comfortable"
@@ -61,12 +56,12 @@
       </div>
 
       @if (!isReportLoading() && updatedAt()) {
-        <div class="report-footer">
+        <div class="table-footer">
           <div class="updated-info">
-            Last updated: {{ updatedAt() | date: 'short' }}
+            Last updated: {{ formatUpdatedAt(updatedAt()) }}
           </div>
         </div>
       }
     }
   </tng-card>
-</div>
+</main>

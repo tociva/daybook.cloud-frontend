@@ -81,11 +81,11 @@
         </ng-template>
 
         <ng-template tngTableCellTemplate="openingdr" let-row="row">
-          {{ row.openingdr }}
+          {{ row.openingdr === 0 ? '' : row.openingdr }}
         </ng-template>
 
         <ng-template tngTableCellTemplate="openingcr" let-row="row">
-          {{ row.openingcr }}
+          {{ row.openingcr === 0 ? '' : row.openingcr }}
         </ng-template>
 
         <ng-template tngTableCellTemplate="description" let-row="row">

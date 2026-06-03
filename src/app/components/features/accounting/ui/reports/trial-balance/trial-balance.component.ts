@@ -25,6 +25,7 @@ import {
   FiscalYearDateRangePickerComponent,
   FiscalYearDateRangeService,
 } from '../../../../../../shared/fiscal-year-date-range-picker';
+import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { TrialBalanceService } from '../../../data/trial-balance/trial-balance.service';
 import { LedgerStore } from '../../../data/ledger';
 import type { Ledger } from '../../../data/ledger';
@@ -104,6 +105,8 @@ const amountCellClass = (row: TrialBalanceTreeRow): string =>
 const reportCatalogPageSize = 1000;
 const softColumnBorder =
   '1px solid color-mix(in srgb, var(--tng-semantic-border-subtle) 72%, var(--tng-semantic-foreground-muted) 28%)';
+const ledgerColumnWidth = '28%';
+const amountColumnWidth = '12%';
 
 @Component({
   selector: 'app-trial-balance',
@@ -126,6 +129,7 @@ export class TrialBalanceComponent implements OnInit {
   private readonly ledgerStore = inject(LedgerStore);
   private readonly ledgerCategoryStore = inject(LedgerCategoryStore);
   private readonly fiscalYearDateRange = inject(FiscalYearDateRangeService);
+  private readonly dateManagement = inject(DateManagementService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
@@ -259,7 +263,7 @@ export class TrialBalanceComponent implements OnInit {
     {
       key: 'name',
       label: 'Ledger Category / Ledger',
-      width: '18rem',
+      width: ledgerColumnWidth,
       treeToggle: true,
       cellClass: rowNameClass,
       headerStyle: {
@@ -382,6 +386,9 @@ export class TrialBalanceComponent implements OnInit {
   protected readonly getTreeRowClass = (row: TrialBalanceTreeRow): string =>
     `trial-balance-${row.kind}-row`;
 
+  protected readonly formatUpdatedAt = (value: string | null | undefined): string =>
+    this.dateManagement.formatDisplayDateTime(value, '—');
+
   protected onExpandedKeysChange(keys: readonly unknown[]): void {
     this.expandedKeys.set(keys.filter((key): key is string => typeof key === 'string'));
   }
@@ -396,7 +403,7 @@ export class TrialBalanceComponent implements OnInit {
       label,
       accessor: (row) => (this.shouldHideBranchBalance(row) ? '' : formatAmount(row[key])),
       align: 'end',
-      width: '10rem',
+      width: amountColumnWidth,
       cellClass: amountCellClass,
       headerStyle: borderEnd ? { 'border-inline-end': softColumnBorder } : undefined,
       cellStyle: borderEnd ? { 'border-inline-end': softColumnBorder } : undefined,

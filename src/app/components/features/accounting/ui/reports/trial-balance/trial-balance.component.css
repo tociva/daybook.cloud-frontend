@@ -1,35 +1,7 @@
-.trial-balance-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  padding: 0;
-}
-
-.page-header-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-}
-
-.trial-balance-card {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.filter-section {
-  margin-left: auto;
-  display: flex;
-  align-items: flex-end;
-  gap: 1rem;
-  padding: 0;
-}
-
-.filter-controls {
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
-  gap: 1rem;
+.management-page {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.25rem;
 }
 
 .date-filter {
@@ -49,26 +21,33 @@
   width: 100%;
 }
 
-.error-message {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+.notice {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  color: var(--tng-semantic-foreground-primary);
   padding: 1rem;
-  background-color: var(--color-error-subtle);
-  border-left: 4px solid var(--color-error);
-  border-radius: 0.375rem;
-  color: var(--color-error);
-  font-size: 0.875rem;
 }
 
-.table-wrapper {
-  overflow-x: auto;
-  margin: 0 -1rem;
+.notice--danger {
+  border-color: var(--tng-semantic-accent-danger);
+}
+
+.table-stack {
+  display: grid;
+  gap: 1rem;
+}
+
+:host ::ng-deep .tng-tree-table {
+  table-layout: fixed;
 }
 
 :host ::ng-deep .trial-balance-name-cell {
   color: var(--color-text-primary);
-  min-width: 18rem;
+  min-width: 0;
+}
+
+:host ::ng-deep .trial-balance-name-cell .tng-tree-table__cell-content {
+  overflow-wrap: anywhere;
 }
 
 :host ::ng-deep .trial-balance-category-cell {
@@ -96,19 +75,23 @@
   color: var(--color-text-primary);
   font-family: 'Menlo', 'Monaco', monospace;
   font-size: 0.875rem;
-  min-width: 10rem;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+:host ::ng-deep .trial-balance-amount-cell .tng-tree-table__cell-content {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 :host ::ng-deep .trial-balance-ledger-cell.trial-balance-amount-cell {
   color: var(--color-text-secondary);
 }
 
-.report-footer {
+.table-footer {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding-top: 1rem;
-  border-top: 1px solid var(--color-border-subtle);
+  justify-content: flex-end;
   font-size: 0.75rem;
   color: var(--color-text-secondary);
 }
@@ -119,17 +102,9 @@
 }
 
 
-@media (max-width: 960px) {
-  .page-header-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .filter-section {
-    margin-left: 0;
-  }
-
-  .filter-controls {
-    justify-content: flex-start;
+@media (max-width: 700px) {
+  .date-filter {
+    max-width: none;
+    width: 100%;
   }
 }
