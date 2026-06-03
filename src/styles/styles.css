@@ -19,3 +19,34 @@ body {
 tng-table .tng-table__cell[data-align='end'] > .row-actions {
   justify-content: flex-end;
 }
+
+button.link-button {
+  appearance: none;
+  display: inline;
+  text-align: start;
+}
+
+main.management-page tng-table {
+  --app-list-table-row-hover-bg: color-mix(
+    in srgb,
+    var(--tng-semantic-accent-brand) 10%,
+    var(--tng-semantic-background-surface)
+  );
+  --app-list-table-row-alt-bg: color-mix(
+    in srgb,
+    var(--tng-semantic-background-muted) 45%,
+    var(--tng-semantic-background-surface)
+  );
+  --app-list-table-row-alt-hover-bg: color-mix(
+    in srgb,
+    var(--tng-semantic-accent-brand) 14%,
+    var(--app-list-table-row-alt-bg)
+  );
+  --tng-table-row-hover-bg: var(--app-list-table-row-hover-bg);
+}
+
+main.management-page tng-table:not(.journal-table) .tng-table tbody tr:nth-child(even),
+main.management-page tng-table.journal-table .tng-table tbody tr.journal-row--alt {
+  --tng-table-row-bg: var(--app-list-table-row-alt-bg);
+  --tng-table-row-hover-bg: var(--app-list-table-row-alt-hover-bg);
+}

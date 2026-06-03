@@ -26,6 +26,9 @@ import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { LedgerStore } from '../../../data/ledger';
 import type { Ledger } from '../../../data/ledger';
 
+const openingHeaderBorder =
+  '1px solid color-mix(in srgb, var(--tng-semantic-border-subtle) 70%, var(--tng-semantic-foreground-muted) 30%)';
+
 @Component({
   selector: 'app-list-ledger',
   standalone: true,
@@ -83,25 +86,59 @@ export class ListLedgerComponent {
   };
 
   protected readonly columns: readonly TngTableColumn<Ledger>[] = [
-    { id: 'name', label: 'Name', sortable: true, width: '14rem' },
+    {
+      id: 'name',
+      label: 'Name',
+      sortable: true,
+      width: '14rem',
+      headerStyle: {
+        'border-inline-end': openingHeaderBorder,
+      },
+    },
     { id: 'category', label: 'Category', width: '12rem' },
     {
-      id: 'openingdr',
-      label: 'Opening DR',
-      sortable: true,
-      width: '10rem',
-      align: 'end',
-      headerAlign: 'end',
+      id: 'opening',
+      label: 'Opening',
+      headerAlign: 'center',
+      headerStyle: {
+        'border-block-end': '0',
+        'border-inline-start': openingHeaderBorder,
+        'border-inline-end': openingHeaderBorder,
+      },
+      children: [
+        {
+          id: 'openingdr',
+          label: 'Debit',
+          sortable: true,
+          width: '10rem',
+          align: 'end',
+          headerAlign: 'end',
+          headerStyle: {
+            'border-inline-start': openingHeaderBorder,
+          },
+        },
+        {
+          id: 'openingcr',
+          label: 'Credit',
+          sortable: true,
+          width: '10rem',
+          align: 'end',
+          headerAlign: 'end',
+          headerStyle: {
+            'border-inline-end': openingHeaderBorder,
+          },
+        },
+      ],
     },
     {
-      id: 'openingcr',
-      label: 'Opening CR',
+      id: 'description',
+      label: 'Description',
       sortable: true,
-      width: '10rem',
-      align: 'end',
-      headerAlign: 'end',
+      truncate: true,
+      headerStyle: {
+        'border-inline-end': openingHeaderBorder,
+      },
     },
-    { id: 'description', label: 'Description', sortable: true, truncate: true },
     { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '8rem' },
   ];
 

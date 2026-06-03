@@ -97,17 +97,6 @@ h1 {
 
 .journal-table {
   display: block;
-  --journal-row-hover-bg: color-mix(in srgb, var(--tng-semantic-accent-brand) 10%, var(--tng-semantic-background-surface));
-  --journal-row-alt-bg: color-mix(in srgb, var(--tng-semantic-background-muted) 45%, var(--tng-semantic-background-surface));
-  --journal-row-alt-hover-bg: color-mix(in srgb, var(--tng-semantic-accent-brand) 14%, var(--journal-row-alt-bg));
-  --tng-table-row-hover-bg: var(--journal-row-hover-bg);
-}
-
-/* Set CSS variables on the <tr> so they inherit into the cells via the
-   tng-table built-in rules (--tng-table-row-bg / --tng-table-row-hover-bg). */
-:host ::ng-deep .journal-table tr.journal-row--alt {
-  --tng-table-row-bg: var(--journal-row-alt-bg);
-  --tng-table-row-hover-bg: var(--journal-row-alt-hover-bg);
 }
 
 .journal-cell {
