@@ -1,0 +1,175 @@
+<main class="management-page">
+  <app-page-heading
+    eyebrow="Accounting"
+    title="Ledger Report"
+    description="Account activity and running balance for the selected period"
+  >
+    <div class="ledger-filter">
+      <tng-autocomplete
+        id="ledger-report-ledger"
+        placeholder="Search ledger..."
+        ariaLabel="Ledger"
+        [options]="autocompleteLedgers()"
+        [value]="selectedLedgerId()"
+        [getOptionValue]="ledgerOptionValue"
+        [getOptionLabel]="ledgerOptionLabel"
+        [trackBy]="ledgerTrackBy"
+        (valueChange)="onLedgerChange($event)"
+        (queryChange)="onLedgerQueryChange($event)"
+      />
+    </div>
+
+    <div class="date-filter">
+      <app-fiscal-year-date-range-picker
+        id="ledger-report-date-range"
+        placeholder="Select report period"
+        [fullWidth]="false"
+        [value]="pickerValue()"
+        (valueChange)="onDateRangeChange($event)"
+        (closed)="onPickerClosed()"
+      />
+    </div>
+
+    <tng-button
+      type="button"
+      appearance="outline"
+      tone="neutral"
+      (click)="onRefresh()"
+      [disabled]="isLoading() || !hasLedgerSelected() || !canViewLedgerReport()"
+    >
+      <tng-icon icon="refresh-cw" aria-hidden="true" />
+      Refresh
+    </tng-button>
+  </app-page-heading>
+
+  <tng-card variant="outline" padding="lg">
+    @if (!canViewLedgerReport()) {
+      <div class="notice notice--danger">
+        You do not have permission to view the ledger report.
+      </div>
+    } @else if (hasError()) {
+      <div class="notice notice--danger">{{ error() }}</div>
+    } @else if (showSelectLedgerNotice()) {
+      <div class="notice notice--info">
+        Select a ledger to view its report for the chosen period.
+      </div>
+    } @else {
+      <div class="summary-grid" aria-label="Ledger report summary">
+        <section class="summary-band">
+          <h3 class="summary-band-title">Opening</h3>
+          <div class="summary-row">
+            <span>Balance</span>
+            <span>{{ openingBalanceLabel() || '—' }}</span>
+          </div>
+          <div class="summary-row">
+            <span>Debit / Credit</span>
+            <span>{{
+              formatSummaryDebitCredit(summary().openingDebit, summary().openingCredit)
+            }}</span>
+          </div>
+        </section>
+
+        <section class="summary-band">
+          <h3 class="summary-band-title">Period movement</h3>
+          <div class="summary-row">
+            <span>Net</span>
+            <span>{{ runningBalanceLabel() || '—' }}</span>
+          </div>
+          <div class="summary-row">
+            <span>Debit / Credit</span>
+            <span>{{
+              formatSummaryDebitCredit(summary().runningDebit, summary().runningCredit)
+            }}</span>
+          </div>
+        </section>
+
+        <section class="summary-band">
+          <h3 class="summary-band-title">Closing</h3>
+          <div class="summary-row">
+            <span>Balance</span>
+            <span>{{ closingBalanceLabel() || '—' }}</span>
+          </div>
+          <div class="summary-row">
+            <span>Debit / Credit</span>
+            <span>{{
+              formatSummaryDebitCredit(summary().closingDebit, summary().closingCredit)
+            }}</span>
+          </div>
+        </section>
+      </div>
+
+      <div class="table-stack">
+        <tng-table
+          ariaLabel="Ledger report transactions"
+          density="comfortable"
+          layout="fixed"
+          [columns]="columns"
+          [items]="tableRows()"
+          [loading]="isLoading()"
+          emptyText="No transactions in this period."
+        >
+          <ng-template tngTableCellTemplate="date" let-row="row">
+            <span class="ledger-report-cell">{{ formatDisplayDate(row.date) }}</span>
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="journalNumber" let-row="row">
+            <span class="ledger-report-cell">
+              <button type="button" class="link-button" (click)="viewJournal(row.journalid)">
+                {{ row.journalNumber }}
+              </button>
+            </span>
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="description" let-row="row">
+            <span class="ledger-report-cell">
+              @if (row.description) {
+                <span class="truncate" [title]="row.description">{{ row.description }}</span>
+              }
+            </span>
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="debit" let-row="row">
+            <span class="ledger-report-cell num">{{ formatAmount()(row.debit) }}</span>
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="credit" let-row="row">
+            <span class="ledger-report-cell num">{{ formatAmount()(row.credit) }}</span>
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="oppositeLedgers" let-row="row">
+            <span class="ledger-report-cell opposite-ledgers">
+              @if (row.oppositeLedgers.length === 0) {
+                —
+              } @else {
+                @for (opposite of row.oppositeLedgers; track opposite.ledgerid; let last = $last) {
+                  <button
+                    type="button"
+                    class="link-button"
+                    (click)="openOppositeLedger(opposite.ledgerid)"
+                  >
+                    {{ opposite.ledgerName }}
+                  </button>
+                  @if (!last) {
+                    <span class="opposite-separator" aria-hidden="true">, </span>
+                  }
+                }
+              }
+            </span>
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="balance" let-row="row">
+            <span class="ledger-report-cell num">{{ formatRowBalance(row) }}</span>
+          </ng-template>
+        </tng-table>
+
+        @if (!isLoading() && generatedAt()) {
+          <div class="table-footer">
+            <span class="updated-info">
+              Generated at: {{ formatGeneratedAt(generatedAt()) }}
+            </span>
+          </div>
+        }
+      </div>
+    }
+  </tng-card>
+</main>

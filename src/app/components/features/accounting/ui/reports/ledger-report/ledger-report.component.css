@@ -1,0 +1,134 @@
+.management-page {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.25rem;
+}
+
+.date-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 24rem;
+}
+
+.ledger-filter {
+  max-width: 24rem;
+  min-width: 16rem;
+}
+
+.notice {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  color: var(--tng-semantic-foreground-primary);
+  padding: 1rem;
+}
+
+.notice--danger {
+  border-color: var(--tng-semantic-accent-danger);
+}
+
+.notice--info {
+  color: var(--tng-semantic-foreground-muted);
+}
+
+.table-stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.table-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.link-button {
+  background: transparent;
+  border: 0;
+  color: var(--tng-semantic-accent-brand);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  padding: 0;
+}
+
+.ledger-report-cell {
+  display: block;
+  min-height: 1.35em;
+  min-width: 0;
+}
+
+.ledger-report-cell.num {
+  font-family: 'Menlo', 'Monaco', monospace;
+  font-size: 0.875rem;
+}
+
+.ledger-report-cell .truncate {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.opposite-ledgers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0;
+}
+
+.summary-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 1.25rem;
+}
+
+.summary-band {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.75rem 1rem;
+}
+
+.summary-band-title {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.summary-row {
+  align-items: baseline;
+  display: flex;
+  font-family: 'Menlo', 'Monaco', monospace;
+  font-size: 0.875rem;
+  gap: 0.75rem;
+  justify-content: space-between;
+}
+
+.summary-row span:last-child {
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.updated-info {
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+}
+
+@media (max-width: 900px) {
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .date-filter,
+  .ledger-filter {
+    max-width: none;
+    width: 100%;
+  }
+}

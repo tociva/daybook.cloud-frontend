@@ -52,7 +52,17 @@
           [getChildren]="getTreeRowChildren"
           [rowClass]="getTreeRowClass"
           (expandedKeysChange)="onExpandedKeysChange($event)"
-        />
+        >
+          <ng-template tngTreeTableCellTemplate="name" let-row="row">
+            @if (row.kind === 'ledger' && row.ledgerid && canOpenLedgerReport()) {
+              <button type="button" class="link-button" (click)="onLedgerNameClick(row, $event)">
+                {{ row.name }}
+              </button>
+            } @else {
+              {{ row.name }}
+            }
+          </ng-template>
+        </tng-tree-table>
       </div>
 
       @if (!isReportLoading() && generatedAt()) {

@@ -18,6 +18,7 @@ import {
   FiscalYearDateRangeService,
 } from '../../../../../../shared/fiscal-year-date-range-picker';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
+import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
 import { ProfitLossService } from '../../../data/profit-loss/profit-loss.service';
 import type { ProfitLossItem, ProfitLossReport, ProfitLossQuery } from '../../../data/profit-loss/profit-loss.model';
 
@@ -82,7 +83,6 @@ export class ProfitLossComponent {
   protected readonly isLoading = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly reportData = signal<ProfitLossReport['data']>(emptyData());
-  protected readonly reportTitle = signal<string>('');
   protected readonly generatedAt = signal<string>('');
   protected readonly pickerValue = signal<TngDateRangePickerSelectionInput<Date>>(null);
   protected readonly pendingPickerValue = signal<TngDateRangePickerSelectionInput<Date>>(null);
@@ -178,11 +178,10 @@ export class ProfitLossComponent {
 
       const report = await this.profitLossService.getProfitLoss(query);
       this.reportData.set(report.data);
-      this.reportTitle.set(report.title);
       this.generatedAt.set(report.generatedAt);
       this.error.set(null);
     } catch (err) {
-      this.error.set(err instanceof Error ? err.message : 'Failed to load profit & loss report');
+      this.error.set(getApiErrorMessage(err, 'Failed to load profit & loss report.'));
       this.reportData.set(emptyData());
     } finally {
       this.isLoading.set(false);

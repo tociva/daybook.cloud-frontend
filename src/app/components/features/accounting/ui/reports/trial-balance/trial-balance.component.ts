@@ -14,6 +14,7 @@ import {
   TngButtonComponent,
   TngCardComponent,
   TngTreeTable,
+  TngTreeTableCellTpl,
 } from '@tailng-ui/components';
 import type {
   TngDateRangePickerSelectionInput,
@@ -26,7 +27,10 @@ import {
   FiscalYearDateRangeService,
 } from '../../../../../../shared/fiscal-year-date-range-picker';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
+import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
+import { PermissionsStore } from '../../../../../../core/permissions/permissions.store';
 import { TrialBalanceService } from '../../../data/trial-balance/trial-balance.service';
+import { hasAccountingReportPermission } from '../../../shared/accounting-report-permissions';
 import { LedgerStore } from '../../../data/ledger';
 import type { Ledger } from '../../../data/ledger';
 import { LedgerCategoryStore } from '../../../data/ledger-category';
@@ -47,6 +51,7 @@ type TrialBalanceTreeRow = TrialBalanceAmounts & {
   children: TrialBalanceTreeRow[];
   key: string;
   kind: 'category' | 'ledger' | 'total';
+  ledgerid?: string;
   name: string;
 };
 
@@ -118,6 +123,7 @@ const amountColumnWidth = '12%';
     TngCardComponent,
     TngIcon,
     TngTreeTable,
+    TngTreeTableCellTpl,
     FiscalYearDateRangePickerComponent,
   ],
   templateUrl: './trial-balance.component.html',
@@ -132,6 +138,7 @@ export class TrialBalanceComponent implements OnInit {
   private readonly dateManagement = inject(DateManagementService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly permissionsStore = inject(PermissionsStore);
 
   // Single RxJS bridge — Router has no native signal for query params yet.
   private readonly queryParams = toSignal(this.route.queryParamMap, {
@@ -142,6 +149,9 @@ export class TrialBalanceComponent implements OnInit {
   protected readonly error = signal<string | null>(null);
   protected readonly reportData = signal<readonly TrialBalanceItem[]>([]);
   protected readonly generatedAt = signal<string>('');
+  protected readonly canOpenLedgerReport = computed(() =>
+    hasAccountingReportPermission(this.permissionsStore.all(), 'ledgerReport'),
+  );
   protected readonly expandedKeys = signal<readonly string[]>([]);
   private readonly expandedKeySet = computed(() => new Set(this.expandedKeys()));
   protected readonly pickerValue = signal<TngDateRangePickerSelectionInput<Date>>(null);
@@ -393,6 +403,19 @@ export class TrialBalanceComponent implements OnInit {
     this.expandedKeys.set(keys.filter((key): key is string => typeof key === 'string'));
   }
 
+  protected onLedgerNameClick(row: TrialBalanceTreeRow, event: Event): void {
+    event.stopPropagation();
+    if (!row.ledgerid || !this.canOpenLedgerReport()) return;
+
+    const params = this.queryParams();
+    void this.router.navigate(['/app/accounting/reports/ledger', row.ledgerid], {
+      queryParams: {
+        start: params.get('start'),
+        end: params.get('end'),
+      },
+    });
+  }
+
   private amountColumn(
     key: TrialBalanceAmountKey,
     label: string,
@@ -433,6 +456,7 @@ export class TrialBalanceComponent implements OnInit {
       children: [],
       key: `ledger:${ledger.id}`,
       kind: 'ledger',
+      ledgerid: ledger.id,
       name: balance?.name ?? ledger.name,
     };
   }
@@ -502,7 +526,7 @@ export class TrialBalanceComponent implements OnInit {
       this.generatedAt.set(report.generatedAt);
       this.error.set(null);
     } catch (err) {
-      this.error.set(err instanceof Error ? err.message : 'Failed to load trial balance');
+      this.error.set(getApiErrorMessage(err, 'Failed to load trial balance.'));
       this.reportData.set([]);
     } finally {
       this.isLoading.set(false);

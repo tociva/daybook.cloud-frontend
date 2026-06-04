@@ -16,6 +16,7 @@ import { PageHeadingComponent } from '../../../../../../shared/page-heading/page
 import { FiscalYearDateRangeService } from '../../../../../../shared/fiscal-year-date-range-picker';
 import { FiscalYearDatepickerComponent } from '../../../../../../shared/fiscal-year-datepicker';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
+import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
 import { BalanceSheetService } from '../../../data/balance-sheet/balance-sheet.service';
 import type { BalanceSheetItem, BalanceSheetReport, BalanceSheetQuery } from '../../../data/balance-sheet/balance-sheet.model';
 
@@ -72,7 +73,6 @@ export class BalanceSheetComponent {
   protected readonly isLoading = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly reportData = signal<BalanceSheetReport['data']>(emptyData());
-  protected readonly reportTitle = signal<string>('');
   protected readonly generatedAt = signal<string>('');
 
   // Single date picker value (end date only)
@@ -145,11 +145,10 @@ export class BalanceSheetComponent {
 
       const report = await this.balanceSheetService.getBalanceSheet(query);
       this.reportData.set(report.data);
-      this.reportTitle.set(report.title);
       this.generatedAt.set(report.generatedAt);
       this.error.set(null);
     } catch (err) {
-      this.error.set(err instanceof Error ? err.message : 'Failed to load balance sheet');
+      this.error.set(getApiErrorMessage(err, 'Failed to load balance sheet.'));
       this.reportData.set(emptyData());
     } finally {
       this.isLoading.set(false);
