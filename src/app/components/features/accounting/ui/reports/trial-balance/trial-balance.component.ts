@@ -141,7 +141,7 @@ export class TrialBalanceComponent implements OnInit {
   protected readonly isLoading = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly reportData = signal<readonly TrialBalanceItem[]>([]);
-  protected readonly updatedAt = signal<string>('');
+  protected readonly generatedAt = signal<string>('');
   protected readonly expandedKeys = signal<readonly string[]>([]);
   private readonly expandedKeySet = computed(() => new Set(this.expandedKeys()));
   protected readonly pickerValue = signal<TngDateRangePickerSelectionInput<Date>>(null);
@@ -386,7 +386,7 @@ export class TrialBalanceComponent implements OnInit {
   protected readonly getTreeRowClass = (row: TrialBalanceTreeRow): string =>
     `trial-balance-${row.kind}-row`;
 
-  protected readonly formatUpdatedAt = (value: string | null | undefined): string =>
+  protected readonly formatGeneratedAt = (value: string | null | undefined): string =>
     this.dateManagement.formatDisplayDateTime(value, '—');
 
   protected onExpandedKeysChange(keys: readonly unknown[]): void {
@@ -499,7 +499,7 @@ export class TrialBalanceComponent implements OnInit {
 
       const report = await this.trialBalanceService.getTrialBalance(query);
       this.reportData.set(report.data);
-      this.updatedAt.set(report.updatedAt);
+      this.generatedAt.set(report.generatedAt);
       this.error.set(null);
     } catch (err) {
       this.error.set(err instanceof Error ? err.message : 'Failed to load trial balance');

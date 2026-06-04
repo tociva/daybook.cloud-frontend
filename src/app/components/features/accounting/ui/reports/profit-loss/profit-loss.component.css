@@ -1,0 +1,201 @@
+.management-page {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.25rem;
+}
+
+.date-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 24rem;
+}
+
+.notice {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  color: var(--tng-semantic-foreground-primary);
+  padding: 1rem;
+}
+
+.notice--danger {
+  border-color: var(--tng-semantic-accent-danger);
+}
+
+.loading-state {
+  padding: 2rem 0;
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+}
+
+/* Account sections */
+.account-section {
+  margin-bottom: 1.5rem;
+}
+
+.account-section:last-of-type {
+  margin-bottom: 0;
+}
+
+.account-section-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  margin: 0 0 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--tng-semantic-border-subtle);
+}
+
+/* Two-column ledger layout */
+.account-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.account-column {
+  padding: 0.75rem 1rem;
+}
+
+.account-column--right {
+  border-inline-start: 1px solid var(--tng-semantic-border-subtle);
+}
+
+/* Bucket heading */
+.bucket-heading {
+  font-size: 0.75rem;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-secondary);
+  padding: 0.25rem 0 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.empty-bucket {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  padding: 0.25rem 0 0.5rem;
+  font-style: italic;
+}
+
+/* Ledger rows */
+.ledger-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.25rem 0;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+
+.ledger-row.carry-forward {
+  color: var(--color-text-primary);
+  font-weight: 600;
+  font-style: italic;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
+  border-bottom: 1px dashed var(--tng-semantic-border-subtle);
+}
+
+.ledger-name {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.ledger-amount {
+  font-family: 'Menlo', 'Monaco', monospace;
+  font-size: 0.8125rem;
+  white-space: nowrap;
+  text-align: end;
+}
+
+/* Bucket total */
+.bucket-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.375rem 0;
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  font-weight: 650;
+  color: var(--color-text-primary);
+  border-top: 1px solid var(--tng-semantic-border-subtle);
+}
+
+.bucket-total span:last-child {
+  font-family: 'Menlo', 'Monaco', monospace;
+  white-space: nowrap;
+}
+
+/* Gross / Net figures */
+.gross-figure,
+.net-figure {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.5rem 0.75rem;
+  margin-top: 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.gross-figure span:last-child,
+.net-figure span:last-child {
+  font-family: 'Menlo', 'Monaco', monospace;
+  white-space: nowrap;
+}
+
+.gross-figure--profit,
+.net-figure--profit {
+  background: color-mix(in srgb, var(--tng-semantic-accent-success) 10%, transparent);
+  color: var(--tng-semantic-accent-success);
+}
+
+.gross-figure--loss,
+.net-figure--loss {
+  background: color-mix(in srgb, var(--tng-semantic-accent-danger) 10%, transparent);
+  color: var(--tng-semantic-accent-danger);
+}
+
+/* Footer */
+.table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.updated-info {
+  display: flex;
+  gap: 0.5rem;
+}
+
+@media (max-width: 700px) {
+  .date-filter {
+    max-width: none;
+    width: 100%;
+  }
+
+  .account-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .account-column--right {
+    border-inline-start: none;
+    border-top: 1px solid var(--tng-semantic-border-subtle);
+  }
+}

@@ -55,10 +55,10 @@
         />
       </div>
 
-      @if (!isReportLoading() && updatedAt()) {
+      @if (!isReportLoading() && generatedAt()) {
         <div class="table-footer">
           <div class="updated-info">
-            Last updated: {{ formatUpdatedAt(updatedAt()) }}
+            Generated at: {{ formatGeneratedAt(generatedAt()) }}
           </div>
         </div>
       }

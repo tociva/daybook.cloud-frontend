@@ -167,5 +167,19 @@ export const routes: Routes = [
         (m) => m.trialBalanceRoutes,
       ),
   },
+  {
+    path: 'app/accounting/reports/profit-loss',
+    loadChildren: () =>
+      import('./components/features/accounting/ui/reports/profit-loss/profit-loss.routes').then(
+        (m) => m.profitLossRoutes,
+      ),
+  },
+  {
+    path: 'app/accounting/reports/balance-sheet',
+    loadChildren: () =>
+      import('./components/features/accounting/ui/reports/balance-sheet/balance-sheet.routes').then(
+        (m) => m.balanceSheetRoutes,
+      ),
+  },
   { path: 'bootstrap/bootstrap-organization', component: BootstrapOrganizationComponent },
 ];

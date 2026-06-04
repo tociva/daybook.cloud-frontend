@@ -1,0 +1,128 @@
+<main class="management-page">
+  <app-page-heading
+    eyebrow="Accounting"
+    title="Balance Sheet"
+    description="Financial position as of the selected date"
+  >
+    <div class="date-filter">
+      <app-fiscal-year-datepicker
+        id="end-date"
+        placeholder="Select date"
+        [fullWidth]="false"
+        [value]="pickerValue()"
+        (valueChange)="onDateChange($event)"
+      />
+    </div>
+
+    <tng-button
+      type="button"
+      appearance="outline"
+      tone="neutral"
+      (click)="onRefresh()"
+      [disabled]="isLoading()"
+    >
+      <tng-icon icon="refresh-cw" aria-hidden="true" />
+      Refresh
+    </tng-button>
+  </app-page-heading>
+
+  <tng-card variant="outline" padding="lg">
+
+    @if (hasError()) {
+      <div class="notice notice--danger">
+        {{ error() }}
+      </div>
+    }
+
+    @if (!hasError()) {
+      @if (isLoading()) {
+        <div class="loading-state">
+          <span>Loading balance sheet...</span>
+        </div>
+      } @else {
+
+        <div class="balance-sheet-columns">
+
+          <!-- Assets -->
+          <div class="bs-column">
+            <h3 class="bs-column-title">Assets</h3>
+
+            @if (data().assets.length === 0) {
+              <div class="empty-bucket">No asset entries</div>
+            } @else {
+              @for (item of data().assets; track item.ledgerid) {
+                <div class="ledger-row">
+                  <div class="ledger-meta">
+                    <span class="ledger-name">{{ item.name }}</span>
+                    <span class="ledger-category">{{ item.category }}</span>
+                  </div>
+                  <span class="ledger-amount">{{ itemAmount(item) }}</span>
+                </div>
+              }
+            }
+
+            @if (!isCurrentYearProfit() && adjustments().currentYearLoss > 0) {
+              <div class="ledger-row adjustment-row">
+                <div class="ledger-meta">
+                  <span class="ledger-name">Current Year Loss</span>
+                  <span class="ledger-category">Adjustment</span>
+                </div>
+                <span class="ledger-amount">{{ formatAmount(adjustments().currentYearLoss) }}</span>
+              </div>
+            }
+
+            <div class="column-total">
+              <span>Total Assets</span>
+              <span>{{ formatAmount(totals().assets) }}</span>
+            </div>
+          </div>
+
+          <!-- Liabilities & Equity -->
+          <div class="bs-column bs-column--right">
+            <h3 class="bs-column-title">Liabilities &amp; Equity</h3>
+
+            @if (data().liabilities.length === 0) {
+              <div class="empty-bucket">No liability entries</div>
+            } @else {
+              @for (item of data().liabilities; track item.ledgerid) {
+                <div class="ledger-row">
+                  <div class="ledger-meta">
+                    <span class="ledger-name">{{ item.name }}</span>
+                    <span class="ledger-category">{{ item.category }}</span>
+                  </div>
+                  <span class="ledger-amount">{{ itemAmount(item) }}</span>
+                </div>
+              }
+            }
+
+            @if (isCurrentYearProfit() && adjustments().currentYearProfit > 0) {
+              <div class="ledger-row adjustment-row adjustment-row--profit">
+                <div class="ledger-meta">
+                  <span class="ledger-name">Current Year Profit</span>
+                  <span class="ledger-category">Adjustment</span>
+                </div>
+                <span class="ledger-amount">{{ formatAmount(adjustments().currentYearProfit) }}</span>
+              </div>
+            }
+
+            <div class="column-total">
+              <span>Total Liabilities &amp; Equity</span>
+              <span>{{ formatAmount(totals().liabilitiesAndEquity) }}</span>
+            </div>
+          </div>
+
+        </div>
+
+      }
+
+      @if (!isLoading() && generatedAt()) {
+        <div class="table-footer">
+          <div class="updated-info">
+            Generated at: {{ formatGeneratedAt(generatedAt()) }}
+          </div>
+        </div>
+      }
+    }
+
+  </tng-card>
+</main>

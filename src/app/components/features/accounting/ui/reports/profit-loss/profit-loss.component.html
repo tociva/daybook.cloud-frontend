@@ -1,0 +1,228 @@
+<main class="management-page">
+  <app-page-heading
+    eyebrow="Accounting"
+    title="Profit & Loss Report"
+    description="Income and expense summary for the selected period"
+  >
+    <div class="date-filter">
+      <app-fiscal-year-date-range-picker
+        id="date-range"
+        placeholder="Select report period"
+        [fullWidth]="false"
+        [value]="pickerValue()"
+        (valueChange)="onDateRangeChange($event)"
+        (closed)="onPickerClosed()"
+      />
+    </div>
+
+    <tng-button
+      type="button"
+      appearance="outline"
+      tone="neutral"
+      (click)="onRefresh()"
+      [disabled]="isLoading()"
+    >
+      <tng-icon icon="refresh-cw" aria-hidden="true" />
+      Refresh
+    </tng-button>
+  </app-page-heading>
+
+  <tng-card variant="outline" padding="lg">
+
+    @if (hasError()) {
+      <div class="notice notice--danger">
+        {{ error() }}
+      </div>
+    }
+
+    @if (!hasError()) {
+      @if (isLoading()) {
+        <div class="loading-state">
+          <span>Loading profit &amp; loss report...</span>
+        </div>
+      } @else {
+
+        <!-- Trading Account -->
+        <section class="account-section">
+          <h3 class="account-section-title">Trading Account</h3>
+
+          <div class="account-columns">
+
+            <!-- Direct Income -->
+            <div class="account-column">
+              <div class="bucket-heading">Direct Income</div>
+              @if (data().directIncome.length === 0) {
+                <div class="empty-bucket">No entries</div>
+              } @else {
+                @for (item of data().directIncome; track item.ledgerid) {
+                  <div class="ledger-row">
+                    <span class="ledger-name">{{ item.name }}</span>
+                    <span class="ledger-amount">{{ itemAmount(item) }}</span>
+                  </div>
+                }
+              }
+              <div class="bucket-total">
+                <span>Total Direct Income</span>
+                <span>{{ formatAmount(totals().directIncome) }}</span>
+              </div>
+
+              @if (!isGrossProfit()) {
+                <div class="gross-figure gross-figure--loss">
+                  <span>Gross Loss c/d</span>
+                  <span>{{ formatAmount(totals().grossLoss) }}</span>
+                </div>
+              }
+            </div>
+
+            <!-- Direct Expense -->
+            <div class="account-column account-column--right">
+              <div class="bucket-heading">Direct Expense</div>
+              @if (data().directExpense.length === 0) {
+                <div class="empty-bucket">No entries</div>
+              } @else {
+                @for (item of data().directExpense; track item.ledgerid) {
+                  <div class="ledger-row">
+                    <span class="ledger-name">{{ item.name }}</span>
+                    <span class="ledger-amount">{{ itemAmount(item) }}</span>
+                  </div>
+                }
+              }
+              <div class="bucket-total">
+                <span>Total Direct Expense</span>
+                <span>{{ formatAmount(totals().directExpense) }}</span>
+              </div>
+
+              @if (isGrossProfit()) {
+                <div class="gross-figure gross-figure--profit">
+                  <span>Gross Profit c/d</span>
+                  <span>{{ formatAmount(totals().grossProfit) }}</span>
+                </div>
+              }
+            </div>
+
+          </div>
+        </section>
+
+        <!-- P&L Account -->
+        <section class="account-section">
+          <h3 class="account-section-title">Profit &amp; Loss Account</h3>
+
+          <div class="account-columns">
+
+            <!-- Indirect Income -->
+            <div class="account-column">
+              @if (isGrossProfit()) {
+                <div class="ledger-row carry-forward">
+                  <span class="ledger-name">Gross Profit b/d</span>
+                  <span class="ledger-amount">{{ formatAmount(totals().grossProfit) }}</span>
+                </div>
+              }
+              <div class="bucket-heading">Indirect Income</div>
+              @if (data().indirectIncome.length === 0) {
+                <div class="empty-bucket">No entries</div>
+              } @else {
+                @for (item of data().indirectIncome; track item.ledgerid) {
+                  <div class="ledger-row">
+                    <span class="ledger-name">{{ item.name }}</span>
+                    <span class="ledger-amount">{{ itemAmount(item) }}</span>
+                  </div>
+                }
+              }
+              <div class="bucket-total">
+                <span>Total Indirect Income</span>
+                <span>{{ formatAmount(totals().indirectIncome) }}</span>
+              </div>
+
+              @if (!isNetProfit()) {
+                <div class="net-figure net-figure--loss">
+                  <span>Net Loss</span>
+                  <span>{{ formatAmount(totals().netLoss) }}</span>
+                </div>
+              }
+            </div>
+
+            <!-- Indirect Expense -->
+            <div class="account-column account-column--right">
+              @if (!isGrossProfit()) {
+                <div class="ledger-row carry-forward">
+                  <span class="ledger-name">Gross Loss b/d</span>
+                  <span class="ledger-amount">{{ formatAmount(totals().grossLoss) }}</span>
+                </div>
+              }
+              <div class="bucket-heading">Indirect Expense</div>
+              @if (data().indirectExpense.length === 0) {
+                <div class="empty-bucket">No entries</div>
+              } @else {
+                @for (item of data().indirectExpense; track item.ledgerid) {
+                  <div class="ledger-row">
+                    <span class="ledger-name">{{ item.name }}</span>
+                    <span class="ledger-amount">{{ itemAmount(item) }}</span>
+                  </div>
+                }
+              }
+              <div class="bucket-total">
+                <span>Total Indirect Expense</span>
+                <span>{{ formatAmount(totals().indirectExpense) }}</span>
+              </div>
+
+              @if (isNetProfit()) {
+                <div class="net-figure net-figure--profit">
+                  <span>Net Profit</span>
+                  <span>{{ formatAmount(totals().netProfit) }}</span>
+                </div>
+              }
+            </div>
+
+          </div>
+        </section>
+
+        <!-- Unclassified (shown only when entries exist) -->
+        @if (hasUnclassified()) {
+          <section class="account-section">
+            <h3 class="account-section-title">Unclassified</h3>
+
+            <div class="account-columns">
+              <div class="account-column">
+                <div class="bucket-heading">Unclassified Income</div>
+                @for (item of data().unclassifiedIncome; track item.ledgerid) {
+                  <div class="ledger-row">
+                    <span class="ledger-name">{{ item.name }}</span>
+                    <span class="ledger-amount">{{ itemAmount(item) }}</span>
+                  </div>
+                }
+                <div class="bucket-total">
+                  <span>Total</span>
+                  <span>{{ formatAmount(totals().unclassifiedIncome) }}</span>
+                </div>
+              </div>
+
+              <div class="account-column account-column--right">
+                <div class="bucket-heading">Unclassified Expense</div>
+                @for (item of data().unclassifiedExpense; track item.ledgerid) {
+                  <div class="ledger-row">
+                    <span class="ledger-name">{{ item.name }}</span>
+                    <span class="ledger-amount">{{ itemAmount(item) }}</span>
+                  </div>
+                }
+                <div class="bucket-total">
+                  <span>Total</span>
+                  <span>{{ formatAmount(totals().unclassifiedExpense) }}</span>
+                </div>
+              </div>
+            </div>
+          </section>
+        }
+
+      }
+
+      @if (!isLoading() && generatedAt()) {
+        <div class="table-footer">
+          <div class="updated-info">
+            Generated at: {{ formatGeneratedAt(generatedAt()) }}
+          </div>
+        </div>
+      }
+    }
+
+  </tng-card>
+</main>

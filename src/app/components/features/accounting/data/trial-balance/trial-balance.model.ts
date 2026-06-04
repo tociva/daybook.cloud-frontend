@@ -11,7 +11,7 @@ export type TrialBalanceItem = Readonly<{
 
 export type TrialBalanceReport = Readonly<{
   title: string;
-  updatedAt: string;
+  generatedAt: string;
   data: readonly TrialBalanceItem[];
 }>;
 
