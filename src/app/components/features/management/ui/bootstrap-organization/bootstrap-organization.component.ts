@@ -5,6 +5,7 @@ import {
   ElementRef,
   ViewChild,
   computed,
+  effect,
   inject,
   signal,
 } from '@angular/core';
@@ -172,6 +173,12 @@ const getCurrentFiscalDateRange = (): { start: string; end: string } => {
   };
 };
 
+const countryByTimezone: Record<string, string | readonly string[]> = {
+  'Asia/Kolkata': 'IN',
+  'Asia/Dubai': 'AE',
+  'America/New_York': 'US',
+};
+
 const buildNextNumberingSequences = (
   template: string,
   fiscalYearRange: Readonly<{ enddate: string; startdate: string }>,
@@ -272,6 +279,7 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
   protected readonly submitted = signal(false);
   protected readonly saved = signal(false);
   protected readonly isSubmitting = signal(false);
+  private readonly browserCountryDefaultApplied = signal(false);
   protected readonly invoiceTemplateDialogOpen = signal(false);
   protected readonly receiptTemplateDialogOpen = signal(false);
   protected readonly journalTemplateDialogOpen = signal(false);
@@ -584,6 +592,7 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
     void this.countryStore.load();
     void this.currencyStore.load();
     void this.dateFormatStore.load();
+    this.applyBrowserCountryDefault();
   }
 
   ngAfterViewInit(): void {
@@ -682,6 +691,43 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
     this.touched.set({});
     this.saved.set(false);
     this.logoSection?.clearPending();
+  }
+
+  private applyBrowserCountryDefault(): void {
+    effect(() => {
+      if (this.browserCountryDefaultApplied() || this.organizationModel().countryCode.trim()) {
+        return;
+      }
+
+      if (this.countries().length === 0) {
+        return;
+      }
+
+      const country = this.findCountryFromBrowserTimezone();
+      if (!country) {
+        return;
+      }
+
+      this.selectCountry(country.code);
+      this.browserCountryDefaultApplied.set(true);
+    });
+  }
+
+  private findCountryFromBrowserTimezone(): Country | null {
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const countryCodes = countryByTimezone[timeZone];
+    const countryCode = Array.isArray(countryCodes)
+      ? this.findCountryCodeFromLocale(countryCodes)
+      : countryCodes;
+    const country = this.countries().find((item) => item.code === countryCode) ?? null;
+
+    return country;
+  }
+
+  private findCountryCodeFromLocale(countryCodes: readonly string[]): string | undefined {
+    const locale = new Intl.Locale(navigator.language);
+
+    return countryCodes.find((code) => code === locale.region) ?? countryCodes[0];
   }
 
   private markAllTouched(): void {
