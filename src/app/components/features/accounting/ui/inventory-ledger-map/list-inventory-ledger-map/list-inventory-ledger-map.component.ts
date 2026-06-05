@@ -18,7 +18,6 @@ import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import { LedgerStore } from '../../../data/ledger';
-import { FiscalYearStore } from '../../../../management/data/fiscal-year/fiscal-year.store';
 import { BankCashStore } from '../../../../trading/data/bank-cash';
 import { CustomerStore } from '../../../../trading/data/customer';
 import { InventoryLedgerMapStore } from '../../../data/inventory-ledger-map';
@@ -58,7 +57,6 @@ export class ListInventoryLedgerMapComponent {
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly inventoryLedgerMapStore = inject(InventoryLedgerMapStore);
   protected readonly ledgerStore = inject(LedgerStore);
-  protected readonly fiscalYearStore = inject(FiscalYearStore);
   protected readonly customerStore = inject(CustomerStore);
   protected readonly vendorStore = inject(VendorStore);
   protected readonly itemStore = inject(ItemStore);
@@ -67,7 +65,6 @@ export class ListInventoryLedgerMapComponent {
   protected readonly hasError = computed(() => this.inventoryLedgerMapStore.error() !== null);
 
   protected readonly columns: readonly TngTableColumn<InventoryLedgerMap>[] = [
-    { id: 'fiscalyearid', label: 'Fiscal Year', width: '12rem' },
     { id: 'entitytype', label: 'Entity Type', sortable: true, width: '10rem' },
     { id: 'entityid', label: 'Entity', width: '14rem' },
     { id: 'ledgertype', label: 'Ledger Type', sortable: true, width: '12rem' },
@@ -84,14 +81,6 @@ export class ListInventoryLedgerMapComponent {
     const map = new Map<string, string>();
     for (const ledger of this.ledgerStore.items()) {
       if (ledger.id) map.set(ledger.id, ledger.name);
-    }
-    return map;
-  });
-
-  private readonly fiscalYearNameById = computed(() => {
-    const map = new Map<string, string>();
-    for (const fiscalYear of this.fiscalYearStore.items()) {
-      if (fiscalYear.id) map.set(fiscalYear.id, fiscalYear.name || fiscalYear.jnumber || fiscalYear.id);
     }
     return map;
   });
@@ -145,11 +134,6 @@ export class ListInventoryLedgerMapComponent {
     return formatInventoryLedgerType(value);
   }
 
-  protected fiscalYearName(id: string | null | undefined): string {
-    if (!id) return 'Session fiscal year';
-    return this.fiscalYearNameById().get(id) ?? id;
-  }
-
   protected ledgerName(id: string): string {
     return this.ledgerNameById().get(id) ?? id;
   }
@@ -172,7 +156,6 @@ export class ListInventoryLedgerMapComponent {
   private async loadLookupCatalogs(): Promise<void> {
     await Promise.all([
       this.ledgerStore.loadLedgers({ limit: 1000, offset: 0 }),
-      this.fiscalYearStore.loadFiscalYears({ limit: 1000, offset: 0 }),
       this.customerStore.loadCustomers({ limit: 1000, offset: 0 }),
       this.vendorStore.loadVendors({ limit: 1000, offset: 0 }),
       this.itemStore.loadItems({ limit: 1000, offset: 0 }),

@@ -59,10 +59,6 @@
           [sortDirection]="crudQuery.sortDirection()"
           (sortChange)="crudQuery.applySort($event)"
         >
-          <ng-template tngTableCellTemplate="fiscalyearid" let-row="row">
-            {{ fiscalYearName(row.fiscalyearid) }}
-          </ng-template>
-
           <ng-template tngTableCellTemplate="entitytype" let-row="row">
             {{ formatEntityType(row.entitytype) }}
           </ng-template>
@@ -72,9 +68,11 @@
           </ng-template>
 
           <ng-template tngTableCellTemplate="ledgertype" let-row="row">
-            <button type="button" class="link-button" (click)="viewInventoryLedgerMap(row)">
-              {{ formatLedgerType(row.ledgertype) }}
-            </button>
+            @if (formatLedgerType(row.ledgertype); as ledgerTypeLabel) {
+              <button type="button" class="link-button" (click)="viewInventoryLedgerMap(row)">
+                {{ ledgerTypeLabel }}
+              </button>
+            }
           </ng-template>
 
           <ng-template tngTableCellTemplate="ledgerid" let-row="row">

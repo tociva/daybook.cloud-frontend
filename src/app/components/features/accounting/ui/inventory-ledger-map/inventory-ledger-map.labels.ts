@@ -47,5 +47,6 @@ export function formatInventoryLedgerEntityType(value: string | null | undefined
 }
 
 export function formatInventoryLedgerType(value: string | null | undefined): string {
-  return ledgerTypeOptions.find((option) => option.value === value)?.label ?? value ?? '';
+  if (!value || value === 'general') return '';
+  return ledgerTypeOptions.find((option) => option.value === value)?.label ?? value;
 }
