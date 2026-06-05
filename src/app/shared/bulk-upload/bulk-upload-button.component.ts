@@ -336,21 +336,6 @@ const BULK_UPLOAD_PREVIEW_CONFIGS: Record<string, BulkUploadPreviewConfig> = {
       textColumn('currencycode', 'Currency', 'currencycode', '8rem'),
     ],
   },
-  '/inventory/bank-cash/bulk-upload': {
-    modelName: 'Bank/Cash Accounts',
-    requiredPaths: ['name', 'description'],
-    rootKey: 'bankCash',
-    sampleRows: [
-      {
-        name: 'HDFC Current Account',
-        description: 'Main operating bank account',
-      },
-    ],
-    columns: [
-      textColumn('name', 'Name', 'name', '16rem'),
-      namesColumn('description', 'Description', 'description'),
-    ],
-  },
   '/inventory/purchase-invoice/bulk-upload': {
     modelName: 'Purchase Invoices',
     requiredPaths: [

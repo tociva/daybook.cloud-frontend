@@ -15,7 +15,12 @@ import {
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
-import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload';
+import {
+  bulkUploadNamesColumn,
+  BulkUploadButtonComponent,
+  bulkUploadTextColumn,
+} from '../../../../../../shared/bulk-upload';
+import type { BulkUploadPreviewConfig } from '../../../../../../shared/bulk-upload';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
@@ -51,6 +56,28 @@ export class ListBankCashComponent {
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly bankCashStore = inject(BankCashStore);
   protected readonly hasError = computed(() => this.bankCashStore.error() !== null);
+
+  protected readonly bulkUploadConfig: BulkUploadPreviewConfig = {
+    modelName: 'Bank/Cash Accounts',
+    requiredPaths: ['name'],
+    rootKey: 'bankCash',
+    sampleRows: [
+      {
+        name: 'HDFC Current Account',
+        description: 'Main operating bank account',
+      },
+    ],
+    xlsxColumns: [
+      { header: 'Name', path: 'name' },
+      { header: 'Description', path: 'description' },
+    ],
+    xlsxSheetName: 'Bank Cash Accounts',
+    columns: [
+      bulkUploadTextColumn('name', 'Name', 'name', '16rem'),
+      bulkUploadNamesColumn('description', 'Description', 'description'),
+    ],
+  };
+
   protected readonly columns: readonly TngTableColumn<BankCash>[] = [
     { id: 'name', label: 'Name', sortable: true, width: '18rem' },
     { id: 'description', label: 'Description', sortable: true, truncate: true },
