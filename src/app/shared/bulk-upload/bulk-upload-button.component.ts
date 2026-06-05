@@ -153,54 +153,6 @@ const namesColumn = (
 });
 
 const BULK_UPLOAD_PREVIEW_CONFIGS: Record<string, BulkUploadPreviewConfig> = {
-  '/inventory/item/bulk-upload': {
-    modelName: 'Items',
-    requiredPaths: ['name', 'code', 'displayname', 'category'],
-    rootKey: 'items',
-    sampleRows: [
-      {
-        name: 'Laptop',
-        code: 'LAP-001',
-        displayname: 'Laptop',
-        barcode: '890000000001',
-        description: 'Business laptop',
-        purchaseledger: 'Purchase Account',
-        salesledger: 'Sales Account',
-        category: 'Electronics',
-      },
-    ],
-    columns: [
-      textColumn('name', 'Name', 'name', '12rem'),
-      textColumn('code', 'Code', 'code', '8rem'),
-      textColumn('displayname', 'Display name', 'displayname', '12rem'),
-      textColumn('category', 'Category', 'category', '12rem'),
-      textColumn('barcode', 'Barcode', 'barcode', '10rem'),
-      namesColumn('description', 'Description', 'description'),
-    ],
-  },
-  '/inventory/item-category/bulk-upload': {
-    modelName: 'Item Categories',
-    requiredPaths: ['name', 'code', 'type'],
-    rootKey: 'itemCategory',
-    sampleRows: [
-      {
-        name: 'Electronics',
-        code: 'ELEC',
-        type: 'Product',
-        description: 'Electronic goods',
-        parent: '',
-        taxgroup: '',
-      },
-    ],
-    columns: [
-      textColumn('name', 'Name', 'name', '12rem'),
-      textColumn('code', 'Code', 'code', '8rem'),
-      textColumn('type', 'Type', 'type', '8rem'),
-      textColumn('parent', 'Parent', 'parent', '12rem'),
-      textColumn('taxgroup', 'Tax group', 'taxgroup', '12rem'),
-      namesColumn('description', 'Description', 'description'),
-    ],
-  },
   '/inventory/customer/bulk-upload': {
     modelName: 'Customers',
     requiredPaths: [

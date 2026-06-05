@@ -14,7 +14,12 @@ import {
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
-import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload';
+import {
+  bulkUploadNamesColumn,
+  BulkUploadButtonComponent,
+  bulkUploadTextColumn,
+} from '../../../../../../shared/bulk-upload';
+import type { BulkUploadPreviewConfig } from '../../../../../../shared/bulk-upload';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
@@ -46,6 +51,39 @@ export class ListItemCategoryComponent {
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly itemCategoryStore = inject(ItemCategoryStore);
   protected readonly hasError = computed(() => this.itemCategoryStore.error() !== null);
+
+  protected readonly bulkUploadConfig: BulkUploadPreviewConfig = {
+    modelName: 'Item Categories',
+    requiredPaths: ['name', 'code', 'type'],
+    rootKey: 'itemCategory',
+    sampleRows: [
+      {
+        name: 'Electronics',
+        code: 'ELEC',
+        type: 'Product',
+        description: 'Electronic goods',
+        parent: '',
+        taxgroup: '',
+      },
+    ],
+    xlsxColumns: [
+      { header: 'Name', path: 'name' },
+      { header: 'Code', path: 'code' },
+      { header: 'Type', path: 'type' },
+      { header: 'Parent', path: 'parent' },
+      { header: 'Tax Group', path: 'taxgroup' },
+      { header: 'Description', path: 'description' },
+    ],
+    xlsxSheetName: 'Item Categories',
+    columns: [
+      bulkUploadTextColumn('name', 'Name', 'name', '12rem'),
+      bulkUploadTextColumn('code', 'Code', 'code', '8rem'),
+      bulkUploadTextColumn('type', 'Type', 'type', '8rem'),
+      bulkUploadTextColumn('parent', 'Parent', 'parent', '12rem'),
+      bulkUploadTextColumn('taxgroup', 'Tax group', 'taxgroup', '12rem'),
+      bulkUploadNamesColumn('description', 'Description', 'description'),
+    ],
+  };
 
   protected readonly columns: readonly TngTableColumn<ItemCategory>[] = [
     { id: 'name', label: 'Name', sortable: true, width: '14rem' },

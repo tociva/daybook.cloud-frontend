@@ -19,6 +19,7 @@
 
     <app-bulk-upload-button
       endpoint="/inventory/item-category/bulk-upload"
+      [config]="bulkUploadConfig"
       (uploaded)="reloadItemCategories()"
     />
 
@@ -76,11 +77,11 @@
         </ng-template>
 
         <ng-template tngTableCellTemplate="parent" let-row="row">
-          {{ row.parent?.name || '—' }}
+          {{ row.parent?.name || '' }}
         </ng-template>
 
         <ng-template tngTableCellTemplate="description" let-row="row">
-          {{ row.description || 'No description' }}
+          {{ row.description || '' }}
         </ng-template>
 
         <ng-template tngTableCellTemplate="actions" let-row="row">
