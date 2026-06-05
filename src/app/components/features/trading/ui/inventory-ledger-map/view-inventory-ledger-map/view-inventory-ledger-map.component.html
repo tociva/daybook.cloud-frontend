@@ -1,0 +1,56 @@
+<main class="trading-page">
+  <tng-card variant="outline" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Inventory Ledger Mapping Details</tng-card-title>
+      <tng-card-description>Review the entity scope and accounting ledger target.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (inventoryLedgerMapStore.error()) {
+        <div class="notice notice--danger">{{ inventoryLedgerMapStore.error() }}</div>
+      }
+
+      @if (inventoryLedgerMapStore.isLoading() && !inventoryLedgerMapStore.selectedItem()) {
+        <div class="notice">Loading mapping...</div>
+      } @else if (inventoryLedgerMapStore.selectedItem(); as item) {
+        <dl class="details-grid">
+          <div>
+            <dt>Fiscal Year</dt>
+            <dd>{{ fiscalYearName(item.fiscalyearid) }}</dd>
+          </div>
+          <div>
+            <dt>Entity Type</dt>
+            <dd>{{ formatEntityType(item.entitytype) }}</dd>
+          </div>
+          <div>
+            <dt>Entity</dt>
+            <dd>{{ entityName(item) }}</dd>
+          </div>
+          <div>
+            <dt>Ledger Type</dt>
+            <dd>{{ formatLedgerType(item.ledgertype) }}</dd>
+          </div>
+          <div class="wide">
+            <dt>Ledger</dt>
+            <dd>{{ ledgerName(item.ledgerid) }}</dd>
+          </div>
+          <div class="wide">
+            <dt>Props</dt>
+            <dd><pre>{{ propsJson(item) }}</pre></dd>
+          </div>
+        </dl>
+      } @else {
+        <div class="notice">Inventory ledger mapping not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button />
+        <app-burl-edit-button (clicked)="edit()" />
+        <app-burl-delete-button (clicked)="delete()" />
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>
+

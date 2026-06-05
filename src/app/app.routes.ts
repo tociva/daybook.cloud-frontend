@@ -34,6 +34,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'app/trading/inventory-ledger-map',
+    loadChildren: () =>
+      import(
+        './components/features/trading/ui/inventory-ledger-map/inventory-ledger-map.routes'
+      ).then((m) => m.inventoryLedgerMapRoutes),
+  },
+  {
     path: 'app/trading/tax',
     loadChildren: () =>
       import('./components/features/trading/ui/tax/tax.routes').then((m) => m.taxRoutes),

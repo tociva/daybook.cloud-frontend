@@ -17,6 +17,11 @@
       Categories
     </tng-button>
 
+    <tng-button type="button" appearance="outline" tone="neutral" (click)="showAllItems()">
+      <tng-icon icon="list-tree" aria-hidden="true" />
+      Show All
+    </tng-button>
+
     <app-bulk-upload-button endpoint="/inventory/item/bulk-upload" (uploaded)="reloadItems()" />
 
     <tng-button type="button" appearance="solid" tone="primary" (click)="createItem()">

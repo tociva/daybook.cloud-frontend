@@ -80,6 +80,10 @@ export class ListItemComponent {
     void this.router.navigate(['/app/trading/item-category']);
   }
 
+  protected showAllItems(): void {
+    void this.router.navigate(['/app/trading/item']);
+  }
+
   protected reloadItems(): void {
     void this.itemStore.loadItems({ ...this.crudQuery.filter(), includes: ['category'] });
   }

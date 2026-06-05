@@ -1,0 +1,157 @@
+<main class="trading-page">
+  <section class="setup-layout" aria-labelledby="mapping-setup-title">
+    <form class="mapping-form" (submit)="submitForm($event)" novalidate>
+      <tng-card variant="outline" padding="lg">
+        <tng-card-header>
+          <tng-card-title>{{ title() }}</tng-card-title>
+          <tng-card-description>
+            Choose the mapped entity, posting type, and accounting ledger.
+          </tng-card-description>
+        </tng-card-header>
+
+        <tng-card-content>
+          @if (inventoryLedgerMapStore.error()) {
+            <div class="notice notice--danger">{{ inventoryLedgerMapStore.error() }}</div>
+          }
+
+          @if (inventoryLedgerMapStore.isLoading() && mode() === 'edit' && !inventoryLedgerMapStore.selectedItem()) {
+            <div class="notice">Loading mapping...</div>
+          } @else {
+            <div class="field-grid">
+              <div class="field">
+                <tng-form-field labelPosition="above" [invalid]="fiscalYearError() !== null">
+                  <tng-label forId="ilm-fiscal-year" required>Fiscal Year</tng-label>
+                  <tng-autocomplete
+                    id="ilm-fiscal-year"
+                    placeholder="Search fiscal year"
+                    ariaLabel="Fiscal year"
+                    [options]="fiscalYearStore.items()"
+                    [value]="model().fiscalyearid"
+                    [getOptionValue]="fiscalYearOptionValue"
+                    [getOptionLabel]="fiscalYearOptionLabel"
+                    [trackBy]="fiscalYearTrackBy"
+                    (valueChange)="onFiscalYearChange($event)"
+                    (queryChange)="onFiscalYearQueryChange($event)"
+                  />
+                  <tng-error [show]="fiscalYearError() !== null">{{ fiscalYearError() }}</tng-error>
+                </tng-form-field>
+              </div>
+
+              <div class="field">
+                <tng-form-field labelPosition="above">
+                  <tng-label forId="ilm-entity-type" required>Entity Type</tng-label>
+                  <tng-select
+                    id="ilm-entity-type"
+                    [options]="entityTypeOptions"
+                    [getOptionLabel]="getOptionLabel"
+                    [getOptionValue]="getOptionValue"
+                    [trackBy]="trackByValue"
+                    [value]="model().entitytype"
+                    (valueChange)="onEntityTypeChange($event)"
+                  />
+                </tng-form-field>
+              </div>
+
+              @if (entityRequired()) {
+                <div class="field field--wide">
+                  <tng-form-field labelPosition="above" [invalid]="entityError() !== null">
+                    <tng-label forId="ilm-entity" required>Entity</tng-label>
+                    <tng-autocomplete
+                      id="ilm-entity"
+                      placeholder="Search entity"
+                      ariaLabel="Mapped entity"
+                      [options]="entityOptions()"
+                      [value]="model().entityid"
+                      [getOptionValue]="entityOptionValue"
+                      [getOptionLabel]="entityOptionLabel"
+                      [trackBy]="entityTrackBy"
+                      (valueChange)="onEntityChange($event)"
+                      (queryChange)="onEntityQueryChange($event)"
+                    />
+                    <tng-error [show]="entityError() !== null">{{ entityError() }}</tng-error>
+                  </tng-form-field>
+                </div>
+              }
+
+              <div class="field">
+                <tng-form-field labelPosition="above">
+                  <tng-label forId="ilm-ledger-type" required>Ledger Type</tng-label>
+                  <tng-select
+                    id="ilm-ledger-type"
+                    [options]="ledgerTypeOptions"
+                    [getOptionLabel]="getOptionLabel"
+                    [getOptionValue]="getOptionValue"
+                    [trackBy]="trackByValue"
+                    [value]="model().ledgertype"
+                    (valueChange)="onLedgerTypeChange($event)"
+                  />
+                </tng-form-field>
+              </div>
+
+              <div class="field">
+                <tng-form-field labelPosition="above" [invalid]="ledgerError() !== null">
+                  <tng-label forId="ilm-ledger" required>Ledger</tng-label>
+                  <tng-autocomplete
+                    id="ilm-ledger"
+                    placeholder="Search ledger"
+                    ariaLabel="Ledger"
+                    [options]="ledgerStore.items()"
+                    [value]="model().ledgerid"
+                    [getOptionValue]="ledgerOptionValue"
+                    [getOptionLabel]="ledgerOptionLabel"
+                    [trackBy]="ledgerTrackBy"
+                    (valueChange)="onLedgerChange($event)"
+                    (queryChange)="onLedgerQueryChange($event)"
+                  />
+                  <tng-error [show]="ledgerError() !== null">{{ ledgerError() }}</tng-error>
+                </tng-form-field>
+              </div>
+
+              <div class="field field--wide">
+                <tng-form-field labelPosition="above" [invalid]="propsError() !== null">
+                  <tng-label forId="ilm-props">Props</tng-label>
+                  <tng-textarea
+                    id="ilm-props"
+                    rows="5"
+                    [value]="model().propsJson"
+                    (valueChange)="onPropsChange($event)"
+                  />
+                  <tng-error [show]="propsError() !== null">{{ propsError() }}</tng-error>
+                </tng-form-field>
+              </div>
+            </div>
+
+            <tng-card-footer>
+              <tng-card-actions align="end">
+                <app-burl-back-button label="Cancel" />
+                <app-burl-create-button
+                  [icon]="mode() === 'edit' ? 'save' : 'plus'"
+                  [label]="mode() === 'edit' ? 'Save changes' : 'Create mapping'"
+                  [disabled]="inventoryLedgerMapStore.isLoading()"
+                />
+              </tng-card-actions>
+            </tng-card-footer>
+          }
+        </tng-card-content>
+      </tng-card>
+    </form>
+
+    <aside class="setup-overview" aria-labelledby="mapping-setup-title">
+      <div class="setup-copy">
+        <p class="eyebrow">Ledger mapping</p>
+        <h1 id="mapping-setup-title">{{ title() }}</h1>
+        <p>
+          Store each mapping against a fiscal year, entity scope, ledger type, and ledger account.
+        </p>
+        <tng-stepper
+          class="setup-stepper"
+          ariaLabel="Inventory ledger mapping setup progress"
+          [ordered]="true"
+          [steps]="setupSteps()"
+          [value]="activeSetupStep()"
+        />
+      </div>
+    </aside>
+  </section>
+</main>
+

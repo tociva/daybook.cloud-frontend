@@ -1,0 +1,119 @@
+<main class="management-page">
+  <app-page-heading
+    eyebrow="Trading"
+    title="Inventory Ledger Mappings"
+    description="Map inventory entities and system posting types to accounting ledgers."
+  >
+    <app-crud-filter-popover
+      ariaLabel="Inventory ledger mapping filters"
+      title="Filter mappings"
+      [fields]="filterFields"
+      [filter]="crudQuery.filter()"
+      syncUrl
+    />
+
+    <tng-button type="button" appearance="solid" tone="primary" (click)="createInventoryLedgerMap()">
+      <tng-icon icon="plus" aria-hidden="true" />
+      New mapping
+    </tng-button>
+  </app-page-heading>
+
+  <tng-card variant="outline" padding="lg">
+    @if (inventoryLedgerMapStore.error()) {
+      <div class="notice notice--danger">{{ inventoryLedgerMapStore.error() }}</div>
+    }
+
+    <div class="table-stack">
+      @if (!inventoryLedgerMapStore.isLoading() && !hasError() && crudQuery.shouldShowEmptyState(inventoryLedgerMapStore.items().length, inventoryLedgerMapStore.count())) {
+        @if (crudQuery.hasActiveFilter()) {
+          <app-empty-state
+            icon="searchX"
+            title="No mappings match your filter"
+            description="Try adjusting or clearing your filter to find what you're looking for."
+          >
+            <tng-button type="button" appearance="outline" tone="neutral" (click)="crudQuery.clearFilter()">
+              Clear filter
+            </tng-button>
+          </app-empty-state>
+        } @else {
+          <app-empty-state
+            icon="gitBranch"
+            title="No mappings yet"
+            description="Create your first inventory ledger mapping."
+          >
+            <tng-button type="button" appearance="solid" tone="primary" (click)="createInventoryLedgerMap()">
+              <tng-icon icon="plus" aria-hidden="true" />
+              New mapping
+            </tng-button>
+          </app-empty-state>
+        }
+      } @else {
+        <tng-table
+          ariaLabel="Inventory ledger mappings"
+          density="comfortable"
+          [columns]="columns"
+          [items]="inventoryLedgerMapStore.items()"
+          [loading]="inventoryLedgerMapStore.isLoading()"
+          [error]="hasError()"
+          [sortActive]="crudQuery.sortActive()"
+          [sortDirection]="crudQuery.sortDirection()"
+          (sortChange)="crudQuery.applySort($event)"
+        >
+          <ng-template tngTableCellTemplate="fiscalyearid" let-row="row">
+            {{ fiscalYearName(row.fiscalyearid) }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="entitytype" let-row="row">
+            {{ formatEntityType(row.entitytype) }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="entityid" let-row="row">
+            {{ entityName(row) }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="ledgertype" let-row="row">
+            <button type="button" class="link-button" (click)="viewInventoryLedgerMap(row)">
+              {{ formatLedgerType(row.ledgertype) }}
+            </button>
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="ledgerid" let-row="row">
+            {{ ledgerName(row.ledgerid) }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="actions" let-row="row">
+            <div class="row-actions">
+              <app-table-row-icon-button
+                icon="eye"
+                ariaLabel="View mapping"
+                (action)="viewInventoryLedgerMap(row)"
+              />
+              <app-table-row-icon-button
+                icon="pencil"
+                ariaLabel="Edit mapping"
+                (action)="editInventoryLedgerMap(row)"
+              />
+              <app-table-row-icon-button
+                icon="trash2"
+                ariaLabel="Delete mapping"
+                tone="danger"
+                (action)="deleteInventoryLedgerMap(row)"
+              />
+            </div>
+          </ng-template>
+        </tng-table>
+
+        <div class="table-footer">
+          <app-crud-paginator
+            ariaLabel="Inventory ledger mapping pagination"
+            [filter]="crudQuery.filter()"
+            [totalItems]="inventoryLedgerMapStore.count()"
+            [pageSizeOptions]="crudQuery.pageSizeOptions()"
+            syncUrl
+          />
+        </div>
+      }
+    </div>
+  </tng-card>
+</main>
+
