@@ -16,14 +16,9 @@ export type LedgerReportRow = Readonly<{
   balanceCredit: number;
 }>;
 
-export type LedgerReportSummary = Readonly<{
-  openingDebit: number;
-  openingCredit: number;
-  runningDebit: number;
-  runningCredit: number;
-  closingDebit: number;
-  closingCredit: number;
-}>;
+import type { AccountingReportSummary } from '../../shared/accounting-report-summary.util';
+
+export type LedgerReportSummary = AccountingReportSummary;
 
 export type LedgerReportLedger = Readonly<{
   ledgerid: string;

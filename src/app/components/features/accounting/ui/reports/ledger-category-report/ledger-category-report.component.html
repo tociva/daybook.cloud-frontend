@@ -1,27 +1,27 @@
 <main class="management-page">
   <app-page-heading
     eyebrow="Accounting"
-    title="Ledger Report"
-    description="Account activity and running balance for the selected period"
+    title="Ledger Category Report"
+    description="Activity and running balance for a ledger category group in the selected period"
   >
-    <div class="ledger-filter">
+    <div class="category-filter">
       <tng-autocomplete
-        id="ledger-report-ledger"
-        placeholder="Search ledger..."
-        ariaLabel="Ledger"
-        [options]="autocompleteLedgers()"
-        [value]="selectedLedgerId()"
-        [getOptionValue]="ledgerOptionValue"
-        [getOptionLabel]="ledgerOptionLabel"
-        [trackBy]="ledgerTrackBy"
-        (valueChange)="onLedgerChange($event)"
-        (queryChange)="onLedgerQueryChange($event)"
+        id="ledger-category-report-category"
+        placeholder="Search ledger category..."
+        ariaLabel="Ledger category"
+        [options]="autocompleteCategories()"
+        [value]="selectedCategoryId()"
+        [getOptionValue]="categoryOptionValue"
+        [getOptionLabel]="categoryOptionLabel"
+        [trackBy]="categoryTrackBy"
+        (valueChange)="onCategoryChange($event)"
+        (queryChange)="onCategoryQueryChange($event)"
       />
     </div>
 
     <div class="date-filter">
       <app-fiscal-year-date-range-picker
-        id="ledger-report-date-range"
+        id="ledger-category-report-date-range"
         placeholder="Select report period"
         [fullWidth]="false"
         [value]="pickerValue()"
@@ -35,7 +35,7 @@
       appearance="outline"
       tone="neutral"
       (click)="onRefresh()"
-      [disabled]="isLoading() || !hasLedgerSelected() || !canViewLedgerReport()"
+      [disabled]="isLoading() || !hasCategorySelected() || !canViewLedgerCategoryReport()"
     >
       <tng-icon icon="refresh-cw" aria-hidden="true" />
       Refresh
@@ -43,18 +43,18 @@
   </app-page-heading>
 
   <tng-card variant="outline" padding="lg">
-    @if (!canViewLedgerReport()) {
+    @if (!canViewLedgerCategoryReport()) {
       <div class="notice notice--danger">
-        You do not have permission to view the ledger report.
+        You do not have permission to view the ledger category report.
       </div>
     } @else if (hasError()) {
       <div class="notice notice--danger">{{ displayError() }}</div>
-    } @else if (showSelectLedgerNotice()) {
+    } @else if (showSelectCategoryNotice()) {
       <div class="notice notice--info">
-        Select a ledger to view its report for the chosen period.
+        Select a ledger category to view its report for the chosen period.
       </div>
     } @else {
-      <div class="summary-grid" aria-label="Ledger report summary">
+      <div class="summary-grid" aria-label="Ledger category report summary">
         @for (metric of summaryMetrics(); track metric.id) {
         <section class="summary-metric">
           <h3 class="summary-metric-title">{{ metric.label }}</h3>
@@ -65,7 +65,7 @@
 
       <div class="table-stack">
         <tng-table
-          ariaLabel="Ledger report transactions"
+          ariaLabel="Ledger category report transactions"
           density="comfortable"
           layout="fixed"
           [columns]="columns"
@@ -74,19 +74,35 @@
           emptyText="No transactions in this period."
         >
           <ng-template tngTableCellTemplate="date" let-row="row">
-            <span class="ledger-report-cell">{{ formatDisplayDate(row.date) }}</span>
+            <span class="ledger-category-report-cell">{{ formatDisplayDate(row.date) }}</span>
           </ng-template>
 
           <ng-template tngTableCellTemplate="journalNumber" let-row="row">
-            <span class="ledger-report-cell">
+            <span class="ledger-category-report-cell">
               <button type="button" class="link-button" (click)="viewJournal(row.journalid)">
                 {{ row.journalNumber }}
               </button>
             </span>
           </ng-template>
 
+          <ng-template tngTableCellTemplate="ledgerName" let-row="row">
+            <span class="ledger-category-report-cell">
+              @if (canOpenLedgerReport()) {
+                <button type="button" class="link-button" (click)="openRowLedger(row.ledgerid)">
+                  {{ row.ledgerName }}
+                </button>
+              } @else {
+                {{ row.ledgerName }}
+              }
+            </span>
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="ledgerCategoryName" let-row="row">
+            <span class="ledger-category-report-cell">{{ row.ledgerCategoryName }}</span>
+          </ng-template>
+
           <ng-template tngTableCellTemplate="description" let-row="row">
-            <span class="ledger-report-cell">
+            <span class="ledger-category-report-cell">
               @if (row.description) {
                 <span class="truncate" [title]="row.description">{{ row.description }}</span>
               }
@@ -94,26 +110,30 @@
           </ng-template>
 
           <ng-template tngTableCellTemplate="debit" let-row="row">
-            <span class="ledger-report-cell num">{{ formatAmount()(row.debit) }}</span>
+            <span class="ledger-category-report-cell num">{{ formatAmount()(row.debit) }}</span>
           </ng-template>
 
           <ng-template tngTableCellTemplate="credit" let-row="row">
-            <span class="ledger-report-cell num">{{ formatAmount()(row.credit) }}</span>
+            <span class="ledger-category-report-cell num">{{ formatAmount()(row.credit) }}</span>
           </ng-template>
 
           <ng-template tngTableCellTemplate="oppositeLedgers" let-row="row">
-            <span class="ledger-report-cell opposite-ledgers">
+            <span class="ledger-category-report-cell opposite-ledgers">
               @if (row.oppositeLedgers.length === 0) {
                 —
               } @else {
                 @for (opposite of row.oppositeLedgers; track opposite.ledgerid; let last = $last) {
-                  <button
-                    type="button"
-                    class="link-button"
-                    (click)="openOppositeLedger(opposite.ledgerid)"
-                  >
+                  @if (canOpenLedgerReport()) {
+                    <button
+                      type="button"
+                      class="link-button"
+                      (click)="openOppositeLedger(opposite.ledgerid)"
+                    >
+                      {{ opposite.ledgerName }}
+                    </button>
+                  } @else {
                     {{ opposite.ledgerName }}
-                  </button>
+                  }
                   @if (!last) {
                     <span class="opposite-separator" aria-hidden="true">, </span>
                   }
@@ -123,7 +143,7 @@
           </ng-template>
 
           <ng-template tngTableCellTemplate="balance" let-row="row">
-            <span class="ledger-report-cell num">{{ formatRowBalance(row) }}</span>
+            <span class="ledger-category-report-cell num">{{ formatRowBalance(row) }}</span>
           </ng-template>
         </tng-table>
 

@@ -188,5 +188,12 @@ export const routes: Routes = [
         (m) => m.ledgerReportRoutes,
       ),
   },
+  {
+    path: 'app/accounting/reports/ledger-category',
+    loadChildren: () =>
+      import(
+        './components/features/accounting/ui/reports/ledger-category-report/ledger-category-report.routes'
+      ).then((m) => m.ledgerCategoryReportRoutes),
+  },
   { path: 'bootstrap/bootstrap-organization', component: BootstrapOrganizationComponent },
 ];

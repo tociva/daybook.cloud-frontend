@@ -21,16 +21,16 @@ import { PageHeadingComponent } from '../../../../../../shared/page-heading/page
 import { FiscalYearDateRangePickerComponent } from '../../../../../../shared/fiscal-year-date-range-picker';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { UserSessionStore } from '../../../../management/data/user-session/user-session.store';
-import type { LedgerReportRow } from '../../../data/ledger-report/ledger-report.model';
+import type { LedgerCategoryReportRow } from '../../../data/ledger-category-report/ledger-category-report.model';
 import {
   buildAccountingReportSummaryMetrics,
   type AccountingReportSummaryMetric,
 } from '../../../shared/accounting-report-summary.util';
 import { createReportAmountFormatter, formatNetBalance } from '../../../shared/report-amount.util';
-import { LedgerReportFacade } from './ledger-report.facade';
+import { LedgerCategoryReportFacade } from './ledger-category-report.facade';
 
 @Component({
-  selector: 'app-ledger-report',
+  selector: 'app-ledger-category-report',
   standalone: true,
   imports: [
     CommonModule,
@@ -43,13 +43,13 @@ import { LedgerReportFacade } from './ledger-report.facade';
     TngAutocompleteComponent,
     FiscalYearDateRangePickerComponent,
   ],
-  templateUrl: './ledger-report.component.html',
-  styleUrl: './ledger-report.component.css',
+  templateUrl: './ledger-category-report.component.html',
+  styleUrl: './ledger-category-report.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [LedgerReportFacade],
+  providers: [LedgerCategoryReportFacade],
 })
-export class LedgerReportComponent {
-  private readonly facade = inject(LedgerReportFacade);
+export class LedgerCategoryReportComponent {
+  private readonly facade = inject(LedgerCategoryReportFacade);
   private readonly dateManagement = inject(DateManagementService);
   private readonly userSessionStore = inject(UserSessionStore);
 
@@ -57,16 +57,17 @@ export class LedgerReportComponent {
   protected readonly displayError = this.facade.displayError;
   protected readonly generatedAt = this.facade.generatedAt;
   protected readonly tableRows = this.facade.tableRows;
-  protected readonly selectedLedgerId = this.facade.selectedLedgerId;
+  protected readonly selectedCategoryId = this.facade.selectedCategoryId;
   protected readonly pickerValue = this.facade.pickerValue;
-  protected readonly canViewLedgerReport = this.facade.canViewLedgerReport;
+  protected readonly canViewLedgerCategoryReport = this.facade.canViewLedgerCategoryReport;
+  protected readonly canOpenLedgerReport = this.facade.canOpenLedgerReport;
   protected readonly hasError = this.facade.hasError;
-  protected readonly hasLedgerSelected = this.facade.hasLedgerSelected;
-  protected readonly showSelectLedgerNotice = this.facade.showSelectLedgerNotice;
-  protected readonly autocompleteLedgers = this.facade.autocompleteLedgers;
-  protected readonly ledgerOptionValue = this.facade.ledgerOptionValue;
-  protected readonly ledgerOptionLabel = this.facade.ledgerOptionLabel;
-  protected readonly ledgerTrackBy = this.facade.ledgerTrackBy;
+  protected readonly hasCategorySelected = this.facade.hasCategorySelected;
+  protected readonly showSelectCategoryNotice = this.facade.showSelectCategoryNotice;
+  protected readonly autocompleteCategories = this.facade.autocompleteCategories;
+  protected readonly categoryOptionValue = this.facade.categoryOptionValue;
+  protected readonly categoryOptionLabel = this.facade.categoryOptionLabel;
+  protected readonly categoryTrackBy = this.facade.categoryTrackBy;
 
   protected readonly currencyMinorUnit = computed(() => {
     const currency = this.userSessionStore.session()?.fiscalyear?.currency;
@@ -90,13 +91,15 @@ export class LedgerReportComponent {
     ),
   );
 
-  protected readonly columns: readonly TngTableColumn<LedgerReportRow>[] = [
+  protected readonly columns: readonly TngTableColumn<LedgerCategoryReportRow>[] = [
     { id: 'date', label: 'Date', width: '7.5rem' },
-    { id: 'journalNumber', label: 'Journal #', width: '11rem' },
-    { id: 'oppositeLedgers', label: 'Against', width: '14rem' },
-    { id: 'debit', label: 'Debit', align: 'end', headerAlign: 'end', width: '8rem' },
-    { id: 'credit', label: 'Credit', align: 'end', headerAlign: 'end', width: '8rem' },
-    { id: 'balance', label: 'Balance', align: 'end', headerAlign: 'end', width: '9rem' },
+    { id: 'journalNumber', label: 'Journal #', width: '10rem' },
+    { id: 'ledgerName', label: 'Ledger', width: '12rem' },
+    { id: 'ledgerCategoryName', label: 'Category', width: '12rem' },
+    { id: 'oppositeLedgers', label: 'Against', width: '12rem' },
+    { id: 'debit', label: 'Debit', align: 'end', headerAlign: 'end', width: '7.5rem' },
+    { id: 'credit', label: 'Credit', align: 'end', headerAlign: 'end', width: '7.5rem' },
+    { id: 'balance', label: 'Balance', align: 'end', headerAlign: 'end', width: '8.5rem' },
     { id: 'description', label: 'Description', truncate: true },
   ];
 
@@ -108,12 +111,12 @@ export class LedgerReportComponent {
     this.facade.onPickerClosed();
   }
 
-  protected onLedgerQueryChange(query: string): void {
-    this.facade.onLedgerQueryChange(query);
+  protected onCategoryQueryChange(query: string): void {
+    this.facade.onCategoryQueryChange(query);
   }
 
-  protected onLedgerChange(ledgerid: string | null): void {
-    this.facade.onLedgerChange(ledgerid);
+  protected onCategoryChange(ledgercategoryid: string | null): void {
+    this.facade.onCategoryChange(ledgercategoryid);
   }
 
   protected onRefresh(): void {
@@ -127,12 +130,16 @@ export class LedgerReportComponent {
   protected readonly formatGeneratedAt = (value: string | null | undefined): string =>
     this.dateManagement.formatDisplayDateTime(value, '—');
 
-  protected formatRowBalance(row: LedgerReportRow): string {
+  protected formatRowBalance(row: LedgerCategoryReportRow): string {
     return formatNetBalance(row.balanceDebit, row.balanceCredit, this.formatAmount());
   }
 
   protected viewJournal(journalid: string): void {
     this.facade.viewJournal(journalid);
+  }
+
+  protected openRowLedger(ledgerid: string): void {
+    this.facade.openRowLedger(ledgerid);
   }
 
   protected openOppositeLedger(ledgerid: string): void {

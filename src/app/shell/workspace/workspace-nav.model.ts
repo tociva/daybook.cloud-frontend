@@ -47,6 +47,7 @@ export const workspaceSidebarMenu: readonly MenuNode[] = [
       { path: 'documents', name: 'Documents' },
       { path: 'reports/trial-balance', name: 'Trial balance' },
       { path: 'reports/ledger', name: 'Ledger report' },
+      { path: 'reports/ledger-category', name: 'Ledger category report' },
       { path: 'daybook', name: 'Daybook' },
       { path: 'reports/profit-loss', name: 'Profit and loss' },
       { path: 'reports/balance-sheet', name: 'Balance sheet' },

@@ -11,7 +11,7 @@
   max-width: 24rem;
 }
 
-.ledger-filter {
+.category-filter {
   max-width: 24rem;
   min-width: 16rem;
 }
@@ -51,18 +51,18 @@
   padding: 0;
 }
 
-.ledger-report-cell {
+.ledger-category-report-cell {
   display: block;
   min-height: 1.35em;
   min-width: 0;
 }
 
-.ledger-report-cell.num {
+.ledger-category-report-cell.num {
   font-family: 'Menlo', 'Monaco', monospace;
   font-size: 0.875rem;
 }
 
-.ledger-report-cell .truncate {
+.ledger-category-report-cell .truncate {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -122,7 +122,7 @@
 
 @media (max-width: 700px) {
   .date-filter,
-  .ledger-filter {
+  .category-filter {
     max-width: none;
     width: 100%;
   }

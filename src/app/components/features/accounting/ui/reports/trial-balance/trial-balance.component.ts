@@ -51,6 +51,7 @@ type TrialBalanceTreeRow = TrialBalanceAmounts & {
   children: TrialBalanceTreeRow[];
   key: string;
   kind: 'category' | 'ledger' | 'total';
+  ledgercategoryid?: string;
   ledgerid?: string;
   name: string;
 };
@@ -151,6 +152,9 @@ export class TrialBalanceComponent implements OnInit {
   protected readonly generatedAt = signal<string>('');
   protected readonly canOpenLedgerReport = computed(() =>
     hasAccountingReportPermission(this.permissionsStore.all(), 'ledgerReport'),
+  );
+  protected readonly canOpenLedgerCategoryReport = computed(() =>
+    hasAccountingReportPermission(this.permissionsStore.all(), 'ledgerCategoryReport'),
   );
   protected readonly expandedKeys = signal<readonly string[]>([]);
   private readonly expandedKeySet = computed(() => new Set(this.expandedKeys()));
@@ -416,6 +420,22 @@ export class TrialBalanceComponent implements OnInit {
     });
   }
 
+  protected onCategoryNameClick(row: TrialBalanceTreeRow, event: Event): void {
+    event.stopPropagation();
+    if (!row.ledgercategoryid || !this.canOpenLedgerCategoryReport()) return;
+
+    const params = this.queryParams();
+    void this.router.navigate(
+      ['/app/accounting/reports/ledger-category', row.ledgercategoryid],
+      {
+        queryParams: {
+          start: params.get('start'),
+          end: params.get('end'),
+        },
+      },
+    );
+  }
+
   private amountColumn(
     key: TrialBalanceAmountKey,
     label: string,
@@ -443,6 +463,7 @@ export class TrialBalanceComponent implements OnInit {
       children: [],
       key: `category:${category.id}`,
       kind: 'category',
+      ledgercategoryid: category.id,
       name: category.name,
     };
   }

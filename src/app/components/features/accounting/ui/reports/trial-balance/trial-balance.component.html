@@ -58,6 +58,12 @@
               <button type="button" class="link-button" (click)="onLedgerNameClick(row, $event)">
                 {{ row.name }}
               </button>
+            } @else if (
+              row.kind === 'category' && row.ledgercategoryid && canOpenLedgerCategoryReport()
+            ) {
+              <button type="button" class="link-button" (click)="onCategoryNameClick(row, $event)">
+                {{ row.name }}
+              </button>
             } @else {
               {{ row.name }}
             }
