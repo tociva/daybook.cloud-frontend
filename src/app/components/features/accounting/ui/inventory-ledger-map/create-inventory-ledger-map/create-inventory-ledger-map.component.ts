@@ -15,43 +15,19 @@ import {
   TngSelectComponent,
   TngStepperComponent,
 } from '@tailng-ui/components';
-import { DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS } from '../../../../../../util/constants';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
 import { LedgerStore } from '../../../data/ledger';
-import type { Ledger } from '../../../data/ledger';
-import { BankCashStore, type BankCash } from '../../../../trading/data/bank-cash';
-import { CustomerStore, type Customer } from '../../../../trading/data/customer';
 import {
   InventoryLedgerMapFacade,
   InventoryLedgerMapStore,
-  type InventoryLedgerEntityType,
-  type InventoryLedgerMapPayload,
-  type InventoryLedgerType,
 } from '../../../data/inventory-ledger-map';
-import { ItemStore, type Item } from '../../../../trading/data/item';
-import { TaxStore, type Tax } from '../../../../trading/data/tax';
-import { VendorStore, type Vendor } from '../../../../trading/data/vendor';
-import {
-  entityTypeOptions,
-  INVENTORY_LEDGER_TYPES_BY_ENTITY,
-  ledgerTypeOptions,
-} from '../inventory-ledger-map.labels';
-
-type SelectOption<T extends string = string> = Readonly<{ label: string; value: T }>;
-
-type MappingEntity = Customer | Vendor | Item | Tax | BankCash;
-
-type InventoryLedgerMapFormModel = {
-  entitytype: InventoryLedgerEntityType;
-  entityid: string;
-  ledgertype: InventoryLedgerType | null;
-  ledgerid: string;
-};
+import { InventoryLedgerMapDraftStore } from './inventory-ledger-map-draft.store';
 
 @Component({
   selector: 'app-create-inventory-ledger-map',
   standalone: true,
+  providers: [InventoryLedgerMapDraftStore],
   imports: [
     TngAutocompleteComponent,
     TngCardActionsComponent,
@@ -76,157 +52,29 @@ type InventoryLedgerMapFormModel = {
 export class CreateInventoryLedgerMapComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(InventoryLedgerMapFacade);
+  private readonly ledgerStore = inject(LedgerStore);
   protected readonly inventoryLedgerMapStore = inject(InventoryLedgerMapStore);
-  protected readonly ledgerStore = inject(LedgerStore);
-  protected readonly customerStore = inject(CustomerStore);
-  protected readonly vendorStore = inject(VendorStore);
-  protected readonly itemStore = inject(ItemStore);
-  protected readonly taxStore = inject(TaxStore);
-  protected readonly bankCashStore = inject(BankCashStore);
+  protected readonly draft = inject(InventoryLedgerMapDraftStore);
 
   protected readonly id = signal<string | null>(null);
-  protected readonly submitted = signal(false);
-
-  protected readonly entityTypeOptions = entityTypeOptions;
-  protected readonly ledgerTypeOptions = computed(() => {
-    const allowedTypes = INVENTORY_LEDGER_TYPES_BY_ENTITY[this.model().entitytype];
-    return ledgerTypeOptions.filter((option) => allowedTypes.includes(option.value));
-  });
-  protected readonly showLedgerType = computed(() => this.ledgerTypeOptions().length > 0);
-  protected readonly getOptionLabel = (option: SelectOption): string => option.label;
-  protected readonly getOptionValue = (option: SelectOption): string => option.value;
-  protected readonly trackByValue = (_i: number, option: SelectOption): string => option.value;
-
-  protected readonly model = signal<InventoryLedgerMapFormModel>({
-    entitytype: 'item',
-    entityid: '',
-    ledgertype: 'sale',
-    ledgerid: '',
-  });
-
   protected readonly mode = computed(() => (this.id() ? 'edit' : 'create'));
   protected readonly title = computed(() =>
     this.mode() === 'edit' ? 'Edit Inventory Ledger Mapping' : 'New Inventory Ledger Mapping',
   );
-  protected readonly entityRequired = computed(() => this.model().entitytype !== 'system');
-  protected readonly entityError = computed(() =>
-    this.submitted() && this.entityRequired() && !this.model().entityid
-      ? 'Entity is required.'
-      : null,
-  );
-  protected readonly ledgerError = computed(() =>
-    this.submitted() && !this.model().ledgerid ? 'Ledger is required.' : null,
-  );
-
-  protected readonly ledgerOptionValue = (item: Ledger): string => item.id ?? '';
-  protected readonly ledgerOptionLabel = (item: Ledger): string => item.name ?? '';
-  protected readonly ledgerTrackBy = (_i: number, item: Ledger): string => item.id ?? '';
-
-  protected readonly entityOptions = computed<readonly MappingEntity[]>(() => {
-    switch (this.model().entitytype) {
-      case 'customer':
-        return this.customerStore.items();
-      case 'vendor':
-        return this.vendorStore.items();
-      case 'item':
-        return this.itemStore.items();
-      case 'tax':
-        return this.taxStore.items();
-      case 'bankCash':
-        return this.bankCashStore.items();
-      case 'system':
-      default:
-        return [];
-    }
-  });
-  protected readonly entityOptionValue = (item: MappingEntity): string => item.id ?? '';
-  protected readonly entityOptionLabel = (item: MappingEntity): string =>
-    'displayname' in item ? item.displayname || item.name : item.name;
-  protected readonly entityTrackBy = (_i: number, item: MappingEntity): string => item.id ?? '';
-
-  protected readonly setupSteps = computed(() => {
-    const m = this.model();
-    return [
-      {
-        value: 'scope',
-        label: 'Scope',
-        description: 'Mapped entity',
-        completed: !this.entityRequired() || !!m.entityid,
-      },
-      {
-        value: 'ledger',
-        label: 'Ledger',
-        description: 'Posting type and ledger account',
-        completed: (!this.showLedgerType() || !!m.ledgertype) && !!m.ledgerid,
-      },
-    ] as const;
-  });
-  protected readonly activeSetupStep = computed(
-    () => this.setupSteps().find((step) => !step.completed)?.value ?? 'ledger',
-  );
-
-  private ledgerSearchTimer: ReturnType<typeof setTimeout> | null = null;
-  private entitySearchTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     void this.loadInitialState();
   }
 
-  protected onEntityTypeChange(value: unknown): void {
-    const entitytype = this.resolveEntityType(value);
-    const ledgerTypes = INVENTORY_LEDGER_TYPES_BY_ENTITY[entitytype];
-    this.model.update((m) => ({
-      ...m,
-      entitytype,
-      entityid: entitytype === 'system' ? '' : m.entitytype === entitytype ? m.entityid : '',
-      ledgertype: ledgerTypes.length > 0 ? ledgerTypes[0] : null,
-    }));
-    void this.loadEntities(entitytype);
-  }
-
-  protected onEntityChange(value: unknown): void {
-    this.model.update((m) => ({ ...m, entityid: typeof value === 'string' ? value : '' }));
-  }
-
-  protected onEntityQueryChange(value: unknown): void {
-    const query = this.normalizeQuery(value);
-    if (this.entitySearchTimer) clearTimeout(this.entitySearchTimer);
-    this.entitySearchTimer = setTimeout(() => {
-      void this.loadEntities(this.model().entitytype, query);
-    }, DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS);
-  }
-
-  protected onLedgerTypeChange(value: unknown): void {
-    this.model.update((m) => ({ ...m, ledgertype: this.resolveLedgerType(value) }));
-  }
-
-  protected onLedgerChange(value: unknown): void {
-    this.model.update((m) => ({ ...m, ledgerid: typeof value === 'string' ? value : '' }));
-  }
-
-  protected onLedgerQueryChange(value: unknown): void {
-    const query = this.normalizeQuery(value);
-    if (this.ledgerSearchTimer) clearTimeout(this.ledgerSearchTimer);
-    this.ledgerSearchTimer = setTimeout(() => {
-      void this.ledgerStore.loadLedgers(this.nameQuery(query));
-    }, DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS);
-  }
-
   protected async submitForm(event: SubmitEvent): Promise<void> {
     event.preventDefault();
-    this.submitted.set(true);
+    this.draft.submitted.set(true);
 
-    if (this.entityError() || this.ledgerError()) return;
-
-    const m = this.model();
-    const payload: InventoryLedgerMapPayload = {
-      entitytype: m.entitytype,
-      entityid: m.entitytype === 'system' ? null : m.entityid,
-      ledgerid: m.ledgerid,
-      ...(this.showLedgerType() && m.ledgertype ? { ledgertype: m.ledgertype } : {}),
-    };
+    if (this.draft.entityError() || this.draft.ledgerError()) return;
 
     const currentId = this.id();
+    const payload = this.draft.buildPayload();
+
     if (currentId) {
       await this.facade.update(currentId, payload);
     } else {
@@ -236,9 +84,10 @@ export class CreateInventoryLedgerMapComponent {
 
   private async loadInitialState(): Promise<void> {
     this.inventoryLedgerMapStore.clearError();
+
     await Promise.all([
       this.ledgerStore.loadLedgers({ limit: 50, offset: 0 }),
-      this.loadEntities(this.model().entitytype),
+      this.draft.loadEntitiesForType(this.draft.entitytype()),
     ]);
 
     const id = this.route.snapshot.paramMap.get('id');
@@ -250,72 +99,14 @@ export class CreateInventoryLedgerMapComponent {
     }
 
     const cached = this.inventoryLedgerMapStore.selectedItem();
-    const item = cached?.id === id ? cached : await this.inventoryLedgerMapStore.loadInventoryLedgerMapById(id);
-    if (!item) return;
-
-    this.model.set({
-      entitytype: item.entitytype,
-      entityid: item.entityid ?? '',
-      ledgertype: this.resolveLedgerTypeForEntity(item.entitytype, item.ledgertype),
-      ledgerid: item.ledgerid,
-    });
-    await this.loadEntities(item.entitytype);
-  }
-
-  private async loadEntities(type: InventoryLedgerEntityType, query = ''): Promise<void> {
-    if (type === 'system') return;
-    const filter = this.nameQuery(query);
-    switch (type) {
-      case 'customer':
-        await this.customerStore.loadCustomers(filter);
-        break;
-      case 'vendor':
-        await this.vendorStore.loadVendors(filter);
-        break;
-      case 'item':
-        await this.itemStore.loadItems(filter);
-        break;
-      case 'tax':
-        await this.taxStore.loadTaxes(filter);
-        break;
-      case 'bankCash':
-        await this.bankCashStore.loadBankCashes(filter);
-        break;
+    if (cached?.id === id) {
+      await this.draft.patchFromMapping(cached);
+      return;
     }
-  }
 
-  private nameQuery(query: string): { limit: number; offset: number; where?: Record<string, unknown> } {
-    return query
-      ? { limit: 50, offset: 0, where: { name: { ilike: `%${query}%` } } }
-      : { limit: 50, offset: 0 };
-  }
-
-  private normalizeQuery(value: unknown): string {
-    return typeof value === 'string' ? value.trim() : '';
-  }
-
-  private resolveEntityType(value: unknown): InventoryLedgerEntityType {
-    return entityTypeOptions.some((option) => option.value === value)
-      ? (value as InventoryLedgerEntityType)
-      : 'item';
-  }
-
-  private resolveLedgerType(value: unknown): InventoryLedgerType {
-    return this.ledgerTypeOptions().some((option) => option.value === value)
-      ? (value as InventoryLedgerType)
-      : (this.defaultLedgerType(this.model().entitytype) ?? 'sale');
-  }
-
-  private defaultLedgerType(entitytype: InventoryLedgerEntityType): InventoryLedgerType | null {
-    return INVENTORY_LEDGER_TYPES_BY_ENTITY[entitytype][0] ?? null;
-  }
-
-  private resolveLedgerTypeForEntity(
-    entitytype: InventoryLedgerEntityType,
-    ledgertype: InventoryLedgerType | null | undefined,
-  ): InventoryLedgerType | null {
-    const allowedTypes = INVENTORY_LEDGER_TYPES_BY_ENTITY[entitytype];
-    if (ledgertype && allowedTypes.includes(ledgertype)) return ledgertype;
-    return allowedTypes[0] ?? null;
+    const item = await this.inventoryLedgerMapStore.loadInventoryLedgerMapById(id);
+    if (item) {
+      await this.draft.patchFromMapping(item);
+    }
   }
 }

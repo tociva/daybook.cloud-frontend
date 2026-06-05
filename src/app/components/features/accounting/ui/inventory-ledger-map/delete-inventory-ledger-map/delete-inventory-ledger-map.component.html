@@ -12,19 +12,25 @@
 
       @if (inventoryLedgerMapStore.isLoading() && !inventoryLedgerMapStore.selectedItem()) {
         <div class="notice">Loading mapping...</div>
-      } @else if (inventoryLedgerMapStore.selectedItem(); as item) {
+      } @else if (inventoryLedgerMapStore.selectedItem()) {
         <dl class="details-grid">
           <div>
             <dt>Entity Type</dt>
-            <dd>{{ formatEntityType(item.entitytype) }}</dd>
+            <dd>{{ draft.displayEntityType() }}</dd>
           </div>
           <div>
-            <dt>Ledger Type</dt>
-            <dd>{{ formatLedgerType(item.ledgertype) }}</dd>
+            <dt>Entity</dt>
+            <dd>{{ draft.displayEntityName() }}</dd>
           </div>
+          @if (draft.displayLedgerType()) {
+            <div>
+              <dt>Ledger Type</dt>
+              <dd>{{ draft.displayLedgerType() }}</dd>
+            </div>
+          }
           <div>
-            <dt>Ledger ID</dt>
-            <dd>{{ item.ledgerid }}</dd>
+            <dt>Ledger</dt>
+            <dd>{{ draft.displayLedgerName() }}</dd>
           </div>
         </dl>
 

@@ -23,70 +23,70 @@
                   <tng-label forId="ilm-entity-type" required>Entity Type</tng-label>
                   <tng-select
                     id="ilm-entity-type"
-                    [options]="entityTypeOptions"
-                    [getOptionLabel]="getOptionLabel"
-                    [getOptionValue]="getOptionValue"
-                    [trackBy]="trackByValue"
-                    [value]="model().entitytype"
-                    (valueChange)="onEntityTypeChange($event)"
+                    [options]="draft.entityTypeOptions"
+                    [getOptionLabel]="draft.getOptionLabel"
+                    [getOptionValue]="draft.getOptionValue"
+                    [trackBy]="draft.trackByValue"
+                    [value]="draft.entitytype()"
+                    (valueChange)="draft.onEntityTypeChange($event)"
                   />
                 </tng-form-field>
               </div>
 
-              @if (entityRequired()) {
+              @if (draft.entityRequired()) {
                 <div class="field">
-                  <tng-form-field labelPosition="above" [invalid]="entityError() !== null">
+                  <tng-form-field labelPosition="above" [invalid]="draft.entityError() !== null">
                     <tng-label forId="ilm-entity" required>Entity</tng-label>
                     <tng-autocomplete
                       id="ilm-entity"
                       placeholder="Search entity"
                       ariaLabel="Mapped entity"
-                      [options]="entityOptions()"
-                      [value]="model().entityid"
-                      [getOptionValue]="entityOptionValue"
-                      [getOptionLabel]="entityOptionLabel"
-                      [trackBy]="entityTrackBy"
-                      (valueChange)="onEntityChange($event)"
-                      (queryChange)="onEntityQueryChange($event)"
+                      [options]="draft.entityAutocompleteOptions()"
+                      [value]="draft.entityid()"
+                      [getOptionValue]="draft.entityOptionValue"
+                      [getOptionLabel]="draft.entityOptionLabel"
+                      [trackBy]="draft.entityTrackBy"
+                      (valueChange)="draft.onEntityChange($event)"
+                      (queryChange)="draft.onEntityQueryChange($event)"
                     />
-                    <tng-error [show]="entityError() !== null">{{ entityError() }}</tng-error>
+                    <tng-error [show]="draft.entityError() !== null">{{ draft.entityError() }}</tng-error>
                   </tng-form-field>
                 </div>
               }
 
-              @if (showLedgerType()) {
+              @if (draft.showLedgerType()) {
                 <div class="field">
                   <tng-form-field labelPosition="above">
                     <tng-label forId="ilm-ledger-type" required>Ledger Type</tng-label>
                     <tng-select
                       id="ilm-ledger-type"
-                      [options]="ledgerTypeOptions()"
-                      [getOptionLabel]="getOptionLabel"
-                      [getOptionValue]="getOptionValue"
-                      [trackBy]="trackByValue"
-                      [value]="model().ledgertype"
-                      (valueChange)="onLedgerTypeChange($event)"
+                      [options]="draft.ledgerTypeOptions()"
+                      [getOptionLabel]="draft.getOptionLabel"
+                      [getOptionValue]="draft.getOptionValue"
+                      [trackBy]="draft.trackByValue"
+                      [value]="draft.ledgertype()"
+                      (valueChange)="draft.onLedgerTypeChange($event)"
                     />
                   </tng-form-field>
                 </div>
               }
 
-              <div class="field">
-                <tng-form-field labelPosition="above" [invalid]="ledgerError() !== null">
+              <div class="field" (focusin)="draft.onLedgerAutocompleteFocus()">
+                <tng-form-field labelPosition="above" [invalid]="draft.ledgerError() !== null">
                   <tng-label forId="ilm-ledger" required>Ledger</tng-label>
                   <tng-autocomplete
                     id="ilm-ledger"
                     placeholder="Search ledger"
                     ariaLabel="Ledger"
-                    [options]="ledgerStore.items()"
-                    [value]="model().ledgerid"
-                    [getOptionValue]="ledgerOptionValue"
-                    [getOptionLabel]="ledgerOptionLabel"
-                    [trackBy]="ledgerTrackBy"
-                    (valueChange)="onLedgerChange($event)"
-                    (queryChange)="onLedgerQueryChange($event)"
+                    [options]="draft.ledgerAutocompleteOptions()"
+                    [value]="draft.ledgerid()"
+                    [getOptionValue]="draft.ledgerOptionValue"
+                    [getOptionLabel]="draft.ledgerOptionLabel"
+                    [trackBy]="draft.ledgerTrackBy"
+                    (valueChange)="draft.onLedgerChange($event)"
+                    (queryChange)="draft.onLedgerQueryChange($event)"
                   />
-                  <tng-error [show]="ledgerError() !== null">{{ ledgerError() }}</tng-error>
+                  <tng-error [show]="draft.ledgerError() !== null">{{ draft.ledgerError() }}</tng-error>
                 </tng-form-field>
               </div>
             </div>
@@ -117,8 +117,8 @@
           class="setup-stepper"
           ariaLabel="Inventory ledger mapping setup progress"
           [ordered]="true"
-          [steps]="setupSteps()"
-          [value]="activeSetupStep()"
+          [steps]="draft.setupSteps()"
+          [value]="draft.activeSetupStep()"
         />
       </div>
     </aside>

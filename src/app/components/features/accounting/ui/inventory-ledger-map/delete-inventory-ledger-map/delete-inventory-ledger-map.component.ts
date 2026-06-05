@@ -16,14 +16,12 @@ import {
   InventoryLedgerMapFacade,
   InventoryLedgerMapStore,
 } from '../../../data/inventory-ledger-map';
-import {
-  formatInventoryLedgerEntityType,
-  formatInventoryLedgerType,
-} from '../inventory-ledger-map.labels';
+import { InventoryLedgerMapDraftStore } from '../create-inventory-ledger-map/inventory-ledger-map-draft.store';
 
 @Component({
   selector: 'app-delete-inventory-ledger-map',
   standalone: true,
+  providers: [InventoryLedgerMapDraftStore],
   imports: [
     TngCardActionsComponent,
     TngCardComponent,
@@ -44,18 +42,11 @@ export class DeleteInventoryLedgerMapComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(InventoryLedgerMapFacade);
   protected readonly inventoryLedgerMapStore = inject(InventoryLedgerMapStore);
+  protected readonly draft = inject(InventoryLedgerMapDraftStore);
   protected readonly confirmed = signal(false);
 
   constructor() {
     void this.loadInitialState();
-  }
-
-  protected formatEntityType(value: string): string {
-    return formatInventoryLedgerEntityType(value);
-  }
-
-  protected formatLedgerType(value: string | null | undefined): string {
-    return formatInventoryLedgerType(value);
   }
 
   protected async deleteInventoryLedgerMap(): Promise<void> {
@@ -66,9 +57,16 @@ export class DeleteInventoryLedgerMapComponent {
 
   private async loadInitialState(): Promise<void> {
     this.inventoryLedgerMapStore.clearError();
+
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) return;
-    if (this.inventoryLedgerMapStore.selectedItem()?.id === id) return;
-    await this.inventoryLedgerMapStore.loadInventoryLedgerMapById(id);
+
+    const cached = this.inventoryLedgerMapStore.selectedItem();
+    const item =
+      cached?.id === id ? cached : await this.inventoryLedgerMapStore.loadInventoryLedgerMapById(id);
+
+    if (item) {
+      await this.draft.patchFromMapping(item);
+    }
   }
 }
