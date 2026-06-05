@@ -123,7 +123,7 @@ export class ListItemComponent {
   }
 
   protected showAllItems(): void {
-    void this.router.navigate(['/app/trading/item']);
+    void this.router.navigate(['/app/trading/item/tree-view']);
   }
 
   protected reloadItems(): void {

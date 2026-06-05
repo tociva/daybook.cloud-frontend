@@ -1,0 +1,50 @@
+.trading-page {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.25rem;
+}
+
+.notice {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  color: var(--tng-semantic-foreground-primary);
+  padding: 1rem;
+}
+
+.notice--danger {
+  border-color: var(--tng-semantic-accent-danger);
+}
+
+.table-stack {
+  display: grid;
+  gap: 1rem;
+}
+
+:host ::ng-deep .tng-tree-table {
+  table-layout: fixed;
+}
+
+:host ::ng-deep .item-tree-name-cell {
+  color: var(--color-text-primary);
+  min-width: 0;
+}
+
+:host ::ng-deep .item-tree-name-cell .tng-tree-table__cell-content {
+  overflow-wrap: anywhere;
+}
+
+:host ::ng-deep .item-tree-category-cell {
+  font-weight: 650;
+}
+
+:host ::ng-deep .item-tree-item-cell {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.row-actions {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.35rem;
+  justify-content: flex-end;
+}

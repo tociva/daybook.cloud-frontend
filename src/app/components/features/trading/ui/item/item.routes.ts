@@ -11,6 +11,11 @@ export const itemRoutes: Routes = [
       import('./create-item/create-item.component').then((m) => m.CreateItemComponent),
   },
   {
+    path: 'tree-view',
+    loadComponent: () =>
+      import('./tree-view-item/tree-view-item.component').then((m) => m.TreeViewItemComponent),
+  },
+  {
     path: ':id',
     loadComponent: () => import('./view-item/view-item.component').then((m) => m.ViewItemComponent),
   },

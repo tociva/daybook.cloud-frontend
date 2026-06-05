@@ -1,0 +1,110 @@
+<main class="trading-page">
+  <app-page-heading
+    eyebrow="Trading"
+    title="Item Tree View"
+    description="Browse items within their category hierarchy."
+  >
+    <tng-button
+      type="button"
+      appearance="outline"
+      tone="neutral"
+      (click)="onRefresh()"
+      [disabled]="isLoading()"
+    >
+      <tng-icon icon="refresh-cw" aria-hidden="true" />
+      Refresh
+    </tng-button>
+
+    <tng-button type="button" appearance="solid" tone="primary" (click)="createItemCategory()">
+      <tng-icon icon="plus" aria-hidden="true" />
+      New category
+    </tng-button>
+
+    <tng-button type="button" appearance="solid" tone="primary" (click)="createItem()">
+      <tng-icon icon="plus" aria-hidden="true" />
+      New item
+    </tng-button>
+  </app-page-heading>
+
+  <tng-card variant="outline" padding="lg">
+    @if (hasError()) {
+      <div class="notice notice--danger">{{ displayError() }}</div>
+    }
+
+    @if (!hasError()) {
+      @if (!isLoading() && treeData().length === 0) {
+        <app-empty-state
+          icon="package"
+          title="No items or categories yet"
+          description="Get started by creating an item category or item."
+        >
+          <tng-button type="button" appearance="solid" tone="primary" (click)="createItem()">
+            <tng-icon icon="plus" aria-hidden="true" />
+            New item
+          </tng-button>
+        </app-empty-state>
+      } @else {
+        <div class="table-stack">
+          <tng-tree-table
+            ariaLabel="Item tree view"
+            density="comfortable"
+            [columns]="columns"
+            [data]="treeData()"
+            [loading]="isLoading()"
+            loadingText="Loading items..."
+            emptyText="No items or categories found."
+            treeColumnKey="name"
+            [expandOnRowClick]="true"
+            [expandedKeys]="expandedKeys()"
+            [getKey]="getTreeRowKey"
+            [getChildren]="getTreeRowChildren"
+            [rowClass]="getTreeRowClass"
+            (expandedKeysChange)="onExpandedKeysChange($event)"
+          >
+            <ng-template tngTreeTableCellTemplate="actions" let-row="row">
+              @if (shouldShowRowActions(row)) {
+                <div class="row-actions" (click)="$event.stopPropagation()">
+                  @if (row.kind === 'item') {
+                    <app-table-row-icon-button
+                      icon="eye"
+                      ariaLabel="View item"
+                      (action)="viewItem(row)"
+                    />
+                    <app-table-row-icon-button
+                      icon="pencil"
+                      ariaLabel="Edit item"
+                      (action)="editItem(row)"
+                    />
+                    <app-table-row-icon-button
+                      icon="trash2"
+                      ariaLabel="Delete item"
+                      tone="danger"
+                      (action)="deleteItem(row)"
+                    />
+                  } @else {
+                    <app-table-row-icon-button
+                      icon="eye"
+                      ariaLabel="View item category"
+                      (action)="viewItemCategory(row)"
+                    />
+                    <app-table-row-icon-button
+                      icon="pencil"
+                      ariaLabel="Edit item category"
+                      (action)="editItemCategory(row)"
+                    />
+                    <app-table-row-icon-button
+                      icon="trash2"
+                      ariaLabel="Delete item category"
+                      tone="danger"
+                      (action)="deleteItemCategory(row)"
+                    />
+                  }
+                </div>
+              }
+            </ng-template>
+          </tng-tree-table>
+        </div>
+      }
+    }
+  </tng-card>
+</main>
