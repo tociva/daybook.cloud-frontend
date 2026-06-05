@@ -26,7 +26,6 @@ export const workspaceSidebarMenu: readonly MenuNode[] = [
     defaultPath: 'sale-invoice',
     children: [
       { path: 'bank-cash', name: 'Bank & Cash' },
-      { path: 'inventory-ledger-map', name: 'Ledger Mapping' },
       { path: 'tax', name: 'Tax' },
       { path: 'item', name: 'Item' },
       { path: 'customer', name: 'Customer' },
@@ -53,6 +52,7 @@ export const workspaceSidebarMenu: readonly MenuNode[] = [
       { path: 'reports/profit-loss', name: 'Profit and loss' },
       { path: 'reports/balance-sheet', name: 'Balance sheet' },
       { path: 'banking', name: 'Banking' },
+      { path: 'inventory-ledger-map', name: 'Ledger Mapping' },
     ],
   },
   {

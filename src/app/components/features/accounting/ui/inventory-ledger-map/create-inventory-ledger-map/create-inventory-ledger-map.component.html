@@ -1,4 +1,4 @@
-<main class="trading-page">
+<main class="management-page">
   <section class="setup-layout" aria-labelledby="mapping-setup-title">
     <form class="mapping-form" (submit)="submitForm($event)" novalidate>
       <tng-card variant="outline" padding="lg">
@@ -18,25 +18,6 @@
             <div class="notice">Loading mapping...</div>
           } @else {
             <div class="field-grid">
-              <div class="field">
-                <tng-form-field labelPosition="above" [invalid]="fiscalYearError() !== null">
-                  <tng-label forId="ilm-fiscal-year" required>Fiscal Year</tng-label>
-                  <tng-autocomplete
-                    id="ilm-fiscal-year"
-                    placeholder="Search fiscal year"
-                    ariaLabel="Fiscal year"
-                    [options]="fiscalYearStore.items()"
-                    [value]="model().fiscalyearid"
-                    [getOptionValue]="fiscalYearOptionValue"
-                    [getOptionLabel]="fiscalYearOptionLabel"
-                    [trackBy]="fiscalYearTrackBy"
-                    (valueChange)="onFiscalYearChange($event)"
-                    (queryChange)="onFiscalYearQueryChange($event)"
-                  />
-                  <tng-error [show]="fiscalYearError() !== null">{{ fiscalYearError() }}</tng-error>
-                </tng-form-field>
-              </div>
-
               <div class="field">
                 <tng-form-field labelPosition="above">
                   <tng-label forId="ilm-entity-type" required>Entity Type</tng-label>
@@ -73,20 +54,22 @@
                 </div>
               }
 
-              <div class="field">
-                <tng-form-field labelPosition="above">
-                  <tng-label forId="ilm-ledger-type" required>Ledger Type</tng-label>
-                  <tng-select
-                    id="ilm-ledger-type"
-                    [options]="ledgerTypeOptions"
-                    [getOptionLabel]="getOptionLabel"
-                    [getOptionValue]="getOptionValue"
-                    [trackBy]="trackByValue"
-                    [value]="model().ledgertype"
-                    (valueChange)="onLedgerTypeChange($event)"
-                  />
-                </tng-form-field>
-              </div>
+              @if (showLedgerType()) {
+                <div class="field">
+                  <tng-form-field labelPosition="above">
+                    <tng-label forId="ilm-ledger-type" required>Ledger Type</tng-label>
+                    <tng-select
+                      id="ilm-ledger-type"
+                      [options]="ledgerTypeOptions()"
+                      [getOptionLabel]="getOptionLabel"
+                      [getOptionValue]="getOptionValue"
+                      [trackBy]="trackByValue"
+                      [value]="model().ledgertype"
+                      (valueChange)="onLedgerTypeChange($event)"
+                    />
+                  </tng-form-field>
+                </div>
+              }
 
               <div class="field">
                 <tng-form-field labelPosition="above" [invalid]="ledgerError() !== null">
@@ -104,19 +87,6 @@
                     (queryChange)="onLedgerQueryChange($event)"
                   />
                   <tng-error [show]="ledgerError() !== null">{{ ledgerError() }}</tng-error>
-                </tng-form-field>
-              </div>
-
-              <div class="field field--wide">
-                <tng-form-field labelPosition="above" [invalid]="propsError() !== null">
-                  <tng-label forId="ilm-props">Props</tng-label>
-                  <tng-textarea
-                    id="ilm-props"
-                    rows="5"
-                    [value]="model().propsJson"
-                    (valueChange)="onPropsChange($event)"
-                  />
-                  <tng-error [show]="propsError() !== null">{{ propsError() }}</tng-error>
                 </tng-form-field>
               </div>
             </div>
@@ -141,7 +111,7 @@
         <p class="eyebrow">Ledger mapping</p>
         <h1 id="mapping-setup-title">{{ title() }}</h1>
         <p>
-          Store each mapping against a fiscal year, entity scope, ledger type, and ledger account.
+          Store each mapping against an entity scope, posting type, and ledger account.
         </p>
         <tng-stepper
           class="setup-stepper"
@@ -154,4 +124,3 @@
     </aside>
   </section>
 </main>
-

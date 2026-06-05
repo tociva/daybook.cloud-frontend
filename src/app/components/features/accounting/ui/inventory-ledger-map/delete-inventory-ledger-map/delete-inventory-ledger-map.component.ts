@@ -54,7 +54,7 @@ export class DeleteInventoryLedgerMapComponent {
     return formatInventoryLedgerEntityType(value);
   }
 
-  protected formatLedgerType(value: string): string {
+  protected formatLedgerType(value: string | null | undefined): string {
     return formatInventoryLedgerType(value);
   }
 
@@ -72,4 +72,3 @@ export class DeleteInventoryLedgerMapComponent {
     await this.inventoryLedgerMapStore.loadInventoryLedgerMapById(id);
   }
 }
-

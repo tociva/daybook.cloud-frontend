@@ -1,8 +1,8 @@
-<main class="trading-page">
-  <tng-card variant="outline" tone="danger" padding="lg">
+<main class="management-page">
+  <tng-card variant="outline" padding="lg">
     <tng-card-header>
-      <tng-card-title>Delete Inventory Ledger Mapping</tng-card-title>
-      <tng-card-description>This action cannot be undone.</tng-card-description>
+      <tng-card-title>Inventory Ledger Mapping Details</tng-card-title>
+      <tng-card-description>Review the entity scope and accounting ledger target.</tng-card-description>
     </tng-card-header>
 
     <tng-card-content>
@@ -15,23 +15,30 @@
       } @else if (inventoryLedgerMapStore.selectedItem(); as item) {
         <dl class="details-grid">
           <div>
+            <dt>Fiscal Year</dt>
+            <dd>{{ fiscalYearName(item.fiscalyearid) }}</dd>
+          </div>
+          <div>
             <dt>Entity Type</dt>
             <dd>{{ formatEntityType(item.entitytype) }}</dd>
+          </div>
+          <div>
+            <dt>Entity</dt>
+            <dd>{{ entityName(item) }}</dd>
           </div>
           <div>
             <dt>Ledger Type</dt>
             <dd>{{ formatLedgerType(item.ledgertype) }}</dd>
           </div>
-          <div>
-            <dt>Ledger ID</dt>
-            <dd>{{ item.ledgerid }}</dd>
+          <div class="wide">
+            <dt>Ledger</dt>
+            <dd>{{ ledgerName(item.ledgerid) }}</dd>
+          </div>
+          <div class="wide">
+            <dt>Props</dt>
+            <dd><pre>{{ propsJson(item) }}</pre></dd>
           </div>
         </dl>
-
-        <label class="confirm-row">
-          <tng-checkbox [checked]="confirmed()" (checkedChange)="confirmed.set(!!$event)" />
-          <span>I understand that this mapping will be permanently deleted.</span>
-        </label>
       } @else {
         <div class="notice">Inventory ledger mapping not found.</div>
       }
@@ -39,14 +46,10 @@
 
     <tng-card-footer>
       <tng-card-actions align="end">
-        <app-burl-back-button label="Cancel" />
-        <app-burl-delete-button
-          [label]="inventoryLedgerMapStore.isLoading() ? 'Deleting…' : 'Delete mapping'"
-          [disabled]="!confirmed() || inventoryLedgerMapStore.isLoading()"
-          (clicked)="deleteInventoryLedgerMap()"
-        />
+        <app-burl-back-button />
+        <app-burl-edit-button (clicked)="edit()" />
+        <app-burl-delete-button (clicked)="delete()" />
       </tng-card-actions>
     </tng-card-footer>
   </tng-card>
 </main>
-

@@ -50,7 +50,7 @@ export const BootstrapOrganizationStore = signalStore(
 
       try {
         const organization = await api.post<Organization, BootstrapOrganizationPayload>(
-          `${apiBaseUrl.replace(/\/$/, '')}/organization/organization/bootstrap-with-data`,
+          `${apiBaseUrl.replace(/\/$/, '')}/organization/organization/bootstrap`,
           payload,
         );
 

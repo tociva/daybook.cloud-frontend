@@ -13,14 +13,14 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
 import { BurlDeleteButtonComponent } from '../../../../../../shared/burl-delete-button/burl-delete-button.component';
 import { BurlEditButtonComponent } from '../../../../../../shared/burl-edit-button/burl-edit-button.component';
-import { LedgerStore } from '../../../../accounting/data/ledger';
+import { LedgerStore } from '../../../data/ledger';
 import { FiscalYearStore } from '../../../../management/data/fiscal-year/fiscal-year.store';
-import { BankCashStore } from '../../../data/bank-cash';
-import { CustomerStore } from '../../../data/customer';
+import { BankCashStore } from '../../../../trading/data/bank-cash';
+import { CustomerStore } from '../../../../trading/data/customer';
 import { InventoryLedgerMapStore, type InventoryLedgerMap } from '../../../data/inventory-ledger-map';
-import { ItemStore } from '../../../data/item';
-import { TaxStore } from '../../../data/tax';
-import { VendorStore } from '../../../data/vendor';
+import { ItemStore } from '../../../../trading/data/item';
+import { TaxStore } from '../../../../trading/data/tax';
+import { VendorStore } from '../../../../trading/data/vendor';
 import {
   formatInventoryLedgerEntityType,
   formatInventoryLedgerType,
@@ -74,7 +74,7 @@ export class ViewInventoryLedgerMapComponent {
   protected edit(): void {
     const id = this.inventoryLedgerMapStore.selectedItem()?.id;
     if (!id) return;
-    void this.router.navigate(['/app/trading/inventory-ledger-map', id, 'edit'], {
+    void this.router.navigate(['/app/accounting/inventory-ledger-map', id, 'edit'], {
       queryParams: { burl: this.burlNavigation.getBackUrl() },
     });
   }
@@ -82,7 +82,7 @@ export class ViewInventoryLedgerMapComponent {
   protected delete(): void {
     const id = this.inventoryLedgerMapStore.selectedItem()?.id;
     if (!id) return;
-    void this.router.navigate(['/app/trading/inventory-ledger-map', id, 'delete'], {
+    void this.router.navigate(['/app/accounting/inventory-ledger-map', id, 'delete'], {
       queryParams: { burl: this.burlNavigation.getBackUrl() },
     });
   }
@@ -91,11 +91,12 @@ export class ViewInventoryLedgerMapComponent {
     return formatInventoryLedgerEntityType(value);
   }
 
-  protected formatLedgerType(value: string): string {
+  protected formatLedgerType(value: string | null | undefined): string {
     return formatInventoryLedgerType(value);
   }
 
-  protected fiscalYearName(id: string): string {
+  protected fiscalYearName(id: string | null | undefined): string {
+    if (!id) return 'Session fiscal year';
     return this.fiscalYearNameById().get(id) ?? id;
   }
 
@@ -161,4 +162,3 @@ export class ViewInventoryLedgerMapComponent {
     return map;
   }
 }
-

@@ -17,15 +17,15 @@ import type { CrudFilterField } from '../../../../../../shared/crud';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
-import { LedgerStore } from '../../../../accounting/data/ledger';
+import { LedgerStore } from '../../../data/ledger';
 import { FiscalYearStore } from '../../../../management/data/fiscal-year/fiscal-year.store';
-import { BankCashStore } from '../../../data/bank-cash';
-import { CustomerStore } from '../../../data/customer';
+import { BankCashStore } from '../../../../trading/data/bank-cash';
+import { CustomerStore } from '../../../../trading/data/customer';
 import { InventoryLedgerMapStore } from '../../../data/inventory-ledger-map';
 import type { InventoryLedgerMap } from '../../../data/inventory-ledger-map';
-import { ItemStore } from '../../../data/item';
-import { TaxStore } from '../../../data/tax';
-import { VendorStore } from '../../../data/vendor';
+import { ItemStore } from '../../../../trading/data/item';
+import { TaxStore } from '../../../../trading/data/tax';
+import { VendorStore } from '../../../../trading/data/vendor';
 import {
   entityTypeOptions,
   formatInventoryLedgerEntityType,
@@ -108,7 +108,7 @@ export class ListInventoryLedgerMapComponent {
   }
 
   protected createInventoryLedgerMap(): void {
-    void this.router.navigate(['/app/trading/inventory-ledger-map/create'], {
+    void this.router.navigate(['/app/accounting/inventory-ledger-map/create'], {
       queryParams: { burl: this.router.url },
     });
   }
@@ -116,7 +116,7 @@ export class ListInventoryLedgerMapComponent {
   protected viewInventoryLedgerMap(item: InventoryLedgerMap): void {
     if (!item.id) return;
     this.inventoryLedgerMapStore.setSelectedItem(item);
-    void this.router.navigate(['/app/trading/inventory-ledger-map', item.id], {
+    void this.router.navigate(['/app/accounting/inventory-ledger-map', item.id], {
       queryParams: { burl: this.router.url },
     });
   }
@@ -124,7 +124,7 @@ export class ListInventoryLedgerMapComponent {
   protected editInventoryLedgerMap(item: InventoryLedgerMap): void {
     if (!item.id) return;
     this.inventoryLedgerMapStore.setSelectedItem(item);
-    void this.router.navigate(['/app/trading/inventory-ledger-map', item.id, 'edit'], {
+    void this.router.navigate(['/app/accounting/inventory-ledger-map', item.id, 'edit'], {
       queryParams: { burl: this.router.url },
     });
   }
@@ -132,7 +132,7 @@ export class ListInventoryLedgerMapComponent {
   protected deleteInventoryLedgerMap(item: InventoryLedgerMap): void {
     if (!item.id) return;
     this.inventoryLedgerMapStore.setSelectedItem(item);
-    void this.router.navigate(['/app/trading/inventory-ledger-map', item.id, 'delete'], {
+    void this.router.navigate(['/app/accounting/inventory-ledger-map', item.id, 'delete'], {
       queryParams: { burl: this.router.url },
     });
   }
@@ -141,11 +141,12 @@ export class ListInventoryLedgerMapComponent {
     return formatInventoryLedgerEntityType(value);
   }
 
-  protected formatLedgerType(value: string): string {
+  protected formatLedgerType(value: string | null | undefined): string {
     return formatInventoryLedgerType(value);
   }
 
-  protected fiscalYearName(id: string): string {
+  protected fiscalYearName(id: string | null | undefined): string {
+    if (!id) return 'Session fiscal year';
     return this.fiscalYearNameById().get(id) ?? id;
   }
 
@@ -188,4 +189,3 @@ export class ListInventoryLedgerMapComponent {
     return map;
   }
 }
-

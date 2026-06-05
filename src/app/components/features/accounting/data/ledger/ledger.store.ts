@@ -49,6 +49,18 @@ export const LedgerStore = signalStore(
         }));
       };
 
+      const clearCatalogState = (): void => {
+        catalogCache.clearPendingLoad();
+        patchState(store, (state) => ({
+          ledger: {
+            ...state.ledger,
+            catalog: [],
+            catalogLoaded: false,
+            catalogTotalCount: 0,
+          },
+        }));
+      };
+
       const applyViewQuery = (query?: LedgerListQuery): void => {
         const { items, count } = applyLedgerListQuery(store.ledger().catalog, query);
         patchState(store, (state) => ({
@@ -139,15 +151,7 @@ export const LedgerStore = signalStore(
 
       return {
         clearCatalog(): void {
-          catalogCache.clearPendingLoad();
-          patchState(store, (state) => ({
-            ledger: {
-              ...state.ledger,
-              catalog: [],
-              catalogLoaded: false,
-              catalogTotalCount: 0,
-            },
-          }));
+          clearCatalogState();
         },
 
         clearError(): void {
@@ -267,6 +271,24 @@ export const LedgerStore = signalStore(
             if (cacheReady) {
               applyViewQuery(query);
               return;
+            }
+
+            await loadLedgersFromApi(query);
+          } catch (error) {
+            setError(getApiErrorMessage(error, 'Failed to load ledgers.'));
+          }
+        },
+
+        async refreshLedgers(query?: LedgerListQuery): Promise<void> {
+          setLoading();
+          try {
+            if (cachePrefs.enabled()) {
+              clearCatalogState();
+              const cacheReady = await catalogCache.ensureLoaded();
+              if (cacheReady) {
+                applyViewQuery(query);
+                return;
+              }
             }
 
             await loadLedgersFromApi(query);

@@ -31,10 +31,10 @@ export type InventoryLedgerType = (typeof INVENTORY_LEDGER_TYPES)[number];
 export type InventoryLedgerMapProps = Readonly<Record<string, unknown>>;
 
 export type InventoryLedgerMapPayload = Readonly<{
-  fiscalyearid: string;
+  fiscalyearid?: string;
   entitytype: InventoryLedgerEntityType;
   entityid: string | null;
-  ledgertype: InventoryLedgerType;
+  ledgertype?: InventoryLedgerType | null;
   ledgerid: string;
   props?: InventoryLedgerMapProps;
 }>;
@@ -46,4 +46,3 @@ export type InventoryLedgerMap = InventoryLedgerMapPayload &
 
 export type InventoryLedgerMapListQuery = Lb4ListQuery;
 export type InventoryLedgerMapGetQuery = Readonly<{ includes?: readonly string[] }>;
-

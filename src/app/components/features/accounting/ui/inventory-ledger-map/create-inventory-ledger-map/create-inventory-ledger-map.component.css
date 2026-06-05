@@ -3,7 +3,7 @@
   color: var(--tng-semantic-foreground-primary);
 }
 
-.trading-page {
+.management-page {
   min-height: 0;
   overflow: visible;
   padding: 1.25rem;
@@ -101,8 +101,7 @@
 }
 
 tng-autocomplete,
-tng-select,
-tng-textarea {
+tng-select {
   width: 100%;
 }
 
@@ -126,4 +125,3 @@ tng-textarea {
     grid-template-columns: 1fr;
   }
 }
-

@@ -10,7 +10,5 @@ export type {
   InventoryLedgerMapGetQuery,
   InventoryLedgerMapListQuery,
   InventoryLedgerMapPayload,
-  InventoryLedgerMapProps,
   InventoryLedgerType,
 } from './inventory-ledger-map.model';
-

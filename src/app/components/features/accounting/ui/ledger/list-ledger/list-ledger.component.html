@@ -25,7 +25,7 @@
     <app-bulk-upload-button
       endpoint="/accounting/ledger/bulk-upload"
       [config]="bulkUploadConfig"
-      (uploaded)="reloadLedgers()"
+      (uploaded)="refreshLedgers()"
     />
 
     <tng-button type="button" appearance="solid" tone="primary" (click)="createLedger()">

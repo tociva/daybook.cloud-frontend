@@ -14,17 +14,14 @@ import {
   TngLabelComponent,
   TngSelectComponent,
   TngStepperComponent,
-  TngTextareaComponent,
 } from '@tailng-ui/components';
 import { DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS } from '../../../../../../util/constants';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
-import { LedgerStore } from '../../../../accounting/data/ledger';
-import type { Ledger } from '../../../../accounting/data/ledger';
-import { FiscalYearStore } from '../../../../management/data/fiscal-year/fiscal-year.store';
-import type { FiscalYear } from '../../../../management/data/fiscal-year/fiscal-year.model';
-import { BankCashStore, type BankCash } from '../../../data/bank-cash';
-import { CustomerStore, type Customer } from '../../../data/customer';
+import { LedgerStore } from '../../../data/ledger';
+import type { Ledger } from '../../../data/ledger';
+import { BankCashStore, type BankCash } from '../../../../trading/data/bank-cash';
+import { CustomerStore, type Customer } from '../../../../trading/data/customer';
 import {
   InventoryLedgerMapFacade,
   InventoryLedgerMapStore,
@@ -32,22 +29,24 @@ import {
   type InventoryLedgerMapPayload,
   type InventoryLedgerType,
 } from '../../../data/inventory-ledger-map';
-import { ItemStore, type Item } from '../../../data/item';
-import { TaxStore, type Tax } from '../../../data/tax';
-import { VendorStore, type Vendor } from '../../../data/vendor';
-import { entityTypeOptions, ledgerTypeOptions } from '../inventory-ledger-map.labels';
+import { ItemStore, type Item } from '../../../../trading/data/item';
+import { TaxStore, type Tax } from '../../../../trading/data/tax';
+import { VendorStore, type Vendor } from '../../../../trading/data/vendor';
+import {
+  entityTypeOptions,
+  INVENTORY_LEDGER_TYPES_BY_ENTITY,
+  ledgerTypeOptions,
+} from '../inventory-ledger-map.labels';
 
 type SelectOption<T extends string = string> = Readonly<{ label: string; value: T }>;
 
 type MappingEntity = Customer | Vendor | Item | Tax | BankCash;
 
 type InventoryLedgerMapFormModel = {
-  fiscalyearid: string;
   entitytype: InventoryLedgerEntityType;
   entityid: string;
-  ledgertype: InventoryLedgerType;
+  ledgertype: InventoryLedgerType | null;
   ledgerid: string;
-  propsJson: string;
 };
 
 @Component({
@@ -67,7 +66,6 @@ type InventoryLedgerMapFormModel = {
     TngLabelComponent,
     TngSelectComponent,
     TngStepperComponent,
-    TngTextareaComponent,
     BurlBackButtonComponent,
     BurlCreateButtonComponent,
   ],
@@ -80,7 +78,6 @@ export class CreateInventoryLedgerMapComponent {
   private readonly facade = inject(InventoryLedgerMapFacade);
   protected readonly inventoryLedgerMapStore = inject(InventoryLedgerMapStore);
   protected readonly ledgerStore = inject(LedgerStore);
-  protected readonly fiscalYearStore = inject(FiscalYearStore);
   protected readonly customerStore = inject(CustomerStore);
   protected readonly vendorStore = inject(VendorStore);
   protected readonly itemStore = inject(ItemStore);
@@ -91,18 +88,20 @@ export class CreateInventoryLedgerMapComponent {
   protected readonly submitted = signal(false);
 
   protected readonly entityTypeOptions = entityTypeOptions;
-  protected readonly ledgerTypeOptions = ledgerTypeOptions;
+  protected readonly ledgerTypeOptions = computed(() => {
+    const allowedTypes = INVENTORY_LEDGER_TYPES_BY_ENTITY[this.model().entitytype];
+    return ledgerTypeOptions.filter((option) => allowedTypes.includes(option.value));
+  });
+  protected readonly showLedgerType = computed(() => this.ledgerTypeOptions().length > 0);
   protected readonly getOptionLabel = (option: SelectOption): string => option.label;
   protected readonly getOptionValue = (option: SelectOption): string => option.value;
   protected readonly trackByValue = (_i: number, option: SelectOption): string => option.value;
 
   protected readonly model = signal<InventoryLedgerMapFormModel>({
-    fiscalyearid: '',
     entitytype: 'item',
     entityid: '',
     ledgertype: 'sale',
     ledgerid: '',
-    propsJson: '{}',
   });
 
   protected readonly mode = computed(() => (this.id() ? 'edit' : 'create'));
@@ -110,10 +109,6 @@ export class CreateInventoryLedgerMapComponent {
     this.mode() === 'edit' ? 'Edit Inventory Ledger Mapping' : 'New Inventory Ledger Mapping',
   );
   protected readonly entityRequired = computed(() => this.model().entitytype !== 'system');
-
-  protected readonly fiscalYearError = computed(() =>
-    this.submitted() && !this.model().fiscalyearid ? 'Fiscal year is required.' : null,
-  );
   protected readonly entityError = computed(() =>
     this.submitted() && this.entityRequired() && !this.model().entityid
       ? 'Entity is required.'
@@ -122,15 +117,6 @@ export class CreateInventoryLedgerMapComponent {
   protected readonly ledgerError = computed(() =>
     this.submitted() && !this.model().ledgerid ? 'Ledger is required.' : null,
   );
-  protected readonly propsError = computed(() => {
-    if (!this.submitted()) return null;
-    return this.parseProps() === null ? 'Props must be valid JSON object syntax.' : null;
-  });
-
-  protected readonly fiscalYearOptionValue = (item: FiscalYear): string => item.id ?? '';
-  protected readonly fiscalYearOptionLabel = (item: FiscalYear): string =>
-    item.name || item.jnumber || `${item.startdate} - ${item.enddate}`;
-  protected readonly fiscalYearTrackBy = (_i: number, item: FiscalYear): string => item.id ?? '';
 
   protected readonly ledgerOptionValue = (item: Ledger): string => item.id ?? '';
   protected readonly ledgerOptionLabel = (item: Ledger): string => item.name ?? '';
@@ -164,28 +150,21 @@ export class CreateInventoryLedgerMapComponent {
       {
         value: 'scope',
         label: 'Scope',
-        description: 'Fiscal year and mapped entity',
-        completed: !!m.fiscalyearid && (!this.entityRequired() || !!m.entityid),
+        description: 'Mapped entity',
+        completed: !this.entityRequired() || !!m.entityid,
       },
       {
         value: 'ledger',
         label: 'Ledger',
         description: 'Posting type and ledger account',
-        completed: !!m.ledgertype && !!m.ledgerid,
-      },
-      {
-        value: 'props',
-        label: 'Props',
-        description: 'Optional JSON metadata',
-        completed: this.parseProps() !== null,
+        completed: (!this.showLedgerType() || !!m.ledgertype) && !!m.ledgerid,
       },
     ] as const;
   });
   protected readonly activeSetupStep = computed(
-    () => this.setupSteps().find((step) => !step.completed)?.value ?? 'props',
+    () => this.setupSteps().find((step) => !step.completed)?.value ?? 'ledger',
   );
 
-  private fiscalYearSearchTimer: ReturnType<typeof setTimeout> | null = null;
   private ledgerSearchTimer: ReturnType<typeof setTimeout> | null = null;
   private entitySearchTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -193,20 +172,14 @@ export class CreateInventoryLedgerMapComponent {
     void this.loadInitialState();
   }
 
-  protected onFiscalYearChange(value: unknown): void {
-    this.model.update((m) => ({ ...m, fiscalyearid: typeof value === 'string' ? value : '' }));
-  }
-
-  protected onFiscalYearQueryChange(value: unknown): void {
-    this.debounceFiscalYears(this.normalizeQuery(value));
-  }
-
   protected onEntityTypeChange(value: unknown): void {
     const entitytype = this.resolveEntityType(value);
+    const ledgerTypes = INVENTORY_LEDGER_TYPES_BY_ENTITY[entitytype];
     this.model.update((m) => ({
       ...m,
       entitytype,
       entityid: entitytype === 'system' ? '' : m.entitytype === entitytype ? m.entityid : '',
+      ledgertype: ledgerTypes.length > 0 ? ledgerTypes[0] : null,
     }));
     void this.loadEntities(entitytype);
   }
@@ -239,25 +212,18 @@ export class CreateInventoryLedgerMapComponent {
     }, DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS);
   }
 
-  protected onPropsChange(value: unknown): void {
-    this.model.update((m) => ({ ...m, propsJson: typeof value === 'string' ? value : String(value ?? '') }));
-  }
-
   protected async submitForm(event: SubmitEvent): Promise<void> {
     event.preventDefault();
     this.submitted.set(true);
 
-    const props = this.parseProps();
-    if (this.fiscalYearError() || this.entityError() || this.ledgerError() || props === null) return;
+    if (this.entityError() || this.ledgerError()) return;
 
     const m = this.model();
     const payload: InventoryLedgerMapPayload = {
-      fiscalyearid: m.fiscalyearid,
       entitytype: m.entitytype,
       entityid: m.entitytype === 'system' ? null : m.entityid,
-      ledgertype: m.ledgertype,
       ledgerid: m.ledgerid,
-      props,
+      ...(this.showLedgerType() && m.ledgertype ? { ledgertype: m.ledgertype } : {}),
     };
 
     const currentId = this.id();
@@ -271,7 +237,6 @@ export class CreateInventoryLedgerMapComponent {
   private async loadInitialState(): Promise<void> {
     this.inventoryLedgerMapStore.clearError();
     await Promise.all([
-      this.fiscalYearStore.loadFiscalYears({ limit: 50, offset: 0 }),
       this.ledgerStore.loadLedgers({ limit: 50, offset: 0 }),
       this.loadEntities(this.model().entitytype),
     ]);
@@ -289,21 +254,12 @@ export class CreateInventoryLedgerMapComponent {
     if (!item) return;
 
     this.model.set({
-      fiscalyearid: item.fiscalyearid,
       entitytype: item.entitytype,
       entityid: item.entityid ?? '',
-      ledgertype: item.ledgertype,
+      ledgertype: this.resolveLedgerTypeForEntity(item.entitytype, item.ledgertype),
       ledgerid: item.ledgerid,
-      propsJson: JSON.stringify(item.props ?? {}, null, 2),
     });
     await this.loadEntities(item.entitytype);
-  }
-
-  private debounceFiscalYears(query: string): void {
-    if (this.fiscalYearSearchTimer) clearTimeout(this.fiscalYearSearchTimer);
-    this.fiscalYearSearchTimer = setTimeout(() => {
-      void this.fiscalYearStore.loadFiscalYears(this.nameQuery(query));
-    }, DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS);
   }
 
   private async loadEntities(type: InventoryLedgerEntityType, query = ''): Promise<void> {
@@ -334,19 +290,6 @@ export class CreateInventoryLedgerMapComponent {
       : { limit: 50, offset: 0 };
   }
 
-  private parseProps(): Record<string, unknown> | null {
-    const raw = this.model().propsJson.trim();
-    if (!raw) return {};
-    try {
-      const parsed = JSON.parse(raw) as unknown;
-      return parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)
-        ? (parsed as Record<string, unknown>)
-        : null;
-    } catch {
-      return null;
-    }
-  }
-
   private normalizeQuery(value: unknown): string {
     return typeof value === 'string' ? value.trim() : '';
   }
@@ -358,9 +301,21 @@ export class CreateInventoryLedgerMapComponent {
   }
 
   private resolveLedgerType(value: unknown): InventoryLedgerType {
-    return ledgerTypeOptions.some((option) => option.value === value)
+    return this.ledgerTypeOptions().some((option) => option.value === value)
       ? (value as InventoryLedgerType)
-      : 'sale';
+      : (this.defaultLedgerType(this.model().entitytype) ?? 'sale');
+  }
+
+  private defaultLedgerType(entitytype: InventoryLedgerEntityType): InventoryLedgerType | null {
+    return INVENTORY_LEDGER_TYPES_BY_ENTITY[entitytype][0] ?? null;
+  }
+
+  private resolveLedgerTypeForEntity(
+    entitytype: InventoryLedgerEntityType,
+    ledgertype: InventoryLedgerType | null | undefined,
+  ): InventoryLedgerType | null {
+    const allowedTypes = INVENTORY_LEDGER_TYPES_BY_ENTITY[entitytype];
+    if (ledgertype && allowedTypes.includes(ledgertype)) return ledgertype;
+    return allowedTypes[0] ?? null;
   }
 }
-

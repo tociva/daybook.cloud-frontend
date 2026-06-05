@@ -31,6 +31,17 @@ export const ledgerTypeOptions: readonly { label: string; value: InventoryLedger
   { label: 'Cash', value: 'cash' },
 ];
 
+export const INVENTORY_LEDGER_TYPES_BY_ENTITY: Readonly<
+  Record<InventoryLedgerEntityType, readonly InventoryLedgerType[]>
+> = {
+  customer: [],
+  vendor: [],
+  item: ['sale', 'purchase'],
+  tax: ['outputTax', 'inputTax'],
+  bankCash: [],
+  system: ['roundOff', 'discountAllowed'],
+};
+
 export function formatInventoryLedgerEntityType(value: string | null | undefined): string {
   return entityTypeOptions.find((option) => option.value === value)?.label ?? value ?? '';
 }
@@ -38,4 +49,3 @@ export function formatInventoryLedgerEntityType(value: string | null | undefined
 export function formatInventoryLedgerType(value: string | null | undefined): string {
   return ledgerTypeOptions.find((option) => option.value === value)?.label ?? value ?? '';
 }
-

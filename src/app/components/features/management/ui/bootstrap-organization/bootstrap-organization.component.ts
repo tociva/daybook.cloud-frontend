@@ -179,6 +179,27 @@ const countryByTimezone: Record<string, string | readonly string[]> = {
   'America/New_York': 'US',
 };
 
+const buildFiscalYearName = (fiscalStart: string, today = dayjs()): string => {
+  const normalized = fiscalStart.trim();
+  if (normalized.length === 0) {
+    return `${today.year()}`;
+  }
+
+  const parsedStart = dayjs(normalized, ['MMMM-D', 'MMMM-DD', 'MMM-D', 'MMM-DD'], true);
+  if (!parsedStart.isValid()) {
+    return `${today.year()}`;
+  }
+
+  if (parsedStart.month() === 0 && parsedStart.date() === 1) {
+    return `${today.year()}`;
+  }
+
+  const currentYearStart = parsedStart.year(today.year());
+  const startYear = today.isBefore(currentYearStart, 'day') ? today.year() - 1 : today.year();
+
+  return `${startYear} - ${startYear + 1}`;
+};
+
 const buildNextNumberingSequences = (
   template: string,
   fiscalYearRange: Readonly<{ enddate: string; startdate: string }>,
@@ -207,7 +228,7 @@ const createInitialForm = (): OrganizationSignalFormModel => ({
   description: '',
   email: '',
   fiscalDateRange: getCurrentFiscalDateRange(),
-  fiscalname: `${new Date().getFullYear()} Financial Year`,
+  fiscalname: buildFiscalYearName('January-01'),
   fiscalstart: 'January-01',
   gstin: '',
   invnumber: DEFAULT_INVOICE_NUMBER_FORMAT,
@@ -565,6 +586,7 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
       countryCode,
       currencyCode: country?.currencycode ?? '',
       dateFormatName: country?.dateformat ?? '',
+      fiscalname: buildFiscalYearName(nextFiscalStart),
       fiscalstart: nextFiscalStart,
       fiscalDateRange: {
         ...current.fiscalDateRange,
@@ -575,6 +597,7 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
     }));
 
     if (nextFiscalStart.length > 0) {
+      this.markTouched('fiscalname');
       this.markTouched('fiscalDateRange.start');
       this.markTouched('fiscalDateRange.end');
     }

@@ -198,6 +198,10 @@ export class ListLedgerComponent {
     });
   }
 
+  protected refreshLedgers(): void {
+    void this.ledgerStore.refreshLedgers({ ...this.crudQuery.filter(), includes: ['category'] });
+  }
+
   protected reloadLedgers(): void {
     void this.ledgerStore.loadLedgers({ ...this.crudQuery.filter(), includes: ['category'] });
   }
