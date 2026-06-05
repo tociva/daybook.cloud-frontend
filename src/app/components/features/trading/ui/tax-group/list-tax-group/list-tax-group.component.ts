@@ -14,7 +14,14 @@ import {
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
-import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload';
+import {
+  bulkUploadCountColumn,
+  bulkUploadNamesColumn,
+  bulkUploadNumberColumn,
+  BulkUploadButtonComponent,
+  bulkUploadTextColumn,
+} from '../../../../../../shared/bulk-upload';
+import type { BulkUploadPreviewConfig } from '../../../../../../shared/bulk-upload';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
@@ -45,6 +52,34 @@ export class ListTaxGroupComponent {
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly taxGroupStore = inject(TaxGroupStore);
   protected readonly hasError = computed(() => this.taxGroupStore.error() !== null);
+
+  protected readonly bulkUploadConfig: BulkUploadPreviewConfig = {
+    modelName: 'Tax Groups',
+    requiredPaths: ['name', 'rate'],
+    rootKey: 'taxgroups',
+    sampleRows: [
+      {
+        name: 'GST 18%',
+        rate: 18,
+        description: 'CGST + SGST',
+        groups: [{ mode: 'intra-state', taxes: ['CGST 9%', 'SGST 9%'] }],
+      },
+    ],
+    xlsxColumns: [
+      { header: 'Name', path: 'name' },
+      { header: 'Rate', path: 'rate' },
+      { header: 'Description', path: 'description' },
+      { header: 'Groups', path: 'groups' },
+    ],
+    xlsxSheetName: 'Tax Groups',
+    columns: [
+      bulkUploadTextColumn('name', 'Name', 'name', '14rem'),
+      bulkUploadNumberColumn('rate', 'Rate', 'rate', '7rem'),
+      bulkUploadCountColumn('groups', 'Groups', 'groups', '7rem'),
+      bulkUploadNamesColumn('description', 'Description', 'description'),
+    ],
+  };
+
   protected readonly columns: readonly TngTableColumn<TaxGroup>[] = [
     { id: 'name', label: 'Name', sortable: true, width: '16rem' },
     { id: 'rate', label: 'Rate (%)', sortable: true, width: '8rem' },

@@ -15,7 +15,13 @@ import {
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
-import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload';
+import {
+  bulkUploadNamesColumn,
+  bulkUploadNumberColumn,
+  BulkUploadButtonComponent,
+  bulkUploadTextColumn,
+} from '../../../../../../shared/bulk-upload';
+import type { BulkUploadPreviewConfig } from '../../../../../../shared/bulk-upload';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
@@ -51,6 +57,37 @@ export class ListTaxComponent {
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly taxStore = inject(TaxStore);
   protected readonly hasError = computed(() => this.taxStore.error() !== null);
+
+  protected readonly bulkUploadConfig: BulkUploadPreviewConfig = {
+    modelName: 'Taxes',
+    requiredPaths: ['name', 'shortname', 'rate', 'appliedto'],
+    rootKey: 'taxes',
+    sampleRows: [
+      {
+        name: 'CGST 9%',
+        shortname: 'CGST',
+        rate: 9,
+        appliedto: 1,
+        description: 'Central GST',
+      },
+    ],
+    xlsxColumns: [
+      { header: 'Name', path: 'name' },
+      { header: 'Short Name', path: 'shortname' },
+      { header: 'Rate', path: 'rate' },
+      { header: 'Applied To', path: 'appliedto' },
+      { header: 'Description', path: 'description' },
+    ],
+    xlsxSheetName: 'Taxes',
+    columns: [
+      bulkUploadTextColumn('name', 'Name', 'name', '14rem'),
+      bulkUploadTextColumn('shortname', 'Short name', 'shortname', '9rem'),
+      bulkUploadNumberColumn('rate', 'Rate', 'rate', '7rem'),
+      bulkUploadNumberColumn('appliedto', 'Applied to', 'appliedto', '8rem'),
+      bulkUploadNamesColumn('description', 'Description', 'description'),
+    ],
+  };
+
   protected readonly columns: readonly TngTableColumn<Tax>[] = [
     { id: 'name', label: 'Name', sortable: true, width: '14rem' },
     { id: 'shortname', label: 'Short Name', sortable: true, width: '10rem' },

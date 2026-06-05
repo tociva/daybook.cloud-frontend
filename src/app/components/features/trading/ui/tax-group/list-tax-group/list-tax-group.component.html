@@ -17,7 +17,11 @@
       Taxes
     </tng-button>
 
-    <app-bulk-upload-button endpoint="/inventory/tax-group/bulk-upload" (uploaded)="reloadTaxGroups()" />
+    <app-bulk-upload-button
+      endpoint="/inventory/tax-group/bulk-upload"
+      [config]="bulkUploadConfig"
+      (uploaded)="reloadTaxGroups()"
+    />
 
     <tng-button type="button" appearance="solid" tone="primary" (click)="createTaxGroup()">
       <tng-icon icon="plus" aria-hidden="true" />

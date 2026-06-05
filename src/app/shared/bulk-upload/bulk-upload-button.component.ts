@@ -201,46 +201,6 @@ const BULK_UPLOAD_PREVIEW_CONFIGS: Record<string, BulkUploadPreviewConfig> = {
       namesColumn('description', 'Description', 'description'),
     ],
   },
-  '/inventory/tax/bulk-upload': {
-    modelName: 'Taxes',
-    requiredPaths: ['name', 'shortname', 'rate', 'appliedto'],
-    rootKey: 'taxes',
-    sampleRows: [
-      {
-        name: 'CGST 9%',
-        shortname: 'CGST',
-        rate: 9,
-        appliedto: 1,
-        description: 'Central GST',
-      },
-    ],
-    columns: [
-      textColumn('name', 'Name', 'name', '14rem'),
-      textColumn('shortname', 'Short name', 'shortname', '9rem'),
-      numberColumn('rate', 'Rate', 'rate', '7rem'),
-      numberColumn('appliedto', 'Applied to', 'appliedto', '8rem'),
-      namesColumn('description', 'Description', 'description'),
-    ],
-  },
-  '/inventory/tax-group/bulk-upload': {
-    modelName: 'Tax Groups',
-    requiredPaths: ['name', 'rate'],
-    rootKey: 'taxgroups',
-    sampleRows: [
-      {
-        name: 'GST 18%',
-        rate: 18,
-        description: 'CGST + SGST',
-        groups: [{ mode: 'intra-state', taxes: ['CGST 9%', 'SGST 9%'] }],
-      },
-    ],
-    columns: [
-      textColumn('name', 'Name', 'name', '14rem'),
-      numberColumn('rate', 'Rate', 'rate', '7rem'),
-      countColumn('groups', 'Groups', 'groups', '7rem'),
-      namesColumn('description', 'Description', 'description'),
-    ],
-  },
   '/inventory/customer/bulk-upload': {
     modelName: 'Customers',
     requiredPaths: [
