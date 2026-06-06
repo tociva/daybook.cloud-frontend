@@ -12,7 +12,11 @@
       syncUrl
     />
 
-    <app-bulk-upload-button endpoint="/inventory/customer/bulk-upload" (uploaded)="reloadCustomers()" />
+    <app-bulk-upload-button
+      endpoint="/inventory/customer/bulk-upload"
+      [config]="bulkUploadConfig"
+      (uploaded)="reloadCustomers()"
+    />
 
     <tng-button type="button" appearance="solid" tone="primary" (click)="createCustomer()">
       <tng-icon icon="plus" aria-hidden="true" />

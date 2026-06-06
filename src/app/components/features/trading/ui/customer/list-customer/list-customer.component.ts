@@ -14,7 +14,11 @@ import {
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
-import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload';
+import {
+  BulkUploadButtonComponent,
+  bulkUploadTextColumn,
+} from '../../../../../../shared/bulk-upload';
+import type { BulkUploadPreviewConfig } from '../../../../../../shared/bulk-upload';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
@@ -46,6 +50,62 @@ export class ListCustomerComponent {
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly customerStore = inject(CustomerStore);
   protected readonly hasError = computed(() => this.customerStore.error() !== null);
+
+  protected readonly bulkUploadConfig: BulkUploadPreviewConfig = {
+    modelName: 'Customers',
+    requiredPaths: ['name', 'countrycode', 'currencycode'],
+    rootKey: 'customers',
+    sampleRows: [
+      {
+        name: 'Acme Retail',
+        mobile: '+91 9876543210',
+        email: 'billing@acme.example',
+        gstin: '29ABCDE1234F1Z5',
+        address: {
+          name: 'Acme Retail',
+          line1: 'Plot 10',
+          line2: '',
+          street: 'MG Road',
+          city: 'Bengaluru',
+          state: 'Karnataka',
+          zip: '560001',
+          country: 'India',
+        },
+        countrycode: 'IN',
+        state: 'Karnataka',
+        currencycode: 'INR',
+        description: 'Retail customer',
+      },
+    ],
+    xlsxColumns: [
+      { header: 'Name', path: 'name' },
+      { header: 'Mobile', path: 'mobile' },
+      { header: 'Email', path: 'email' },
+      { header: 'GSTIN', path: 'gstin' },
+      { header: 'Address Name', path: 'address.name' },
+      { header: 'Address Line 1', path: 'address.line1' },
+      { header: 'Address Line 2', path: 'address.line2' },
+      { header: 'Street', path: 'address.street' },
+      { header: 'City', path: 'address.city' },
+      { header: 'Address State', path: 'address.state' },
+      { header: 'Zip', path: 'address.zip' },
+      { header: 'Country', path: 'address.country' },
+      { header: 'Country Code', path: 'countrycode' },
+      { header: 'State', path: 'state' },
+      { header: 'Currency Code', path: 'currencycode' },
+      { header: 'Description', path: 'description' },
+    ],
+    xlsxSheetName: 'Customers',
+    columns: [
+      bulkUploadTextColumn('name', 'Name', 'name', '14rem'),
+      bulkUploadTextColumn('mobile', 'Mobile', 'mobile', '10rem'),
+      bulkUploadTextColumn('email', 'Email', 'email', '14rem'),
+      bulkUploadTextColumn('gstin', 'GSTIN', 'gstin', '12rem'),
+      bulkUploadTextColumn('city', 'City', 'address.city', '10rem'),
+      bulkUploadTextColumn('state', 'State', 'state', '10rem'),
+      bulkUploadTextColumn('currencycode', 'Currency', 'currencycode', '8rem'),
+    ],
+  };
 
   protected readonly columns: readonly TngTableColumn<Customer>[] = [
     { id: 'name', label: 'Name', sortable: true, width: '14rem' },
