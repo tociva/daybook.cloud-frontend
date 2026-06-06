@@ -118,7 +118,7 @@ export class PurchaseInvoiceDraftStore {
   // ── Tax-mode options ──────────────────────────────────────────────────────
 
   readonly taxModeOptions = computed<SelectOption[]>(() => {
-    const seen = new Set<string>(['Intra State', 'Inter State']);
+    const seen = new Set<string>(['Intra State', 'Inter State', 'Export', 'NonTaxable']);
     for (const tg of this.taxGroupStore.items()) {
       for (const g of tg.groups ?? []) {
         if (g.mode) seen.add(g.mode);
@@ -401,12 +401,7 @@ export class PurchaseInvoiceDraftStore {
   onTaxOptionChange(value: string | null): void {
     const opt = value ?? 'Intra State';
     this.taxoption.set(opt);
-    this.items.update((rows) =>
-      rows.map((row) => {
-        const updated = { ...row, taxes: row.item ? this.buildTaxes(row.item, opt) : [] };
-        return this.calcRow(updated);
-      }),
-    );
+    void this.rebuildTaxesForRows(opt);
   }
 
   // ── Item methods ──────────────────────────────────────────────────────────
@@ -538,37 +533,13 @@ export class PurchaseInvoiceDraftStore {
 
   // ── Private helpers ───────────────────────────────────────────────────────
 
-  private buildTaxes(item: Item, taxOption: string): TaxRow[] {
-    type ItemWithCat = Item & { category?: { taxgroupid?: string } };
-    const taxGroupId = (item as ItemWithCat).category?.taxgroupid;
-    if (!taxGroupId || !taxOption) return [];
-
-    const tg = this.taxGroupStore.items().find((g) => g.id === taxGroupId);
-    if (!tg) return [];
-
-    const group = tg?.groups?.find((g) => g.mode === taxOption);
-    if (!group) return [];
-
-    return this.taxIdsForMode(tg, taxOption).map((taxId) => {
-      const tax = this.taxStore.items().find((t) => t.id === taxId);
-      return {
-        taxid: tax?.id ?? taxId,
-        name: tax?.name ?? '',
-        shortname: tax?.shortname ?? '',
-        rate: tax?.rate ?? 0,
-        appliedto: tax?.appliedto ?? 100,
-        amount: 0,
-      };
-    });
-  }
-
   private async withFetchedCategory(item: Item): Promise<Item> {
     const categoryId = item.categoryid || item.category?.id;
     if (!categoryId) return item;
 
     const category =
       (await this.itemCategoryStore.loadItemCategoryById(categoryId, {
-        includes: ['taxgroup'],
+        includes: ['parent', 'taxgroup'],
       })) ??
       item.category ??
       null;
@@ -577,9 +548,11 @@ export class PurchaseInvoiceDraftStore {
   }
 
   private async buildTaxesForItem(item: Item, taxOption: string): Promise<TaxRow[]> {
+    if (!taxOption) return [];
+
     const category = item.category ?? (await this.fetchItemCategory(item));
-    const taxGroup = category ? await this.fetchTaxGroup(category) : null;
-    if (!taxGroup || !taxOption) return [];
+    const taxGroup = category ? await this.findNearestTaxGroup(category, taxOption) : null;
+    if (!taxGroup) return [];
 
     const taxIds = this.taxIdsForMode(taxGroup, taxOption);
     const taxes = await Promise.all(taxIds.map((taxId) => this.fetchTax(taxId)));
@@ -603,9 +576,70 @@ export class PurchaseInvoiceDraftStore {
 
     return (
       (await this.itemCategoryStore.loadItemCategoryById(categoryId, {
-        includes: ['taxgroup'],
+        includes: ['parent', 'taxgroup'],
       })) ??
       item.category ??
+      null
+    );
+  }
+
+  private async rebuildTaxesForRows(taxOption: string): Promise<void> {
+    const taxesByItemId = new Map(
+      await Promise.all(
+        this.items().map(async (row) => [
+          row.itemid,
+          row.item ? await this.buildTaxesForItem(row.item, taxOption) : [],
+        ] as const),
+      ),
+    );
+
+    if (this.taxoption() !== taxOption) return;
+
+    this.items.update((rows) =>
+      rows.map((row) =>
+        this.calcRow({
+          ...row,
+          taxes: row.item ? (taxesByItemId.get(row.itemid) ?? []) : [],
+        }),
+      ),
+    );
+  }
+
+  private async findNearestTaxGroup(
+    category: ItemCategory,
+    taxOption: string,
+    visited = new Set<string>(),
+  ): Promise<TaxGroup | null> {
+    const categoryId = category.id;
+    if (categoryId) {
+      if (visited.has(categoryId)) return null;
+      visited.add(categoryId);
+    }
+
+    const taxGroup = await this.fetchTaxGroup(category);
+    if (taxGroup && this.taxIdsForMode(taxGroup, taxOption).length > 0) {
+      return taxGroup;
+    }
+
+    const parent = await this.fetchParentCategory(category);
+    return parent ? this.findNearestTaxGroup(parent, taxOption, visited) : null;
+  }
+
+  private async fetchParentCategory(category: ItemCategory): Promise<ItemCategory | null> {
+    const parentId = category.parentid || category.parent?.id;
+    if (!parentId) return category.parent ?? null;
+
+    const cachedParent =
+      category.parent && category.parent.id === parentId ? category.parent : undefined;
+    if (cachedParent?.taxgroup && cachedParent.parent) {
+      return cachedParent;
+    }
+
+    return (
+      (await this.itemCategoryStore.loadItemCategoryById(parentId, {
+        includes: ['parent', 'taxgroup'],
+      })) ??
+      cachedParent ??
       null
     );
   }

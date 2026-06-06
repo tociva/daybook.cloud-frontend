@@ -52,7 +52,7 @@
         <tng-card variant="outline" padding="lg">
           <header class="party-head">
             <div class="party-details">
-              <h2>{{ group.partyName || 'Unknown Party' }}</h2>
+              <h2>{{ partyName(group) }}</h2>
               <p>{{ group.partyGstin || 'GSTIN not available' }}</p>
             </div>
             @if (showCreatePartyLink(group)) {

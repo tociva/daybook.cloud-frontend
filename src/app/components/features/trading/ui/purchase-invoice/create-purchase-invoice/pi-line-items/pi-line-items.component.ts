@@ -71,7 +71,7 @@ export class PiLineItemsComponent {
   protected readonly createItemSentinelId = CREATE_ITEM_SENTINEL_ID;
 
   // ── Tax column visibility (derived from draft tax option) ──────────────
-  // Intra State → CGST + SGST; Inter State → IGST only; Export / No Taxable → none
+  // Intra State → CGST + SGST; Inter State → IGST only; Export / NonTaxable → none
   readonly showIntraStateTax = computed(() => this.draft.taxoption() === 'Intra State');
   readonly showIGST          = computed(() => this.draft.taxoption() === 'Inter State');
 
@@ -188,7 +188,7 @@ export class PiLineItemsComponent {
   // Each tax group occupies label(3%) + pct/amt(5%) = 8% of table width.
   // Intra State shows CGST+SGST (16%), frees IGST (8%).
   // Inter State shows IGST (8%), frees CGST+SGST (16%).
-  // Export / No Taxable shows nothing, frees all three (24%).
+  // Export / NonTaxable shows nothing, frees all three (24%).
   private readonly taxFreeWidth = computed<number>(() => {
     const opt = this.draft.taxoption();
     if (opt === 'Intra State') return 8;   // IGST hidden

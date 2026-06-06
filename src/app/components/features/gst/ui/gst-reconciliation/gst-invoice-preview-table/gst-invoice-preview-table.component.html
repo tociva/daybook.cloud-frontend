@@ -16,13 +16,15 @@
     </ng-template>
 
     <ng-template tngTableCellTemplate="itcAvailable" let-row="row">
-      <span
-        class="itc-badge"
-        [class.itc-badge--yes]="row.itcAvailable"
-        [class.itc-badge--no]="!row.itcAvailable"
-      >
-        {{ row.itcAvailable ? 'Yes' : 'No' }}
-      </span>
+      @if (row.itcAvailable !== undefined) {
+        <span
+          class="itc-badge"
+          [class.itc-badge--yes]="row.itcAvailable"
+          [class.itc-badge--no]="!row.itcAvailable"
+        >
+          {{ row.itcAvailable ? 'Yes' : 'No' }}
+        </span>
+      }
     </ng-template>
   </tng-table>
 

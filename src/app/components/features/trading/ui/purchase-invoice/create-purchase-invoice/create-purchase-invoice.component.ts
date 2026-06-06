@@ -12,6 +12,7 @@ import {
 } from '@tailng-ui/primitives';
 import { TngIcon } from '@tailng-ui/icons';
 import { VendorStore } from '../../../data/vendor';
+import type { VendorListQuery } from '../../../data/vendor';
 import { InvoiceDocumentService } from '../../../data/invoice-document';
 import { ItemStore } from '../../../data/item';
 import type {
@@ -88,7 +89,7 @@ export class CreatePurchaseInvoiceComponent {
     this.purchaseInvoiceStore.clearError();
 
     await Promise.all([
-      this.vendorStore.loadVendors({}),
+      this.vendorStore.loadVendors(this.initialVendorQuery()),
       this.itemStore.loadItems({ includes: ['category'] }),
       this.taxGroupStore.loadTaxGroups({}),
       this.taxStore.loadTaxes({}),
@@ -110,6 +111,30 @@ export class CreatePurchaseInvoiceComponent {
     }
 
     this.draft.patchFromGstReconciliation(this.route.snapshot.queryParamMap);
+  }
+
+  private initialVendorQuery(): VendorListQuery {
+    const query = this.route.snapshot.queryParamMap;
+    const partyGstin = query.get('partyGstin')?.trim();
+    const partyName = query.get('partyName')?.trim();
+
+    if (partyGstin) {
+      return {
+        limit: 20,
+        offset: 0,
+        where: { gstin: { ilike: partyGstin } },
+      };
+    }
+
+    if (partyName) {
+      return {
+        limit: 20,
+        offset: 0,
+        where: { name: { ilike: partyName } },
+      };
+    }
+
+    return {};
   }
 
   // ── Vendor selection ──────────────────────────────────────────────────────

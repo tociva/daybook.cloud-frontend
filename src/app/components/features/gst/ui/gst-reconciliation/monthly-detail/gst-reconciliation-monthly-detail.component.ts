@@ -116,8 +116,7 @@ export class GstReconciliationMonthlyDetailComponent {
   });
 
   constructor() {
-    void this.loadDetail();
-    void this.loadLocalParties();
+    void this.loadData();
   }
 
   protected async back(): Promise<void> {
@@ -170,6 +169,10 @@ export class GstReconciliationMonthlyDetailComponent {
 
   protected rowParty(row: GstReconciliationDetailRow): string {
     return row.partyName || row.partyGstin || '-';
+  }
+
+  protected partyName(group: GstReconciliationPartyGroup): string {
+    return group.partyName || this.localPartyName(group.partyGstin) || 'Unknown Party';
   }
 
   protected rowDifferenceAmount(row: GstReconciliationDetailRow): number {
@@ -260,6 +263,8 @@ export class GstReconciliationMonthlyDetailComponent {
     group: GstReconciliationPartyGroup,
   ): Promise<void> {
     const sourceInvoice = row.gstInvoice;
+    const partyName = row.partyName || this.localPartyName(row.partyGstin || group.partyGstin) || group.partyName;
+    const partyGstin = row.partyGstin || group.partyGstin;
     const route =
       this.returnType() === 'gstr2b'
         ? '/app/trading/purchase-invoice/create'
@@ -268,8 +273,8 @@ export class GstReconciliationMonthlyDetailComponent {
     await this.router.navigate([route], {
       queryParams: {
         burl: this.router.url,
-        ...(row.partyName || group.partyName ? { partyName: row.partyName || group.partyName } : {}),
-        ...(row.partyGstin || group.partyGstin ? { partyGstin: row.partyGstin || group.partyGstin } : {}),
+        ...(partyName ? { partyName } : {}),
+        ...(partyGstin ? { partyGstin } : {}),
         ...(sourceInvoice?.invoiceNumber ? { invoiceNumber: sourceInvoice.invoiceNumber } : {}),
         ...(sourceInvoice?.invoiceDate ? { invoiceDate: sourceInvoice.invoiceDate } : {}),
         ...(sourceInvoice?.taxableValue !== undefined ? { taxableValue: sourceInvoice.taxableValue } : {}),
@@ -282,6 +287,11 @@ export class GstReconciliationMonthlyDetailComponent {
     });
   }
 
+  private async loadData(): Promise<void> {
+    await this.loadDetail();
+    await this.loadLocalParties();
+  }
+
   private async loadDetail(): Promise<void> {
     const session = this.sessionStore.session();
     if (!session?.branch?.id) return;
@@ -289,46 +299,87 @@ export class GstReconciliationMonthlyDetailComponent {
   }
 
   private async loadLocalParties(): Promise<void> {
+    const gstins = this.detailPartyGstins();
+
+    if (gstins.length === 0) {
+      this.vendorsLoaded.set(this.returnType() === 'gstr2b');
+      this.customersLoaded.set(this.returnType() === 'gstr1');
+      return;
+    }
+
+    const query = {
+      limit: gstins.length,
+      offset: 0,
+      where:
+        gstins.length === 1
+          ? { gstin: { ilike: gstins[0] } }
+          : { or: gstins.map((gstin) => ({ gstin: { ilike: gstin } })) },
+    };
+
     if (this.returnType() === 'gstr2b') {
       this.vendorStore.clearError();
-      await this.vendorStore.loadVendors();
+      await this.vendorStore.loadVendors(query);
       this.vendorsLoaded.set(this.vendorStore.error() === null);
       return;
     }
 
     this.customerStore.clearError();
-    await this.customerStore.loadCustomers();
+    await this.customerStore.loadCustomers(query);
     this.customersLoaded.set(this.customerStore.error() === null);
   }
 
   private hasLocalVendor(group: GstReconciliationPartyGroup): boolean {
     const partyGstin = this.normalizeComparable(group.partyGstin);
-    const partyName = this.normalizeComparable(group.partyName);
+    if (!partyGstin) return false;
 
     return this.vendorStore.items().some((vendor) => {
       const vendorGstin = this.normalizeComparable(vendor.gstin);
-      const vendorName = this.normalizeComparable(vendor.name);
 
-      return (
-        (partyGstin && vendorGstin === partyGstin) ||
-        (!partyGstin && partyName && vendorName === partyName)
-      );
+      return vendorGstin === partyGstin;
     });
   }
 
   private hasLocalCustomer(group: GstReconciliationPartyGroup): boolean {
     const partyGstin = this.normalizeComparable(group.partyGstin);
-    const partyName = this.normalizeComparable(group.partyName);
+    if (!partyGstin) return false;
 
     return this.customerStore.items().some((customer) => {
       const customerGstin = this.normalizeComparable(customer.gstin);
-      const customerName = this.normalizeComparable(customer.name);
 
-      return (
-        (partyGstin && customerGstin === partyGstin) ||
-        (!partyGstin && partyName && customerName === partyName)
-      );
+      return customerGstin === partyGstin;
     });
+  }
+
+  private localPartyName(gstin: string | null | undefined): string {
+    const partyGstin = this.normalizeComparable(gstin);
+    if (!partyGstin) return '';
+
+    const localParty =
+      this.returnType() === 'gstr2b'
+        ? this.vendorStore
+            .items()
+            .find((vendor) => this.normalizeComparable(vendor.gstin) === partyGstin)
+        : this.customerStore
+            .items()
+            .find((customer) => this.normalizeComparable(customer.gstin) === partyGstin);
+
+    return localParty?.name?.trim() ?? '';
+  }
+
+  private detailPartyGstins(): string[] {
+    const gstins = new Set<string>();
+
+    this.store.detail()?.groups.forEach((group) => {
+      this.addGstin(gstins, group.partyGstin);
+      group.rows.forEach((row) => this.addGstin(gstins, row.partyGstin));
+    });
+
+    return [...gstins];
+  }
+
+  private addGstin(gstins: Set<string>, value: string | null | undefined): void {
+    const gstin = value?.trim();
+    if (gstin) gstins.add(gstin);
   }
 
   private normalizeComparable(value: string | null | undefined): string {

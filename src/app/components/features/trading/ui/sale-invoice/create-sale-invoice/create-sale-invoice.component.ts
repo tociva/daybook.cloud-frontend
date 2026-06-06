@@ -12,7 +12,7 @@ import {
   type TngFileUploadSelectedEvent,
 } from '@tailng-ui/primitives';
 import { TngIcon } from '@tailng-ui/icons';
-import { CustomerStore } from '../../../data/customer';
+import { CustomerStore, type CustomerListQuery } from '../../../data/customer';
 import { InvoiceDocumentService, type StoredDocument } from '../../../data/invoice-document';
 import { ItemStore } from '../../../data/item';
 import type {
@@ -97,7 +97,7 @@ export class CreateSaleInvoiceComponent {
     this.saleInvoiceStore.clearError();
 
     await Promise.all([
-      this.customerStore.loadCustomers({}),
+      this.customerStore.loadCustomers(this.initialCustomerQuery()),
       this.itemStore.loadItems({ includes: ['category'] }),
       this.taxGroupStore.loadTaxGroups({}),
       this.taxStore.loadTaxes({}),
@@ -133,6 +133,7 @@ export class CreateSaleInvoiceComponent {
           this.lineItemsRef?.focusPriceInput(pendingRow);
         }
       }
+      this.draft.patchFromGstReconciliation(this.route.snapshot.queryParamMap);
       return;
     }
 
@@ -148,6 +149,30 @@ export class CreateSaleInvoiceComponent {
       });
       if (invoice) this.draft.patchFromInvoice(invoice);
     }
+  }
+
+  private initialCustomerQuery(): CustomerListQuery {
+    const query = this.route.snapshot.queryParamMap;
+    const partyGstin = query.get('partyGstin')?.trim();
+    const partyName = query.get('partyName')?.trim();
+
+    if (partyGstin) {
+      return {
+        limit: 20,
+        offset: 0,
+        where: { gstin: { ilike: partyGstin } },
+      };
+    }
+
+    if (partyName) {
+      return {
+        limit: 20,
+        offset: 0,
+        where: { name: { ilike: partyName } },
+      };
+    }
+
+    return {};
   }
 
   // ── Customer selection ────────────────────────────────────────────────────

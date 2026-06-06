@@ -45,10 +45,10 @@ export class GstImportConfirmDialogComponent {
 
   protected readonly gstr2bPreviewColumns: readonly TngTableColumn<ParsedInvoice>[] = [
     { id: 'rowNumber',    label: '#',           align: 'end', width: '3rem',  accessor: (_row, index) => index + 1 },
-    { id: 'supplierName', label: 'Supplier',    truncate: true, width: '12rem' },
-    { id: 'gstin',        label: 'GSTIN',       width: '11rem' },
-    { id: 'invoiceNo',    label: 'Invoice No',  width: '9rem' },
-    { id: 'invoiceDate',  label: 'Date',        width: '7rem' },
+    { id: 'supplierName', label: 'Supplier',    truncate: true, width: '12rem', accessor: (row) => this.formatText(row.supplierName) },
+    { id: 'gstin',        label: 'GSTIN',       width: '11rem', accessor: (row) => this.formatText(row.gstin) },
+    { id: 'invoiceNo',    label: 'Invoice No',  width: '9rem', accessor: (row) => this.formatText(row.invoiceNo) },
+    { id: 'invoiceDate',  label: 'Date',        width: '7rem', accessor: (row) => this.formatText(row.invoiceDate) },
     { id: 'invoiceValue', label: 'Value (₹)',   align: 'end', width: '8rem',  accessor: (row) => this.formatNum(row.invoiceValue) },
     { id: 'taxableValue', label: 'Taxable (₹)', align: 'end', width: '8rem',  accessor: (row) => this.formatNum(row.taxableValue) },
     { id: 'igst',         label: 'IGST',        align: 'end', width: '7rem',  accessor: (row) => this.formatOptionalAmount(row.igst) },
@@ -59,10 +59,10 @@ export class GstImportConfirmDialogComponent {
 
   protected readonly gstr1PreviewColumns: readonly TngTableColumn<ParsedInvoice>[] = [
     { id: 'rowNumber',    label: '#',           align: 'end', width: '3rem',  accessor: (_row, index) => index + 1 },
-    { id: 'exportType',   label: 'Type',        width: '10rem', accessor: (row) => row.exportType ?? '—' },
-    { id: 'invoiceNo',    label: 'Invoice No',  width: '9rem' },
-    { id: 'invoiceDate',  label: 'Date',        width: '7rem' },
-    { id: 'taxRate',      label: 'Rate %',      align: 'end', width: '6rem',  accessor: (row) => row.taxRate ?? 0 },
+    { id: 'exportType',   label: 'Type',        width: '10rem', accessor: (row) => this.formatText(row.exportType) },
+    { id: 'invoiceNo',    label: 'Invoice No',  width: '9rem', accessor: (row) => this.formatText(row.invoiceNo) },
+    { id: 'invoiceDate',  label: 'Date',        width: '7rem', accessor: (row) => this.formatText(row.invoiceDate) },
+    { id: 'taxRate',      label: 'Rate %',      align: 'end', width: '6rem',  accessor: (row) => row.taxRate ?? '' },
     { id: 'invoiceValue', label: 'Value (₹)',   align: 'end', width: '8rem',  accessor: (row) => this.formatNum(row.invoiceValue) },
     { id: 'taxableValue', label: 'Taxable (₹)', align: 'end', width: '8rem',  accessor: (row) => this.formatNum(row.taxableValue) },
     { id: 'igst',         label: 'IGST',        align: 'end', width: '7rem',  accessor: (row) => this.formatOptionalAmount(row.igst) },
@@ -107,6 +107,10 @@ export class GstImportConfirmDialogComponent {
   }
 
   protected formatOptionalAmount(value: number): string {
-    return value ? this.formatNum(value) : '—';
+    return value ? this.formatNum(value) : '';
+  }
+
+  private formatText(value: string | null | undefined): string {
+    return value?.trim() ?? '';
   }
 }

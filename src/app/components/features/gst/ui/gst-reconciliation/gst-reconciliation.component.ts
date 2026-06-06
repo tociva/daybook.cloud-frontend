@@ -330,16 +330,22 @@ export class GstReconciliationComponent {
 
         for (const inv of this.asList<Record<string, unknown>>(supplier['inv'])) {
           const itms = this.asList<Record<string, unknown>>(inv['itms']);
+          const itemDetails = itms.map((item) => item['itm_det'] as Record<string, unknown> | undefined);
+          const igst = itemDetails.reduce((s, i) => s + (Number(i?.['iamt'])  || 0), 0);
+          const cgst = itemDetails.reduce((s, i) => s + (Number(i?.['camt'])  || 0), 0);
+          const sgst = itemDetails.reduce((s, i) => s + (Number(i?.['samt'])  || 0), 0);
           invoices.push({
             gstin:        ctin,
             supplierName: name,
             invoiceNo:    String(inv['inum'] ?? ''),
             invoiceDate:  String(inv['idt']  ?? ''),
             invoiceValue: Number(inv['val'])  || 0,
-            taxableValue: itms.reduce((s, i) => s + (Number((i['itm_det'] as Record<string, unknown>)?.['txval']) || 0), 0),
-            igst:         itms.reduce((s, i) => s + (Number((i['itm_det'] as Record<string, unknown>)?.['iamt'])  || 0), 0),
-            cgst:         itms.reduce((s, i) => s + (Number((i['itm_det'] as Record<string, unknown>)?.['camt'])  || 0), 0),
-            sgst:         itms.reduce((s, i) => s + (Number((i['itm_det'] as Record<string, unknown>)?.['samt'])  || 0), 0),
+            taxableValue: itemDetails.reduce((s, i) => s + (Number(i?.['txval']) || 0), 0),
+            igst,
+            cgst,
+            sgst,
+            taxRate:      Number(itemDetails[0]?.['rt']) || 0,
+            exportType:   this.gstr1InvoiceTypeLabel(String(inv['inv_typ'] ?? ''), { igst, cgst, sgst }),
             period,
           });
         }
@@ -370,6 +376,31 @@ export class GstReconciliationComponent {
     const month = parseInt(fp.slice(0, 2), 10);
     const year  = fp.slice(4);
     return `${MONTH_LABELS[(month - 1) % 12]}'${year}`;
+  }
+
+  private gstr1InvoiceTypeLabel(
+    value: string,
+    tax?: Readonly<{ igst: number; cgst: number; sgst: number }>,
+  ): string {
+    const taxLabel = this.gstr1TaxLabel(tax);
+    switch (value.trim().toUpperCase()) {
+      case 'R': return taxLabel;
+      case 'DE': return 'Deemed Export';
+      case 'SEWP': return 'SEZ With Tax';
+      case 'SEWOP': return 'SEZ No Tax';
+      case 'CBW': return 'Custom Bonded Warehouse';
+      default: return value;
+    }
+  }
+
+  private gstr1TaxLabel(tax: Readonly<{ igst: number; cgst: number; sgst: number }> | undefined): string {
+    if (!tax) return '';
+    const hasStateTax = tax.cgst > 0 || tax.sgst > 0;
+    const hasIgst = tax.igst > 0;
+    if (hasStateTax && hasIgst) return 'SGST + CGST, IGST';
+    if (hasStateTax) return 'SGST + CGST';
+    if (hasIgst) return 'IGST';
+    return '';
   }
 
   // ── Private: misc ─────────────────────────────────────────────────────────
