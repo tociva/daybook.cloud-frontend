@@ -134,8 +134,8 @@
                     </span>
                   } @else {
                     <span>{{ label }}</span>
-                    @if (option.code) {
-                      <span class="pi-li-option-code"> - {{ option.code }}</span>
+                    @if (itemCategoryName(option); as categoryName) {
+                      <span class="pi-li-option-code"> - {{ categoryName }}</span>
                     }
                   }
                 </ng-template>

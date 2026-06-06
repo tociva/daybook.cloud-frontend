@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   TngButtonComponent,
@@ -116,7 +116,11 @@ export class GstReconciliationMonthlyDetailComponent {
   });
 
   constructor() {
-    void this.loadData();
+    effect(() => {
+      const session = this.sessionStore.session();
+      if (!session?.branch?.id) return;
+      void this.loadData();
+    });
   }
 
   protected async back(): Promise<void> {

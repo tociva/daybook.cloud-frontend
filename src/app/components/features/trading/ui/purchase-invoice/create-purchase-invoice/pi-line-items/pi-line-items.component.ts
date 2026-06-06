@@ -63,7 +63,8 @@ export class PiLineItemsComponent {
   protected readonly lineItemsForm = form(this.draft.items);
   protected readonly rowCount = computed(() => this.lineItemsForm().value().length);
   protected readonly itemOptionValue = (item: Item): string => item.id ?? '';
-  protected readonly itemOptionLabel = (item: Item): string => item.displayname ?? item.name ?? '';
+  protected readonly itemOptionLabel = (item: Item): string => item.name ?? item.displayname ?? '';
+  protected readonly itemCategoryName = (item: Item): string => item.category?.name ?? '';
   protected readonly itemTrackBy = (_index: number, item: Item): unknown => item.id ?? item.name;
   private readonly hostElement = inject<ElementRef<HTMLElement>>(ElementRef);
 
