@@ -5,4 +5,12 @@
     <span class="invoice-gtd__amount">{{ grandtotal() }}</span>
   </div>
   <div class="invoice-gtd__words">{{ amountInWords() }}</div>
+  @if (showConvertedAmount()) {
+    <div class="invoice-gtd__words">
+      1 {{ currencySymbol() }} = {{ conversionRateDisplay() }} {{ branchCurrencySymbol() }}
+    </div>
+    <div class="invoice-gtd__words">
+      {{ branchCurrencySymbol() }} {{ convertedAmountDisplay() }} - {{ convertedAmountInWords() }}
+    </div>
+  }
 </div>

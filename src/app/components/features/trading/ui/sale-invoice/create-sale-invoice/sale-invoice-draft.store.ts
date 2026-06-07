@@ -12,6 +12,7 @@ import type { Tax } from '../../../data/tax';
 import { TaxStore } from '../../../data/tax';
 import type { TaxGroup } from '../../../data/tax-group';
 import { TaxGroupStore } from '../../../data/tax-group';
+import { UserSessionStore } from '../../../../management/data/user-session/user-session.store';
 import { FiscalYearDateRangeService } from '../../../../../../shared/fiscal-year-date-range-picker';
 import {
   DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS,
@@ -67,6 +68,7 @@ interface SaleInvoiceDraftSnapshot {
   date: string;
   duedate: string;
   currencycode: string;
+  conversionrate: string;
   taxoption: string;
   deliverystate: string;
   customerid: string;
@@ -106,6 +108,7 @@ export class SaleInvoiceDraftStore {
   private readonly itemCategoryStore = inject(ItemCategoryStore);
   private readonly taxGroupStore = inject(TaxGroupStore);
   private readonly taxStore = inject(TaxStore);
+  private readonly userSession = inject(UserSessionStore);
   private readonly fiscalYearDateRange = inject(FiscalYearDateRangeService);
 
   // ── Submission flag ───────────────────────────────────────────────────────
@@ -122,6 +125,7 @@ export class SaleInvoiceDraftStore {
   readonly date = signal(this.fiscalYearDateRange.defaultDate());
   readonly duedate = signal(dayjs().add(14, 'day').format(DEFAULT_NODE_DATE_FORMAT));
   readonly currencycode = signal('INR');
+  readonly conversionrate = signal('1');
   readonly taxoption = signal('Intra State');
   readonly deliverystate = signal('');
 
@@ -166,7 +170,7 @@ export class SaleInvoiceDraftStore {
   // ── Tax-mode options ──────────────────────────────────────────────────────
 
   readonly taxModeOptions = computed<SelectOption[]>(() => {
-    const seen = new Set<string>(['Intra State', 'Inter State', 'Export', 'NonTaxable']);
+    const seen = new Set<string>(['Intra State', 'Inter State', 'Export', 'Non Taxable']);
     for (const tg of this.taxGroupStore.items()) {
       for (const g of tg.groups ?? []) {
         if (g.mode) seen.add(g.mode);
@@ -224,6 +228,13 @@ export class SaleInvoiceDraftStore {
     fmt(this.items().reduce((s, r) => s + r.grandtotal, 0) + toNum(this.roundoff())),
   );
 
+  readonly branchCurrencyCode = computed(() => this.userSession.session()?.branch?.currencycode ?? '');
+  readonly showConversionRate = computed(() => {
+    const branchCurrency = this.branchCurrencyCode();
+    const invoiceCurrency = this.currencycode();
+    return !!branchCurrency && !!invoiceCurrency && invoiceCurrency !== branchCurrency;
+  });
+
   // ── Validation ────────────────────────────────────────────────────────────
 
   readonly customerError = computed(() =>
@@ -233,6 +244,17 @@ export class SaleInvoiceDraftStore {
     if (!this.submitted()) return null;
     if (!this.date()) return 'Date is required.';
     return this.fiscalYearDateRange.errorMessage(this.date());
+  });
+  readonly conversionRateError = computed(() => {
+    if (!this.showConversionRate()) return null;
+
+    const value = this.conversionrate().trim();
+    if (!value) return 'Conversion rate is required.';
+
+    const rate = Number(value);
+    return Number.isFinite(rate) && rate > 0
+      ? null
+      : 'Conversion rate must be greater than 0.';
   });
 
   // ── Auto-numbering effect ─────────────────────────────────────────────────
@@ -283,6 +305,7 @@ export class SaleInvoiceDraftStore {
     this.date.set(inv.date ?? '');
     this.duedate.set(inv.duedate ?? '');
     this.currencycode.set(inv.currencycode ?? inv.currency?.code ?? 'INR');
+    this.conversionrate.set(String(cprops?.fx ?? 1));
     this.taxoption.set(cprops?.taxoption ?? 'Intra State');
     this.deliverystate.set(cprops?.deliverystate ?? '');
     this.customerid.set(inv.customerid ?? inv.customer?.id ?? '');
@@ -354,12 +377,16 @@ export class SaleInvoiceDraftStore {
     const igst = this.queryNumber(query, 'igst');
     const cgst = this.queryNumber(query, 'cgst');
     const sgst = this.queryNumber(query, 'sgst');
+    const isExportInvoice = this.isExportInvoiceQuery(query);
 
     if (!invoiceNumber && !invoiceDate && !partyName && !partyGstin && invoiceValue === 0) {
       return;
     }
 
-    this.number.set(invoiceNumber || this.number());
+    if (invoiceNumber) {
+      this.autoNumbering.set(false);
+      this.number.set(invoiceNumber);
+    }
     if (invoiceDate) {
       this.date.set(invoiceDate);
       this.duedate.set(this.getDefaultDueDate(invoiceDate));
@@ -376,6 +403,11 @@ export class SaleInvoiceDraftStore {
       if (this.useBillingForShipping()) this.syncShippingFromBilling();
     }
 
+    if (isExportInvoice) {
+      this.taxoption.set('Export');
+      this.currencycode.set('USD');
+    }
+
     if (taxableValue || totalTax || invoiceValue) {
       const taxableBase = taxableValue || Math.max(invoiceValue - totalTax, 0) || invoiceValue;
       const taxes = this.buildGstReconciliationTaxes({
@@ -385,7 +417,9 @@ export class SaleInvoiceDraftStore {
         cgst,
         sgst,
       });
-      this.taxoption.set(igst > 0 ? 'Inter State' : 'Intra State');
+      if (!isExportInvoice) {
+        this.taxoption.set(igst > 0 ? 'Inter State' : 'Intra State');
+      }
       this.items.set([
         {
           ...this.emptyItemRow(taxes.length),
@@ -667,6 +701,7 @@ export class SaleInvoiceDraftStore {
         date: this.date(),
         duedate: this.duedate(),
         currencycode: this.currencycode(),
+        conversionrate: this.conversionrate(),
         taxoption: this.taxoption(),
         deliverystate: this.deliverystate(),
         customerid: this.customerid(),
@@ -717,6 +752,7 @@ export class SaleInvoiceDraftStore {
     this.date.set(snapshot.date);
     this.duedate.set(snapshot.duedate);
     this.currencycode.set(snapshot.currencycode);
+    this.conversionrate.set(snapshot.conversionrate ?? '1');
     this.taxoption.set(snapshot.taxoption);
     this.deliverystate.set(snapshot.deliverystate);
     this.customerid.set(snapshot.customerid);
@@ -871,6 +907,24 @@ export class SaleInvoiceDraftStore {
 
   private queryNumber(query: ParamMap, key: string): number {
     return toNum(query.get(key));
+  }
+
+  private isExportInvoiceQuery(query: ParamMap): boolean {
+    const invoiceType = this.normalizeComparable(
+      query.get('invoiceType') ??
+        query.get('exportType') ??
+        query.get('gstInvoiceType') ??
+        query.get('supplyType') ??
+        query.get('type') ??
+        '',
+    );
+
+    return (
+      invoiceType.includes('export') ||
+      invoiceType === 'exp' ||
+      invoiceType === 'wpay' ||
+      invoiceType === 'wopay'
+    );
   }
 
   private buildGstReconciliationTaxes(values: {

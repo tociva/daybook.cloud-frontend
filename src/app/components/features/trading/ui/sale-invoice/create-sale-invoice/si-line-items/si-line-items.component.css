@@ -38,7 +38,7 @@
  *
  * taxFreeWidth (tf):  8% (Intra State – IGST hidden)
  *                    16% (Inter State – CGST+SGST hidden)
- *                    24% (Export / NonTaxable – all tax hidden)
+ *                    24% (Export / Non Taxable – all tax hidden)
  *
  * Base combos (tf=0 reference, single qty col):
  *   disc=ON,  desc=ON  → name=15, desc=16

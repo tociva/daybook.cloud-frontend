@@ -12,7 +12,6 @@ import { TngIcon } from '@tailng-ui/icons';
 import type { Item } from '../../../../data/item';
 import { ItemStore } from '../../../../data/item';
 import type { StoredDocument } from '../../../../data/invoice-document';
-import { UserSessionStore } from '../../../../../management/data/user-session/user-session.store';
 import { InvoiceGrandTotalDisplayComponent } from '../../../../../../../shared/invoice-grand-total-display/invoice-grand-total-display.component';
 import { InvoiceDocumentTagsComponent } from '../../../shared/invoice-document-tags/invoice-document-tags.component';
 import { SaleInvoiceDraftStore, type ItemRow } from '../sale-invoice-draft.store';
@@ -55,7 +54,6 @@ const INTERACTIVE_CLICK_TARGET_SELECTOR = [
 })
 export class SiLineItemsComponent {
   protected readonly draft        = inject(SaleInvoiceDraftStore);
-  private  readonly userSession   = inject(UserSessionStore);
   private  readonly itemStore     = inject(ItemStore);
   private  readonly router        = inject(Router);
   readonly readOnly = input(false);
@@ -77,7 +75,7 @@ export class SiLineItemsComponent {
   protected readonly createItemSentinelId = CREATE_ITEM_SENTINEL_ID;
 
   // ── Tax column visibility (derived from draft tax option) ──────────────
-  // Intra State → CGST + SGST; Inter State → IGST only; Export / NonTaxable → none
+  // Intra State → CGST + SGST; Inter State → IGST only; Export / Non Taxable → none
   readonly showIntraStateTax = computed(() => this.draft.taxoption() === 'Intra State');
   readonly showIGST          = computed(() => this.draft.taxoption() === 'Inter State');
 
@@ -201,7 +199,7 @@ export class SiLineItemsComponent {
   // Each tax group occupies label(3%) + pct/amt(5%) = 8% of table width.
   // Intra State shows CGST+SGST (16%), frees IGST (8%).
   // Inter State shows IGST (8%), frees CGST+SGST (16%).
-  // Export / NonTaxable shows nothing, frees all three (24%).
+  // Export / Non Taxable shows nothing, frees all three (24%).
   private readonly taxFreeWidth = computed<number>(() => {
     const opt = this.draft.taxoption();
     if (opt === 'Intra State') return 8;   // IGST hidden
@@ -247,10 +245,7 @@ export class SiLineItemsComponent {
 
   // ── Currency symbol (kept here for the summary-table column) ──────────────
   readonly currencySymbol = computed(() => {
-    const session = this.userSession.session();
-    const code    = session?.fiscalyear?.currencycode
-                 ?? session?.branch?.currencycode
-                 ?? 'INR';
+    const code = this.draft.currencycode() || 'INR';
     const symbols: Record<string, string> = {
       AED: 'د.إ', AUD: 'A$',  BDT: '৳',   CAD: 'C$',  CHF: 'Fr',
       CNY: '¥',   EUR: '€',   GBP: '£',   INR: '₹',   JPY: '¥',

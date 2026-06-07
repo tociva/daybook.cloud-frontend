@@ -48,6 +48,8 @@ const MONTH_NAMES: Readonly<Record<number, string>> = {
   12: 'December',
 };
 
+const GST_AMOUNT_TOLERANCE = 0;
+
 @Component({
   selector: 'app-gst-reconciliation-monthly-detail',
   standalone: true,
@@ -129,6 +131,14 @@ export class GstReconciliationMonthlyDetailComponent {
   }
 
   protected status(row: GstReconciliationDetailRow): DisplayStatus {
+    if (row.booksInvoice && row.gstInvoice) {
+      return this.rowDifferenceAmount(row) <= GST_AMOUNT_TOLERANCE ? 'matched' : 'partial';
+    }
+
+    if (row.booksInvoice || row.gstInvoice) {
+      return 'notMatched';
+    }
+
     return row.status ?? row.reconciliationStatus ?? row.computedStatus ?? 'pending';
   }
 
@@ -145,7 +155,7 @@ export class GstReconciliationMonthlyDetailComponent {
   }
 
   protected formatAmount(value: number | null | undefined): string {
-    return formatAmountWithCurrency(value ?? 0, this.currencyCode());
+    return formatAmountWithCurrency(value ?? 0, this.branchCurrencyCode());
   }
 
   protected invoiceNumber(invoice: GstReconciliationInvoice | null | undefined): string {
@@ -154,21 +164,58 @@ export class GstReconciliationMonthlyDetailComponent {
 
   protected invoiceTotal(invoice: GstReconciliationInvoice | null | undefined): string {
     if (!invoice) return '-';
-    return this.formatAmount(invoice.invoiceValue);
+    return this.formatInvoiceAmount(invoice, invoice.invoiceValue);
   }
 
   protected invoiceTax(invoice: GstReconciliationInvoice | null | undefined): string {
     if (!invoice) return '-';
-    return this.formatAmount(invoice.totalTax);
+    return this.formatInvoiceAmount(invoice, invoice.totalTax);
   }
 
   protected invoiceTaxable(invoice: GstReconciliationInvoice | null | undefined): string {
     if (!invoice) return '-';
-    return this.formatAmount(invoice.taxableValue);
+    return this.formatInvoiceAmount(invoice, invoice.taxableValue);
+  }
+
+  protected showBookInvoiceConvertedAmount(
+    invoice: GstReconciliationInvoice | null | undefined,
+  ): boolean {
+    if (!invoice) return false;
+
+    const invoiceCurrency = this.invoiceCurrencyCode(invoice);
+    const branchCurrency = this.branchCurrencyCode();
+
+    return !!invoiceCurrency && !!branchCurrency && invoiceCurrency !== branchCurrency;
+  }
+
+  protected bookInvoiceConvertedTotal(
+    invoice: GstReconciliationInvoice | null | undefined,
+  ): string {
+    if (!invoice) return '-';
+
+    return this.formatAmount(this.convertedInvoiceValue(invoice, 'invoiceValue'));
+  }
+
+  protected detailMatchedCount(detail: GstReconciliationDetailResponse): number {
+    return this.detailRows(detail).filter((row) => this.status(row) === 'matched').length;
+  }
+
+  protected detailPartialCount(detail: GstReconciliationDetailResponse): number {
+    return this.detailRows(detail).filter((row) => {
+      const status = this.status(row);
+      return status === 'partial' || status === 'partialMatch';
+    }).length;
+  }
+
+  protected detailNotMatchedCount(detail: GstReconciliationDetailResponse): number {
+    return this.detailRows(detail).filter((row) => {
+      const status = this.status(row);
+      return status === 'notMatched' || status === 'noMatch';
+    }).length;
   }
 
   protected hasDifference(row: GstReconciliationDetailRow): boolean {
-    return this.rowDifferenceAmount(row) !== 0;
+    return this.rowDifferenceAmount(row) > GST_AMOUNT_TOLERANCE;
   }
 
   protected rowParty(row: GstReconciliationDetailRow): string {
@@ -180,9 +227,22 @@ export class GstReconciliationMonthlyDetailComponent {
   }
 
   protected rowDifferenceAmount(row: GstReconciliationDetailRow): number {
-    return Math.abs(
-      (row.booksInvoice?.invoiceValue ?? 0) - (row.gstInvoice?.invoiceValue ?? 0),
-    );
+    if (!row.booksInvoice || !row.gstInvoice) {
+      return row.differenceAmount ?? 0;
+    }
+
+    return this.roundAmount(Math.abs(
+      this.bookInvoiceReconciliationValue(row.booksInvoice) -
+        (row.gstInvoice.invoiceValue ?? 0),
+    ));
+  }
+
+  protected rowReason(row: GstReconciliationDetailRow): string {
+    if (row.booksInvoice && row.gstInvoice && !this.hasDifference(row)) {
+      return '';
+    }
+
+    return row.reason || '';
   }
 
   protected detailDifferenceAmount(detail: GstReconciliationDetailResponse): number {
@@ -281,6 +341,7 @@ export class GstReconciliationMonthlyDetailComponent {
         ...(partyGstin ? { partyGstin } : {}),
         ...(sourceInvoice?.invoiceNumber ? { invoiceNumber: sourceInvoice.invoiceNumber } : {}),
         ...(sourceInvoice?.invoiceDate ? { invoiceDate: sourceInvoice.invoiceDate } : {}),
+        ...(this.isExportInvoice(row, group) ? { invoiceType: 'Export' } : {}),
         ...(sourceInvoice?.taxableValue !== undefined ? { taxableValue: sourceInvoice.taxableValue } : {}),
         ...(sourceInvoice?.totalTax !== undefined ? { totalTax: sourceInvoice.totalTax } : {}),
         ...(sourceInvoice?.invoiceValue !== undefined ? { invoiceValue: sourceInvoice.invoiceValue } : {}),
@@ -404,10 +465,123 @@ export class GstReconciliationMonthlyDetailComponent {
     return returnType === 'gstr1' ? 'GSTR-1' : 'GSTR-2B';
   }
 
-  private currencyCode(): string | undefined {
+  private isExportInvoice(
+    row: GstReconciliationDetailRow,
+    group: GstReconciliationPartyGroup,
+  ): boolean {
+    if (this.returnType() !== 'gstr1') return false;
+
+    const invoice = row.gstInvoice;
+    const invoiceType = this.normalizeComparable(
+      invoice?.exportType ??
+        invoice?.invoiceType ??
+        invoice?.gstInvoiceType ??
+        invoice?.supplyType ??
+        invoice?.type,
+    );
+
+    if (
+      invoiceType.includes('export') ||
+      invoiceType === 'exp' ||
+      invoiceType === 'wpay' ||
+      invoiceType === 'wopay'
+    ) {
+      return true;
+    }
+
+    const partyGstin = this.normalizeComparable(row.partyGstin || group.partyGstin);
+    const totalTax = (invoice?.igst ?? 0) + (invoice?.cgst ?? 0) + (invoice?.sgst ?? 0);
+
+    return !partyGstin && !!invoice && totalTax === 0;
+  }
+
+  private formatInvoiceAmount(
+    invoice: GstReconciliationInvoice,
+    value: number | null | undefined,
+  ): string {
+    return formatAmountWithCurrency(value ?? 0, this.invoiceCurrencyCode(invoice));
+  }
+
+  private detailRows(detail: GstReconciliationDetailResponse): readonly GstReconciliationDetailRow[] {
+    return detail.groups.flatMap((group) => group.rows);
+  }
+
+  private bookInvoiceReconciliationValue(
+    invoice: GstReconciliationInvoice | null | undefined,
+  ): number {
+    if (!invoice) return 0;
+    return this.convertedInvoiceValue(invoice, 'invoiceValue');
+  }
+
+  private convertedInvoiceValue(
+    invoice: GstReconciliationInvoice,
+    amountKey: 'taxableValue' | 'totalTax' | 'invoiceValue',
+  ): number {
+    const value = invoice[amountKey] ?? 0;
+
+    if (!this.showBookInvoiceConvertedAmount(invoice)) {
+      return value;
+    }
+
+    const explicitConvertedValue = this.explicitConvertedInvoiceValue(invoice, amountKey);
+    if (explicitConvertedValue !== null) return explicitConvertedValue;
+
+    return value * this.invoiceConversionRate(invoice);
+  }
+
+  private explicitConvertedInvoiceValue(
+    invoice: GstReconciliationInvoice,
+    amountKey: 'taxableValue' | 'totalTax' | 'invoiceValue',
+  ): number | null {
+    if (amountKey === 'invoiceValue') {
+      const localAmount = this.numericValue(invoice.cprops?.lamt);
+      if (localAmount !== null) return localAmount;
+    }
+
+    const convertedKeys: Record<typeof amountKey, readonly string[]> = {
+      taxableValue: ['convertedTaxableValue', 'taxableValueInBranchCurrency'],
+      totalTax: ['convertedTotalTax', 'totalTaxInBranchCurrency'],
+      invoiceValue: ['convertedInvoiceValue', 'invoiceValueInBranchCurrency'],
+    };
+
+    for (const key of convertedKeys[amountKey]) {
+      const value = this.numericValue(invoice[key]);
+      if (value !== null) return value;
+    }
+
+    return null;
+  }
+
+  private invoiceConversionRate(invoice: GstReconciliationInvoice): number {
+    const rate =
+      this.numericValue(invoice.conversionrate) ??
+      this.numericValue(invoice.exchangeRate) ??
+      this.numericValue(invoice.cprops?.fx);
+
+    return rate && rate > 0 ? rate : 1;
+  }
+
+  private invoiceCurrencyCode(invoice: GstReconciliationInvoice): string | undefined {
     return (
-      this.sessionStore.session()?.fiscalyear?.currencycode ??
-      this.sessionStore.session()?.branch?.currencycode
+      invoice.currencycode?.trim() ||
+      invoice.currency?.code?.trim() ||
+      this.branchCurrencyCode()
+    );
+  }
+
+  private numericValue(value: unknown): number | null {
+    const numberValue = typeof value === 'number' ? value : Number(value);
+    return Number.isFinite(numberValue) ? numberValue : null;
+  }
+
+  private roundAmount(value: number): number {
+    return Math.round((value + Number.EPSILON) * 100) / 100;
+  }
+
+  private branchCurrencyCode(): string | undefined {
+    return (
+      this.sessionStore.session()?.branch?.currencycode ??
+      this.sessionStore.session()?.fiscalyear?.currencycode
     );
   }
 }

@@ -71,12 +71,30 @@ export type GstReconciliationInvoice = Readonly<{
   id?: string;
   invoiceNumber?: string;
   invoiceDate?: string;
+  currencycode?: string;
+  currency?: Readonly<{ code?: string }>;
+  cprops?: Readonly<{
+    fx?: number;
+    lamt?: number;
+    [key: string]: unknown;
+  }>;
+  conversionrate?: number | string;
+  exchangeRate?: number | string;
+  convertedTaxableValue?: number;
+  convertedTotalTax?: number;
+  convertedInvoiceValue?: number;
+  exportType?: string;
+  invoiceType?: string;
+  gstInvoiceType?: string;
+  supplyType?: string;
+  type?: string;
   taxableValue?: number;
   igst?: number;
   cgst?: number;
   sgst?: number;
   totalTax?: number;
   invoiceValue?: number;
+  [key: string]: unknown;
 }>;
 
 export type GstReconciliationDetailRow = Readonly<{

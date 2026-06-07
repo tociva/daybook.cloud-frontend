@@ -28,7 +28,7 @@ import type { Tax } from '../../../data/tax';
 import { TaxGroupFacade, TaxGroupStore } from '../../../data/tax-group';
 import type { TaxGroup, TaxGroupCU } from '../../../data/tax-group';
 
-const TAX_GROUP_MODE_SUGGESTIONS = ['Inter State', 'Intra State', 'Export', 'NonTaxable'] as const;
+const TAX_GROUP_MODE_SUGGESTIONS = ['Inter State', 'Intra State', 'Export', 'Non Taxable'] as const;
 
 /** Row model: API JSON shape. */
 type TaxGroupRowModel = {

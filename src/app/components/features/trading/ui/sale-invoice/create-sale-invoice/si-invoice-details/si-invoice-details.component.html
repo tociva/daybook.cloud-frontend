@@ -21,14 +21,22 @@
           <dt>Tax Option</dt>
           <dd>{{ draft.taxoption() || '—' }}</dd>
         </div>
-        <div class="detail-field">
-          <dt>Delivery State</dt>
-          <dd>{{ draft.deliverystate() || '—' }}</dd>
-        </div>
+        @if (showDeliveryState()) {
+          <div class="detail-field">
+            <dt>Delivery State</dt>
+            <dd>{{ draft.deliverystate() || '—' }}</dd>
+          </div>
+        }
         <div class="detail-field">
           <dt>Currency</dt>
           <dd>{{ draft.currencycode() || '—' }}</dd>
         </div>
+        @if (draft.showConversionRate()) {
+          <div class="detail-field">
+            <dt>Conversion Rate</dt>
+            <dd>{{ draft.conversionrate() || '—' }}</dd>
+          </div>
+        }
       </dl>
     } @else {
       <div class="aside-fields">
@@ -85,14 +93,16 @@
           />
         </tng-form-field>
 
-        <tng-form-field labelPosition="outline">
-          <tng-label forId="inv-deliverystate">Delivery State</tng-label>
-          <tng-input
-            id="inv-deliverystate"
-            [value]="draft.deliverystate()"
-            (valueChange)="draft.deliverystate.set($any($event))"
-          />
-        </tng-form-field>
+        @if (showDeliveryState()) {
+          <tng-form-field labelPosition="outline">
+            <tng-label forId="inv-deliverystate">Delivery State</tng-label>
+            <tng-input
+              id="inv-deliverystate"
+              [value]="draft.deliverystate()"
+              (valueChange)="draft.deliverystate.set($any($event))"
+            />
+          </tng-form-field>
+        }
 
         <tng-form-field labelPosition="outline">
           <tng-label forId="inv-currency" required>Currency</tng-label>
@@ -109,6 +119,26 @@
             (queryChange)="onCurrencyQueryChange($event)"
           />
         </tng-form-field>
+
+        @if (draft.showConversionRate()) {
+          <tng-form-field labelPosition="outline" [invalid]="draft.conversionRateError() !== null">
+            <tng-label forId="inv-conversion-rate" required>Conversion Rate</tng-label>
+            <tng-input
+              id="inv-conversion-rate"
+              type="number"
+              inputmode="decimal"
+              min="0"
+              step="0.000001"
+              required
+              [ariaInvalid]="draft.conversionRateError() !== null"
+              [value]="draft.conversionrate()"
+              (valueChange)="draft.conversionrate.set($any($event))"
+            />
+            <tng-error [show]="draft.conversionRateError() !== null">
+              {{ draft.conversionRateError() }}
+            </tng-error>
+          </tng-form-field>
+        }
       </div>
     }
   </tng-card-content>

@@ -55,6 +55,9 @@ export class SiInvoiceDetailsComponent {
   // ── Currency autocomplete ────────────────────────────────────────────────
 
   protected readonly currencyQuery = signal('');
+  protected readonly showDeliveryState = computed(
+    () => this.draft.taxoption().trim().toLowerCase() !== 'export',
+  );
 
   protected readonly filteredCurrencies = computed<Currency[]>(() => {
     const q = this.currencyQuery();

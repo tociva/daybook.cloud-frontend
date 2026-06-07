@@ -183,6 +183,11 @@
   color: var(--tng-semantic-accent-danger, #dc2626);
 }
 
+.invoice-cell__converted {
+  color: var(--tng-semantic-foreground-secondary) !important;
+  font-weight: 700;
+}
+
 .amount-cell {
   font-weight: 700;
 }

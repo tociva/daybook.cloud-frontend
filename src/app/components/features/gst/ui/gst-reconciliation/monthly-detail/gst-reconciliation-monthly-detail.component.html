@@ -18,15 +18,15 @@
     <section class="summary-grid" aria-label="Monthly reconciliation summary">
       <tng-card class="summary-tile" variant="outline" padding="md" data-status="matched">
         <small>Matched</small>
-        <strong>{{ detail.summary.matchedCount }}</strong>
+        <strong>{{ detailMatchedCount(detail) }}</strong>
       </tng-card>
       <tng-card class="summary-tile" variant="outline" padding="md" data-status="partialMatch">
         <small>Partial match</small>
-        <strong>{{ detail.summary.partialCount }}</strong>
+        <strong>{{ detailPartialCount(detail) }}</strong>
       </tng-card>
       <tng-card class="summary-tile" variant="outline" padding="md" data-status="noMatch">
         <small>No match</small>
-        <strong>{{ detail.summary.notMatchedCount }}</strong>
+        <strong>{{ detailNotMatchedCount(detail) }}</strong>
       </tng-card>
       <tng-card class="summary-tile" variant="outline" padding="md">
         <small>Book invoices</small>
@@ -98,6 +98,11 @@
                   <small>Taxable {{ invoiceTaxable(row.booksInvoice) }}</small>
                   <small>Tax {{ invoiceTax(row.booksInvoice) }}</small>
                   <small>Total {{ invoiceTotal(row.booksInvoice) }}</small>
+                  @if (showBookInvoiceConvertedAmount(row.booksInvoice)) {
+                    <small class="invoice-cell__converted">
+                      Converted {{ bookInvoiceConvertedTotal(row.booksInvoice) }}
+                    </small>
+                  }
                 </span>
               }
             </ng-template>
@@ -119,7 +124,7 @@
             </ng-template>
 
             <ng-template tngTableCellTemplate="reason" let-row="row">
-              <span class="reason-cell">{{ row.reason || '-' }}</span>
+              <span class="reason-cell">{{ rowReason(row) }}</span>
             </ng-template>
           </tng-table>
         </tng-card>

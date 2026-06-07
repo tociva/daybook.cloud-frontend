@@ -350,7 +350,11 @@
 <div class="si-li-summary-wrap">
   <!-- Grand total in digits + amount in words — left side (hidden when zero) -->
   @if (+draft.grandtotal() !== 0) {
-    <app-invoice-grand-total-display [grandtotal]="draft.grandtotal()" />
+    <app-invoice-grand-total-display
+      [grandtotal]="draft.grandtotal()"
+      [currencycode]="draft.currencycode()"
+      [conversionrate]="draft.conversionrate()"
+    />
   }
 
   <table class="si-li-summary-table" aria-label="Invoice summary">

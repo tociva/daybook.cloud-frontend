@@ -118,7 +118,7 @@ export class PurchaseInvoiceDraftStore {
   // ── Tax-mode options ──────────────────────────────────────────────────────
 
   readonly taxModeOptions = computed<SelectOption[]>(() => {
-    const seen = new Set<string>(['Intra State', 'Inter State', 'Export', 'NonTaxable']);
+    const seen = new Set<string>(['Intra State', 'Inter State', 'Export', 'Non Taxable']);
     for (const tg of this.taxGroupStore.items()) {
       for (const g of tg.groups ?? []) {
         if (g.mode) seen.add(g.mode);

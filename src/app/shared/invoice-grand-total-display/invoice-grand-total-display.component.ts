@@ -12,10 +12,61 @@ export class InvoiceGrandTotalDisplayComponent {
 
   /** Grand-total string produced by the draft store (e.g. "12345.67"). */
   readonly grandtotal = input.required<string>();
+  readonly currencycode = input<string | null | undefined>(undefined);
+  readonly conversionrate = input<string | number | null | undefined>(undefined);
+
+  private readonly selectedCurrencyCode = computed(() => {
+    const selectedCode = this.currencycode();
+    if (selectedCode) return selectedCode;
+
+    const session = this.userSession.session();
+    return session?.fiscalyear?.currencycode ?? session?.branch?.currencycode ?? 'INR';
+  });
 
   protected readonly currencySymbol = computed(() => {
+    return this.currencySymbolFor(this.selectedCurrencyCode());
+  });
+
+  private readonly branchCurrencyCode = computed(() => {
+    return this.userSession.session()?.branch?.currencycode ?? '';
+  });
+
+  protected readonly showConvertedAmount = computed(() => {
+    const selectedCode = this.selectedCurrencyCode();
+    const branchCode = this.branchCurrencyCode();
+    return !!branchCode && selectedCode !== branchCode && this.conversionRateValue() > 0;
+  });
+
+  protected readonly conversionRateDisplay = computed(() => {
+    return this.formatRate(this.conversionRateValue());
+  });
+
+  protected readonly branchCurrencySymbol = computed(() => {
+    return this.currencySymbolFor(this.branchCurrencyCode());
+  });
+
+  protected readonly convertedAmount = computed(() => {
+    const total = parseFloat(String(this.grandtotal())) || 0;
+    return total * this.conversionRateValue();
+  });
+
+  protected readonly convertedAmountDisplay = computed(() => {
+    return this.convertedAmount().toFixed(2);
+  });
+
+  protected readonly convertedAmountInWords = computed(() => {
     const session = this.userSession.session();
-    const code = session?.fiscalyear?.currencycode ?? session?.branch?.currencycode ?? 'INR';
+    const currencycode = this.branchCurrencyCode();
+    const countrycode = session?.branch?.countrycode ?? 'IN';
+    return this.convertToWords(this.convertedAmount(), currencycode, countrycode);
+  });
+
+  private conversionRateValue(): number {
+    const rate = Number(this.conversionrate());
+    return Number.isFinite(rate) ? rate : 0;
+  }
+
+  private currencySymbolFor(code: string): string {
     const symbols: Record<string, string> = {
       AED: 'د.إ', AUD: 'A$',  BDT: '৳',   CAD: 'C$',  CHF: 'Fr',
       CNY: '¥',   EUR: '€',   GBP: '£',   INR: '₹',   JPY: '¥',
@@ -23,12 +74,16 @@ export class InvoiceGrandTotalDisplayComponent {
       PKR: '₨',   QAR: 'ر.ق', SAR: 'ر.س', SGD: 'S$',  USD: '$',
     };
     return symbols[code] ?? code;
-  });
+  }
+
+  private formatRate(rate: number): string {
+    return rate.toFixed(6).replace(/\.?0+$/, '');
+  }
 
   protected readonly amountInWords = computed(() => {
-    const session      = this.userSession.session();
-    const currencycode = session?.fiscalyear?.currencycode ?? session?.branch?.currencycode ?? 'INR';
-    const countrycode  = session?.branch?.countrycode ?? 'IN';
+    const session = this.userSession.session();
+    const currencycode = this.selectedCurrencyCode();
+    const countrycode = session?.branch?.countrycode ?? 'IN';
     return this.convertToWords(parseFloat(String(this.grandtotal())) || 0, currencycode, countrycode);
   });
 

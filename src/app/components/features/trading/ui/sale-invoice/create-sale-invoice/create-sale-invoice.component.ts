@@ -254,7 +254,13 @@ export class CreateSaleInvoiceComponent {
   protected async submitForm(event: Event): Promise<void> {
     event.preventDefault();
     this.draft.submitted.set(true);
-    if (!this.draft.customerid() || this.draft.dateError() !== null) return;
+    if (
+      !this.draft.customerid() ||
+      this.draft.dateError() !== null ||
+      this.draft.conversionRateError() !== null
+    ) {
+      return;
+    }
 
     const billing: InvoiceAddress = {
       name: this.draft.billingName(),
@@ -331,6 +337,7 @@ export class CreateSaleInvoiceComponent {
       items,
       cprops: {
         autoNumbering: this.draft.autoNumbering(),
+        fx: toNum(this.draft.conversionrate()),
         showdiscount: this.draft.showDiscount(),
         showdescription: this.draft.showDescription(),
         taxoption: this.draft.taxoption(),
