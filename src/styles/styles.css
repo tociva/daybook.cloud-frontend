@@ -50,3 +50,25 @@ main.management-page tng-table.journal-table .tng-table tbody tr.journal-row--al
   --tng-table-row-bg: var(--app-list-table-row-alt-bg);
   --tng-table-row-hover-bg: var(--app-list-table-row-alt-hover-bg);
 }
+
+app-bank-statement-mapping-dialog .tng-dialog-panel,
+app-bank-statement-preview-dialog .tng-dialog-panel {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 2rem);
+  overflow: hidden;
+}
+
+app-bank-statement-mapping-dialog .tng-dialog-header,
+app-bank-statement-preview-dialog .tng-dialog-header {
+  flex-shrink: 0;
+}
+
+app-bank-statement-mapping-dialog [data-slot='dialog-content'],
+app-bank-statement-preview-dialog [data-slot='dialog-content'] {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 1rem;
+  overflow: hidden;
+}

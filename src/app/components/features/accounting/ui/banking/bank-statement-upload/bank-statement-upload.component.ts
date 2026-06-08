@@ -65,6 +65,7 @@ export class BankStatementUploadComponent {
   readonly uploaded = output<readonly unknown[]>();
 
   protected readonly accept = BANK_STATEMENT_ACCEPT;
+  protected readonly maxSize = BANK_STATEMENT_MAX_SIZE;
   protected readonly isUploading = signal(false);
   protected readonly isMappingOpen = signal(false);
   protected readonly isPreviewOpen = signal(false);
@@ -95,7 +96,7 @@ export class BankStatementUploadComponent {
     const statement = this.pendingStatement();
     if (!statement) return null;
 
-    if (!this.selectedBankCashId()) return 'Bank account is required.';
+    if (!this.selectedBankCash()) return 'Bank account is required.';
 
     const startRow = this.startingRow();
     if (!Number.isInteger(startRow) || startRow < 1 || startRow > statement.rows.length) {
@@ -147,6 +148,8 @@ export class BankStatementUploadComponent {
 
   protected onStartingRowChange(row: number): void {
     this.startingRow.set(row);
+    if (!this.startingRowIsValid(row)) return;
+
     this.refreshStatementHeaderContext();
   }
 
@@ -338,9 +341,12 @@ export class BankStatementUploadComponent {
     const statement = this.pendingStatement();
     if (!statement) return;
 
+    const requestedStartingRow = this.startingRow();
+    if (!this.startingRowIsValid(requestedStartingRow, statement.rows.length)) return;
+
     const { headerRowIndex, startingRow } = this.resolveStatementHeaderContext(
       statement.rows,
-      this.startingRow(),
+      requestedStartingRow,
       statement.detectedHeaderRowIndex,
     );
 
@@ -397,6 +403,10 @@ export class BankStatementUploadComponent {
 
   private readMappedText(row: StatementRow, columnIndex: number | null): string {
     return columnIndex === null ? '' : formatStatementCell(row[columnIndex]).trim();
+  }
+
+  private startingRowIsValid(row: number, rowCount = this.pendingStatement()?.rows.length ?? 0): boolean {
+    return Number.isInteger(row) && row >= 1 && row <= rowCount;
   }
 
   private clearStatement(): void {
