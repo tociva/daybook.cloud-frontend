@@ -22,6 +22,7 @@ import type { BankCash } from '../../../data/bank-cash/bank-cash.model';
 import { BankCashStore } from '../../../data/bank-cash';
 import type { Currency } from '../../../../../features/management/data/currency/currency.model';
 import { CurrencyStore } from '../../../../../features/management/data/currency/currency.store';
+import { UserSessionStore } from '../../../../../features/management/data/user-session/user-session.store';
 import type { Customer } from '../../../data/customer/customer.model';
 import { CustomerStore } from '../../../data/customer';
 import type {
@@ -79,6 +80,7 @@ export class CreateCustomerReceiptComponent {
   protected readonly customerStore = inject(CustomerStore);
   protected readonly bankCashStore = inject(BankCashStore);
   private readonly currencyStore = inject(CurrencyStore);
+  private readonly userSessionStore = inject(UserSessionStore);
   private readonly saleInvoiceStore = inject(SaleInvoiceStore);
   private customerSearchTimer: ReturnType<typeof setTimeout> | null = null;
   private bankCashSearchTimer: ReturnType<typeof setTimeout> | null = null;
@@ -109,6 +111,7 @@ export class CreateCustomerReceiptComponent {
   protected readonly receiptNumber = signal('');
   protected readonly amount = signal('');
   protected readonly currencycode = signal('');
+  protected readonly conversionrate = signal('1');
   protected readonly description = signal('');
   private readonly customProperties = signal<CustomerReceipt['cprops']>({});
   protected readonly numberEnabled = computed(() => !this.autoNumbering());
@@ -155,6 +158,48 @@ export class CreateCustomerReceiptComponent {
   protected readonly currencyOptionLabel = (c: Currency): string => `${c.name} (${c.symbol})`;
   protected readonly currencyTrackBy = (_index: number, c: Currency): string => c.code;
 
+  protected readonly branchCurrencyCode = computed(
+    () => this.userSessionStore.session()?.branch?.currencycode ?? '',
+  );
+  protected readonly showConversionRate = computed(() => {
+    const branchCurrency = this.branchCurrencyCode();
+    const receiptCurrency = this.currencycode();
+    return !!branchCurrency && !!receiptCurrency && receiptCurrency !== branchCurrency;
+  });
+  protected readonly receiptCurrencySymbol = computed(
+    () =>
+      this.currencyStore.currencies().find((c) => c.code === this.currencycode())?.symbol ??
+      this.currencycode(),
+  );
+  protected readonly branchCurrencySymbol = computed(
+    () =>
+      this.currencyStore.currencies().find((c) => c.code === this.branchCurrencyCode())?.symbol ??
+      this.branchCurrencyCode(),
+  );
+  protected readonly convertedAmount = computed(() => {
+    const amount = Number(this.amount());
+    const rate = Number(this.conversionrate());
+    return Number.isFinite(amount) && Number.isFinite(rate) ? amount * rate : 0;
+  });
+  protected readonly conversionRateSummary = computed(() => {
+    const rate = Number(this.conversionrate());
+    if (!this.showConversionRate() || !Number.isFinite(rate) || rate <= 0) return '';
+    const unit =
+      this.receiptCurrencySymbol() === this.currencycode()
+        ? `1 ${this.currencycode()}`
+        : `1${this.receiptCurrencySymbol()}`;
+    const amount = Number(this.amount());
+    const convertedAmount = Number.isFinite(amount) ? this.convertedAmount().toFixed(2) : '0.00';
+    return `${unit} = ${rate.toFixed(2)} ${this.branchCurrencyCode()}`;
+  });
+  protected readonly convertedAmountSummary = computed(() => {
+    if (!this.showConversionRate()) return '';
+    const amount = Number(this.amount());
+    const rate = Number(this.conversionrate());
+    if (!Number.isFinite(amount) || !Number.isFinite(rate) || rate <= 0) return '';
+    return `Amount: ${this.branchCurrencySymbol()} ${this.convertedAmount().toFixed(2)}`;
+  });
+
   // ── Invoice rows (two-way bound to child RcptInvoiceLinesComponent) ──────
 
   protected readonly invoiceRows = signal<InvoiceRow[]>([]);
@@ -187,6 +232,17 @@ export class CreateCustomerReceiptComponent {
   protected readonly currencyError = computed(() =>
     this.submitted() && !this.currencycode().trim() ? 'Currency is required.' : null,
   );
+  protected readonly conversionRateError = computed(() => {
+    if (!this.showConversionRate()) return null;
+
+    const value = this.conversionrate().trim();
+    if (!value) return 'Conversion rate is required.';
+
+    const rate = Number(value);
+    return Number.isFinite(rate) && rate > 0
+      ? null
+      : 'Conversion rate must be greater than 0.';
+  });
 
   // ── Stepper ───────────────────────────────────────────────────────────────
 
@@ -198,7 +254,8 @@ export class CreateCustomerReceiptComponent {
       !!this.amount() &&
       Number(this.amount()) > 0 &&
       !!this.bcashid() &&
-      !!this.currencycode().trim();
+      !!this.currencycode().trim() &&
+      this.conversionRateError() === null;
 
     const invoicesLinked = this.invoiceRows().some((r) => r.invoice !== null); // driven by child via two-way binding
 
@@ -283,6 +340,7 @@ export class CreateCustomerReceiptComponent {
 
   private applyInvoicePrefill(invoice: SaleInvoice): void {
     this.currencycode.set(invoice.currencycode ?? 'INR');
+    this.conversionrate.set(String(invoice.cprops?.fx ?? 1));
 
     // Remaining balance = grand total minus whatever has already been received.
     const received = invoice.receipts?.reduce((sum, r) => sum + r.amount, 0) ?? 0;
@@ -322,6 +380,7 @@ export class CreateCustomerReceiptComponent {
     this.rcptdate.set(r.date ?? this.fiscalYearDateRange.defaultDate());
     this.amount.set(String(r.amount ?? ''));
     this.currencycode.set(r.currencycode ?? 'INR');
+    this.conversionrate.set(String(r.cprops?.fx ?? 1));
     this.description.set(r.description ?? '');
     this.customerid.set(r.customerid ?? r.customer?.id ?? '');
 
@@ -466,10 +525,22 @@ export class CreateCustomerReceiptComponent {
       !this.amount() ||
       amountVal <= 0 ||
       !this.bcashid() ||
-      !this.currencycode().trim()
+      !this.currencycode().trim() ||
+      this.conversionRateError() !== null
     ) {
       return;
     }
+
+    const cprops = {
+      ...(this.customProperties() ?? {}),
+      autoNumbering: this.autoNumbering(),
+      ...(this.showConversionRate()
+        ? {
+            fx: Number(this.conversionrate()),
+            lamt: this.convertedAmount(),
+          }
+        : {}),
+    };
 
     const invoices: CustomerReceiptInvoiceRequest[] = this.invoiceRows()
       .filter((r) => r.invoice?.id)
@@ -485,10 +556,7 @@ export class CreateCustomerReceiptComponent {
       currencycode: this.currencycode().trim(),
       customerid: this.customerid(),
       bcashid: this.bcashid(),
-      cprops: {
-        ...(this.customProperties() ?? {}),
-        autoNumbering: this.autoNumbering(),
-      },
+      cprops,
       ...(this.description().trim() ? { description: this.description().trim() } : {}),
       ...(invoices.length ? { invoices } : {}),
     };

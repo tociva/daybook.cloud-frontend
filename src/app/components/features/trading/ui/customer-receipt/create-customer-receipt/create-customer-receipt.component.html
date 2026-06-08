@@ -121,6 +121,41 @@
               </tng-form-field>
             </div>
 
+            @if (showConversionRate()) {
+              <!-- Conversion Rate -->
+              <div class="field">
+                <tng-form-field
+                  labelPosition="above"
+                  [invalid]="conversionRateError() !== null"
+                >
+                  <tng-label forId="rcpt-conversion-rate" required>Conversion Rate</tng-label>
+                  <tng-input
+                    id="rcpt-conversion-rate"
+                    type="number"
+                    inputmode="decimal"
+                    min="0"
+                    step="0.000001"
+                    placeholder="1.00"
+                    [ariaInvalid]="conversionRateError() !== null"
+                    [value]="conversionrate()"
+                    (valueChange)="conversionrate.set($any($event) ?? '')"
+                  />
+                  <tng-error [show]="conversionRateError() !== null">
+                    {{ conversionRateError() }}
+                  </tng-error>
+                </tng-form-field>
+                @if (conversionRateSummary()) {
+                  <p class="field-note">
+                    {{ conversionRateSummary() }}
+                    @if (convertedAmountSummary()) {
+                      <span>, </span>
+                      <strong class="field-note__strong">{{ convertedAmountSummary() }}</strong>
+                    }
+                  </p>
+                }
+              </div>
+            }
+
             <!-- Bank/Cash -->
             <div class="field">
               <tng-form-field labelPosition="above" [invalid]="bankCashError() !== null">

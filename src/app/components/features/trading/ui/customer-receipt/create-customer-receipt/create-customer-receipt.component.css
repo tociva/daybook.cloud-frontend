@@ -127,6 +127,18 @@
   align-content: end;
 }
 
+.field-note {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.field-note__strong {
+  color: var(--tng-semantic-foreground-primary);
+  font-weight: 700;
+}
+
 .toggle-row {
   align-items: center;
   color: var(--tng-semantic-foreground-primary);
