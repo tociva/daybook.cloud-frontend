@@ -1,0 +1,140 @@
+<main class="accounting-page">
+  <section class="setup-layout" aria-labelledby="bank-txn-setup-title">
+    <form class="bank-txn-form" (submit)="submitForm($event)" novalidate>
+      <tng-card variant="outline" padding="lg">
+        <tng-card-header>
+          <tng-card-title>{{ title() }}</tng-card-title>
+          <tng-card-description>
+            Record bank inflows and outflows against a mapped bank ledger.
+          </tng-card-description>
+        </tng-card-header>
+
+        <tng-card-content>
+          @if (bankTxnStore.error()) {
+            <div class="notice notice--danger">{{ bankTxnStore.error() }}</div>
+          }
+
+          @if (bankTxnStore.isLoading() && mode() === 'edit' && !bankTxnStore.selectedItem()) {
+            <div class="notice">Loading bank transaction...</div>
+          } @else {
+            <div class="field-grid">
+              <div class="field">
+                <tng-form-field labelPosition="above" [invalid]="bankError() !== null">
+                  <tng-label forId="bt-bank" required>Bank Account</tng-label>
+                  <tng-select
+                    id="bt-bank"
+                    [options]="bankMapOptions()"
+                    [getOptionLabel]="bankOptionLabel"
+                    [getOptionValue]="bankOptionValue"
+                    [trackBy]="bankTrackBy"
+                    [value]="inventoryledgermapid()"
+                    (valueChange)="onBankChange($event)"
+                  />
+                  <tng-error [show]="bankError() !== null">{{ bankError() }}</tng-error>
+                </tng-form-field>
+              </div>
+
+              <div class="field">
+                <tng-form-field labelPosition="above" [invalid]="dateError() !== null">
+                  <tng-label forId="bt-date" required>Transaction Date</tng-label>
+                  <app-fiscal-year-datepicker
+                    id="bt-date"
+                    [value]="txndate()"
+                    [invalid]="dateError() !== null"
+                    (valueChange)="onDateChange($event)"
+                  />
+                  <tng-error [show]="dateError() !== null">{{ dateError() }}</tng-error>
+                </tng-form-field>
+              </div>
+
+              <div class="field">
+                <tng-form-field labelPosition="above">
+                  <tng-label forId="bt-type" required>Transaction Type</tng-label>
+                  <tng-select
+                    id="bt-type"
+                    [options]="amountTypeOptions"
+                    [getOptionLabel]="amountTypeLabel"
+                    [getOptionValue]="amountTypeValue"
+                    [trackBy]="amountTypeTrackBy"
+                    [value]="amountType()"
+                    (valueChange)="onAmountTypeChange($event)"
+                  />
+                </tng-form-field>
+              </div>
+
+              <div class="field">
+                <tng-form-field labelPosition="above" [invalid]="amountError() !== null">
+                  <tng-label forId="bt-amount" required>Amount</tng-label>
+                  <tng-input
+                    id="bt-amount"
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    placeholder="0.00"
+                    [value]="amount()"
+                    (valueChange)="amount.set($any($event) ?? '')"
+                  />
+                  <tng-error [show]="amountError() !== null">{{ amountError() }}</tng-error>
+                </tng-form-field>
+              </div>
+
+              <div class="field">
+                <tng-form-field labelPosition="above">
+                  <tng-label forId="bt-bankref">Bank Reference</tng-label>
+                  <tng-input
+                    id="bt-bankref"
+                    placeholder="UTR / cheque number"
+                    [value]="bankref()"
+                    (valueChange)="bankref.set($any($event) ?? '')"
+                  />
+                </tng-form-field>
+              </div>
+
+              <div class="field field--wide">
+                <tng-form-field labelPosition="above">
+                  <tng-label forId="bt-description">Description</tng-label>
+                  <tng-textarea
+                    id="bt-description"
+                    placeholder="Bank narration or internal notes"
+                    rows="3"
+                    [value]="description()"
+                    (valueChange)="description.set($any($event) ?? '')"
+                  />
+                </tng-form-field>
+              </div>
+            </div>
+
+            <tng-card-footer>
+              <tng-card-actions align="end">
+                <app-burl-back-button label="Cancel" />
+                <app-burl-create-button
+                  [icon]="mode() === 'edit' ? 'save' : 'plus'"
+                  [label]="mode() === 'edit' ? 'Save changes' : 'Create transaction'"
+                  [disabled]="bankTxnStore.isLoading()"
+                />
+              </tng-card-actions>
+            </tng-card-footer>
+          }
+        </tng-card-content>
+      </tng-card>
+    </form>
+
+    <aside class="setup-overview" aria-labelledby="bank-txn-setup-title">
+      <div class="setup-copy">
+        <p class="eyebrow">Banking</p>
+        <h1 id="bank-txn-setup-title">{{ title() }}</h1>
+        <p>
+          Select the bank ledger, choose whether money came in or went out, and attach the bank
+          reference for later matching.
+        </p>
+        <tng-stepper
+          class="setup-stepper"
+          ariaLabel="Bank transaction setup progress"
+          [ordered]="true"
+          [steps]="setupSteps()"
+          [value]="activeSetupStep()"
+        />
+      </div>
+    </aside>
+  </section>
+</main>

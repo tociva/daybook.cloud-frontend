@@ -161,6 +161,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'app/accounting/banking',
+    loadChildren: () =>
+      import('./components/features/accounting/ui/banking/banking.routes').then(
+        (m) => m.bankingRoutes,
+      ),
+  },
+  {
     path: 'app/accounting/documents',
     loadChildren: () =>
       import('./components/features/accounting/ui/document/document.routes').then(

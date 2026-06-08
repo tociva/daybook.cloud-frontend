@@ -28,20 +28,21 @@
               </label>
             </div>
 
-            <!-- Number -->
-            <div class="field">
-              <tng-form-field labelPosition="above" [invalid]="numberError() !== null">
-                <tng-label forId="rcpt-number" required>Receipt Number</tng-label>
-                <tng-input
-                  id="rcpt-number"
-                  [value]="number()"
-                  [disabled]="!numberEnabled()"
-                  [ariaInvalid]="numberError() !== null"
-                  (valueChange)="number.set($any($event) ?? '')"
-                />
-                <tng-error [show]="numberError() !== null">{{ numberError() }}</tng-error>
-              </tng-form-field>
-            </div>
+            @if (!autoNumbering()) {
+              <!-- Number -->
+              <div class="field">
+                <tng-form-field labelPosition="above" [invalid]="numberError() !== null">
+                  <tng-label forId="rcpt-number" required>Receipt Number</tng-label>
+                  <tng-input
+                    id="rcpt-number"
+                    [value]="number()"
+                    [ariaInvalid]="numberError() !== null"
+                    (valueChange)="number.set($any($event) ?? '')"
+                  />
+                  <tng-error [show]="numberError() !== null">{{ numberError() }}</tng-error>
+                </tng-form-field>
+              </div>
+            }
 
             <!-- Date -->
             <div class="field">

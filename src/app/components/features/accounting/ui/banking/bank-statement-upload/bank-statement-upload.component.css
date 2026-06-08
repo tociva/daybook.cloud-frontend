@@ -1,0 +1,31 @@
+:host {
+  display: inline-flex;
+}
+
+.statement-upload-control {
+  align-items: center;
+  border: 1px solid var(--tng-semantic-border-strong);
+  border-radius: 0.6rem;
+  display: inline-flex;
+  outline: 2px dotted transparent;
+  outline-offset: 0;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    outline-color 160ms ease,
+    outline-offset 160ms ease,
+    transform 160ms ease;
+}
+
+.statement-upload-control[data-dragging] {
+  border-color: var(--tng-semantic-accent-brand);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--tng-semantic-accent-brand) 18%, transparent);
+  outline-color: var(--tng-semantic-accent-brand);
+  outline-offset: 0.18rem;
+  transform: translateY(-1px);
+}
+
+.statement-upload-control[data-rejected] {
+  border-color: var(--tng-semantic-accent-danger);
+  outline-color: var(--tng-semantic-accent-danger);
+}

@@ -132,7 +132,7 @@
     size="lg"
     description="Review the selected data before sending it to the server."
     [open]="isPreviewOpen()"
-    [closeOnBackdrop]="!isUploading()"
+    [closeOnBackdrop]="false"
     [closeOnEscape]="!isUploading()"
     (closed)="onPreviewClosed()"
   >
@@ -213,6 +213,7 @@
     size="md"
     description="Use the sample files below to match the required upload format."
     [open]="isFormatErrorOpen()"
+    [closeOnBackdrop]="false"
     (closed)="onFormatErrorClosed()"
   >
     <div class="bulk-upload-error">

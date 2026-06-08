@@ -1,0 +1,55 @@
+.accounting-page {
+  padding: 1.25rem;
+}
+
+.notice {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.notice--danger {
+  border-color: var(--tng-semantic-accent-danger);
+  color: var(--tng-semantic-accent-danger);
+}
+
+.details-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+}
+
+.details-grid div {
+  border-bottom: 1px solid var(--tng-semantic-border-subtle);
+  padding-bottom: 0.75rem;
+}
+
+.details-grid .wide {
+  grid-column: 1 / -1;
+}
+
+dt {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+}
+
+dd {
+  margin: 0;
+}
+
+.confirm-row {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 700px) {
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+}

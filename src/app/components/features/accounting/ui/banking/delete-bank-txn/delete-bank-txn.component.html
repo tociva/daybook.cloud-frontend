@@ -1,0 +1,61 @@
+<main class="accounting-page">
+  <tng-card variant="outline" tone="danger" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Delete Bank Transaction</tng-card-title>
+      <tng-card-description>This action cannot be undone.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (bankTxnStore.error()) {
+        <div class="notice notice--danger">{{ bankTxnStore.error() }}</div>
+      }
+
+      @if (bankTxnStore.isLoading() && !bankTxnStore.selectedItem()) {
+        <div class="notice">Loading bank transaction...</div>
+      } @else if (bankTxnStore.selectedItem(); as txn) {
+        <dl class="details-grid">
+          <div>
+            <dt>Date</dt>
+            <dd>{{ formatDisplayDate(txn.txndate) }}</dd>
+          </div>
+          <div>
+            <dt>Bank Account</dt>
+            <dd>{{ bankName(txn.inventoryledgermapid) }}</dd>
+          </div>
+          <div>
+            <dt>Amount</dt>
+            <dd>{{ transactionAmountLabel() }}</dd>
+          </div>
+          <div>
+            <dt>Reference</dt>
+            <dd>{{ txn.bankref || '-' }}</dd>
+          </div>
+          @if (txn.description) {
+            <div class="wide">
+              <dt>Description</dt>
+              <dd>{{ txn.description }}</dd>
+            </div>
+          }
+        </dl>
+
+        <label class="confirm-row">
+          <tng-checkbox [checked]="confirmed()" (checkedChange)="confirmed.set(!!$event)" />
+          <span>I understand that this bank transaction will be permanently deleted.</span>
+        </label>
+      } @else {
+        <div class="notice">Bank transaction not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button label="Cancel" />
+        <app-burl-delete-button
+          [label]="bankTxnStore.isLoading() ? 'Deleting...' : 'Delete transaction'"
+          [disabled]="!confirmed() || bankTxnStore.isLoading()"
+          (clicked)="deleteBankTxn()"
+        />
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>

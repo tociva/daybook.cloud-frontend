@@ -1083,7 +1083,9 @@ function parseXlsxCellValue(
   }
 
   if (typeof sampleValue === 'number' || isNumericXlsxPath(path)) {
-    const numericValue = typeof value === 'number' ? value : Number(value);
+    const normalizedNumber =
+      typeof value === 'string' ? value.replace(/[,₹$€£\s]/g, '') : value;
+    const numericValue = typeof normalizedNumber === 'number' ? normalizedNumber : Number(normalizedNumber);
     if (!Number.isFinite(numericValue)) {
       return { ok: false, message: `Row ${rowNumber} column "${header}" must be a number.` };
     }

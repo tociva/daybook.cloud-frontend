@@ -1,0 +1,178 @@
+:host ::ng-deep .tng-dialog-panel {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 2rem);
+  overflow: hidden;
+}
+
+:host ::ng-deep .tng-dialog-header {
+  flex-shrink: 0;
+}
+
+:host ::ng-deep .tng-dialog-content {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 1rem;
+  overflow: hidden;
+}
+
+.mapping-body {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.statement-meta {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  display: grid;
+  gap: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+.statement-meta div {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: 7rem minmax(0, 1fr);
+  padding: 0.65rem 0.75rem;
+}
+
+.statement-meta div + div {
+  border-top: 1px solid var(--tng-semantic-border-subtle);
+}
+
+.statement-meta dt {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.statement-meta dd {
+  color: var(--tng-semantic-foreground-primary);
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.statement-meta,
+.statement-form,
+.statement-mapping-grid,
+.statement-error {
+  flex-shrink: 0;
+}
+
+.statement-form {
+  --tng-autocomplete-overlay-z-index: 10000;
+  --tng-autocomplete-z-overlay: 10000;
+  --tng-autocomplete-bg: var(--tng-semantic-background-base);
+  --tng-autocomplete-surface: var(--tng-semantic-background-surface);
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: minmax(16rem, 1fr) minmax(10rem, 16rem);
+}
+
+tng-autocomplete {
+  display: block;
+  width: 100%;
+}
+
+.muted {
+  color: var(--tng-semantic-foreground-muted);
+}
+
+.statement-mapping-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+}
+
+.statement-mapping-grid tng-select {
+  display: block;
+  width: 100%;
+}
+
+.statement-raw-preview {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.statement-raw-preview__header {
+  background: var(--tng-semantic-background-canvas);
+  border-bottom: 1px solid var(--tng-semantic-border-subtle);
+  flex-shrink: 0;
+  padding: 0.65rem 0.75rem;
+}
+
+.statement-raw-preview__table {
+  max-height: min(10rem, 22vh);
+  overflow: auto;
+}
+
+.statement-raw-preview table {
+  border-collapse: collapse;
+  min-width: 100%;
+  table-layout: fixed;
+}
+
+.statement-raw-preview th,
+.statement-raw-preview td {
+  border-bottom: 1px solid var(--tng-semantic-border-subtle);
+  color: var(--tng-semantic-foreground-primary);
+  font-size: 0.78rem;
+  max-width: 12rem;
+  overflow: hidden;
+  padding: 0.5rem 0.65rem;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.statement-raw-preview th {
+  background: var(--tng-semantic-background-canvas);
+  color: var(--tng-semantic-foreground-muted);
+  font-weight: 700;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.statement-raw-preview tr[data-start-row] td,
+.statement-raw-preview tr[data-start-row] th {
+  background: color-mix(in srgb, var(--tng-semantic-accent-brand) 10%, transparent);
+}
+
+.statement-error {
+  border: 1px solid var(--tng-semantic-accent-danger);
+  border-radius: 0.5rem;
+  color: var(--tng-semantic-accent-danger);
+  margin: 0;
+  padding: 0.75rem;
+}
+
+.dialog-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 0;
+}
+
+@media (max-width: 640px) {
+  .statement-form,
+  .statement-meta div {
+    grid-template-columns: 1fr;
+  }
+
+  .dialog-actions {
+    flex-direction: column-reverse;
+  }
+}

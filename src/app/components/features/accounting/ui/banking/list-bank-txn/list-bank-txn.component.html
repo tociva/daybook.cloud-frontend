@@ -1,0 +1,133 @@
+<main class="management-page">
+  <app-page-heading
+    eyebrow="Accounting"
+    title="Banking"
+    description="Manage bank statement transactions for reconciliation and audit trails."
+  >
+    <app-crud-filter-popover
+      ariaLabel="Bank transaction filters"
+      title="Filter bank transactions"
+      [fields]="filterFields"
+      [filter]="crudQuery.filter()"
+      syncUrl
+    />
+
+    <app-bank-statement-upload (uploaded)="reloadBankTxns()" />
+
+    <tng-button type="button" appearance="solid" tone="primary" (click)="createBankTxn()">
+      <tng-icon icon="plus" aria-hidden="true" />
+      New transaction
+    </tng-button>
+  </app-page-heading>
+
+  <tng-card variant="outline" padding="lg">
+    @if (bankTxnStore.error()) {
+      <div class="notice notice--danger">{{ bankTxnStore.error() }}</div>
+    }
+
+    <div class="table-stack">
+      @if (
+        !bankTxnStore.isLoading() &&
+        !hasError() &&
+        crudQuery.shouldShowEmptyState(bankTxnStore.items().length, bankTxnStore.count())
+      ) {
+        @if (crudQuery.hasActiveFilter()) {
+          <app-empty-state
+            icon="searchX"
+            title="No bank transactions match your filter"
+            description="Try adjusting or clearing your filter to find the transaction."
+          >
+            <tng-button
+              type="button"
+              appearance="outline"
+              tone="neutral"
+              (click)="crudQuery.clearFilter()"
+            >
+              Clear filter
+            </tng-button>
+          </app-empty-state>
+        } @else {
+          <app-empty-state
+            icon="landmark"
+            title="No bank transactions yet"
+            description="Create a transaction or upload an original bank statement file."
+          >
+            <tng-button type="button" appearance="solid" tone="primary" (click)="createBankTxn()">
+              <tng-icon icon="plus" aria-hidden="true" />
+              New transaction
+            </tng-button>
+          </app-empty-state>
+        }
+      } @else {
+        <tng-table
+          ariaLabel="Bank transactions"
+          density="comfortable"
+          [columns]="columns"
+          [items]="bankTxnStore.items()"
+          [loading]="bankTxnStore.isLoading()"
+          [error]="hasError()"
+          [sortActive]="crudQuery.sortActive()"
+          [sortDirection]="crudQuery.sortDirection()"
+          (sortChange)="crudQuery.applySort($event)"
+        >
+          <ng-template tngTableCellTemplate="txndate" let-row="row">
+            <button type="button" class="link-button" (click)="viewBankTxn(row)">
+              {{ formatDisplayDate(row.txndate) }}
+            </button>
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="bank" let-row="row">
+            {{ bankName(row) }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="description" let-row="row">
+            {{ row.description }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="bankref" let-row="row">
+            {{ row.bankref }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="debit" let-row="row">
+            {{ formatAmount(row.debit) }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="credit" let-row="row">
+            {{ formatAmount(row.credit) }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="actions" let-row="row">
+            <div class="row-actions">
+              <app-table-row-icon-button
+                icon="eye"
+                ariaLabel="View bank transaction"
+                (action)="viewBankTxn(row)"
+              />
+              <app-table-row-icon-button
+                icon="pencil"
+                ariaLabel="Edit bank transaction"
+                (action)="editBankTxn(row)"
+              />
+              <app-table-row-icon-button
+                icon="trash2"
+                ariaLabel="Delete bank transaction"
+                tone="danger"
+                (action)="deleteBankTxn(row)"
+              />
+            </div>
+          </ng-template>
+        </tng-table>
+
+        <div class="table-footer">
+          <app-crud-paginator
+            ariaLabel="Bank transaction pagination"
+            [filter]="crudQuery.filter()"
+            [totalItems]="bankTxnStore.count()"
+            [pageSizeOptions]="crudQuery.pageSizeOptions()"
+            syncUrl
+          />
+        </div>
+      }
+    </div>
+  </tng-card>
+</main>

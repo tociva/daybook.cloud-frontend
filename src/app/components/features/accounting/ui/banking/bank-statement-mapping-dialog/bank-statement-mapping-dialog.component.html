@@ -1,0 +1,148 @@
+<tng-dialog
+  title="Configure bank statement"
+  size="lg"
+  description="Select the bank account, transaction starting row, and statement columns."
+  [open]="open()"
+  [closeOnBackdrop]="false"
+  [closeOnEscape]="!isUploading()"
+  (closed)="onDialogClosed()"
+>
+  <div class="mapping-body">
+    <dl class="statement-meta">
+      <div>
+        <dt>File</dt>
+        <dd>{{ statement().file.name }}</dd>
+      </div>
+      <div>
+        <dt>Size</dt>
+        <dd>{{ statement().fileSize }}</dd>
+      </div>
+      <div>
+        <dt>Rows</dt>
+        <dd>{{ statement().rows.length }}</dd>
+      </div>
+        <div>
+          <dt>Column header row</dt>
+          <dd>{{ statement().headerRowIndex + 1 }}</dd>
+        </div>
+    </dl>
+
+    <div class="statement-form">
+      <tng-form-field labelPosition="above" [invalid]="!selectedBankCashId()">
+        <tng-label forId="statement-bank" required>Bank account</tng-label>
+        <tng-autocomplete
+          id="statement-bank"
+          placeholder="Search bank or cash account"
+          ariaLabel="Bank account"
+          [options]="filteredBankCashes()"
+          [getOptionLabel]="bankCashOptionLabel"
+          [getOptionValue]="bankCashOptionValue"
+          [trackBy]="bankCashTrackBy"
+          [value]="selectedBankCashId()"
+          (valueChange)="setBankCash($event)"
+          (queryChange)="setBankCashQuery($event)"
+        >
+          <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
+            <span>{{ label }}</span>
+            @if (option.description) {
+              <span class="muted"> — {{ option.description }}</span>
+            }
+          </ng-template>
+        </tng-autocomplete>
+        <tng-error [show]="!selectedBankCashId()">Select a bank account.</tng-error>
+      </tng-form-field>
+
+      <tng-form-field labelPosition="above" [invalid]="startingRowInvalid()">
+        <tng-label forId="statement-start-row">Transaction starting row</tng-label>
+        <tng-input
+          id="statement-start-row"
+          type="number"
+          ariaLabel="Transaction starting row"
+          [min]="1"
+          [max]="statement().rows.length"
+          [step]="1"
+          [value]="startingRowValue()"
+          (valueChange)="setStartingRow($event)"
+        />
+        <tng-error [show]="startingRowInvalid()">
+          Enter a starting row between 1 and {{ statement().rows.length }}.
+        </tng-error>
+      </tng-form-field>
+    </div>
+
+    <div class="statement-mapping-grid">
+      @for (field of fields; track field.path) {
+        <tng-form-field labelPosition="above">
+          <tng-label [forId]="fieldSelectId(field)" [required]="!!field.required">
+            {{ field.label }}
+          </tng-label>
+          <tng-select
+            [id]="fieldSelectId(field)"
+            placeholder="Not mapped"
+            [attr.aria-label]="field.label"
+            [options]="columnSelectOptions()"
+            [getOptionLabel]="columnOptionLabel"
+            [getOptionValue]="columnOptionValue"
+            [trackBy]="columnOptionTrackBy"
+            [value]="fieldSelectValue(field)"
+            (valueChange)="setFieldMapping(field, $event)"
+          />
+        </tng-form-field>
+      }
+    </div>
+
+    <div class="statement-raw-preview">
+      <div class="statement-raw-preview__header">
+        <strong>Statement preview</strong>
+      </div>
+      <div class="statement-raw-preview__table">
+        <table>
+          <thead>
+            <tr>
+              <th>Row</th>
+              @for (column of statement().columnOptions; track column.index) {
+                <th>{{ columnName(column.index) }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of mappingPreviewRows(); track row.rowNumber) {
+              <tr [attr.data-start-row]="row.rowNumber === startingRow() ? '' : null">
+                <th>{{ row.rowNumber }}</th>
+                @for (value of row.values; track $index) {
+                  <td>{{ value }}</td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    @if (mappingError(); as message) {
+      <p class="statement-error">{{ message }}</p>
+    }
+  </div>
+
+  <div class="dialog-actions">
+    <tng-button
+      type="button"
+      appearance="outline"
+      tone="neutral"
+      [disabled]="isUploading()"
+      (click)="onCancel()"
+    >
+      Cancel
+    </tng-button>
+
+    <tng-button
+      type="button"
+      appearance="solid"
+      tone="primary"
+      [disabled]="isUploading() || mappingError() !== null"
+      (click)="onContinue()"
+    >
+      Continue
+    </tng-button>
+  </div>
+</tng-dialog>

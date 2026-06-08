@@ -1,0 +1,59 @@
+<main class="accounting-page">
+  <tng-card variant="outline" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Bank Transaction Details</tng-card-title>
+      <tng-card-description>Review bank transaction information.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (bankTxnStore.error()) {
+        <div class="notice notice--danger">{{ bankTxnStore.error() }}</div>
+      }
+
+      @if (bankTxnStore.isLoading() && !bankTxnStore.selectedItem()) {
+        <div class="notice">Loading bank transaction...</div>
+      } @else if (bankTxnStore.selectedItem(); as txn) {
+        <dl class="details-grid">
+          <div>
+            <dt>Date</dt>
+            <dd>{{ formatDisplayDate(txn.txndate) }}</dd>
+          </div>
+          <div>
+            <dt>Bank Account</dt>
+            <dd>{{ bankName(txn.inventoryledgermapid) }}</dd>
+          </div>
+          <div>
+            <dt>Inflow</dt>
+            <dd>{{ formatAmount(txn.debit) }}</dd>
+          </div>
+          <div>
+            <dt>Outflow</dt>
+            <dd>{{ formatAmount(txn.credit) }}</dd>
+          </div>
+          <div>
+            <dt>Bank Reference</dt>
+            <dd>{{ txn.bankref || '-' }}</dd>
+          </div>
+          <div>
+            <dt>Matches</dt>
+            <dd>{{ txn.matches?.length ?? 0 }}</dd>
+          </div>
+          <div class="wide">
+            <dt>Description</dt>
+            <dd>{{ txn.description || 'No description' }}</dd>
+          </div>
+        </dl>
+      } @else {
+        <div class="notice">Bank transaction not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button />
+        <app-burl-edit-button (clicked)="edit()" />
+        <app-burl-delete-button (clicked)="delete()" />
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>

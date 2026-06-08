@@ -1,0 +1,63 @@
+<div
+  class="statement-upload-control"
+  tngFileUpload
+  [accept]="accept"
+  [disabled]="isDisabled()"
+  [maxSize]="1048576"
+  [multiple]="false"
+  (filesRejected)="onFilesRejected($event)"
+  (filesSelected)="onFilesSelected($event)"
+>
+  <tng-button
+    type="button"
+    appearance="ghost"
+    tone="neutral"
+    [disabled]="isDisabled()"
+    (click)="chooseFile(fileInput)"
+  >
+    <tng-icon [icon]="isUploading() ? 'loaderCircle' : 'upload'" aria-hidden="true" />
+    {{ isUploading() ? 'Uploading...' : 'Upload statement' }}
+  </tng-button>
+</div>
+
+<input
+  #fileInput
+  type="file"
+  hidden
+  [accept]="accept"
+  [disabled]="isDisabled()"
+  (change)="onFileInputChange($event)"
+/>
+
+@if (pendingStatement(); as statement) {
+  <app-bank-statement-mapping-dialog
+    [open]="isMappingOpen()"
+    [statement]="statement"
+    [isUploading]="isUploading()"
+    [selectedBankCashId]="selectedBankCashId()"
+    [bankCashQuery]="bankCashQuery()"
+    [startingRow]="startingRow()"
+    [fieldMappings]="fieldMappings()"
+    [mappingError]="mappingError()"
+    (closed)="onMappingClosed()"
+    (cancelled)="cancelMapping()"
+    (continued)="continueToPreview()"
+    (selectedBankCashIdChange)="selectedBankCashId.set($event)"
+    (bankCashQueryChange)="bankCashQuery.set($event)"
+    (startingRowChange)="onStartingRowChange($event)"
+    (fieldMappingsChange)="fieldMappings.set($event)"
+  />
+
+  <app-bank-statement-preview-dialog
+    [open]="isPreviewOpen()"
+    [statement]="statement"
+    [previewRows]="previewRows()"
+    [bankAccountName]="selectedBankCash()?.name ?? ''"
+    [startingRow]="startingRow()"
+    [isUploading]="isUploading()"
+    (closed)="onPreviewClosed()"
+    (back)="backToMapping()"
+    (confirmed)="confirmUpload()"
+    (rowRemoved)="removePreviewRow($event)"
+  />
+}

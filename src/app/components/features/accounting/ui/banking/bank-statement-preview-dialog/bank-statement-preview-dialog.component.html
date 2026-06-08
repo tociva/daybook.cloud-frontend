@@ -1,0 +1,81 @@
+<tng-dialog
+  title="Confirm bank statement import"
+  size="lg"
+  description="Review the mapped transactions before bulk import."
+  [open]="open()"
+  [closeOnBackdrop]="false"
+  [closeOnEscape]="!isUploading()"
+  (closed)="onDialogClosed()"
+>
+  <div class="preview-body">
+    <dl class="statement-meta">
+      <div>
+        <dt>Bank account</dt>
+        <dd>{{ bankAccountName() }}</dd>
+      </div>
+      <div>
+        <dt>File</dt>
+        <dd>{{ statement().file.name }}</dd>
+      </div>
+      <div>
+        <dt>Records</dt>
+        <dd>{{ previewRows().length }}</dd>
+      </div>
+      <div>
+        <dt>Starting row</dt>
+        <dd>{{ startingRow() }}</dd>
+      </div>
+    </dl>
+
+    <div class="statement-table">
+      <tng-table
+        ariaLabel="Bank statement import preview"
+        density="compact"
+        scrollAxis="both"
+        [columns]="previewColumns"
+        [items]="previewRows()"
+        [stickyHeader]="true"
+      >
+        <ng-template tngTableCellTemplate="rowNumber" let-row="row">
+          <div class="preview-row-cell">
+            <app-table-row-icon-button
+              icon="trash2"
+              ariaLabel="Remove row from import"
+              tone="danger"
+              [disabled]="isUploading()"
+              (action)="removeRow(row)"
+            />
+            <span>{{ row.rowNumber }}</span>
+          </div>
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="txndate" let-row="row">
+          {{ formatDisplayDate(row.txndate) }}
+        </ng-template>
+      </tng-table>
+    </div>
+  </div>
+
+  <div class="dialog-actions">
+    <tng-button
+      type="button"
+      appearance="outline"
+      tone="neutral"
+      [disabled]="isUploading()"
+      (click)="onBack()"
+    >
+      Back
+    </tng-button>
+
+    <tng-button
+      type="button"
+      appearance="solid"
+      tone="primary"
+      [disabled]="isUploading() || previewRows().length === 0"
+      (click)="onConfirm()"
+    >
+      <tng-icon [icon]="isUploading() ? 'loaderCircle' : 'upload'" aria-hidden="true" />
+      {{ isUploading() ? 'Importing...' : 'Start import' }}
+    </tng-button>
+  </div>
+</tng-dialog>
