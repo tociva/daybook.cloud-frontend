@@ -105,6 +105,25 @@ tng-select {
   width: 100%;
 }
 
+.entity-option {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.entity-option__name,
+.entity-option__category {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.entity-option__category {
+  color: var(--tng-semantic-foreground-secondary);
+  font-size: 0.85rem;
+}
+
 @media (max-width: 900px) {
   .setup-layout {
     grid-template-columns: 1fr;

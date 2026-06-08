@@ -48,7 +48,16 @@
                       [trackBy]="draft.entityTrackBy"
                       (valueChange)="draft.onEntityChange($event)"
                       (queryChange)="draft.onEntityQueryChange($event)"
-                    />
+                    >
+                      <ng-template #tngAutocompleteOptionTpl let-option>
+                        <span class="entity-option">
+                          <span class="entity-option__name">{{ draft.entityPrimaryName(option) }}</span>
+                          @if (draft.entityCategoryName(option); as categoryName) {
+                            <span class="entity-option__category">({{ categoryName }})</span>
+                          }
+                        </span>
+                      </ng-template>
+                    </tng-autocomplete>
                     <tng-error [show]="draft.entityError() !== null">{{ draft.entityError() }}</tng-error>
                   </tng-form-field>
                 </div>

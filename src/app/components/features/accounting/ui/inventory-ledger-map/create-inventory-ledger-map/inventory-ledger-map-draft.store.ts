@@ -75,8 +75,16 @@ export class InventoryLedgerMapDraftStore {
   readonly ledgerTrackBy = (_i: number, item: Ledger): string => item.id ?? '';
 
   readonly entityOptionValue = (item: MappingEntity): string => item.id ?? '';
-  readonly entityOptionLabel = (item: MappingEntity): string =>
-    'displayname' in item ? item.displayname || item.name : item.name;
+  readonly entityOptionLabel = (item: MappingEntity): string => {
+    const name = this.entityPrimaryName(item);
+    const categoryName = this.entityCategoryName(item);
+
+    return categoryName ? `${name} (${categoryName})` : name;
+  };
+  readonly entityPrimaryName = (item: MappingEntity): string =>
+    'displayname' in item ? item.name || item.displayname : item.name;
+  readonly entityCategoryName = (item: MappingEntity): string =>
+    this.isItem(item) ? (item.category?.name ?? '') : '';
   readonly entityTrackBy = (_i: number, item: MappingEntity): string => item.id ?? '';
 
   readonly ledgerAutocompleteOptions = computed(() =>
@@ -226,7 +234,7 @@ export class InventoryLedgerMapDraftStore {
         await this.vendorStore.loadVendors(filter);
         break;
       case 'item':
-        await this.itemStore.loadItems(filter);
+        await this.itemStore.loadItems({ ...filter, includes: ['category'] });
         break;
       case 'tax':
         await this.taxStore.loadTaxes(filter);
@@ -277,8 +285,8 @@ export class InventoryLedgerMapDraftStore {
         return vendor?.name || '';
       }
       case 'item': {
-        const item = await this.itemStore.loadItemById(entityId);
-        return item?.displayname || item?.name || '';
+        const item = await this.itemStore.loadItemById(entityId, { includes: ['category'] });
+        return item ? this.entityOptionLabel(item) : '';
       }
       case 'tax': {
         const tax = await this.taxStore.loadTaxById(entityId);
@@ -366,6 +374,10 @@ export class InventoryLedgerMapDraftStore {
 
   private normalizeQuery(value: unknown): string {
     return typeof value === 'string' ? value.trim() : '';
+  }
+
+  private isItem(item: MappingEntity): item is Item {
+    return 'categoryid' in item;
   }
 
   private resolveEntityType(value: unknown): InventoryLedgerEntityType {
