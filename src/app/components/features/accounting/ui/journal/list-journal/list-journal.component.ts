@@ -11,11 +11,15 @@ import { Router } from '@angular/router';
 import {
   TngButtonComponent,
   TngCardComponent,
+  TngDialogComponent,
+  TngMenuComponent,
+  TngMenuTriggerFor,
   TngTable,
   TngTableCellTpl,
 } from '@tailng-ui/components';
 import type { TngTableColumn, TngTableRowClassFn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
+import { TngMenuItem } from '@tailng-ui/primitives';
 import {
   CrudFilterPopoverComponent,
   CrudListQueryService,
@@ -26,11 +30,22 @@ import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload'
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
+import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
+import { ToastStore } from '../../../../../../core/toast/toast.store';
+import { formatAmountWithCurrency } from '../../../../../../shared/format/currency';
 import { JournalService, JournalStore } from '../../../data/journal';
 import type { Journal, JournalEntry } from '../../../data/journal';
 import { LedgerStore } from '../../../data/ledger';
 import type { Ledger } from '../../../data/ledger';
 import { LedgerService } from '../../../data/ledger/ledger.service';
+import { SaleInvoiceService } from '../../../../trading/data/sale-invoice';
+import type { SaleInvoice } from '../../../../trading/data/sale-invoice';
+import { PurchaseInvoiceService } from '../../../../trading/data/purchase-invoice';
+import type { PurchaseInvoice } from '../../../../trading/data/purchase-invoice';
+import { CustomerReceiptService } from '../../../../trading/data/customer-receipt';
+import type { CustomerReceipt } from '../../../../trading/data/customer-receipt';
+import { VendorPaymentService } from '../../../../trading/data/vendor-payment';
+import type { VendorPayment } from '../../../../trading/data/vendor-payment';
 
 type JournalTableRow = Readonly<{
   credit: number | null | undefined;
@@ -45,6 +60,70 @@ type JournalTableRow = Readonly<{
   rowKey: string;
 }>;
 
+type JournalImportSource =
+  | 'saleInvoice'
+  | 'purchaseInvoice'
+  | 'customerReceipt'
+  | 'vendorPayment';
+
+type JournalImportCandidate = Readonly<{
+  id: string;
+  amount: number | undefined;
+  currencycode: string | undefined;
+  date: string;
+  number: string;
+  party: string;
+}>;
+
+type JournalImportConfig = Readonly<{
+  actionLabel: string;
+  amountLabel: string;
+  dialogTitle: string;
+  emptyDescription: string;
+  emptyTitle: string;
+  itemLabel: string;
+  sourceType: string;
+}>;
+
+const JOURNAL_IMPORT_CONFIG: Record<JournalImportSource, JournalImportConfig> = {
+  saleInvoice: {
+    actionLabel: 'Create Journals',
+    amountLabel: 'Grand Total',
+    dialogTitle: 'Import Sale Invoice Journals',
+    emptyDescription: 'All sale invoices already have journals generated.',
+    emptyTitle: 'No sale invoices to import',
+    itemLabel: 'sale invoice',
+    sourceType: 'sale_invoice',
+  },
+  purchaseInvoice: {
+    actionLabel: 'Create Journals',
+    amountLabel: 'Grand Total',
+    dialogTitle: 'Import Purchase Invoice Journals',
+    emptyDescription: 'All purchase invoices already have journals generated.',
+    emptyTitle: 'No purchase invoices to import',
+    itemLabel: 'purchase invoice',
+    sourceType: 'purchase_invoice',
+  },
+  customerReceipt: {
+    actionLabel: 'Create Journals',
+    amountLabel: 'Amount',
+    dialogTitle: 'Import Customer Receipt Journals',
+    emptyDescription: 'All customer receipts already have journals generated.',
+    emptyTitle: 'No customer receipts to import',
+    itemLabel: 'customer receipt',
+    sourceType: 'receipt',
+  },
+  vendorPayment: {
+    actionLabel: 'Create Journals',
+    amountLabel: 'Amount',
+    dialogTitle: 'Import Vendor Payment Journals',
+    emptyDescription: 'All vendor payments already have journals generated.',
+    emptyTitle: 'No vendor payments to import',
+    itemLabel: 'vendor payment',
+    sourceType: 'payment',
+  },
+};
+
 @Component({
   selector: 'app-list-journal',
   standalone: true,
@@ -52,9 +131,13 @@ type JournalTableRow = Readonly<{
     PageHeadingComponent,
     TngButtonComponent,
     TngCardComponent,
+    TngDialogComponent,
+    TngMenuComponent,
+    TngMenuTriggerFor,
     CrudFilterPopoverComponent,
     CrudPaginatorComponent,
     TngIcon,
+    TngMenuItem,
     EmptyStateComponent,
     BulkUploadButtonComponent,
     TngTable,
@@ -73,8 +156,22 @@ export class ListJournalComponent {
   protected readonly journalStore = inject(JournalStore);
   private readonly ledgerService = inject(LedgerService);
   private readonly ledgerStore = inject(LedgerStore);
+  private readonly saleInvoiceService = inject(SaleInvoiceService);
+  private readonly purchaseInvoiceService = inject(PurchaseInvoiceService);
+  private readonly customerReceiptService = inject(CustomerReceiptService);
+  private readonly vendorPaymentService = inject(VendorPaymentService);
+  private readonly toastStore = inject(ToastStore);
   protected readonly hasError = computed(() => this.journalStore.error() !== null);
   protected readonly unfilteredJournalCount = signal<number | null>(null);
+  protected readonly journalImportSource = signal<JournalImportSource | null>(null);
+  protected readonly journalImportCandidates = signal<readonly JournalImportCandidate[]>([]);
+  protected readonly journalImportError = signal<string | null>(null);
+  protected readonly journalImportLoading = signal(false);
+  protected readonly journalImportGenerating = signal(false);
+  protected readonly journalImportConfig = computed<JournalImportConfig | null>(() => {
+    const source = this.journalImportSource();
+    return source ? JOURNAL_IMPORT_CONFIG[source] : null;
+  });
 
   /** Local map of ledger id → name, populated after each journal page load. */
   private readonly ledgerNames = signal(new Map<string, string>());
@@ -120,6 +217,20 @@ export class ListJournalComponent {
       width: '8rem',
     },
   ];
+
+  protected readonly journalImportColumns = computed<readonly TngTableColumn<JournalImportCandidate>[]>(
+    () => [
+    { id: 'number', label: 'Document', width: '11rem' },
+    { id: 'party', label: 'Party', width: '15rem' },
+    { id: 'date', label: 'Date', width: '9rem' },
+    {
+      id: 'amount',
+      label: this.journalImportConfig()?.amountLabel ?? 'Amount',
+      align: 'end',
+      headerAlign: 'end',
+      width: '11rem',
+    },
+  ]);
 
   protected readonly rows = computed<readonly JournalTableRow[]>(() =>
     this.journalStore.items().flatMap((journal, index) => this.toJournalRows(journal, index)),
@@ -322,6 +433,227 @@ export class ListJournalComponent {
 
   protected sortedEntries(entries: readonly JournalEntry[] | undefined): readonly JournalEntry[] {
     return [...(entries ?? [])].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  }
+
+  protected formatJournalImportAmount(item: JournalImportCandidate): string {
+    return formatAmountWithCurrency(item.amount, item.currencycode);
+  }
+
+  protected async openJournalImportDialog(source: JournalImportSource): Promise<void> {
+    this.journalImportSource.set(source);
+    await this.loadJournalImportCandidates();
+  }
+
+  protected closeJournalImportDialog(): void {
+    if (this.journalImportGenerating()) return;
+    this.journalImportSource.set(null);
+  }
+
+  protected async createImportedJournals(): Promise<void> {
+    const source = this.journalImportSource();
+    const ids = this.journalImportCandidates().map((item) => item.id);
+
+    if (!source || !ids.length || this.journalImportGenerating()) return;
+
+    this.journalImportGenerating.set(true);
+    this.journalImportError.set(null);
+
+    try {
+      const journals = await this.createJournalsForSource(source, ids);
+      this.toastStore.success(
+        `${journals.length} journal${journals.length === 1 ? '' : 's'} generated.`,
+      );
+      this.journalImportSource.set(null);
+      this.journalImportCandidates.set([]);
+      this.reloadJournals();
+    } catch (error) {
+      const message = getApiErrorMessage(error, 'Failed to generate journals.');
+      this.journalImportError.set(message);
+      this.toastStore.danger(message);
+      await this.loadJournalImportCandidates({ preserveError: true });
+    } finally {
+      this.journalImportGenerating.set(false);
+    }
+  }
+
+  private async loadJournalImportCandidates(
+    options: { preserveError?: boolean } = {},
+  ): Promise<void> {
+    const source = this.journalImportSource();
+    if (!source || this.journalImportLoading()) return;
+
+    this.journalImportLoading.set(true);
+    if (!options.preserveError) {
+      this.journalImportError.set(null);
+    }
+
+    try {
+      const candidates = await this.fetchImportCandidates(source);
+      const sourceIds = candidates.map((candidate) => candidate.id);
+      const generatedSourceIds = await this.fetchGeneratedJournalSourceIds(source, sourceIds);
+
+      this.journalImportCandidates.set(
+        candidates.filter((candidate) => !generatedSourceIds.has(candidate.id)),
+      );
+    } catch (error) {
+      this.journalImportCandidates.set([]);
+      this.journalImportError.set(
+        getApiErrorMessage(error, 'Failed to load source documents for journal generation.'),
+      );
+    } finally {
+      this.journalImportLoading.set(false);
+    }
+  }
+
+  private async fetchImportCandidates(
+    source: JournalImportSource,
+  ): Promise<readonly JournalImportCandidate[]> {
+    switch (source) {
+      case 'saleInvoice':
+        return this.fetchSaleInvoiceImportCandidates();
+      case 'purchaseInvoice':
+        return this.fetchPurchaseInvoiceImportCandidates();
+      case 'customerReceipt':
+        return this.fetchCustomerReceiptImportCandidates();
+      case 'vendorPayment':
+        return this.fetchVendorPaymentImportCandidates();
+    }
+  }
+
+  private async fetchSaleInvoiceImportCandidates(): Promise<readonly JournalImportCandidate[]> {
+    const count = await this.saleInvoiceService.count({});
+    const invoices =
+      count > 0
+        ? await this.saleInvoiceService.list({
+            includes: ['customer'],
+            limit: count,
+            order: ['date DESC'],
+          })
+        : [];
+
+    return invoices
+      .filter((invoice) => invoice.id && !this.hasGeneratedJournal(invoice))
+      .map((invoice) => ({
+        id: invoice.id ?? '',
+        amount: invoice.grandtotal,
+        currencycode: invoice.currencycode,
+        date: invoice.date,
+        number: invoice.number || '—',
+        party: invoice.customer?.name || '—',
+      }));
+  }
+
+  private async fetchPurchaseInvoiceImportCandidates(): Promise<readonly JournalImportCandidate[]> {
+    const count = await this.purchaseInvoiceService.count({});
+    const invoices =
+      count > 0
+        ? await this.purchaseInvoiceService.list({
+            includes: ['vendor'],
+            limit: count,
+            order: ['date DESC'],
+          })
+        : [];
+
+    return invoices
+      .filter((invoice) => invoice.id && !this.hasGeneratedJournal(invoice))
+      .map((invoice) => ({
+        id: invoice.id ?? '',
+        amount: invoice.grandtotal,
+        currencycode: invoice.currencycode,
+        date: invoice.date,
+        number: invoice.number || '—',
+        party: invoice.vendor?.name || '—',
+      }));
+  }
+
+  private async fetchCustomerReceiptImportCandidates(): Promise<readonly JournalImportCandidate[]> {
+    const count = await this.customerReceiptService.count({});
+    const receipts =
+      count > 0
+        ? await this.customerReceiptService.list({
+            includes: ['customer'],
+            limit: count,
+            order: ['date DESC'],
+          })
+        : [];
+
+    return receipts
+      .filter((receipt) => Boolean(receipt.id))
+      .map((receipt) => ({
+        id: receipt.id ?? '',
+        amount: receipt.amount,
+        currencycode: receipt.currencycode,
+        date: receipt.date,
+        number: receipt.number || '—',
+        party: receipt.customer?.name || '—',
+      }));
+  }
+
+  private async fetchVendorPaymentImportCandidates(): Promise<readonly JournalImportCandidate[]> {
+    const count = await this.vendorPaymentService.count({});
+    const payments =
+      count > 0
+        ? await this.vendorPaymentService.list({
+            includes: ['vendor'],
+            limit: count,
+            order: ['date DESC'],
+          })
+        : [];
+
+    return payments
+      .filter((payment) => Boolean(payment.id))
+      .map((payment) => ({
+        id: payment.id ?? '',
+        amount: payment.amount,
+        currencycode: payment.currencycode,
+        date: payment.date,
+        number: '—',
+        party: payment.vendor?.name || '—',
+      }));
+  }
+
+  private hasGeneratedJournal(
+    document: Pick<SaleInvoice | PurchaseInvoice, 'sprops'>,
+  ): boolean {
+    const journal = document.sprops?.journal;
+    return typeof journal === 'string' ? journal.trim().length > 0 : Boolean(journal);
+  }
+
+  private async fetchGeneratedJournalSourceIds(
+    source: JournalImportSource,
+    sourceIds: readonly string[],
+  ): Promise<ReadonlySet<string>> {
+    if (!sourceIds.length) return new Set();
+
+    const journals = await this.journalService.list({
+      limit: sourceIds.length,
+      where: {
+        sourceid: { inq: sourceIds },
+        sourcetype: JOURNAL_IMPORT_CONFIG[source].sourceType,
+      },
+    });
+
+    return new Set(
+      journals
+        .map((journal) => journal.sourceid)
+        .filter((sourceid): sourceid is string => Boolean(sourceid)),
+    );
+  }
+
+  private createJournalsForSource(
+    source: JournalImportSource,
+    ids: readonly string[],
+  ): Promise<readonly Journal[]> {
+    switch (source) {
+      case 'saleInvoice':
+        return this.journalService.createFromSaleInvoices(ids);
+      case 'purchaseInvoice':
+        return this.journalService.createFromPurchaseInvoices(ids);
+      case 'customerReceipt':
+        return this.journalService.createFromCustomerReceipts(ids);
+      case 'vendorPayment':
+        return this.journalService.createFromVendorPayments(ids);
+    }
   }
 
   protected createJournal(): void {

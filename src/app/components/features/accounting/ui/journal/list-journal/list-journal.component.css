@@ -65,6 +65,71 @@ h1 {
   justify-content: flex-end;
 }
 
+.journal-import-dialog {
+  display: grid;
+  gap: 1rem;
+}
+
+.dialog-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.dialog-actions__summary {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-right: auto;
+}
+
+.journal-import-menu {
+  display: inline-flex;
+  position: relative;
+}
+
+.journal-import-menu-trigger[data-slot='menu-trigger'] {
+  background: transparent;
+  border: 1px solid var(--tng-semantic-border-strong);
+  border-radius: var(--tng-radius-control, 0.5rem);
+  box-shadow: none;
+  color: var(--tng-semantic-foreground-primary);
+  font-size: var(--tng-text-body, 0.875rem);
+  font-weight: var(--tng-font-weight-semibold, 600);
+  gap: 0.5rem;
+  line-height: 1;
+  min-height: var(--tng-control-height-md, 2.5rem);
+  min-width: auto;
+  padding: 0 1rem;
+  transition: var(
+    --tng-button-transition,
+    var(
+      --tng-transition-colors,
+      background-color 120ms ease,
+      border-color 120ms ease,
+      color 120ms ease,
+      opacity 120ms ease
+    )
+  );
+}
+
+.journal-import-menu-trigger[data-slot='menu-trigger']:hover,
+.journal-import-menu-trigger[data-slot='menu-trigger'][aria-expanded='true'] {
+  background: var(--tng-semantic-background-muted);
+  border-color: var(--tng-semantic-border-strong);
+  box-shadow: none;
+  color: var(--tng-semantic-foreground-primary);
+}
+
+.journal-import-menu-trigger[data-slot='menu-trigger']:focus-visible {
+  border-color: var(--tng-semantic-border-strong);
+  box-shadow: var(
+    --tng-button-focus-ring,
+    var(--tng-focus-ring, 0 0 0 3px var(--tng-semantic-focus-ring))
+  );
+}
 
 .link-button {
   background: transparent;

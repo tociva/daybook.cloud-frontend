@@ -28,6 +28,30 @@ export class JournalService {
     return firstValueFrom(this.http.post<Journal[]>(url, payloads));
   }
 
+  async createFromSaleInvoices(saleinvoiceids: readonly string[]): Promise<readonly Journal[]> {
+    const url = `${await this.collectionUrl()}/sale-invoices`;
+    return firstValueFrom(this.http.post<Journal[]>(url, { saleinvoiceids }));
+  }
+
+  async createFromPurchaseInvoices(
+    purchaseinvoiceids: readonly string[],
+  ): Promise<readonly Journal[]> {
+    const url = `${await this.collectionUrl()}/purchase-invoices`;
+    return firstValueFrom(this.http.post<Journal[]>(url, { purchaseinvoiceids }));
+  }
+
+  async createFromCustomerReceipts(
+    customerreceiptids: readonly string[],
+  ): Promise<readonly Journal[]> {
+    const url = `${await this.collectionUrl()}/customer-receipts`;
+    return firstValueFrom(this.http.post<Journal[]>(url, { customerreceiptids }));
+  }
+
+  async createFromVendorPayments(vendorpaymentids: readonly string[]): Promise<readonly Journal[]> {
+    const url = `${await this.collectionUrl()}/vendor-payments`;
+    return firstValueFrom(this.http.post<Journal[]>(url, { vendorpaymentids }));
+  }
+
   /** Backend returns 204 No Content. */
   async delete(id: string): Promise<void> {
     const url = `${await this.collectionUrl()}/${id}`;

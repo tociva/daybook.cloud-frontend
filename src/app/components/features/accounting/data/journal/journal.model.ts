@@ -16,6 +16,8 @@ export type Journal = Readonly<{
   number: string;
   date: string;
   description?: string;
+  sourcetype?: string;
+  sourceid?: string;
   props?: Record<string, unknown>;
   fiscalyearid: string;
   documentids?: readonly string[];
