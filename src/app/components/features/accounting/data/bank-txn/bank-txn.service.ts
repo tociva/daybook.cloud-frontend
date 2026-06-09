@@ -1,10 +1,18 @@
-import { HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { ApiClientService } from '../../../../../core/api/api-client.service';
 import { AppConfigStore } from '../../../../../core/config/app-config.store';
 import { CrudApiService } from '../../../../../shared/crud';
 import type { Lb4Count } from '../../../../../shared/crud';
-import type { BankTxn, BankTxnGetQuery, BankTxnListQuery, BankTxnPayload } from './bank-txn.model';
+import type { Journal } from '../journal';
+import type {
+  BankTxn,
+  BankTxnGetQuery,
+  BankTxnJournalCreatePayload,
+  BankTxnListQuery,
+  BankTxnPayload,
+} from './bank-txn.model';
 
 const ENDPOINT = '/accounting/bank-txn';
 
@@ -13,6 +21,7 @@ export class BankTxnService {
   private readonly api = inject(ApiClientService);
   private readonly appConfigStore = inject(AppConfigStore);
   private readonly crudApi = inject(CrudApiService);
+  private readonly http = inject(HttpClient);
 
   async create(payload: BankTxnPayload): Promise<BankTxn> {
     return this.crudApi.create<BankTxn, BankTxnPayload>(ENDPOINT, payload);
@@ -44,6 +53,14 @@ export class BankTxnService {
 
   async update(id: string, payload: BankTxnPayload): Promise<BankTxn> {
     return this.crudApi.update<BankTxn, BankTxnPayload>(ENDPOINT, id, payload);
+  }
+
+  async createJournal(
+    bankTxnId: string,
+    payload: BankTxnJournalCreatePayload,
+  ): Promise<Journal> {
+    const url = `${await this.collectionUrl()}/${bankTxnId}/journal`;
+    return firstValueFrom(this.http.post<Journal>(url, payload));
   }
 
   private async collectionUrl(): Promise<string> {

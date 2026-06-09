@@ -1,9 +1,16 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal, viewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { BurlBackButtonComponent } from '../../../../../../../shared/burl-back-button/burl-back-button.component';
 import { BurlNavigationService } from '../../../../../../../shared/burl-back-button/burl-navigation.service';
 import { BurlCreateButtonComponent } from '../../../../../../../shared/burl-create-button/burl-create-button.component';
-import type { Journal } from '../../../../data/journal';
+import { JournalFacade, JournalStore } from '../../../../data/journal';
 import { JournalCreateFormComponent } from '../journal-create-form/journal-create-form.component';
 
 @Component({
@@ -17,6 +24,8 @@ import { JournalCreateFormComponent } from '../journal-create-form/journal-creat
 export class CreateShellComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly navigation = inject(BurlNavigationService);
+  private readonly facade = inject(JournalFacade);
+  private readonly journalStore = inject(JournalStore);
 
   protected readonly journalForm = viewChild.required(JournalCreateFormComponent);
 
@@ -30,6 +39,9 @@ export class CreateShellComponent {
     this.mode() === 'edit' ? 'Save changes' : 'Create journal',
   );
   protected readonly submitIcon = computed(() => (this.mode() === 'edit' ? 'save' : 'plus'));
+  protected readonly isSaving = computed(
+    () => this.journalStore.isLoading() || this.journalForm().isBusy(),
+  );
 
   constructor() {
     this.id.set(this.route.snapshot.paramMap.get('id'));
@@ -37,10 +49,24 @@ export class CreateShellComponent {
 
   protected async onSubmit(event: Event): Promise<void> {
     event.preventDefault();
-    await this.journalForm().submit();
-  }
 
-  protected onSaved(_journal: Journal): void {
+    const form = this.journalForm();
+    const payload = form.buildPayload();
+    if (!payload) return;
+
+    const journalId = this.id();
+    let savedJournal = null;
+
+    if (journalId) {
+      const saved = await this.facade.update(journalId, payload, { navigateBack: false });
+      savedJournal = saved ? (this.journalStore.selectedItem() ?? null) : null;
+    } else {
+      savedJournal = await this.facade.create(payload, { navigateBack: false });
+    }
+
+    if (!savedJournal?.id) return;
+    if (!(await form.attachPendingDocuments(savedJournal.id, savedJournal))) return;
+
     void this.navigation.navigateBack();
   }
 }

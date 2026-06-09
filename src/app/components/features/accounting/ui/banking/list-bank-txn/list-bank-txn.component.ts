@@ -59,6 +59,7 @@ export class ListBankTxnComponent {
   protected readonly hasError = computed(() => this.bankTxnStore.error() !== null);
 
   protected readonly journalDialogOpen = signal(false);
+  protected readonly journalDialogBankTxn = signal<BankTxn | null>(null);
 
   protected readonly columns: readonly TngTableColumn<BankTxn>[] = [
     { id: 'txndate', label: 'Date', sortable: true, width: '9rem' },
@@ -181,11 +182,13 @@ export class ListBankTxnComponent {
     if (!item.id) return;
 
     await this.journalDraftStaging.stageFromBankTxn(item);
+    this.journalDialogBankTxn.set(item);
     this.journalDialogOpen.set(true);
   }
 
   protected closeJournalDialog(): void {
     this.journalDialogOpen.set(false);
+    this.journalDialogBankTxn.set(null);
     this.journalDraftStaging.clear();
   }
 

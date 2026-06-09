@@ -1,4 +1,5 @@
 import type { Lb4Include, Lb4ListQuery } from '../../../../../shared/crud';
+import type { JournalCreatePayload } from '../journal';
 import type { InventoryLedgerMap } from '../inventory-ledger-map';
 
 export type BankMatch = Readonly<Record<string, unknown>>;
@@ -35,3 +36,10 @@ export type BankTxnListQuery = Lb4ListQuery;
 export type BankTxnGetQuery = Readonly<{
   includes?: readonly Lb4Include[];
 }>;
+
+export type BankTxnJournalCreatePayload = Readonly<
+  JournalCreatePayload & {
+    matchedamount: number;
+    matchprops?: Record<string, unknown>;
+  }
+>;

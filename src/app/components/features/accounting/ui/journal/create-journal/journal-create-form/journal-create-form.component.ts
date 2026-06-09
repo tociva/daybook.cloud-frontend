@@ -5,7 +5,6 @@ import {
   effect,
   inject,
   input,
-  output,
   signal,
   untracked,
 } from '@angular/core';
@@ -13,8 +12,8 @@ import { getApiErrorMessage } from '../../../../../../../core/api/api-error.util
 import { ToastStore } from '../../../../../../../core/toast/toast.store';
 import type { StoredDocument } from '../../../../../trading/data/invoice-document';
 import { InvoiceDocumentService } from '../../../../../trading/data/invoice-document';
-import { JournalFacade, JournalStore } from '../../../../data/journal';
-import type { Journal } from '../../../../data/journal';
+import { JournalStore } from '../../../../data/journal';
+import type { Journal, JournalCreatePayload } from '../../../../data/journal';
 import { LedgerStore } from '../../../../data/ledger';
 import { JournalCreateDraftStagingService } from '../journal-create-draft-staging.service';
 import { JournalDetailsComponent } from '../journal-details/journal-details.component';
@@ -31,7 +30,6 @@ import { JournalEntriesComponent } from '../journal-entries/journal-entries.comp
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class JournalCreateFormComponent {
-  private readonly facade = inject(JournalFacade);
   private readonly documentService = inject(InvoiceDocumentService);
   private readonly toastStore = inject(ToastStore);
   protected readonly journalStore = inject(JournalStore);
@@ -41,8 +39,6 @@ export class JournalCreateFormComponent {
 
   readonly journalId = input<string | null>(null);
 
-  readonly saved = output<Journal>();
-
   private readonly resolvedId = signal<string | null>(null);
   private createPrefillApplied = false;
   protected readonly pendingDocumentFiles = signal<readonly File[]>([]);
@@ -50,11 +46,8 @@ export class JournalCreateFormComponent {
   protected readonly deletingDocumentId = signal<string | null>(null);
 
   readonly mode = computed(() => (this.resolvedId() ? 'edit' : 'create'));
-  readonly isSaving = computed(
-    () =>
-      this.journalStore.isLoading() ||
-      this.isUploadingDocuments() ||
-      this.deletingDocumentId() !== null,
+  readonly isBusy = computed(
+    () => this.isUploadingDocuments() || this.deletingDocumentId() !== null,
   );
   protected readonly selectedDocuments = computed(() => {
     const item = this.journalStore.selectedItem();
@@ -72,7 +65,11 @@ export class JournalCreateFormComponent {
     });
   }
 
-  async submit(): Promise<Journal | null> {
+  resolvedJournalId(): string | null {
+    return this.resolvedId();
+  }
+
+  buildPayload(): JournalCreatePayload | null {
     this.draft.submitted.set(true);
 
     if (this.draft.dateError() || !this.draft.canSave()) return null;
@@ -84,7 +81,7 @@ export class JournalCreateFormComponent {
     const includeNumber =
       this.mode() === 'edit' ? !!number : !this.draft.autoNumbering() && !!number;
 
-    const payload = {
+    return {
       date: this.draft.journalDateModel().trim(),
       ...(includeNumber ? { number } : {}),
       ...(this.draft.journalDescription().trim()
@@ -92,25 +89,45 @@ export class JournalCreateFormComponent {
         : {}),
       entries: v.entries,
     };
+  }
 
-    const currentId = this.resolvedId();
-    let savedJournal: Journal | null = null;
-    let savedId = currentId;
-
-    if (currentId) {
-      const saved = await this.facade.update(currentId, payload, { navigateBack: false });
-      savedJournal = saved ? (this.journalStore.selectedItem() ?? null) : null;
-    } else {
-      savedJournal = await this.facade.create(payload, { navigateBack: false });
-      savedId = savedJournal?.id ?? null;
-      if (savedId) this.resolvedId.set(savedId);
+  async attachPendingDocuments(parentId: string | null, journal?: Journal | null): Promise<boolean> {
+    if (journal) {
+      this.journalStore.setSelectedItem(journal);
+      if (journal.id) this.resolvedId.set(journal.id);
     }
 
-    if (!savedJournal) return null;
-    if (!(await this.attachPendingDocuments(savedId))) return null;
+    const files = this.pendingDocumentFiles();
+    if (!files.length) return true;
+    if (!parentId) {
+      this.toastStore.danger('Journal saved, but documents could not be attached.');
+      return false;
+    }
 
-    this.saved.emit(savedJournal);
-    return savedJournal;
+    this.isUploadingDocuments.set(true);
+    try {
+      const created = await this.documentService.attachInvoiceDocuments('journal', parentId, files);
+      this.pendingDocumentFiles.set([]);
+
+      const selected = this.journalStore.selectedItem();
+      if (selected) {
+        const documents = [...(selected.documents ?? []), ...created];
+        this.journalStore.setSelectedItem({
+          ...selected,
+          documentids: documents.map((item) => item.id).filter((id): id is string => !!id),
+          documents,
+        });
+      }
+      this.toastStore.success(files.length === 1 ? 'Document attached.' : 'Documents attached.');
+      return true;
+    } catch (error) {
+      this.toastStore.danger(
+        getApiErrorMessage(error, 'Journal saved, but documents could not be attached.'),
+      );
+      return false;
+    } finally {
+      this.isUploadingDocuments.set(false);
+    }
   }
 
   protected async deleteDocument(document: StoredDocument): Promise<void> {
@@ -169,40 +186,6 @@ export class JournalCreateFormComponent {
     });
     if (journal) {
       await this.draft.hydrateFromJournal(journal);
-    }
-  }
-
-  private async attachPendingDocuments(parentId: string | null): Promise<boolean> {
-    const files = this.pendingDocumentFiles();
-    if (!files.length) return true;
-    if (!parentId) {
-      this.toastStore.danger('Journal saved, but documents could not be attached.');
-      return false;
-    }
-
-    this.isUploadingDocuments.set(true);
-    try {
-      const created = await this.documentService.attachInvoiceDocuments('journal', parentId, files);
-      this.pendingDocumentFiles.set([]);
-
-      const selected = this.journalStore.selectedItem();
-      if (selected) {
-        const documents = [...(selected.documents ?? []), ...created];
-        this.journalStore.setSelectedItem({
-          ...selected,
-          documentids: documents.map((item) => item.id).filter((id): id is string => !!id),
-          documents,
-        });
-      }
-      this.toastStore.success(files.length === 1 ? 'Document attached.' : 'Documents attached.');
-      return true;
-    } catch (error) {
-      this.toastStore.danger(
-        getApiErrorMessage(error, 'Journal saved, but documents could not be attached.'),
-      );
-      return false;
-    } finally {
-      this.isUploadingDocuments.set(false);
     }
   }
 }

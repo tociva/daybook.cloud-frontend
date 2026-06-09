@@ -3,7 +3,7 @@
     <h1>{{ title() }}</h1>
   </header>
 
-  <app-journal-create-form [journalId]="id()" (saved)="onSaved($event)" />
+  <app-journal-create-form [journalId]="id()" />
 
   <div class="journal-actions">
     <app-burl-back-button label="Cancel" />
@@ -11,7 +11,7 @@
       [type]="'button'"
       [icon]="submitIcon()"
       [label]="submitLabel()"
-      [disabled]="journalForm().isSaving()"
+      [disabled]="isSaving()"
       (clicked)="onSubmit($event)"
     />
   </div>

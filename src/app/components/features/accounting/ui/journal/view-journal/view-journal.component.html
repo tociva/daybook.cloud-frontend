@@ -20,11 +20,11 @@
           </div>
           <div>
             <dt>Date</dt>
-            <dd>{{ journal.date }}</dd>
+            <dd>{{ formatDisplayDate(journal.date) }}</dd>
           </div>
           <div class="wide">
             <dt>Description</dt>
-            <dd>{{ journal.description || '—' }}</dd>
+            <dd>{{ journal.description || '' }}</dd>
           </div>
           @if (journal.documentids; as docIds) {
             <div>
@@ -48,8 +48,8 @@
               @for (line of sortedEntries(journal.entries); track line.id ?? line.ledgerid + (line.order ?? '')) {
                 <tr>
                   <td>{{ ledgerName(line.ledgerid) }}</td>
-                  <td class="num">{{ line.debit != null && line.debit > 0 ? line.debit : '—' }}</td>
-                  <td class="num">{{ line.credit != null && line.credit > 0 ? line.credit : '—' }}</td>
+                  <td class="num">{{ line.debit != null && line.debit > 0 ? line.debit : '' }}</td>
+                  <td class="num">{{ line.credit != null && line.credit > 0 ? line.credit : '' }}</td>
                 </tr>
               }
             </tbody>

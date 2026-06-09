@@ -1,7 +1,14 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
-import type { BankTxn, BankTxnGetQuery, BankTxnListQuery, BankTxnPayload } from './bank-txn.model';
+import type { Journal } from '../journal';
+import type {
+  BankTxn,
+  BankTxnGetQuery,
+  BankTxnJournalCreatePayload,
+  BankTxnListQuery,
+  BankTxnPayload,
+} from './bank-txn.model';
 import { BankTxnService } from './bank-txn.service';
 import { initialBankTxnState } from './bank-txn.state';
 
@@ -38,6 +45,27 @@ export const BankTxnStore = signalStore(
         patchState(store, (state) => ({
           bankTxn: { ...state.bankTxn, selectedItem: null },
         }));
+      },
+
+      async createBankTxnJournal(
+        bankTxnId: string,
+        payload: BankTxnJournalCreatePayload,
+      ): Promise<Journal | null> {
+        setLoading();
+        try {
+          const journal = await service.createJournal(bankTxnId, payload);
+          patchState(store, (state) => ({
+            bankTxn: {
+              ...state.bankTxn,
+              error: null,
+              isLoading: false,
+            },
+          }));
+          return journal;
+        } catch (error) {
+          setError(getApiErrorMessage(error, 'Failed to create journal.'));
+          return null;
+        }
       },
 
       async createBankTxn(payload: BankTxnPayload): Promise<BankTxn | null> {

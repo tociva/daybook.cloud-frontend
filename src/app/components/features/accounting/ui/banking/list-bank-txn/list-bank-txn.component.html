@@ -164,6 +164,7 @@
 
   <app-journal-create-dialog
     [open]="journalDialogOpen()"
+    [bankTxn]="journalDialogBankTxn()"
     (closed)="closeJournalDialog()"
     (created)="onJournalCreated()"
   />

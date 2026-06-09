@@ -8,7 +8,7 @@
       <app-journal-entries
         [documents]="selectedDocuments()"
         [pendingFiles]="pendingDocumentFiles()"
-        [documentsDisabled]="isSaving()"
+        [documentsDisabled]="isBusy()"
         [documentsUploading]="isUploadingDocuments()"
         (pendingFilesChange)="pendingDocumentFiles.set($event)"
         (documentRemove)="deleteDocument($event)"

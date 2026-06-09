@@ -13,6 +13,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 import { BurlDeleteButtonComponent } from '../../../../../../shared/burl-delete-button/burl-delete-button.component';
 import { BurlEditButtonComponent } from '../../../../../../shared/burl-edit-button/burl-edit-button.component';
 import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
+import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { JournalStore } from '../../../data/journal';
 import type { JournalEntry } from '../../../data/journal';
 import { LedgerStore } from '../../../data/ledger';
@@ -43,6 +44,7 @@ export class ViewJournalComponent {
   private readonly burlNavigation = inject(BurlNavigationService);
   protected readonly journalStore = inject(JournalStore);
   protected readonly ledgerStore = inject(LedgerStore);
+  private readonly dateManagement = inject(DateManagementService);
 
   protected readonly ledgerById = computed(() => {
     const map = new Map<string, Ledger>();
@@ -79,6 +81,10 @@ export class ViewJournalComponent {
 
   protected ledgerName(ledgerid: string): string {
     return this.ledgerById().get(ledgerid)?.name ?? ledgerid;
+  }
+
+  protected formatDisplayDate(value: string | undefined): string {
+    return this.dateManagement.formatDisplayDate(value, '—');
   }
 
   protected sortedEntries(entries: readonly JournalEntry[] | undefined): readonly JournalEntry[] {

@@ -72,3 +72,23 @@ app-bank-statement-preview-dialog [data-slot='dialog-content'] {
   gap: 1rem;
   overflow: hidden;
 }
+
+app-journal-create-dialog .tng-dialog-panel {
+  display: flex;
+  flex-direction: column;
+  width: calc(100vw - 2rem);
+  max-width: calc(100vw - 2rem);
+  height: calc(100vh - 2rem);
+  max-height: calc(100vh - 2rem);
+  overflow: hidden;
+}
+
+app-journal-create-dialog .tng-dialog-header {
+  flex-shrink: 0;
+}
+
+app-journal-create-dialog .tng-dialog-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
