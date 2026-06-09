@@ -317,10 +317,12 @@ export class CreateSaleInvoiceComponent {
         };
       });
 
+    const number = this.draft.number().trim();
+    const includeNumber =
+      this.mode() === 'edit' ? !!number : !this.draft.autoNumbering() && !!number;
+
     const payload: SaleInvoicePayload = {
-      ...(!this.draft.autoNumbering() && this.draft.number()
-        ? { number: this.draft.number() }
-        : {}),
+      ...(includeNumber ? { number } : {}),
       date: this.draft.date(),
       duedate: this.draft.duedate(),
       itemtotal: toNum(this.draft.itemtotal()),
@@ -336,7 +338,7 @@ export class CreateSaleInvoiceComponent {
       customerid: this.draft.customerid(),
       items,
       cprops: {
-        autoNumbering: this.draft.autoNumbering(),
+        autoNumbering: this.mode() === 'edit' ? false : this.draft.autoNumbering(),
         fx: toNum(this.draft.conversionrate()),
         showdiscount: this.draft.showDiscount(),
         showdescription: this.draft.showDescription(),

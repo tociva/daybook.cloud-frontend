@@ -40,23 +40,26 @@
       </dl>
     } @else {
       <div class="aside-fields">
-        <label class="toggle-row">
-          <tng-switch
-            [checked]="draft.autoNumbering()"
-            (checkedChange)="draft.toggleAutoNumbering(!!$event)"
-          />
-          Auto numbering
-        </label>
+        @if (!isEdit()) {
+          <label class="toggle-row">
+            <tng-switch
+              [checked]="draft.autoNumbering()"
+              (checkedChange)="draft.toggleAutoNumbering(!!$event)"
+            />
+            Auto numbering
+          </label>
+        }
 
-        <tng-form-field labelPosition="outline">
-          <tng-label forId="inv-number">Number</tng-label>
-          <tng-input
-            id="inv-number"
-            [value]="draft.number()"
-            [disabled]="!draft.numberEnabled()"
-            (valueChange)="draft.number.set($any($event))"
-          />
-        </tng-form-field>
+        @if (isEdit() || !draft.autoNumbering()) {
+          <tng-form-field labelPosition="outline">
+            <tng-label forId="inv-number">Number</tng-label>
+            <tng-input
+              id="inv-number"
+              [value]="draft.number()"
+              (valueChange)="draft.number.set($any($event))"
+            />
+          </tng-form-field>
+        }
 
         <tng-form-field labelPosition="outline" [invalid]="draft.dateError() !== null">
           <tng-label forId="inv-date" required>Date</tng-label>

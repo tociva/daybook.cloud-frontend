@@ -47,6 +47,7 @@ export class SiInvoiceDetailsComponent {
   private readonly dateManagement = inject(DateManagementService);
   private readonly currencyStore = inject(CurrencyStore);
   readonly readOnly = input(false);
+  readonly isEdit = input(false);
 
   readonly getOptionLabel = (o: SelectOption): string => o.label;
   readonly getOptionValue = (o: SelectOption): string => o.value;

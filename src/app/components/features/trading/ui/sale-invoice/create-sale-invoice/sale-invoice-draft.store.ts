@@ -296,12 +296,9 @@ export class SaleInvoiceDraftStore {
 
   patchFromInvoice(inv: SaleInvoice): void {
     const cprops = inv.cprops;
-    const auto = cprops?.autoNumbering ?? false;
 
     this.invoiceNumber.set(inv.number ?? '');
-    this.autoNumbering.set(auto);
     this.number.set(inv.number ?? '');
-    this.numberEnabled.set(!auto);
     this.date.set(inv.date ?? '');
     this.duedate.set(inv.duedate ?? '');
     this.currencycode.set(inv.currencycode ?? inv.currency?.code ?? 'INR');

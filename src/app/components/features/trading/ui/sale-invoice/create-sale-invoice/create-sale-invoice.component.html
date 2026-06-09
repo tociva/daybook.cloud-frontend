@@ -40,7 +40,7 @@
 
     <!-- ══ RIGHT COLUMN ════════════════════════════════════════════════════ -->
     <aside class="invoice-aside">
-      <app-si-invoice-details />
+      <app-si-invoice-details [isEdit]="mode() === 'edit'" />
     </aside>
   </div>
 
