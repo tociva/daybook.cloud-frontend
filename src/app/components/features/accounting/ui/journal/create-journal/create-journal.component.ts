@@ -109,9 +109,13 @@ export class CreateJournalComponent {
     const v = this.draft.validatedEntries();
     if (!v.ok) return;
 
+    const number = this.draft.journalNumber().trim();
+    const includeNumber =
+      this.mode() === 'edit' ? !!number : !this.draft.autoNumbering() && !!number;
+
     const payload = {
       date: this.draft.journalDateModel().trim(),
-      ...(this.draft.journalNumber().trim() ? { number: this.draft.journalNumber().trim() } : {}),
+      ...(includeNumber ? { number } : {}),
       ...(this.draft.journalDescription().trim()
         ? { description: this.draft.journalDescription().trim() }
         : {}),

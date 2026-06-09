@@ -37,6 +37,7 @@ export class JournalDraftStore {
   private readonly ledgerSearchVersions = new Map<string, number>();
 
   readonly submitted = signal(false);
+  readonly autoNumbering = signal(true);
   readonly journalDateModel = signal(this.fiscalYearDateRange.defaultDate());
   readonly journalNumber = signal('');
   readonly journalDescription = signal('');
@@ -122,7 +123,7 @@ export class JournalDraftStore {
   }): Promise<void> {
     this.clearLedgerSearchState();
     this.journalDateModel.set(journal.date);
-    this.journalNumber.set(journal.number ?? '');
+    this.journalNumber.set(journal.number?.trim() ?? '');
     this.journalDescription.set(journal.description ?? '');
     this.ledgerDefaultOptions.set(this.ledgerStore.items());
 
@@ -196,6 +197,10 @@ export class JournalDraftStore {
         credit: debit > 0 ? amountStr : '',
       },
     ]);
+  }
+
+  toggleAutoNumbering(value: boolean): void {
+    this.autoNumbering.set(value);
   }
 
   onDateChange(value: unknown): void {

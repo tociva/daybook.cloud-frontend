@@ -4,6 +4,28 @@
   </tng-card-header>
   <tng-card-content>
     <div class="aside-fields">
+      @if (!isEdit()) {
+        <label class="toggle-row">
+          <tng-switch
+            [checked]="draft.autoNumbering()"
+            (checkedChange)="draft.toggleAutoNumbering(!!$event)"
+          />
+          Auto numbering
+        </label>
+      }
+
+      @if (isEdit() || !draft.autoNumbering()) {
+        <tng-form-field labelPosition="outline">
+          <tng-label forId="j-number">Number</tng-label>
+          <tng-input
+            id="j-number"
+            placeholder="Enter journal number"
+            [value]="draft.journalNumber()"
+            (valueChange)="draft.journalNumber.set($any($event) ?? '')"
+          />
+        </tng-form-field>
+      }
+
       <tng-form-field labelPosition="outline" [invalid]="draft.dateError() !== null">
         <tng-label forId="j-date" required>Date</tng-label>
         <app-fiscal-year-datepicker
@@ -13,16 +35,6 @@
           (valueChange)="draft.onDateChange($event)"
         />
         <tng-error [show]="draft.dateError() !== null">{{ draft.dateError() }}</tng-error>
-      </tng-form-field>
-
-      <tng-form-field labelPosition="outline">
-        <tng-label forId="j-number">Number</tng-label>
-        <tng-input
-          id="j-number"
-          placeholder="Leave blank to auto-generate"
-          [value]="draft.journalNumber()"
-          (valueChange)="draft.journalNumber.set($any($event) ?? '')"
-        />
       </tng-form-field>
 
       <tng-form-field labelPosition="outline">

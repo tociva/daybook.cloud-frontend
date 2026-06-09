@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import {
   TngCardComponent,
   TngCardContentComponent,
@@ -8,6 +8,7 @@ import {
   TngFormFieldComponent,
   TngInputComponent,
   TngLabelComponent,
+  TngSwitchComponent,
   TngTextareaComponent,
 } from '@tailng-ui/components';
 import { FiscalYearDatepickerComponent } from '../../../../../../../shared/fiscal-year-datepicker';
@@ -25,6 +26,7 @@ import { JournalDraftStore } from '../journal-draft.store';
     TngFormFieldComponent,
     TngInputComponent,
     TngLabelComponent,
+    TngSwitchComponent,
     TngTextareaComponent,
     FiscalYearDatepickerComponent,
   ],
@@ -33,4 +35,5 @@ import { JournalDraftStore } from '../journal-draft.store';
 })
 export class JournalDetailsComponent {
   protected readonly draft = inject(JournalDraftStore);
+  readonly isEdit = input(false);
 }
