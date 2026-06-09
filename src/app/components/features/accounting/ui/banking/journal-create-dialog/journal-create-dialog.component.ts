@@ -14,6 +14,9 @@ import { JournalCreateFormComponent } from '../../journal/create-journal/journal
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class JournalCreateDialogComponent {
+  protected readonly dialogWidth = 'calc(100vw - 2rem)';
+  protected readonly dialogHeight = 'calc(100vh - 2rem)';
+
   protected readonly journalStore = inject(JournalStore);
 
   protected readonly journalForm = viewChild(JournalCreateFormComponent);

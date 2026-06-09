@@ -1,7 +1,8 @@
 <tng-dialog
   title="Create journal"
-  size="lg"
   description="Record journal entries for this bank transaction."
+  [style.--tng-dialog-width]="dialogWidth"
+  [style.--tng-dialog-height]="dialogHeight"
   [open]="open()"
   [closeOnBackdrop]="false"
   [closeOnEscape]="!journalStore.isLoading()"
