@@ -72,12 +72,19 @@ export class JournalDraftStore {
       if (ledger.id) map.set(ledger.id, ledger);
     }
     const row = this.rows().find((entry) => entry.uid === uid);
-    if (row?.ledgerId && row.ledgerName && !map.has(row.ledgerId)) {
-      map.set(row.ledgerId, {
-        id: row.ledgerId,
-        name: row.ledgerName,
-        categoryid: '',
-      });
+    if (row?.ledgerId && !map.has(row.ledgerId)) {
+      const resolved =
+        options.find((ledger) => ledger.id === row.ledgerId) ??
+        this.ledgerDefaultOptions().find((ledger) => ledger.id === row.ledgerId) ??
+        this.ledgerStore.items().find((ledger) => ledger.id === row.ledgerId);
+      map.set(
+        row.ledgerId,
+        resolved ?? {
+          id: row.ledgerId,
+          name: row.ledgerName || row.ledgerId,
+          categoryid: '',
+        },
+      );
     }
     return [...map.values()];
   }
@@ -177,6 +184,35 @@ export class JournalDraftStore {
     this.journalDescription.set(snapshot.journalDescription);
     this.ledgerDefaultOptions.set(snapshot.ledgerDefaultOptions);
     this.rows.set(snapshot.rows);
+    this.seedLedgerOptionsForRows(snapshot.rows, snapshot.ledgerDefaultOptions);
+  }
+
+  private seedLedgerOptionsForRows(
+    rows: readonly JournalLineRow[],
+    ledgerDefaultOptions: readonly Ledger[],
+  ): void {
+    const optionsByRow: Record<string, readonly Ledger[]> = {};
+
+    for (const row of rows) {
+      if (!row.ledgerId) continue;
+
+      const resolved =
+        ledgerDefaultOptions.find((ledger) => ledger.id === row.ledgerId) ??
+        ({
+          id: row.ledgerId,
+          name: row.ledgerName || row.ledgerId,
+          categoryid: '',
+        } satisfies Ledger);
+
+      const merged = new Map<string, Ledger>();
+      merged.set(row.ledgerId, resolved);
+      for (const ledger of ledgerDefaultOptions) {
+        if (ledger.id) merged.set(ledger.id, ledger);
+      }
+      optionsByRow[row.uid] = [...merged.values()];
+    }
+
+    this.ledgerOptionsByRow.set(optionsByRow);
   }
 
   resetForCreate(): void {

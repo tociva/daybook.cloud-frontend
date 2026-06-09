@@ -44,6 +44,7 @@ export class JournalCreateFormComponent {
   readonly saved = output<Journal>();
 
   private readonly resolvedId = signal<string | null>(null);
+  private createPrefillApplied = false;
   protected readonly pendingDocumentFiles = signal<readonly File[]>([]);
   protected readonly isUploadingDocuments = signal(false);
   protected readonly deletingDocumentId = signal<string | null>(null);
@@ -145,11 +146,14 @@ export class JournalCreateFormComponent {
 
     if (!journalId) {
       this.journalStore.clearSelectedItem();
-      const staged = this.draftStaging.consume();
-      if (staged) {
-        this.draft.applyCreateSnapshot(staged);
-      } else {
-        this.draft.resetForCreate();
+      if (!this.createPrefillApplied) {
+        this.createPrefillApplied = true;
+        const staged = this.draftStaging.consume();
+        if (staged) {
+          this.draft.applyCreateSnapshot(staged);
+        } else {
+          this.draft.resetForCreate();
+        }
       }
       return;
     }
