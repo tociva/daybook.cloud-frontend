@@ -59,7 +59,12 @@ export class BankTxnService {
     bankTxnId: string,
     payload: BankTxnJournalCreatePayload,
   ): Promise<Journal> {
-    const url = `${await this.collectionUrl()}/${bankTxnId}/journal`;
+    const config = this.appConfigStore.config() ?? (await this.appConfigStore.load());
+    if (!config) {
+      throw new Error('Unable to load app configuration.');
+    }
+    const base = config.apiBaseUrl.replace(/\/$/, '');
+    const url = `${base}/accounting/journal/bank-txn/${bankTxnId}`;
     return firstValueFrom(this.http.post<Journal>(url, payload));
   }
 

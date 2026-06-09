@@ -73,21 +73,21 @@ app-bank-statement-preview-dialog [data-slot='dialog-content'] {
   overflow: hidden;
 }
 
-app-journal-create-dialog .tng-dialog-panel {
+app-journal-assign-dialog.journal-assign-dialog--create .tng-dialog-panel {
   display: flex;
   flex-direction: column;
-  width: calc(100vw - 2rem);
-  max-width: calc(100vw - 2rem);
+  width: var(--tng-dialog-width, 50%);
+  max-width: var(--tng-dialog-width, 50%);
   height: calc(100vh - 2rem);
   max-height: calc(100vh - 2rem);
   overflow: hidden;
 }
 
-app-journal-create-dialog .tng-dialog-header {
+app-journal-assign-dialog.journal-assign-dialog--create .tng-dialog-header {
   flex-shrink: 0;
 }
 
-app-journal-create-dialog .tng-dialog-content {
+app-journal-assign-dialog.journal-assign-dialog--create .tng-dialog-content {
   flex: 1;
   min-height: 0;
   overflow: auto;

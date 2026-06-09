@@ -1,0 +1,132 @@
+:host {
+  display: contents;
+}
+
+.assign-dialog-toolbar {
+  margin-bottom: 1rem;
+}
+
+.journal-dialog-body {
+  --tng-autocomplete-overlay-z-index: 10000;
+  --tng-autocomplete-z-overlay: 10000;
+}
+
+.select-dialog-body {
+  min-height: 12rem;
+}
+
+.assign-journal-table {
+  display: block;
+}
+
+.journal-cell {
+  display: block;
+  min-height: 1.35em;
+}
+
+.load-more-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.select-cell {
+  display: flex;
+  justify-content: center;
+}
+
+.match-amount-cell {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.match-amount-cell tng-input {
+  width: 9rem;
+  max-width: 100%;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.truncate {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+app-journal-assign-dialog tng-table.journal-table .tng-table tbody tr.journal-row--alt {
+  --tng-table-row-bg: var(--app-list-table-row-alt-bg);
+  --tng-table-row-hover-bg: var(--app-list-table-row-alt-hover-bg);
+}
+
+.dialog-footer {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.dialog-footer__error {
+  width: 100%;
+}
+
+.dialog-footer__toolbar {
+  border-top: 1px solid var(--tng-semantic-border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-top: 1rem;
+}
+
+.dialog-footer__row {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.dialog-footer__amount {
+  width: 14rem;
+  max-width: 100%;
+}
+
+.dialog-footer__actions {
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dialog-footer__summary {
+  color: var(--tng-semantic-text-secondary);
+  font-size: 0.875rem;
+  margin-right: auto;
+}
+
+.notice {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  margin: 0;
+  padding: 0.75rem 1rem;
+}
+
+.notice--danger {
+  border-color: var(--tng-semantic-accent-danger);
+  color: var(--tng-semantic-accent-danger);
+}
+
+@media (max-width: 640px) {
+  .dialog-footer__amount {
+    width: 100%;
+  }
+
+  .dialog-footer__actions {
+    flex-wrap: wrap;
+  }
+
+  .dialog-footer__summary {
+    width: 100%;
+    margin-right: 0;
+  }
+}

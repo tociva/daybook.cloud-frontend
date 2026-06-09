@@ -115,9 +115,9 @@
                 appearance="outline"
                 tone="primary"
                 size="sm"
-                (click)="createJournal(row)"
+                (click)="assignJournal(row)"
               >
-                Create
+                Assign
               </tng-button>
             }
           </ng-template>
@@ -126,8 +126,8 @@
             <div class="row-actions">
               <app-table-row-icon-button
                 icon="bookOpen"
-                ariaLabel="Create journal"
-                (action)="createJournal(row)"
+                ariaLabel="Assign journal"
+                (action)="assignJournal(row)"
               />
               <app-table-row-icon-button
                 icon="eye"
@@ -162,10 +162,10 @@
     </div>
   </tng-card>
 
-  <app-journal-create-dialog
+  <app-journal-assign-dialog
     [open]="journalDialogOpen()"
     [bankTxn]="journalDialogBankTxn()"
     (closed)="closeJournalDialog()"
-    (created)="onJournalCreated()"
+    (assigned)="onJournalAssigned()"
   />
 </main>

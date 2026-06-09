@@ -24,7 +24,7 @@ import type { BankTxn, BankTxnJournal } from '../../../data/bank-txn';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { BankStatementUploadComponent } from '../bank-statement-upload/bank-statement-upload.component';
 import { JournalCreateDraftStagingService } from '../../journal/create-journal/journal-create-draft-staging.service';
-import { JournalCreateDialogComponent } from '../journal-create-dialog/journal-create-dialog.component';
+import { JournalAssignDialogComponent } from '../journal-assign-dialog/journal-assign-dialog.component';
 
 @Component({
   selector: 'app-list-bank-txn',
@@ -41,7 +41,7 @@ import { JournalCreateDialogComponent } from '../journal-create-dialog/journal-c
     TngTableCellTpl,
     TableRowIconButtonComponent,
     BankStatementUploadComponent,
-    JournalCreateDialogComponent,
+    JournalAssignDialogComponent,
   ],
   templateUrl: './list-bank-txn.component.html',
   styleUrl: './list-bank-txn.component.css',
@@ -178,10 +178,9 @@ export class ListBankTxnComponent {
     return (item.journals?.length ?? 0) > 0;
   }
 
-  protected async createJournal(item: BankTxn): Promise<void> {
+  protected assignJournal(item: BankTxn): void {
     if (!item.id) return;
 
-    await this.journalDraftStaging.stageFromBankTxn(item);
     this.journalDialogBankTxn.set(item);
     this.journalDialogOpen.set(true);
   }
@@ -192,7 +191,7 @@ export class ListBankTxnComponent {
     this.journalDraftStaging.clear();
   }
 
-  protected onJournalCreated(): void {
+  protected onJournalAssigned(): void {
     this.closeJournalDialog();
     this.reloadBankTxns();
   }

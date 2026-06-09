@@ -1,0 +1,238 @@
+<tng-dialog
+  title="Assign journal"
+  [description]="dialogDescription()"
+  [style.--tng-dialog-width]="isCreateMode() ? createDialogWidth : selectDialogWidth"
+  [style.--tng-dialog-height]="isCreateMode() ? createDialogHeight : undefined"
+  [open]="open()"
+  [closeOnBackdrop]="false"
+  [closeOnEscape]="!isSaving()"
+  (closed)="onDialogClosed()"
+>
+  <div class="assign-dialog-toolbar">
+    <tng-button-toggle-group
+      ariaLabel="Assign journal mode"
+      type="single"
+      [value]="mode()"
+      (valueChange)="onModeChange($event)"
+    >
+      <tng-button-toggle value="select">Select existing</tng-button-toggle>
+      <tng-button-toggle value="create">Create new</tng-button-toggle>
+    </tng-button-toggle-group>
+  </div>
+
+  @if (open()) {
+    @if (isCreateMode()) {
+      @if (createDraftReady()) {
+        <div class="journal-dialog-body">
+          <app-journal-create-form />
+        </div>
+      } @else {
+        <div class="notice">Preparing journal form...</div>
+      }
+    } @else {
+      <div class="select-dialog-body">
+        @if (candidatesLoading()) {
+          <div class="notice">Loading compatible journals...</div>
+        } @else if (assignRows().length === 0 && !showLoadMore()) {
+          <app-empty-state
+            icon="bookOpen"
+            title="No compatible journals"
+            description="Create a new journal or adjust existing journals so they include a matching bank ledger entry."
+          />
+        } @else {
+          @if (assignRows().length === 0) {
+            <app-empty-state
+              icon="bookOpen"
+              title="No compatible journals in date range"
+              [description]="
+                'No journals found within ±' +
+                JOURNAL_ASSIGN_DATE_RANGE_DAYS +
+                ' days of this bank transaction. Load more to search all journals.'
+              "
+            />
+          } @else {
+            <tng-table
+              class="journal-table assign-journal-table"
+              ariaLabel="Compatible journals"
+              density="comfortable"
+              hoverMode="group"
+              layout="fixed"
+              scrollAxis="both"
+              [columns]="assignColumns"
+              [items]="assignRows()"
+              [loading]="candidatesLoadingMore()"
+              [error]="false"
+              [rowClass]="rowClassFn()"
+            >
+              <ng-template tngTableCellTemplate="selected" let-row="row">
+                <div class="journal-cell select-cell">
+                  <tng-checkbox
+                    [checked]="isSelected(row.journal.id)"
+                    (checkedChange)="toggleCandidate(row.journal.id, !!$event, row.defaultMatchedAmount)"
+                  />
+                </div>
+              </ng-template>
+
+              <ng-template tngTableCellTemplate="journalGroupKey" let-row="row">
+                <span class="journal-cell">{{ row.number }}</span>
+              </ng-template>
+
+              <ng-template tngTableCellTemplate="date" let-row="row">
+                <span class="journal-cell">{{ formatDisplayDate(row.date) }}</span>
+              </ng-template>
+
+              <ng-template tngTableCellTemplate="ledgerid" let-row="row">
+                <span class="journal-cell">
+                  @if (row.ledgerid) {
+                    {{ getLedgerName(row.ledgerid) }}
+                  } @else {
+                    —
+                  }
+                </span>
+              </ng-template>
+
+              <ng-template tngTableCellTemplate="debit" let-row="row">
+                <span class="journal-cell num">
+                  {{ row.debit != null && row.debit > 0 ? formatAmount(row.debit) : '' }}
+                </span>
+              </ng-template>
+
+              <ng-template tngTableCellTemplate="credit" let-row="row">
+                <span class="journal-cell num">
+                  {{ row.credit != null && row.credit > 0 ? formatAmount(row.credit) : '' }}
+                </span>
+              </ng-template>
+
+              <ng-template tngTableCellTemplate="description" let-row="row">
+                <span class="journal-cell">
+                  @if (row.description) {
+                    <span class="truncate" [title]="row.description">{{ row.description }}</span>
+                  }
+                </span>
+              </ng-template>
+
+              <ng-template tngTableCellTemplate="matchAmount" let-row="row">
+                <div class="journal-cell match-amount-cell">
+                  <tng-input
+                    [id]="matchAmountInputId(row.journal.id)"
+                    type="number"
+                    inputmode="decimal"
+                    placeholder="Amount"
+                    [disabled]="!isSelected(row.journal.id)"
+                    [value]="matchAmountFor(row.journal.id)"
+                    (valueChange)="setMatchAmount(row.journal.id, $event)"
+                  />
+                </div>
+              </ng-template>
+            </tng-table>
+          }
+
+          @if (showLoadMore()) {
+            <div class="load-more-row">
+              <tng-button
+                type="button"
+                appearance="outline"
+                tone="neutral"
+                [disabled]="candidatesLoadingMore()"
+                (click)="loadMoreCandidates()"
+              >
+                @if (candidatesLoadingMore()) {
+                  <tng-icon icon="loaderCircle" aria-hidden="true" />
+                  Loading...
+                } @else {
+                  Load more journals
+                }
+              </tng-button>
+            </div>
+          }
+        }
+      </div>
+    }
+  }
+
+  <footer class="dialog-footer">
+    @if (dialogError(); as error) {
+      <div class="notice notice--danger dialog-footer__error">{{ error }}</div>
+    }
+
+    @if (selectValidationError(); as error) {
+      <div class="notice notice--danger dialog-footer__error">{{ error }}</div>
+    }
+
+    <div class="dialog-footer__toolbar">
+      @if (isCreateMode()) {
+        <div class="dialog-footer__row">
+          <tng-form-field
+            class="dialog-footer__amount"
+            labelPosition="outline"
+            [invalid]="matchedAmountError() !== null"
+          >
+            <tng-label forId="bank-txn-matched-amount" required>Matched amount</tng-label>
+            <tng-input
+              id="bank-txn-matched-amount"
+              type="number"
+              inputmode="decimal"
+              placeholder="Amount to match"
+              [value]="matchedAmount()"
+              (valueChange)="matchedAmount.set($any($event) ?? '')"
+            />
+            <tng-error [show]="matchedAmountError() !== null">{{ matchedAmountError() }}</tng-error>
+          </tng-form-field>
+        </div>
+      }
+
+      <div class="dialog-footer__row dialog-footer__actions">
+        @if (!isCreateMode()) {
+          <span class="dialog-footer__summary">
+            {{ selectedJournalCount() }} selected ·
+            {{ formatAmount(selectedMatchedTotal()) }} of
+            {{ formatAmount(remainingMatchAmount()) }} remaining
+          </span>
+        }
+
+        <tng-button
+          type="button"
+          appearance="outline"
+          tone="neutral"
+          [disabled]="isSaving()"
+          (click)="onCancelled()"
+        >
+          Cancel
+        </tng-button>
+
+        @if (isCreateMode()) {
+          <tng-button
+            type="button"
+            appearance="solid"
+            tone="primary"
+            [disabled]="isSaving() || !createDraftReady()"
+            (click)="onCreateJournal()"
+          >
+            @if (isSaving()) {
+              <tng-icon icon="loaderCircle" aria-hidden="true" />
+              Creating...
+            } @else {
+              <tng-icon icon="plus" aria-hidden="true" />
+              Create journal
+            }
+          </tng-button>
+        } @else {
+          <tng-button
+            type="button"
+            appearance="solid"
+            tone="primary"
+            [disabled]="isSaving() || candidatesLoading() || assignRows().length === 0"
+            (click)="onAssignSelected()"
+          >
+            @if (isSaving()) {
+              <tng-icon icon="loaderCircle" aria-hidden="true" />
+              Assigning...
+            } @else {
+              Assign journals
+            }
+          </tng-button>
+        }
+      </div>
+    </div>
+  </footer>
+</tng-dialog>
