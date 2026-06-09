@@ -161,4 +161,10 @@
       }
     </div>
   </tng-card>
+
+  <app-journal-create-dialog
+    [open]="journalDialogOpen()"
+    (closed)="closeJournalDialog()"
+    (created)="onJournalCreated()"
+  />
 </main>

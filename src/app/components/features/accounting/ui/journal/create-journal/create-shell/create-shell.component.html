@@ -1,0 +1,18 @@
+<main class="journal-page">
+  <header class="journal-header">
+    <h1>{{ title() }}</h1>
+  </header>
+
+  <app-journal-create-form [journalId]="id()" (saved)="onSaved($event)" />
+
+  <div class="journal-actions">
+    <app-burl-back-button label="Cancel" />
+    <app-burl-create-button
+      [type]="'button'"
+      [icon]="submitIcon()"
+      [label]="submitLabel()"
+      [disabled]="journalForm().isSaving()"
+      (clicked)="onSubmit($event)"
+    />
+  </div>
+</main>

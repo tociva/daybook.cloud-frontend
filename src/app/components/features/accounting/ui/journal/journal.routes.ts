@@ -9,7 +9,7 @@ export const journalRoutes: Routes = [
   {
     path: 'create',
     loadComponent: () =>
-      import('./create-journal/create-journal.component').then((m) => m.CreateJournalComponent),
+      import('./create-journal/create-shell/create-shell.component').then((m) => m.CreateShellComponent),
   },
   {
     path: ':id',
@@ -19,7 +19,7 @@ export const journalRoutes: Routes = [
   {
     path: ':id/edit',
     loadComponent: () =>
-      import('./create-journal/create-journal.component').then((m) => m.CreateJournalComponent),
+      import('./create-journal/create-shell/create-shell.component').then((m) => m.CreateShellComponent),
   },
   {
     path: ':id/delete',

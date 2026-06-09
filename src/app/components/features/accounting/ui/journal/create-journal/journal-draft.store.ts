@@ -9,7 +9,6 @@ import {
   journalFormRowInput,
   validateJournalEntriesForSubmit,
 } from '../../../data/journal';
-import type { BankTxn } from '../../../data/bank-txn';
 import type { JournalEntry } from '../../../data/journal';
 import { LedgerStore } from '../../../data/ledger';
 import type { Ledger } from '../../../data/ledger';
@@ -22,13 +21,24 @@ export type JournalLineRow = Readonly<{
   credit: string;
 }>;
 
-const newRow = (): JournalLineRow => ({
+export type JournalCreateSnapshot = Readonly<{
+  autoNumbering: boolean;
+  journalDateModel: string;
+  journalNumber: string;
+  journalDescription: string;
+  ledgerDefaultOptions: readonly Ledger[];
+  rows: readonly JournalLineRow[];
+}>;
+
+export const newJournalLineRow = (): JournalLineRow => ({
   uid: crypto.randomUUID(),
   ledgerId: '',
   ledgerName: '',
   debit: '',
   credit: '',
 });
+
+const newRow = newJournalLineRow;
 
 @Injectable()
 export class JournalDraftStore {
@@ -158,45 +168,26 @@ export class JournalDraftStore {
     this.ensureTrailingEmptyRow();
   }
 
-  async hydrateFromBankTxn(txn: BankTxn): Promise<void> {
+  applyCreateSnapshot(snapshot: JournalCreateSnapshot): void {
     this.clearLedgerSearchState();
+    this.submitted.set(false);
+    this.autoNumbering.set(snapshot.autoNumbering);
+    this.journalDateModel.set(snapshot.journalDateModel);
+    this.journalNumber.set(snapshot.journalNumber);
+    this.journalDescription.set(snapshot.journalDescription);
+    this.ledgerDefaultOptions.set(snapshot.ledgerDefaultOptions);
+    this.rows.set(snapshot.rows);
+  }
 
-    const ledgerId = txn.inventoryledgermap?.ledgerid ?? '';
-    const debit = Number(txn.debit ?? 0);
-    const credit = Number(txn.credit ?? 0);
-    const amount = debit > 0 ? debit : credit;
-    const amountStr = amount > 0 ? String(amount) : '';
-
-    this.journalDateModel.set(toIsoDate(txn.txndate, this.journalDateModel()));
-    this.journalDescription.set(txn.description?.trim() || txn.bankref?.trim() || '');
-
-    if (ledgerId) {
-      await this.ledgerStore.loadLedgers({
-        where: { id: { inq: [ledgerId] } },
-        limit: 1,
-        includes: ['category'],
-      });
-    }
-    this.ledgerDefaultOptions.set(this.ledgerStore.items());
-
-    const ledger = this.ledgerStore.items().find((item) => item.id === ledgerId);
-
-    this.rows.set([
-      {
-        uid: crypto.randomUUID(),
-        ledgerId,
-        ledgerName: ledger?.name ?? '',
-        debit: debit > 0 ? amountStr : '',
-        credit: credit > 0 ? amountStr : '',
-      },
-      {
-        uid: crypto.randomUUID(),
-        ledgerId: '',
-        ledgerName: '',
-        debit: credit > 0 ? amountStr : '',
-        credit: debit > 0 ? amountStr : '',
-      },
-    ]);
+  resetForCreate(): void {
+    this.clearLedgerSearchState();
+    this.submitted.set(false);
+    this.autoNumbering.set(true);
+    this.journalDateModel.set(this.fiscalYearDateRange.defaultDate());
+    this.journalNumber.set('');
+    this.journalDescription.set('');
+    this.ledgerDefaultOptions.set([]);
+    this.rows.set([newRow(), newRow()]);
   }
 
   toggleAutoNumbering(value: boolean): void {

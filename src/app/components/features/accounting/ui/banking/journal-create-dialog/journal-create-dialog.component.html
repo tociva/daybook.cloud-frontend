@@ -1,0 +1,41 @@
+<tng-dialog
+  title="Create journal"
+  size="lg"
+  description="Record journal entries for this bank transaction."
+  [open]="open()"
+  [closeOnBackdrop]="false"
+  [closeOnEscape]="!journalStore.isLoading()"
+  (closed)="onDialogClosed()"
+>
+  @if (open()) {
+    <app-journal-create-form (saved)="onFormSaved($event)" />
+  }
+
+  <div class="dialog-actions">
+    <tng-button
+      type="button"
+      appearance="outline"
+      tone="neutral"
+      [disabled]="journalForm()?.isSaving() ?? false"
+      (click)="onCancelled()"
+    >
+      Cancel
+    </tng-button>
+
+    <tng-button
+      type="button"
+      appearance="solid"
+      tone="primary"
+      [disabled]="journalForm()?.isSaving() ?? false"
+      (click)="onSubmit()"
+    >
+      @if (journalForm()?.isSaving() ?? false) {
+        <tng-icon icon="loaderCircle" aria-hidden="true" />
+        Creating...
+      } @else {
+        <tng-icon icon="plus" aria-hidden="true" />
+        Create journal
+      }
+    </tng-button>
+  </div>
+</tng-dialog>

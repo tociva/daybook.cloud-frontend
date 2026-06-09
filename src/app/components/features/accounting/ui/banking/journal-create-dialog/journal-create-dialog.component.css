@@ -1,0 +1,37 @@
+:host {
+  display: contents;
+}
+
+:host ::ng-deep .tng-dialog-panel {
+  display: flex;
+  flex-direction: column;
+  width: calc(100vw - 2rem);
+  max-width: calc(100vw - 2rem);
+  height: calc(100vh - 2rem);
+  max-height: calc(100vh - 2rem);
+  overflow: hidden;
+}
+
+:host ::ng-deep .tng-dialog-header {
+  flex-shrink: 0;
+}
+
+:host ::ng-deep .tng-dialog-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.dialog-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+@media (max-width: 640px) {
+  .dialog-actions {
+    flex-direction: column-reverse;
+  }
+}

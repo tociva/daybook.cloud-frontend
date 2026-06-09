@@ -1,0 +1,27 @@
+:host {
+  display: block;
+  color: var(--tng-semantic-foreground-primary);
+}
+
+.journal-page {
+  padding: 1.25rem;
+  min-height: 0;
+  overflow: visible;
+}
+
+.journal-header h1 {
+  font-size: clamp(1.75rem, 3vw, 2.35rem);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0 0 1rem;
+}
+
+.journal-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin: 1rem auto 0;
+  max-width: 76rem;
+}

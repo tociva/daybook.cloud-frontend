@@ -1,0 +1,21 @@
+<div class="journal-create-form">
+  @if (journalStore.error()) {
+    <div class="notice notice--danger">{{ journalStore.error() }}</div>
+  }
+
+  <div class="journal-layout">
+    <div class="journal-main">
+      <app-journal-entries
+        [documents]="selectedDocuments()"
+        [pendingFiles]="pendingDocumentFiles()"
+        [documentsDisabled]="isSaving()"
+        [documentsUploading]="isUploadingDocuments()"
+        (pendingFilesChange)="pendingDocumentFiles.set($event)"
+        (documentRemove)="deleteDocument($event)"
+      />
+    </div>
+    <aside class="journal-aside">
+      <app-journal-details [isEdit]="mode() === 'edit'" />
+    </aside>
+  </div>
+</div>

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   TngButtonComponent,
@@ -23,6 +23,8 @@ import { BankTxnStore } from '../../../data/bank-txn';
 import type { BankTxn, BankTxnJournal } from '../../../data/bank-txn';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { BankStatementUploadComponent } from '../bank-statement-upload/bank-statement-upload.component';
+import { JournalCreateDraftStagingService } from '../../journal/create-journal/journal-create-draft-staging.service';
+import { JournalCreateDialogComponent } from '../journal-create-dialog/journal-create-dialog.component';
 
 @Component({
   selector: 'app-list-bank-txn',
@@ -39,6 +41,7 @@ import { BankStatementUploadComponent } from '../bank-statement-upload/bank-stat
     TngTableCellTpl,
     TableRowIconButtonComponent,
     BankStatementUploadComponent,
+    JournalCreateDialogComponent,
   ],
   templateUrl: './list-bank-txn.component.html',
   styleUrl: './list-bank-txn.component.css',
@@ -52,7 +55,10 @@ export class ListBankTxnComponent {
   protected readonly bankTxnStore = inject(BankTxnStore);
   protected readonly inventoryLedgerMapStore = inject(InventoryLedgerMapStore);
   protected readonly bankCashStore = inject(BankCashStore);
+  private readonly journalDraftStaging = inject(JournalCreateDraftStagingService);
   protected readonly hasError = computed(() => this.bankTxnStore.error() !== null);
+
+  protected readonly journalDialogOpen = signal(false);
 
   protected readonly columns: readonly TngTableColumn<BankTxn>[] = [
     { id: 'txndate', label: 'Date', sortable: true, width: '9rem' },
@@ -171,12 +177,21 @@ export class ListBankTxnComponent {
     return (item.journals?.length ?? 0) > 0;
   }
 
-  protected createJournal(item: BankTxn): void {
+  protected async createJournal(item: BankTxn): Promise<void> {
     if (!item.id) return;
 
-    void this.router.navigate(['/app/accounting/journal/create'], {
-      queryParams: { banktxnid: item.id, burl: this.router.url },
-    });
+    await this.journalDraftStaging.stageFromBankTxn(item);
+    this.journalDialogOpen.set(true);
+  }
+
+  protected closeJournalDialog(): void {
+    this.journalDialogOpen.set(false);
+    this.journalDraftStaging.clear();
+  }
+
+  protected onJournalCreated(): void {
+    this.closeJournalDialog();
+    this.reloadBankTxns();
   }
 
   protected viewJournal(journal: BankTxnJournal): void {
