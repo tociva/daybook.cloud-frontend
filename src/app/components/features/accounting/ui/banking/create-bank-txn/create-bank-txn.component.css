@@ -79,6 +79,10 @@
   color: var(--tng-semantic-accent-danger);
 }
 
+.muted {
+  color: var(--tng-semantic-foreground-muted);
+}
+
 .field-grid {
   display: grid;
   gap: 0.25rem 1rem;
@@ -95,6 +99,7 @@
   grid-column: 1 / -1;
 }
 
+tng-autocomplete,
 tng-input,
 tng-select,
 tng-textarea,

@@ -21,15 +21,25 @@
               <div class="field">
                 <tng-form-field labelPosition="above" [invalid]="bankError() !== null">
                   <tng-label forId="bt-bank" required>Bank Account</tng-label>
-                  <tng-select
+                  <tng-autocomplete
                     id="bt-bank"
-                    [options]="bankMapOptions()"
-                    [getOptionLabel]="bankOptionLabel"
-                    [getOptionValue]="bankOptionValue"
-                    [trackBy]="bankTrackBy"
-                    [value]="inventoryledgermapid()"
-                    (valueChange)="onBankChange($event)"
-                  />
+                    placeholder="Search bank or cash account"
+                    ariaLabel="Bank account"
+                    [options]="filteredBankCashes()"
+                    [getOptionLabel]="bankCashOptionLabel"
+                    [getOptionValue]="bankCashOptionValue"
+                    [trackBy]="bankCashTrackBy"
+                    [value]="selectedBankCashId()"
+                    (valueChange)="onBankCashValueChange($event)"
+                    (queryChange)="onBankCashQueryChange($event)"
+                  >
+                    <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
+                      <span>{{ label }}</span>
+                      @if (option.description) {
+                        <span class="muted"> — {{ option.description }}</span>
+                      }
+                    </ng-template>
+                  </tng-autocomplete>
                   <tng-error [show]="bankError() !== null">{{ bankError() }}</tng-error>
                 </tng-form-field>
               </div>

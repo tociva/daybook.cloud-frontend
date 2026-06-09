@@ -80,14 +80,6 @@
             {{ bankName(row) }}
           </ng-template>
 
-          <ng-template tngTableCellTemplate="description" let-row="row">
-            {{ row.description }}
-          </ng-template>
-
-          <ng-template tngTableCellTemplate="bankref" let-row="row">
-            {{ row.bankref }}
-          </ng-template>
-
           <ng-template tngTableCellTemplate="debit" let-row="row">
             {{ formatAmount(row.debit) }}
           </ng-template>
@@ -96,8 +88,47 @@
             {{ formatAmount(row.credit) }}
           </ng-template>
 
+          <ng-template tngTableCellTemplate="balance" let-row="row">
+            {{ formatBalance(row.balance) }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="description" let-row="row">
+            {{ row.description }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="bankref" let-row="row">
+            {{ row.bankref }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="journals" let-row="row">
+            @if (hasJournals(row)) {
+              <span class="journal-links">
+                @for (journal of row.journals; track journal.id; let last = $last) {
+                  <button type="button" class="link-button" (click)="viewJournal(journal)">
+                    {{ journal.number }}
+                  </button>@if (!last) {<span>, </span>}
+                }
+              </span>
+            } @else {
+              <tng-button
+                type="button"
+                appearance="outline"
+                tone="primary"
+                size="sm"
+                (click)="createJournal(row)"
+              >
+                Create
+              </tng-button>
+            }
+          </ng-template>
+
           <ng-template tngTableCellTemplate="actions" let-row="row">
             <div class="row-actions">
+              <app-table-row-icon-button
+                icon="bookOpen"
+                ariaLabel="Create journal"
+                (action)="createJournal(row)"
+              />
               <app-table-row-icon-button
                 icon="eye"
                 ariaLabel="View bank transaction"

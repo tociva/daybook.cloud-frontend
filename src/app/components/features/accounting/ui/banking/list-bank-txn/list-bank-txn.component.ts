@@ -20,7 +20,7 @@ import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-
 import { BankCashStore } from '../../../../trading/data/bank-cash';
 import { InventoryLedgerMapStore } from '../../../data/inventory-ledger-map';
 import { BankTxnStore } from '../../../data/bank-txn';
-import type { BankTxn } from '../../../data/bank-txn';
+import type { BankTxn, BankTxnJournal } from '../../../data/bank-txn';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { BankStatementUploadComponent } from '../bank-statement-upload/bank-statement-upload.component';
 
@@ -57,11 +57,9 @@ export class ListBankTxnComponent {
   protected readonly columns: readonly TngTableColumn<BankTxn>[] = [
     { id: 'txndate', label: 'Date', sortable: true, width: '9rem' },
     { id: 'bank', label: 'Bank', width: '14rem' },
-    { id: 'description', label: 'Description', sortable: true, truncate: true },
-    { id: 'bankref', label: 'Reference', sortable: true, width: '12rem' },
     {
       id: 'debit',
-      label: 'Inflow',
+      label: 'Deposit',
       align: 'end',
       headerAlign: 'end',
       sortable: true,
@@ -69,13 +67,23 @@ export class ListBankTxnComponent {
     },
     {
       id: 'credit',
-      label: 'Outflow',
+      label: 'Withdrawal',
       align: 'end',
       headerAlign: 'end',
       sortable: true,
       width: '9rem',
     },
-    { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '8rem' },
+    {
+      id: 'balance',
+      label: 'Balance',
+      align: 'end',
+      headerAlign: 'end',
+      width: '9rem',
+    },
+    { id: 'description', label: 'Description', sortable: true, truncate: true },
+    { id: 'bankref', label: 'Reference', sortable: true, width: '12rem' },
+    { id: 'journals', label: 'Journals', width: '12rem' },
+    { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '10rem' },
   ];
 
   protected readonly filterFields: readonly CrudFilterField[] = [
@@ -85,36 +93,48 @@ export class ListBankTxnComponent {
     { id: 'bankref', label: 'Reference', placeholder: 'UTR / cheque no', type: 'text' },
   ];
 
+  private readonly bankCashNameById = computed(() => {
+    const map = new Map<string, string>();
+    for (const bank of this.bankCashStore.items()) {
+      if (bank.id) map.set(bank.id, bank.name);
+    }
+    return map;
+  });
+
   private readonly bankNameByMapId = computed(() => {
-    const banksById = new Map(this.bankCashStore.items().map((item) => [item.id, item.name]));
+    const banksById = this.bankCashNameById();
     return new Map(
       this.inventoryLedgerMapStore
         .items()
         .filter((map) => map.id)
         .map((map) => [
           map.id as string,
-          map.entityid ? (banksById.get(map.entityid) ?? map.entityid) : (map.id as string),
+          map.entityid ? (banksById.get(map.entityid) ?? '') : '',
         ]),
     );
   });
 
   constructor() {
+    void this.initialize();
+  }
+
+  private async initialize(): Promise<void> {
+    await Promise.all([
+      this.inventoryLedgerMapStore.loadInventoryLedgerMaps({
+        limit: 1000,
+        offset: 0,
+        where: { entitytype: 'bankCash' },
+      }),
+      this.bankCashStore.loadBankCashes({ limit: 1000, offset: 0 }),
+    ]);
+
     this.crudQuery.init((filter) => {
       void this.bankTxnStore.loadBankTxns({
         ...filter,
         includes: ['inventoryledgermap', 'matches'],
-        order: filter.order?.length ? filter.order : ['txndate DESC'],
+        order: filter.order?.length ? filter.order : ['txndate ASC'],
       });
     });
-
-    void Promise.all([
-      this.inventoryLedgerMapStore.loadInventoryLedgerMaps({
-        limit: 1000,
-        offset: 0,
-        where: { entitytype: 'bankCash', ledgertype: 'bank' },
-      }),
-      this.bankCashStore.loadBankCashes({ limit: 1000, offset: 0 }),
-    ]);
   }
 
   protected createBankTxn(): void {
@@ -147,16 +167,43 @@ export class ListBankTxnComponent {
     }
   }
 
+  protected hasJournals(item: BankTxn): boolean {
+    return (item.journals?.length ?? 0) > 0;
+  }
+
+  protected createJournal(item: BankTxn): void {
+    if (!item.id) return;
+
+    void this.router.navigate(['/app/accounting/journal/create'], {
+      queryParams: { banktxnid: item.id, burl: this.router.url },
+    });
+  }
+
+  protected viewJournal(journal: BankTxnJournal): void {
+    void this.router.navigate(['/app/accounting/journal', journal.id], {
+      queryParams: { burl: this.router.url },
+    });
+  }
+
   protected reloadBankTxns(): void {
+    const filter = this.crudQuery.filter();
     void this.bankTxnStore.loadBankTxns({
-      ...this.crudQuery.filter(),
+      ...filter,
       includes: ['inventoryledgermap', 'matches'],
+      order: filter.order?.length ? filter.order : ['txndate ASC'],
     });
   }
 
   protected bankName(item: BankTxn): string {
     const mapId = item.inventoryledgermapid;
-    return this.bankNameByMapId().get(mapId) ?? item.inventoryledgermap?.entityid ?? mapId;
+    const entityId = item.inventoryledgermap?.entityid;
+
+    if (entityId) {
+      return this.bankCashNameById().get(entityId) ?? this.bankNameByMapId().get(mapId) ?? mapId;
+    }
+
+    const fromMap = this.bankNameByMapId().get(mapId);
+    return fromMap || mapId;
   }
 
   protected formatDisplayDate(value: string | undefined): string {
@@ -171,5 +218,12 @@ export class ListBankTxnComponent {
           minimumFractionDigits: 2,
         }).format(amount)
       : '';
+  }
+
+  protected formatBalance(value: number | undefined): string {
+    return new Intl.NumberFormat('en-IN', {
+      maximumFractionDigits: 2,
+      minimumFractionDigits: 2,
+    }).format(Number(value ?? 0));
   }
 }

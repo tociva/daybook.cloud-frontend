@@ -3,6 +3,11 @@ import type { InventoryLedgerMap } from '../inventory-ledger-map';
 
 export type BankMatch = Readonly<Record<string, unknown>>;
 
+export type BankTxnJournal = Readonly<{
+  id: string;
+  number: string;
+}>;
+
 export type BankTxnProps = Readonly<Record<string, unknown>>;
 
 export type BankTxnPayload = Readonly<{
@@ -19,6 +24,8 @@ export type BankTxn = BankTxnPayload &
   Readonly<{
     id?: string;
     fiscalyearid?: string;
+    balance?: number;
+    journals?: readonly BankTxnJournal[];
     matches?: readonly BankMatch[];
     inventoryledgermap?: InventoryLedgerMap;
   }>;

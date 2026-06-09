@@ -9,6 +9,7 @@ import {
   journalFormRowInput,
   validateJournalEntriesForSubmit,
 } from '../../../data/journal';
+import type { BankTxn } from '../../../data/bank-txn';
 import type { JournalEntry } from '../../../data/journal';
 import { LedgerStore } from '../../../data/ledger';
 import type { Ledger } from '../../../data/ledger';
@@ -154,6 +155,47 @@ export class JournalDraftStore {
       })),
     );
     this.ensureTrailingEmptyRow();
+  }
+
+  async hydrateFromBankTxn(txn: BankTxn): Promise<void> {
+    this.clearLedgerSearchState();
+
+    const ledgerId = txn.inventoryledgermap?.ledgerid ?? '';
+    const debit = Number(txn.debit ?? 0);
+    const credit = Number(txn.credit ?? 0);
+    const amount = debit > 0 ? debit : credit;
+    const amountStr = amount > 0 ? String(amount) : '';
+
+    this.journalDateModel.set(toIsoDate(txn.txndate, this.journalDateModel()));
+    this.journalDescription.set(txn.description?.trim() || txn.bankref?.trim() || '');
+
+    if (ledgerId) {
+      await this.ledgerStore.loadLedgers({
+        where: { id: { inq: [ledgerId] } },
+        limit: 1,
+        includes: ['category'],
+      });
+    }
+    this.ledgerDefaultOptions.set(this.ledgerStore.items());
+
+    const ledger = this.ledgerStore.items().find((item) => item.id === ledgerId);
+
+    this.rows.set([
+      {
+        uid: crypto.randomUUID(),
+        ledgerId,
+        ledgerName: ledger?.name ?? '',
+        debit: debit > 0 ? amountStr : '',
+        credit: credit > 0 ? amountStr : '',
+      },
+      {
+        uid: crypto.randomUUID(),
+        ledgerId: '',
+        ledgerName: '',
+        debit: credit > 0 ? amountStr : '',
+        credit: debit > 0 ? amountStr : '',
+      },
+    ]);
   }
 
   onDateChange(value: unknown): void {

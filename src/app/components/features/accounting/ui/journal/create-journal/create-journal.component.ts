@@ -7,6 +7,7 @@ import { BurlNavigationService } from '../../../../../../shared/burl-back-button
 import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
 import type { StoredDocument } from '../../../../trading/data/invoice-document';
 import { InvoiceDocumentService } from '../../../../trading/data/invoice-document';
+import { BankTxnStore } from '../../../data/bank-txn';
 import { JournalFacade, JournalStore } from '../../../data/journal';
 import { LedgerStore } from '../../../data/ledger';
 import { JournalDetailsComponent } from './journal-details/journal-details.component';
@@ -34,6 +35,7 @@ export class CreateJournalComponent {
   private readonly toastStore = inject(ToastStore);
   private readonly navigation = inject(BurlNavigationService);
   protected readonly journalStore = inject(JournalStore);
+  private readonly bankTxnStore = inject(BankTxnStore);
   private readonly ledgerStore = inject(LedgerStore);
   protected readonly draft = inject(JournalDraftStore);
 
@@ -71,6 +73,16 @@ export class CreateJournalComponent {
 
     if (!id) {
       this.journalStore.clearSelectedItem();
+
+      const bankTxnId = this.route.snapshot.queryParamMap.get('banktxnid')?.trim();
+      if (bankTxnId) {
+        const txn = await this.bankTxnStore.loadBankTxnById(bankTxnId, {
+          includes: ['inventoryledgermap'],
+        });
+        if (txn) {
+          await this.draft.hydrateFromBankTxn(txn);
+        }
+      }
       return;
     }
 
