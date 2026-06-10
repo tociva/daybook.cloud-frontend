@@ -38,6 +38,15 @@ export class JournalService {
     return firstValueFrom(this.http.post<Journal[]>(url, { saleinvoiceids }));
   }
 
+  async createFromPurchaseInvoice(purchaseInvoiceId: string): Promise<Journal> {
+    const journals = await this.createFromPurchaseInvoices([purchaseInvoiceId]);
+    const journal = journals[0];
+    if (!journal) {
+      throw new Error('No journal returned.');
+    }
+    return journal;
+  }
+
   async createFromPurchaseInvoices(
     purchaseinvoiceids: readonly string[],
   ): Promise<readonly Journal[]> {

@@ -126,6 +126,13 @@ export type PurchaseInvoicePayload = Readonly<{
   items: readonly PurchaseInvoiceItemRequest[];
 }>;
 
+// ── Minimal journal ref (mirrors SaleInvoiceJournal) ────────────────────────
+
+export type PurchaseInvoiceJournal = Readonly<{
+  id: string;
+  number: string;
+}>;
+
 // ── Read model ───────────────────────────────────────────────────────────────
 
 export type PurchaseInvoiceCurrency = Readonly<{

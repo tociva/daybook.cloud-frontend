@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   TngButtonComponent,
@@ -13,16 +13,19 @@ import {
   CrudListQueryService,
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
-import type { CrudFilterField } from '../../../../../../shared/crud';
+import type { CrudFilterField, Lb4ListQuery } from '../../../../../../shared/crud';
 import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import { VendorStore } from '../../../data/vendor';
 import type { Vendor } from '../../../data/vendor';
+import { JournalService, JournalSourceType } from '../../../../accounting/data/journal';
 import { PurchaseInvoiceStore } from '../../../data/purchase-invoice';
-import type { PurchaseInvoice } from '../../../data/purchase-invoice';
+import type { PurchaseInvoice, PurchaseInvoiceJournal } from '../../../data/purchase-invoice';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
+import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
+import { ToastStore } from '../../../../../../core/toast/toast.store';
 import { formatAmountWithCurrency } from '../../../../../../shared/format/currency';
 
 @Component({
@@ -48,10 +51,16 @@ import { formatAmountWithCurrency } from '../../../../../../shared/format/curren
 export class ListPurchaseInvoiceComponent {
   private readonly router = inject(Router);
   private readonly dateManagement = inject(DateManagementService);
+  private readonly journalService = inject(JournalService);
+  private readonly toastStore = inject(ToastStore);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly vendorStore = inject(VendorStore);
   protected readonly purchaseInvoiceStore = inject(PurchaseInvoiceStore);
   protected readonly hasError = computed(() => this.purchaseInvoiceStore.error() !== null);
+  protected readonly generatingJournalInvoiceId = signal<string | null>(null);
+  protected readonly journalsByInvoiceId = signal<Map<string, readonly PurchaseInvoiceJournal[]>>(
+    new Map(),
+  );
 
   protected readonly vendorOptionValue = (option: unknown): string =>
     (option as Vendor).id ?? '';
@@ -79,7 +88,8 @@ export class ListPurchaseInvoiceComponent {
       width: '10rem',
     },
     { id: 'paid', label: 'Paid', align: 'end', headerAlign: 'end', width: '10rem' },
-    { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '8rem' },
+    { id: 'journals', label: 'Journals', width: '12rem' },
+    { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '10rem' },
   ];
 
   protected readonly filterFields: readonly CrudFilterField[] = [
@@ -154,13 +164,80 @@ export class ListPurchaseInvoiceComponent {
 
   constructor() {
     void this.vendorStore.loadVendors({});
-    this.crudQuery.init(
-      (filter) =>
-        void this.purchaseInvoiceStore.loadPurchaseInvoices({
-          ...filter,
-          includes: ['vendor', 'payments'],
-        }),
-    );
+    this.crudQuery.init((filter) => this.loadPurchaseInvoicesWithJournals(filter));
+  }
+
+  private async loadPurchaseInvoicesWithJournals(filter: Lb4ListQuery): Promise<void> {
+    await this.purchaseInvoiceStore.loadPurchaseInvoices({
+      ...filter,
+      includes: ['vendor', 'payments'],
+    });
+    if (!this.purchaseInvoiceStore.error()) {
+      await this.loadLinkedJournals(this.purchaseInvoiceStore.items());
+    }
+  }
+
+  private async loadLinkedJournals(invoices: readonly PurchaseInvoice[]): Promise<void> {
+    const ids = invoices.map((invoice) => invoice.id).filter((id): id is string => Boolean(id));
+    if (!ids.length) {
+      this.journalsByInvoiceId.set(new Map());
+      return;
+    }
+
+    try {
+      const journals = await this.journalService.list({
+        limit: ids.length,
+        where: {
+          sourceid: { inq: ids },
+          sourcetype: JournalSourceType.PURCHASE_INVOICE,
+        },
+      });
+
+      const map = new Map<string, readonly PurchaseInvoiceJournal[]>();
+      for (const journal of journals) {
+        if (!journal.sourceid) continue;
+        const ref: PurchaseInvoiceJournal = { id: journal.id, number: journal.number };
+        const existing = map.get(journal.sourceid) ?? [];
+        map.set(journal.sourceid, [...existing, ref]);
+      }
+      this.journalsByInvoiceId.set(map);
+    } catch {
+      this.journalsByInvoiceId.set(new Map());
+    }
+  }
+
+  protected linkedJournals(row: PurchaseInvoice): readonly PurchaseInvoiceJournal[] {
+    const id = row.id;
+    if (!id) return [];
+    return this.journalsByInvoiceId().get(id) ?? [];
+  }
+
+  protected hasJournals(row: PurchaseInvoice): boolean {
+    return this.linkedJournals(row).length > 0;
+  }
+
+  protected viewJournal(journal: PurchaseInvoiceJournal): void {
+    void this.router.navigate(['/app/accounting/journal', journal.id], {
+      queryParams: { burl: this.router.url },
+    });
+  }
+
+  protected async generateJournal(row: PurchaseInvoice): Promise<void> {
+    if (!row.id || this.generatingJournalInvoiceId() === row.id) return;
+
+    this.generatingJournalInvoiceId.set(row.id);
+    try {
+      const journal = await this.journalService.createFromPurchaseInvoice(row.id);
+      this.toastStore.success('Journal generated.');
+      const ref: PurchaseInvoiceJournal = { id: journal.id, number: journal.number };
+      const map = new Map(this.journalsByInvoiceId());
+      map.set(row.id, [ref]);
+      this.journalsByInvoiceId.set(map);
+    } catch (error) {
+      this.toastStore.danger(getApiErrorMessage(error, 'Failed to generate journal.'));
+    } finally {
+      this.generatingJournalInvoiceId.set(null);
+    }
   }
 
   private searchVendors(query: string): void {
@@ -175,10 +252,7 @@ export class ListPurchaseInvoiceComponent {
   }
 
   protected reloadPurchaseInvoices(): void {
-    void this.purchaseInvoiceStore.loadPurchaseInvoices({
-      ...this.crudQuery.filter(),
-      includes: ['vendor', 'payments'],
-    });
+    void this.loadPurchaseInvoicesWithJournals(this.crudQuery.filter());
   }
 
   protected viewPurchaseInvoice(item: PurchaseInvoice): void {
