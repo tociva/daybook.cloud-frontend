@@ -44,6 +44,13 @@ export type CustomerReceiptPayload = Readonly<{
   invoices?: readonly CustomerReceiptInvoiceRequest[];
 }>;
 
+// ── Minimal journal ref (mirrors SaleInvoiceJournal) ────────────────────────
+
+export type CustomerReceiptJournal = Readonly<{
+  id: string;
+  number: string;
+}>;
+
 // ── Read model ────────────────────────────────────────────────────────────────
 
 export type CustomerReceipt = Readonly<{

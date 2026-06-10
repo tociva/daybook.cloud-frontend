@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   TngButtonComponent,
@@ -13,15 +13,18 @@ import {
   CrudListQueryService,
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
-import type { CrudFilterField } from '../../../../../../shared/crud';
+import type { CrudFilterField, Lb4ListQuery } from '../../../../../../shared/crud';
 import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
+import { JournalService, JournalSourceType } from '../../../../accounting/data/journal';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
+import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
+import { ToastStore } from '../../../../../../core/toast/toast.store';
 import { formatAmountWithCurrency } from '../../../../../../shared/format/currency';
 import { CustomerReceiptStore } from '../../../data/customer-receipt';
-import type { CustomerReceipt } from '../../../data/customer-receipt';
+import type { CustomerReceipt, CustomerReceiptJournal } from '../../../data/customer-receipt';
 
 @Component({
   selector: 'app-list-customer-receipt',
@@ -46,9 +49,15 @@ import type { CustomerReceipt } from '../../../data/customer-receipt';
 export class ListCustomerReceiptComponent {
   private readonly router = inject(Router);
   private readonly dateManagement = inject(DateManagementService);
+  private readonly journalService = inject(JournalService);
+  private readonly toastStore = inject(ToastStore);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly customerReceiptStore = inject(CustomerReceiptStore);
   protected readonly hasError = computed(() => this.customerReceiptStore.error() !== null);
+  protected readonly generatingJournalReceiptId = signal<string | null>(null);
+  protected readonly journalsByReceiptId = signal<Map<string, readonly CustomerReceiptJournal[]>>(
+    new Map(),
+  );
 
   protected readonly columns: readonly TngTableColumn<CustomerReceipt>[] = [
     { id: 'number', label: 'Number', sortable: true, width: '12rem' },
@@ -64,7 +73,8 @@ export class ListCustomerReceiptComponent {
     },
     { id: 'bcash', label: 'Bank/Cash', width: '12rem' },
     { id: 'description', label: 'Description', width: '16rem' },
-    { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '8rem' },
+    { id: 'journals', label: 'Journals', width: '12rem' },
+    { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '10rem' },
   ];
 
   protected readonly filterFields: readonly CrudFilterField[] = [
@@ -79,13 +89,80 @@ export class ListCustomerReceiptComponent {
   protected readonly formatAmountWithCurrency = formatAmountWithCurrency;
 
   constructor() {
-    this.crudQuery.init(
-      (filter) =>
-        void this.customerReceiptStore.loadCustomerReceipts({
-          ...filter,
-          includes: ['customer', 'bcash'],
-        }),
-    );
+    this.crudQuery.init((filter) => this.loadCustomerReceiptsWithJournals(filter));
+  }
+
+  private async loadCustomerReceiptsWithJournals(filter: Lb4ListQuery): Promise<void> {
+    await this.customerReceiptStore.loadCustomerReceipts({
+      ...filter,
+      includes: ['customer', 'bcash'],
+    });
+    if (!this.customerReceiptStore.error()) {
+      await this.loadLinkedJournals(this.customerReceiptStore.items());
+    }
+  }
+
+  private async loadLinkedJournals(receipts: readonly CustomerReceipt[]): Promise<void> {
+    const ids = receipts.map((receipt) => receipt.id).filter((id): id is string => Boolean(id));
+    if (!ids.length) {
+      this.journalsByReceiptId.set(new Map());
+      return;
+    }
+
+    try {
+      const journals = await this.journalService.list({
+        limit: ids.length,
+        where: {
+          sourceid: { inq: ids },
+          sourcetype: JournalSourceType.RECEIPT,
+        },
+      });
+
+      const map = new Map<string, readonly CustomerReceiptJournal[]>();
+      for (const journal of journals) {
+        if (!journal.sourceid) continue;
+        const ref: CustomerReceiptJournal = { id: journal.id, number: journal.number };
+        const existing = map.get(journal.sourceid) ?? [];
+        map.set(journal.sourceid, [...existing, ref]);
+      }
+      this.journalsByReceiptId.set(map);
+    } catch {
+      this.journalsByReceiptId.set(new Map());
+    }
+  }
+
+  protected linkedJournals(row: CustomerReceipt): readonly CustomerReceiptJournal[] {
+    const id = row.id;
+    if (!id) return [];
+    return this.journalsByReceiptId().get(id) ?? [];
+  }
+
+  protected hasJournals(row: CustomerReceipt): boolean {
+    return this.linkedJournals(row).length > 0;
+  }
+
+  protected viewJournal(journal: CustomerReceiptJournal): void {
+    void this.router.navigate(['/app/accounting/journal', journal.id], {
+      queryParams: { burl: this.router.url },
+    });
+  }
+
+  protected async generateJournal(row: CustomerReceipt): Promise<void> {
+    if (!row.id || this.generatingJournalReceiptId() === row.id) return;
+
+    this.generatingJournalReceiptId.set(row.id);
+    try {
+      const journal = await this.journalService.createFromCustomerReceipt(row.id);
+      this.toastStore.success('Journal generated.');
+      const ref: CustomerReceiptJournal = { id: journal.id, number: journal.number };
+      const map = new Map(this.journalsByReceiptId());
+      map.set(row.id, [ref]);
+      this.journalsByReceiptId.set(map);
+    } catch (error) {
+      this.toastStore.danger(getApiErrorMessage(error, 'Failed to generate journal.'));
+    } finally {
+      this.generatingJournalReceiptId.set(null);
+    }
   }
 
   protected createReceipt(): void {
@@ -95,10 +172,7 @@ export class ListCustomerReceiptComponent {
   }
 
   protected reloadCustomerReceipts(): void {
-    void this.customerReceiptStore.loadCustomerReceipts({
-      ...this.crudQuery.filter(),
-      includes: ['customer', 'bcash'],
-    });
+    void this.loadCustomerReceiptsWithJournals(this.crudQuery.filter());
   }
 
   protected editReceipt(item: CustomerReceipt): void {

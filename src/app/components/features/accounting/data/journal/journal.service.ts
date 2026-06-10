@@ -54,6 +54,15 @@ export class JournalService {
     return firstValueFrom(this.http.post<Journal[]>(url, { purchaseinvoiceids }));
   }
 
+  async createFromCustomerReceipt(customerReceiptId: string): Promise<Journal> {
+    const journals = await this.createFromCustomerReceipts([customerReceiptId]);
+    const journal = journals[0];
+    if (!journal) {
+      throw new Error('No journal returned.');
+    }
+    return journal;
+  }
+
   async createFromCustomerReceipts(
     customerreceiptids: readonly string[],
   ): Promise<readonly Journal[]> {
