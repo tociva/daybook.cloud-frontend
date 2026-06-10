@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import {
   TngButtonComponent,
   TngCardComponent,
+  TngProgressSpinnerComponent,
   TngTable,
   TngTableCellTpl,
 } from '@tailng-ui/components';
@@ -14,11 +15,13 @@ import {
   CrudListQueryService,
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
-import type { CrudFilterField } from '../../../../../../shared/crud';
+import type { CrudFilterField, Lb4ListQuery } from '../../../../../../shared/crud';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import { BankCashStore } from '../../../../trading/data/bank-cash';
 import { InventoryLedgerMapStore } from '../../../data/inventory-ledger-map';
+import { JournalSourceType } from '../../../data/journal';
+import { ReconciliationMatchService } from '../../../data/reconciliation-match';
 import { BankTxnStore } from '../../../data/bank-txn';
 import type { BankTxn, BankTxnJournal } from '../../../data/bank-txn';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
@@ -37,6 +40,7 @@ import { JournalAssignDialogComponent } from '../journal-assign-dialog/journal-a
     CrudPaginatorComponent,
     TngIcon,
     EmptyStateComponent,
+    TngProgressSpinnerComponent,
     TngTable,
     TngTableCellTpl,
     TableRowIconButtonComponent,
@@ -51,6 +55,7 @@ import { JournalAssignDialogComponent } from '../journal-assign-dialog/journal-a
 export class ListBankTxnComponent {
   private readonly router = inject(Router);
   private readonly dateManagement = inject(DateManagementService);
+  private readonly reconciliationMatchService = inject(ReconciliationMatchService);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly bankTxnStore = inject(BankTxnStore);
   protected readonly inventoryLedgerMapStore = inject(InventoryLedgerMapStore);
@@ -60,6 +65,10 @@ export class ListBankTxnComponent {
 
   protected readonly journalDialogOpen = signal(false);
   protected readonly journalDialogBankTxn = signal<BankTxn | null>(null);
+  protected readonly journalsLoading = signal(false);
+  protected readonly journalsByBankTxnId = signal<Map<string, readonly BankTxnJournal[]>>(
+    new Map(),
+  );
 
   protected readonly columns: readonly TngTableColumn<BankTxn>[] = [
     { id: 'txndate', label: 'Date', width: '9rem' },
@@ -133,12 +142,46 @@ export class ListBankTxnComponent {
       this.bankCashStore.loadBankCashes({ limit: 1000, offset: 0 }),
     ]);
 
-    this.crudQuery.init((filter) => {
-      void this.bankTxnStore.loadBankTxns({
-        ...filter,
-        includes: ['inventoryledgermap'],
-      });
+    this.crudQuery.init((filter) => this.loadBankTxnsWithJournals(filter));
+  }
+
+  private async loadBankTxnsWithJournals(filter: Lb4ListQuery): Promise<void> {
+    await this.bankTxnStore.loadBankTxns({
+      ...filter,
+      includes: ['inventoryledgermap'],
     });
+    if (this.bankTxnStore.error()) {
+      this.journalsByBankTxnId.set(new Map());
+      this.journalsLoading.set(false);
+      return;
+    }
+    await this.loadLinkedJournals(this.bankTxnStore.items());
+  }
+
+  private async loadLinkedJournals(txns: readonly BankTxn[]): Promise<void> {
+    const ids = txns.map((txn) => txn.id).filter((id): id is string => Boolean(id));
+    if (!ids.length) {
+      this.journalsByBankTxnId.set(new Map());
+      this.journalsLoading.set(false);
+      return;
+    }
+
+    this.journalsLoading.set(true);
+    try {
+      const groups = await this.reconciliationMatchService.findJournalsBySourceIds(
+        JournalSourceType.BANK_TXN,
+        ids,
+      );
+      const map = new Map<string, readonly BankTxnJournal[]>();
+      for (const group of groups) {
+        map.set(group.sourceid, group.journals);
+      }
+      this.journalsByBankTxnId.set(map);
+    } catch {
+      this.journalsByBankTxnId.set(new Map());
+    } finally {
+      this.journalsLoading.set(false);
+    }
   }
 
   protected createBankTxn(): void {
@@ -171,8 +214,14 @@ export class ListBankTxnComponent {
     }
   }
 
+  protected linkedJournals(item: BankTxn): readonly BankTxnJournal[] {
+    const id = item.id;
+    if (!id) return [];
+    return this.journalsByBankTxnId().get(id) ?? [];
+  }
+
   protected hasJournals(item: BankTxn): boolean {
-    return (item.journals?.length ?? 0) > 0;
+    return this.linkedJournals(item).length > 0;
   }
 
   protected assignJournal(item: BankTxn): void {
@@ -200,6 +249,7 @@ export class ListBankTxnComponent {
       ...filter,
       includes: ['inventoryledgermap'],
     });
+    await this.loadLinkedJournals(this.bankTxnStore.items());
 
     if (!id) return;
 
@@ -216,11 +266,7 @@ export class ListBankTxnComponent {
   }
 
   protected reloadBankTxns(): void {
-    const filter = this.crudQuery.filter();
-    void this.bankTxnStore.loadBankTxns({
-      ...filter,
-      includes: ['inventoryledgermap'],
-    });
+    void this.loadBankTxnsWithJournals(this.crudQuery.filter());
   }
 
   protected bankName(item: BankTxn): string {

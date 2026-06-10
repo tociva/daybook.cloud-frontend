@@ -1,8 +1,12 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { AppConfigStore } from '../../../../../core/config/app-config.store';
-import type { ReconciliationMatch, ReconciliationMatchLinkPayload } from './reconciliation-match.model';
+import type {
+  ReconciliationMatch,
+  ReconciliationMatchLinkPayload,
+  SourceJournalsGroup,
+} from './reconciliation-match.model';
 
 const ENDPOINT = '/accounting/reconciliation-match';
 
@@ -28,6 +32,17 @@ export class ReconciliationMatchService {
     if (res.status < 200 || res.status >= 300) {
       throw new Error(`Unexpected response status ${res.status}.`);
     }
+  }
+
+  async findJournalsBySourceIds(
+    sourcetype: string,
+    sourceIds: readonly string[],
+  ): Promise<readonly SourceJournalsGroup[]> {
+    if (!sourceIds.length) return [];
+
+    const url = `${await this.baseUrl()}/sources/${sourcetype}`;
+    const params = new HttpParams().set('sourceids', sourceIds.join(','));
+    return firstValueFrom(this.http.get<readonly SourceJournalsGroup[]>(url, { params }));
   }
 
   private async baseUrl(): Promise<string> {

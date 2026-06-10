@@ -84,3 +84,8 @@
 .journal-links {
   display: inline;
 }
+
+.journal-cell-spinner {
+  display: inline-flex;
+  align-items: center;
+}

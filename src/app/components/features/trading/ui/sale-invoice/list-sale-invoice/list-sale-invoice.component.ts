@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import {
   TngButtonComponent,
   TngCardComponent,
+  TngProgressSpinnerComponent,
   TngTable,
   TngTableCellTpl,
 } from '@tailng-ui/components';
@@ -22,6 +23,7 @@ import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-
 import { CustomerStore } from '../../../data/customer';
 import type { Customer } from '../../../data/customer';
 import { JournalService, JournalSourceType } from '../../../../accounting/data/journal';
+import { ReconciliationMatchService } from '../../../../accounting/data/reconciliation-match';
 import { SaleInvoicePrintService, SaleInvoiceStore } from '../../../data/sale-invoice';
 import type { SaleInvoice, SaleInvoiceJournal } from '../../../data/sale-invoice';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
@@ -40,6 +42,7 @@ import { formatAmountWithCurrency } from '../../../../../../shared/format/curren
     CrudPaginatorComponent,
     TngIcon,
     EmptyStateComponent,
+    TngProgressSpinnerComponent,
     TngTable,
     TngTableCellTpl,
     TableRowIconButtonComponent,
@@ -53,6 +56,7 @@ export class ListSaleInvoiceComponent {
   private readonly router = inject(Router);
   private readonly dateManagement = inject(DateManagementService);
   private readonly journalService = inject(JournalService);
+  private readonly reconciliationMatchService = inject(ReconciliationMatchService);
   private readonly printService = inject(SaleInvoicePrintService);
   private readonly toastStore = inject(ToastStore);
   protected readonly crudQuery = inject(CrudListQueryService);
@@ -61,6 +65,7 @@ export class ListSaleInvoiceComponent {
   protected readonly hasError = computed(() => this.saleInvoiceStore.error() !== null);
   protected readonly previewingInvoiceId = signal<string | null>(null);
   protected readonly generatingJournalInvoiceId = signal<string | null>(null);
+  protected readonly journalsLoading = signal(false);
   protected readonly journalsByInvoiceId = signal<Map<string, readonly SaleInvoiceJournal[]>>(
     new Map(),
   );
@@ -178,37 +183,37 @@ export class ListSaleInvoiceComponent {
       includes: ['customer', 'receipts'],
     };
     await this.saleInvoiceStore.loadSaleInvoices(query);
-    if (!this.saleInvoiceStore.error()) {
-      await this.loadLinkedJournals(this.saleInvoiceStore.items());
+    if (this.saleInvoiceStore.error()) {
+      this.journalsByInvoiceId.set(new Map());
+      this.journalsLoading.set(false);
+      return;
     }
+    await this.loadLinkedJournals(this.saleInvoiceStore.items());
   }
 
   private async loadLinkedJournals(invoices: readonly SaleInvoice[]): Promise<void> {
     const ids = invoices.map((invoice) => invoice.id).filter((id): id is string => Boolean(id));
     if (!ids.length) {
       this.journalsByInvoiceId.set(new Map());
+      this.journalsLoading.set(false);
       return;
     }
 
+    this.journalsLoading.set(true);
     try {
-      const journals = await this.journalService.list({
-        limit: ids.length,
-        where: {
-          sourceid: { inq: ids },
-          sourcetype: JournalSourceType.SALE_INVOICE,
-        },
-      });
-
+      const groups = await this.reconciliationMatchService.findJournalsBySourceIds(
+        JournalSourceType.SALE_INVOICE,
+        ids,
+      );
       const map = new Map<string, readonly SaleInvoiceJournal[]>();
-      for (const journal of journals) {
-        if (!journal.sourceid) continue;
-        const ref: SaleInvoiceJournal = { id: journal.id, number: journal.number };
-        const existing = map.get(journal.sourceid) ?? [];
-        map.set(journal.sourceid, [...existing, ref]);
+      for (const group of groups) {
+        map.set(group.sourceid, group.journals);
       }
       this.journalsByInvoiceId.set(map);
     } catch {
       this.journalsByInvoiceId.set(new Map());
+    } finally {
+      this.journalsLoading.set(false);
     }
   }
 

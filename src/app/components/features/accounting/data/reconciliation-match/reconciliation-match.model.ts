@@ -20,3 +20,13 @@ export type ReconciliationMatchLinkAssignment = Readonly<{
   matchedamount: number;
   matchprops?: Record<string, unknown>;
 }>;
+
+export type SourceJournalRef = Readonly<{
+  id: string;
+  number: string;
+}>;
+
+export type SourceJournalsGroup = Readonly<{
+  sourceid: string;
+  journals: readonly SourceJournalRef[];
+}>;

@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import {
   TngButtonComponent,
   TngCardComponent,
+  TngProgressSpinnerComponent,
   TngTable,
   TngTableCellTpl,
 } from '@tailng-ui/components';
@@ -19,6 +20,7 @@ import { PageHeadingComponent } from '../../../../../../shared/page-heading/page
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import { JournalService, JournalSourceType } from '../../../../accounting/data/journal';
+import { ReconciliationMatchService } from '../../../../accounting/data/reconciliation-match';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
@@ -37,6 +39,7 @@ import type { VendorPayment, VendorPaymentJournal } from '../../../data/vendor-p
     CrudPaginatorComponent,
     TngIcon,
     EmptyStateComponent,
+    TngProgressSpinnerComponent,
     TngTable,
     TngTableCellTpl,
     TableRowIconButtonComponent,
@@ -50,11 +53,13 @@ export class ListVendorPaymentComponent {
   private readonly router = inject(Router);
   private readonly dateManagement = inject(DateManagementService);
   private readonly journalService = inject(JournalService);
+  private readonly reconciliationMatchService = inject(ReconciliationMatchService);
   private readonly toastStore = inject(ToastStore);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly vendorPaymentStore = inject(VendorPaymentStore);
   protected readonly hasError = computed(() => this.vendorPaymentStore.error() !== null);
   protected readonly generatingJournalPaymentId = signal<string | null>(null);
+  protected readonly journalsLoading = signal(false);
   protected readonly journalsByPaymentId = signal<Map<string, readonly VendorPaymentJournal[]>>(
     new Map(),
   );
@@ -95,37 +100,37 @@ export class ListVendorPaymentComponent {
       ...filter,
       includes: ['vendor', 'bcash'],
     });
-    if (!this.vendorPaymentStore.error()) {
-      await this.loadLinkedJournals(this.vendorPaymentStore.items());
+    if (this.vendorPaymentStore.error()) {
+      this.journalsByPaymentId.set(new Map());
+      this.journalsLoading.set(false);
+      return;
     }
+    await this.loadLinkedJournals(this.vendorPaymentStore.items());
   }
 
   private async loadLinkedJournals(payments: readonly VendorPayment[]): Promise<void> {
     const ids = payments.map((payment) => payment.id).filter((id): id is string => Boolean(id));
     if (!ids.length) {
       this.journalsByPaymentId.set(new Map());
+      this.journalsLoading.set(false);
       return;
     }
 
+    this.journalsLoading.set(true);
     try {
-      const journals = await this.journalService.list({
-        limit: ids.length,
-        where: {
-          sourceid: { inq: ids },
-          sourcetype: JournalSourceType.PAYMENT,
-        },
-      });
-
+      const groups = await this.reconciliationMatchService.findJournalsBySourceIds(
+        JournalSourceType.PAYMENT,
+        ids,
+      );
       const map = new Map<string, readonly VendorPaymentJournal[]>();
-      for (const journal of journals) {
-        if (!journal.sourceid) continue;
-        const ref: VendorPaymentJournal = { id: journal.id, number: journal.number };
-        const existing = map.get(journal.sourceid) ?? [];
-        map.set(journal.sourceid, [...existing, ref]);
+      for (const group of groups) {
+        map.set(group.sourceid, group.journals);
       }
       this.journalsByPaymentId.set(map);
     } catch {
       this.journalsByPaymentId.set(new Map());
+    } finally {
+      this.journalsLoading.set(false);
     }
   }
 

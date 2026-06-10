@@ -116,7 +116,15 @@
         </ng-template>
 
         <ng-template tngTableCellTemplate="journals" let-row="row">
-          @if (hasJournals(row)) {
+          @if (journalsLoading()) {
+            <tng-progress-spinner
+              class="journal-cell-spinner"
+              [indeterminate]="true"
+              [size]="16"
+              [strokeWidth]="2"
+              ariaLabel="Loading journals"
+            />
+          } @else if (hasJournals(row)) {
             <span class="journal-links">
               @for (journal of linkedJournals(row); track journal.id; let last = $last) {
                 <button type="button" class="link-button" (click)="viewJournal(journal)">

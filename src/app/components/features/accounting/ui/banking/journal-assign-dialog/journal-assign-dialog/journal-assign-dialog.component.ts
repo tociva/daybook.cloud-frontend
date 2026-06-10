@@ -22,9 +22,11 @@ import {
 } from '@tailng-ui/components';
 import { TngTab, TngTabList, TngTabPanel } from '@tailng-ui/primitives';
 import { TngIcon } from '@tailng-ui/icons';
-import { ReconciliationMatchFacade } from '../../../../data/reconciliation-match';
 import {
-  BankTxnService,
+  ReconciliationMatchFacade,
+  ReconciliationMatchService,
+} from '../../../../data/reconciliation-match';
+import {
   BankTxnStore,
   bankTxnMaxAmount,
   journalBankLedgerMatchedAmount,
@@ -33,7 +35,7 @@ import {
 } from '../../../../data/bank-txn';
 import type { BankTxn, BankTxnJournal } from '../../../../data/bank-txn';
 import { InventoryLedgerMapStore } from '../../../../data/inventory-ledger-map';
-import { JournalService } from '../../../../data/journal';
+import { JournalService, JournalSourceType } from '../../../../data/journal';
 import { JournalAssignAssignedSectionComponent } from '../journal-assign-assigned-section/journal-assign-assigned-section.component';
 import { JournalAssignCreateComponent } from '../journal-assign-create/journal-assign-create.component';
 import { JournalAssignSelectComponent } from '../journal-assign-select/journal-assign-select.component';
@@ -74,8 +76,8 @@ export class JournalAssignDialogComponent {
   protected readonly dialogWidth = '70%';
   protected readonly createDialogHeight = 'calc(100vh - 2rem)';
 
-  private readonly bankTxnService = inject(BankTxnService);
   private readonly reconciliationMatchFacade = inject(ReconciliationMatchFacade);
+  private readonly reconciliationMatchService = inject(ReconciliationMatchService);
   private readonly journalService = inject(JournalService);
   private readonly inventoryLedgerMapStore = inject(InventoryLedgerMapStore);
   private readonly ledgerNames = inject(JournalAssignLedgerNamesService);
@@ -284,10 +286,10 @@ export class JournalAssignDialogComponent {
   }
 
   private async fetchBankTxnJournalRefs(bankTxnId: string): Promise<readonly BankTxnJournal[]> {
-    const items = await this.bankTxnService.list({
-      where: { id: bankTxnId },
-      limit: 1,
-    });
-    return items[0]?.journals ?? [];
+    const groups = await this.reconciliationMatchService.findJournalsBySourceIds(
+      JournalSourceType.BANK_TXN,
+      [bankTxnId],
+    );
+    return groups[0]?.journals ?? [];
   }
 }

@@ -6,6 +6,7 @@ export enum JournalSourceType {
   PURCHASE_INVOICE = 'purchase_invoice',
   RECEIPT = 'receipt',
   PAYMENT = 'payment',
+  BANK_TXN = 'bank_txn',
 }
 
 /** Full journal as returned by GET / list when included. */
