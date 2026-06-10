@@ -74,10 +74,48 @@
             ariaLabel="Un-assign journal"
             tone="danger"
             [disabled]="disabled()"
-            (action)="onUnassign(row.journal.id)"
+            (action)="openUnassignConfirm(row.journal.id)"
           />
         </div>
       </ng-template>
     </tng-table>
   </section>
 }
+
+<tng-dialog
+  title="Un-assign journal"
+  size="md"
+  description="This will remove the link between this journal and the bank transaction."
+  [open]="pendingUnassignJournalId() !== null"
+  [closeOnBackdrop]="false"
+  [closeOnEscape]="!disabled()"
+  (closed)="closeUnassignConfirm()"
+>
+  @if (pendingUnassignAssignment(); as assignment) {
+    <p class="unassign-confirm-message">
+      Un-assign journal <strong>{{ assignment.journal.number }}</strong>
+      ({{ formatAmount(assignment.matchedAmount) }} matched)?
+    </p>
+  }
+
+  <div class="dialog-actions">
+    <tng-button
+      type="button"
+      appearance="ghost"
+      tone="neutral"
+      [disabled]="disabled()"
+      (click)="closeUnassignConfirm()"
+    >
+      Cancel
+    </tng-button>
+    <tng-button
+      type="button"
+      appearance="solid"
+      tone="danger"
+      [disabled]="disabled()"
+      (click)="confirmUnassign()"
+    >
+      Un-assign
+    </tng-button>
+  </div>
+</tng-dialog>

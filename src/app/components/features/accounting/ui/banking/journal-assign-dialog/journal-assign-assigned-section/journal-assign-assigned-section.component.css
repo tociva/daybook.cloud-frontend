@@ -60,3 +60,15 @@
   --tng-table-row-bg: var(--app-list-table-row-alt-bg);
   --tng-table-row-hover-bg: var(--app-list-table-row-alt-hover-bg);
 }
+
+.unassign-confirm-message {
+  margin: 0 0 1rem;
+}
+
+.dialog-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 0;
+}

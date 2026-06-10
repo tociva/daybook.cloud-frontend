@@ -6,9 +6,10 @@ import {
   inject,
   input,
   output,
+  signal,
   untracked,
 } from '@angular/core';
-import { TngTable, TngTableCellTpl } from '@tailng-ui/components';
+import { TngButtonComponent, TngDialogComponent, TngTable, TngTableCellTpl } from '@tailng-ui/components';
 import type { TngTableColumn, TngTableRowClassFn } from '@tailng-ui/components';
 import { TableRowIconButtonComponent } from '../../../../../../../shared/table-row-icon-button';
 import { DateManagementService } from '../../../../../../../core/date/date-management.service';
@@ -21,7 +22,13 @@ import type { AssignJournalTableRow, ExistingAssignment } from '../shared/journa
 @Component({
   selector: 'app-journal-assign-assigned-section',
   standalone: true,
-  imports: [TableRowIconButtonComponent, TngTable, TngTableCellTpl],
+  imports: [
+    TableRowIconButtonComponent,
+    TngButtonComponent,
+    TngDialogComponent,
+    TngTable,
+    TngTableCellTpl,
+  ],
   templateUrl: './journal-assign-assigned-section.component.html',
   styleUrl: './journal-assign-assigned-section.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -119,6 +126,14 @@ export class JournalAssignAssignedSectionComponent {
     return (row) => ((order.get(row.journalGroupKey) ?? 0) % 2 === 1 ? 'journal-row--alt' : null);
   });
 
+  protected readonly pendingUnassignJournalId = signal<string | null>(null);
+
+  protected readonly pendingUnassignAssignment = computed(() => {
+    const journalId = this.pendingUnassignJournalId();
+    if (!journalId) return null;
+    return this.assignments().find((assignment) => assignment.journal.id === journalId) ?? null;
+  });
+
   constructor() {
     effect(() => {
       const assignments = this.assignments();
@@ -142,7 +157,19 @@ export class JournalAssignAssignedSectionComponent {
     return this.ledgerNames.getLedgerName(ledgerid);
   }
 
-  protected onUnassign(journalId: string): void {
+  protected openUnassignConfirm(journalId: string): void {
+    if (this.disabled()) return;
+    this.pendingUnassignJournalId.set(journalId);
+  }
+
+  protected closeUnassignConfirm(): void {
+    this.pendingUnassignJournalId.set(null);
+  }
+
+  protected confirmUnassign(): void {
+    const journalId = this.pendingUnassignJournalId();
+    if (!journalId || this.disabled()) return;
+    this.pendingUnassignJournalId.set(null);
     this.unassign.emit(journalId);
   }
 }
