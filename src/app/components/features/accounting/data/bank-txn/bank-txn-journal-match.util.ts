@@ -6,6 +6,17 @@ import type { BankTxn } from './bank-txn.model';
 
 export const JOURNAL_ASSIGN_DATE_RANGE_DAYS = 7;
 
+const DEFAULT_MINOR_DIGITS = 2;
+
+export function roundMoney(value: number, minorDigits = DEFAULT_MINOR_DIGITS): number {
+  const factor = 10 ** minorDigits;
+  return Math.round(value * factor) / factor;
+}
+
+export function formatAmountForInput(value: number, minorDigits = DEFAULT_MINOR_DIGITS): string {
+  return roundMoney(value, minorDigits).toFixed(minorDigits);
+}
+
 export type JournalMatchCandidate = Readonly<{
   journal: Journal;
   matchedAmount: number;
@@ -30,16 +41,17 @@ export function journalBankLedgerMatchedAmount(
   if (txnCredit > 0 && entryCredit <= 0) return 0;
 
   const matchedAmount = entryDebit > 0 ? entryDebit : entryCredit;
-  return matchedAmount > 0 ? matchedAmount : 0;
+  return matchedAmount > 0 ? roundMoney(matchedAmount) : 0;
 }
 
 export function sumExistingMatchedAmount(
   assignments?: readonly { matchedAmount?: number }[] | null,
 ): number {
-  return (assignments ?? []).reduce((sum, item) => {
+  const total = (assignments ?? []).reduce((sum, item) => {
     const amount = Number(item.matchedAmount ?? 0);
     return Number.isFinite(amount) && amount > 0 ? sum + amount : sum;
   }, 0);
+  return roundMoney(total);
 }
 
 export function resolveBankLedgerId(
@@ -88,7 +100,7 @@ export function bankTxnMaxAmount(txn: BankTxn | null | undefined): number {
   if (!txn) return 0;
   const debit = Number(txn.debit ?? 0);
   const credit = Number(txn.credit ?? 0);
-  return debit > 0 ? debit : credit;
+  return roundMoney(debit > 0 ? debit : credit);
 }
 
 export function remainingMatchAmount(
@@ -97,7 +109,7 @@ export function remainingMatchAmount(
 ): number {
   const max = bankTxnMaxAmount(txn);
   if (max <= 0) return 0;
-  return Math.max(0, max - sumExistingMatchedAmount(assignments));
+  return roundMoney(Math.max(0, max - sumExistingMatchedAmount(assignments)));
 }
 
 export function buildJournalDateRangeBounds(

@@ -14,7 +14,7 @@ import { BankTxnFacade } from '../../../../data/bank-txn';
 import type { BankTxn } from '../../../../data/bank-txn';
 import { JournalCreateDraftStagingService } from '../../../journal/create-journal/journal-create-draft-staging.service';
 import { JournalCreateFormComponent } from '../../../journal/create-journal/journal-create-form/journal-create-form.component';
-import { parseMatchedAmount } from '../shared/journal-assign-table.util';
+import { formatAmount, formatAmountForInput, parseMatchedAmount } from '../shared/journal-assign-table.util';
 
 @Component({
   selector: 'app-journal-assign-create',
@@ -31,6 +31,7 @@ export class JournalAssignCreateComponent {
   private readonly journalForm = viewChild(JournalCreateFormComponent);
 
   readonly dialogOpen = input(false);
+  readonly assignmentsLoaded = input(false);
   readonly bankTxn = input<BankTxn | null>(null);
   readonly remainingMatchAmount = input(0);
   readonly active = input(false);
@@ -57,7 +58,7 @@ export class JournalAssignCreateComponent {
     }
 
     if (parsed > remaining) {
-      return `Matched amount cannot exceed ${remaining}.`;
+      return `Matched amount cannot exceed ${formatAmount(remaining)}.`;
     }
 
     return null;
@@ -75,22 +76,23 @@ export class JournalAssignCreateComponent {
     });
 
     effect(() => {
-      if (!this.active()) return;
+      if (!this.active() || !this.assignmentsLoaded()) return;
 
       const txn = this.bankTxn();
-      if (!txn || this.createDraftReady()) return;
+      const remaining = this.remainingMatchAmount();
+      if (!txn || this.createDraftReady() || remaining <= 0) return;
 
       untracked(() => {
-        void this.ensureCreateDraft(txn);
+        void this.ensureCreateDraft(txn, remaining);
       });
     });
 
     effect(() => {
-      if (!this.active()) return;
+      if (!this.active() || !this.assignmentsLoaded()) return;
 
       const remaining = this.remainingMatchAmount();
       untracked(() => {
-        this.matchedAmount.set(remaining > 0 ? String(remaining) : '');
+        this.matchedAmount.set(remaining > 0 ? formatAmountForInput(remaining) : '');
         this.submitted.set(false);
       });
     });
@@ -126,8 +128,8 @@ export class JournalAssignCreateComponent {
     this.assigned.emit();
   }
 
-  private async ensureCreateDraft(txn: BankTxn): Promise<void> {
-    await this.journalDraftStaging.stageFromBankTxn(txn);
+  private async ensureCreateDraft(txn: BankTxn, bankLedgerAmount: number): Promise<void> {
+    await this.journalDraftStaging.stageFromBankTxn(txn, { bankLedgerAmount });
     this.createDraftReady.set(true);
   }
 }

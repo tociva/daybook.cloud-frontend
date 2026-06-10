@@ -37,6 +37,7 @@ import { JournalAssignLedgerNamesService } from '../shared/journal-assign-ledger
 import {
   collectLedgerIds,
   formatAmount,
+  formatAmountForInput,
   parseMatchedAmount,
   toAssignJournalRows,
 } from '../shared/journal-assign-table.util';
@@ -251,7 +252,7 @@ export class JournalAssignSelectComponent {
     }
 
     if (this.selectedMatchedTotal() > remaining) {
-      return `Total matched amount cannot exceed ${remaining}.`;
+      return `Total matched amount cannot exceed ${formatAmount(remaining)}.`;
     }
 
     return null;
@@ -326,7 +327,7 @@ export class JournalAssignSelectComponent {
     if (checked) {
       nextSelected.add(journalId);
       if (!parseMatchedAmount(nextAmounts.get(journalId) ?? '') && defaultAmount > 0) {
-        nextAmounts.set(journalId, String(defaultAmount));
+        nextAmounts.set(journalId, formatAmountForInput(defaultAmount));
       }
     } else {
       nextSelected.delete(journalId);

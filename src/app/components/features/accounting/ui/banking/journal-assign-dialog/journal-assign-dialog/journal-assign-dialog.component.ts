@@ -68,7 +68,7 @@ import type { AssignMode, ExistingAssignment } from '../shared/journal-assign.ty
 export class JournalAssignDialogComponent {
   @HostBinding('class.journal-assign-dialog--create')
   get createModeClass(): boolean {
-    return this.isCreateMode();
+    return this.isCreateMode() && !this.isFullyReconciled();
   }
 
   protected readonly dialogWidth = '70%';
@@ -106,9 +106,10 @@ export class JournalAssignDialogComponent {
 
   protected readonly isCreateMode = computed(() => this.mode() === 'create');
 
-  protected readonly dialogDescription = computed(() =>
-    this.isCreateMode() ? 'Record journal entries for this bank transaction.' : null,
-  );
+  protected readonly dialogDescription = computed(() => {
+    if (this.isFullyReconciled()) return null;
+    return this.isCreateMode() ? 'Record journal entries for this bank transaction.' : null;
+  });
 
   protected readonly bankTxnMaxAmount = computed(() => bankTxnMaxAmount(this.bankTxn()));
 
@@ -122,6 +123,13 @@ export class JournalAssignDialogComponent {
 
   protected readonly hasExistingAssignments = computed(
     () => this.existingAssignments().length > 0,
+  );
+
+  protected readonly isFullyReconciled = computed(
+    () =>
+      !this.existingAssignmentsLoading() &&
+      this.hasExistingAssignments() &&
+      this.remainingMatchAmount() <= 0,
   );
 
   protected readonly selectValidationError = computed(

@@ -1,5 +1,8 @@
+import { formatAmountForInput, roundMoney } from '../../../../data/bank-txn';
 import type { Journal, JournalEntry } from '../../../../data/journal';
 import type { AssignJournalRowCandidate, AssignJournalTableRow } from './journal-assign.types';
+
+export { formatAmountForInput };
 
 export function parseMatchedAmount(raw: string): number | null {
   const trimmed = raw.trim().replace(/,/g, '');
@@ -13,7 +16,7 @@ export function formatAmount(value: number): string {
   return new Intl.NumberFormat('en-IN', {
     maximumFractionDigits: 2,
     minimumFractionDigits: 2,
-  }).format(value);
+  }).format(roundMoney(value));
 }
 
 export function journalGroupKey(journal: Journal, index: number): string {

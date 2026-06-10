@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { toIsoDate } from '../../../../../../core/date/dayjs-date.utils';
 import { FiscalYearDateRangeService } from '../../../../../../shared/fiscal-year-date-range-picker/fiscal-year-date-range.service';
+import { formatAmountForInput, roundMoney } from '../../../data/bank-txn';
 import type { BankTxn } from '../../../data/bank-txn';
 import { InventoryLedgerMapStore } from '../../../data/inventory-ledger-map';
 import { LedgerStore } from '../../../data/ledger';
@@ -16,8 +17,11 @@ export class JournalCreateDraftStagingService {
 
   private snapshot: JournalCreateSnapshot | null = null;
 
-  async stageFromBankTxn(txn: BankTxn): Promise<void> {
-    this.snapshot = await this.buildSnapshotFromBankTxn(txn);
+  async stageFromBankTxn(
+    txn: BankTxn,
+    options?: Readonly<{ bankLedgerAmount?: number }>,
+  ): Promise<void> {
+    this.snapshot = await this.buildSnapshotFromBankTxn(txn, options);
   }
 
   consume(): JournalCreateSnapshot | null {
@@ -30,13 +34,21 @@ export class JournalCreateDraftStagingService {
     this.snapshot = null;
   }
 
-  private async buildSnapshotFromBankTxn(txn: BankTxn): Promise<JournalCreateSnapshot> {
+  private async buildSnapshotFromBankTxn(
+    txn: BankTxn,
+    options?: Readonly<{ bankLedgerAmount?: number }>,
+  ): Promise<JournalCreateSnapshot> {
     const defaultDate = this.fiscalYearDateRange.defaultDate();
     const ledgerId = this.resolveBankLedgerId(txn);
     const debit = Number(txn.debit ?? 0);
     const credit = Number(txn.credit ?? 0);
-    const amount = debit > 0 ? debit : credit;
-    const amountStr = amount > 0 ? String(amount) : '';
+    const fullAmount = roundMoney(debit > 0 ? debit : credit);
+    const overrideAmount = options?.bankLedgerAmount;
+    const amount =
+      overrideAmount !== undefined && overrideAmount > 0
+        ? roundMoney(overrideAmount)
+        : fullAmount;
+    const amountStr = amount > 0 ? formatAmountForInput(amount) : '';
 
     let ledgerDefaultOptions: readonly Ledger[] = [];
     let ledgerName = '';
