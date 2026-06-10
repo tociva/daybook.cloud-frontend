@@ -70,6 +70,10 @@ h1 {
   gap: 1rem;
 }
 
+.unlink-confirm-message {
+  margin: 0 0 1rem;
+}
+
 .dialog-actions {
   align-items: center;
   display: flex;

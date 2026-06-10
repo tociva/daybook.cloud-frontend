@@ -1,3 +1,5 @@
+import type { Lb4ListQuery } from '../../../../../shared/crud';
+
 export type ReconciliationMatch = Readonly<{
   id: string;
   sourcetype: string;
@@ -30,3 +32,5 @@ export type SourceJournalsGroup = Readonly<{
   sourceid: string;
   journals: readonly SourceJournalRef[];
 }>;
+
+export type ReconciliationMatchListQuery = Lb4ListQuery;

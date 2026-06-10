@@ -46,6 +46,15 @@ import { CustomerReceiptService } from '../../../../trading/data/customer-receip
 import type { CustomerReceipt } from '../../../../trading/data/customer-receipt';
 import { VendorPaymentService } from '../../../../trading/data/vendor-payment';
 import type { VendorPayment } from '../../../../trading/data/vendor-payment';
+import {
+  ReconciliationMatchFacade,
+  ReconciliationMatchService,
+} from '../../../data/reconciliation-match';
+
+type JournalSourceMatch = Readonly<{
+  sourceid: string;
+  sourcetype: JournalSourceType;
+}>;
 
 type JournalTableRow = Readonly<{
   credit: number | null | undefined;
@@ -162,7 +171,12 @@ export class ListJournalComponent {
   private readonly customerReceiptService = inject(CustomerReceiptService);
   private readonly vendorPaymentService = inject(VendorPaymentService);
   private readonly toastStore = inject(ToastStore);
+  private readonly reconciliationMatchFacade = inject(ReconciliationMatchFacade);
+  private readonly reconciliationMatchService = inject(ReconciliationMatchService);
   protected readonly hasError = computed(() => this.journalStore.error() !== null);
+  private readonly sourceMatchByJournalId = signal(new Map<string, JournalSourceMatch>());
+  protected readonly pendingUnlinkJournal = signal<Journal | null>(null);
+  protected readonly unlinkingJournalId = signal<string | null>(null);
   protected readonly unfilteredJournalCount = signal<number | null>(null);
   protected readonly journalImportSource = signal<JournalImportSource | null>(null);
   protected readonly journalImportCandidates = signal<readonly JournalImportCandidate[]>([]);
@@ -177,6 +191,7 @@ export class ListJournalComponent {
   /** Local map of ledger id → name, populated after each journal page load. */
   private readonly ledgerNames = signal(new Map<string, string>());
   private ledgerNameFetchVersion = 0;
+  private sourceMatchFetchVersion = 0;
   private unfilteredJournalCountFetchVersion = 0;
 
   protected readonly columns: readonly TngTableColumn<JournalTableRow>[] = [
@@ -223,7 +238,7 @@ export class ListJournalComponent {
       groupBy: true,
       groupByAlign: 'top',
       headerAlign: 'end',
-      width: '8rem',
+      width: '10rem',
     },
   ];
 
@@ -293,6 +308,43 @@ export class ListJournalComponent {
       if (!ids.length) return;
       void untracked(() => this.fetchLedgerNames(ids));
     });
+
+    effect(() => {
+      const items = this.journalStore.items();
+      const error = this.journalStore.error();
+      if (error || !items.length) {
+        untracked(() => this.sourceMatchByJournalId.set(new Map()));
+        return;
+      }
+
+      const journalIds = [
+        ...new Set(items.map((journal) => journal.id).filter((id): id is string => Boolean(id))),
+      ];
+      if (!journalIds.length) return;
+      void untracked(() => this.fetchSourceMatches(journalIds));
+    });
+  }
+
+  private async fetchSourceMatches(journalIds: readonly string[]): Promise<void> {
+    const fetchVersion = ++this.sourceMatchFetchVersion;
+
+    try {
+      const matches = await this.reconciliationMatchService.findByJournalIds(journalIds);
+      if (fetchVersion !== this.sourceMatchFetchVersion) return;
+
+      const map = new Map<string, JournalSourceMatch>();
+      for (const match of matches) {
+        if (!match.journalid || !match.sourceid) continue;
+        map.set(match.journalid, {
+          sourceid: match.sourceid,
+          sourcetype: match.sourcetype as JournalSourceType,
+        });
+      }
+      this.sourceMatchByJournalId.set(map);
+    } catch {
+      if (fetchVersion !== this.sourceMatchFetchVersion) return;
+      this.sourceMatchByJournalId.set(new Map());
+    }
   }
 
   private async refreshUnfilteredJournalCount(
@@ -639,18 +691,13 @@ export class ListJournalComponent {
   ): Promise<ReadonlySet<string>> {
     if (!sourceIds.length) return new Set();
 
-    const journals = await this.journalService.list({
-      limit: sourceIds.length,
-      where: {
-        sourceid: { inq: sourceIds },
-        sourcetype: JOURNAL_IMPORT_CONFIG[source].sourceType,
-      },
-    });
+    const groups = await this.reconciliationMatchService.findJournalsBySourceIds(
+      JOURNAL_IMPORT_CONFIG[source].sourceType,
+      sourceIds,
+    );
 
     return new Set(
-      journals
-        .map((journal) => journal.sourceid)
-        .filter((sourceid): sourceid is string => Boolean(sourceid)),
+      groups.filter((group) => group.journals.length > 0).map((group) => group.sourceid),
     );
   }
 
@@ -704,6 +751,50 @@ export class ListJournalComponent {
     void this.router.navigate(['/app/accounting/journal', item.id, 'delete'], {
       queryParams: { burl: this.router.url },
     });
+  }
+
+  protected canUnlink(journal: Journal): boolean {
+    return this.sourceMatchByJournalId().has(journal.id);
+  }
+
+  protected unlinkSourceTypeLabel(journal: Journal): string {
+    const match = this.sourceMatchByJournalId().get(journal.id);
+    return this.getSourceTypeLabel(match?.sourcetype ?? journal.sourcetype);
+  }
+
+  protected openUnlinkConfirm(journal: Journal): void {
+    if (!this.canUnlink(journal) || this.unlinkingJournalId()) return;
+    this.pendingUnlinkJournal.set(journal);
+  }
+
+  protected closeUnlinkConfirm(): void {
+    if (this.unlinkingJournalId()) return;
+    this.pendingUnlinkJournal.set(null);
+  }
+
+  protected async confirmUnlink(): Promise<void> {
+    const journal = this.pendingUnlinkJournal();
+    const journalId = journal?.id;
+    const match = journalId ? this.sourceMatchByJournalId().get(journalId) : undefined;
+    if (!journal || !journalId || !match || this.unlinkingJournalId() || !this.canUnlink(journal)) {
+      return;
+    }
+
+    this.unlinkingJournalId.set(journalId);
+    this.pendingUnlinkJournal.set(null);
+
+    try {
+      const ok = await this.reconciliationMatchFacade.unlinkJournalFromSource(
+        match.sourcetype,
+        match.sourceid,
+        journalId,
+      );
+      if (ok) {
+        this.reloadJournals();
+      }
+    } finally {
+      this.unlinkingJournalId.set(null);
+    }
   }
 
   protected openLedgers(): void {

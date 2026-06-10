@@ -1,12 +1,21 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
 import { ToastStore } from '../../../../../core/toast/toast.store';
+import { JournalSourceType } from '../journal';
 import type {
   ReconciliationMatch,
   ReconciliationMatchLinkAssignment,
   ReconciliationMatchLinkPayload,
 } from './reconciliation-match.model';
 import { ReconciliationMatchService } from './reconciliation-match.service';
+
+const UNLINKABLE_SOURCE_TYPES = new Set<JournalSourceType>([
+  JournalSourceType.BANK_TXN,
+  JournalSourceType.SALE_INVOICE,
+  JournalSourceType.PURCHASE_INVOICE,
+  JournalSourceType.RECEIPT,
+  JournalSourceType.PAYMENT,
+]);
 
 @Injectable({ providedIn: 'root' })
 export class ReconciliationMatchFacade {
@@ -71,14 +80,37 @@ export class ReconciliationMatchFacade {
   }
 
   async unlinkJournalFromBankTxn(bankTxnId: string, journalId: string): Promise<boolean> {
+    return this.executeUnlink(JournalSourceType.BANK_TXN, bankTxnId, journalId);
+  }
+
+  async unlinkJournalFromSource(
+    sourcetype: JournalSourceType,
+    sourceId: string,
+    journalId: string,
+  ): Promise<boolean> {
+    if (!UNLINKABLE_SOURCE_TYPES.has(sourcetype)) {
+      this._error.set('This journal cannot be unlinked from its source.');
+      return false;
+    }
+
+    return this.executeUnlink(sourcetype, sourceId, journalId);
+  }
+
+  private async executeUnlink(
+    sourcetype: JournalSourceType,
+    sourceId: string,
+    journalId: string,
+  ): Promise<boolean> {
     this._isLoading.set(true);
     this._error.set(null);
     try {
-      await this.service.unlinkFromBankTxn(bankTxnId, journalId);
-      this.toastStore.success('Journal unassigned.');
+      await this.service.unlinkJournalFromSource(sourcetype, sourceId, journalId);
+      const message =
+        sourcetype === JournalSourceType.BANK_TXN ? 'Journal unassigned.' : 'Source unlinked.';
+      this.toastStore.success(message);
       return true;
     } catch (error) {
-      this._error.set(getApiErrorMessage(error, 'Failed to unassign journal.'));
+      this._error.set(getApiErrorMessage(error, 'Failed to unlink source.'));
       return false;
     } finally {
       this._isLoading.set(false);

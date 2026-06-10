@@ -157,22 +157,31 @@
 
           <ng-template tngTableCellTemplate="actions" let-row="row">
             <div class="journal-cell row-actions">
+              @if (canUnlink(row.journal)) {
+                <app-table-row-icon-button
+                  icon="link2Off"
+                  ariaLabel="Unlink source"
+                  tone="danger"
+                  [disabled]="unlinkingJournalId() === row.journal.id"
+                  (action)="openUnlinkConfirm(row.journal)"
+                />
+              }
               <app-table-row-icon-button
-              icon="eye"
-              ariaLabel="View journal"
-              (action)="viewJournal(row.journal)"
-            />
+                icon="eye"
+                ariaLabel="View journal"
+                (action)="viewJournal(row.journal)"
+              />
               <app-table-row-icon-button
-              icon="pencil"
-              ariaLabel="Edit journal"
-              (action)="editJournal(row.journal)"
-            />
+                icon="pencil"
+                ariaLabel="Edit journal"
+                (action)="editJournal(row.journal)"
+              />
               <app-table-row-icon-button
-              icon="trash2"
-              ariaLabel="Delete journal"
-              tone="danger"
-              (action)="deleteJournal(row.journal)"
-            />
+                icon="trash2"
+                ariaLabel="Delete journal"
+                tone="danger"
+                (action)="deleteJournal(row.journal)"
+              />
             </div>
           </ng-template>
         </tng-table>
@@ -190,6 +199,44 @@
       }
     </div>
   </tng-card>
+
+  <tng-dialog
+    title="Unlink source"
+    size="md"
+    description="This will remove the link between this journal and its source document."
+    [open]="pendingUnlinkJournal() !== null"
+    [closeOnBackdrop]="false"
+    [closeOnEscape]="unlinkingJournalId() === null"
+    (closed)="closeUnlinkConfirm()"
+  >
+    @if (pendingUnlinkJournal(); as journal) {
+      <p class="unlink-confirm-message">
+        Unlink journal <strong>{{ journal.number }}</strong>
+        from <strong>{{ unlinkSourceTypeLabel(journal) }}</strong>?
+      </p>
+    }
+
+    <div class="dialog-actions">
+      <tng-button
+        type="button"
+        appearance="ghost"
+        tone="neutral"
+        [disabled]="unlinkingJournalId() !== null"
+        (click)="closeUnlinkConfirm()"
+      >
+        Cancel
+      </tng-button>
+      <tng-button
+        type="button"
+        appearance="solid"
+        tone="danger"
+        [disabled]="unlinkingJournalId() !== null"
+        (click)="confirmUnlink()"
+      >
+        Unlink
+      </tng-button>
+    </div>
+  </tng-dialog>
 
   <tng-dialog
     [title]="journalImportConfig()?.dialogTitle ?? 'Import Journals'"
