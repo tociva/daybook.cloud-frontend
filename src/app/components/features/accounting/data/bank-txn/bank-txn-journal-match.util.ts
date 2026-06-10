@@ -11,9 +11,35 @@ export type JournalMatchCandidate = Readonly<{
   matchedAmount: number;
 }>;
 
-/** List API returns linked journals but not per-match amounts. */
-export function sumExistingMatchedAmount(_txn: BankTxn | null | undefined): number {
-  return 0;
+export function journalBankLedgerMatchedAmount(
+  journal: Journal,
+  bankTxn: BankTxn,
+  bankLedgerId: string,
+): number {
+  if (!bankLedgerId) return 0;
+
+  const bankEntry = journal.entries?.find((entry) => entry.ledgerid === bankLedgerId);
+  if (!bankEntry) return 0;
+
+  const txnDebit = Number(bankTxn.debit ?? 0);
+  const txnCredit = Number(bankTxn.credit ?? 0);
+  const entryDebit = Number(bankEntry.debit ?? 0);
+  const entryCredit = Number(bankEntry.credit ?? 0);
+
+  if (txnDebit > 0 && entryDebit <= 0) return 0;
+  if (txnCredit > 0 && entryCredit <= 0) return 0;
+
+  const matchedAmount = entryDebit > 0 ? entryDebit : entryCredit;
+  return matchedAmount > 0 ? matchedAmount : 0;
+}
+
+export function sumExistingMatchedAmount(
+  assignments?: readonly { matchedAmount?: number }[] | null,
+): number {
+  return (assignments ?? []).reduce((sum, item) => {
+    const amount = Number(item.matchedAmount ?? 0);
+    return Number.isFinite(amount) && amount > 0 ? sum + amount : sum;
+  }, 0);
 }
 
 export function resolveBankLedgerId(
@@ -38,26 +64,20 @@ export function getCompatibleJournalCandidates(
   journals: readonly Journal[],
   bankTxn: BankTxn,
   bankLedgerId: string,
+  linkedJournalIds?: readonly string[],
 ): readonly JournalMatchCandidate[] {
   if (!bankLedgerId) return [];
 
-  const linkedIds = new Set((bankTxn.journals ?? []).map((journal) => journal.id));
-  const txnDebit = Number(bankTxn.debit ?? 0);
-  const txnCredit = Number(bankTxn.credit ?? 0);
+  const linkedIds = new Set(
+    linkedJournalIds !== undefined
+      ? linkedJournalIds
+      : (bankTxn.journals ?? []).map((journal) => journal.id),
+  );
 
   return journals.flatMap((journal) => {
     if (!journal.id || linkedIds.has(journal.id)) return [];
 
-    const bankEntry = journal.entries?.find((entry) => entry.ledgerid === bankLedgerId);
-    if (!bankEntry) return [];
-
-    const entryDebit = Number(bankEntry.debit ?? 0);
-    const entryCredit = Number(bankEntry.credit ?? 0);
-
-    if (txnDebit > 0 && entryDebit <= 0) return [];
-    if (txnCredit > 0 && entryCredit <= 0) return [];
-
-    const matchedAmount = entryDebit > 0 ? entryDebit : entryCredit;
+    const matchedAmount = journalBankLedgerMatchedAmount(journal, bankTxn, bankLedgerId);
     if (matchedAmount <= 0) return [];
 
     return [{ journal, matchedAmount }];
@@ -71,10 +91,13 @@ export function bankTxnMaxAmount(txn: BankTxn | null | undefined): number {
   return debit > 0 ? debit : credit;
 }
 
-export function remainingMatchAmount(txn: BankTxn | null | undefined): number {
+export function remainingMatchAmount(
+  txn: BankTxn | null | undefined,
+  assignments?: readonly { matchedAmount?: number }[] | null,
+): number {
   const max = bankTxnMaxAmount(txn);
   if (max <= 0) return 0;
-  return Math.max(0, max - sumExistingMatchedAmount(txn));
+  return Math.max(0, max - sumExistingMatchedAmount(assignments));
 }
 
 export function buildJournalDateRangeBounds(

@@ -8,6 +8,92 @@
   [closeOnEscape]="!isSaving()"
   (closed)="onDialogClosed()"
 >
+  @if (open()) {
+    @if (existingAssignmentsLoading()) {
+      <div class="notice assigned-section-notice">Loading assigned journals...</div>
+    } @else if (hasExistingAssignments()) {
+      <section class="assigned-section">
+        <div class="assigned-section__header">
+          <h3 class="assigned-section__title">Assigned journals</h3>
+          <p class="assigned-section__summary">
+            {{ formatAmount(existingMatchedTotal()) }} matched ·
+            {{ formatAmount(remainingMatchAmount()) }} remaining of
+            {{ formatAmount(bankTxnMaxAmount()) }} total
+          </p>
+        </div>
+        <tng-table
+          class="journal-table assigned-journal-table"
+          ariaLabel="Assigned journals"
+          density="comfortable"
+          hoverMode="group"
+          layout="fixed"
+          scrollAxis="both"
+          [columns]="assignedColumns"
+          [items]="existingAssignmentRows()"
+          [loading]="false"
+          [error]="false"
+          [rowClass]="existingRowClassFn()"
+        >
+          <ng-template tngTableCellTemplate="journalGroupKey" let-row="row">
+            <span class="journal-cell">{{ row.number }}</span>
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="date" let-row="row">
+            <span class="journal-cell">{{ formatDisplayDate(row.date) }}</span>
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="ledgerid" let-row="row">
+            <span class="journal-cell">
+              @if (row.ledgerid) {
+                {{ getLedgerName(row.ledgerid) }}
+              } @else {
+                —
+              }
+            </span>
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="debit" let-row="row">
+            <span class="journal-cell num">
+              {{ row.debit != null && row.debit > 0 ? formatAmount(row.debit) : '' }}
+            </span>
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="credit" let-row="row">
+            <span class="journal-cell num">
+              {{ row.credit != null && row.credit > 0 ? formatAmount(row.credit) : '' }}
+            </span>
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="description" let-row="row">
+            <span class="journal-cell">
+              @if (row.description) {
+                <span class="truncate" [title]="row.description">{{ row.description }}</span>
+              }
+            </span>
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="matchedAmount" let-row="row">
+            <span class="journal-cell num">
+              {{ row.matchedAmount > 0 ? formatAmount(row.matchedAmount) : '—' }}
+            </span>
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="actions" let-row="row">
+            <div class="journal-cell actions-cell">
+              <app-table-row-icon-button
+                icon="link2Off"
+                ariaLabel="Un-assign journal"
+                tone="danger"
+                [disabled]="isSaving()"
+                (action)="onUnassign(row.journal.id)"
+              />
+            </div>
+          </ng-template>
+        </tng-table>
+      </section>
+    }
+  }
+
   <div class="assign-dialog-toolbar">
     <tng-button-toggle-group
       ariaLabel="Assign journal mode"
@@ -33,7 +119,7 @@
       <div class="select-dialog-body">
         @if (candidatesLoading()) {
           <div class="notice">Loading compatible journals...</div>
-        } @else if (assignRows().length === 0 && !showLoadMore()) {
+        } @else if (assignRows().length === 0 && !showLoadMore() && !hasExistingAssignments()) {
           <app-empty-state
             icon="bookOpen"
             title="No compatible journals"
@@ -41,16 +127,21 @@
           />
         } @else {
           @if (assignRows().length === 0) {
-            <app-empty-state
-              icon="bookOpen"
-              title="No compatible journals in date range"
-              [description]="
-                'No journals found within ±' +
-                JOURNAL_ASSIGN_DATE_RANGE_DAYS +
-                ' days of this bank transaction. Load more to search all journals.'
-              "
-            />
+            @if (!hasExistingAssignments()) {
+              <app-empty-state
+                icon="bookOpen"
+                title="No compatible journals in date range"
+                [description]="
+                  'No journals found within ±' +
+                  JOURNAL_ASSIGN_DATE_RANGE_DAYS +
+                  ' days of this bank transaction. Load more to search all journals.'
+                "
+              />
+            }
           } @else {
+            @if (hasExistingAssignments()) {
+              <h3 class="candidates-section__title">Add more journals</h3>
+            }
             <tng-table
               class="journal-table assign-journal-table"
               ariaLabel="Compatible journals"
@@ -116,8 +207,10 @@
                   <tng-input
                     [id]="matchAmountInputId(row.journal.id)"
                     type="number"
+                    min="0.01"
+                    step="any"
                     inputmode="decimal"
-                    placeholder="Amount"
+                    placeholder="0.00"
                     [disabled]="!isSelected(row.journal.id)"
                     [value]="matchAmountFor(row.journal.id)"
                     (valueChange)="setMatchAmount(row.journal.id, $event)"
@@ -171,6 +264,8 @@
             <tng-input
               id="bank-txn-matched-amount"
               type="number"
+              min="0.01"
+              step="any"
               inputmode="decimal"
               placeholder="Amount to match"
               [value]="matchedAmount()"
@@ -187,6 +282,12 @@
             {{ selectedJournalCount() }} selected ·
             {{ formatAmount(selectedMatchedTotal()) }} of
             {{ formatAmount(remainingMatchAmount()) }} remaining
+          </span>
+        } @else if (hasExistingAssignments()) {
+          <span class="dialog-footer__summary">
+            {{ formatAmount(existingMatchedTotal()) }} matched ·
+            {{ formatAmount(remainingMatchAmount()) }} remaining of
+            {{ formatAmount(bankTxnMaxAmount()) }} total
           </span>
         }
 
@@ -221,7 +322,12 @@
             type="button"
             appearance="solid"
             tone="primary"
-            [disabled]="isSaving() || candidatesLoading() || assignRows().length === 0"
+            [disabled]="
+              isSaving() ||
+              candidatesLoading() ||
+              remainingMatchAmount() <= 0 ||
+              assignRows().length === 0
+            "
             (click)="onAssignSelected()"
           >
             @if (isSaving()) {

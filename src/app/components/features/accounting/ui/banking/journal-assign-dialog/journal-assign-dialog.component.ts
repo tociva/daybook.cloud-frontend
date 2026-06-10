@@ -27,19 +27,23 @@ import {
 import type { TngTableColumn, TngTableRowClassFn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
+import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
-import { BankMatchFacade } from '../../../data/bank-match';
+import { ReconciliationMatchFacade } from '../../../data/reconciliation-match';
 import {
   BankTxnFacade,
+  BankTxnService,
   BankTxnStore,
+  bankTxnMaxAmount,
   buildJournalDateRangeWhere,
   buildJournalOutsideDateRangeWhere,
   getCompatibleJournalCandidates,
   JOURNAL_ASSIGN_DATE_RANGE_DAYS,
+  journalBankLedgerMatchedAmount,
   remainingMatchAmount,
   resolveBankLedgerId,
 } from '../../../data/bank-txn';
-import type { BankTxn, JournalMatchCandidate } from '../../../data/bank-txn';
+import type { BankTxn, BankTxnJournal, JournalMatchCandidate } from '../../../data/bank-txn';
 import { InventoryLedgerMapStore } from '../../../data/inventory-ledger-map';
 import { JournalService } from '../../../data/journal';
 import type { Journal, JournalEntry } from '../../../data/journal';
@@ -52,6 +56,11 @@ import type { Lb4Where } from '../../../../../../shared/crud/lb4-query';
 
 type AssignMode = 'select' | 'create';
 
+type ExistingAssignment = Readonly<{
+  journal: Journal;
+  matchedAmount: number;
+}>;
+
 type AssignJournalTableRow = Readonly<{
   credit: number | null | undefined;
   date: string;
@@ -62,6 +71,7 @@ type AssignJournalTableRow = Readonly<{
   journal: Journal;
   journalGroupKey: string;
   ledgerid: string;
+  matchedAmount: number;
   number: string;
   rowKey: string;
 }>;
@@ -90,6 +100,7 @@ function parseMatchedAmount(raw: string): number | null {
     TngInputComponent,
     TngLabelComponent,
     TngIcon,
+    TableRowIconButtonComponent,
     TngTable,
     TngTableCellTpl,
   ],
@@ -109,7 +120,8 @@ export class JournalAssignDialogComponent {
   protected readonly JOURNAL_ASSIGN_DATE_RANGE_DAYS = JOURNAL_ASSIGN_DATE_RANGE_DAYS;
 
   private readonly bankTxnFacade = inject(BankTxnFacade);
-  private readonly bankMatchFacade = inject(BankMatchFacade);
+  private readonly bankTxnService = inject(BankTxnService);
+  private readonly reconciliationMatchFacade = inject(ReconciliationMatchFacade);
   private readonly journalService = inject(JournalService);
   private readonly ledgerService = inject(LedgerService);
   private readonly ledgerStore = inject(LedgerStore);
@@ -125,6 +137,7 @@ export class JournalAssignDialogComponent {
 
   readonly closed = output<void>();
   readonly assigned = output<void>();
+  readonly assignmentsChanged = output<void>();
 
   protected readonly mode = signal<AssignMode>('select');
   protected readonly matchedAmount = signal('');
@@ -135,10 +148,63 @@ export class JournalAssignDialogComponent {
   protected readonly candidatesError = signal<string | null>(null);
   protected readonly hasMoreCandidates = signal(false);
   protected readonly candidates = signal<readonly JournalMatchCandidate[]>([]);
+  protected readonly existingAssignments = signal<readonly ExistingAssignment[]>([]);
+  protected readonly existingAssignmentsLoading = signal(false);
+  protected readonly unassigningJournalId = signal<string | null>(null);
   protected readonly selectedJournalIds = signal<ReadonlySet<string>>(new Set());
   protected readonly journalMatchAmounts = signal<ReadonlyMap<string, string>>(new Map());
   private readonly ledgerNames = signal(new Map<string, string>());
   private ledgerNameFetchVersion = 0;
+
+  protected readonly assignedColumns: readonly TngTableColumn<AssignJournalTableRow>[] = [
+    {
+      id: 'journalGroupKey',
+      label: 'Number',
+      accessor: 'journalGroupKey',
+      groupBy: true,
+      groupByAlign: 'top',
+      width: '11rem',
+    },
+    {
+      id: 'date',
+      label: 'Date',
+      accessor: 'journalGroupKey',
+      groupBy: true,
+      groupByAlign: 'top',
+      width: '9rem',
+    },
+    { id: 'ledgerid', label: 'Ledger', width: '15rem' },
+    { id: 'debit', label: 'Debit', align: 'end', headerAlign: 'end', width: '9rem' },
+    { id: 'credit', label: 'Credit', align: 'end', headerAlign: 'end', width: '9rem' },
+    {
+      id: 'description',
+      label: 'Description',
+      accessor: 'journalGroupKey',
+      groupBy: true,
+      groupByAlign: 'top',
+      truncate: true,
+    },
+    {
+      id: 'matchedAmount',
+      label: 'Matched amount',
+      accessor: 'journalGroupKey',
+      align: 'end',
+      groupBy: true,
+      groupByAlign: 'top',
+      headerAlign: 'end',
+      width: '10rem',
+    },
+    {
+      id: 'actions',
+      label: 'Un-assign',
+      accessor: 'journalGroupKey',
+      groupBy: true,
+      groupByAlign: 'top',
+      align: 'end',
+      headerAlign: 'end',
+      width: '6.5rem',
+    },
+  ];
 
   protected readonly assignColumns: readonly TngTableColumn<AssignJournalTableRow>[] = [
     {
@@ -191,7 +257,8 @@ export class JournalAssignDialogComponent {
   protected readonly isSaving = computed(
     () =>
       this.bankTxnStore.isLoading() ||
-      this.bankMatchFacade.isLoading() ||
+      this.reconciliationMatchFacade.isLoading() ||
+      this.unassigningJournalId() !== null ||
       (this.journalForm()?.isBusy() ?? false),
   );
 
@@ -207,11 +274,50 @@ export class JournalAssignDialogComponent {
     () => this.hasMoreCandidates() && !this.candidatesLoading() && !this.candidatesLoadingMore(),
   );
 
-  protected readonly remainingMatchAmount = computed(() => remainingMatchAmount(this.bankTxn()));
+  protected readonly bankTxnMaxAmount = computed(() => bankTxnMaxAmount(this.bankTxn()));
+
+  protected readonly existingMatchedTotal = computed(() =>
+    this.existingAssignments().reduce((sum, assignment) => sum + assignment.matchedAmount, 0),
+  );
+
+  protected readonly remainingMatchAmount = computed(() =>
+    remainingMatchAmount(this.bankTxn(), this.existingAssignments()),
+  );
+
+  protected readonly hasExistingAssignments = computed(
+    () => this.existingAssignments().length > 0,
+  );
+
+  protected readonly existingAssignmentRows = computed<readonly AssignJournalTableRow[]>(() =>
+    this.existingAssignments().flatMap((assignment, index) =>
+      this.toAssignJournalRows(
+        { journal: assignment.journal, matchedAmount: assignment.matchedAmount },
+        index,
+        assignment.matchedAmount,
+      ),
+    ),
+  );
+
+  private readonly existingJournalGroupOrder = computed(() => {
+    const order = new Map<string, number>();
+    let i = 0;
+    for (const row of this.existingAssignmentRows()) {
+      if (!order.has(row.journalGroupKey)) order.set(row.journalGroupKey, i++);
+    }
+    return order;
+  });
+
+  protected readonly existingRowClassFn = computed<TngTableRowClassFn<AssignJournalTableRow> | null>(
+    () => {
+      const order = this.existingJournalGroupOrder();
+      return (row) =>
+        (order.get(row.journalGroupKey) ?? 0) % 2 === 1 ? 'journal-row--alt' : null;
+    },
+  );
 
   protected readonly assignRows = computed<readonly AssignJournalTableRow[]>(() =>
     this.candidates().flatMap((candidate, index) =>
-      this.toAssignJournalRows(candidate, index),
+      this.toAssignJournalRows(candidate, index, 0),
     ),
   );
 
@@ -295,7 +401,7 @@ export class JournalAssignDialogComponent {
   protected readonly dialogError = computed(
     () =>
       this.bankTxnStore.error() ??
-      this.bankMatchFacade.error() ??
+      this.reconciliationMatchFacade.error() ??
       this.candidatesError() ??
       null,
   );
@@ -314,11 +420,14 @@ export class JournalAssignDialogComponent {
         this.journalMatchAmounts.set(new Map());
         this.matchedAmount.set('');
         this.candidates.set([]);
+        this.existingAssignments.set([]);
+        this.existingAssignmentsLoading.set(false);
         this.candidatesError.set(null);
         this.hasMoreCandidates.set(false);
+        this.unassigningJournalId.set(null);
         this.bankTxnStore.clearError();
-        this.bankMatchFacade.clearError();
-        void this.loadCandidates(txn);
+        this.reconciliationMatchFacade.clearError();
+        void this.loadDialogData(txn);
       });
     });
 
@@ -358,7 +467,29 @@ export class JournalAssignDialogComponent {
     this.mode.set(next);
     this.submitted.set(false);
     this.bankTxnStore.clearError();
-    this.bankMatchFacade.clearError();
+    this.reconciliationMatchFacade.clearError();
+  }
+
+  protected async onUnassign(journalId: string): Promise<void> {
+    const txn = this.bankTxn();
+    const bankTxnId = txn?.id;
+    if (!bankTxnId || this.isSaving()) return;
+
+    this.unassigningJournalId.set(journalId);
+    this.reconciliationMatchFacade.clearError();
+
+    try {
+      const ok = await this.reconciliationMatchFacade.unlinkJournalFromBankTxn(
+        bankTxnId,
+        journalId,
+      );
+      if (!ok) return;
+
+      await this.loadDialogData(txn);
+      this.assignmentsChanged.emit();
+    } finally {
+      this.unassigningJournalId.set(null);
+    }
   }
 
   protected isSelected(journalId: string): boolean {
@@ -441,13 +572,13 @@ export class JournalAssignDialogComponent {
     const bankTxnId = bankTxn?.id;
     if (!bankTxnId) return;
 
-    const payloads = this.selectedAssignments().map((assignment) => ({
-      banktxnid: bankTxnId,
-      journalid: assignment.journal.id,
-      matchedamount: assignment.matchedAmount,
-    }));
-
-    const ok = await this.bankMatchFacade.linkJournalsToBankTxn(payloads);
+    const ok = await this.reconciliationMatchFacade.linkJournalsToBankTxn(
+      bankTxnId,
+      this.selectedAssignments().map((assignment) => ({
+        journalId: assignment.journal.id,
+        matchedamount: assignment.matchedAmount,
+      })),
+    );
     if (!ok) return;
 
     this.assigned.emit();
@@ -477,9 +608,71 @@ export class JournalAssignDialogComponent {
     this.assigned.emit();
   }
 
+  private async loadDialogData(txn: BankTxn): Promise<void> {
+    await this.loadExistingAssignments(txn);
+    await this.loadCandidates(txn);
+  }
+
   private async ensureCreateDraft(txn: BankTxn): Promise<void> {
     await this.journalDraftStaging.stageFromBankTxn(txn);
     this.createDraftReady.set(true);
+  }
+
+  private async loadExistingAssignments(txn: BankTxn): Promise<void> {
+    if (!txn.id) {
+      this.existingAssignments.set([]);
+      this.existingAssignmentsLoading.set(false);
+      return;
+    }
+
+    this.existingAssignmentsLoading.set(true);
+
+    try {
+      const journalRefs = await this.fetchBankTxnJournalRefs(txn.id);
+      if (!journalRefs.length) {
+        this.existingAssignments.set([]);
+        return;
+      }
+
+      const journalIds = journalRefs.map((journal) => journal.id).filter(Boolean);
+      const journals = await this.journalService.list({
+        where: { id: { inq: journalIds } },
+        includes: ['entries'],
+        limit: journalIds.length,
+      });
+
+      const journalById = new Map(
+        journals.filter((journal) => journal.id).map((journal) => [journal.id as string, journal]),
+      );
+
+      const bankLedgerId = resolveBankLedgerId(txn, this.inventoryLedgerMapStore.items());
+      const assignments = journalRefs.flatMap((ref) => {
+        const journal = journalById.get(ref.id);
+        if (!journal) return [];
+
+        return [
+          {
+            journal,
+            matchedAmount: journalBankLedgerMatchedAmount(journal, txn, bankLedgerId),
+          },
+        ];
+      });
+
+      this.existingAssignments.set(assignments);
+      void this.fetchLedgerNames(this.collectLedgerIds(journals));
+    } catch {
+      this.existingAssignments.set([]);
+    } finally {
+      this.existingAssignmentsLoading.set(false);
+    }
+  }
+
+  private async fetchBankTxnJournalRefs(bankTxnId: string): Promise<readonly BankTxnJournal[]> {
+    const items = await this.bankTxnService.list({
+      where: { id: bankTxnId },
+      limit: 1,
+    });
+    return items[0]?.journals ?? [];
   }
 
   private async loadCandidates(txn: BankTxn): Promise<void> {
@@ -528,7 +721,8 @@ export class JournalAssignDialogComponent {
     });
 
     const bankLedgerId = resolveBankLedgerId(txn, this.inventoryLedgerMapStore.items());
-    return getCompatibleJournalCandidates(journals, txn, bankLedgerId);
+    const linkedJournalIds = this.existingAssignments().map((assignment) => assignment.journal.id);
+    return getCompatibleJournalCandidates(journals, txn, bankLedgerId, linkedJournalIds);
   }
 
   private mergeCandidates(
@@ -545,6 +739,7 @@ export class JournalAssignDialogComponent {
   private toAssignJournalRows(
     candidate: JournalMatchCandidate,
     journalIndex: number,
+    displayMatchedAmount: number,
   ): readonly AssignJournalTableRow[] {
     const journal = candidate.journal;
     const entries = this.sortedEntries(journal.entries);
@@ -555,6 +750,7 @@ export class JournalAssignDialogComponent {
       description: journal.description ?? '',
       journal,
       journalGroupKey: groupKey,
+      matchedAmount: displayMatchedAmount,
       number: journal.number,
     };
 

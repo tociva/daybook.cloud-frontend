@@ -193,6 +193,22 @@ export class ListBankTxnComponent {
     this.reloadBankTxns();
   }
 
+  protected async onAssignmentsChanged(): Promise<void> {
+    const id = this.journalDialogBankTxn()?.id;
+    const filter = this.crudQuery.filter();
+    await this.bankTxnStore.loadBankTxns({
+      ...filter,
+      includes: ['inventoryledgermap'],
+    });
+
+    if (!id) return;
+
+    const updated = this.bankTxnStore.items().find((item) => item.id === id) ?? null;
+    if (updated) {
+      this.journalDialogBankTxn.set(updated);
+    }
+  }
+
   protected viewJournal(journal: BankTxnJournal): void {
     void this.router.navigate(['/app/accounting/journal', journal.id], {
       queryParams: { burl: this.router.url },

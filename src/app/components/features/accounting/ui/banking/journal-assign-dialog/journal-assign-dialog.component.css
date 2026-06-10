@@ -1,5 +1,15 @@
 :host {
+  --match-amount-cell-focus-border: var(--tng-semantic-accent-brand, var(--tng-semantic-focus-ring));
+
   display: contents;
+}
+
+.assigned-section {
+  margin-bottom: 1.25rem;
+}
+
+.assigned-section-notice {
+  margin-bottom: 1.25rem;
 }
 
 .assign-dialog-toolbar {
@@ -12,7 +22,36 @@
 }
 
 .select-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
   min-height: 12rem;
+}
+
+.assigned-section__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1rem;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.assigned-section__title,
+.candidates-section__title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.assigned-section__summary {
+  color: var(--tng-semantic-text-secondary);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.assigned-journal-table {
+  display: block;
 }
 
 .assign-journal-table {
@@ -30,19 +69,57 @@
   margin-top: 1rem;
 }
 
-.select-cell {
+.select-cell,
+.actions-cell {
   display: flex;
   justify-content: center;
 }
 
-.match-amount-cell {
-  display: flex;
+.actions-cell {
   justify-content: flex-end;
 }
 
-.match-amount-cell tng-input {
-  width: 9rem;
-  max-width: 100%;
+.match-amount-cell {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+.match-amount-cell > tng-input {
+  --tng-input-bg: var(--tng-semantic-background-canvas);
+  --tng-input-border: transparent;
+  --tng-input-focus-ring: transparent;
+  --tng-input-min-height: 100%;
+  --tng-input-number-controls-display: none;
+  --tng-input-px: 8px;
+  --tng-input-radius: 0;
+
+  display: block;
+  max-width: 9rem;
+  width: 100%;
+}
+
+:host ::ng-deep .match-amount-cell > tng-input [data-slot='input-group'] {
+  border-color: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+:host ::ng-deep .match-amount-cell > tng-input [data-slot='input-group'][data-focused] {
+  border-bottom-color: var(--match-amount-cell-focus-border);
+}
+
+:host ::ng-deep .match-amount-cell input[type='number'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+  text-align: right;
+}
+
+:host ::ng-deep .match-amount-cell input[type='number']::-webkit-inner-spin-button,
+:host ::ng-deep .match-amount-cell input[type='number']::-webkit-outer-spin-button {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .num {
