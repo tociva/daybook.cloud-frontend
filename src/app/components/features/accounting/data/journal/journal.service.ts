@@ -70,6 +70,15 @@ export class JournalService {
     return firstValueFrom(this.http.post<Journal[]>(url, { customerreceiptids }));
   }
 
+  async createFromVendorPayment(vendorPaymentId: string): Promise<Journal> {
+    const journals = await this.createFromVendorPayments([vendorPaymentId]);
+    const journal = journals[0];
+    if (!journal) {
+      throw new Error('No journal returned.');
+    }
+    return journal;
+  }
+
   async createFromVendorPayments(vendorpaymentids: readonly string[]): Promise<readonly Journal[]> {
     const url = `${await this.collectionUrl()}/vendor-payments`;
     return firstValueFrom(this.http.post<Journal[]>(url, { vendorpaymentids }));

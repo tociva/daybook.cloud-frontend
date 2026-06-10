@@ -30,6 +30,13 @@ export type VendorPaymentPayload = Readonly<{
   invoices?: readonly VendorPaymentInvoiceRequest[];
 }>;
 
+// ── Minimal journal ref (mirrors CustomerReceiptJournal) ────────────────────
+
+export type VendorPaymentJournal = Readonly<{
+  id: string;
+  number: string;
+}>;
+
 // ── Read model ────────────────────────────────────────────────────────────────
 
 export type VendorPayment = Readonly<{

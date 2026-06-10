@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   TngButtonComponent,
@@ -13,15 +13,18 @@ import {
   CrudListQueryService,
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
-import type { CrudFilterField } from '../../../../../../shared/crud';
+import type { CrudFilterField, Lb4ListQuery } from '../../../../../../shared/crud';
 import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
+import { JournalService, JournalSourceType } from '../../../../accounting/data/journal';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
+import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
+import { ToastStore } from '../../../../../../core/toast/toast.store';
 import { formatAmountWithCurrency } from '../../../../../../shared/format/currency';
 import { VendorPaymentStore } from '../../../data/vendor-payment';
-import type { VendorPayment } from '../../../data/vendor-payment';
+import type { VendorPayment, VendorPaymentJournal } from '../../../data/vendor-payment';
 
 @Component({
   selector: 'app-list-vendor-payment',
@@ -46,9 +49,15 @@ import type { VendorPayment } from '../../../data/vendor-payment';
 export class ListVendorPaymentComponent {
   private readonly router = inject(Router);
   private readonly dateManagement = inject(DateManagementService);
+  private readonly journalService = inject(JournalService);
+  private readonly toastStore = inject(ToastStore);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly vendorPaymentStore = inject(VendorPaymentStore);
   protected readonly hasError = computed(() => this.vendorPaymentStore.error() !== null);
+  protected readonly generatingJournalPaymentId = signal<string | null>(null);
+  protected readonly journalsByPaymentId = signal<Map<string, readonly VendorPaymentJournal[]>>(
+    new Map(),
+  );
 
   protected readonly columns: readonly TngTableColumn<VendorPayment>[] = [
     { id: 'date', label: 'Date', sortable: true, width: '10rem' },
@@ -63,7 +72,8 @@ export class ListVendorPaymentComponent {
     },
     { id: 'bcash', label: 'Bank/Cash', width: '12rem' },
     { id: 'description', label: 'Description', width: '16rem' },
-    { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '8rem' },
+    { id: 'journals', label: 'Journals', width: '12rem' },
+    { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '10rem' },
   ];
 
   protected readonly filterFields: readonly CrudFilterField[] = [
@@ -77,13 +87,80 @@ export class ListVendorPaymentComponent {
   protected readonly formatAmountWithCurrency = formatAmountWithCurrency;
 
   constructor() {
-    this.crudQuery.init(
-      (filter) =>
-        void this.vendorPaymentStore.loadVendorPayments({
-          ...filter,
-          includes: ['vendor', 'bcash'],
-        }),
-    );
+    this.crudQuery.init((filter) => this.loadVendorPaymentsWithJournals(filter));
+  }
+
+  private async loadVendorPaymentsWithJournals(filter: Lb4ListQuery): Promise<void> {
+    await this.vendorPaymentStore.loadVendorPayments({
+      ...filter,
+      includes: ['vendor', 'bcash'],
+    });
+    if (!this.vendorPaymentStore.error()) {
+      await this.loadLinkedJournals(this.vendorPaymentStore.items());
+    }
+  }
+
+  private async loadLinkedJournals(payments: readonly VendorPayment[]): Promise<void> {
+    const ids = payments.map((payment) => payment.id).filter((id): id is string => Boolean(id));
+    if (!ids.length) {
+      this.journalsByPaymentId.set(new Map());
+      return;
+    }
+
+    try {
+      const journals = await this.journalService.list({
+        limit: ids.length,
+        where: {
+          sourceid: { inq: ids },
+          sourcetype: JournalSourceType.PAYMENT,
+        },
+      });
+
+      const map = new Map<string, readonly VendorPaymentJournal[]>();
+      for (const journal of journals) {
+        if (!journal.sourceid) continue;
+        const ref: VendorPaymentJournal = { id: journal.id, number: journal.number };
+        const existing = map.get(journal.sourceid) ?? [];
+        map.set(journal.sourceid, [...existing, ref]);
+      }
+      this.journalsByPaymentId.set(map);
+    } catch {
+      this.journalsByPaymentId.set(new Map());
+    }
+  }
+
+  protected linkedJournals(row: VendorPayment): readonly VendorPaymentJournal[] {
+    const id = row.id;
+    if (!id) return [];
+    return this.journalsByPaymentId().get(id) ?? [];
+  }
+
+  protected hasJournals(row: VendorPayment): boolean {
+    return this.linkedJournals(row).length > 0;
+  }
+
+  protected viewJournal(journal: VendorPaymentJournal): void {
+    void this.router.navigate(['/app/accounting/journal', journal.id], {
+      queryParams: { burl: this.router.url },
+    });
+  }
+
+  protected async generateJournal(row: VendorPayment): Promise<void> {
+    if (!row.id || this.generatingJournalPaymentId() === row.id) return;
+
+    this.generatingJournalPaymentId.set(row.id);
+    try {
+      const journal = await this.journalService.createFromVendorPayment(row.id);
+      this.toastStore.success('Journal generated.');
+      const ref: VendorPaymentJournal = { id: journal.id, number: journal.number };
+      const map = new Map(this.journalsByPaymentId());
+      map.set(row.id, [ref]);
+      this.journalsByPaymentId.set(map);
+    } catch (error) {
+      this.toastStore.danger(getApiErrorMessage(error, 'Failed to generate journal.'));
+    } finally {
+      this.generatingJournalPaymentId.set(null);
+    }
   }
 
   protected createPayment(): void {
@@ -93,10 +170,7 @@ export class ListVendorPaymentComponent {
   }
 
   protected reloadVendorPayments(): void {
-    void this.vendorPaymentStore.loadVendorPayments({
-      ...this.crudQuery.filter(),
-      includes: ['vendor', 'bcash'],
-    });
+    void this.loadVendorPaymentsWithJournals(this.crudQuery.filter());
   }
 
   protected editPayment(item: VendorPayment): void {
