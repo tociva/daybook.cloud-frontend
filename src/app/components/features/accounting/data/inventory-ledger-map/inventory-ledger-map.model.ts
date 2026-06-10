@@ -33,7 +33,7 @@ export type InventoryLedgerMapProps = Readonly<Record<string, unknown>>;
 export type InventoryLedgerMapPayload = Readonly<{
   fiscalyearid?: string;
   entitytype: InventoryLedgerEntityType;
-  entityid: string | null;
+  entityid?: string | null;
   ledgertype?: InventoryLedgerType | null;
   ledgerid: string;
   props?: InventoryLedgerMapProps;

@@ -13,15 +13,17 @@ import {
   CrudListQueryService,
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
-import type { CrudFilterField } from '../../../../../../shared/crud';
+import type { CrudFilterField, Lb4ListQuery } from '../../../../../../shared/crud';
+import type { SaleInvoiceListQuery } from '../../../data/sale-invoice/sale-invoice.model';
 import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import { CustomerStore } from '../../../data/customer';
 import type { Customer } from '../../../data/customer';
+import { JournalService, JournalSourceType } from '../../../../accounting/data/journal';
 import { SaleInvoicePrintService, SaleInvoiceStore } from '../../../data/sale-invoice';
-import type { SaleInvoice } from '../../../data/sale-invoice';
+import type { SaleInvoice, SaleInvoiceJournal } from '../../../data/sale-invoice';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
@@ -50,6 +52,7 @@ import { formatAmountWithCurrency } from '../../../../../../shared/format/curren
 export class ListSaleInvoiceComponent {
   private readonly router = inject(Router);
   private readonly dateManagement = inject(DateManagementService);
+  private readonly journalService = inject(JournalService);
   private readonly printService = inject(SaleInvoicePrintService);
   private readonly toastStore = inject(ToastStore);
   protected readonly crudQuery = inject(CrudListQueryService);
@@ -57,6 +60,10 @@ export class ListSaleInvoiceComponent {
   protected readonly saleInvoiceStore = inject(SaleInvoiceStore);
   protected readonly hasError = computed(() => this.saleInvoiceStore.error() !== null);
   protected readonly previewingInvoiceId = signal<string | null>(null);
+  protected readonly generatingJournalInvoiceId = signal<string | null>(null);
+  protected readonly journalsByInvoiceId = signal<Map<string, readonly SaleInvoiceJournal[]>>(
+    new Map(),
+  );
   protected readonly customerOptionValue = (option: unknown): string =>
     (option as Customer).id ?? '';
   protected readonly customerOptionLabel = (option: unknown): string =>
@@ -83,6 +90,7 @@ export class ListSaleInvoiceComponent {
       width: '10rem',
     },
     { id: 'received', label: 'Received', align: 'end', headerAlign: 'end', width: '10rem' },
+    { id: 'journals', label: 'Journals', width: '12rem' },
     { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '10rem' },
   ];
 
@@ -161,13 +169,81 @@ export class ListSaleInvoiceComponent {
 
   constructor() {
     void this.customerStore.loadCustomers({});
-    this.crudQuery.init(
-      (filter) =>
-        void this.saleInvoiceStore.loadSaleInvoices({
-          ...filter,
-          includes: ['customer', 'receipts'],
-        }),
-    );
+    this.crudQuery.init((filter) => this.loadSaleInvoicesWithJournals(filter));
+  }
+
+  private async loadSaleInvoicesWithJournals(filter: Lb4ListQuery): Promise<void> {
+    const query: SaleInvoiceListQuery = {
+      ...filter,
+      includes: ['customer', 'receipts'],
+    };
+    await this.saleInvoiceStore.loadSaleInvoices(query);
+    if (!this.saleInvoiceStore.error()) {
+      await this.loadLinkedJournals(this.saleInvoiceStore.items());
+    }
+  }
+
+  private async loadLinkedJournals(invoices: readonly SaleInvoice[]): Promise<void> {
+    const ids = invoices.map((invoice) => invoice.id).filter((id): id is string => Boolean(id));
+    if (!ids.length) {
+      this.journalsByInvoiceId.set(new Map());
+      return;
+    }
+
+    try {
+      const journals = await this.journalService.list({
+        limit: ids.length,
+        where: {
+          sourceid: { inq: ids },
+          sourcetype: JournalSourceType.SALE_INVOICE,
+        },
+      });
+
+      const map = new Map<string, readonly SaleInvoiceJournal[]>();
+      for (const journal of journals) {
+        if (!journal.sourceid) continue;
+        const ref: SaleInvoiceJournal = { id: journal.id, number: journal.number };
+        const existing = map.get(journal.sourceid) ?? [];
+        map.set(journal.sourceid, [...existing, ref]);
+      }
+      this.journalsByInvoiceId.set(map);
+    } catch {
+      this.journalsByInvoiceId.set(new Map());
+    }
+  }
+
+  protected linkedJournals(row: SaleInvoice): readonly SaleInvoiceJournal[] {
+    const id = row.id;
+    if (!id) return [];
+    return this.journalsByInvoiceId().get(id) ?? [];
+  }
+
+  protected hasJournals(row: SaleInvoice): boolean {
+    return this.linkedJournals(row).length > 0;
+  }
+
+  protected viewJournal(journal: SaleInvoiceJournal): void {
+    void this.router.navigate(['/app/accounting/journal', journal.id], {
+      queryParams: { burl: this.router.url },
+    });
+  }
+
+  protected async generateJournal(row: SaleInvoice): Promise<void> {
+    if (!row.id || this.generatingJournalInvoiceId() === row.id) return;
+
+    this.generatingJournalInvoiceId.set(row.id);
+    try {
+      const journal = await this.journalService.createFromSaleInvoice(row.id);
+      this.toastStore.success('Journal generated.');
+      const ref: SaleInvoiceJournal = { id: journal.id, number: journal.number };
+      const map = new Map(this.journalsByInvoiceId());
+      map.set(row.id, [ref]);
+      this.journalsByInvoiceId.set(map);
+    } catch (error) {
+      this.toastStore.danger(getApiErrorMessage(error, 'Failed to generate journal.'));
+    } finally {
+      this.generatingJournalInvoiceId.set(null);
+    }
   }
 
   private searchCustomers(query: string): void {
@@ -201,10 +277,7 @@ export class ListSaleInvoiceComponent {
   }
 
   protected reloadSaleInvoices(): void {
-    void this.saleInvoiceStore.loadSaleInvoices({
-      ...this.crudQuery.filter(),
-      includes: ['customer', 'receipts'],
-    });
+    void this.loadSaleInvoicesWithJournals(this.crudQuery.filter());
   }
 
   protected viewSaleInvoice(item: SaleInvoice): void {

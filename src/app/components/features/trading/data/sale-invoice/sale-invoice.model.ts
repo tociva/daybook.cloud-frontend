@@ -124,6 +124,13 @@ export type SaleInvoicePayload = Readonly<{
   items: readonly SaleInvoiceItemRequest[];
 }>;
 
+// ── Minimal journal ref (mirrors BankTxnJournal) ────────────────────────────
+
+export type SaleInvoiceJournal = Readonly<{
+  id: string;
+  number: string;
+}>;
+
 // ── Minimal receipt-link shape (avoids circular import with customer-receipt) ─
 
 export type SaleInvoiceReceiptLink = Readonly<{
@@ -164,6 +171,7 @@ export type SaleInvoice = Readonly<{
   customer?: Customer;
   items?: readonly SaleItem[];
   receipts?: readonly SaleInvoiceReceiptLink[];
+  journals?: readonly SaleInvoiceJournal[];
   documentids?: readonly string[];
   documents?: readonly StoredDocument[];
   branchid?: string;

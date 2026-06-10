@@ -28,6 +28,11 @@ export class JournalService {
     return firstValueFrom(this.http.post<Journal[]>(url, payloads));
   }
 
+  async createFromSaleInvoice(saleInvoiceId: string): Promise<Journal> {
+    const url = `${await this.collectionUrl()}/sale-invoices/${saleInvoiceId}`;
+    return firstValueFrom(this.http.post<Journal>(url, null));
+  }
+
   async createFromSaleInvoices(saleinvoiceids: readonly string[]): Promise<readonly Journal[]> {
     const url = `${await this.collectionUrl()}/sale-invoices`;
     return firstValueFrom(this.http.post<Journal[]>(url, { saleinvoiceids }));

@@ -131,6 +131,29 @@
             }
           </ng-template>
 
+          <ng-template tngTableCellTemplate="journals" let-row="row">
+            @if (hasJournals(row)) {
+              <span class="journal-links">
+                @for (journal of linkedJournals(row); track journal.id; let last = $last) {
+                  <button type="button" class="link-button" (click)="viewJournal(journal)">
+                    {{ journal.number }}
+                  </button>@if (!last) {<span>, </span>}
+                }
+              </span>
+            } @else {
+              <tng-button
+                type="button"
+                appearance="outline"
+                tone="primary"
+                size="sm"
+                [disabled]="generatingJournalInvoiceId() === row.id"
+                (click)="generateJournal(row)"
+              >
+                Generate
+              </tng-button>
+            }
+          </ng-template>
+
           <ng-template tngTableCellTemplate="actions" let-row="row">
             <div class="row-actions">
               <app-table-row-icon-button

@@ -146,7 +146,7 @@ export class InventoryLedgerMapDraftStore {
   buildPayload(): InventoryLedgerMapPayload {
     return {
       entitytype: this.entitytype(),
-      entityid: this.entitytype() === 'system' ? null : this.entityid(),
+      ...(this.entitytype() !== 'system' ? { entityid: this.entityid() } : {}),
       ledgerid: this.ledgerid(),
       ...(this.showLedgerType() && this.ledgertype() ? { ledgertype: this.ledgertype()! } : {}),
     };
