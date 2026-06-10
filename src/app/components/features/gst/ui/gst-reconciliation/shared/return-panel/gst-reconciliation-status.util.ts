@@ -1,5 +1,5 @@
-import type { GstReconciliationStatus } from '../../../data/gst-reconciliation/gst-reconciliation.store';
-import type { GstReconciliationMonthCell } from '../gst-reconciliation.types';
+import type { GstReconciliationStatus } from '../../../../data/gst-reconciliation/gst-reconciliation.store';
+import type { GstReconciliationMonthCell } from '../../gst-reconciliation.types';
 
 export type GstReconciliationStatusMeta = Readonly<{
   icon: string;

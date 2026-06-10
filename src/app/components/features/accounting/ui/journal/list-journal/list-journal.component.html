@@ -119,6 +119,12 @@
             </span>
           </ng-template>
 
+          <ng-template tngTableCellTemplate="sourcetype" let-row="row">
+            <span class="journal-cell">
+              {{ getSourceTypeLabel(row.sourcetype) }}
+            </span>
+          </ng-template>
+
           <ng-template tngTableCellTemplate="ledgerid" let-row="row">
             <span class="journal-cell">
               @if (row.ledgerid) {

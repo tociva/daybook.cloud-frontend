@@ -93,7 +93,17 @@
                 </span>
               } @else {
                 <span class="invoice-cell">
-                  <strong>{{ invoiceNumber(row.booksInvoice) }}</strong>
+                  @if (canViewBookInvoice(row.booksInvoice)) {
+                    <button
+                      type="button"
+                      class="invoice-link"
+                      (click)="viewBookInvoice(row.booksInvoice!)"
+                    >
+                      {{ invoiceNumber(row.booksInvoice) }}
+                    </button>
+                  } @else {
+                    <strong>{{ invoiceNumber(row.booksInvoice) }}</strong>
+                  }
                   <small>{{ formatDate(row.booksInvoice?.invoiceDate) }}</small>
                   <small>Taxable {{ invoiceTaxable(row.booksInvoice) }}</small>
                   <small>Tax {{ invoiceTax(row.booksInvoice) }}</small>

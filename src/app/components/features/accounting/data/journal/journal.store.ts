@@ -8,6 +8,7 @@ import type {
   JournalListQuery,
   JournalUpdatePayload,
 } from './journal.model';
+import { journalDeleteErrorMessage } from './journal-delete-error.util';
 import { JournalService } from './journal.service';
 import { initialJournalState } from './journal.state';
 
@@ -88,7 +89,7 @@ export const JournalStore = signalStore(
           }));
           return true;
         } catch (error) {
-          setError(getApiErrorMessage(error, 'Failed to delete journal.'));
+          setError(journalDeleteErrorMessage(error));
           return false;
         }
       },

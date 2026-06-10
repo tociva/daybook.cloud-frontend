@@ -126,6 +126,21 @@
   text-decoration: underline;
 }
 
+.invoice-link {
+  background: transparent;
+  border: 0;
+  color: var(--tng-semantic-accent-brand, #0284c7);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  padding: 0;
+  text-align: left;
+}
+
+.invoice-link:hover {
+  text-decoration: underline;
+}
+
 .recon-table {
   display: block;
 }

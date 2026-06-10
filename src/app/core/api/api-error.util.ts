@@ -108,16 +108,34 @@ export function interpolateApiErrorMessage(template: string, params?: ApiErrorPa
   );
 }
 
+function parseHttpErrorBody(error: unknown): unknown {
+  if (typeof error !== 'string') {
+    return error;
+  }
+
+  const trimmed = error.trim();
+  if (!trimmed.startsWith('{') && !trimmed.startsWith('[')) {
+    return error;
+  }
+
+  try {
+    return JSON.parse(trimmed) as unknown;
+  } catch {
+    return error;
+  }
+}
+
 function normalizeHttpErrorResponse(
   response: HttpErrorResponse,
   options: ApiErrorNormalizationOptions,
 ): ApiError {
   const requestId = normalizeOptionalString(response.headers.get('x-request-id'));
   const contentLanguage = normalizeOptionalString(response.headers.get('content-language'));
+  const errorBody = parseHttpErrorBody(response.error);
 
-  if (isApiErrorResponse(response.error)) {
+  if (isApiErrorResponse(errorBody)) {
     return normalizeApiErrorEnvelope(
-      response.error,
+      errorBody,
       {
         contentLanguage,
         requestId,

@@ -172,6 +172,28 @@ describe('normalizeApiError', () => {
     expect(normalized.requestId).toBe('req-header-500');
   });
 
+  it('normalizes stringified JSON error envelopes from text responseType requests', () => {
+    const normalized = normalizeApiError(
+      createHttpError(
+        422,
+        JSON.stringify(
+          createEnvelope(422, {
+            code: 'UNPROCESSABLE_ENTITY',
+            message:
+              'error: update or delete on table "journal" violates foreign key constraint "fk_reconciliationmatch_journalid" on table "reconciliationmatch"',
+            path: '/accounting/journal/e08c927f-a782-4bf8-be7e-0b0eb1c40398',
+            method: 'DELETE',
+          }),
+        ),
+      ),
+    );
+
+    expect(normalized.statusCode).toBe(422);
+    expect(normalized.code).toBe('UNPROCESSABLE_ENTITY');
+    expect(normalized.message).toContain('fk_reconciliationmatch_journalid');
+    expect(normalized.message).not.toBe('Please review the highlighted fields and try again.');
+  });
+
   it('falls back by HTTP status for malformed non-standard error responses', () => {
     const normalized = normalizeApiError(
       createHttpError(

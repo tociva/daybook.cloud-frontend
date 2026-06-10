@@ -23,8 +23,8 @@ import {
   type ParsedFilePreview,
   type ParsedInvoice,
 } from './gst-reconciliation.types';
-import { GST_RECONCILIATION_MONTH_OPTIONS } from './shared/gst-reconciliation-months.util';
-import { GST_RECONCILIATION_STATUS_LEGEND } from './shared/gst-reconciliation-status.util';
+import { GST_RECONCILIATION_MONTH_OPTIONS } from './shared/return-base/gst-reconciliation-months.util';
+import { GST_RECONCILIATION_STATUS_LEGEND } from './shared/return-panel/gst-reconciliation-status.util';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 

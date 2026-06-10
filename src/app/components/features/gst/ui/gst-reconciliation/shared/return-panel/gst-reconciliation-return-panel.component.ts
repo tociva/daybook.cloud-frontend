@@ -13,14 +13,14 @@ import type {
 } from '../../gst-reconciliation.types';
 import {
   gstReconciliationMonthDifferenceKey,
-} from '../gst-reconciliation-months.util';
+} from '../return-base/gst-reconciliation-months.util';
 import {
   GST_RECONCILIATION_STATUS_LEGEND,
   gstReconciliationStatusIcon,
   gstReconciliationStatusLabel,
   gstReconciliationStatusTone,
   totalGstReconciliationMonthsByStatus,
-} from '../gst-reconciliation-status.util';
+} from './gst-reconciliation-status.util';
 
 @Component({
   selector: 'app-gst-reconciliation-return-panel',

@@ -2,8 +2,8 @@ import type {
   GstReconciliationMonthSummary,
   GstReconciliationReturnType,
   GstReconciliationStatus,
-} from '../../../data/gst-reconciliation/gst-reconciliation.store';
-import type { GstReconciliationMonthCell } from '../gst-reconciliation.types';
+} from '../../../../data/gst-reconciliation/gst-reconciliation.store';
+import type { GstReconciliationMonthCell } from '../../gst-reconciliation.types';
 
 export const GST_RECONCILIATION_MONTH_OPTIONS: readonly { label: string; value: number }[] = [
   { label: 'April', value: 4 },    { label: 'May', value: 5 },

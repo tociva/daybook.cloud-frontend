@@ -1,29 +1,21 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import {
-  TngButtonComponent,
-  TngCardComponent,
-  TngTable,
-  TngTableCellTpl,
-} from '@tailng-ui/components';
 import type { TngTableColumn } from '@tailng-ui/components';
-import { TngIcon } from '@tailng-ui/icons';
-import { DateManagementService } from '../../../../../../core/date/date-management.service';
-import { formatAmountWithCurrency } from '../../../../../../shared/format/currency';
-import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
-import { UserSessionStore } from '../../../../management/data/user-session/user-session.store';
-import { CustomerStore } from '../../../../trading/data/customer';
-import { VendorStore } from '../../../../trading/data/vendor';
-import type { GstReconciliationDetailResponse } from '../../../data/gst-reconciliation/gst-reconciliation.model';
+import { DateManagementService } from '../../../../../../../core/date/date-management.service';
+import { formatAmountWithCurrency } from '../../../../../../../shared/format/currency';
+import { UserSessionStore } from '../../../../../management/data/user-session/user-session.store';
+import { CustomerStore } from '../../../../../trading/data/customer';
+import { VendorStore } from '../../../../../trading/data/vendor';
+import type { GstReconciliationDetailResponse } from '../../../../data/gst-reconciliation/gst-reconciliation.model';
 import {
   GstReconciliationStore,
   type GstComputedStatus,
   type GstReconciliationDetailRow,
   type GstReconciliationInvoice,
   type GstReconciliationPartyGroup,
-  type GstReconciliationReturnType,
   type GstReconciliationStatus,
-} from '../../../data/gst-reconciliation/gst-reconciliation.store';
+} from '../../../../data/gst-reconciliation/gst-reconciliation.store';
+import type { GstReconciliationMonthlyDetailConfig } from './gst-reconciliation-monthly-detail.config';
 
 type DisplayStatus = GstReconciliationStatus | GstComputedStatus;
 
@@ -50,30 +42,16 @@ const MONTH_NAMES: Readonly<Record<number, string>> = {
 
 const GST_AMOUNT_TOLERANCE = 0;
 
-@Component({
-  selector: 'app-gst-reconciliation-monthly-detail',
-  standalone: true,
-  imports: [
-    PageHeadingComponent,
-    TngButtonComponent,
-    TngCardComponent,
-    TngIcon,
-    TngTable,
-    TngTableCellTpl,
-  ],
-  templateUrl: './gst-reconciliation-monthly-detail.component.html',
-  styleUrl: './gst-reconciliation-monthly-detail.component.css',
-})
-export class GstReconciliationMonthlyDetailComponent {
-  private readonly dateManagement = inject(DateManagementService);
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
-  private readonly sessionStore = inject(UserSessionStore);
-  private readonly customerStore = inject(CustomerStore);
-  private readonly vendorStore = inject(VendorStore);
+export abstract class GstReconciliationMonthlyDetailBase {
+  protected readonly dateManagement = inject(DateManagementService);
+  protected readonly route = inject(ActivatedRoute);
+  protected readonly router = inject(Router);
+  protected readonly sessionStore = inject(UserSessionStore);
+  protected readonly customerStore = inject(CustomerStore);
+  protected readonly vendorStore = inject(VendorStore);
   protected readonly store = inject(GstReconciliationStore);
-  private readonly customersLoaded = signal(false);
-  private readonly vendorsLoaded = signal(false);
+
+  private readonly partiesLoaded = signal(false);
 
   protected readonly statusLegend: readonly StatusMeta[] = [
     { status: 'matched', label: 'Matched', icon: 'circleCheck' },
@@ -94,15 +72,10 @@ export class GstReconciliationMonthlyDetailComponent {
     { id: 'reason', label: 'Reason', width: '16rem' },
   ];
 
-  protected readonly returnType = computed<GstReconciliationReturnType>(() => {
-    const value = this.route.snapshot.paramMap.get('returnType');
-    return value === 'gstr2b' ? 'gstr2b' : 'gstr1';
-  });
-
   protected readonly month = computed(() => Number(this.route.snapshot.paramMap.get('month') ?? 4));
 
   protected readonly title = computed(
-    () => `${this.returnTypeLabel(this.returnType())} · ${MONTH_NAMES[this.month()] ?? 'Month'}`,
+    () => `${this.config.returnTypeLabel} · ${MONTH_NAMES[this.month()] ?? 'Month'}`,
   );
 
   protected readonly contextMessage = computed(() => {
@@ -117,7 +90,7 @@ export class GstReconciliationMonthlyDetailComponent {
     return this.contextMessage() || 'Monthly reconciliation grouped by party.';
   });
 
-  constructor() {
+  protected constructor(protected readonly config: GstReconciliationMonthlyDetailConfig) {
     effect(() => {
       const session = this.sessionStore.session();
       if (!session?.branch?.id) return;
@@ -282,34 +255,25 @@ export class GstReconciliationMonthlyDetailComponent {
       return false;
     }
 
-    return this.returnType() === 'gstr2b'
-      ? this.vendorsLoaded() && !this.hasLocalVendor(group)
-      : this.customersLoaded() && !this.hasLocalCustomer(group);
+    return this.partiesLoaded() && !this.hasLocalParty(group);
   }
 
   protected createPartyLabel(): string {
-    return this.returnType() === 'gstr2b' ? 'Create new vendor' : 'Create new customer';
+    return this.config.createPartyLabel;
   }
 
   protected missingPartyMessage(): string {
-    return this.returnType() === 'gstr2b'
-      ? 'Vendor not exists in our record,'
-      : 'Customer not exists in our record,';
+    return this.config.missingPartyMessage;
   }
 
   protected async createParty(group: GstReconciliationPartyGroup): Promise<void> {
-    const route =
-      this.returnType() === 'gstr2b'
-        ? '/app/trading/vendor/create'
-        : '/app/trading/customer/create';
-
-    if (this.returnType() === 'gstr2b') {
+    if (this.config.partyType === 'vendor') {
       this.vendorStore.clearSelectedItem();
     } else {
       this.customerStore.clearSelectedItem();
     }
 
-    await this.router.navigate([route], {
+    await this.router.navigate([this.config.createPartyRoute], {
       queryParams: {
         burl: this.router.url,
         ...(group.partyName ? { name: group.partyName } : {}),
@@ -319,7 +283,20 @@ export class GstReconciliationMonthlyDetailComponent {
   }
 
   protected createBookInvoiceLabel(): string {
-    return this.returnType() === 'gstr2b' ? 'Create purchase invoice' : 'Create sale invoice';
+    return this.config.createBookInvoiceLabel;
+  }
+
+  protected canViewBookInvoice(invoice: GstReconciliationInvoice | null | undefined): boolean {
+    return !!invoice?.id?.trim();
+  }
+
+  protected async viewBookInvoice(invoice: GstReconciliationInvoice): Promise<void> {
+    const id = invoice.id?.trim();
+    if (!id) return;
+
+    await this.router.navigate([this.config.bookInvoiceViewRoutePrefix, id], {
+      queryParams: { burl: this.router.url },
+    });
   }
 
   protected async createBookInvoice(
@@ -329,12 +306,8 @@ export class GstReconciliationMonthlyDetailComponent {
     const sourceInvoice = row.gstInvoice;
     const partyName = row.partyName || this.localPartyName(row.partyGstin || group.partyGstin) || group.partyName;
     const partyGstin = row.partyGstin || group.partyGstin;
-    const route =
-      this.returnType() === 'gstr2b'
-        ? '/app/trading/purchase-invoice/create'
-        : '/app/trading/sale-invoice/create';
 
-    await this.router.navigate([route], {
+    await this.router.navigate([this.config.createBookInvoiceRoute], {
       queryParams: {
         burl: this.router.url,
         ...(partyName ? { partyName } : {}),
@@ -360,15 +333,14 @@ export class GstReconciliationMonthlyDetailComponent {
   private async loadDetail(): Promise<void> {
     const session = this.sessionStore.session();
     if (!session?.branch?.id) return;
-    await this.store.loadDetail(this.returnType(), this.month());
+    await this.store.loadDetail(this.config.returnType, this.month());
   }
 
   private async loadLocalParties(): Promise<void> {
     const gstins = this.detailPartyGstins();
 
     if (gstins.length === 0) {
-      this.vendorsLoaded.set(this.returnType() === 'gstr2b');
-      this.customersLoaded.set(this.returnType() === 'gstr1');
+      this.partiesLoaded.set(true);
       return;
     }
 
@@ -381,37 +353,30 @@ export class GstReconciliationMonthlyDetailComponent {
           : { or: gstins.map((gstin) => ({ gstin: { ilike: gstin } })) },
     };
 
-    if (this.returnType() === 'gstr2b') {
+    if (this.config.partyType === 'vendor') {
       this.vendorStore.clearError();
       await this.vendorStore.loadVendors(query);
-      this.vendorsLoaded.set(this.vendorStore.error() === null);
+      this.partiesLoaded.set(this.vendorStore.error() === null);
       return;
     }
 
     this.customerStore.clearError();
     await this.customerStore.loadCustomers(query);
-    this.customersLoaded.set(this.customerStore.error() === null);
+    this.partiesLoaded.set(this.customerStore.error() === null);
   }
 
-  private hasLocalVendor(group: GstReconciliationPartyGroup): boolean {
+  private hasLocalParty(group: GstReconciliationPartyGroup): boolean {
     const partyGstin = this.normalizeComparable(group.partyGstin);
     if (!partyGstin) return false;
 
-    return this.vendorStore.items().some((vendor) => {
-      const vendorGstin = this.normalizeComparable(vendor.gstin);
-
-      return vendorGstin === partyGstin;
-    });
-  }
-
-  private hasLocalCustomer(group: GstReconciliationPartyGroup): boolean {
-    const partyGstin = this.normalizeComparable(group.partyGstin);
-    if (!partyGstin) return false;
+    if (this.config.partyType === 'vendor') {
+      return this.vendorStore.items().some((vendor) => {
+        return this.normalizeComparable(vendor.gstin) === partyGstin;
+      });
+    }
 
     return this.customerStore.items().some((customer) => {
-      const customerGstin = this.normalizeComparable(customer.gstin);
-
-      return customerGstin === partyGstin;
+      return this.normalizeComparable(customer.gstin) === partyGstin;
     });
   }
 
@@ -420,7 +385,7 @@ export class GstReconciliationMonthlyDetailComponent {
     if (!partyGstin) return '';
 
     const localParty =
-      this.returnType() === 'gstr2b'
+      this.config.partyType === 'vendor'
         ? this.vendorStore
             .items()
             .find((vendor) => this.normalizeComparable(vendor.gstin) === partyGstin)
@@ -461,15 +426,11 @@ export class GstReconciliationMonthlyDetailComponent {
     return `unknown:${index}`;
   }
 
-  private returnTypeLabel(returnType: GstReconciliationReturnType): string {
-    return returnType === 'gstr1' ? 'GSTR-1' : 'GSTR-2B';
-  }
-
   private isExportInvoice(
     row: GstReconciliationDetailRow,
     group: GstReconciliationPartyGroup,
   ): boolean {
-    if (this.returnType() !== 'gstr1') return false;
+    if (!this.config.supportsExportInvoice) return false;
 
     const invoice = row.gstInvoice;
     const invoiceType = this.normalizeComparable(

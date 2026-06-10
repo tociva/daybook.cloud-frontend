@@ -1,7 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import type { GstReconciliationReturnType } from '../../../data/gst-reconciliation/gst-reconciliation.store';
 import { GSTR2B_RETURN_TYPE_META } from '../gst-reconciliation.types';
-import { GstReconciliationReturnBase } from '../shared/gst-reconciliation-return-base';
+import { GstReconciliationReturnBase } from '../shared/return-base/gst-reconciliation-return-base';
 import { GstReconciliationReturnPanelComponent } from '../shared/return-panel/gst-reconciliation-return-panel.component';
 
 @Component({

@@ -33,7 +33,7 @@ import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-
 import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
 import { formatAmountWithCurrency } from '../../../../../../shared/format/currency';
-import { JournalService, JournalStore } from '../../../data/journal';
+import { JournalService, JournalSourceType, JournalStore, journalSourceTypeLabel } from '../../../data/journal';
 import type { Journal, JournalEntry } from '../../../data/journal';
 import { LedgerStore } from '../../../data/ledger';
 import type { Ledger } from '../../../data/ledger';
@@ -58,6 +58,7 @@ type JournalTableRow = Readonly<{
   ledgerid: string;
   number: string;
   rowKey: string;
+  sourcetype: JournalSourceType | string | undefined;
 }>;
 
 type JournalImportSource =
@@ -82,7 +83,7 @@ type JournalImportConfig = Readonly<{
   emptyDescription: string;
   emptyTitle: string;
   itemLabel: string;
-  sourceType: string;
+  sourceType: JournalSourceType;
 }>;
 
 const JOURNAL_IMPORT_CONFIG: Record<JournalImportSource, JournalImportConfig> = {
@@ -93,7 +94,7 @@ const JOURNAL_IMPORT_CONFIG: Record<JournalImportSource, JournalImportConfig> = 
     emptyDescription: 'All sale invoices already have journals generated.',
     emptyTitle: 'No sale invoices to import',
     itemLabel: 'sale invoice',
-    sourceType: 'sale_invoice',
+    sourceType: JournalSourceType.SALE_INVOICE,
   },
   purchaseInvoice: {
     actionLabel: 'Create Journals',
@@ -102,7 +103,7 @@ const JOURNAL_IMPORT_CONFIG: Record<JournalImportSource, JournalImportConfig> = 
     emptyDescription: 'All purchase invoices already have journals generated.',
     emptyTitle: 'No purchase invoices to import',
     itemLabel: 'purchase invoice',
-    sourceType: 'purchase_invoice',
+    sourceType: JournalSourceType.PURCHASE_INVOICE,
   },
   customerReceipt: {
     actionLabel: 'Create Journals',
@@ -111,7 +112,7 @@ const JOURNAL_IMPORT_CONFIG: Record<JournalImportSource, JournalImportConfig> = 
     emptyDescription: 'All customer receipts already have journals generated.',
     emptyTitle: 'No customer receipts to import',
     itemLabel: 'customer receipt',
-    sourceType: 'receipt',
+    sourceType: JournalSourceType.RECEIPT,
   },
   vendorPayment: {
     actionLabel: 'Create Journals',
@@ -120,7 +121,7 @@ const JOURNAL_IMPORT_CONFIG: Record<JournalImportSource, JournalImportConfig> = 
     emptyDescription: 'All vendor payments already have journals generated.',
     emptyTitle: 'No vendor payments to import',
     itemLabel: 'vendor payment',
-    sourceType: 'payment',
+    sourceType: JournalSourceType.PAYMENT,
   },
 };
 
@@ -194,6 +195,14 @@ export class ListJournalComponent {
       groupBy: true,
       groupByAlign: 'top',
       width: '9rem',
+    },
+    {
+      id: 'sourcetype',
+      label: 'Type',
+      accessor: 'journalGroupKey',
+      groupBy: true,
+      groupByAlign: 'top',
+      width: '11rem',
     },
     { id: 'ledgerid', label: 'Ledger', width: '15rem' },
     { id: 'debit', label: 'Debit', align: 'end', headerAlign: 'end', width: '9rem' },
@@ -398,6 +407,7 @@ export class ListJournalComponent {
       journal,
       journalGroupKey: groupKey,
       number: journal.number,
+      sourcetype: journal.sourcetype,
     };
 
     if (entries.length === 0) {
@@ -429,6 +439,10 @@ export class ListJournalComponent {
 
   protected getLedgerName(ledgerid: string): string {
     return this.ledgerNames().get(ledgerid) ?? ledgerid;
+  }
+
+  protected getSourceTypeLabel(sourcetype: JournalSourceType | string | undefined): string {
+    return journalSourceTypeLabel(sourcetype);
   }
 
   protected sortedEntries(entries: readonly JournalEntry[] | undefined): readonly JournalEntry[] {

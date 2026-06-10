@@ -1,6 +1,13 @@
 import type { Lb4ListQuery } from '../../../../../shared/crud';
 import type { StoredDocument } from '../../../trading/data/invoice-document';
 
+export enum JournalSourceType {
+  SALE_INVOICE = 'sale_invoice',
+  PURCHASE_INVOICE = 'purchase_invoice',
+  RECEIPT = 'receipt',
+  PAYMENT = 'payment',
+}
+
 /** Full journal as returned by GET / list when included. */
 export type JournalEntry = Readonly<{
   id?: string;
@@ -16,7 +23,7 @@ export type Journal = Readonly<{
   number: string;
   date: string;
   description?: string;
-  sourcetype?: string;
+  sourcetype?: JournalSourceType | string;
   sourceid?: string;
   props?: Record<string, unknown>;
   fiscalyearid: string;
