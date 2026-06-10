@@ -24,7 +24,7 @@ import type { BankTxn, BankTxnJournal } from '../../../data/bank-txn';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { BankStatementUploadComponent } from '../bank-statement-upload/bank-statement-upload.component';
 import { JournalCreateDraftStagingService } from '../../journal/create-journal/journal-create-draft-staging.service';
-import { JournalAssignDialogComponent } from '../journal-assign-dialog/journal-assign-dialog.component';
+import { JournalAssignDialogComponent } from '../journal-assign-dialog/journal-assign-dialog/journal-assign-dialog.component';
 
 @Component({
   selector: 'app-list-bank-txn',

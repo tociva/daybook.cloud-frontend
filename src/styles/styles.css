@@ -76,8 +76,8 @@ app-bank-statement-preview-dialog [data-slot='dialog-content'] {
 app-journal-assign-dialog.journal-assign-dialog--create .tng-dialog-panel {
   display: flex;
   flex-direction: column;
-  width: var(--tng-dialog-width, 50%);
-  max-width: var(--tng-dialog-width, 50%);
+  width: var(--tng-dialog-width, 60%);
+  max-width: var(--tng-dialog-width, 60%);
   height: calc(100vh - 2rem);
   max-height: calc(100vh - 2rem);
   overflow: hidden;

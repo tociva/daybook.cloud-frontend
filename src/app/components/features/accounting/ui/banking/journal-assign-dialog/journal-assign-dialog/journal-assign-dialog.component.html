@@ -1,0 +1,147 @@
+<tng-dialog
+  title="Assign journal"
+  [description]="dialogDescription()"
+  [style.--tng-dialog-width]="dialogWidth"
+  [style.--tng-dialog-height]="isCreateMode() ? createDialogHeight : undefined"
+  [open]="open()"
+  [closeOnBackdrop]="false"
+  [closeOnEscape]="!isSaving()"
+  (closed)="onDialogClosed()"
+>
+  @if (open()) {
+    <app-journal-assign-assigned-section
+      [loading]="existingAssignmentsLoading()"
+      [assignments]="existingAssignments()"
+      [bankTxn]="bankTxn()"
+      [disabled]="isSaving()"
+      (unassign)="onUnassign($event)"
+    />
+
+    <tng-tabs
+      class="assign-dialog-tabs"
+      ariaLabel="Assign journal mode"
+      [value]="mode()"
+      [keepAlive]="true"
+      (valueChange)="onModeChange($event)"
+    >
+      <div tngTabList class="assign-dialog-tab-list">
+        <button type="button" tngTab value="create">Create journal</button>
+        <button type="button" tngTab value="select">Select existing</button>
+      </div>
+
+      <div tngTabPanel value="create">
+        <app-journal-assign-create
+          [dialogOpen]="open()"
+          [bankTxn]="bankTxn()"
+          [remainingMatchAmount]="remainingMatchAmount()"
+          [active]="mode() === 'create'"
+          (assigned)="assigned.emit()"
+        />
+      </div>
+
+      <div tngTabPanel value="select">
+        <app-journal-assign-select
+          [dialogOpen]="open()"
+          [bankTxn]="bankTxn()"
+          [existingAssignments]="existingAssignments()"
+          [active]="mode() === 'select'"
+          (assigned)="assigned.emit()"
+        />
+      </div>
+    </tng-tabs>
+  }
+
+  <footer class="dialog-footer">
+    @if (dialogError(); as error) {
+      <div class="notice notice--danger dialog-footer__error">{{ error }}</div>
+    }
+
+    @if (selectValidationError(); as error) {
+      <div class="notice notice--danger dialog-footer__error">{{ error }}</div>
+    }
+
+    <div class="dialog-footer__toolbar">
+      @if (isCreateMode()) {
+        <div class="dialog-footer__row">
+          <tng-form-field
+            class="dialog-footer__amount"
+            labelPosition="outline"
+            [invalid]="matchedAmountError() !== null"
+          >
+            <tng-label forId="bank-txn-matched-amount" required>Matched amount</tng-label>
+            <tng-input
+              id="bank-txn-matched-amount"
+              type="number"
+              min="0.01"
+              step="any"
+              inputmode="decimal"
+              placeholder="Amount to match"
+              [value]="matchedAmount()"
+              (valueChange)="onMatchedAmountChange($event)"
+            />
+            <tng-error [show]="matchedAmountError() !== null">{{ matchedAmountError() }}</tng-error>
+          </tng-form-field>
+        </div>
+      }
+
+      <div class="dialog-footer__row dialog-footer__actions">
+        @if (!isCreateMode()) {
+          <span class="dialog-footer__summary">
+            {{ selectedJournalCount() }} selected ·
+            {{ formatAmount(selectedMatchedTotal()) }} of
+            {{ formatAmount(remainingMatchAmount()) }} remaining
+          </span>
+        } @else if (hasExistingAssignments()) {
+          <span class="dialog-footer__summary">
+            {{ formatAmount(existingMatchedTotal()) }} matched ·
+            {{ formatAmount(remainingMatchAmount()) }} remaining of
+            {{ formatAmount(bankTxnMaxAmount()) }} total
+          </span>
+        }
+
+        <tng-button
+          type="button"
+          appearance="outline"
+          tone="neutral"
+          [disabled]="isSaving()"
+          (click)="onCancelled()"
+        >
+          Cancel
+        </tng-button>
+
+        @if (isCreateMode()) {
+          <tng-button
+            type="button"
+            appearance="solid"
+            tone="primary"
+            [disabled]="isSaving() || !createDraftReady()"
+            (click)="onCreateJournal()"
+          >
+            @if (isSaving()) {
+              <tng-icon icon="loaderCircle" aria-hidden="true" />
+              Creating...
+            } @else {
+              <tng-icon icon="plus" aria-hidden="true" />
+              Create journal
+            }
+          </tng-button>
+        } @else {
+          <tng-button
+            type="button"
+            appearance="solid"
+            tone="primary"
+            [disabled]="isSaving() || !selectCanAssign()"
+            (click)="onAssignSelected()"
+          >
+            @if (isSaving()) {
+              <tng-icon icon="loaderCircle" aria-hidden="true" />
+              Assigning...
+            } @else {
+              Assign journals
+            }
+          </tng-button>
+        }
+      </div>
+    </div>
+  </footer>
+</tng-dialog>

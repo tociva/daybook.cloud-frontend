@@ -1,0 +1,83 @@
+@if (loading()) {
+  <div class="notice assigned-section-notice">Loading assigned journals...</div>
+} @else if (hasAssignments()) {
+  <section class="assigned-section">
+    <div class="assigned-section__header">
+      <h3 class="assigned-section__title">Assigned journals</h3>
+      <p class="assigned-section__summary">
+        {{ formatAmount(existingMatchedTotal()) }} matched ·
+        {{ formatAmount(remainingMatchAmount()) }} remaining of
+        {{ formatAmount(bankTxnMaxAmount()) }} total
+      </p>
+    </div>
+    <tng-table
+      class="journal-table assigned-journal-table"
+      ariaLabel="Assigned journals"
+      density="comfortable"
+      hoverMode="group"
+      layout="fixed"
+      scrollAxis="both"
+      [columns]="assignedColumns"
+      [items]="assignmentRows()"
+      [loading]="false"
+      [error]="false"
+      [rowClass]="rowClassFn()"
+    >
+      <ng-template tngTableCellTemplate="journalGroupKey" let-row="row">
+        <span class="journal-cell">{{ row.number }}</span>
+      </ng-template>
+
+      <ng-template tngTableCellTemplate="date" let-row="row">
+        <span class="journal-cell">{{ formatDisplayDate(row.date) }}</span>
+      </ng-template>
+
+      <ng-template tngTableCellTemplate="ledgerid" let-row="row">
+        <span class="journal-cell">
+          @if (row.ledgerid) {
+            {{ getLedgerName(row.ledgerid) }}
+          } @else {
+            —
+          }
+        </span>
+      </ng-template>
+
+      <ng-template tngTableCellTemplate="debit" let-row="row">
+        <span class="journal-cell num">
+          {{ row.debit != null && row.debit > 0 ? formatAmount(row.debit) : '' }}
+        </span>
+      </ng-template>
+
+      <ng-template tngTableCellTemplate="credit" let-row="row">
+        <span class="journal-cell num">
+          {{ row.credit != null && row.credit > 0 ? formatAmount(row.credit) : '' }}
+        </span>
+      </ng-template>
+
+      <ng-template tngTableCellTemplate="description" let-row="row">
+        <span class="journal-cell">
+          @if (row.description) {
+            <span class="truncate" [title]="row.description">{{ row.description }}</span>
+          }
+        </span>
+      </ng-template>
+
+      <ng-template tngTableCellTemplate="matchedAmount" let-row="row">
+        <span class="journal-cell num">
+          {{ row.matchedAmount > 0 ? formatAmount(row.matchedAmount) : '—' }}
+        </span>
+      </ng-template>
+
+      <ng-template tngTableCellTemplate="actions" let-row="row">
+        <div class="journal-cell actions-cell">
+          <app-table-row-icon-button
+            icon="link2Off"
+            ariaLabel="Un-assign journal"
+            tone="danger"
+            [disabled]="disabled()"
+            (action)="onUnassign(row.journal.id)"
+          />
+        </div>
+      </ng-template>
+    </tng-table>
+  </section>
+}

@@ -1,24 +1,7 @@
 :host {
   --match-amount-cell-focus-border: var(--tng-semantic-accent-brand, var(--tng-semantic-focus-ring));
 
-  display: contents;
-}
-
-.assigned-section {
-  margin-bottom: 1.25rem;
-}
-
-.assigned-section-notice {
-  margin-bottom: 1.25rem;
-}
-
-.assign-dialog-toolbar {
-  margin-bottom: 1rem;
-}
-
-.journal-dialog-body {
-  --tng-autocomplete-overlay-z-index: 10000;
-  --tng-autocomplete-z-overlay: 10000;
+  display: block;
 }
 
 .select-dialog-body {
@@ -28,30 +11,17 @@
   min-height: 12rem;
 }
 
-.assigned-section__header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.5rem 1rem;
-  justify-content: space-between;
-  margin-bottom: 0.75rem;
+.select-dialog-intro {
+  color: var(--tng-semantic-text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  margin: 0;
 }
 
-.assigned-section__title,
 .candidates-section__title {
   font-size: 0.9375rem;
   font-weight: 600;
   margin: 0;
-}
-
-.assigned-section__summary {
-  color: var(--tng-semantic-text-secondary);
-  font-size: 0.875rem;
-  margin: 0;
-}
-
-.assigned-journal-table {
-  display: block;
 }
 
 .assign-journal-table {
@@ -69,14 +39,9 @@
   margin-top: 1rem;
 }
 
-.select-cell,
-.actions-cell {
+.select-cell {
   display: flex;
   justify-content: center;
-}
-
-.actions-cell {
-  justify-content: flex-end;
 }
 
 .match-amount-cell {
@@ -134,53 +99,6 @@
   white-space: nowrap;
 }
 
-app-journal-assign-dialog tng-table.journal-table .tng-table tbody tr.journal-row--alt {
-  --tng-table-row-bg: var(--app-list-table-row-alt-bg);
-  --tng-table-row-hover-bg: var(--app-list-table-row-alt-hover-bg);
-}
-
-.dialog-footer {
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-  gap: 0.75rem;
-  margin-top: 1rem;
-}
-
-.dialog-footer__error {
-  width: 100%;
-}
-
-.dialog-footer__toolbar {
-  border-top: 1px solid var(--tng-semantic-border-subtle);
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding-top: 1rem;
-}
-
-.dialog-footer__row {
-  display: flex;
-  justify-content: flex-end;
-  width: 100%;
-}
-
-.dialog-footer__amount {
-  width: 14rem;
-  max-width: 100%;
-}
-
-.dialog-footer__actions {
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.dialog-footer__summary {
-  color: var(--tng-semantic-text-secondary);
-  font-size: 0.875rem;
-  margin-right: auto;
-}
-
 .notice {
   border: 1px solid var(--tng-semantic-border-subtle);
   border-radius: 0.5rem;
@@ -188,22 +106,7 @@ app-journal-assign-dialog tng-table.journal-table .tng-table tbody tr.journal-ro
   padding: 0.75rem 1rem;
 }
 
-.notice--danger {
-  border-color: var(--tng-semantic-accent-danger);
-  color: var(--tng-semantic-accent-danger);
-}
-
-@media (max-width: 640px) {
-  .dialog-footer__amount {
-    width: 100%;
-  }
-
-  .dialog-footer__actions {
-    flex-wrap: wrap;
-  }
-
-  .dialog-footer__summary {
-    width: 100%;
-    margin-right: 0;
-  }
+:host ::ng-deep tng-table.journal-table .tng-table tbody tr.journal-row--alt {
+  --tng-table-row-bg: var(--app-list-table-row-alt-bg);
+  --tng-table-row-hover-bg: var(--app-list-table-row-alt-hover-bg);
 }

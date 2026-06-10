@@ -1,0 +1,7 @@
+@if (draftReady()) {
+  <div class="journal-dialog-body">
+    <app-journal-create-form />
+  </div>
+} @else {
+  <div class="notice">Preparing journal form...</div>
+}

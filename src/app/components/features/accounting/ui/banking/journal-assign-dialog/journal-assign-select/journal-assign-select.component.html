@@ -1,0 +1,116 @@
+<div class="select-dialog-body">
+  @if (loading()) {
+    <div class="notice">Loading compatible journals...</div>
+  } @else {
+    <p class="select-dialog-intro">
+      Select journals within ±{{ JOURNAL_ASSIGN_DATE_RANGE_DAYS }} days of the bank transaction date, or load more.
+    </p>
+
+    @if (emptyState()) {
+      <app-empty-state
+        icon="bookOpen"
+        [title]="emptyStateTitle()"
+        [description]="emptyStateDescription()"
+      />
+    } @else {
+      @if (hasExistingAssignments()) {
+        <h3 class="candidates-section__title">Add more journals</h3>
+      }
+      <tng-table
+        class="journal-table assign-journal-table"
+        ariaLabel="Compatible journals"
+        density="comfortable"
+        hoverMode="group"
+        layout="fixed"
+        scrollAxis="both"
+        [columns]="assignColumns"
+        [items]="assignRows()"
+        [loading]="loadingMore()"
+        [error]="false"
+        [rowClass]="rowClassFn()"
+      >
+        <ng-template tngTableCellTemplate="selected" let-row="row">
+          <div class="journal-cell select-cell">
+            <tng-checkbox
+              [checked]="isSelected(row.journal.id)"
+              (checkedChange)="toggleCandidate(row.journal.id, !!$event, row.defaultMatchedAmount)"
+            />
+          </div>
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="journalGroupKey" let-row="row">
+          <span class="journal-cell">{{ row.number }}</span>
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="date" let-row="row">
+          <span class="journal-cell">{{ formatDisplayDate(row.date) }}</span>
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="ledgerid" let-row="row">
+          <span class="journal-cell">
+            @if (row.ledgerid) {
+              {{ getLedgerName(row.ledgerid) }}
+            } @else {
+              —
+            }
+          </span>
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="debit" let-row="row">
+          <span class="journal-cell num">
+            {{ row.debit != null && row.debit > 0 ? formatAmount(row.debit) : '' }}
+          </span>
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="credit" let-row="row">
+          <span class="journal-cell num">
+            {{ row.credit != null && row.credit > 0 ? formatAmount(row.credit) : '' }}
+          </span>
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="description" let-row="row">
+          <span class="journal-cell">
+            @if (row.description) {
+              <span class="truncate" [title]="row.description">{{ row.description }}</span>
+            }
+          </span>
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="matchAmount" let-row="row">
+          <div class="journal-cell match-amount-cell">
+            <tng-input
+              [id]="matchAmountInputId(row.journal.id)"
+              type="number"
+              min="0.01"
+              step="any"
+              inputmode="decimal"
+              placeholder="0.00"
+              [disabled]="!isSelected(row.journal.id)"
+              [value]="matchAmountFor(row.journal.id)"
+              (valueChange)="setMatchAmount(row.journal.id, $event)"
+            />
+          </div>
+        </ng-template>
+      </tng-table>
+    }
+
+    @if (showLoadMore()) {
+      <div class="load-more-row">
+        <tng-button
+          type="button"
+          appearance="outline"
+          tone="neutral"
+          [disabled]="loadingMore()"
+          (click)="loadMoreCandidates()"
+        >
+          @if (loadingMore()) {
+            <tng-icon icon="loaderCircle" aria-hidden="true" />
+            Loading...
+          } @else {
+            Load more journals
+          }
+        </tng-button>
+      </div>
+    }
+  }
+</div>

@@ -1,0 +1,62 @@
+.assigned-section {
+  margin-bottom: 1.25rem;
+}
+
+.assigned-section-notice {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  margin: 0 0 1.25rem;
+  padding: 0.75rem 1rem;
+}
+
+.assigned-section__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1rem;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.assigned-section__title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.assigned-section__summary {
+  color: var(--tng-semantic-text-secondary);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.assigned-journal-table {
+  display: block;
+}
+
+.journal-cell {
+  display: block;
+  min-height: 1.35em;
+}
+
+.actions-cell {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.truncate {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:host ::ng-deep tng-table.journal-table .tng-table tbody tr.journal-row--alt {
+  --tng-table-row-bg: var(--app-list-table-row-alt-bg);
+  --tng-table-row-hover-bg: var(--app-list-table-row-alt-hover-bg);
+}
