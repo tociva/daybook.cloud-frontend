@@ -1,10 +1,8 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import { ApiClientService } from '../../../../../core/api/api-client.service';
 import { AppConfigStore } from '../../../../../core/config/app-config.store';
 import { CrudApiService } from '../../../../../shared/crud';
-import type { Lb4Count } from '../../../../../shared/crud';
 import type { Journal } from '../journal';
 import type {
   BankTxn,
@@ -18,7 +16,6 @@ const ENDPOINT = '/accounting/bank-txn';
 
 @Injectable({ providedIn: 'root' })
 export class BankTxnService {
-  private readonly api = inject(ApiClientService);
   private readonly appConfigStore = inject(AppConfigStore);
   private readonly crudApi = inject(CrudApiService);
   private readonly http = inject(HttpClient);
@@ -40,15 +37,7 @@ export class BankTxnService {
   }
 
   async count(query: BankTxnListQuery = {}): Promise<number> {
-    const params =
-      query.where === undefined
-        ? undefined
-        : new HttpParams().set('where', JSON.stringify(query.where));
-    const result = await this.api.get<Lb4Count>(`${await this.collectionUrl()}/count`, {
-      ...(params ? { params } : {}),
-    });
-
-    return result.count;
+    return this.crudApi.count(ENDPOINT, query);
   }
 
   async update(id: string, payload: BankTxnPayload): Promise<BankTxn> {

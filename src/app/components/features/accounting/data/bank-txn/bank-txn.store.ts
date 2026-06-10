@@ -114,7 +114,17 @@ export const BankTxnStore = signalStore(
       async loadBankTxnById(id: string, query?: BankTxnGetQuery): Promise<BankTxn | null> {
         setLoading();
         try {
-          const item = await service.getById(id, query);
+          const items = await service.list({
+            where: { id },
+            limit: 1,
+            ...(query?.includes?.length ? { includes: query.includes } : {}),
+          });
+          const item = items[0] ?? null;
+          if (!item) {
+            setError('Bank transaction not found.');
+            return null;
+          }
+
           patchState(store, (state) => ({
             bankTxn: {
               ...state.bankTxn,

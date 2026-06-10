@@ -17,6 +17,7 @@ import { BankCashStore } from '../../../../trading/data/bank-cash';
 import { InventoryLedgerMapStore } from '../../../data/inventory-ledger-map';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { BankTxnStore } from '../../../data/bank-txn';
+import type { BankTxnJournal } from '../../../data/bank-txn';
 
 @Component({
   selector: 'app-view-bank-txn',
@@ -99,6 +100,23 @@ export class ViewBankTxnComponent {
       : '-';
   }
 
+  protected formatBalance(value: number | undefined): string {
+    return new Intl.NumberFormat('en-IN', {
+      maximumFractionDigits: 2,
+      minimumFractionDigits: 2,
+    }).format(Number(value ?? 0));
+  }
+
+  protected hasJournals(journals: readonly BankTxnJournal[] | undefined): boolean {
+    return (journals?.length ?? 0) > 0;
+  }
+
+  protected viewJournal(journal: BankTxnJournal): void {
+    void this.router.navigate(['/app/accounting/journal', journal.id], {
+      queryParams: { burl: this.burlNavigation.getBackUrl() },
+    });
+  }
+
   private async loadInitialState(): Promise<void> {
     this.bankTxnStore.clearError();
 
@@ -113,7 +131,7 @@ export class ViewBankTxnComponent {
 
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
-      await this.bankTxnStore.loadBankTxnById(id, { includes: ['inventoryledgermap', 'matches'] });
+      await this.bankTxnStore.loadBankTxnById(id, { includes: ['inventoryledgermap'] });
     }
   }
 }

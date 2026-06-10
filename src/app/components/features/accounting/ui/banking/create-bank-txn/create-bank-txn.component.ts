@@ -255,7 +255,7 @@ export class CreateBankTxnComponent {
     }
 
     const item = await this.bankTxnStore.loadBankTxnById(id, {
-      includes: ['inventoryledgermap', 'matches'],
+      includes: ['inventoryledgermap'],
     });
     if (!item) return;
 

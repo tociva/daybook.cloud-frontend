@@ -2,8 +2,6 @@ import type { Lb4Include, Lb4ListQuery } from '../../../../../shared/crud';
 import type { JournalCreatePayload } from '../journal';
 import type { InventoryLedgerMap } from '../inventory-ledger-map';
 
-export type BankMatch = Readonly<Record<string, unknown>>;
-
 export type BankTxnJournal = Readonly<{
   id: string;
   number: string;
@@ -27,7 +25,6 @@ export type BankTxn = BankTxnPayload &
     fiscalyearid?: string;
     balance?: number;
     journals?: readonly BankTxnJournal[];
-    matches?: readonly BankMatch[];
     inventoryledgermap?: InventoryLedgerMap;
   }>;
 

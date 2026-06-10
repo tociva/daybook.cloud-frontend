@@ -11,13 +11,9 @@ export type JournalMatchCandidate = Readonly<{
   matchedAmount: number;
 }>;
 
-export function sumExistingMatchedAmount(matches: BankTxn['matches']): number {
-  if (!matches?.length) return 0;
-
-  return matches.reduce((sum, match) => {
-    const amount = Number((match as { matchedamount?: number }).matchedamount ?? 0);
-    return sum + (Number.isFinite(amount) ? amount : 0);
-  }, 0);
+/** List API returns linked journals but not per-match amounts. */
+export function sumExistingMatchedAmount(_txn: BankTxn | null | undefined): number {
+  return 0;
 }
 
 export function resolveBankLedgerId(
@@ -78,7 +74,7 @@ export function bankTxnMaxAmount(txn: BankTxn | null | undefined): number {
 export function remainingMatchAmount(txn: BankTxn | null | undefined): number {
   const max = bankTxnMaxAmount(txn);
   if (max <= 0) return 0;
-  return Math.max(0, max - sumExistingMatchedAmount(txn?.matches));
+  return Math.max(0, max - sumExistingMatchedAmount(txn));
 }
 
 export function buildJournalDateRangeBounds(

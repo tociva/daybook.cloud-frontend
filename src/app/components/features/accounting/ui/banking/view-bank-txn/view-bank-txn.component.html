@@ -35,8 +35,24 @@
             <dd>{{ txn.bankref || '-' }}</dd>
           </div>
           <div>
-            <dt>Matches</dt>
-            <dd>{{ txn.matches?.length ?? 0 }}</dd>
+            <dt>Balance</dt>
+            <dd>{{ formatBalance(txn.balance) }}</dd>
+          </div>
+          <div>
+            <dt>Journals</dt>
+            <dd>
+              @if (hasJournals(txn.journals)) {
+                <span class="journal-links">
+                  @for (journal of txn.journals; track journal.id; let last = $last) {
+                    <button type="button" class="link-button" (click)="viewJournal(journal)">
+                      {{ journal.number }}
+                    </button>@if (!last) {<span>, </span>}
+                  }
+                </span>
+              } @else {
+                -
+              }
+            </dd>
           </div>
           <div class="wide">
             <dt>Description</dt>

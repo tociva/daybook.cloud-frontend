@@ -103,7 +103,7 @@ export class JournalAssignDialogComponent {
     return this.isCreateMode();
   }
 
-  protected readonly createDialogWidth = '50%';
+  protected readonly createDialogWidth = '70%';
   protected readonly createDialogHeight = 'calc(100vh - 2rem)';
   protected readonly selectDialogWidth = 'min(72rem, calc(100vw - 2rem))';
   protected readonly JOURNAL_ASSIGN_DATE_RANGE_DAYS = JOURNAL_ASSIGN_DATE_RANGE_DAYS;

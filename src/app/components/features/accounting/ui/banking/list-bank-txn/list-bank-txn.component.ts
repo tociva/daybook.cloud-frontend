@@ -62,14 +62,13 @@ export class ListBankTxnComponent {
   protected readonly journalDialogBankTxn = signal<BankTxn | null>(null);
 
   protected readonly columns: readonly TngTableColumn<BankTxn>[] = [
-    { id: 'txndate', label: 'Date', sortable: true, width: '9rem' },
+    { id: 'txndate', label: 'Date', width: '9rem' },
     { id: 'bank', label: 'Bank', width: '14rem' },
     {
       id: 'debit',
       label: 'Deposit',
       align: 'end',
       headerAlign: 'end',
-      sortable: true,
       width: '9rem',
     },
     {
@@ -77,7 +76,6 @@ export class ListBankTxnComponent {
       label: 'Withdrawal',
       align: 'end',
       headerAlign: 'end',
-      sortable: true,
       width: '9rem',
     },
     {
@@ -87,8 +85,8 @@ export class ListBankTxnComponent {
       headerAlign: 'end',
       width: '9rem',
     },
-    { id: 'description', label: 'Description', sortable: true, truncate: true },
-    { id: 'bankref', label: 'Reference', sortable: true, width: '12rem' },
+    { id: 'description', label: 'Description', truncate: true },
+    { id: 'bankref', label: 'Reference', width: '12rem' },
     { id: 'journals', label: 'Journals', width: '12rem' },
     { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '10rem' },
   ];
@@ -138,8 +136,7 @@ export class ListBankTxnComponent {
     this.crudQuery.init((filter) => {
       void this.bankTxnStore.loadBankTxns({
         ...filter,
-        includes: ['inventoryledgermap', 'matches'],
-        order: filter.order?.length ? filter.order : ['txndate ASC'],
+        includes: ['inventoryledgermap'],
       });
     });
   }
@@ -206,8 +203,7 @@ export class ListBankTxnComponent {
     const filter = this.crudQuery.filter();
     void this.bankTxnStore.loadBankTxns({
       ...filter,
-      includes: ['inventoryledgermap', 'matches'],
-      order: filter.order?.length ? filter.order : ['txndate ASC'],
+      includes: ['inventoryledgermap'],
     });
   }
 
