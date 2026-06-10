@@ -107,15 +107,9 @@
                 }
               </span>
             } @else {
-              <tng-button
-                type="button"
-                appearance="outline"
-                tone="primary"
-                size="sm"
-                (click)="assignJournal(row)"
-              >
+              <button type="button" class="link-button" (click)="assignJournal(row)">
                 Assign
-              </tng-button>
+              </button>
             }
           </ng-template>
 

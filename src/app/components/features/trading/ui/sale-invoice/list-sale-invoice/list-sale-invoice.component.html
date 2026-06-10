@@ -141,16 +141,14 @@
                 }
               </span>
             } @else {
-              <tng-button
+              <button
                 type="button"
-                appearance="outline"
-                tone="primary"
-                size="sm"
+                class="link-button"
                 [disabled]="generatingJournalInvoiceId() === row.id"
                 (click)="generateJournal(row)"
               >
                 Generate
-              </tng-button>
+              </button>
             }
           </ng-template>
 
