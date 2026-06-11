@@ -1,11 +1,7 @@
 import { Component } from '@angular/core';
-import {
-  TngButtonComponent,
-  TngCardComponent,
-  TngTable,
-  TngTableCellTpl,
-} from '@tailng-ui/components';
+import { TngCardComponent, TngTable, TngTableCellTpl } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
+import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { GstReconciliationMonthlyDetailBase } from '../shared/monthly-detail/gst-reconciliation-monthly-detail-base';
 import { GSTR2B_MONTHLY_DETAIL_CONFIG } from '../shared/monthly-detail/gst-reconciliation-monthly-detail.config';
@@ -14,8 +10,8 @@ import { GSTR2B_MONTHLY_DETAIL_CONFIG } from '../shared/monthly-detail/gst-recon
   selector: 'app-gstr2b-reconciliation-monthly-detail',
   standalone: true,
   imports: [
+    BurlBackButtonComponent,
     PageHeadingComponent,
-    TngButtonComponent,
     TngCardComponent,
     TngIcon,
     TngTable,

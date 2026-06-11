@@ -1,9 +1,6 @@
 <main class="trading-page">
   <app-page-heading eyebrow="Trading" [title]="title()" [description]="description()">
-    <tng-button type="button" appearance="outline" tone="neutral" (click)="back()">
-      <tng-icon icon="arrowLeft" aria-hidden="true" />
-      Back
-    </tng-button>
+    <app-burl-back-button [fallbackUrl]="'/app/trading/gst-reconciliation'" />
   </app-page-heading>
 
   @if (contextMessage()) {

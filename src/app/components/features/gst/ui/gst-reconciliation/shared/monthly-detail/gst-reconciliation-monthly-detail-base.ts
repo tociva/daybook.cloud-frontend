@@ -98,11 +98,6 @@ export abstract class GstReconciliationMonthlyDetailBase {
     });
   }
 
-  protected async back(): Promise<void> {
-    const backUrl = this.route.snapshot.queryParamMap.get('burl');
-    await this.router.navigateByUrl(backUrl || '/app/trading/gst-reconciliation');
-  }
-
   protected status(row: GstReconciliationDetailRow): DisplayStatus {
     if (row.booksInvoice && row.gstInvoice) {
       return this.rowDifferenceAmount(row) <= GST_AMOUNT_TOLERANCE ? 'matched' : 'partial';
