@@ -132,6 +132,12 @@ export class JournalDraftStore {
     return validateJournalEntriesForSubmit(this.formRowInputs()).ok;
   });
 
+  readonly canInvert = computed(() =>
+    this.rows().some(
+      (row) => this.parseAmount(row.debit) != null || this.parseAmount(row.credit) != null,
+    ),
+  );
+
   async hydrateFromJournal(journal: {
     date: string;
     number: string;
@@ -282,6 +288,12 @@ export class JournalDraftStore {
       debit: this.parseAmount(credit) != null ? '' : row.debit,
     }));
     this.ensureTrailingEmptyRow();
+  }
+
+  invertEntries(): void {
+    this.rows.update((rows) =>
+      rows.map((row) => ({ ...row, debit: row.credit, credit: row.debit })),
+    );
   }
 
   addLine(): void {

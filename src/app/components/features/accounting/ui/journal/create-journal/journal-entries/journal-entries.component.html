@@ -15,6 +15,15 @@
           (filesChange)="pendingFilesChange.emit($event)"
           (documentRemove)="documentRemove.emit($event)"
         />
+        <tng-button
+          type="button"
+          appearance="outline"
+          tone="neutral"
+          [disabled]="!draft.canInvert()"
+          (click)="draft.invertEntries()"
+        >
+          Invert
+        </tng-button>
         <tng-button type="button" appearance="outline" tone="neutral" (click)="draft.addLine()">
           <tng-icon icon="plus" aria-hidden="true" />
           New Entry
