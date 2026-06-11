@@ -43,7 +43,6 @@ export class GstReconciliationReturnPanelComponent {
   readonly isParsing = input(false);
   readonly isUploading = input(false);
   readonly refreshingCellKey = input<string | null>(null);
-  readonly monthDifferenceAmounts = input<Readonly<Record<string, number>>>({});
   readonly currencyCode = input<string | undefined>(undefined);
 
   readonly importRequested = output<ReturnTypeMeta['value']>();
@@ -82,10 +81,10 @@ export class GstReconciliationReturnPanelComponent {
   }
 
   protected monthDifferenceAmount(cell: GstReconciliationMonthCell): number {
-    return this.monthDifferenceAmounts()[this.cellKey(cell)] ?? cell.differenceAmount ?? 0;
+    return cell.differenceAmount ?? 0;
   }
 
   protected hasMonthDifference(cell: GstReconciliationMonthCell): boolean {
-    return this.monthDifferenceAmount(cell) !== 0;
+    return cell.differenceAmount !== 0;
   }
 }
