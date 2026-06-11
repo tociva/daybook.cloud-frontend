@@ -7,6 +7,12 @@
 
   <div class="journal-actions">
     <app-burl-back-button label="Cancel" />
+    @if (mode() === 'edit') {
+      <tng-button type="button" appearance="outline" tone="neutral" (click)="clone()">
+        <tng-icon icon="copy" aria-hidden="true" />
+        Clone
+      </tng-button>
+    }
     <app-burl-create-button
       [type]="'button'"
       [icon]="submitIcon()"

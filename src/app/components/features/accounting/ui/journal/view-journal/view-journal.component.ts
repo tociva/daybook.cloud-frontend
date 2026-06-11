@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
+  TngButtonComponent,
   TngCardActionsComponent,
   TngCardComponent,
   TngCardContentComponent,
@@ -9,6 +10,7 @@ import {
   TngCardHeaderComponent,
   TngCardTitleComponent,
 } from '@tailng-ui/components';
+import { TngIcon } from '@tailng-ui/icons';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 import { BurlDeleteButtonComponent } from '../../../../../../shared/burl-delete-button/burl-delete-button.component';
 import { BurlEditButtonComponent } from '../../../../../../shared/burl-edit-button/burl-edit-button.component';
@@ -18,6 +20,7 @@ import { JournalStore } from '../../../data/journal';
 import type { JournalEntry } from '../../../data/journal';
 import { LedgerStore } from '../../../data/ledger';
 import type { Ledger } from '../../../data/ledger';
+import { JournalCreateDraftStagingService } from '../create-journal/journal-create-draft-staging.service';
 
 @Component({
   selector: 'app-view-journal',
@@ -33,6 +36,8 @@ import type { Ledger } from '../../../data/ledger';
     BurlBackButtonComponent,
     BurlDeleteButtonComponent,
     BurlEditButtonComponent,
+    TngButtonComponent,
+    TngIcon,
   ],
   templateUrl: './view-journal.component.html',
   styleUrl: './view-journal.component.css',
@@ -42,9 +47,15 @@ export class ViewJournalComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly burlNavigation = inject(BurlNavigationService);
+  private readonly draftStaging = inject(JournalCreateDraftStagingService);
   protected readonly journalStore = inject(JournalStore);
   protected readonly ledgerStore = inject(LedgerStore);
   private readonly dateManagement = inject(DateManagementService);
+
+  protected readonly canClone = computed(() => {
+    const journal = this.journalStore.selectedItem();
+    return !this.journalStore.isLoading() && (journal?.entries?.length ?? 0) > 0;
+  });
 
   protected readonly ledgerById = computed(() => {
     const map = new Map<string, Ledger>();
@@ -100,6 +111,16 @@ export class ViewJournalComponent {
         queryParams: { burl: this.burlNavigation.getBackUrl() },
       });
     }
+  }
+
+  protected async clone(): Promise<void> {
+    const journal = this.journalStore.selectedItem();
+    if (!journal?.entries?.length) return;
+
+    await this.draftStaging.stageFromJournal(journal);
+    void this.router.navigate(['/app/accounting/journal/create'], {
+      queryParams: { burl: this.burlNavigation.getBackUrl() },
+    });
   }
 
   protected delete(): void {

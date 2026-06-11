@@ -64,6 +64,16 @@
       <tng-card-actions align="end">
         <app-burl-back-button />
         <app-burl-edit-button (clicked)="edit()" />
+        <tng-button
+          type="button"
+          appearance="outline"
+          tone="neutral"
+          [disabled]="!canClone()"
+          (click)="clone()"
+        >
+          <tng-icon icon="copy" aria-hidden="true" />
+          Clone
+        </tng-button>
         <app-burl-delete-button (clicked)="delete()" />
       </tng-card-actions>
     </tng-card-footer>

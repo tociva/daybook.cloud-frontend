@@ -6,7 +6,8 @@ import type { BankTxn } from '../../../data/bank-txn';
 import { InventoryLedgerMapStore } from '../../../data/inventory-ledger-map';
 import { LedgerStore } from '../../../data/ledger';
 import type { Ledger } from '../../../data/ledger';
-import type { JournalCreateSnapshot } from './journal-draft.store';
+import type { Journal, JournalEntry } from '../../../data/journal';
+import type { JournalCreateSnapshot, JournalLineRow } from './journal-draft.store';
 import { newJournalLineRow } from './journal-draft.store';
 
 @Injectable({ providedIn: 'root' })
@@ -22,6 +23,20 @@ export class JournalCreateDraftStagingService {
     options?: Readonly<{ bankLedgerAmount?: number }>,
   ): Promise<void> {
     this.snapshot = await this.buildSnapshotFromBankTxn(txn, options);
+  }
+
+  stage(snapshot: JournalCreateSnapshot): void {
+    this.snapshot = {
+      ...snapshot,
+      autoNumbering: true,
+      journalNumber: '',
+    };
+  }
+
+  async stageFromJournal(
+    journal: Pick<Journal, 'date' | 'description' | 'entries'>,
+  ): Promise<void> {
+    this.snapshot = await this.buildSnapshotFromJournal(journal);
   }
 
   consume(): JournalCreateSnapshot | null {
@@ -93,6 +108,61 @@ export class JournalCreateDraftStagingService {
         },
       ],
     };
+  }
+
+  private async buildSnapshotFromJournal(
+    journal: Pick<Journal, 'date' | 'description' | 'entries'>,
+  ): Promise<JournalCreateSnapshot> {
+    const entries = [...(journal.entries ?? [])].sort(
+      (a, b) => (a.order ?? 0) - (b.order ?? 0),
+    );
+
+    const ledgerIds = [...new Set(entries.map((e) => e.ledgerid).filter(Boolean))];
+    let ledgerDefaultOptions: readonly Ledger[] = [];
+
+    if (ledgerIds.length > 0) {
+      await this.ledgerStore.loadLedgers({
+        where: { id: { inq: ledgerIds } },
+        limit: Math.max(ledgerIds.length, 10),
+        includes: ['category'],
+      });
+      ledgerDefaultOptions = this.ledgerStore.items();
+    }
+
+    const nameById = new Map(
+      ledgerDefaultOptions.flatMap((l) => (l.id ? [[l.id, l.name ?? ''] as const] : [])),
+    );
+
+    const rows: JournalLineRow[] = entries.map((e) => this.entryToLineRow(e, nameById));
+    this.ensureMinimumRows(rows);
+
+    return {
+      autoNumbering: true,
+      journalDateModel: journal.date,
+      journalNumber: '',
+      journalDescription: journal.description ?? '',
+      ledgerDefaultOptions,
+      rows,
+    };
+  }
+
+  private entryToLineRow(
+    entry: JournalEntry,
+    nameById: ReadonlyMap<string, string>,
+  ): JournalLineRow {
+    return {
+      uid: crypto.randomUUID(),
+      ledgerId: entry.ledgerid,
+      ledgerName: nameById.get(entry.ledgerid) ?? '',
+      debit: entry.debit != null && entry.debit > 0 ? String(entry.debit) : '',
+      credit: entry.credit != null && entry.credit > 0 ? String(entry.credit) : '',
+    };
+  }
+
+  private ensureMinimumRows(rows: JournalLineRow[]): void {
+    while (rows.length < 2) {
+      rows.push(newJournalLineRow());
+    }
   }
 
   private resolveBankLedgerId(txn: BankTxn): string {

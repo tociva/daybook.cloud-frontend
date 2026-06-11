@@ -17,7 +17,7 @@ import type { Journal, JournalCreatePayload } from '../../../../data/journal';
 import { LedgerStore } from '../../../../data/ledger';
 import { JournalCreateDraftStagingService } from '../journal-create-draft-staging.service';
 import { JournalDetailsComponent } from '../journal-details/journal-details.component';
-import { JournalDraftStore } from '../journal-draft.store';
+import { JournalDraftStore, type JournalCreateSnapshot } from '../journal-draft.store';
 import { JournalEntriesComponent } from '../journal-entries/journal-entries.component';
 
 @Component({
@@ -67,6 +67,10 @@ export class JournalCreateFormComponent {
 
   resolvedJournalId(): string | null {
     return this.resolvedId();
+  }
+
+  buildCloneSnapshot(): JournalCreateSnapshot {
+    return this.draft.buildCloneSnapshot();
   }
 
   buildPayload(): JournalCreatePayload | null {

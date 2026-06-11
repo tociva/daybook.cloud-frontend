@@ -296,6 +296,26 @@ export class JournalDraftStore {
     );
   }
 
+  buildCloneSnapshot(): JournalCreateSnapshot {
+    const nonEmpty = this.rows().filter((row) => !isJournalFormRowEmpty(journalFormRowInput(row)));
+    const rows: JournalLineRow[] = nonEmpty.map((row) => ({
+      ...row,
+      uid: crypto.randomUUID(),
+    }));
+    while (rows.length < 2) {
+      rows.push(newRow());
+    }
+
+    return {
+      autoNumbering: true,
+      journalDateModel: this.journalDateModel(),
+      journalNumber: '',
+      journalDescription: this.journalDescription(),
+      ledgerDefaultOptions: this.ledgerDefaultOptions(),
+      rows,
+    };
+  }
+
   addLine(): void {
     this.rows.update((r) => [...r, newRow()]);
   }
