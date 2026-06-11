@@ -180,6 +180,12 @@
     "url": "/app/accounting/documents"
   },
   {
+    "title": "Reports",
+    "description": "Browse accounting reports including trial balance, profit and loss, balance sheet, and daybook.",
+    "keywords": ["reports", "accounting", "financial statements", "trial balance", "profit and loss", "balance sheet", "daybook"],
+    "url": "/app/accounting/reports"
+  },
+  {
     "title": "Trial balance",
     "description": "View trial balance report.",
     "keywords": ["trial balance", "report", "accounting", "books"],
@@ -202,6 +208,18 @@
     "description": "View balance sheet report.",
     "keywords": ["balance sheet", "report", "financials", "accounting"],
     "url": "/app/accounting/reports/balance-sheet"
+  },
+  {
+    "title": "Ledger report",
+    "description": "View ledger activity and running balance for a selected period.",
+    "keywords": ["ledger report", "ledger", "account activity", "accounting", "report"],
+    "url": "/app/accounting/reports/ledger"
+  },
+  {
+    "title": "Ledger category report",
+    "description": "View category-level ledger activity and balances for a selected period.",
+    "keywords": ["ledger category report", "ledger category", "accounting", "report"],
+    "url": "/app/accounting/reports/ledger-category"
   },
   {
     "title": "Banking",

@@ -6,6 +6,10 @@ import { AppSystemStore } from '../../../core/system/app-system.store';
 import { UserSessionStore } from '../../../components/features/management/data/user-session/user-session.store';
 import { WorkspaceContentComponent } from '../workspace-content/workspace-content.component';
 import { WorkspaceHeaderComponent } from '../workspace-header/workspace-header.component';
+import {
+  ACCOUNTING_REPORTS_BASE_PATH,
+  findAccountingReportByRoute,
+} from '../../../components/features/accounting/ui/reports/shared/accounting-reports-nav.model';
 import { BreadcrumbItem, WorkspaceNavItem, workspaceSidebarMenu } from '../workspace-nav.model';
 import { WorkspaceSidebarComponent } from '../workspace-sidebar/workspace-sidebar.component';
 
@@ -132,6 +136,11 @@ export class WorkspaceShellComponent {
       }
     }
 
+    const accountingReportsBreadcrumbs = this.resolveAccountingReportsBreadcrumbs(path);
+    if (accountingReportsBreadcrumbs) {
+      return accountingReportsBreadcrumbs;
+    }
+
     // Check sidebar menu groups (e.g. /app/trading/bank-cash)
     for (const group of workspaceSidebarMenu) {
       const groupBase = `/app/${group.path}`;
@@ -196,6 +205,37 @@ export class WorkspaceShellComponent {
 
   protected logout(): void {
     void this.systemStore.logout();
+  }
+
+  private resolveAccountingReportsBreadcrumbs(path: string): readonly BreadcrumbItem[] | null {
+    if (path === ACCOUNTING_REPORTS_BASE_PATH) {
+      return null;
+    }
+
+    const report = findAccountingReportByRoute(path);
+    if (!report) {
+      return null;
+    }
+
+    const accountingHref = '/app/accounting/ledger';
+    const hasSubPath = path.length > report.route.length;
+
+    if (!hasSubPath) {
+      return [
+        { label: 'Home', routerLink: '/app/dashboard' },
+        { label: 'Accounting', routerLink: accountingHref },
+        { label: 'Reports', routerLink: ACCOUNTING_REPORTS_BASE_PATH },
+        { label: report.label, current: true },
+      ];
+    }
+
+    return [
+      { label: 'Home', routerLink: '/app/dashboard' },
+      { label: 'Accounting', routerLink: accountingHref },
+      { label: 'Reports', routerLink: ACCOUNTING_REPORTS_BASE_PATH },
+      { label: report.label, routerLink: report.route },
+      { label: 'View', current: true },
+    ];
   }
 
   /**

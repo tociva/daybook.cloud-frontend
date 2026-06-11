@@ -1,0 +1,49 @@
+<main class="management-page">
+  <app-page-heading
+    eyebrow="Accounting"
+    title="Reports"
+    description="Financial statements, ledger reports, and daybook for your books"
+  />
+
+  @if (visibleReports().length === 0) {
+    <div class="notice notice--info">
+      You do not have access to any accounting reports.
+    </div>
+  } @else {
+    <div class="report-cards">
+      @for (report of visibleReports(); track report.slug) {
+        <tng-card
+          class="report-card"
+          variant="outline"
+          padding="sm"
+          interactive
+          role="button"
+          tabindex="0"
+          [attr.aria-label]="report.label + ': ' + report.description"
+          (click)="openReport(report)"
+          (keydown.enter)="openReport(report)"
+          (keydown.space.prevent)="openReport(report)"
+        >
+          <div class="report-card__content">
+            <tng-icon
+              class="report-card__icon"
+              [icon]="report.icon"
+              aria-hidden="true"
+            />
+
+            <div class="report-card__copy">
+              <h2 class="report-card__title">{{ report.label }}</h2>
+              <p class="report-card__description">{{ report.description }}</p>
+            </div>
+
+            <tng-icon
+              class="report-card__chevron"
+              icon="chevron-right"
+              aria-hidden="true"
+            />
+          </div>
+        </tng-card>
+      }
+    </div>
+  }
+</main>

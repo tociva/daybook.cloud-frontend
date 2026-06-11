@@ -175,6 +175,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'app/accounting/reports',
+    loadChildren: () =>
+      import(
+        './components/features/accounting/ui/reports/accounting-reports/accounting-reports.routes'
+      ).then((m) => m.accountingReportsRoutes),
+  },
+  {
     path: 'app/accounting/reports/trial-balance',
     loadChildren: () =>
       import('./components/features/accounting/ui/reports/trial-balance/trial-balance.routes').then(

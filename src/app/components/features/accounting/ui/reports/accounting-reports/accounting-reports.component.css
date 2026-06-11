@@ -1,0 +1,122 @@
+.management-page {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.25rem;
+}
+
+.report-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  /* vertical spacing */
+  row-gap: 0.75rem;
+
+  /* horizontal spacing */
+  column-gap: 1.25rem;
+}
+
+.report-card {
+  display: block;
+  block-size: 6.75rem;
+  inline-size: 100%;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.report-card__content {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  block-size: 100%;
+}
+
+.report-card__icon {
+  flex-shrink: 0;
+  margin-block-start: 0.05rem;
+  color: var(--tng-semantic-accent-brand);
+  font-size: 1.1rem;
+}
+
+.report-card__copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+
+.report-card__title {
+  margin: 0 0 0.15rem;
+  color: var(--tng-semantic-foreground-primary);
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.report-card__description {
+  display: -webkit-box;
+  flex: 1;
+  margin: 0;
+  overflow: hidden;
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.report-card__chevron {
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-block-start: 0.05rem;
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 1024px) {
+  .report-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 0.75rem;
+    column-gap: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .management-page {
+    padding: 1rem;
+  }
+
+  .report-cards {
+    /*
+      Use 2 columns on mobile also.
+      This avoids each card becoming 100% width.
+    */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 0.75rem;
+    column-gap: 0.75rem;
+  }
+
+  .report-card {
+    block-size: 7rem;
+  }
+
+  .report-card__content {
+    gap: 0.5rem;
+  }
+
+  .report-card__title {
+    font-size: 0.8rem;
+  }
+
+  .report-card__description {
+    font-size: 0.7rem;
+    line-height: 1.35;
+  }
+
+  .report-card__icon {
+    font-size: 1rem;
+  }
+
+  .report-card__chevron {
+    font-size: 0.8rem;
+  }
+}

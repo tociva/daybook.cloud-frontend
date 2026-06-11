@@ -10,6 +10,7 @@ import {
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { filter } from 'rxjs';
+import { isAccountingReportsSectionRoute } from '../../../components/features/accounting/ui/reports/shared/accounting-reports-nav.model';
 import { MenuNode, workspaceSidebarMenu } from '../workspace-nav.model';
 
 const groupSubtitleByPath: Readonly<Record<string, string>> = {
@@ -86,6 +87,15 @@ export class WorkspaceSidebarComponent {
   protected getActiveGroupPath(group: MenuNode): string | null {
     if (!group.children) {
       return null;
+    }
+
+    const currentPath = this.currentUrl().split(/[?#]/)[0] ?? '';
+
+    if (group.path === 'accounting' && isAccountingReportsSectionRoute(currentPath)) {
+      const reportsChild = group.children.find((child) => child.path === 'reports');
+      if (reportsChild) {
+        return this.getChildPath(group, reportsChild);
+      }
     }
 
     const activeChild = group.children.find((child) =>
