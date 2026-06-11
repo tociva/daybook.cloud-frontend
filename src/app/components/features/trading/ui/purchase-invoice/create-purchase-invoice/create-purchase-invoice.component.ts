@@ -11,6 +11,7 @@ import {
   type TngFileUploadSelectedEvent,
 } from '@tailng-ui/primitives';
 import { TngIcon } from '@tailng-ui/icons';
+import { TngSkeletonComponent } from '@tailng-ui/components';
 import { VendorStore } from '../../../data/vendor';
 import type { VendorListQuery } from '../../../data/vendor';
 import { InvoiceDocumentService } from '../../../data/invoice-document';
@@ -42,6 +43,7 @@ import { PiLineItemsComponent } from './pi-line-items/pi-line-items.component';
     BurlCreateButtonComponent,
     TngIcon,
     TngFileUploadDirective,
+    TngSkeletonComponent,
     PiVendorComponent,
     PiLineItemsComponent,
     PiInvoiceDetailsComponent,
@@ -70,10 +72,14 @@ export class CreatePurchaseInvoiceComponent {
 
   protected readonly id = signal<string | null>(null);
   protected readonly pendingDocumentFiles = signal<readonly File[]>([]);
+  protected readonly isInitialLoading = signal(true);
   protected readonly isUploadingDocuments = signal(false);
   protected readonly mode = computed(() => (this.id() ? 'edit' : 'create'));
   protected readonly isSaving = computed(
-    () => this.purchaseInvoiceStore.isLoading() || this.isUploadingDocuments(),
+    () =>
+      this.isInitialLoading() ||
+      this.purchaseInvoiceStore.isLoading() ||
+      this.isUploadingDocuments(),
   );
   protected readonly title = computed(() =>
     this.mode() === 'edit' ? 'Edit Purchase Invoice' : 'New Purchase Invoice',
@@ -88,29 +94,33 @@ export class CreatePurchaseInvoiceComponent {
   private async loadInitialState(): Promise<void> {
     this.purchaseInvoiceStore.clearError();
 
-    await Promise.all([
-      this.vendorStore.loadVendors(this.initialVendorQuery()),
-      this.itemStore.loadItems({ includes: ['category'] }),
-      this.taxGroupStore.loadTaxGroups({}),
-      this.taxStore.loadTaxes({}),
-    ]);
-    this.draft.markAllItemsLoaded();
+    try {
+      await Promise.all([
+        this.vendorStore.loadVendors(this.initialVendorQuery()),
+        this.itemStore.loadItems({ includes: ['category'] }),
+        this.taxGroupStore.loadTaxGroups({}),
+        this.taxStore.loadTaxes({}),
+      ]);
+      this.draft.markAllItemsLoaded();
 
-    const id = this.route.snapshot.paramMap.get('id');
-    this.id.set(id);
+      const id = this.route.snapshot.paramMap.get('id');
+      this.id.set(id);
 
-    if (id) {
-      const cached = this.purchaseInvoiceStore.selectedItem();
-      if (cached?.id === id) this.draft.patchFromInvoice(cached);
+      if (id) {
+        const cached = this.purchaseInvoiceStore.selectedItem();
+        if (cached?.id === id) this.draft.patchFromInvoice(cached);
 
-      const invoice = await this.purchaseInvoiceStore.loadPurchaseInvoiceById(id, {
-        includes: PURCHASE_INVOICE_DETAIL_INCLUDES,
-      });
-      if (invoice) this.draft.patchFromInvoice(invoice);
-      return;
+        const invoice = await this.purchaseInvoiceStore.loadPurchaseInvoiceById(id, {
+          includes: PURCHASE_INVOICE_DETAIL_INCLUDES,
+        });
+        if (invoice) this.draft.patchFromInvoice(invoice);
+        return;
+      }
+
+      this.draft.patchFromGstReconciliation(this.route.snapshot.queryParamMap);
+    } finally {
+      this.isInitialLoading.set(false);
     }
-
-    this.draft.patchFromGstReconciliation(this.route.snapshot.queryParamMap);
   }
 
   private initialVendorQuery(): VendorListQuery {
@@ -188,35 +198,38 @@ export class CreatePurchaseInvoiceComponent {
       ...(this.draft.vendorAddressCountry() ? { country: this.draft.vendorAddressCountry() } : {}),
     };
 
-    const items: PurchaseInvoiceItemRequest[] = this.draft.items().filter((row) => !!row.itemid).map((row, i) => {
-      const taxes: PurchaseInvoiceItemTaxRequest[] = row.taxes.map((t) => ({
-        name: t.name,
-        shortname: t.shortname,
-        rate: toNum(t.rate),
-        appliedto: toNum(t.appliedto),
-        amount: toNum(t.amount),
-        ...(t.taxid ? { taxid: t.taxid } : {}),
-      }));
-      const displayname = row.item?.displayname ?? row.item?.name ?? row.name ?? '';
+    const items: PurchaseInvoiceItemRequest[] = this.draft
+      .items()
+      .filter((row) => !!row.itemid)
+      .map((row, i) => {
+        const taxes: PurchaseInvoiceItemTaxRequest[] = row.taxes.map((t) => ({
+          name: t.name,
+          shortname: t.shortname,
+          rate: toNum(t.rate),
+          appliedto: toNum(t.appliedto),
+          amount: toNum(t.amount),
+          ...(t.taxid ? { taxid: t.taxid } : {}),
+        }));
+        const displayname = row.item?.displayname ?? row.item?.name ?? row.name ?? '';
 
-      return {
-        name: row.name,
-        displayname,
-        description: row.description,
-        code: row.code,
-        order: i + 1,
-        price: toNum(row.price),
-        quantity: Math.max(1, toNum(row.quantity)),
-        itemtotal: toNum(row.itemtotal),
-        discpercent: toNum(row.discpercent),
-        discamount: toNum(row.discamount),
-        subtotal: toNum(row.subtotal),
-        taxamount: toNum(row.taxamount),
-        grandtotal: toNum(row.grandtotal),
-        itemid: row.itemid,
-        taxes,
-      };
-    });
+        return {
+          name: row.name,
+          displayname,
+          description: row.description,
+          code: row.code,
+          order: i + 1,
+          price: toNum(row.price),
+          quantity: Math.max(1, toNum(row.quantity)),
+          itemtotal: toNum(row.itemtotal),
+          discpercent: toNum(row.discpercent),
+          discamount: toNum(row.discamount),
+          subtotal: toNum(row.subtotal),
+          taxamount: toNum(row.taxamount),
+          grandtotal: toNum(row.grandtotal),
+          itemid: row.itemid,
+          taxes,
+        };
+      });
 
     const payload: PurchaseInvoicePayload = {
       ...(this.draft.number() ? { number: this.draft.number() } : {}),

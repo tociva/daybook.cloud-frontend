@@ -7,36 +7,87 @@
     <div class="notice notice--danger">{{ purchaseInvoiceStore.error() }}</div>
   }
 
-  <div class="invoice-layout">
-    <!-- ══ LEFT COLUMN ════════════════════════════════════════════════════ -->
-    <div
-      class="invoice-main"
-      tngFileUpload
-      [multiple]="true"
-      [disabled]="isSaving()"
-      (filesSelected)="onDocumentFilesSelected($event)"
-      (filesRejected)="onDocumentFilesRejected($event)"
-    >
-      <app-pi-vendor (vendorSelected)="onVendorSelected()" />
-      <app-pi-line-items
-        [documentFiles]="pendingDocumentFiles()"
-        [documentsDisabled]="purchaseInvoiceStore.isLoading()"
-        [documentsUploading]="isUploadingDocuments()"
-        (documentFilesChange)="pendingDocumentFiles.set($event)"
-      />
-      <div class="invoice-drop-overlay" aria-hidden="true">
-        <div class="invoice-drop-overlay__inner">
-          <tng-icon icon="upload" aria-hidden="true" />
-          <span>Drop files here</span>
+  @if (isInitialLoading()) {
+    <div class="invoice-layout" aria-busy="true" aria-label="Loading purchase invoice form">
+      <div class="invoice-main skeleton-stack">
+        <section class="skeleton-panel">
+          <div class="skeleton-row">
+            <tng-skeleton width="10rem" height="1.1rem"></tng-skeleton>
+            <tng-skeleton width="7rem" height="1.1rem"></tng-skeleton>
+          </div>
+          <section class="text-shell">
+            <tng-skeleton width="52%" height="0.85rem"></tng-skeleton>
+            <tng-skeleton width="100%" height="1.1rem"></tng-skeleton>
+            <tng-skeleton width="88%" height="0.95rem"></tng-skeleton>
+            <tng-skeleton width="76%" height="0.95rem"></tng-skeleton>
+          </section>
+        </section>
+
+        <section class="skeleton-panel skeleton-panel--table">
+          <div class="skeleton-row skeleton-row--header">
+            <tng-skeleton width="12rem" height="1.1rem"></tng-skeleton>
+            <tng-skeleton width="6rem" height="2rem"></tng-skeleton>
+          </div>
+          @for (row of [0, 1, 2, 3]; track row) {
+            <div class="skeleton-grid-row">
+              <tng-skeleton width="100%" height="2.25rem"></tng-skeleton>
+              <tng-skeleton width="100%" height="2.25rem"></tng-skeleton>
+              <tng-skeleton width="100%" height="2.25rem"></tng-skeleton>
+              <tng-skeleton width="100%" height="2.25rem"></tng-skeleton>
+            </div>
+          }
+        </section>
+      </div>
+
+      <aside class="invoice-aside">
+        <section class="skeleton-panel">
+          <section class="text-shell">
+            <tng-skeleton width="52%" height="0.85rem"></tng-skeleton>
+            <tng-skeleton width="100%" height="1.1rem"></tng-skeleton>
+            <tng-skeleton width="88%" height="0.95rem"></tng-skeleton>
+            <tng-skeleton width="76%" height="0.95rem"></tng-skeleton>
+          </section>
+          <section class="text-shell">
+            <tng-skeleton width="46%" height="0.85rem"></tng-skeleton>
+            <tng-skeleton width="100%" height="2.25rem"></tng-skeleton>
+            <tng-skeleton width="100%" height="2.25rem"></tng-skeleton>
+            <tng-skeleton width="64%" height="2.25rem"></tng-skeleton>
+          </section>
+        </section>
+      </aside>
+    </div>
+  } @else {
+    <div class="invoice-layout">
+      <!-- ══ LEFT COLUMN ════════════════════════════════════════════════════ -->
+      <div
+        class="invoice-main"
+        tngFileUpload
+        [multiple]="true"
+        [disabled]="isSaving()"
+        (filesSelected)="onDocumentFilesSelected($event)"
+        (filesRejected)="onDocumentFilesRejected($event)"
+      >
+        <app-pi-vendor (vendorSelected)="onVendorSelected()" />
+        <app-pi-line-items
+          [documentFiles]="pendingDocumentFiles()"
+          [documentsDisabled]="purchaseInvoiceStore.isLoading()"
+          [documentsUploading]="isUploadingDocuments()"
+          (documentFilesChange)="pendingDocumentFiles.set($event)"
+        />
+        <div class="invoice-drop-overlay" aria-hidden="true">
+          <div class="invoice-drop-overlay__inner">
+            <tng-icon icon="upload" aria-hidden="true" />
+            <span>Drop files here</span>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- ══ RIGHT COLUMN ══════════════════════════════════════════════════ -->
-    <aside class="invoice-aside">
-      <app-pi-invoice-details />
-    </aside>
-  </div>
+      <!-- ══ RIGHT COLUMN ══════════════════════════════════════════════════ -->
+      <aside class="invoice-aside">
+        <app-pi-invoice-details />
+      </aside>
+    </div>
+  }
 
   <!-- ── Footer ───────────────────────────────────────────────────────── -->
   <div class="invoice-actions">
