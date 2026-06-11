@@ -15,15 +15,15 @@
     <section class="summary-grid" aria-label="Monthly reconciliation summary">
       <tng-card class="summary-tile" variant="outline" padding="md" data-status="matched">
         <small>Matched</small>
-        <strong>{{ detailMatchedCount(detail) }}</strong>
+        <strong>{{ detail.summary.matchedCount }}</strong>
       </tng-card>
       <tng-card class="summary-tile" variant="outline" padding="md" data-status="partialMatch">
         <small>Partial match</small>
-        <strong>{{ detailPartialCount(detail) }}</strong>
+        <strong>{{ detail.summary.partialCount }}</strong>
       </tng-card>
       <tng-card class="summary-tile" variant="outline" padding="md" data-status="noMatch">
         <small>No match</small>
-        <strong>{{ detailNotMatchedCount(detail) }}</strong>
+        <strong>{{ detail.summary.notMatchedCount }}</strong>
       </tng-card>
       <tng-card class="summary-tile" variant="outline" padding="md">
         <small>Book invoices</small>
@@ -37,10 +37,10 @@
         class="summary-tile"
         variant="outline"
         padding="md"
-        [class.summary-tile--danger]="detailDifferenceAmount(detail) !== 0"
+        [class.summary-tile--danger]="detail.summary.differenceAmount !== 0"
       >
         <small>Difference</small>
-        <strong>{{ formatAmount(detailDifferenceAmount(detail)) }}</strong>
+        <strong>{{ formatAmount(detail.summary.differenceAmount) }}</strong>
       </tng-card>
     </section>
 

@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnDestroy, signal } from '@angular/core';
 import {
   TngProgressBarComponent,
 } from '@tailng-ui/components';
@@ -50,7 +50,7 @@ const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct
   templateUrl: './gst-reconciliation.component.html',
   styleUrl: './gst-reconciliation.component.css',
 })
-export class GstReconciliationComponent {
+export class GstReconciliationComponent implements OnDestroy {
   private readonly permissionsStore = inject(PermissionsStore);
   private readonly sessionStore = inject(UserSessionStore);
   private readonly xlsxFileReader = inject(XlsxFileReaderService);
@@ -107,12 +107,17 @@ export class GstReconciliationComponent {
 
   // ── Constructor ───────────────────────────────────────────────────────────
   constructor() {
+    this.store.clearRefreshResult();
+
     effect(() => {
       const ctx = this.context();
       if (!ctx) return;
       void this.store.loadSummary();
     });
+  }
 
+  ngOnDestroy(): void {
+    this.store.clearRefreshResult();
   }
 
   // ── Import button on each card ────────────────────────────────────────────

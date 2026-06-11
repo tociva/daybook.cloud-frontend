@@ -6,7 +6,6 @@ import { formatAmountWithCurrency } from '../../../../../../../shared/format/cur
 import { UserSessionStore } from '../../../../../management/data/user-session/user-session.store';
 import { CustomerStore } from '../../../../../trading/data/customer';
 import { VendorStore } from '../../../../../trading/data/vendor';
-import type { GstReconciliationDetailResponse } from '../../../../data/gst-reconciliation/gst-reconciliation.model';
 import {
   GstReconciliationStore,
   type GstComputedStatus,
@@ -164,24 +163,6 @@ export abstract class GstReconciliationMonthlyDetailBase {
     return this.formatAmount(this.convertedInvoiceValue(invoice, 'invoiceValue'));
   }
 
-  protected detailMatchedCount(detail: GstReconciliationDetailResponse): number {
-    return this.detailRows(detail).filter((row) => this.status(row) === 'matched').length;
-  }
-
-  protected detailPartialCount(detail: GstReconciliationDetailResponse): number {
-    return this.detailRows(detail).filter((row) => {
-      const status = this.status(row);
-      return status === 'partial' || status === 'partialMatch';
-    }).length;
-  }
-
-  protected detailNotMatchedCount(detail: GstReconciliationDetailResponse): number {
-    return this.detailRows(detail).filter((row) => {
-      const status = this.status(row);
-      return status === 'notMatched' || status === 'noMatch';
-    }).length;
-  }
-
   protected hasDifference(row: GstReconciliationDetailRow): boolean {
     return this.rowDifferenceAmount(row) > GST_AMOUNT_TOLERANCE;
   }
@@ -211,14 +192,6 @@ export abstract class GstReconciliationMonthlyDetailBase {
     }
 
     return row.reason || '';
-  }
-
-  protected detailDifferenceAmount(detail: GstReconciliationDetailResponse): number {
-    return detail.groups.reduce(
-      (total, group) =>
-        total + group.rows.reduce((groupTotal, row) => groupTotal + this.rowDifferenceAmount(row), 0),
-      0,
-    );
   }
 
   protected groupedPartyGroups(
@@ -456,10 +429,6 @@ export abstract class GstReconciliationMonthlyDetailBase {
     value: number | null | undefined,
   ): string {
     return formatAmountWithCurrency(value ?? 0, this.invoiceCurrencyCode(invoice));
-  }
-
-  private detailRows(detail: GstReconciliationDetailResponse): readonly GstReconciliationDetailRow[] {
-    return detail.groups.flatMap((group) => group.rows);
   }
 
   private bookInvoiceReconciliationValue(
