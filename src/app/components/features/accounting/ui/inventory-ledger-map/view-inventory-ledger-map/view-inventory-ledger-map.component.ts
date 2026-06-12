@@ -129,8 +129,8 @@ export class ViewInventoryLedgerMapComponent {
     await Promise.all([
       this.ledgerStore.loadLedgers({ limit: 1000, offset: 0 }),
       this.fiscalYearStore.loadFiscalYears({ limit: 1000, offset: 0 }),
-      this.customerStore.loadCustomers({ limit: 1000, offset: 0 }),
-      this.vendorStore.loadVendors({ limit: 1000, offset: 0 }),
+      this.customerStore.ensureCustomerCatalogLoaded(),
+      this.vendorStore.ensureVendorCatalogLoaded(),
       this.itemStore.ensureItemCatalogLoaded(),
       this.taxStore.ensureTaxCatalogLoaded(),
       this.bankCashStore.loadBankCashes({ limit: 1000, offset: 0 }),
@@ -140,9 +140,9 @@ export class ViewInventoryLedgerMapComponent {
   private entityNameMap(entityType: string): Map<string, string> {
     switch (entityType) {
       case 'customer':
-        return this.nameMap(this.customerStore.items());
+        return this.nameMap(this.customerStore.catalog());
       case 'vendor':
-        return this.nameMap(this.vendorStore.items());
+        return this.nameMap(this.vendorStore.catalog());
       case 'item':
         return this.nameMap(this.itemStore.catalog());
       case 'tax':
