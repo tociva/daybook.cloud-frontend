@@ -75,7 +75,7 @@ export class TreeViewItemComponent implements OnInit {
 
   protected readonly treeData = computed<readonly ItemTreeRow[]>(() => {
     const categories = this.itemCategoryStore.items();
-    const items = this.itemStore.items();
+    const items = this.itemStore.catalog();
     const categoryNodes = new Map<string, ItemTreeRow>();
     const categoriesById = new Map<string, ItemCategory>();
     const rootRows: ItemTreeRow[] = [];
@@ -322,7 +322,7 @@ export class TreeViewItemComponent implements OnInit {
     if (row.kind !== 'item') return undefined;
     const itemId = row.key.startsWith('item:') ? row.key.slice('item:'.length) : null;
     if (!itemId) return undefined;
-    return this.itemStore.items().find((item) => item.id === itemId);
+    return this.itemStore.catalog().find((item) => item.id === itemId);
   }
 
   private categoryIdFromRow(row: ItemTreeRow): string | null {
@@ -351,16 +351,6 @@ export class TreeViewItemComponent implements OnInit {
   }
 
   private async loadItems(): Promise<void> {
-    const query = {
-      includes: ['category'],
-      limit: catalogPageSize,
-      offset: 0,
-    };
-
-    await this.itemStore.loadItems(query);
-    const count = this.itemStore.count();
-    if (count > this.itemStore.items().length) {
-      await this.itemStore.loadItems({ ...query, limit: count });
-    }
+    await this.itemStore.ensureItemCatalogLoaded();
   }
 }

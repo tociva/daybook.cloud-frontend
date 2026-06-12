@@ -87,7 +87,7 @@ export class ListInventoryLedgerMapComponent {
 
   private readonly customerNameById = computed(() => this.nameMap(this.customerStore.items()));
   private readonly vendorNameById = computed(() => this.nameMap(this.vendorStore.items()));
-  private readonly itemNameById = computed(() => this.nameMap(this.itemStore.items()));
+  private readonly itemNameById = computed(() => this.nameMap(this.itemStore.catalog()));
   private readonly taxNameById = computed(() => this.nameMap(this.taxStore.items()));
   private readonly bankCashNameById = computed(() => this.nameMap(this.bankCashStore.items()));
 
@@ -158,7 +158,7 @@ export class ListInventoryLedgerMapComponent {
       this.ledgerStore.loadLedgers({ limit: 1000, offset: 0 }),
       this.customerStore.loadCustomers({ limit: 1000, offset: 0 }),
       this.vendorStore.loadVendors({ limit: 1000, offset: 0 }),
-      this.itemStore.loadItems({ limit: 1000, offset: 0 }),
+      this.itemStore.ensureItemCatalogLoaded(),
       this.taxStore.loadTaxes({ limit: 1000, offset: 0 }),
       this.bankCashStore.loadBankCashes({ limit: 1000, offset: 0 }),
     ]);
