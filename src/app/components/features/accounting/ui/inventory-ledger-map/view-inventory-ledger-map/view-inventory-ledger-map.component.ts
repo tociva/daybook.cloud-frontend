@@ -132,7 +132,7 @@ export class ViewInventoryLedgerMapComponent {
       this.customerStore.loadCustomers({ limit: 1000, offset: 0 }),
       this.vendorStore.loadVendors({ limit: 1000, offset: 0 }),
       this.itemStore.ensureItemCatalogLoaded(),
-      this.taxStore.loadTaxes({ limit: 1000, offset: 0 }),
+      this.taxStore.ensureTaxCatalogLoaded(),
       this.bankCashStore.loadBankCashes({ limit: 1000, offset: 0 }),
     ]);
   }
@@ -146,7 +146,7 @@ export class ViewInventoryLedgerMapComponent {
       case 'item':
         return this.nameMap(this.itemStore.catalog());
       case 'tax':
-        return this.nameMap(this.taxStore.items());
+        return this.nameMap(this.taxStore.catalog());
       case 'bankCash':
         return this.nameMap(this.bankCashStore.items());
       default:

@@ -108,7 +108,6 @@ const rowNameClass = (row: TrialBalanceTreeRow): string =>
 const amountCellClass = (row: TrialBalanceTreeRow): string =>
   `trial-balance-amount-cell trial-balance-${row.kind}-cell`;
 
-const reportCatalogPageSize = 1000;
 const softColumnBorder =
   '1px solid color-mix(in srgb, var(--tng-semantic-border-subtle) 72%, var(--tng-semantic-foreground-muted) 28%)';
 const ledgerColumnWidth = '28%';
@@ -192,7 +191,7 @@ export class TrialBalanceComponent implements OnInit {
   });
 
   protected readonly trialBalanceTreeData = computed<readonly TrialBalanceTreeRow[]>(() => {
-    const categories = this.ledgerCategoryStore.items();
+    const categories = this.ledgerCategoryStore.catalog();
     const ledgers = this.ledgerStore.catalog();
     const balances = this.trialBalanceByLedgerId();
     const categoryNodes = new Map<string, TrialBalanceTreeRow>();
@@ -506,17 +505,7 @@ export class TrialBalanceComponent implements OnInit {
   }
 
   private async loadLedgerCategoriesForReport(): Promise<void> {
-    const query = {
-      includes: ['parent'],
-      limit: reportCatalogPageSize,
-      offset: 0,
-    };
-
-    await this.ledgerCategoryStore.loadLedgerCategories(query);
-    const count = this.ledgerCategoryStore.count();
-    if (count > this.ledgerCategoryStore.items().length) {
-      await this.ledgerCategoryStore.loadLedgerCategories({ ...query, limit: count });
-    }
+    await this.ledgerCategoryStore.ensureLedgerCategoryCatalogLoaded();
   }
 
   private async loadLedgersForReport(): Promise<void> {

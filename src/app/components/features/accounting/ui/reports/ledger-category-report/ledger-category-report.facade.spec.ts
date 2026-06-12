@@ -94,11 +94,14 @@ describe('LedgerCategoryReportFacade', () => {
   };
   let router: { navigate: ReturnType<typeof vi.fn> };
   let categoryItems: ReturnType<typeof signal<readonly LedgerCategory[]>>;
+  let categoryCatalog: ReturnType<typeof signal<readonly LedgerCategory[]>>;
   let categoryCount: ReturnType<typeof signal<number>>;
   let categoryError: ReturnType<typeof signal<string | null>>;
   let ledgerCategoryStore: {
+    catalog: typeof categoryCatalog;
     count: typeof categoryCount;
     error: typeof categoryError;
+    ensureLedgerCategoryCatalogLoaded: ReturnType<typeof vi.fn>;
     items: typeof categoryItems;
     loadLedgerCategories: ReturnType<typeof vi.fn>;
   };
@@ -143,12 +146,15 @@ describe('LedgerCategoryReportFacade', () => {
       navigate: vi.fn(() => Promise.resolve(true)),
     };
     categoryItems = signal<readonly LedgerCategory[]>([]);
+    categoryCatalog = signal<readonly LedgerCategory[]>([]);
     categoryCount = signal(0);
     categoryError = signal<string | null>(null);
     ledgerCategoryStore = {
+      catalog: categoryCatalog,
       items: categoryItems,
       count: categoryCount,
       error: categoryError,
+      ensureLedgerCategoryCatalogLoaded: vi.fn(async () => true),
       loadLedgerCategories: vi.fn(async () => undefined),
     };
     permissions = signal<readonly string[]>(options?.permissions ?? []);
@@ -235,10 +241,7 @@ describe('LedgerCategoryReportFacade', () => {
     expect(facade.error()).toBeNull();
     expect(facade.generatedAt()).toBe('');
     expect(facade.tableRows()).toEqual([]);
-    expect(ledgerCategoryStore.loadLedgerCategories).toHaveBeenCalledWith({
-      limit: 1000,
-      offset: 0,
-    });
+    expect(ledgerCategoryStore.ensureLedgerCategoryCatalogLoaded).toHaveBeenCalledWith(false);
   });
 
   it('shows the permission error and does not call the report API when permission is missing', async () => {
@@ -252,7 +255,7 @@ describe('LedgerCategoryReportFacade', () => {
     expect(facade.error()).toBe(
       'You do not have permission to view the ledger category report.',
     );
-    expect(ledgerCategoryStore.loadLedgerCategories).not.toHaveBeenCalled();
+    expect(ledgerCategoryStore.ensureLedgerCategoryCatalogLoaded).not.toHaveBeenCalled();
     expect(ledgerCategoryReportService.getLedgerCategoryReport).not.toHaveBeenCalled();
   });
 

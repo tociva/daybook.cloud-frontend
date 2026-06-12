@@ -108,10 +108,14 @@ export class CreateItemCategoryComponent implements AfterViewInit {
 
   // Filter out the current item from parent options (avoids self-reference in edit)
   protected readonly parentOptions = computed(() =>
-    this.itemCategoryStore.items().filter((c) => c.id !== this.id()),
+    this.itemCategoryStore.catalog().filter((c) => c.id !== this.id()),
   );
   protected readonly filteredParentOptions = computed(() =>
-    this.parentOptions(),
+    this.filterAutocompleteOptions(
+      this.parentOptions(),
+      this.parentOptionLabel,
+      this.parentQuery(),
+    ),
   );
 
   // ── Tax group autocomplete helpers ────────────────────────────────────────
@@ -120,7 +124,11 @@ export class CreateItemCategoryComponent implements AfterViewInit {
   protected readonly taxGroupOptionLabel = (tg: TaxGroup): string => tg.name ?? '';
   protected readonly taxGroupTrackBy = (_index: number, tg: TaxGroup): string => tg.id ?? '';
   protected readonly filteredTaxGroupOptions = computed(() =>
-    this.taxGroupStore.items(),
+    this.filterAutocompleteOptions(
+      this.taxGroupStore.catalog(),
+      this.taxGroupOptionLabel,
+      this.taxGroupQuery(),
+    ),
   );
 
   // ── Validation ────────────────────────────────────────────────────────────
@@ -185,8 +193,8 @@ export class CreateItemCategoryComponent implements AfterViewInit {
     this.itemCategoryStore.clearError();
 
     await Promise.all([
-      this.itemCategoryStore.loadItemCategories({}),
-      this.taxGroupStore.loadTaxGroups({}),
+      this.itemCategoryStore.ensureItemCategoryCatalogLoaded(),
+      this.taxGroupStore.ensureTaxGroupCatalogLoaded(),
     ]);
 
     const id = this.route.snapshot.paramMap.get('id');
@@ -197,7 +205,7 @@ export class CreateItemCategoryComponent implements AfterViewInit {
       return;
     }
 
-    // Instant pre-fill from cache; taxGroupId resolves via already-loaded taxGroupStore.items().
+    // Instant pre-fill from cache; taxGroupId resolves via the loaded tax group catalog.
     const cached = this.itemCategoryStore.selectedItem();
     if (cached?.id === id) {
       this.categoryModel.set({

@@ -1,17 +1,20 @@
+import { createInitialCachedCrudState, type CachedCrudState } from '../../../../../shared/crud';
 import type { ItemCategory } from './item-category.model';
 
 export type ItemCategoryState = Readonly<{
-  itemCategory: Readonly<{
-    count: number;
-    error: string | null;
-    isLoading: boolean;
-    items: readonly ItemCategory[];
-    selectedItem: ItemCategory | null;
-  }>;
+  itemCategory: CachedCrudState<ItemCategory> &
+    Readonly<{
+      count: number;
+      error: string | null;
+      isLoading: boolean;
+      items: readonly ItemCategory[];
+      selectedItem: ItemCategory | null;
+    }>;
 }>;
 
 export const initialItemCategoryState: ItemCategoryState = {
   itemCategory: {
+    ...createInitialCachedCrudState<ItemCategory>(),
     count: 0,
     error: null,
     isLoading: false,

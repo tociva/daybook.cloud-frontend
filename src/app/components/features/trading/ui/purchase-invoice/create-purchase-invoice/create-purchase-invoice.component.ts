@@ -98,8 +98,8 @@ export class CreatePurchaseInvoiceComponent {
       await Promise.all([
         this.vendorStore.loadVendors(this.initialVendorQuery()),
         this.itemStore.loadItems({ includes: ['category'] }),
-        this.taxGroupStore.loadTaxGroups({}),
-        this.taxStore.loadTaxes({}),
+        this.taxGroupStore.ensureTaxGroupCatalogLoaded(),
+        this.taxStore.ensureTaxCatalogLoaded(),
       ]);
       this.draft.markAllItemsLoaded();
 

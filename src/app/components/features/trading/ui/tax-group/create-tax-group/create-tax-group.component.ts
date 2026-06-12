@@ -170,7 +170,7 @@ export class CreateTaxGroupComponent implements AfterViewInit {
    * regardless of what the current search query returns.
    */
   protected readonly taxOptions = computed(() => {
-    const items = this.taxStore.items();
+    const items = this.taxStore.items().length ? this.taxStore.items() : this.taxStore.catalog();
     const cached = this.taxCache();
     if (cached.length === 0) return items;
     const liveIds = new Set(items.map((t) => t.id));
@@ -196,16 +196,12 @@ export class CreateTaxGroupComponent implements AfterViewInit {
     this.id.set(routeId);
 
     if (!routeId) {
-      // Create mode: a small first page is enough for the initial dropdown.
-      await this.taxStore.loadTaxes({});
+      await this.taxStore.ensureTaxCatalogLoaded();
       this.taxGroupStore.clearSelectedItem();
       return;
     }
 
-    // Edit mode: load taxes with a large limit so every selected tax is present
-    // in taxStore.items() when we seed the taxCache below.  The default page
-    // size is only 10, which may not cover all the taxes used in this group.
-    await this.taxStore.loadTaxes({ limit: 500 });
+    await this.taxStore.ensureTaxCatalogLoaded();
 
     // Use cached selectedItem if it matches; skip the API call in that case.
     const cached = this.taxGroupStore.selectedItem();
@@ -220,7 +216,7 @@ export class CreateTaxGroupComponent implements AfterViewInit {
       const selectedIds = new Set(
         (taxGroup.groups ?? []).flatMap((g) => [...(g.taxids ?? []), ...(g.taxes ?? [])]),
       );
-      this.taxCache.set(this.taxStore.items().filter((t) => t.id && selectedIds.has(t.id)));
+      this.taxCache.set(this.taxStore.catalog().filter((t) => t.id && selectedIds.has(t.id)));
     }
   }
 
@@ -235,7 +231,7 @@ export class CreateTaxGroupComponent implements AfterViewInit {
 
   protected onTaxIdsChange(groupIndex: number, ids: readonly string[]): void {
     // Keep the cache up to date so chip labels survive subsequent search queries.
-    const selected = this.taxStore.items().filter((t) => t.id && ids.includes(t.id));
+    const selected = this.taxStore.catalog().filter((t) => t.id && ids.includes(t.id));
     this.taxCache.update((cache) => {
       const cacheIds = new Set(cache.map((t) => t.id));
       const incoming = selected.filter((t) => !cacheIds.has(t.id));

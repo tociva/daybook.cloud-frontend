@@ -39,10 +39,10 @@ export class ViewTaxGroupComponent {
   protected readonly taxGroupStore = inject(TaxGroupStore);
   protected readonly taxStore = inject(TaxStore);
 
-  /** Fast ID→Tax lookup built reactively from taxStore.items(). */
+  /** Fast ID→Tax lookup built reactively from the full tax catalog. */
   private readonly taxMap = computed(() => {
     const map = new Map<string, Tax>();
-    for (const t of this.taxStore.items()) {
+    for (const t of this.taxStore.catalog()) {
       if (t.id) map.set(t.id, t);
     }
     return map;
@@ -57,19 +57,16 @@ export class ViewTaxGroupComponent {
 
     const id = this.route.snapshot.paramMap.get('id');
     const skipGroupFetch = id != null && this.taxGroupStore.selectedItem()?.id === id;
-    // Load taxes with a large limit so getTaxById can resolve every tax used
-    // in the group.  The default page size is only 10 which may not cover all
-    // referenced taxes.
     await Promise.all([
       skipGroupFetch ? Promise.resolve(null) : id ? this.taxGroupStore.loadTaxGroupById(id) : Promise.resolve(null),
-      this.taxStore.loadTaxes({ limit: 500 }),
+      this.taxStore.ensureTaxCatalogLoaded(),
     ]);
   }
 
   /**
    * Returns the Tax for a given ID, or undefined if not yet loaded.
    * Reads from the reactive taxMap so the template re-evaluates automatically
-   * when taxStore.items() updates.
+   * when the tax catalog updates.
    */
   protected getTaxById(id: string): Tax | undefined {
     return this.taxMap().get(id);

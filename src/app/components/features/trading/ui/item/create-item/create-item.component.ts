@@ -164,7 +164,11 @@ export class CreateItemComponent implements AfterViewInit {
   protected readonly createCategorySentinelId = CREATE_CATEGORY_SENTINEL_ID;
 
   protected readonly filteredCategories = computed(() =>
-    this.itemCategoryStore.items(),
+    this.filterAutocompleteOptions(
+      this.itemCategoryStore.catalog(),
+      this.categoryOptionLabel,
+      this.categoryQuery(),
+    ),
   );
 
   /**
@@ -194,7 +198,7 @@ export class CreateItemComponent implements AfterViewInit {
     this.itemStore.clearError();
 
     // Pre-load categories for the autocomplete
-    await this.itemCategoryStore.loadItemCategories({});
+    await this.itemCategoryStore.ensureItemCategoryCatalogLoaded();
 
     const id = this.route.snapshot.paramMap.get('id');
     this.id.set(id);
@@ -265,7 +269,7 @@ export class CreateItemComponent implements AfterViewInit {
     }
 
     // Auto-fill code from the selected category if code field is empty
-    const category = this.itemCategoryStore.items().find((c) => c.id === categoryId);
+    const category = this.itemCategoryStore.catalog().find((c) => c.id === categoryId);
     this.itemModel.update((m) => ({
       ...m,
       categoryId,
@@ -343,4 +347,12 @@ export class CreateItemComponent implements AfterViewInit {
     return typeof event === 'string' ? event.trim().toLowerCase() : '';
   }
 
+  private filterAutocompleteOptions<T>(
+    options: readonly T[],
+    getLabel: (option: T) => string,
+    query: string,
+  ): T[] {
+    if (!query) return [...options];
+    return options.filter((option) => getLabel(option).toLowerCase().includes(query));
+  }
 }

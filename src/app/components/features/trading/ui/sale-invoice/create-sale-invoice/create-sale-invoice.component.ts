@@ -99,8 +99,8 @@ export class CreateSaleInvoiceComponent {
     await Promise.all([
       this.customerStore.loadCustomers(this.initialCustomerQuery()),
       this.itemStore.loadItems({ includes: ['category'] }),
-      this.taxGroupStore.loadTaxGroups({}),
-      this.taxStore.loadTaxes({}),
+      this.taxGroupStore.ensureTaxGroupCatalogLoaded(),
+      this.taxStore.ensureTaxCatalogLoaded(),
     ]);
     // The full item list is now in the store; tell the draft so that the first
     // autocomplete focus doesn't trigger a redundant empty-query fetch.

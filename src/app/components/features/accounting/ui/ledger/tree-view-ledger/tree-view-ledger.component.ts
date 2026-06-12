@@ -34,7 +34,6 @@ type LedgerTreeRow = {
   openingdr: number;
 };
 
-const catalogPageSize = 1000;
 const softColumnBorder =
   '1px solid color-mix(in srgb, var(--tng-semantic-border-subtle) 72%, var(--tng-semantic-foreground-muted) 28%)';
 
@@ -90,7 +89,7 @@ export class TreeViewLedgerComponent implements OnInit {
   );
 
   protected readonly treeData = computed<readonly LedgerTreeRow[]>(() => {
-    const categories = this.ledgerCategoryStore.items();
+    const categories = this.ledgerCategoryStore.catalog();
     const ledgers = this.ledgerStore.catalog();
     const categoryNodes = new Map<string, LedgerTreeRow>();
     const categoriesById = new Map<string, LedgerCategory>();
@@ -388,17 +387,7 @@ export class TreeViewLedgerComponent implements OnInit {
   }
 
   private async loadLedgerCategories(): Promise<void> {
-    const query = {
-      includes: ['parent'],
-      limit: catalogPageSize,
-      offset: 0,
-    };
-
-    await this.ledgerCategoryStore.loadLedgerCategories(query);
-    const count = this.ledgerCategoryStore.count();
-    if (count > this.ledgerCategoryStore.items().length) {
-      await this.ledgerCategoryStore.loadLedgerCategories({ ...query, limit: count });
-    }
+    await this.ledgerCategoryStore.ensureLedgerCategoryCatalogLoaded();
   }
 
   private async loadLedgers(): Promise<void> {

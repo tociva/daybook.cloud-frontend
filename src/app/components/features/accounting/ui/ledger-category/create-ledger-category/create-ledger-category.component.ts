@@ -102,10 +102,14 @@ export class CreateLedgerCategoryComponent implements AfterViewInit {
 
   // ── Parent category autocomplete ──────────────────────────────────────────
   protected readonly parentOptions = computed(() =>
-    this.ledgerCategoryStore.items().filter((c) => c.id !== this.id()),
+    this.ledgerCategoryStore.catalog().filter((c) => c.id !== this.id()),
   );
   protected readonly filteredParentOptions = computed(() =>
-    this.parentOptions(),
+    this.filterAutocompleteOptions(
+      this.parentOptions(),
+      this.parentOptionLabel,
+      this.parentQuery(),
+    ),
   );
   protected readonly parentOptionValue = (cat: LedgerCategory): string => cat.id ?? '';
   protected readonly parentOptionLabel = (cat: LedgerCategory): string => cat.name ?? '';
@@ -175,7 +179,7 @@ export class CreateLedgerCategoryComponent implements AfterViewInit {
   private async loadInitialState(): Promise<void> {
     this.ledgerCategoryStore.clearError();
 
-    await this.ledgerCategoryStore.loadLedgerCategories({});
+    await this.ledgerCategoryStore.ensureLedgerCategoryCatalogLoaded();
 
     const id = this.route.snapshot.paramMap.get('id');
     this.id.set(id);

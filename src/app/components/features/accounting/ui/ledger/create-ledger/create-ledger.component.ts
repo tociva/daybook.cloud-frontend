@@ -90,7 +90,11 @@ export class CreateLedgerComponent implements AfterViewInit {
   protected readonly categoryOptionLabel = (cat: LedgerCategory): string => cat.name ?? '';
   protected readonly categoryTrackBy = (_i: number, cat: LedgerCategory): string => cat.id ?? '';
   protected readonly filteredCategories = computed(() =>
-    this.ledgerCategoryStore.items(),
+    this.filterAutocompleteOptions(
+      this.ledgerCategoryStore.catalog(),
+      this.categoryOptionLabel,
+      this.categoryQuery(),
+    ),
   );
 
   // ── Validation ────────────────────────────────────────────────────────────
@@ -153,7 +157,7 @@ export class CreateLedgerComponent implements AfterViewInit {
   private async loadInitialState(): Promise<void> {
     this.ledgerStore.clearError();
 
-    await this.ledgerCategoryStore.loadLedgerCategories({});
+    await this.ledgerCategoryStore.ensureLedgerCategoryCatalogLoaded();
 
     const id = this.route.snapshot.paramMap.get('id');
     this.id.set(id);
@@ -163,7 +167,7 @@ export class CreateLedgerComponent implements AfterViewInit {
       return;
     }
 
-    // Instant pre-fill from cache; categoryId resolves via already-loaded ledgerCategoryStore.items().
+    // Instant pre-fill from cache; categoryId resolves via the loaded category catalog.
     const cached = this.ledgerStore.selectedItem();
     if (cached?.id === id) {
       this.ledgerModel.set({
@@ -267,6 +271,15 @@ export class CreateLedgerComponent implements AfterViewInit {
     if (!normalized) return 0;
     const amount = Number.parseFloat(normalized);
     return Number.isFinite(amount) ? amount : 0;
+  }
+
+  private filterAutocompleteOptions<T>(
+    options: readonly T[],
+    getLabel: (option: T) => string,
+    query: string,
+  ): T[] {
+    if (!query) return [...options];
+    return options.filter((option) => getLabel(option).toLowerCase().includes(query));
   }
 
 }

@@ -35,7 +35,6 @@ type ItemTreeRow = {
   type: string;
 };
 
-const catalogPageSize = 1000;
 const softColumnBorder =
   '1px solid color-mix(in srgb, var(--tng-semantic-border-subtle) 72%, var(--tng-semantic-foreground-muted) 28%)';
 
@@ -74,7 +73,7 @@ export class TreeViewItemComponent implements OnInit {
   );
 
   protected readonly treeData = computed<readonly ItemTreeRow[]>(() => {
-    const categories = this.itemCategoryStore.items();
+    const categories = this.itemCategoryStore.catalog();
     const items = this.itemStore.catalog();
     const categoryNodes = new Map<string, ItemTreeRow>();
     const categoriesById = new Map<string, ItemCategory>();
@@ -337,17 +336,7 @@ export class TreeViewItemComponent implements OnInit {
   }
 
   private async loadItemCategories(): Promise<void> {
-    const query = {
-      includes: ['parent'],
-      limit: catalogPageSize,
-      offset: 0,
-    };
-
-    await this.itemCategoryStore.loadItemCategories(query);
-    const count = this.itemCategoryStore.count();
-    if (count > this.itemCategoryStore.items().length) {
-      await this.itemCategoryStore.loadItemCategories({ ...query, limit: count });
-    }
+    await this.itemCategoryStore.ensureItemCategoryCatalogLoaded();
   }
 
   private async loadItems(): Promise<void> {

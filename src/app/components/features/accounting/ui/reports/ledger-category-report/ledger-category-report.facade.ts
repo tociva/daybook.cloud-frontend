@@ -22,7 +22,6 @@ import {
   seedMissingReportDateQuery,
 } from '../shared/report-date-query.util';
 
-const reportCatalogPageSize = 1000;
 const permissionError = 'You do not have permission to view the ledger category report.';
 
 const ledgerCategoryReportPath = (ledgercategoryid: string): readonly string[] => [
@@ -100,7 +99,7 @@ export class LedgerCategoryReportFacade {
 
   readonly autocompleteCategories = computed(() => {
     const query = this.categoryQuery().trim().toLowerCase();
-    const items = this.ledgerCategoryStore.items();
+    const items = this.ledgerCategoryStore.catalog();
     const filtered = !query
       ? items
       : items.filter((category) => (category.name ?? '').toLowerCase().includes(query));
@@ -281,7 +280,7 @@ export class LedgerCategoryReportFacade {
     if (map.has(ledgercategoryid)) return [...map.values()];
 
     const fromCatalog = this.ledgerCategoryStore
-      .items()
+      .catalog()
       .find((category) => category.id === ledgercategoryid);
     if (fromCatalog) {
       map.set(ledgercategoryid, fromCatalog);
@@ -324,7 +323,7 @@ export class LedgerCategoryReportFacade {
     }
 
     if (!this.categoryCatalogPromise) {
-      this.categoryCatalogPromise = this.fetchCategoryCatalog().finally(() => {
+      this.categoryCatalogPromise = this.fetchCategoryCatalog(forceReload).finally(() => {
         this.categoryCatalogPromise = null;
       });
     }
@@ -340,16 +339,12 @@ export class LedgerCategoryReportFacade {
     }
   }
 
-  private async fetchCategoryCatalog(): Promise<void> {
-    const query = {
-      limit: reportCatalogPageSize,
-      offset: 0,
-    };
-
-    await this.ledgerCategoryStore.loadLedgerCategories(query);
-    const count = this.ledgerCategoryStore.count();
-    if (count > this.ledgerCategoryStore.items().length) {
-      await this.ledgerCategoryStore.loadLedgerCategories({ ...query, limit: count });
+  private async fetchCategoryCatalog(forceReload: boolean): Promise<void> {
+    const loaded = await this.ledgerCategoryStore.ensureLedgerCategoryCatalogLoaded(forceReload);
+    if (!loaded) {
+      throw new Error(
+        this.ledgerCategoryStore.error() ?? 'Failed to load ledger category catalog.',
+      );
     }
   }
 

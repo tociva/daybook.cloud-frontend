@@ -171,7 +171,7 @@ export class SaleInvoiceDraftStore {
 
   readonly taxModeOptions = computed<SelectOption[]>(() => {
     const seen = new Set<string>(['Intra State', 'Inter State', 'Export', 'Non Taxable']);
-    for (const tg of this.taxGroupStore.items()) {
+    for (const tg of this.taxGroupStore.catalog()) {
       for (const g of tg.groups ?? []) {
         if (g.mode) seen.add(g.mode);
       }
@@ -195,7 +195,7 @@ export class SaleInvoiceDraftStore {
 
   readonly taxColumnCount = computed<number>(() => {
     const opt = this.taxoption();
-    for (const tg of this.taxGroupStore.items()) {
+    for (const tg of this.taxGroupStore.catalog()) {
       for (const g of tg.groups ?? []) {
         if (g.mode === opt) return (g.taxids ?? []).length;
       }
@@ -205,11 +205,11 @@ export class SaleInvoiceDraftStore {
 
   readonly taxColumns = computed<{ name: string; shortname: string }[]>(() => {
     const opt = this.taxoption();
-    for (const tg of this.taxGroupStore.items()) {
+    for (const tg of this.taxGroupStore.catalog()) {
       for (const g of tg.groups ?? []) {
         if (g.mode === opt && (g.taxids ?? []).length > 0) {
           return (g.taxids ?? []).map((taxId) => {
-            const tax = this.taxStore.items().find((t) => t.id === taxId);
+            const tax = this.taxStore.catalog().find((t) => t.id === taxId);
             return { name: tax?.name ?? '', shortname: tax?.shortname ?? taxId.slice(0, 4) };
           });
         }
@@ -785,14 +785,14 @@ export class SaleInvoiceDraftStore {
     const taxGroupId = (item as ItemWithCat).category?.taxgroupid;
     if (!taxGroupId || !taxOption) return [];
 
-    const tg = this.taxGroupStore.items().find((g) => g.id === taxGroupId);
+    const tg = this.taxGroupStore.catalog().find((g) => g.id === taxGroupId);
     if (!tg) return [];
 
     const group = tg?.groups?.find((g) => g.mode === taxOption);
     if (!group) return [];
 
     return this.taxIdsForMode(tg, taxOption).map((taxId) => {
-      const tax = this.taxStore.items().find((t) => t.id === taxId);
+      const tax = this.taxStore.catalog().find((t) => t.id === taxId);
       return {
         taxid: tax?.id ?? taxId,
         name: tax?.name ?? '',
@@ -866,14 +866,14 @@ export class SaleInvoiceDraftStore {
     if (!taxGroupId) return null;
 
     return (
-      this.taxGroupStore.items().find((taxGroup) => taxGroup.id === taxGroupId) ??
+      this.taxGroupStore.catalog().find((taxGroup) => taxGroup.id === taxGroupId) ??
       (await this.taxGroupStore.loadTaxGroupById(taxGroupId))
     );
   }
 
   private async fetchTax(taxId: string): Promise<Tax | null> {
     return (
-      this.taxStore.items().find((tax) => tax.id === taxId) ?? this.taxStore.loadTaxById(taxId)
+      this.taxStore.catalog().find((tax) => tax.id === taxId) ?? this.taxStore.loadTaxById(taxId)
     );
   }
 
