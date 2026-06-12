@@ -9,6 +9,7 @@ import { UserSession } from '../../components/features/management/data/user-sess
 import { UserSessionService } from '../../components/features/management/data/user-session/user-session.service';
 import { UserSessionStore } from '../../components/features/management/data/user-session/user-session.store';
 import { getApiErrorMessage, isApiErrorStatus } from '../api/api-error.util';
+import { CatalogCacheCoordinatorService } from '../cache/catalog-cache-coordinator.service';
 import { LedgerCachePreferencesStore } from '../preferences/ledger-cache-preferences.store';
 import { AppThemeStore } from '../theme/app-theme.store';
 import { AppStartupStatus, AppSystemModel } from './app-system.model';
@@ -107,6 +108,7 @@ export const AppSystemStore = signalStore(
       userSessionStore = inject(UserSessionStore),
       appThemeStore = inject(AppThemeStore),
       ledgerCachePrefsStore = inject(LedgerCachePreferencesStore),
+      catalogCacheCoordinator = inject(CatalogCacheCoordinatorService),
     ) => {
       function updateStartupStatus(
         status: AppStartupStatus,
@@ -363,6 +365,7 @@ export const AppSystemStore = signalStore(
           }
 
           try {
+            await catalogCacheCoordinator.clearAllPersistedCatalogsForUser();
             await userSessionService.clearUserSession(config.apiBaseUrl);
           } catch {
             // Logout should continue even if the backend session is already gone.

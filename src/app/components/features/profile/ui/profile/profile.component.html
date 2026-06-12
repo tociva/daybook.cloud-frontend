@@ -1,6 +1,5 @@
 <main class="profile-page">
   <div class="profile-card">
-
     <!-- Identity -->
     <div class="profile-identity">
       <tng-avatar [fallback]="userDisplayName()" size="lg" class="profile-avatar" />
@@ -19,7 +18,6 @@
       <h2 class="profile-section-title">Appearance</h2>
 
       <form (submit)="submitAppearance($event)" novalidate class="appearance-form">
-
         <!-- Color mode -->
         <tng-form-field labelPosition="above">
           <tng-label>Color Mode</tng-label>
@@ -70,14 +68,37 @@
               (checkedChange)="onLedgerCacheChange($event)"
             />
             <span class="toggle-copy">
-              <span class="toggle-label">Cache ledgers in memory</span>
+              <span class="toggle-label">Cache catalog data</span>
               <span class="toggle-description">
-                Load all ledgers once per session for faster lists and journals. Turn off to always
-                fetch from the server.
+                Keep ledgers, categories, customers, vendors, items, and taxes available across
+                browser refreshes for the active branch and fiscal year.
               </span>
             </span>
           </label>
         </tng-form-field>
+
+        <div class="cache-refresh-row">
+          <span class="toggle-copy">
+            <span class="toggle-label">Cached backend data</span>
+            <span class="toggle-description">
+              Fetch fresh catalog data for the current organization, branch, and fiscal year.
+            </span>
+          </span>
+          <tng-button
+            type="button"
+            appearance="outline"
+            [disabled]="isRefreshingCatalogCache() || !draftLedgerCacheEnabled()"
+            (click)="refreshCatalogCache()"
+          >
+            @if (isRefreshingCatalogCache()) {
+              <tng-icon icon="loader-circle" aria-hidden="true" class="spin" />
+              Refreshing
+            } @else {
+              <tng-icon icon="refresh-cw" aria-hidden="true" />
+              Refresh
+            }
+          </tng-button>
+        </div>
 
         <!-- Error -->
         @if (appearanceSaveError()) {
@@ -94,12 +115,25 @@
           </p>
         }
 
+        @if (catalogCacheRefreshError()) {
+          <p class="form-error" role="alert">
+            <tng-icon icon="circle-alert" aria-hidden="true" />
+            {{ catalogCacheRefreshError() }}
+          </p>
+        }
+
         <!-- Actions -->
         <div class="form-actions">
           @if (ledgerCacheSaveSuccess()) {
             <span class="save-feedback" role="status">
               <tng-icon icon="check" aria-hidden="true" />
               Cache updated
+            </span>
+          }
+          @if (catalogCacheRefreshSuccess()) {
+            <span class="save-feedback" role="status">
+              <tng-icon icon="check" aria-hidden="true" />
+              Cache refreshed
             </span>
           }
           @if (isSavingLedgerCache()) {
@@ -129,9 +163,7 @@
             }
           </tng-button>
         </div>
-
       </form>
     </section>
-
   </div>
 </main>

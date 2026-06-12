@@ -85,6 +85,67 @@ describe('cached CRUD helpers', () => {
     expect(saved).toEqual(catalog);
   });
 
+  it('hydrates from persisted catalog before fetching from the backend', async () => {
+    let loaded = false;
+    let saved: readonly TestEntity[] = [];
+    const persisted = catalog.slice(0, 1);
+    const fetchCatalog = vi.fn(async () => catalog);
+    const loadCatalog = vi.fn(async () => persisted);
+    const persistCatalog = vi.fn(async () => undefined);
+    const loader = createCachedCrudLoader<TestEntity>({
+      fetchCatalog,
+      isEnabled: () => true,
+      isLoaded: () => loaded,
+      loadCatalog,
+      persistCatalog,
+      saveCatalog: (items) => {
+        saved = items;
+        loaded = true;
+      },
+    });
+
+    await expect(loader.ensureLoaded()).resolves.toBe(true);
+
+    expect(loadCatalog).toHaveBeenCalledTimes(1);
+    expect(fetchCatalog).not.toHaveBeenCalled();
+    expect(persistCatalog).not.toHaveBeenCalled();
+    expect(saved).toEqual(persisted);
+  });
+
+  it('persists backend catalog when no persisted catalog is available', async () => {
+    let loaded = false;
+    const persistCatalog = vi.fn(async () => undefined);
+    const loader = createCachedCrudLoader<TestEntity>({
+      fetchCatalog: vi.fn(async () => catalog),
+      isEnabled: () => true,
+      isLoaded: () => loaded,
+      loadCatalog: vi.fn(async () => null),
+      persistCatalog,
+      saveCatalog: () => {
+        loaded = true;
+      },
+    });
+
+    await expect(loader.ensureLoaded()).resolves.toBe(true);
+
+    expect(persistCatalog).toHaveBeenCalledWith(catalog);
+  });
+
+  it('clears persisted catalog when pending loads are cleared', () => {
+    const clearCatalog = vi.fn(async () => undefined);
+    const loader = createCachedCrudLoader<TestEntity>({
+      clearCatalog,
+      fetchCatalog: vi.fn(async () => catalog),
+      isEnabled: () => true,
+      isLoaded: () => false,
+      saveCatalog: () => undefined,
+    });
+
+    loader.clearPendingLoad();
+
+    expect(clearCatalog).toHaveBeenCalledTimes(1);
+  });
+
   it('ignores in-flight catalog loads after they are cleared', async () => {
     let loaded = false;
     let resolveCatalog: (items: readonly TestEntity[]) => void = () => undefined;

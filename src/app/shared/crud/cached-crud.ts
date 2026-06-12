@@ -32,9 +32,13 @@ export type CachedCrudLoader = Readonly<{
 }>;
 
 export type CachedCrudLoaderOptions<TEntity> = Readonly<{
+  canLoadCatalog?: () => boolean;
+  clearCatalog?: () => Promise<void>;
   fetchCatalog: () => Promise<readonly TEntity[]>;
   isEnabled: () => boolean;
   isLoaded: () => boolean;
+  loadCatalog?: () => Promise<readonly TEntity[] | null>;
+  persistCatalog?: (catalog: readonly TEntity[]) => Promise<void>;
   saveCatalog: (catalog: readonly TEntity[]) => void;
 }>;
 
@@ -73,6 +77,7 @@ export function createCachedCrudLoader<TEntity>(
     clearPendingLoad(): void {
       loadGeneration += 1;
       loadPromise = null;
+      void options.clearCatalog?.();
     },
 
     async ensureLoaded(): Promise<boolean> {
@@ -82,8 +87,17 @@ export function createCachedCrudLoader<TEntity>(
       if (!loadPromise) {
         const generation = loadGeneration;
         loadPromise = (async () => {
+          if (options.loadCatalog && (options.canLoadCatalog?.() ?? true)) {
+            const persistedCatalog = await options.loadCatalog();
+            if (persistedCatalog && generation === loadGeneration && options.isEnabled()) {
+              options.saveCatalog(persistedCatalog);
+              return;
+            }
+          }
+
           const catalog = await options.fetchCatalog();
           if (generation !== loadGeneration || !options.isEnabled()) return;
+          await options.persistCatalog?.(catalog).catch(() => undefined);
           options.saveCatalog(catalog);
         })();
       }

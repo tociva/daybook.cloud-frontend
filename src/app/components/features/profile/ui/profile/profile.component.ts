@@ -10,6 +10,7 @@ import {
   TngSwitchComponent,
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
+import { CatalogCacheCoordinatorService } from '../../../../../core/cache/catalog-cache-coordinator.service';
 import { LedgerCachePreferencesStore } from '../../../../../core/preferences/ledger-cache-preferences.store';
 import type { AppThemeName, ThemeOption } from '../../../../../core/theme/app-theme.store';
 import { AppThemeStore, THEME_OPTIONS } from '../../../../../core/theme/app-theme.store';
@@ -39,6 +40,7 @@ type AppearanceFormModel = {
 })
 export class ProfileComponent implements OnDestroy {
   private readonly themeStore = inject(AppThemeStore);
+  private readonly catalogCacheCoordinator = inject(CatalogCacheCoordinatorService);
   private readonly ledgerCachePrefs = inject(LedgerCachePreferencesStore);
   private readonly userSessionStore = inject(UserSessionStore);
   private readonly userProfileService = inject(UserProfileService);
@@ -76,6 +78,9 @@ export class ProfileComponent implements OnDestroy {
   protected readonly isSavingLedgerCache = signal(false);
   protected readonly ledgerCacheSaveSuccess = signal(false);
   protected readonly ledgerCacheSaveError = signal<string | null>(null);
+  protected readonly isRefreshingCatalogCache = signal(false);
+  protected readonly catalogCacheRefreshSuccess = signal(false);
+  protected readonly catalogCacheRefreshError = signal<string | null>(null);
 
   protected readonly themeOptions: ThemeOption[] = THEME_OPTIONS;
   protected readonly getThemeLabel = (opt: ThemeOption) => opt.label;
@@ -115,6 +120,9 @@ export class ProfileComponent implements OnDestroy {
     try {
       await this.userProfileService.updateProfile({ ledgerCache: enabled });
       this.ledgerCachePrefs.commit();
+      if (!enabled) {
+        await this.catalogCacheCoordinator.clearAllCatalogs();
+      }
       this.savedLedgerCacheEnabled = enabled;
       this.ledgerCacheSaveSuccess.set(true);
       setTimeout(() => this.ledgerCacheSaveSuccess.set(false), 2500);
@@ -126,6 +134,30 @@ export class ProfileComponent implements OnDestroy {
       );
     } finally {
       this.isSavingLedgerCache.set(false);
+    }
+  }
+
+  protected async refreshCatalogCache(): Promise<void> {
+    if (this.isRefreshingCatalogCache()) return;
+
+    this.isRefreshingCatalogCache.set(true);
+    this.catalogCacheRefreshSuccess.set(false);
+    this.catalogCacheRefreshError.set(null);
+
+    try {
+      const refreshed = await this.catalogCacheCoordinator.refreshAllCatalogs();
+      if (!refreshed) {
+        throw new Error('Some cached data could not be refreshed.');
+      }
+
+      this.catalogCacheRefreshSuccess.set(true);
+      setTimeout(() => this.catalogCacheRefreshSuccess.set(false), 2500);
+    } catch (err) {
+      this.catalogCacheRefreshError.set(
+        err instanceof Error ? err.message : 'Failed to refresh cached data.',
+      );
+    } finally {
+      this.isRefreshingCatalogCache.set(false);
     }
   }
 
@@ -163,7 +195,9 @@ export class ProfileComponent implements OnDestroy {
       this.appearanceSaveSuccess.set(true);
       setTimeout(() => this.appearanceSaveSuccess.set(false), 2500);
     } catch (err) {
-      this.appearanceSaveError.set(err instanceof Error ? err.message : 'Failed to save appearance.');
+      this.appearanceSaveError.set(
+        err instanceof Error ? err.message : 'Failed to save appearance.',
+      );
     } finally {
       this.isSavingAppearance.set(false);
     }

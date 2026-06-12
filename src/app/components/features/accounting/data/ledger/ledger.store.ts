@@ -8,6 +8,7 @@ import {
   withState,
 } from '@ngrx/signals';
 import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
+import { CatalogCacheService } from '../../../../../core/cache/catalog-cache.service';
 import { LedgerCachePreferencesStore } from '../../../../../core/preferences/ledger-cache-preferences.store';
 import {
   createCachedCrudLoader,
@@ -25,6 +26,7 @@ import { initialLedgerState } from './ledger.state';
 
 const CATALOG_INCLUDES = ['category'] as const;
 const CATALOG_INCLUDE_SET = new Set<string>(CATALOG_INCLUDES);
+const CACHE_NAME = 'ledgers';
 
 export const LedgerStore = signalStore(
   { providedIn: 'root' },
@@ -40,7 +42,12 @@ export const LedgerStore = signalStore(
     selectedItem: computed(() => ledger().selectedItem),
   })),
   withMethods(
-    (store, service = inject(LedgerService), cachePrefs = inject(LedgerCachePreferencesStore)) => {
+    (
+      store,
+      service = inject(LedgerService),
+      cachePrefs = inject(LedgerCachePreferencesStore),
+      catalogCacheStore = inject(CatalogCacheService),
+    ) => {
       let activeViewQuery: LedgerListQuery | undefined;
 
       const setLoading = (): void => {
@@ -104,9 +111,13 @@ export const LedgerStore = signalStore(
       };
 
       const catalogCache = createCachedCrudLoader<Ledger>({
+        canLoadCatalog: () => catalogCacheStore.currentScope() !== null,
+        clearCatalog: () => catalogCacheStore.clearCatalog(CACHE_NAME),
         fetchCatalog: fetchFullCatalog,
         isEnabled: () => cachePrefs.enabled(),
         isLoaded: () => store.ledger().catalogLoaded,
+        loadCatalog: () => catalogCacheStore.loadCatalog<Ledger>(CACHE_NAME),
+        persistCatalog: (catalog) => catalogCacheStore.persistCatalog(CACHE_NAME, catalog),
         saveCatalog,
       });
 
@@ -119,6 +130,7 @@ export const LedgerStore = signalStore(
             catalog: upsertCachedEntity(state.ledger.catalog, ledger),
           },
         }));
+        void catalogCacheStore.persistCatalog(CACHE_NAME, store.ledger().catalog);
       };
 
       const readIncludeRelation = (include: Lb4Include): string | null => {
@@ -196,6 +208,7 @@ export const LedgerStore = signalStore(
         if (store.ledger().catalogLoaded) return true;
 
         const catalog = await fetchFullCatalog();
+        await catalogCacheStore.persistCatalog(CACHE_NAME, catalog);
         saveCatalog(catalog);
         return true;
       };
@@ -273,6 +286,7 @@ export const LedgerStore = signalStore(
                 },
               }));
               reapplyCachedView();
+              void catalogCacheStore.persistCatalog(CACHE_NAME, store.ledger().catalog);
             } else {
               patchState(store, (state) => ({
                 ledger: {
@@ -307,6 +321,7 @@ export const LedgerStore = signalStore(
                 },
               }));
               reapplyCachedView();
+              void catalogCacheStore.persistCatalog(CACHE_NAME, store.ledger().catalog);
             } else {
               patchState(store, (state) => ({
                 ledger: {
@@ -408,6 +423,7 @@ export const LedgerStore = signalStore(
                 },
               }));
               reapplyCachedView();
+              void catalogCacheStore.persistCatalog(CACHE_NAME, store.ledger().catalog);
             } else {
               patchState(store, (state) => ({
                 ledger: {
