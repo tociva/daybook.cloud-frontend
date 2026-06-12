@@ -98,7 +98,7 @@
       <tng-card variant="outline" tone="neutral" padding="lg">
         <tng-card-header>
           <tng-card-title>Additional Details</tng-card-title>
-          <tng-card-description>Barcode, ledger mappings, and optional notes.</tng-card-description>
+          <tng-card-description>Barcode and optional notes.</tng-card-description>
         </tng-card-header>
 
         <tng-card-content>
@@ -110,32 +110,6 @@
                   id="item-barcode"
                   placeholder="1234567890123"
                   [formField]="itemForm.barcode"
-                />
-              </tng-form-field>
-            </div>
-
-            <div class="field">
-              <!-- spacer -->
-            </div>
-
-            <div class="field">
-              <tng-form-field labelPosition="above">
-                <tng-label forId="item-purchase-ledger">Purchase Ledger</tng-label>
-                <tng-input
-                  id="item-purchase-ledger"
-                  placeholder="Purchases A/c"
-                  [formField]="itemForm.purchaseledger"
-                />
-              </tng-form-field>
-            </div>
-
-            <div class="field">
-              <tng-form-field labelPosition="above">
-                <tng-label forId="item-sales-ledger">Sales Ledger</tng-label>
-                <tng-input
-                  id="item-sales-ledger"
-                  placeholder="Sales A/c"
-                  [formField]="itemForm.salesledger"
                 />
               </tng-form-field>
             </div>

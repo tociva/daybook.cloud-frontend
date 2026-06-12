@@ -22,7 +22,7 @@ import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-
 import { ItemCategoryStore } from '../../../data/item-category';
 import type { ItemCategory } from '../../../data/item-category';
 import { ItemFacade, ItemStore } from '../../../data/item';
-import type { Item, ItemPayload } from '../../../data/item';
+import type { ItemPayload } from '../../../data/item';
 import { DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS } from '../../../../../../util/constants';
 
 /** Sentinel id used to represent the "Create new category" action inside the options list. */
@@ -41,8 +41,6 @@ type ItemFormModel = {
   categoryId: string;
   barcode: string;
   description: string;
-  purchaseledger: string;
-  salesledger: string;
 };
 
 @Component({
@@ -87,8 +85,6 @@ export class CreateItemComponent implements AfterViewInit {
     categoryId: '',
     barcode: '',
     description: '',
-    purchaseledger: '',
-    salesledger: '',
   });
   protected readonly itemForm = form(this.itemModel);
 
@@ -121,11 +117,7 @@ export class CreateItemComponent implements AfterViewInit {
     const identityCompleted =
       m.name.trim().length > 0 && m.code.trim().length > 0 && m.displayname.trim().length > 0;
     const categoryCompleted = m.categoryId.trim().length > 0;
-    const detailsCompleted =
-      m.barcode.trim().length > 0 ||
-      m.description.trim().length > 0 ||
-      m.purchaseledger.trim().length > 0 ||
-      m.salesledger.trim().length > 0;
+    const detailsCompleted = m.barcode.trim().length > 0 || m.description.trim().length > 0;
 
     return [
       {
@@ -143,7 +135,7 @@ export class CreateItemComponent implements AfterViewInit {
       {
         value: 'details',
         label: 'Details',
-        description: 'Barcode, ledgers, and notes',
+        description: 'Barcode and notes',
         completed: detailsCompleted,
       },
     ] as const;
@@ -220,8 +212,6 @@ export class CreateItemComponent implements AfterViewInit {
           categoryId: newCategory?.id ?? draft.category?.id ?? draft.categoryid ?? '',
           barcode: draft.barcode ?? '',
           description: draft.description ?? '',
-          purchaseledger: draft.purchaseledger ?? '',
-          salesledger: draft.salesledger ?? '',
         });
       }
       return;
@@ -237,8 +227,6 @@ export class CreateItemComponent implements AfterViewInit {
         categoryId: cached.category?.id ?? cached.categoryid ?? '',
         barcode: cached.barcode ?? '',
         description: cached.description ?? '',
-        purchaseledger: cached.purchaseledger ?? '',
-        salesledger: cached.salesledger ?? '',
       });
       return;
     }
@@ -252,8 +240,6 @@ export class CreateItemComponent implements AfterViewInit {
         categoryId: item.category?.id ?? item.categoryid ?? '',
         barcode: item.barcode ?? '',
         description: item.description ?? '',
-        purchaseledger: item.purchaseledger ?? '',
-        salesledger: item.salesledger ?? '',
       });
     }
   }
@@ -307,8 +293,6 @@ export class CreateItemComponent implements AfterViewInit {
       categoryid: m.categoryId,
       ...(m.barcode ? { barcode: m.barcode } : {}),
       ...(m.description ? { description: m.description } : {}),
-      ...(m.purchaseledger ? { purchaseledger: m.purchaseledger } : {}),
-      ...(m.salesledger ? { salesledger: m.salesledger } : {}),
     });
     void this.router.navigate(['/app/trading/item-category/create'], {
       queryParams: { burl: this.router.url },
@@ -331,8 +315,6 @@ export class CreateItemComponent implements AfterViewInit {
       categoryid: m.categoryId,
       ...(m.barcode.trim() ? { barcode: m.barcode.trim() } : {}),
       ...(m.description.trim() ? { description: m.description.trim() } : {}),
-      ...(m.purchaseledger.trim() ? { purchaseledger: m.purchaseledger.trim() } : {}),
-      ...(m.salesledger.trim() ? { salesledger: m.salesledger.trim() } : {}),
     };
 
     const id = this.id();
