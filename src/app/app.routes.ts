@@ -9,6 +9,7 @@ import { SubscriptionSelectionComponent } from './components/features/management
 export const routes: Routes = [
   { path: '', pathMatch: 'full', component: EmptyRouteComponent },
   { path: 'auth/callback', component: CallbackComponent },
+  { path: 'auth/logout', component: EmptyRouteComponent },
   { path: 'auth/silent-renew', component: SilentRenewComponent },
   { path: 'app/dashboard', component: DashboardComponent },
   { path: 'app/management/subscription', component: SubscriptionSelectionComponent },

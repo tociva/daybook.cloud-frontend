@@ -66,6 +66,41 @@ export class LandingShellComponent {
       } as const;
     }
 
+    if (status === 'logging-out') {
+      return {
+        context: 'We are closing your Daybook Cloud session and redirecting you to sign out.',
+        message: 'Please wait while we log you out.',
+        showProgress: true,
+        title: 'Logging out',
+        tone: 'info',
+      } as const;
+    }
+
+    if (status === 'logged-out') {
+      return {
+        action: 'login',
+        buttonLabel: 'Login again',
+        context: 'Your Daybook Cloud session has been closed on this browser.',
+        message: 'Logout successful.',
+        showProgress: false,
+        title: 'You are logged out',
+        tone: 'success',
+      } as const;
+    }
+
+    if (status === 'logout-error') {
+      return {
+        action: 'login',
+        buttonLabel: 'Login again',
+        context:
+          'Your local Daybook Cloud session was cleared. You can start a fresh login when ready.',
+        message: this.startupError() ?? 'Provider logout could not be completed.',
+        showProgress: false,
+        title: 'Logout finished locally',
+        tone: 'warning',
+      } as const;
+    }
+
     if (status === 'user-session-error') {
       return {
         action: 'retry',
@@ -82,7 +117,7 @@ export class LandingShellComponent {
   });
 
   protected handleAuthNoticeAction(action: AuthNoticeAction): void {
-    if (action === 'retry') {
+    if (action === 'retry' || action === 'login') {
       this.retryAuthentication();
       return;
     }

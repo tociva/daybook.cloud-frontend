@@ -31,6 +31,9 @@ function isConfigLoadedStatus(status: AppStartupStatus): boolean {
     status === 'checking-session' ||
     status === 'session-active' ||
     status === 'session-missing' ||
+    status === 'logging-out' ||
+    status === 'logged-out' ||
+    status === 'logout-error' ||
     status === 'redirecting-to-login' ||
     status === 'redirecting-to-bootstrap' ||
     status === 'redirecting-to-subscription' ||
@@ -283,6 +286,13 @@ export const AppSystemStore = signalStore(
             return;
           }
 
+          if (authService.isPostLogoutRedirectRoute(config.auth)) {
+            authStore.resetSessionState();
+            userSessionStore.resetSession();
+            updateStartupStatus('logged-out');
+            return;
+          }
+
           if (loginErrorMessage) {
             updateStartupStatus('login-error', loginErrorMessage);
             return;
@@ -358,9 +368,15 @@ export const AppSystemStore = signalStore(
           }
         },
         async logout(): Promise<void> {
+          updateStartupStatus('logging-out');
+
           const config = appConfigStore.config() ?? (await appConfigStore.load());
 
           if (!config) {
+            updateStartupStatus(
+              'logout-error',
+              appConfigStore.error() ?? 'Unable to load auth configuration for logout.',
+            );
             return;
           }
 
@@ -373,7 +389,17 @@ export const AppSystemStore = signalStore(
             userSessionStore.resetSession();
           }
 
-          await authService.startLogout(config.auth);
+          try {
+            await authService.startLogout(config.auth);
+          } catch (error) {
+            updateStartupStatus(
+              'logout-error',
+              asErrorMessage(
+                error,
+                'Your local Daybook Cloud session was closed, but provider sign-out could not be completed.',
+              ),
+            );
+          }
         },
         async handleLoginCallback(): Promise<void> {
           const config = await loadConfigForStartup();

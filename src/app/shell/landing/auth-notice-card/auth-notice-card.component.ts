@@ -10,11 +10,11 @@ import {
   TngProgressBarComponent,
 } from '@tailng-ui/components';
 
-export type AuthNoticeAction = 'logout' | 'retry';
+export type AuthNoticeAction = 'login' | 'logout' | 'retry';
 
 export type AuthNotice = Readonly<{
-  action: AuthNoticeAction;
-  buttonLabel: string;
+  action?: AuthNoticeAction;
+  buttonLabel?: string;
   context: string;
   message: string;
   showProgress: boolean;

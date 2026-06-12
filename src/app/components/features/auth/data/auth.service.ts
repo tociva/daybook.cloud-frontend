@@ -7,6 +7,7 @@ const AUTH_PROVIDER_PAUSE_KEY_PREFIX = 'daybook.auth.provider-paused.';
 const AUTH_LOGIN_ERROR_KEY_PREFIX = 'daybook.auth.login-error.';
 const AUTH_RETURN_URI_KEY_PREFIX = 'daybook.auth.return-uri.';
 const DEFAULT_POST_LOGIN_RETURN_PATH = '/handle-login-return';
+const DEFAULT_POST_LOGOUT_PATH = '/auth/logout';
 const DEFAULT_POST_LOGIN_ROUTE = '/app/dashboard';
 
 type OidcErrorResponseLike = Error & {
@@ -83,6 +84,12 @@ export class AuthService {
     return window.location.pathname === DEFAULT_POST_LOGIN_RETURN_PATH;
   }
 
+  isPostLogoutRedirectRoute(authConfig: AuthConfig): boolean {
+    return (
+      this.matchesPath(authConfig.postLogoutRedirect) || this.matchesPath(DEFAULT_POST_LOGOUT_PATH)
+    );
+  }
+
   isAuthServerRoute(): boolean {
     const path = this.normalizePath(window.location.pathname);
     const queryParams = new URLSearchParams(window.location.search);
@@ -139,6 +146,7 @@ export class AuthService {
     await manager.removeUser();
     await manager.signoutRedirect({
       id_token_hint: user?.id_token,
+      post_logout_redirect_uri: authConfig.postLogoutRedirect,
     });
   }
 

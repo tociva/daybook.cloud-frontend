@@ -30,7 +30,15 @@ export class App {
   protected readonly showTopProgress = computed(() => this.progressStore.isVisible());
   protected readonly showLanding = computed(() => {
     const path = this.currentUrl().split('?')[0] ?? '/';
-    return path === '/' || path === '/auth/callback' || path === '/auth/silent-renew';
+    return (
+      this.startupStatus() === 'logging-out' ||
+      this.startupStatus() === 'logged-out' ||
+      this.startupStatus() === 'logout-error' ||
+      path === '/' ||
+      path === '/auth/callback' ||
+      path === '/auth/logout' ||
+      path === '/auth/silent-renew'
+    );
   });
   private lastShownToastId = 0;
 

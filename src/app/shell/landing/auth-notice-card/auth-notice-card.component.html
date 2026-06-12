@@ -14,17 +14,19 @@
           ></tng-progress-bar>
         }
       </tng-card-content>
-      <tng-card-footer>
-        <tng-card-actions>
-          <button
-            class="auth-notice-action"
-            type="button"
-            (click)="noticeAction.emit(noticeValue.action)"
-          >
-            {{ noticeValue.buttonLabel }}
-          </button>
-        </tng-card-actions>
-      </tng-card-footer>
+      @if (noticeValue.action && noticeValue.buttonLabel) {
+        <tng-card-footer>
+          <tng-card-actions>
+            <button
+              class="auth-notice-action"
+              type="button"
+              (click)="noticeAction.emit(noticeValue.action)"
+            >
+              {{ noticeValue.buttonLabel }}
+            </button>
+          </tng-card-actions>
+        </tng-card-footer>
+      }
     </tng-card>
   </div>
 }
