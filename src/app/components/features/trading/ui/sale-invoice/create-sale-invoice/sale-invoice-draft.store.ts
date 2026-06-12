@@ -606,8 +606,7 @@ export class SaleInvoiceDraftStore {
       ),
     );
 
-    const enrichedItem = await this.withFetchedCategory(item);
-    const taxes = await this.buildTaxesForItem(enrichedItem, this.taxoption());
+    const taxes = await this.buildTaxesForItem(item, this.taxoption());
 
     this.items.update((rows) =>
       rows.map((row, i) => {
@@ -615,10 +614,10 @@ export class SaleInvoiceDraftStore {
 
         return this.calcRow({
           ...row,
-          item: enrichedItem,
-          itemid: enrichedItem.id ?? '',
-          name: enrichedItem.name,
-          code: enrichedItem.code ?? '',
+          item,
+          itemid: item.id ?? '',
+          name: item.name,
+          code: item.code ?? '',
           taxes,
         });
       }),
@@ -782,8 +781,8 @@ export class SaleInvoiceDraftStore {
   // ── Private helpers ───────────────────────────────────────────────────────
 
   private buildTaxes(item: Item, taxOption: string): TaxRow[] {
-    type ItemWithCat = Item & { category?: { taxgroupid?: string } };
-    const taxGroupId = (item as ItemWithCat).category?.taxgroupid;
+    const category = this.resolveItemCategory(item);
+    const taxGroupId = category?.taxgroupid || category?.taxgroup?.id;
     if (!taxGroupId || !taxOption) return [];
 
     const tg = this.taxGroupStore.catalog().find((g) => g.id === taxGroupId);
@@ -810,22 +809,8 @@ export class SaleInvoiceDraftStore {
     this.items.update((rows) => rows.map((row, i) => (i === rowIndex ? { ...row, taxes } : row)));
   }
 
-  private async withFetchedCategory(item: Item): Promise<Item> {
-    const categoryId = item.categoryid || item.category?.id;
-    if (!categoryId) return item;
-
-    const category =
-      (await this.itemCategoryStore.loadItemCategoryById(categoryId, {
-        includes: ['taxgroup'],
-      })) ??
-      item.category ??
-      null;
-
-    return category ? { ...item, category } : item;
-  }
-
   private async buildTaxesForItem(item: Item, taxOption: string): Promise<TaxRow[]> {
-    const category = item.category ?? (await this.fetchItemCategory(item));
+    const category = this.resolveItemCategory(item);
     const taxGroup = category ? await this.fetchTaxGroup(category) : null;
     if (!taxGroup || !taxOption) return [];
 
@@ -845,17 +830,14 @@ export class SaleInvoiceDraftStore {
     });
   }
 
-  private async fetchItemCategory(item: Item): Promise<ItemCategory | null> {
+  private resolveItemCategory(item: Item): ItemCategory | null {
     const categoryId = item.categoryid || item.category?.id;
     if (!categoryId) return item.category ?? null;
 
-    return (
-      (await this.itemCategoryStore.loadItemCategoryById(categoryId, {
-        includes: ['taxgroup'],
-      })) ??
-      item.category ??
-      null
-    );
+    const cached = this.itemCategoryStore.catalog().find((category) => category.id === categoryId);
+    if (!cached) return item.category ?? null;
+
+    return item.category ? { ...item.category, ...cached } : cached;
   }
 
   private async fetchTaxGroup(category: ItemCategory): Promise<TaxGroup | null> {
