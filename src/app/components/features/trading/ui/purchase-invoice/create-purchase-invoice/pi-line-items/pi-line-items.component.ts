@@ -152,6 +152,10 @@ export class PiLineItemsComponent {
     this.focusTableControl(event, 'textarea');
   }
 
+  protected normalizeRoundoffOnBlur(): void {
+    this.draft.roundoff.set(this.normalizeRoundoffValue(this.draft.roundoff()));
+  }
+
   private focusTableControl(event: MouseEvent, selector: string): void {
     if (event.defaultPrevented) return;
 
@@ -163,6 +167,14 @@ export class PiLineItemsComponent {
     if (interactiveTarget !== null && currentTarget.contains(interactiveTarget)) return;
 
     currentTarget.querySelector<HTMLElement>(selector)?.focus();
+  }
+
+  private normalizeRoundoffValue(value: string): string {
+    const trimmed = value.trim();
+    if (trimmed === '' || trimmed === '-' || trimmed === '.' || trimmed === '-.') return '0';
+
+    const numericValue = Number(trimmed);
+    return Number.isFinite(numericValue) ? String(numericValue) : '0';
   }
 
   focusItemAutocomplete(rowIndex: number): void {

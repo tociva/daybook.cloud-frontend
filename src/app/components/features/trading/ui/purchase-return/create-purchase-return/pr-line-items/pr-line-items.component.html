@@ -277,13 +277,13 @@
             {{ draft.roundoff() }}
           } @else {
             <tng-input
-              type="number"
+              type="text"
               inputmode="decimal"
-              step="0.01"
               fullWidth
               ariaLabel="Round off"
               [value]="draft.roundoff()"
               (valueChange)="draft.roundoff.set($event)"
+              (blur)="normalizeRoundoffOnBlur()"
             />
           }
         </td>
