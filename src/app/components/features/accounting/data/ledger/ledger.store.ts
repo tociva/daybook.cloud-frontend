@@ -12,6 +12,7 @@ import { LedgerCachePreferencesStore } from '../../../../../core/preferences/led
 import {
   createCachedCrudLoader,
   findCachedEntityById,
+  type Lb4Include,
   removeCachedEntityById,
   updateCachedEntityById,
   upsertCachedEntity,
@@ -23,11 +24,14 @@ import { LedgerService } from './ledger.service';
 import { initialLedgerState } from './ledger.state';
 
 const CATALOG_INCLUDES = ['category'] as const;
+const CATALOG_INCLUDE_SET = new Set<string>(CATALOG_INCLUDES);
 
 export const LedgerStore = signalStore(
   { providedIn: 'root' },
   withState(initialLedgerState),
   withComputed(({ ledger }) => ({
+    catalog: computed(() => ledger().catalog),
+    catalogLoaded: computed(() => ledger().catalogLoaded),
     catalogTotalCount: computed(() => ledger().catalogTotalCount),
     count: computed(() => ledger().count),
     error: computed(() => ledger().error),
@@ -37,6 +41,8 @@ export const LedgerStore = signalStore(
   })),
   withMethods(
     (store, service = inject(LedgerService), cachePrefs = inject(LedgerCachePreferencesStore)) => {
+      let activeViewQuery: LedgerListQuery | undefined;
+
       const setLoading = (): void => {
         patchState(store, (state) => ({
           ledger: { ...state.ledger, error: null, isLoading: true },
@@ -51,17 +57,24 @@ export const LedgerStore = signalStore(
 
       const clearCatalogState = (): void => {
         catalogCache.clearPendingLoad();
+        activeViewQuery = undefined;
         patchState(store, (state) => ({
           ledger: {
             ...state.ledger,
             catalog: [],
             catalogLoaded: false,
             catalogTotalCount: 0,
+            count: 0,
+            error: null,
+            isLoading: false,
+            items: [],
+            selectedItem: null,
           },
         }));
       };
 
       const applyViewQuery = (query?: LedgerListQuery): void => {
+        activeViewQuery = query;
         const { items, count } = applyLedgerListQuery(store.ledger().catalog, query);
         patchState(store, (state) => ({
           ledger: { ...state.ledger, count, error: null, isLoading: false, items },
@@ -78,21 +91,23 @@ export const LedgerStore = signalStore(
         });
       };
 
+      const saveCatalog = (catalog: readonly Ledger[]): void => {
+        patchState(store, (state) => ({
+          ledger: {
+            ...state.ledger,
+            catalog,
+            catalogLoaded: true,
+            catalogTotalCount: catalog.length,
+            error: null,
+          },
+        }));
+      };
+
       const catalogCache = createCachedCrudLoader<Ledger>({
         fetchCatalog: fetchFullCatalog,
         isEnabled: () => cachePrefs.enabled(),
         isLoaded: () => store.ledger().catalogLoaded,
-        saveCatalog: (catalog) => {
-          patchState(store, (state) => ({
-            ledger: {
-              ...state.ledger,
-              catalog,
-              catalogLoaded: true,
-              catalogTotalCount: catalog.length,
-              error: null,
-            },
-          }));
-        },
+        saveCatalog,
       });
 
       const cacheCatalogEntry = (ledger: Ledger): void => {
@@ -106,9 +121,22 @@ export const LedgerStore = signalStore(
         }));
       };
 
+      const readIncludeRelation = (include: Lb4Include): string | null => {
+        return typeof include === 'string' ? include : include.scope ? null : include.relation;
+      };
+
+      const areIncludesCovered = (query?: LedgerGetQuery): boolean => {
+        return (
+          !query?.includes?.length ||
+          query.includes.every((include) => {
+            const relation = readIncludeRelation(include);
+            return relation !== null && CATALOG_INCLUDE_SET.has(relation);
+          })
+        );
+      };
+
       const canUseCachedLedger = (query?: LedgerGetQuery): boolean => {
-        if (store.ledger().catalogLoaded) return true;
-        return !query?.includes?.length;
+        return store.ledger().catalogLoaded && areIncludesCovered(query);
       };
 
       const selectLedger = (ledger: Ledger | null): void => {
@@ -133,6 +161,7 @@ export const LedgerStore = signalStore(
       };
 
       const loadLedgersFromApi = async (query?: LedgerListQuery): Promise<void> => {
+        activeViewQuery = query;
         const [items, count] = await Promise.all([service.list(query), service.count(query)]);
         patchState(store, (state) => ({
           ledger: { ...state.ledger, count, error: null, isLoading: false, items },
@@ -147,6 +176,32 @@ export const LedgerStore = signalStore(
         cacheCatalogEntry(item);
         selectLedger(item);
         return item;
+      };
+
+      const ensureCatalogLoaded = async (forceReload = false): Promise<boolean> => {
+        if (!cachePrefs.enabled()) return false;
+
+        if (forceReload) {
+          clearCatalogState();
+        }
+
+        return catalogCache.ensureLoaded();
+      };
+
+      const loadFullCatalogFromApi = async (forceReload = false): Promise<boolean> => {
+        if (forceReload) {
+          clearCatalogState();
+        }
+
+        if (store.ledger().catalogLoaded) return true;
+
+        const catalog = await fetchFullCatalog();
+        saveCatalog(catalog);
+        return true;
+      };
+
+      const reapplyCachedView = (): void => {
+        applyViewQuery(activeViewQuery);
       };
 
       return {
@@ -172,32 +227,64 @@ export const LedgerStore = signalStore(
           }));
         },
 
+        async ensureLedgerCatalogLoaded(forceReload = false): Promise<boolean> {
+          setLoading();
+          try {
+            const loaded = cachePrefs.enabled()
+              ? await ensureCatalogLoaded(forceReload)
+              : await loadFullCatalogFromApi(forceReload);
+            patchState(store, (state) => ({
+              ledger: { ...state.ledger, error: null, isLoading: false },
+            }));
+            return loaded;
+          } catch (error) {
+            setError(getApiErrorMessage(error, 'Failed to load ledgers.'));
+            return false;
+          }
+        },
+
+        async refreshLedgerCatalog(): Promise<boolean> {
+          setLoading();
+          try {
+            const loaded = cachePrefs.enabled()
+              ? await ensureCatalogLoaded(true)
+              : await loadFullCatalogFromApi(true);
+            patchState(store, (state) => ({
+              ledger: { ...state.ledger, error: null, isLoading: false },
+            }));
+            return loaded;
+          } catch (error) {
+            setError(getApiErrorMessage(error, 'Failed to load ledgers.'));
+            return false;
+          }
+        },
+
         async createLedger(payload: LedgerPayload): Promise<Ledger | null> {
           setLoading();
           try {
             const item = await service.create(payload);
-            patchState(store, (state) => {
-              const cacheEnabled = cachePrefs.enabled();
-              const catalog = cacheEnabled
-                ? upsertCachedEntity(state.ledger.catalog, item)
-                : state.ledger.catalog;
-
-              return {
+            if (cachePrefs.enabled() && store.ledger().catalogLoaded) {
+              patchState(store, (state) => ({
                 ledger: {
                   ...state.ledger,
-                  catalog,
-                  catalogTotalCount:
-                    cacheEnabled && state.ledger.catalogLoaded
-                      ? state.ledger.catalogTotalCount + 1
-                      : state.ledger.catalogTotalCount,
+                  catalog: upsertCachedEntity(state.ledger.catalog, item),
+                  catalogTotalCount: state.ledger.catalogTotalCount + 1,
+                  selectedItem: item,
+                },
+              }));
+              reapplyCachedView();
+            } else {
+              patchState(store, (state) => ({
+                ledger: {
+                  ...state.ledger,
                   count: state.ledger.count + 1,
                   error: null,
                   isLoading: false,
                   items: [item, ...state.ledger.items],
                   selectedItem: item,
                 },
-              };
-            });
+              }));
+            }
             return item;
           } catch (error) {
             setError(getApiErrorMessage(error, 'Failed to create ledger.'));
@@ -209,24 +296,30 @@ export const LedgerStore = signalStore(
           setLoading();
           try {
             await service.delete(id);
-            patchState(store, (state) => ({
-              ledger: {
-                ...state.ledger,
-                catalog: cachePrefs.enabled()
-                  ? removeCachedEntityById(state.ledger.catalog, id)
-                  : state.ledger.catalog,
-                catalogTotalCount:
-                  cachePrefs.enabled() && state.ledger.catalogLoaded
-                    ? Math.max(state.ledger.catalogTotalCount - 1, 0)
-                    : state.ledger.catalogTotalCount,
-                count: Math.max(state.ledger.count - 1, 0),
-                error: null,
-                isLoading: false,
-                items: state.ledger.items.filter((entry) => entry.id !== id),
-                selectedItem:
-                  state.ledger.selectedItem?.id === id ? null : state.ledger.selectedItem,
-              },
-            }));
+            if (cachePrefs.enabled() && store.ledger().catalogLoaded) {
+              patchState(store, (state) => ({
+                ledger: {
+                  ...state.ledger,
+                  catalog: removeCachedEntityById(state.ledger.catalog, id),
+                  catalogTotalCount: Math.max(state.ledger.catalogTotalCount - 1, 0),
+                  selectedItem:
+                    state.ledger.selectedItem?.id === id ? null : state.ledger.selectedItem,
+                },
+              }));
+              reapplyCachedView();
+            } else {
+              patchState(store, (state) => ({
+                ledger: {
+                  ...state.ledger,
+                  count: Math.max(state.ledger.count - 1, 0),
+                  error: null,
+                  isLoading: false,
+                  items: state.ledger.items.filter((entry) => entry.id !== id),
+                  selectedItem:
+                    state.ledger.selectedItem?.id === id ? null : state.ledger.selectedItem,
+                },
+              }));
+            }
             return true;
           } catch (error) {
             setError(getApiErrorMessage(error, 'Failed to delete ledger.'));
@@ -246,13 +339,7 @@ export const LedgerStore = signalStore(
               return cached;
             }
 
-            const cacheReady = await catalogCache.ensureLoaded();
-            if (cacheReady) {
-              const loadedCached = selectCachedLedgerById(id, query);
-              if (loadedCached) {
-                return loadedCached;
-              }
-
+            if (store.ledger().catalogLoaded && areIncludesCovered(query)) {
               selectLedger(null);
               return null;
             }
@@ -267,7 +354,7 @@ export const LedgerStore = signalStore(
         async loadLedgers(query?: LedgerListQuery): Promise<void> {
           setLoading();
           try {
-            const cacheReady = await catalogCache.ensureLoaded();
+            const cacheReady = await ensureCatalogLoaded();
             if (cacheReady) {
               applyViewQuery(query);
               return;
@@ -275,6 +362,14 @@ export const LedgerStore = signalStore(
 
             await loadLedgersFromApi(query);
           } catch (error) {
+            if (cachePrefs.enabled()) {
+              try {
+                await loadLedgersFromApi(query);
+                return;
+              } catch {
+                // Keep the original cache error because it explains why cached mode failed.
+              }
+            }
             setError(getApiErrorMessage(error, 'Failed to load ledgers.'));
           }
         },
@@ -282,13 +377,10 @@ export const LedgerStore = signalStore(
         async refreshLedgers(query?: LedgerListQuery): Promise<void> {
           setLoading();
           try {
-            if (cachePrefs.enabled()) {
-              clearCatalogState();
-              const cacheReady = await catalogCache.ensureLoaded();
-              if (cacheReady) {
-                applyViewQuery(query);
-                return;
-              }
+            const cacheReady = await ensureCatalogLoaded(true);
+            if (cacheReady) {
+              applyViewQuery(query);
+              return;
             }
 
             await loadLedgersFromApi(query);
@@ -301,16 +393,25 @@ export const LedgerStore = signalStore(
           setLoading();
           try {
             const updated = await service.update(id, payload);
-            patchState(store, (state) => {
-              const mergeEntry = (entry: Ledger): Ledger =>
-                entry.id === id ? { ...entry, ...payload, ...updated } : entry;
+            const mergeEntry = (entry: Ledger): Ledger =>
+              entry.id === id ? { ...entry, ...payload, ...updated } : entry;
 
-              return {
+            if (cachePrefs.enabled() && store.ledger().catalogLoaded) {
+              patchState(store, (state) => ({
                 ledger: {
                   ...state.ledger,
-                  catalog: cachePrefs.enabled()
-                    ? updateCachedEntityById(state.ledger.catalog, id, mergeEntry)
-                    : state.ledger.catalog,
+                  catalog: updateCachedEntityById(state.ledger.catalog, id, mergeEntry),
+                  selectedItem:
+                    state.ledger.selectedItem?.id === id
+                      ? mergeEntry(state.ledger.selectedItem)
+                      : state.ledger.selectedItem,
+                },
+              }));
+              reapplyCachedView();
+            } else {
+              patchState(store, (state) => ({
+                ledger: {
+                  ...state.ledger,
                   error: null,
                   isLoading: false,
                   items: state.ledger.items.map(mergeEntry),
@@ -319,8 +420,8 @@ export const LedgerStore = signalStore(
                       ? mergeEntry(state.ledger.selectedItem)
                       : state.ledger.selectedItem,
                 },
-              };
-            });
+              }));
+            }
             return true;
           } catch (error) {
             setError(getApiErrorMessage(error, 'Failed to update ledger.'));

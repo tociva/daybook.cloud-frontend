@@ -91,7 +91,7 @@ export class TreeViewLedgerComponent implements OnInit {
 
   protected readonly treeData = computed<readonly LedgerTreeRow[]>(() => {
     const categories = this.ledgerCategoryStore.items();
-    const ledgers = this.ledgerStore.items();
+    const ledgers = this.ledgerStore.catalog();
     const categoryNodes = new Map<string, LedgerTreeRow>();
     const categoriesById = new Map<string, LedgerCategory>();
     const rootRows: LedgerTreeRow[] = [];
@@ -351,7 +351,7 @@ export class TreeViewLedgerComponent implements OnInit {
     if (row.kind !== 'ledger') return undefined;
     const ledgerId = row.key.startsWith('ledger:') ? row.key.slice('ledger:'.length) : null;
     if (!ledgerId) return undefined;
-    return this.ledgerStore.items().find((ledger) => ledger.id === ledgerId);
+    return this.ledgerStore.catalog().find((ledger) => ledger.id === ledgerId);
   }
 
   private categoryIdFromRow(row: LedgerTreeRow): string | null {
@@ -402,16 +402,6 @@ export class TreeViewLedgerComponent implements OnInit {
   }
 
   private async loadLedgers(): Promise<void> {
-    const query = {
-      includes: ['category'],
-      limit: catalogPageSize,
-      offset: 0,
-    };
-
-    await this.ledgerStore.loadLedgers(query);
-    const count = this.ledgerStore.count();
-    if (count > this.ledgerStore.items().length) {
-      await this.ledgerStore.loadLedgers({ ...query, limit: count });
-    }
+    await this.ledgerStore.ensureLedgerCatalogLoaded();
   }
 }

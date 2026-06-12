@@ -173,7 +173,7 @@ export class TrialBalanceComponent implements OnInit {
 
   private readonly ledgerNameById = computed(() => {
     const map = new Map<string, string>();
-    for (const l of this.ledgerStore.items()) {
+    for (const l of this.ledgerStore.catalog()) {
       if (l.id && l.name) map.set(l.id, l.name);
     }
     return map;
@@ -193,7 +193,7 @@ export class TrialBalanceComponent implements OnInit {
 
   protected readonly trialBalanceTreeData = computed<readonly TrialBalanceTreeRow[]>(() => {
     const categories = this.ledgerCategoryStore.items();
-    const ledgers = this.ledgerStore.items();
+    const ledgers = this.ledgerStore.catalog();
     const balances = this.trialBalanceByLedgerId();
     const categoryNodes = new Map<string, TrialBalanceTreeRow>();
     const rootRows: TrialBalanceTreeRow[] = [];
@@ -520,17 +520,7 @@ export class TrialBalanceComponent implements OnInit {
   }
 
   private async loadLedgersForReport(): Promise<void> {
-    const query = {
-      includes: ['category'],
-      limit: reportCatalogPageSize,
-      offset: 0,
-    };
-
-    await this.ledgerStore.loadLedgers(query);
-    const count = this.ledgerStore.count();
-    if (count > this.ledgerStore.items().length) {
-      await this.ledgerStore.loadLedgers({ ...query, limit: count });
-    }
+    await this.ledgerStore.ensureLedgerCatalogLoaded();
   }
 
   private async loadTrialBalance(start?: string, end?: string): Promise<void> {

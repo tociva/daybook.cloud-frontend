@@ -88,10 +88,13 @@ describe('LedgerReportFacade', () => {
   };
   let router: { navigate: ReturnType<typeof vi.fn> };
   let ledgerItems: ReturnType<typeof signal<readonly Ledger[]>>;
+  let ledgerCatalog: ReturnType<typeof signal<readonly Ledger[]>>;
   let ledgerCount: ReturnType<typeof signal<number>>;
   let ledgerError: ReturnType<typeof signal<string | null>>;
   let ledgerStore: {
+    catalog: typeof ledgerCatalog;
     count: typeof ledgerCount;
+    ensureLedgerCatalogLoaded: ReturnType<typeof vi.fn>;
     error: typeof ledgerError;
     items: typeof ledgerItems;
     loadLedgers: ReturnType<typeof vi.fn>;
@@ -136,13 +139,16 @@ describe('LedgerReportFacade', () => {
     router = {
       navigate: vi.fn(() => Promise.resolve(true)),
     };
+    ledgerCatalog = signal<readonly Ledger[]>([]);
     ledgerItems = signal<readonly Ledger[]>([]);
     ledgerCount = signal(0);
     ledgerError = signal<string | null>(null);
     ledgerStore = {
+      catalog: ledgerCatalog,
       items: ledgerItems,
       count: ledgerCount,
       error: ledgerError,
+      ensureLedgerCatalogLoaded: vi.fn(async () => true),
       loadLedgers: vi.fn(async () => undefined),
     };
     permissions = signal<readonly string[]>(options?.permissions ?? []);
@@ -226,7 +232,7 @@ describe('LedgerReportFacade', () => {
     expect(facade.error()).toBeNull();
     expect(facade.generatedAt()).toBe('');
     expect(facade.tableRows()).toEqual([]);
-    expect(ledgerStore.loadLedgers).toHaveBeenCalledWith({ limit: 1000, offset: 0 });
+    expect(ledgerStore.ensureLedgerCatalogLoaded).toHaveBeenCalledWith(false);
   });
 
   it('shows the permission error and does not call the report API when permission is missing', async () => {
@@ -278,18 +284,21 @@ describe('LedgerReportFacade', () => {
 
   it('retries catalog loading after a failed catalog promise', async () => {
     const facade = configure();
-    ledgerStore.loadLedgers = vi
+    ledgerStore.ensureLedgerCatalogLoaded = vi
       .fn()
-      .mockRejectedValueOnce(new Error('catalog failed'))
-      .mockResolvedValueOnce(undefined);
+      .mockResolvedValueOnce(false)
+      .mockResolvedValueOnce(true);
+    ledgerError.set('catalog failed');
 
     await settle();
     expect(facade.error()).toBe('catalog failed');
 
+    ledgerError.set(null);
     facade.onRefresh();
     await settle();
 
-    expect(ledgerStore.loadLedgers).toHaveBeenCalledTimes(2);
+    expect(ledgerStore.ensureLedgerCatalogLoaded).toHaveBeenCalledTimes(2);
+    expect(ledgerStore.ensureLedgerCatalogLoaded).toHaveBeenLastCalledWith(true);
     expect(facade.error()).toBeNull();
   });
 

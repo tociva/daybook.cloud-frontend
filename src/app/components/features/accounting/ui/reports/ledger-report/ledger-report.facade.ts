@@ -22,7 +22,6 @@ import {
   seedMissingReportDateQuery,
 } from '../shared/report-date-query.util';
 
-const reportCatalogPageSize = 1000;
 const permissionError = 'You do not have permission to view the ledger report.';
 
 const ledgerReportPath = (ledgerid: string): readonly string[] => [
@@ -91,7 +90,7 @@ export class LedgerReportFacade {
 
   readonly autocompleteLedgers = computed(() => {
     const query = this.ledgerQuery().trim().toLowerCase();
-    const items = this.ledgerStore.items();
+    const items = this.ledgerStore.catalog();
     const filtered = !query
       ? items
       : items.filter((ledger) => (ledger.name ?? '').toLowerCase().includes(query));
@@ -256,7 +255,7 @@ export class LedgerReportFacade {
     }
     if (map.has(ledgerid)) return [...map.values()];
 
-    const fromCatalog = this.ledgerStore.items().find((ledger) => ledger.id === ledgerid);
+    const fromCatalog = this.ledgerStore.catalog().find((ledger) => ledger.id === ledgerid);
     if (fromCatalog) {
       map.set(ledgerid, fromCatalog);
       return [...map.values()];
@@ -299,7 +298,7 @@ export class LedgerReportFacade {
     }
 
     if (!this.ledgerCatalogPromise) {
-      this.ledgerCatalogPromise = this.fetchLedgerCatalog().finally(() => {
+      this.ledgerCatalogPromise = this.fetchLedgerCatalog(forceReload).finally(() => {
         this.ledgerCatalogPromise = null;
       });
     }
@@ -315,16 +314,10 @@ export class LedgerReportFacade {
     }
   }
 
-  private async fetchLedgerCatalog(): Promise<void> {
-    const query = {
-      limit: reportCatalogPageSize,
-      offset: 0,
-    };
-
-    await this.ledgerStore.loadLedgers(query);
-    const count = this.ledgerStore.count();
-    if (count > this.ledgerStore.items().length) {
-      await this.ledgerStore.loadLedgers({ ...query, limit: count });
+  private async fetchLedgerCatalog(forceReload = false): Promise<void> {
+    const loaded = await this.ledgerStore.ensureLedgerCatalogLoaded(forceReload);
+    if (!loaded) {
+      throw new Error(this.ledgerStore.error() ?? 'Failed to load ledger catalog.');
     }
   }
 
