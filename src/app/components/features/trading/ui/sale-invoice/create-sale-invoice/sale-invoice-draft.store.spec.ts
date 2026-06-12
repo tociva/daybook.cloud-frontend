@@ -98,4 +98,44 @@ describe('SaleInvoiceDraftStore GST reconciliation party prefill', () => {
     expect(draft.customerid()).toBe('customer-gst');
     expect(draft.selectedCustomer()).toBe(gstCustomer);
   });
+
+  it('rounds row amounts before computing the invoice grand total', () => {
+    const draft = configure();
+
+    draft.items.set([
+      {
+        item: null,
+        itemid: 'item-1',
+        name: 'Taxed item',
+        code: '',
+        price: 5553.245,
+        quantity1: 1,
+        quantity2: 1,
+        itemtotal: 0,
+        discpercent: 0,
+        discamount: 0,
+        subtotal: 0,
+        taxamount: 0,
+        grandtotal: 0,
+        description: '',
+        taxes: [
+          {
+            taxid: 'tax-18',
+            name: 'GST',
+            shortname: 'GST',
+            rate: 18,
+            appliedto: 100,
+            amount: 0,
+          },
+        ],
+      },
+    ]);
+    draft.roundoff.set('-0.01');
+
+    draft.recalcRow(0);
+
+    expect(draft.itemtotal()).toBe('5553.25');
+    expect(draft.tax()).toBe('999.59');
+    expect(draft.grandtotal()).toBe('6552.83');
+  });
 });

@@ -29,6 +29,11 @@ export function fmt(n: number, dec = 2): string {
   return n.toFixed(dec);
 }
 
+export function roundAmount(n: number, dec = 2): number {
+  const factor = 10 ** dec;
+  return Math.round((n + Number.EPSILON) * factor) / factor;
+}
+
 // ── Internal row types ────────────────────────────────────────────────────────
 
 export interface TaxRow {
@@ -757,17 +762,18 @@ export class PurchaseInvoiceDraftStore {
   private calcRow(row: ItemRow): ItemRow {
     const price = toNum(row.price);
     const quantity = Math.max(1, toNum(row.quantity));
-    const itemtotal = price * quantity;
+    const itemtotal = roundAmount(price * quantity);
     const discpercent = toNum(row.discpercent);
-    const discamount = this.showDiscount() ? (itemtotal * discpercent) / 100 : 0;
-    const subtotal = itemtotal - discamount;
+    const discamount = this.showDiscount() ? roundAmount((itemtotal * discpercent) / 100) : 0;
+    const subtotal = roundAmount(itemtotal - discamount);
 
     let taxamount = 0;
     const taxes = row.taxes.map((t) => {
-      const amount = (subtotal * toNum(t.rate)) / 100;
+      const amount = roundAmount((subtotal * toNum(t.rate)) / 100);
       taxamount += amount;
       return { ...t, amount };
     });
+    taxamount = roundAmount(taxamount);
 
     return {
       ...row,
@@ -775,7 +781,7 @@ export class PurchaseInvoiceDraftStore {
       discamount,
       subtotal,
       taxamount,
-      grandtotal: subtotal + taxamount,
+      grandtotal: roundAmount(subtotal + taxamount),
       taxes,
     };
   }
