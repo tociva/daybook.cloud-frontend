@@ -366,6 +366,7 @@ export class SaleInvoiceDraftStore {
   patchFromGstReconciliation(query: ParamMap): void {
     const invoiceNumber = query.get('invoiceNumber')?.trim() ?? '';
     const invoiceDate = this.normalizeInvoiceDate(query.get('invoiceDate'));
+    const partyId = query.get('partyId')?.trim() ?? '';
     const partyName = query.get('partyName')?.trim() ?? '';
     const partyGstin = query.get('partyGstin')?.trim() ?? '';
     const taxableValue = this.queryNumber(query, 'taxableValue');
@@ -389,7 +390,7 @@ export class SaleInvoiceDraftStore {
       this.duedate.set(this.getDefaultDueDate(invoiceDate));
     }
 
-    const customer = this.findCustomerForGstParty(partyGstin, partyName);
+    const customer = this.findCustomerForGstParty(partyGstin, partyName, partyId);
     if (customer) {
       this.selectCustomer(customer);
     } else if (partyName || partyGstin) {
@@ -882,15 +883,30 @@ export class SaleInvoiceDraftStore {
     return group?.taxids ?? group?.taxes ?? [];
   }
 
-  private findCustomerForGstParty(gstin: string, name: string): Customer | null {
+  private findCustomerForGstParty(gstin: string, name: string, id = ''): Customer | null {
     const normalizedGstin = this.normalizeComparable(gstin);
     const normalizedName = this.normalizeComparable(name);
+    const normalizedId = this.normalizeComparable(id);
+
+    if (normalizedId) {
+      const selectedCustomer = this.selectedCustomer();
+      if (this.normalizeComparable(selectedCustomer?.id ?? '') === normalizedId) {
+        return selectedCustomer;
+      }
+
+      const storeSelectedCustomer = this.customerStore.selectedItem();
+      if (this.normalizeComparable(storeSelectedCustomer?.id ?? '') === normalizedId) {
+        return storeSelectedCustomer;
+      }
+    }
 
     return (
       (this.customerStore.items() as Customer[]).find((customer) => {
+        const customerId = this.normalizeComparable(customer.id ?? '');
         const customerGstin = this.normalizeComparable(customer.gstin ?? '');
         const customerName = this.normalizeComparable(customer.name ?? '');
         return (
+          (normalizedId && customerId === normalizedId) ||
           (normalizedGstin && customerGstin === normalizedGstin) ||
           (!normalizedGstin && normalizedName && customerName === normalizedName)
         );

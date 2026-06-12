@@ -13,7 +13,6 @@ import {
 import { TngIcon } from '@tailng-ui/icons';
 import { TngSkeletonComponent } from '@tailng-ui/components';
 import { VendorStore } from '../../../data/vendor';
-import type { VendorListQuery } from '../../../data/vendor';
 import { InvoiceDocumentService } from '../../../data/invoice-document';
 import { ItemStore } from '../../../data/item';
 import type {
@@ -96,7 +95,7 @@ export class CreatePurchaseInvoiceComponent {
 
     try {
       await Promise.all([
-        this.vendorStore.loadVendors(this.initialVendorQuery()),
+        this.shouldLoadInitialVendors() ? this.vendorStore.loadVendors({}) : Promise.resolve(),
         this.itemStore.loadItems({ includes: ['category'] }),
         this.taxGroupStore.ensureTaxGroupCatalogLoaded(),
         this.taxStore.ensureTaxCatalogLoaded(),
@@ -117,34 +116,24 @@ export class CreatePurchaseInvoiceComponent {
         return;
       }
 
+      await this.selectVendorFromGstPartyId();
       this.draft.patchFromGstReconciliation(this.route.snapshot.queryParamMap);
     } finally {
       this.isInitialLoading.set(false);
     }
   }
 
-  private initialVendorQuery(): VendorListQuery {
-    const query = this.route.snapshot.queryParamMap;
-    const partyGstin = query.get('partyGstin')?.trim();
-    const partyName = query.get('partyName')?.trim();
+  private shouldLoadInitialVendors(): boolean {
+    return !this.route.snapshot.queryParamMap.get('partyId')?.trim();
+  }
 
-    if (partyGstin) {
-      return {
-        limit: 20,
-        offset: 0,
-        where: { gstin: { ilike: partyGstin } },
-      };
-    }
+  private async selectVendorFromGstPartyId(): Promise<void> {
+    const partyId = this.route.snapshot.queryParamMap.get('partyId')?.trim();
+    if (!partyId) return;
 
-    if (partyName) {
-      return {
-        limit: 20,
-        offset: 0,
-        where: { name: { ilike: partyName } },
-      };
-    }
-
-    return {};
+    const cached = this.vendorStore.items().find((vendor) => vendor.id === partyId);
+    const vendor = cached ?? (await this.vendorStore.loadVendorById(partyId));
+    if (vendor) this.draft.selectVendor(vendor);
   }
 
   // ── Vendor selection ──────────────────────────────────────────────────────

@@ -270,6 +270,7 @@ export class PurchaseInvoiceDraftStore {
   patchFromGstReconciliation(query: ParamMap): void {
     const invoiceNumber = query.get('invoiceNumber')?.trim() ?? '';
     const invoiceDate = this.normalizeInvoiceDate(query.get('invoiceDate'));
+    const partyId = query.get('partyId')?.trim() ?? '';
     const partyName = query.get('partyName')?.trim() ?? '';
     const partyGstin = query.get('partyGstin')?.trim() ?? '';
     const taxableValue = this.queryNumber(query, 'taxableValue');
@@ -289,7 +290,7 @@ export class PurchaseInvoiceDraftStore {
       this.duedate.set(this.getDefaultDueDate(invoiceDate));
     }
 
-    const vendor = this.findVendorForGstParty(partyGstin, partyName);
+    const vendor = this.findVendorForGstParty(partyGstin, partyName, partyId);
     if (vendor) {
       this.selectVendor(vendor);
     } else if (partyName || partyGstin) {
@@ -669,15 +670,30 @@ export class PurchaseInvoiceDraftStore {
     return group?.taxids ?? group?.taxes ?? [];
   }
 
-  private findVendorForGstParty(gstin: string, name: string): Vendor | null {
+  private findVendorForGstParty(gstin: string, name: string, id = ''): Vendor | null {
     const normalizedGstin = this.normalizeComparable(gstin);
     const normalizedName = this.normalizeComparable(name);
+    const normalizedId = this.normalizeComparable(id);
+
+    if (normalizedId) {
+      const selectedVendor = this.selectedVendor();
+      if (this.normalizeComparable(selectedVendor?.id ?? '') === normalizedId) {
+        return selectedVendor;
+      }
+
+      const storeSelectedVendor = this.vendorStore.selectedItem();
+      if (this.normalizeComparable(storeSelectedVendor?.id ?? '') === normalizedId) {
+        return storeSelectedVendor;
+      }
+    }
 
     return (
       (this.vendorStore.items() as Vendor[]).find((vendor) => {
+        const vendorId = this.normalizeComparable(vendor.id ?? '');
         const vendorGstin = this.normalizeComparable(vendor.gstin ?? '');
         const vendorName = this.normalizeComparable(vendor.name ?? '');
         return (
+          (normalizedId && vendorId === normalizedId) ||
           (normalizedGstin && vendorGstin === normalizedGstin) ||
           (!normalizedGstin && normalizedName && vendorName === normalizedName)
         );

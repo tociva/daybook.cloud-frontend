@@ -297,12 +297,15 @@ export abstract class GstReconciliationMonthlyDetailBase {
     group: GstReconciliationPartyGroup,
   ): Promise<void> {
     const sourceInvoice = row.gstInvoice;
-    const partyName = row.partyName || this.localPartyName(row.partyGstin || group.partyGstin) || group.partyName;
+    const partyName =
+      row.partyName || this.localPartyName(row.partyGstin || group.partyGstin) || group.partyName;
     const partyGstin = row.partyGstin || group.partyGstin;
+    const localParty = this.localParty(partyGstin);
 
     await this.router.navigate([this.config.createBookInvoiceRoute], {
       queryParams: {
         burl: this.router.url,
+        ...(localParty?.id ? { partyId: localParty.id } : {}),
         ...(partyName ? { partyName } : {}),
         ...(partyGstin ? { partyGstin } : {}),
         ...(sourceInvoice?.invoiceNumber ? { invoiceNumber: sourceInvoice.invoiceNumber } : {}),
@@ -369,12 +372,14 @@ export abstract class GstReconciliationMonthlyDetailBase {
   }
 
   private localPartyName(gstin: string | null | undefined): string {
+    return this.localParty(gstin)?.name?.trim() ?? '';
+  }
+
+  private localParty(gstin: string | null | undefined): LocalParty | undefined {
     const partyGstin = this.normalizeComparable(gstin);
-    if (!partyGstin) return '';
+    if (!partyGstin) return undefined;
 
-    const localParty = this.localPartiesByGstin().get(partyGstin);
-
-    return localParty?.name?.trim() ?? '';
+    return this.localPartiesByGstin().get(partyGstin);
   }
 
   private mapLocalPartiesByGstin(parties: readonly LocalParty[]): ReadonlyMap<string, LocalParty> {

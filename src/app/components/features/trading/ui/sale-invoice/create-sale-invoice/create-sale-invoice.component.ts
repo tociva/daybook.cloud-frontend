@@ -12,7 +12,7 @@ import {
   type TngFileUploadSelectedEvent,
 } from '@tailng-ui/primitives';
 import { TngIcon } from '@tailng-ui/icons';
-import { CustomerStore, type CustomerListQuery } from '../../../data/customer';
+import { CustomerStore } from '../../../data/customer';
 import { InvoiceDocumentService, type StoredDocument } from '../../../data/invoice-document';
 import { ItemStore } from '../../../data/item';
 import type {
@@ -97,7 +97,7 @@ export class CreateSaleInvoiceComponent {
     this.saleInvoiceStore.clearError();
 
     await Promise.all([
-      this.customerStore.loadCustomers(this.initialCustomerQuery()),
+      this.shouldLoadInitialCustomers() ? this.customerStore.loadCustomers({}) : Promise.resolve(),
       this.itemStore.loadItems({ includes: ['category'] }),
       this.taxGroupStore.ensureTaxGroupCatalogLoaded(),
       this.taxStore.ensureTaxCatalogLoaded(),
@@ -133,6 +133,7 @@ export class CreateSaleInvoiceComponent {
           this.lineItemsRef?.focusPriceInput(pendingRow);
         }
       }
+      await this.selectCustomerFromGstPartyId();
       this.draft.patchFromGstReconciliation(this.route.snapshot.queryParamMap);
       return;
     }
@@ -151,28 +152,17 @@ export class CreateSaleInvoiceComponent {
     }
   }
 
-  private initialCustomerQuery(): CustomerListQuery {
-    const query = this.route.snapshot.queryParamMap;
-    const partyGstin = query.get('partyGstin')?.trim();
-    const partyName = query.get('partyName')?.trim();
+  private shouldLoadInitialCustomers(): boolean {
+    return !this.route.snapshot.queryParamMap.get('partyId')?.trim();
+  }
 
-    if (partyGstin) {
-      return {
-        limit: 20,
-        offset: 0,
-        where: { gstin: { ilike: partyGstin } },
-      };
-    }
+  private async selectCustomerFromGstPartyId(): Promise<void> {
+    const partyId = this.route.snapshot.queryParamMap.get('partyId')?.trim();
+    if (!partyId) return;
 
-    if (partyName) {
-      return {
-        limit: 20,
-        offset: 0,
-        where: { name: { ilike: partyName } },
-      };
-    }
-
-    return {};
+    const cached = this.customerStore.items().find((customer) => customer.id === partyId);
+    const customer = cached ?? (await this.customerStore.loadCustomerById(partyId));
+    if (customer) this.draft.selectCustomer(customer);
   }
 
   // ── Customer selection ────────────────────────────────────────────────────
