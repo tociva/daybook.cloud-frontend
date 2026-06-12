@@ -6,6 +6,8 @@ export type GstReconciliationMonthlyDetailConfig = Readonly<{
   createBookInvoiceRoute: string;
   createPartyLabel: string;
   createPartyRoute: string;
+  detailsColumnLabel: string;
+  includeBookInvoiceItemNames: boolean;
   missingPartyMessage: string;
   partyType: 'customer' | 'vendor';
   returnType: GstReconciliationReturnType;
@@ -19,6 +21,8 @@ export const GSTR1_MONTHLY_DETAIL_CONFIG: GstReconciliationMonthlyDetailConfig =
   createBookInvoiceRoute: '/app/trading/sale-invoice/create',
   createPartyLabel: 'Create new customer',
   createPartyRoute: '/app/trading/customer/create',
+  detailsColumnLabel: 'Reason',
+  includeBookInvoiceItemNames: false,
   missingPartyMessage: 'Customer not exists in our record,',
   partyType: 'customer',
   returnType: 'gstr1',
@@ -32,6 +36,8 @@ export const GSTR2B_MONTHLY_DETAIL_CONFIG: GstReconciliationMonthlyDetailConfig 
   createBookInvoiceRoute: '/app/trading/purchase-invoice/create',
   createPartyLabel: 'Create new vendor',
   createPartyRoute: '/app/trading/vendor/create',
+  detailsColumnLabel: 'Details',
+  includeBookInvoiceItemNames: true,
   missingPartyMessage: 'Vendor not exists in our record,',
   partyType: 'vendor',
   returnType: 'gstr2b',

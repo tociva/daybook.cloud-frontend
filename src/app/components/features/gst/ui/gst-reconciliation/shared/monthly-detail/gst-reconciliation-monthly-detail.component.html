@@ -131,7 +131,14 @@
             </ng-template>
 
             <ng-template tngTableCellTemplate="reason" let-row="row">
-              <span class="reason-cell">{{ rowReason(row) }}</span>
+              <span class="details-cell">
+                @if (rowReason(row)) {
+                  <span>{{ rowReason(row) }}</span>
+                }
+                @if (config.includeBookInvoiceItemNames && bookInvoiceItemNames(row).length) {
+                  <small>{{ bookInvoiceItemNames(row).join(', ') }}</small>
+                }
+              </span>
             </ng-template>
           </tng-table>
         </tng-card>

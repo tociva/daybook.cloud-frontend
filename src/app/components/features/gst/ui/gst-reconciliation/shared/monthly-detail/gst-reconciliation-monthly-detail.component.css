@@ -207,8 +207,15 @@
   font-weight: 700;
 }
 
-.reason-cell {
+.details-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
   line-height: 1.45;
+}
+
+.details-cell small {
+  color: var(--tng-semantic-foreground-secondary);
 }
 
 .empty-copy {

@@ -94,6 +94,11 @@ export type GstReconciliationInvoice = Readonly<{
   sgst?: number;
   totalTax?: number;
   invoiceValue?: number;
+  items?: readonly Readonly<{
+    name?: string;
+    displayname?: string;
+    item?: Readonly<{ name?: string; displayname?: string }>;
+  }>[];
   [key: string]: unknown;
 }>;
 
