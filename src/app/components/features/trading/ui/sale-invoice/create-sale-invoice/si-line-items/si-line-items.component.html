@@ -17,6 +17,14 @@
       Show Description
     </label>
 
+    <label class="si-li-switch-label">
+      <tng-switch
+        [checked]="draft.showDisplayName()"
+        (checkedChange)="draft.showDisplayName.set(!!$event)"
+      />
+      Show Display Name
+    </label>
+
     <app-invoice-document-tags
       class="si-li-document-picker"
       [editable]="true"
@@ -53,9 +61,24 @@
     <thead>
       <tr>
         <th [attr.rowspan]="rowSpan()" class="si-li-col-serial w-3 p-0 text-center">#</th>
-        <th [attr.rowspan]="rowSpan()" [class]="nameColClass()">Name</th>
+        <th [attr.rowspan]="rowSpan()" [class]="nameColClass()" [style.width.%]="nameColWidth()">Name</th>
+        @if (draft.showDisplayName()) {
+          <th
+            [attr.rowspan]="rowSpan()"
+            [class]="displayNameColClass()"
+            [style.width.%]="displayNameColWidth()"
+          >
+            Display Name
+          </th>
+        }
         @if (draft.showDescription()) {
-          <th [attr.rowspan]="rowSpan()" [class]="descColClass()">Description</th>
+          <th
+            [attr.rowspan]="rowSpan()"
+            [class]="descColClass()"
+            [style.width.%]="descColWidth()"
+          >
+            Description
+          </th>
         }
         <th [attr.rowspan]="rowSpan()" class="si-li-col-price w-7 px-4 text-right">Price</th>
         <!-- Qty1 (rowspan=2, no sub-row) when no discount and no tax;
@@ -149,6 +172,29 @@
               </tng-autocomplete>
             }
           </td>
+
+          <!-- Display Name -->
+          @if (draft.showDisplayName()) {
+            <td
+              [attr.rowspan]="rowSpan()"
+              class="si-li-col-display-name p-0"
+              (click)="focusTableInput($event)"
+            >
+              @if (readOnly()) {
+                <span class="si-li-read-value">
+                  {{ _row.displayname || draft.getItemDisplayName(_row) || '—' }}
+                </span>
+              } @else {
+                <tng-input
+                  type="text"
+                  fullWidth
+                  ariaLabel="Display Name"
+                  [value]="_row.displayname"
+                  (valueChange)="draft.updateItemDisplayName(i, $event)"
+                />
+              }
+            </td>
+          }
 
           <!-- Description -->
           @if (draft.showDescription()) {

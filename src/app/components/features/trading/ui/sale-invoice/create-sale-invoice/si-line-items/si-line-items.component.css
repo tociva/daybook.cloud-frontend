@@ -33,7 +33,10 @@
 .w-9  { width: 9%;  }
 .w-12 { width: 12%; }
 
-/* Name / Description dynamic widths
+/* Text-column dynamic widths are now computed in the component and applied as
+ * inline percentages to Name, Display Name, and Description.
+ *
+ * Name / Description legacy width utilities
  * Exactly one qty column (Qty1 or Qty2) is visible at a time — both are w-8.
  *
  * taxFreeWidth (tf):  8% (Intra State – IGST hidden)
@@ -192,6 +195,7 @@
   background: var(--tng-semantic-background-canvas);
 }
 
+.si-li-col-display-name > tng-input,
 .si-li-col-price > tng-input,
 .si-li-col-qty1 > tng-input,
 .si-li-col-qty2 > tng-input,
@@ -219,6 +223,7 @@
   box-shadow: inset 0 -1px 0 var(--si-li-cell-focus-border);
 }
 
+:host ::ng-deep .si-li-col-display-name > tng-input [data-slot='input-group'],
 :host ::ng-deep .si-li-col-price > tng-input [data-slot='input-group'],
 :host ::ng-deep .si-li-col-qty1 > tng-input [data-slot='input-group'],
 :host ::ng-deep .si-li-col-qty2 > tng-input [data-slot='input-group'],
@@ -240,6 +245,7 @@
   resize: none;
 }
 
+:host ::ng-deep .si-li-col-display-name > tng-input [data-slot='input-group'][data-focused],
 :host ::ng-deep .si-li-col-price > tng-input [data-slot='input-group'][data-focused],
 :host ::ng-deep .si-li-col-qty1 > tng-input [data-slot='input-group'][data-focused],
 :host ::ng-deep .si-li-col-qty2 > tng-input [data-slot='input-group'][data-focused],
@@ -396,6 +402,7 @@
 
 .si-li-col-serial,
 .si-li-col-name,
+.si-li-col-display-name,
 .si-li-col-description,
 .si-li-col-price,
 .si-li-col-qty1,

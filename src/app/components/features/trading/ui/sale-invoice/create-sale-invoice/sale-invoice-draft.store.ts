@@ -50,6 +50,7 @@ export interface ItemRow {
   item: Item | null;
   itemid: string;
   name: string;
+  displayname: string;
   code: string;
   price: number;
   quantity1: number;
@@ -97,6 +98,7 @@ interface SaleInvoiceDraftSnapshot {
   roundoff: string;
   showDiscount: boolean;
   showDescription: boolean;
+  showDisplayName?: boolean;
   items: ItemRow[];
   /** Row index into which a newly-created item should be auto-selected on return. */
   pendingItemRowIndex: number | null;
@@ -162,6 +164,7 @@ export class SaleInvoiceDraftStore {
   readonly roundoff = signal('0');
   readonly showDiscount = signal(false);
   readonly showDescription = signal(false);
+  readonly showDisplayName = signal(false);
   readonly activeItemRowIndex = signal(-1);
   readonly itemSearch = signal('');
 
@@ -314,6 +317,7 @@ export class SaleInvoiceDraftStore {
     this.useBillingForShipping.set(cprops?.usebillingforshipping ?? false);
     this.showDiscount.set(cprops?.showdiscount ?? false);
     this.showDescription.set(cprops?.showdescription ?? false);
+    this.showDisplayName.set(cprops?.showdisplayname ?? false);
 
     if (inv.customer) {
       this.selectedCustomer.set(inv.customer as Customer);
@@ -341,30 +345,33 @@ export class SaleInvoiceDraftStore {
     this.roundoff.set(String(inv.roundoff ?? 0));
 
     this.items.set(
-      (inv.items ?? []).map((si) => ({
-        item: (si.item as Item) ?? null,
-        itemid: si.itemid ?? si.item?.id ?? '',
-        name: si.name,
-        code: si.code,
-        description: si.description ?? '',
-        price: si.price,
-        quantity1: si.quantity,
-        quantity2: si.quantity,
-        itemtotal: si.itemtotal,
-        discpercent: si.discpercent ?? 0,
-        discamount: si.discamount ?? 0,
-        subtotal: si.subtotal,
-        taxamount: si.taxamount ?? 0,
-        grandtotal: si.grandtotal,
-        taxes: (si.taxes ?? []).map((t) => ({
-          taxid: t.taxid ?? t.tax?.id ?? '',
-          name: t.name,
-          shortname: t.shortname,
-          rate: t.rate,
-          appliedto: t.appliedto,
-          amount: t.amount,
+      [...(inv.items ?? [])]
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+        .map((si) => ({
+          item: (si.item as Item) ?? null,
+          itemid: si.itemid ?? si.item?.id ?? '',
+          name: si.name,
+          displayname: si.displayname ?? si.item?.displayname ?? si.item?.name ?? si.name ?? '',
+          code: si.code,
+          description: si.description ?? '',
+          price: si.price,
+          quantity1: si.quantity,
+          quantity2: si.quantity,
+          itemtotal: si.itemtotal,
+          discpercent: si.discpercent ?? 0,
+          discamount: si.discamount ?? 0,
+          subtotal: si.subtotal,
+          taxamount: si.taxamount ?? 0,
+          grandtotal: si.grandtotal,
+          taxes: (si.taxes ?? []).map((t) => ({
+            taxid: t.taxid ?? t.tax?.id ?? '',
+            name: t.name,
+            shortname: t.shortname,
+            rate: t.rate,
+            appliedto: t.appliedto,
+            amount: t.amount,
+          })),
         })),
-      })),
     );
   }
 
@@ -427,6 +434,7 @@ export class SaleInvoiceDraftStore {
         {
           ...this.emptyItemRow(taxes.length),
           name: invoiceNumber ? `GST invoice ${invoiceNumber}` : 'GST invoice',
+          displayname: invoiceNumber ? `GST invoice ${invoiceNumber}` : 'GST invoice',
           description: [
             'Created from GST reconciliation.',
             partyName ? `Party: ${partyName}.` : '',
@@ -606,7 +614,14 @@ export class SaleInvoiceDraftStore {
     this.items.update((rows) =>
       rows.map((row, i) =>
         i === rowIndex
-          ? { ...row, item, itemid: item.id ?? '', name: item.name, code: item.code ?? '' }
+          ? {
+              ...row,
+              item,
+              itemid: item.id ?? '',
+              name: item.name,
+              displayname: item.displayname ?? item.name ?? '',
+              code: item.code ?? '',
+            }
           : row,
       ),
     );
@@ -622,6 +637,7 @@ export class SaleInvoiceDraftStore {
           item,
           itemid: item.id ?? '',
           name: item.name,
+          displayname: item.displayname ?? item.name ?? '',
           code: item.code ?? '',
           taxes,
         });
@@ -676,6 +692,12 @@ export class SaleInvoiceDraftStore {
     );
   }
 
+  updateItemDisplayName(rowIndex: number, value: string | null): void {
+    this.items.update((rows) =>
+      rows.map((row, i) => (i === rowIndex ? { ...row, displayname: value ?? '' } : row)),
+    );
+  }
+
   recalcRow(rowIndex: number): void {
     this.items.update((rows) => rows.map((row, i) => (i === rowIndex ? this.calcRow(row) : row)));
   }
@@ -727,6 +749,7 @@ export class SaleInvoiceDraftStore {
         roundoff: this.roundoff(),
         showDiscount: this.showDiscount(),
         showDescription: this.showDescription(),
+        showDisplayName: this.showDisplayName(),
         items: this.items(),
         pendingItemRowIndex,
       };
@@ -778,7 +801,8 @@ export class SaleInvoiceDraftStore {
     this.roundoff.set(snapshot.roundoff);
     this.showDiscount.set(snapshot.showDiscount);
     this.showDescription.set(snapshot.showDescription);
-    this.items.set(snapshot.items);
+    this.showDisplayName.set(snapshot.showDisplayName ?? false);
+    this.items.set(snapshot.items.map((row) => this.normalizeDisplayName(row)));
     // pendingItemRowIndex is intentionally not restored as a signal — it is
     // read once by the parent component during initialisation and then discarded.
   }
@@ -1057,6 +1081,13 @@ export class SaleInvoiceDraftStore {
     };
   }
 
+  private normalizeDisplayName(row: ItemRow): ItemRow {
+    return {
+      ...row,
+      displayname: row.displayname ?? row.item?.displayname ?? row.item?.name ?? row.name ?? '',
+    };
+  }
+
   private emptyTaxRow(): TaxRow {
     return { taxid: '', name: '', shortname: '', rate: 0, appliedto: 100, amount: 0 };
   }
@@ -1070,6 +1101,7 @@ export class SaleInvoiceDraftStore {
       item: null,
       itemid: '',
       name: '',
+      displayname: '',
       code: '',
       description: '',
       price: 0,

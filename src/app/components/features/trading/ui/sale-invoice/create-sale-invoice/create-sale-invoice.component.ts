@@ -286,7 +286,8 @@ export class CreateSaleInvoiceComponent {
           amount: toNum(t.amount),
           ...(t.taxid ? { taxid: t.taxid } : {}),
         }));
-        const displayname = row.item?.displayname ?? row.item?.name ?? row.name ?? '';
+        const displayname =
+          row.displayname || row.item?.displayname || row.item?.name || row.name || '';
 
         return {
           name: row.name,
@@ -332,6 +333,7 @@ export class CreateSaleInvoiceComponent {
         fx: toNum(this.draft.conversionrate()),
         showdiscount: this.draft.showDiscount(),
         showdescription: this.draft.showDescription(),
+        showdisplayname: this.draft.showDisplayName(),
         taxoption: this.draft.taxoption(),
         deliverystate: this.draft.deliverystate(),
         usebillingforshipping: this.draft.useBillingForShipping(),

@@ -229,27 +229,39 @@ export class SiLineItemsComponent {
   //   disc=OFF, desc=ON  → name=22, desc=24
   //   disc=OFF, desc=OFF → name=46
   //
-  // Freed tax space (taxFreeWidth) is split evenly between name and desc
-  // when desc is ON; otherwise the full amount goes to name.
+  // Freed tax space (taxFreeWidth) is split across visible text columns
+  // (name, display name, description). When only name is visible it receives
+  // the full text-column budget.
   // disc freed: disc-label(3%) + disc-pct(5%) + taxable(7%) = 15%
-  nameColClass = computed(() => {
-    const disc = this.draft.showDiscount();
-    const desc = this.draft.showDescription();
-    const tf   = this.taxFreeWidth();
-    const base = 'si-li-col-name px-4 text-left';
+  private readonly textColumnBudget = computed(() => {
+    const tf = this.taxFreeWidth();
+    return (this.draft.showDiscount() ? 31 : 46) + tf;
+  });
 
-    if ( disc &&  desc) return `${base} w-${15 + tf / 2}`;
-    if ( disc && !desc) return `${base} w-${31 + tf}`;
-    if (!disc &&  desc) return `${base} w-${22 + tf / 2}`;
-    return `${base} w-${46 + tf}`;
+  private readonly textColumnCount = computed(() => {
+    let count = 1;
+    if (this.draft.showDisplayName()) count += 1;
+    if (this.draft.showDescription()) count += 1;
+    return count;
+  });
+
+  private readonly textColumnWidth = computed(() => this.textColumnBudget() / this.textColumnCount());
+
+  nameColClass = computed(() => {
+    return 'si-li-col-name px-4 text-left';
+  });
+
+  displayNameColClass = computed(() => {
+    return 'si-li-col-display-name px-4 text-left';
   });
 
   descColClass = computed(() => {
-    const base = 'si-li-col-description px-4 text-left';
-    const tf   = this.taxFreeWidth();
-    // disc=ON → base desc 16%; disc=OFF → base desc 24%
-    return `${base} w-${(this.draft.showDiscount() ? 16 : 24) + tf / 2}`;
+    return 'si-li-col-description px-4 text-left';
   });
+
+  nameColWidth = computed(() => this.textColumnWidth());
+  displayNameColWidth = computed(() => this.textColumnWidth());
+  descColWidth = computed(() => this.textColumnWidth());
 
   protected formatAmount(value: number | undefined | null): string {
     return value === undefined || value === null ? '—' : value.toFixed(2);

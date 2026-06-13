@@ -27,6 +27,7 @@ export type SaleInvoiceCustomProperties = Readonly<{
   lamt?: number;
   showdiscount?: boolean;
   showdescription?: boolean;
+  showdisplayname?: boolean;
   usebillingforshipping?: boolean;
   taxoption?: string;
   deliverystate?: string;
