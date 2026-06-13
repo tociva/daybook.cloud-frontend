@@ -32,8 +32,6 @@ export class App {
     const path = this.currentUrl().split('?')[0] ?? '/';
     return (
       this.startupStatus() === 'logging-out' ||
-      this.startupStatus() === 'logged-out' ||
-      this.startupStatus() === 'logout-error' ||
       path === '/' ||
       path === '/auth/callback' ||
       path === '/auth/logout' ||
@@ -55,6 +53,11 @@ export class App {
       const path = this.currentUrl().split('?')[0];
 
       if (status === 'idle' && !this.authService.isCurrentLoginCallbackUrl()) {
+        queueMicrotask(() => void this.systemStore.initialize());
+        return;
+      }
+
+      if ((status === 'logged-out' || status === 'logout-error') && path !== '/auth/logout') {
         queueMicrotask(() => void this.systemStore.initialize());
         return;
       }
