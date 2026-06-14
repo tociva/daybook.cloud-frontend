@@ -248,6 +248,10 @@ export abstract class GstReconciliationMonthlyDetailBase {
       return false;
     }
 
+    if (this.isExportPartyGroup(group)) {
+      return false;
+    }
+
     return this.partiesLoaded() && !this.hasLocalParty(group);
   }
 
@@ -421,6 +425,10 @@ export abstract class GstReconciliationMonthlyDetailBase {
     if (name) return `name:${name}`;
 
     return `unknown:${index}`;
+  }
+
+  private isExportPartyGroup(group: GstReconciliationPartyGroup): boolean {
+    return group.rows.length > 0 && group.rows.every((row) => this.isExportInvoice(row, group));
   }
 
   private isExportInvoice(
