@@ -85,7 +85,7 @@ export class SiInvoiceDetailsComponent {
 
   protected onCurrencyValueChange(event: unknown): void {
     const code = typeof event === 'string' ? event : '';
-    if (code) this.draft.currencycode.set(code);
+    if (code) this.draft.setCurrencyCode(code);
   }
 
   protected formatDate(value: string): string {

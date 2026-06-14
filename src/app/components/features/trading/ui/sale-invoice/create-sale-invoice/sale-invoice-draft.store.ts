@@ -488,7 +488,7 @@ export class SaleInvoiceDraftStore {
     this.customerSearch.set(customer.name);
     this.showCustomerDropdown.set(false);
     this.customerid.set(customer.id ?? '');
-    this.currencycode.set(customer.currencycode ?? this.currencycode());
+    this.setCurrencyCode(customer.currencycode ?? this.currencycode());
     this.deliverystate.set(customer.state ?? '');
     this.billingName.set(customer.address?.name ?? customer.name);
     this.billingLine1.set(customer.address?.line1 ?? '');
@@ -530,6 +530,16 @@ export class SaleInvoiceDraftStore {
   toggleAutoNumbering(value: boolean): void {
     this.autoNumbering.set(value);
     if (!value && this.number() === 'Auto Number') this.number.set('');
+  }
+
+  setCurrencyCode(value: string): void {
+    const currencyCode = value.trim();
+    if (!currencyCode) return;
+
+    this.currencycode.set(currencyCode);
+    if (this.isForeignCurrency(currencyCode)) {
+      this.onTaxOptionChange('Export');
+    }
   }
 
   onDateChange(value: unknown): void {
@@ -892,6 +902,16 @@ export class SaleInvoiceDraftStore {
   private taxIdsForMode(taxGroup: TaxGroup, taxOption: string): readonly string[] {
     const group = taxGroup.groups?.find((currentGroup) => currentGroup.mode === taxOption);
     return group?.taxids ?? group?.taxes ?? [];
+  }
+
+  private isForeignCurrency(currencyCode: string): boolean {
+    const branchCurrencyCode = this.branchCurrencyCode().trim();
+    const selectedCurrencyCode = currencyCode.trim();
+    return (
+      !!branchCurrencyCode &&
+      !!selectedCurrencyCode &&
+      selectedCurrencyCode.toUpperCase() !== branchCurrencyCode.toUpperCase()
+    );
   }
 
   private findCustomerForGstParty(gstin: string, name: string, id = ''): Customer | null {

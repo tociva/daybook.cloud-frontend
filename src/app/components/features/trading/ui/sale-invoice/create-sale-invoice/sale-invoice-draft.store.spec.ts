@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { convertToParamMap } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { FiscalYearDateRangeService } from '../../../../../../shared/fiscal-year-date-range-picker';
+import type { UserSession } from '../../../../management/data/user-session/user-session.model';
 import { UserSessionStore } from '../../../../management/data/user-session/user-session.store';
 import type { Customer } from '../../../data/customer';
 import { CustomerStore } from '../../../data/customer';
@@ -32,11 +33,33 @@ const gstCustomer: Customer = {
   address: { name: 'GST Customer', line1: 'GST line' },
 };
 
+const foreignCurrencyCustomer: Customer = {
+  id: 'customer-foreign',
+  name: 'Foreign Customer',
+  countrycode: 'US',
+  currencycode: 'USD',
+  address: { name: 'Foreign Customer', line1: 'Foreign line' },
+};
+
 describe('SaleInvoiceDraftStore GST reconciliation party prefill', () => {
   function configure(
     customers: readonly Customer[] = [],
     storeSelectedCustomer: Customer | null = null,
+    branchCurrencyCode = '',
   ) {
+    const session = signal<UserSession | null>(
+      branchCurrencyCode
+        ? ({
+            name: '',
+            email: '',
+            userid: '',
+            member: null,
+            memberorgs: [],
+            branch: { currencycode: branchCurrencyCode },
+          } as unknown as UserSession)
+        : null,
+    );
+
     TestBed.configureTestingModule({
       providers: [
         SaleInvoiceDraftStore,
@@ -51,7 +74,7 @@ describe('SaleInvoiceDraftStore GST reconciliation party prefill', () => {
         { provide: ItemCategoryStore, useValue: {} },
         { provide: TaxGroupStore, useValue: { catalog: vi.fn(() => []) } },
         { provide: TaxStore, useValue: { catalog: vi.fn(() => []), loadTaxById: vi.fn() } },
-        { provide: UserSessionStore, useValue: { session: signal(null) } },
+        { provide: UserSessionStore, useValue: { session } },
         {
           provide: FiscalYearDateRangeService,
           useValue: {
@@ -100,6 +123,25 @@ describe('SaleInvoiceDraftStore GST reconciliation party prefill', () => {
 
     expect(draft.customerid()).toBe('customer-gst');
     expect(draft.selectedCustomer()).toBe(gstCustomer);
+  });
+
+  it('sets tax option to Export when selected customer currency differs from branch currency', () => {
+    const draft = configure([], null, 'INR');
+
+    draft.selectCustomer(foreignCurrencyCustomer);
+
+    expect(draft.currencycode()).toBe('USD');
+    expect(draft.taxoption()).toBe('Export');
+  });
+
+  it('keeps the current tax option when selected customer currency matches branch currency', () => {
+    const draft = configure([], null, 'INR');
+    draft.taxoption.set('Inter State');
+
+    draft.selectCustomer(selectedCustomer);
+
+    expect(draft.currencycode()).toBe('INR');
+    expect(draft.taxoption()).toBe('Inter State');
   });
 
   it('rounds row amounts before computing the invoice grand total', () => {
