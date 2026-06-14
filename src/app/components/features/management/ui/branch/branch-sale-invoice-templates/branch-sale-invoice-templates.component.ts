@@ -178,10 +178,6 @@ export class BranchSaleInvoiceTemplatesComponent {
     return this.formatFileSize(size);
   }
 
-  protected templatePath(metadata: SaleInvoiceTemplateMetadata | null): string {
-    return metadata?.document?.path ?? metadata?.path ?? '';
-  }
-
   protected previewTitle(): string {
     const type = this.previewType();
     return this.templateDefinitions.find((definition) => definition.type === type)?.title ?? '';

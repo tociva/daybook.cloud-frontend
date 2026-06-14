@@ -56,12 +56,6 @@
                   <dd>{{ templateSize(metadata) }}</dd>
                 </div>
               }
-              @if (templatePath(metadata)) {
-                <div>
-                  <dt>Path</dt>
-                  <dd [title]="templatePath(metadata)">{{ templatePath(metadata) }}</dd>
-                </div>
-              }
             </dl>
 
             @if (uploadingType() === definition.type) {

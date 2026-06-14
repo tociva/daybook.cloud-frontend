@@ -310,6 +310,14 @@
               />
               <tng-error [show]="invnumberError() !== null">{{ invnumberError() }}</tng-error>
             </tng-form-field>
+            <div class="numbering-sequences-preview">
+              <tng-label>Next 5 invoice numbers</tng-label>
+              <ul class="numbering-sequences">
+                @for (item of invoiceNextSequences(); track item) {
+                  <li>{{ item }}</li>
+                }
+              </ul>
+            </div>
           </div>
 
           <div class="field">
@@ -324,6 +332,14 @@
               />
               <tng-error [show]="recnumberError() !== null">{{ recnumberError() }}</tng-error>
             </tng-form-field>
+            <div class="numbering-sequences-preview">
+              <tng-label>Next 5 receipt numbers</tng-label>
+              <ul class="numbering-sequences">
+                @for (item of receiptNextSequences(); track item) {
+                  <li>{{ item }}</li>
+                }
+              </ul>
+            </div>
           </div>
         </div>
 

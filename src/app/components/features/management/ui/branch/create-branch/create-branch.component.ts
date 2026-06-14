@@ -26,6 +26,11 @@ import { OrganizationStore } from '../../../data/organization/organization.store
 import type { Organization } from '../../../data/organization/organization.model';
 import { BranchFacade, BranchStore } from '../../../data/branch';
 import type { BranchPayload } from '../../../data/branch';
+import { AutoNumberingTemplateGeneratorComponent } from '../../../../../../shared/auto-numbering-template-generator/auto-numbering-template-generator.component';
+import {
+  toDateRangeEnd,
+  toDateRangeStartFromFiscalStart,
+} from '../../../../../../core/date/dayjs-date.utils';
 import {
   DEFAULT_INVOICE_NUMBER_FORMAT,
   DEFAULT_RECEIPT_NUMBER_FORMAT,
@@ -160,6 +165,23 @@ export class CreateBranchComponent implements AfterViewInit {
     this.mode() === 'edit'
       ? 'Update branch details and settings.'
       : 'Fill in the details to create a new branch.',
+  );
+  protected readonly fiscalYearRange = computed(() => {
+    const startdate = toDateRangeStartFromFiscalStart(
+      this.fiscalstart(),
+      `${new Date().getFullYear()}-01-01`,
+    );
+
+    return {
+      startdate,
+      enddate: toDateRangeEnd(startdate, `${new Date().getFullYear()}-12-31`),
+    };
+  });
+  protected readonly invoiceNextSequences = computed(() =>
+    this.buildNextNumberingSequences(this.invnumber()),
+  );
+  protected readonly receiptNextSequences = computed(() =>
+    this.buildNextNumberingSequences(this.recnumber()),
   );
 
   // ── Validation ────────────────────────────────────────────────────────────
@@ -412,5 +434,17 @@ export class CreateBranchComponent implements AfterViewInit {
     } finally {
       this.isSubmitting.set(false);
     }
+  }
+
+  private buildNextNumberingSequences(template: string): string[] {
+    const resolvedTemplate = AutoNumberingTemplateGeneratorComponent.fillAutoNumberingTemplate(
+      template,
+      new Date(),
+      this.fiscalYearRange(),
+    );
+
+    return Array.from({ length: 5 }, (_unused, index) =>
+      AutoNumberingTemplateGeneratorComponent.updateSerialWithNumber(resolvedTemplate, index + 1),
+    );
   }
 }

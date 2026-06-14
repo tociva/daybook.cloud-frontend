@@ -44,6 +44,34 @@ tng-card {
   grid-column: 1 / -1;
 }
 
+.numbering-sequences-preview {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.numbering-sequences {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.numbering-sequences li {
+  background: var(--tng-semantic-surface-subtle);
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: var(--tng-radius-sm, 0.25rem);
+  color: var(--tng-semantic-foreground-secondary);
+  font-family: var(--tng-font-mono, monospace);
+  font-size: 0.78rem;
+  line-height: 1.4;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  padding: 0.15rem 0.5rem;
+}
+
 .field-error {
   color: var(--tng-semantic-accent-danger);
   font-size: 0.75rem;
