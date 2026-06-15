@@ -59,6 +59,8 @@ const scopedSession = {
 } as unknown as UserSession;
 
 const scopedLastDateKey = 'daybook:sale-invoice:last-date:user-1:org-1:branch-1:fy-1';
+const scopedUsdInrRateKey =
+  'daybook:sale-invoice:conversion-rate:user-1:org-1:branch-1:fy-1:USD-INR';
 
 function installLocalStorageMock(): void {
   const store = new Map<string, string>();
@@ -196,6 +198,47 @@ describe('SaleInvoiceDraftStore', () => {
 
     expect(draft.date()).toBe('2027-03-31');
     expect(draft.duedate()).toBe('2027-04-14');
+  });
+
+  it('remembers the current conversion rate by currency pair', () => {
+    const draft = configure([], null, '', { session: scopedSession });
+
+    draft.setCurrencyCode('USD');
+    draft.conversionrate.set('80.87');
+    draft.rememberConversionRate();
+
+    expect(localStorage.getItem(scopedUsdInrRateKey)).toBe('80.87');
+  });
+
+  it('applies a remembered conversion rate for the selected currency pair', () => {
+    localStorage.setItem(scopedUsdInrRateKey, '80.87');
+    const draft = configure([], null, '', { session: scopedSession });
+
+    draft.setCurrencyCode('USD');
+
+    expect(draft.currencycode()).toBe('USD');
+    expect(draft.conversionrate()).toBe('80.87');
+  });
+
+  it('does not carry a conversion rate to a different currency pair', () => {
+    localStorage.setItem(scopedUsdInrRateKey, '80.87');
+    const draft = configure([], null, '', { session: scopedSession });
+
+    draft.conversionrate.set('80.87');
+    draft.setCurrencyCode('EUR');
+
+    expect(draft.currencycode()).toBe('EUR');
+    expect(draft.conversionrate()).toBe('1');
+  });
+
+  it('ignores invalid remembered conversion rates', () => {
+    localStorage.setItem(scopedUsdInrRateKey, 'not-a-number');
+    const draft = configure([], null, '', { session: scopedSession });
+
+    draft.conversionrate.set('9');
+    draft.setCurrencyCode('USD');
+
+    expect(draft.conversionrate()).toBe('1');
   });
 
   it('keeps the explicitly selected customer when partyId is present', () => {

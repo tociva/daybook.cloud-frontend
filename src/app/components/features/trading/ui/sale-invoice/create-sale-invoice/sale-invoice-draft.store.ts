@@ -109,6 +109,7 @@ interface SaleInvoiceDraftSnapshot {
 @Injectable()
 export class SaleInvoiceDraftStore {
   private static readonly DRAFT_KEY = 'sale-invoice-create-draft';
+  private static readonly CONVERSION_RATE_KEY_PREFIX = 'daybook:sale-invoice:conversion-rate';
   private static readonly LAST_DATE_KEY_PREFIX = 'daybook:sale-invoice:last-date';
   private customerSearchTimer: ReturnType<typeof setTimeout> | null = null;
   private itemSearchTimer: ReturnType<typeof setTimeout> | null = null;
@@ -328,6 +329,18 @@ export class SaleInvoiceDraftStore {
     }
   }
 
+  rememberConversionRate(): void {
+    try {
+      const key = this.rememberedConversionRateKey(this.currencycode());
+      const rate = this.normalizeConversionRate(this.conversionrate());
+      if (!key || !rate) return;
+
+      localStorage.setItem(key, rate);
+    } catch {
+      // localStorage may be unavailable (private browsing, quota, etc.)
+    }
+  }
+
   // ── Patch from loaded invoice (edit mode) ─────────────────────────────────
 
   patchFromInvoice(inv: SaleInvoice): void {
@@ -443,7 +456,7 @@ export class SaleInvoiceDraftStore {
 
     if (isExportInvoice) {
       this.taxoption.set('Export');
-      this.currencycode.set('USD');
+      this.setCurrencyCode('USD');
     }
 
     if (taxableValue || totalTax || invoiceValue) {
@@ -566,7 +579,10 @@ export class SaleInvoiceDraftStore {
 
     this.currencycode.set(currencyCode);
     if (this.isForeignCurrency(currencyCode)) {
+      this.applyRememberedConversionRate(currencyCode);
       this.onTaxOptionChange('Export');
+    } else {
+      this.conversionrate.set('1');
     }
   }
 
@@ -850,18 +866,54 @@ export class SaleInvoiceDraftStore {
     return isoDate ? this.fiscalYearDateRange.defaultDate(isoDate) : null;
   }
 
+  private applyRememberedConversionRate(currencyCode: string): void {
+    this.conversionrate.set(this.readRememberedConversionRate(currencyCode) ?? '1');
+  }
+
+  private readRememberedConversionRate(currencyCode: string): string | null {
+    const key = this.rememberedConversionRateKey(currencyCode);
+    if (!key) return null;
+
+    try {
+      return this.normalizeConversionRate(localStorage.getItem(key));
+    } catch {
+      return null;
+    }
+  }
+
+  private normalizeConversionRate(value: unknown): string | null {
+    const rate = typeof value === 'string' ? value.trim() : '';
+    if (!rate) return null;
+
+    const numericRate = Number(rate);
+    return Number.isFinite(numericRate) && numericRate > 0 ? rate : null;
+  }
+
+  private rememberedConversionRateKey(currencyCode: string): string | null {
+    const invoiceCurrency = currencyCode.trim().toUpperCase();
+    const branchCurrency = this.branchCurrencyCode().trim().toUpperCase();
+    if (!invoiceCurrency || !branchCurrency || invoiceCurrency === branchCurrency) return null;
+
+    return [
+      ...this.scopedStorageKeyParts(SaleInvoiceDraftStore.CONVERSION_RATE_KEY_PREFIX),
+      `${this.storageKeyPart(invoiceCurrency)}-${this.storageKeyPart(branchCurrency)}`,
+    ].join(':');
+  }
+
   private rememberedInvoiceDateKey(): string {
+    return this.scopedStorageKeyParts(SaleInvoiceDraftStore.LAST_DATE_KEY_PREFIX).join(':');
+  }
+
+  private scopedStorageKeyParts(prefix: string): string[] {
     const session = this.userSession.session();
     const organizationId = session?.organization?.id ?? session?.branch?.organizationid;
-    const parts = [
-      SaleInvoiceDraftStore.LAST_DATE_KEY_PREFIX,
+    return [
+      prefix,
       this.storageKeyPart(session?.userid),
       this.storageKeyPart(organizationId),
       this.storageKeyPart(session?.branch?.id),
       this.storageKeyPart(session?.fiscalyear?.id),
     ];
-
-    return parts.join(':');
   }
 
   private storageKeyPart(value: unknown): string {
