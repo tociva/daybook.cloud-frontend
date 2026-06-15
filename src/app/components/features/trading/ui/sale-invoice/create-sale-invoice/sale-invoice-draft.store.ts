@@ -67,6 +67,12 @@ export interface ItemRow {
 
 export type SelectOption = Readonly<{ label: string; value: string }>;
 
+type CustomerDisplayPreferences = Readonly<{
+  showDiscount: boolean;
+  showDescription: boolean;
+  showDisplayName: boolean;
+}>;
+
 interface SaleInvoiceDraftSnapshot {
   autoNumbering: boolean;
   numberEnabled: boolean;
@@ -108,6 +114,8 @@ interface SaleInvoiceDraftSnapshot {
 
 @Injectable()
 export class SaleInvoiceDraftStore {
+  private static readonly CUSTOMER_DISPLAY_PREFS_KEY_PREFIX =
+    'daybook:sale-invoice:display-prefs';
   private static readonly DRAFT_KEY = 'sale-invoice-create-draft';
   private static readonly CONVERSION_RATE_KEY_PREFIX = 'daybook:sale-invoice:conversion-rate';
   private static readonly LAST_DATE_KEY_PREFIX = 'daybook:sale-invoice:last-date';
@@ -341,6 +349,17 @@ export class SaleInvoiceDraftStore {
     }
   }
 
+  rememberCustomerDisplayPreferences(): void {
+    try {
+      const key = this.customerDisplayPreferencesKey(this.customerid());
+      if (!key) return;
+
+      localStorage.setItem(key, JSON.stringify(this.currentCustomerDisplayPreferences()));
+    } catch {
+      // localStorage may be unavailable (private browsing, quota, etc.)
+    }
+  }
+
   // ── Patch from loaded invoice (edit mode) ─────────────────────────────────
 
   patchFromInvoice(inv: SaleInvoice): void {
@@ -530,6 +549,7 @@ export class SaleInvoiceDraftStore {
     this.showCustomerDropdown.set(false);
     this.customerid.set(customer.id ?? '');
     this.setCurrencyCode(customer.currencycode ?? this.currencycode());
+    this.applyRememberedCustomerDisplayPreferences(customer.id ?? '');
     this.deliverystate.set(customer.state ?? '');
     this.billingName.set(customer.address?.name ?? customer.name);
     this.billingLine1.set(customer.address?.line1 ?? '');
@@ -864,6 +884,79 @@ export class SaleInvoiceDraftStore {
   private normalizeRememberedDate(value: unknown): string | null {
     const isoDate = this.fiscalYearDateRange.toIsoDate(value);
     return isoDate ? this.fiscalYearDateRange.defaultDate(isoDate) : null;
+  }
+
+  private applyRememberedCustomerDisplayPreferences(customerId: string): void {
+    const preferences = this.readCustomerDisplayPreferences(customerId);
+    if (!preferences) return;
+
+    this.applyCustomerDisplayPreferences(preferences);
+  }
+
+  private readCustomerDisplayPreferences(customerId: string): CustomerDisplayPreferences | null {
+    const key = this.customerDisplayPreferencesKey(customerId);
+    if (!key) return null;
+
+    try {
+      const raw = localStorage.getItem(key);
+      return this.parseCustomerDisplayPreferences(raw);
+    } catch {
+      return null;
+    }
+  }
+
+  private parseCustomerDisplayPreferences(value: string | null): CustomerDisplayPreferences | null {
+    if (!value) return null;
+
+    try {
+      const parsed = JSON.parse(value) as unknown;
+      if (Array.isArray(parsed)) {
+        const [showDiscount, showDescription, showDisplayName] = parsed;
+        return typeof showDiscount === 'boolean' &&
+          typeof showDescription === 'boolean' &&
+          typeof showDisplayName === 'boolean'
+          ? { showDiscount, showDescription, showDisplayName }
+          : null;
+      }
+
+      if (!parsed || typeof parsed !== 'object') return null;
+      const preferences = parsed as Partial<CustomerDisplayPreferences>;
+      return typeof preferences.showDiscount === 'boolean' &&
+        typeof preferences.showDescription === 'boolean' &&
+        typeof preferences.showDisplayName === 'boolean'
+        ? {
+            showDiscount: preferences.showDiscount,
+            showDescription: preferences.showDescription,
+            showDisplayName: preferences.showDisplayName,
+          }
+        : null;
+    } catch {
+      return null;
+    }
+  }
+
+  private applyCustomerDisplayPreferences(preferences: CustomerDisplayPreferences): void {
+    this.setShowDiscount(preferences.showDiscount);
+    this.showDescription.set(preferences.showDescription);
+    this.showDisplayName.set(preferences.showDisplayName);
+  }
+
+  private currentCustomerDisplayPreferences(): CustomerDisplayPreferences {
+    return {
+      showDiscount: this.showDiscount(),
+      showDescription: this.showDescription(),
+      showDisplayName: this.showDisplayName(),
+    };
+  }
+
+  private customerDisplayPreferencesKey(customerId: string): string | null {
+    const normalizedCustomerId = customerId.trim();
+    if (!normalizedCustomerId) return null;
+
+    return [
+      ...this.scopedStorageKeyParts(SaleInvoiceDraftStore.CUSTOMER_DISPLAY_PREFS_KEY_PREFIX),
+      this.storageKeyPart(normalizedCustomerId),
+    ].join(':');
   }
 
   private applyRememberedConversionRate(currencyCode: string): void {

@@ -58,6 +58,8 @@ const scopedSession = {
   fiscalyear: { id: 'fy-1', startdate: '2026-04-01', enddate: '2027-03-31' },
 } as unknown as UserSession;
 
+const scopedCustomerDisplayPrefsKey =
+  'daybook:sale-invoice:display-prefs:user-1:org-1:branch-1:fy-1:customer-selected';
 const scopedLastDateKey = 'daybook:sale-invoice:last-date:user-1:org-1:branch-1:fy-1';
 const scopedUsdInrRateKey =
   'daybook:sale-invoice:conversion-rate:user-1:org-1:branch-1:fy-1:USD-INR';
@@ -239,6 +241,54 @@ describe('SaleInvoiceDraftStore', () => {
     draft.setCurrencyCode('USD');
 
     expect(draft.conversionrate()).toBe('1');
+  });
+
+  it('remembers customer display preferences by customer', () => {
+    const draft = configure([], null, '', { session: scopedSession });
+
+    draft.selectCustomer(selectedCustomer);
+    draft.setShowDiscount(false);
+    draft.showDescription.set(false);
+    draft.showDisplayName.set(true);
+    draft.rememberCustomerDisplayPreferences();
+
+    expect(JSON.parse(localStorage.getItem(scopedCustomerDisplayPrefsKey) ?? '')).toEqual({
+      showDiscount: false,
+      showDescription: false,
+      showDisplayName: true,
+    });
+  });
+
+  it('applies remembered customer display preferences when selecting a customer', () => {
+    localStorage.setItem(
+      scopedCustomerDisplayPrefsKey,
+      JSON.stringify({
+        showDiscount: true,
+        showDescription: false,
+        showDisplayName: true,
+      }),
+    );
+    const draft = configure([], null, '', { session: scopedSession });
+
+    draft.selectCustomer(selectedCustomer);
+
+    expect(draft.showDiscount()).toBe(true);
+    expect(draft.showDescription()).toBe(false);
+    expect(draft.showDisplayName()).toBe(true);
+  });
+
+  it('accepts tuple formatted customer display preferences', () => {
+    localStorage.setItem(scopedCustomerDisplayPrefsKey, JSON.stringify([false, true, true]));
+    const draft = configure([], null, '', { session: scopedSession });
+
+    draft.showDiscount.set(true);
+    draft.showDescription.set(false);
+    draft.showDisplayName.set(false);
+    draft.selectCustomer(selectedCustomer);
+
+    expect(draft.showDiscount()).toBe(false);
+    expect(draft.showDescription()).toBe(true);
+    expect(draft.showDisplayName()).toBe(true);
   });
 
   it('keeps the explicitly selected customer when partyId is present', () => {

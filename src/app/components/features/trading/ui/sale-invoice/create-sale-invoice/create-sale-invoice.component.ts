@@ -357,6 +357,7 @@ export class CreateSaleInvoiceComponent {
     if (!saved) return;
     this.draft.rememberInvoiceDate();
     this.draft.rememberConversionRate();
+    this.draft.rememberCustomerDisplayPreferences();
     if (!(await this.attachPendingDocuments(savedId))) return;
     await this.navigation.navigateBack();
   }
