@@ -48,7 +48,7 @@ export function buildGstReconciliationMonthCells(params: {
         today,
       ),
       label: option.label.slice(0, 3),
-      period: `${option.label.slice(0, 3)} ${year}`,
+      period: `${option.label} ${year}`,
     };
   });
 }
