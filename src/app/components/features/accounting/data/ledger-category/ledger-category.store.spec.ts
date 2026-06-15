@@ -120,6 +120,23 @@ describe('LedgerCategoryStore cache', () => {
     expect(service.list).toHaveBeenCalledTimes(1);
   });
 
+  it('reloads the full catalog on refresh', async () => {
+    const store = configure();
+
+    await store.loadLedgerCategories({ limit: 1, offset: 0 });
+    service.count.mockResolvedValueOnce(2);
+    service.list.mockResolvedValueOnce(categories.slice(0, 2));
+
+    await store.refreshLedgerCategories({ limit: 10, offset: 0 });
+
+    expect(service.count).toHaveBeenCalledTimes(2);
+    expect(service.list).toHaveBeenCalledTimes(2);
+    expect(store.catalog()).toEqual(categories.slice(0, 2));
+    expect(store.catalogTotalCount()).toBe(2);
+    expect(store.items()).toEqual(categories.slice(0, 2));
+    expect(store.count()).toBe(2);
+  });
+
   it('reloads, falls back on failure, updates mutations, clears on org switch, and handles by-id cache safety', async () => {
     const store = configure();
 

@@ -116,7 +116,7 @@ export class ListLedgerCategoryComponent {
   }
 
   protected reloadLedgerCategories(): void {
-    void this.ledgerCategoryStore.loadLedgerCategories({
+    void this.ledgerCategoryStore.refreshLedgerCategories({
       ...this.crudQuery.filter(),
       includes: ['parent'],
     });
