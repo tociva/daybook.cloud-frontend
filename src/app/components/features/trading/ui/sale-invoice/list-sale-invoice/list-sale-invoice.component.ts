@@ -31,6 +31,8 @@ import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
 import { formatAmountWithCurrency } from '../../../../../../shared/format/currency';
 
+const DEFAULT_SALE_INVOICE_ORDER = ['date ASC', 'number ASC'] as const;
+
 @Component({
   selector: 'app-list-sale-invoice',
   standalone: true,
@@ -180,6 +182,7 @@ export class ListSaleInvoiceComponent {
   private async loadSaleInvoicesWithJournals(filter: Lb4ListQuery): Promise<void> {
     const query: SaleInvoiceListQuery = {
       ...filter,
+      order: filter.order?.length ? filter.order : DEFAULT_SALE_INVOICE_ORDER,
       includes: ['customer', 'receipts'],
     };
     await this.saleInvoiceStore.loadSaleInvoices(query);

@@ -41,14 +41,59 @@ const foreignCurrencyCustomer: Customer = {
   address: { name: 'Foreign Customer', line1: 'Foreign line' },
 };
 
-describe('SaleInvoiceDraftStore GST reconciliation party prefill', () => {
+type ConfigureOptions = Readonly<{
+  defaultDate?: (value?: string) => string;
+  session?: UserSession | null;
+  toIsoDate?: (value: unknown) => string | null;
+}>;
+
+const scopedSession = {
+  name: '',
+  email: '',
+  userid: 'user-1',
+  member: null,
+  memberorgs: [],
+  organization: { id: 'org-1' },
+  branch: { id: 'branch-1', organizationid: 'org-1', currencycode: 'INR' },
+  fiscalyear: { id: 'fy-1', startdate: '2026-04-01', enddate: '2027-03-31' },
+} as unknown as UserSession;
+
+const scopedLastDateKey = 'daybook:sale-invoice:last-date:user-1:org-1:branch-1:fy-1';
+
+function installLocalStorageMock(): void {
+  const store = new Map<string, string>();
+  const storage: Storage = {
+    get length() {
+      return store.size;
+    },
+    clear: vi.fn(() => store.clear()),
+    getItem: vi.fn((key: string) => store.get(key) ?? null),
+    key: vi.fn((index: number) => Array.from(store.keys())[index] ?? null),
+    removeItem: vi.fn((key: string) => {
+      store.delete(key);
+    }),
+    setItem: vi.fn((key: string, value: string) => {
+      store.set(key, String(value));
+    }),
+  };
+
+  Object.defineProperty(globalThis, 'localStorage', {
+    configurable: true,
+    value: storage,
+  });
+}
+
+describe('SaleInvoiceDraftStore', () => {
   function configure(
     customers: readonly Customer[] = [],
     storeSelectedCustomer: Customer | null = null,
     branchCurrencyCode = '',
+    options: ConfigureOptions = {},
   ) {
     const session = signal<UserSession | null>(
-      branchCurrencyCode
+      options.session !== undefined
+        ? options.session
+        : branchCurrencyCode
         ? ({
             name: '',
             email: '',
@@ -58,6 +103,12 @@ describe('SaleInvoiceDraftStore GST reconciliation party prefill', () => {
             branch: { currencycode: branchCurrencyCode },
           } as unknown as UserSession)
         : null,
+    );
+    const defaultDate = vi.fn(options.defaultDate ?? ((value?: string) => value || '2026-04-01'));
+    const toIsoDate = vi.fn(
+      options.toIsoDate ??
+        ((value: unknown) =>
+          typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : null),
     );
 
     TestBed.configureTestingModule({
@@ -78,9 +129,10 @@ describe('SaleInvoiceDraftStore GST reconciliation party prefill', () => {
         {
           provide: FiscalYearDateRangeService,
           useValue: {
-            defaultDate: vi.fn((value?: string) => value || '2026-04-01'),
+            defaultDate,
             errorMessage: vi.fn(() => null),
             range: signal(null),
+            toIsoDate,
           },
         },
       ],
@@ -92,7 +144,58 @@ describe('SaleInvoiceDraftStore GST reconciliation party prefill', () => {
   beforeEach(() => {
     TestBed.resetTestingModule();
     vi.clearAllMocks();
+    installLocalStorageMock();
     sessionStorage.clear();
+    localStorage.clear();
+  });
+
+  it('remembers the current invoice date in scoped local storage', () => {
+    const draft = configure([], null, '', { session: scopedSession });
+
+    draft.date.set('2026-06-15');
+    draft.rememberInvoiceDate();
+
+    expect(localStorage.getItem(scopedLastDateKey)).toBe('2026-06-15');
+  });
+
+  it('applies the remembered invoice date and recalculates the due date', () => {
+    localStorage.setItem(scopedLastDateKey, '2026-05-02');
+    const draft = configure([], null, '', { session: scopedSession });
+
+    draft.date.set('2026-04-01');
+    draft.duedate.set('2026-04-15');
+    draft.applyRememberedInvoiceDate();
+
+    expect(draft.date()).toBe('2026-05-02');
+    expect(draft.duedate()).toBe('2026-05-16');
+  });
+
+  it('ignores invalid remembered invoice dates', () => {
+    localStorage.setItem(scopedLastDateKey, 'not-a-date');
+    const draft = configure([], null, '', { session: scopedSession });
+
+    draft.date.set('2026-04-01');
+    draft.duedate.set('2026-04-15');
+    draft.applyRememberedInvoiceDate();
+
+    expect(draft.date()).toBe('2026-04-01');
+    expect(draft.duedate()).toBe('2026-04-15');
+  });
+
+  it('constrains remembered invoice dates through the fiscal year date service', () => {
+    localStorage.setItem(scopedLastDateKey, '2027-05-01');
+    const draft = configure([], null, '', {
+      defaultDate: (value?: string) => {
+        if (!value) return '2026-04-01';
+        return value > '2027-03-31' ? '2027-03-31' : value;
+      },
+      session: scopedSession,
+    });
+
+    draft.applyRememberedInvoiceDate();
+
+    expect(draft.date()).toBe('2027-03-31');
+    expect(draft.duedate()).toBe('2027-04-14');
   });
 
   it('keeps the explicitly selected customer when partyId is present', () => {

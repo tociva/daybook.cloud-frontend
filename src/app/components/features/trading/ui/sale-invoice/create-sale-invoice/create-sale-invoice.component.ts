@@ -132,6 +132,8 @@ export class CreateSaleInvoiceComponent {
           await this.draft.selectItem(newItem, pendingRow);
           this.lineItemsRef?.focusPriceInput(pendingRow);
         }
+      } else {
+        this.draft.applyRememberedInvoiceDate();
       }
       await this.selectCustomerFromGstPartyId();
       this.draft.patchFromGstReconciliation(this.route.snapshot.queryParamMap);
@@ -353,6 +355,7 @@ export class CreateSaleInvoiceComponent {
     }
 
     if (!saved) return;
+    this.draft.rememberInvoiceDate();
     if (!(await this.attachPendingDocuments(savedId))) return;
     await this.navigation.navigateBack();
   }

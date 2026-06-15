@@ -108,6 +108,8 @@ interface SaleInvoiceDraftSnapshot {
 
 @Injectable()
 export class SaleInvoiceDraftStore {
+  private static readonly DRAFT_KEY = 'sale-invoice-create-draft';
+  private static readonly LAST_DATE_KEY_PREFIX = 'daybook:sale-invoice:last-date';
   private customerSearchTimer: ReturnType<typeof setTimeout> | null = null;
   private itemSearchTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly customerStore = inject(CustomerStore);
@@ -299,6 +301,32 @@ export class SaleInvoiceDraftStore {
       }
     });
   });
+
+  // ── Remembered invoice date ──────────────────────────────────────────────
+
+  applyRememberedInvoiceDate(): void {
+    try {
+      const raw = localStorage.getItem(this.rememberedInvoiceDateKey());
+      const rememberedDate = this.normalizeRememberedDate(raw);
+      if (!rememberedDate) return;
+
+      this.date.set(rememberedDate);
+      this.duedate.set(this.getDefaultDueDate(rememberedDate));
+    } catch {
+      // localStorage may be unavailable (private browsing, quota, etc.)
+    }
+  }
+
+  rememberInvoiceDate(): void {
+    try {
+      const rememberedDate = this.normalizeRememberedDate(this.date());
+      if (!rememberedDate) return;
+
+      localStorage.setItem(this.rememberedInvoiceDateKey(), rememberedDate);
+    } catch {
+      // localStorage may be unavailable (private browsing, quota, etc.)
+    }
+  }
 
   // ── Patch from loaded invoice (edit mode) ─────────────────────────────────
 
@@ -724,8 +752,6 @@ export class SaleInvoiceDraftStore {
 
   // ── Create-customer navigation draft ─────────────────────────────────────
 
-  private static readonly DRAFT_KEY = 'sale-invoice-create-draft';
-
   saveDraft(pendingItemRowIndex: number | null = null): void {
     try {
       const snapshot: SaleInvoiceDraftSnapshot = {
@@ -818,6 +844,30 @@ export class SaleInvoiceDraftStore {
   }
 
   // ── Private helpers ───────────────────────────────────────────────────────
+
+  private normalizeRememberedDate(value: unknown): string | null {
+    const isoDate = this.fiscalYearDateRange.toIsoDate(value);
+    return isoDate ? this.fiscalYearDateRange.defaultDate(isoDate) : null;
+  }
+
+  private rememberedInvoiceDateKey(): string {
+    const session = this.userSession.session();
+    const organizationId = session?.organization?.id ?? session?.branch?.organizationid;
+    const parts = [
+      SaleInvoiceDraftStore.LAST_DATE_KEY_PREFIX,
+      this.storageKeyPart(session?.userid),
+      this.storageKeyPart(organizationId),
+      this.storageKeyPart(session?.branch?.id),
+      this.storageKeyPart(session?.fiscalyear?.id),
+    ];
+
+    return parts.join(':');
+  }
+
+  private storageKeyPart(value: unknown): string {
+    const text = typeof value === 'string' || typeof value === 'number' ? String(value).trim() : '';
+    return text ? encodeURIComponent(text) : 'global';
+  }
 
   private buildTaxes(item: Item, taxOption: string): TaxRow[] {
     const category = this.resolveItemCategory(item);

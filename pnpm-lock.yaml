@@ -33,14 +33,14 @@ importers:
         specifier: ^0.45.0
         version: 0.45.0(tslib@2.8.1)
       '@tailng-ui/components':
-        specifier: ^0.83.0
-        version: 0.83.0(899589a54d0c63398218f186eab8c1a3)
+        specifier: ^0.84.0
+        version: 0.84.0(40aaef75931fc474caeeaebdd07c97b5)
       '@tailng-ui/icons':
         specifier: ^0.14.0
         version: 0.14.0(@angular/common@21.2.10(@angular/core@21.2.10(@angular/compiler@21.2.10)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.10(@angular/compiler@21.2.10)(rxjs@7.8.2))(rxjs@7.8.2)(tslib@2.8.1)
       '@tailng-ui/primitives':
-        specifier: ^0.64.0
-        version: 0.64.0(@angular/core@21.2.10(@angular/compiler@21.2.10)(rxjs@7.8.2))(@tailng-ui/cdk@0.45.0(tslib@2.8.1))(tslib@2.8.1)
+        specifier: ^0.65.0
+        version: 0.65.0(@angular/core@21.2.10(@angular/compiler@21.2.10)(rxjs@7.8.2))(@tailng-ui/cdk@0.45.0(tslib@2.8.1))(tslib@2.8.1)
       '@tailng-ui/theme':
         specifier: ^0.55.0
         version: 0.55.0(@angular/core@21.2.10(@angular/compiler@21.2.10)(rxjs@7.8.2))
@@ -1366,8 +1366,8 @@ packages:
     peerDependencies:
       tslib: ^2.3.0
 
-  '@tailng-ui/components@0.83.0':
-    resolution: {integrity: sha512-5iu3b4xahgc8jS0EInKnCF+F9IJ2Zpm3R3m1w78NMetnhw5Hjfz35nDetnQ/lUuIjZJioSjlhisSyNeY/BMD7w==}
+  '@tailng-ui/components@0.84.0':
+    resolution: {integrity: sha512-rZBF0/nF3EgK7WyHAx4OqH/dtcaTei0HiXtIFIG1YlK9pKc0iv6k12zd0CzKsxFk3LjAxH1CVFwBaXDPXl/5Dw==}
     peerDependencies:
       '@angular/common': ^21.1.0
       '@angular/core': ^21.1.0
@@ -1375,7 +1375,7 @@ packages:
       '@angular/platform-browser': ^21.1.0
       '@angular/router': ^21.1.0
       '@tailng-ui/cdk': ^0.45.0
-      '@tailng-ui/primitives': ^0.64.0
+      '@tailng-ui/primitives': ^0.65.0
       tslib: ^2.3.0
 
   '@tailng-ui/icons@0.14.0':
@@ -1384,8 +1384,8 @@ packages:
       '@angular/core': ^21.1.0
       tslib: ^2.3.0
 
-  '@tailng-ui/primitives@0.64.0':
-    resolution: {integrity: sha512-QN8ygjd6hSJBZxSFTygkhXPAdgpYy3hzJLQluSg9GCAc10RsfO8O27gzVIx6UpCAyUP2u8Qx98lYkOxi3HEwOg==}
+  '@tailng-ui/primitives@0.65.0':
+    resolution: {integrity: sha512-dg7w3IPq9BxZsIwR0pg45X7smH2E+KUdAviz5QR1CHxgVP8BIvJZv3nif4S2xT63EqVfyJCmvjY+Mgi+XoylIg==}
     peerDependencies:
       '@angular/core': ^21.1.0
       '@tailng-ui/cdk': ^0.45.0
@@ -3947,7 +3947,7 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@tailng-ui/components@0.83.0(899589a54d0c63398218f186eab8c1a3)':
+  '@tailng-ui/components@0.84.0(40aaef75931fc474caeeaebdd07c97b5)':
     dependencies:
       '@angular/common': 21.2.10(@angular/core@21.2.10(@angular/compiler@21.2.10)(rxjs@7.8.2))(rxjs@7.8.2)
       '@angular/core': 21.2.10(@angular/compiler@21.2.10)(rxjs@7.8.2)
@@ -3955,7 +3955,7 @@ snapshots:
       '@angular/platform-browser': 21.2.10(@angular/common@21.2.10(@angular/core@21.2.10(@angular/compiler@21.2.10)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.10(@angular/compiler@21.2.10)(rxjs@7.8.2))
       '@angular/router': 21.2.10(@angular/common@21.2.10(@angular/core@21.2.10(@angular/compiler@21.2.10)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.10(@angular/compiler@21.2.10)(rxjs@7.8.2))(@angular/platform-browser@21.2.10(@angular/common@21.2.10(@angular/core@21.2.10(@angular/compiler@21.2.10)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.10(@angular/compiler@21.2.10)(rxjs@7.8.2)))(rxjs@7.8.2)
       '@tailng-ui/cdk': 0.45.0(tslib@2.8.1)
-      '@tailng-ui/primitives': 0.64.0(@angular/core@21.2.10(@angular/compiler@21.2.10)(rxjs@7.8.2))(@tailng-ui/cdk@0.45.0(tslib@2.8.1))(tslib@2.8.1)
+      '@tailng-ui/primitives': 0.65.0(@angular/core@21.2.10(@angular/compiler@21.2.10)(rxjs@7.8.2))(@tailng-ui/cdk@0.45.0(tslib@2.8.1))(tslib@2.8.1)
       tslib: 2.8.1
 
   '@tailng-ui/icons@0.14.0(@angular/common@21.2.10(@angular/core@21.2.10(@angular/compiler@21.2.10)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.10(@angular/compiler@21.2.10)(rxjs@7.8.2))(rxjs@7.8.2)(tslib@2.8.1)':
@@ -3968,7 +3968,7 @@ snapshots:
       - '@angular/common'
       - rxjs
 
-  '@tailng-ui/primitives@0.64.0(@angular/core@21.2.10(@angular/compiler@21.2.10)(rxjs@7.8.2))(@tailng-ui/cdk@0.45.0(tslib@2.8.1))(tslib@2.8.1)':
+  '@tailng-ui/primitives@0.65.0(@angular/core@21.2.10(@angular/compiler@21.2.10)(rxjs@7.8.2))(@tailng-ui/cdk@0.45.0(tslib@2.8.1))(tslib@2.8.1)':
     dependencies:
       '@angular/core': 21.2.10(@angular/compiler@21.2.10)(rxjs@7.8.2)
       '@tailng-ui/cdk': 0.45.0(tslib@2.8.1)
