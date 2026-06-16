@@ -160,9 +160,35 @@ describe('purchase invoice bulk upload config', () => {
 
     expect(PURCHASE_INVOICE_BULK_UPLOAD_CONFIG.requiredPaths).not.toContain('currencycode');
     expect(PURCHASE_INVOICE_BULK_UPLOAD_CONFIG.requiredPaths).not.toContain('vendoraddress');
+    expect(PURCHASE_INVOICE_BULK_UPLOAD_CONFIG.xlsxRequiredHeaders).not.toContain(
+      'Vendor Address Name',
+    );
+    expect(PURCHASE_INVOICE_BULK_UPLOAD_CONFIG.xlsxRequiredHeaders).not.toContain(
+      'Vendor Address Line 1',
+    );
+    expect(PURCHASE_INVOICE_BULK_UPLOAD_CONFIG.xlsxRequiredHeaders).not.toContain('Vendor Street');
+    expect(PURCHASE_INVOICE_BULK_UPLOAD_CONFIG.xlsxRequiredHeaders).not.toContain('Vendor City');
+    expect(PURCHASE_INVOICE_BULK_UPLOAD_CONFIG.xlsxRequiredHeaders).not.toContain('Vendor State');
+    expect(PURCHASE_INVOICE_BULK_UPLOAD_CONFIG.xlsxRequiredHeaders).not.toContain('Vendor Zip');
+    expect(PURCHASE_INVOICE_BULK_UPLOAD_CONFIG.xlsxRequiredHeaders).not.toContain('Vendor Country');
     expect(result).toEqual([
       {
         ...invoiceWithoutOptionalFields,
+        items: [laptopItem],
+      },
+    ]);
+  });
+
+  it('maps partial vendor address fields when supplied', () => {
+    const partialVendorAddress = { name: 'Acme Supplies' };
+    const result = purchaseInvoiceXlsxRowsToPayloadRows([
+      parsed(2, invoiceRow({ vendoraddress: partialVendorAddress })),
+    ]);
+
+    expect(result).toEqual([
+      {
+        ...invoiceHeader,
+        vendoraddress: partialVendorAddress,
         items: [laptopItem],
       },
     ]);
@@ -178,14 +204,6 @@ describe('purchase invoice bulk upload config', () => {
         parsed(2, invoiceRow({ item: { ...laptopItem, displayname: undefined } })),
       ]),
     ).toBe('Item starting at row 2 is missing required values: Item Display Name.');
-
-    expect(
-      purchaseInvoiceXlsxRowsToPayloadRows([
-        parsed(2, invoiceRow({ vendoraddress: { name: 'Acme Supplies' } })),
-      ]),
-    ).toBe(
-      'Vendor address on invoice starting at row 2 is missing required values: Vendor Address Line 1, Vendor Street, Vendor City, Vendor State, Vendor Zip, Vendor Country.',
-    );
 
     expect(
       purchaseInvoiceXlsxRowsToPayloadRows([

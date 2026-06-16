@@ -14,6 +14,7 @@
 
     <app-bulk-upload-button
       endpoint="/inventory/customer-receipt/bulk-upload"
+      [config]="bulkUploadConfig"
       (uploaded)="reloadCustomerReceipts()"
     />
 

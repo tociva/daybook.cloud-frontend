@@ -14,6 +14,7 @@
 
     <app-bulk-upload-button
       endpoint="/inventory/vendor-payment/bulk-upload"
+      [config]="bulkUploadConfig"
       (uploaded)="reloadVendorPayments()"
     />
 

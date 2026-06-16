@@ -30,6 +30,9 @@ import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
 import { formatAmountWithCurrency } from '../../../../../../shared/format/currency';
 import { PURCHASE_INVOICE_BULK_UPLOAD_CONFIG } from './purchase-invoice-bulk-upload.config';
+import { PurchaseInvoiceBulkUploadValidationService } from './purchase-invoice-bulk-upload-validation.service';
+import { validatePurchaseInvoiceBulkUploadPayload } from './purchase-invoice-bulk-upload.validator';
+import type { BulkUploadPreviewConfig } from '../../../../../../shared/bulk-upload/bulk-upload-preview-config';
 
 @Component({
   selector: 'app-list-purchase-invoice',
@@ -61,7 +64,16 @@ export class ListPurchaseInvoiceComponent {
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly vendorStore = inject(VendorStore);
   protected readonly purchaseInvoiceStore = inject(PurchaseInvoiceStore);
-  protected readonly bulkUploadConfig = PURCHASE_INVOICE_BULK_UPLOAD_CONFIG;
+  private readonly bulkUploadValidationService = inject(PurchaseInvoiceBulkUploadValidationService);
+  protected readonly bulkUploadConfig = computed<BulkUploadPreviewConfig>(() => ({
+    ...PURCHASE_INVOICE_BULK_UPLOAD_CONFIG,
+    prepareValidation: () => this.bulkUploadValidationService.prepare(),
+    validatePayload: (payload) =>
+      validatePurchaseInvoiceBulkUploadPayload(payload, {
+        minorUnit: this.bulkUploadValidationService.branchMinorUnit(),
+      }),
+    validatePayloadAsync: (payload) => this.bulkUploadValidationService.validateReferences(payload),
+  }));
   protected readonly hasError = computed(() => this.purchaseInvoiceStore.error() !== null);
   protected readonly generatingJournalInvoiceId = signal<string | null>(null);
   protected readonly journalsLoading = signal(false);

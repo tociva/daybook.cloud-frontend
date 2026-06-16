@@ -95,29 +95,6 @@ const INVOICE_REQUIRED_FIELDS: readonly BulkUploadField[] = [
   { label: 'Invoice Grand Total', sourcePath: 'grandtotal' },
 ];
 
-const VENDOR_ADDRESS_FIELDS: readonly BulkUploadField[] = [
-  { label: 'Vendor Address Name', sourcePath: 'vendoraddress.name' },
-  { label: 'Vendor Address Line 1', sourcePath: 'vendoraddress.line1' },
-  { label: 'Vendor Address Line 2', sourcePath: 'vendoraddress.line2' },
-  { label: 'Vendor Street', sourcePath: 'vendoraddress.street' },
-  { label: 'Vendor City', sourcePath: 'vendoraddress.city' },
-  { label: 'Vendor State', sourcePath: 'vendoraddress.state' },
-  { label: 'Vendor Zip', sourcePath: 'vendoraddress.zip' },
-  { label: 'Vendor Country', sourcePath: 'vendoraddress.country' },
-  { label: 'Vendor Mobile', sourcePath: 'vendoraddress.mobile' },
-  { label: 'Vendor Email', sourcePath: 'vendoraddress.email' },
-];
-
-const VENDOR_ADDRESS_REQUIRED_FIELDS: readonly BulkUploadField[] = [
-  { label: 'Vendor Address Name', sourcePath: 'vendoraddress.name' },
-  { label: 'Vendor Address Line 1', sourcePath: 'vendoraddress.line1' },
-  { label: 'Vendor Street', sourcePath: 'vendoraddress.street' },
-  { label: 'Vendor City', sourcePath: 'vendoraddress.city' },
-  { label: 'Vendor State', sourcePath: 'vendoraddress.state' },
-  { label: 'Vendor Zip', sourcePath: 'vendoraddress.zip' },
-  { label: 'Vendor Country', sourcePath: 'vendoraddress.country' },
-];
-
 const ITEM_FIELDS: readonly BulkUploadField[] = [
   { label: 'Item Name', outputPath: 'name', sourcePath: 'item.name' },
   { label: 'Item Display Name', outputPath: 'displayname', sourcePath: 'item.displayname' },
@@ -164,6 +141,12 @@ const REQUIRED_PURCHASE_INVOICE_JSON_PATHS = [
   'grandtotal',
   'items',
 ] as const;
+
+const OPTIONAL_XLSX_PATH_PREFIXES = ['vendoraddress.'] as const;
+
+const PURCHASE_INVOICE_XLSX_REQUIRED_HEADERS = PURCHASE_INVOICE_XLSX_COLUMNS.filter(
+  (column) => !OPTIONAL_XLSX_PATH_PREFIXES.some((prefix) => column.path.startsWith(prefix)),
+).map((column) => column.header);
 
 const SAMPLE_VENDOR_ADDRESS = {
   name: 'Acme Supplies',
@@ -227,8 +210,8 @@ export const PURCHASE_INVOICE_BULK_UPLOAD_CONFIG: BulkUploadPreviewConfig = {
     { header: 'Due Date', path: 'duedate', label: 'Due date format' },
   ],
   xlsxHelpText:
-    'Use one row per invoice item or tax line. Put invoice and vendor address fields on the first row for an invoice, item fields on the first row for an item, and leave invoice/item columns blank on continuation tax rows. Download the sample XLSX and keep the header row unchanged.',
-  xlsxRequiredHeaders: PURCHASE_INVOICE_XLSX_COLUMNS.map((column) => column.header),
+    'Use one row per invoice item or tax line. Put invoice fields on the first row for an invoice, include vendor address fields only when overriding the saved vendor address, put item fields on the first row for an item, and leave invoice/item columns blank on continuation tax rows.',
+  xlsxRequiredHeaders: PURCHASE_INVOICE_XLSX_REQUIRED_HEADERS,
   xlsxRowsToPayloadRows: purchaseInvoiceXlsxRowsToPayloadRows,
   xlsxSampleRows: [
     {
@@ -309,11 +292,6 @@ export function purchaseInvoiceXlsxRowsToPayloadRows(
       const invoiceMissing = missingRequiredLabels(row, INVOICE_REQUIRED_FIELDS);
       if (invoiceMissing.length) {
         return `Invoice starting at row ${rowNumber} is missing required values: ${invoiceMissing.join(', ')}.`;
-      }
-
-      const vendorAddressMissing = missingVendorAddressLabels(row);
-      if (vendorAddressMissing.length) {
-        return `Vendor address on invoice starting at row ${rowNumber} is missing required values: ${vendorAddressMissing.join(', ')}.`;
       }
 
       if (!startsItem) {
@@ -435,12 +413,6 @@ function validatePurchaseInvoiceXlsxItem(
   }
 
   return null;
-}
-
-function missingVendorAddressLabels(row: BulkUploadPreviewRow): readonly string[] {
-  if (!hasAnyValue(row, VENDOR_ADDRESS_FIELDS)) return [];
-
-  return missingRequiredLabels(row, VENDOR_ADDRESS_REQUIRED_FIELDS);
 }
 
 function copyFields(

@@ -16,6 +16,7 @@ import {
 } from '../../../../../../shared/crud';
 import type { CrudFilterField, Lb4ListQuery } from '../../../../../../shared/crud';
 import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload';
+import type { BulkUploadPreviewConfig } from '../../../../../../shared/bulk-upload/bulk-upload-preview-config';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
@@ -27,6 +28,8 @@ import { ToastStore } from '../../../../../../core/toast/toast.store';
 import { formatAmountWithCurrency } from '../../../../../../shared/format/currency';
 import { VendorPaymentStore } from '../../../data/vendor-payment';
 import type { VendorPayment, VendorPaymentJournal } from '../../../data/vendor-payment';
+import { VENDOR_PAYMENT_BULK_UPLOAD_CONFIG } from './vendor-payment-bulk-upload.config';
+import { VendorPaymentBulkUploadValidationService } from './vendor-payment-bulk-upload-validation.service';
 
 @Component({
   selector: 'app-list-vendor-payment',
@@ -55,8 +58,13 @@ export class ListVendorPaymentComponent {
   private readonly journalService = inject(JournalService);
   private readonly reconciliationMatchService = inject(ReconciliationMatchService);
   private readonly toastStore = inject(ToastStore);
+  private readonly bulkUploadValidationService = inject(VendorPaymentBulkUploadValidationService);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly vendorPaymentStore = inject(VendorPaymentStore);
+  protected readonly bulkUploadConfig: BulkUploadPreviewConfig = {
+    ...VENDOR_PAYMENT_BULK_UPLOAD_CONFIG,
+    validatePayloadAsync: (payload) => this.bulkUploadValidationService.validateReferences(payload),
+  };
   protected readonly hasError = computed(() => this.vendorPaymentStore.error() !== null);
   protected readonly generatingJournalPaymentId = signal<string | null>(null);
   protected readonly journalsLoading = signal(false);

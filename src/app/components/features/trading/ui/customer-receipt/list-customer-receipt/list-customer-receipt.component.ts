@@ -27,6 +27,7 @@ import { ToastStore } from '../../../../../../core/toast/toast.store';
 import { formatAmountWithCurrency } from '../../../../../../shared/format/currency';
 import { CustomerReceiptStore } from '../../../data/customer-receipt';
 import type { CustomerReceipt, CustomerReceiptJournal } from '../../../data/customer-receipt';
+import { CUSTOMER_RECEIPT_BULK_UPLOAD_CONFIG } from './customer-receipt-bulk-upload.config';
 
 @Component({
   selector: 'app-list-customer-receipt',
@@ -57,6 +58,7 @@ export class ListCustomerReceiptComponent {
   private readonly toastStore = inject(ToastStore);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly customerReceiptStore = inject(CustomerReceiptStore);
+  protected readonly bulkUploadConfig = CUSTOMER_RECEIPT_BULK_UPLOAD_CONFIG;
   protected readonly hasError = computed(() => this.customerReceiptStore.error() !== null);
   protected readonly generatingJournalReceiptId = signal<string | null>(null);
   protected readonly journalsLoading = signal(false);
