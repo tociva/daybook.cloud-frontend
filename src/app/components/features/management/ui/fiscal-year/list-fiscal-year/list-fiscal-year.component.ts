@@ -65,7 +65,11 @@ export class ListFiscalYearComponent {
 
   constructor() {
     this.crudQuery.init((filter) =>
-      void this.fiscalYearStore.loadFiscalYears({ ...filter, includes: ['currency'] }),
+      void this.fiscalYearStore.loadFiscalYears({
+        ...filter,
+        includes: ['currency'],
+        order: filter.order?.length ? filter.order : ['startdate ASC'],
+      }),
     );
   }
 
