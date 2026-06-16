@@ -89,7 +89,6 @@ type BulkUploadPreview = Readonly<{
 
 type BulkUploadInfo = Readonly<{
   modelName: string;
-  requiredColumns: readonly string[];
   rootKey: string;
   usesJsonXlsxCells: boolean;
   usesFieldPathHeaders: boolean;
@@ -1106,7 +1105,6 @@ export class BulkUploadButtonComponent {
 
     return {
       modelName: config.modelName,
-      requiredColumns: requiredXlsxHeaders(config),
       rootKey: config.rootKey,
       usesJsonXlsxCells: usesJsonXlsxCells(config),
       usesFieldPathHeaders: !config.xlsxColumns,

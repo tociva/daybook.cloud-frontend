@@ -103,14 +103,12 @@
 }
 
 .bulk-upload-info-panel p,
-.bulk-upload-info-list,
-.bulk-upload-required {
+.bulk-upload-info-list {
   margin: 0;
 }
 
 .bulk-upload-info-panel p,
-.bulk-upload-info-list dd,
-.bulk-upload-required span {
+.bulk-upload-info-list dd {
   color: var(--tng-semantic-foreground-muted);
   font-size: 0.875rem;
   line-height: 1.45;
@@ -126,8 +124,7 @@
   gap: 0.2rem;
 }
 
-.bulk-upload-info-list dt,
-.bulk-upload-required span {
+.bulk-upload-info-list dt {
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -144,19 +141,6 @@
   color: var(--tng-semantic-foreground-primary);
   font-size: 0.78rem;
   padding: 0.08rem 0.3rem;
-}
-
-.bulk-upload-required {
-  display: grid;
-  gap: 0.35rem;
-}
-
-.bulk-upload-required-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-  max-height: 8.5rem;
-  overflow: auto;
 }
 
 .bulk-upload-info-actions {

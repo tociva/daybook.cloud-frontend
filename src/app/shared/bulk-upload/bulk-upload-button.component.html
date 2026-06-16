@@ -81,14 +81,6 @@
           </div>
         </dl>
 
-        <div class="bulk-upload-required">
-          <span>Required columns</span>
-          <div class="bulk-upload-required-list">
-            @for (column of info.requiredColumns; track column) {
-              <code>{{ column }}</code>
-            }
-          </div>
-        </div>
       } @else {
         <p>Bulk upload help is not configured for this model.</p>
       }
