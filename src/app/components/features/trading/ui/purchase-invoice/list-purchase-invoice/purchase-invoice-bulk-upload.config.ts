@@ -15,35 +15,24 @@ type BulkUploadField = Readonly<{
   sourcePath: string;
 }>;
 
-const SALE_INVOICE_XLSX_COLUMNS: readonly BulkUploadXlsxColumn[] = [
+const PURCHASE_INVOICE_XLSX_COLUMNS: readonly BulkUploadXlsxColumn[] = [
   { header: 'Invoice Number', path: 'number' },
   { header: 'Date', path: 'date' },
   { header: 'Due Date', path: 'duedate' },
-  { header: 'Customer Name', path: 'customername' },
+  { header: 'Vendor Name', path: 'vendorname' },
   { header: 'Currency Code', path: 'currencycode' },
   { header: 'Description', path: 'description' },
   { header: 'Tax Option', path: 'taxoption' },
-  { header: 'Delivery State', path: 'deliverystate' },
-  { header: 'Billing Address Name', path: 'billingaddress.name' },
-  { header: 'Billing Address Line 1', path: 'billingaddress.line1' },
-  { header: 'Billing Address Line 2', path: 'billingaddress.line2' },
-  { header: 'Billing Street', path: 'billingaddress.street' },
-  { header: 'Billing City', path: 'billingaddress.city' },
-  { header: 'Billing State', path: 'billingaddress.state' },
-  { header: 'Billing Zip', path: 'billingaddress.zip' },
-  { header: 'Billing Country', path: 'billingaddress.country' },
-  { header: 'Billing Mobile', path: 'billingaddress.mobile' },
-  { header: 'Billing Email', path: 'billingaddress.email' },
-  { header: 'Shipping Address Name', path: 'shippingaddress.name' },
-  { header: 'Shipping Address Line 1', path: 'shippingaddress.line1' },
-  { header: 'Shipping Address Line 2', path: 'shippingaddress.line2' },
-  { header: 'Shipping Street', path: 'shippingaddress.street' },
-  { header: 'Shipping City', path: 'shippingaddress.city' },
-  { header: 'Shipping State', path: 'shippingaddress.state' },
-  { header: 'Shipping Zip', path: 'shippingaddress.zip' },
-  { header: 'Shipping Country', path: 'shippingaddress.country' },
-  { header: 'Shipping Mobile', path: 'shippingaddress.mobile' },
-  { header: 'Shipping Email', path: 'shippingaddress.email' },
+  { header: 'Vendor Address Name', path: 'vendoraddress.name' },
+  { header: 'Vendor Address Line 1', path: 'vendoraddress.line1' },
+  { header: 'Vendor Address Line 2', path: 'vendoraddress.line2' },
+  { header: 'Vendor Street', path: 'vendoraddress.street' },
+  { header: 'Vendor City', path: 'vendoraddress.city' },
+  { header: 'Vendor State', path: 'vendoraddress.state' },
+  { header: 'Vendor Zip', path: 'vendoraddress.zip' },
+  { header: 'Vendor Country', path: 'vendoraddress.country' },
+  { header: 'Vendor Mobile', path: 'vendoraddress.mobile' },
+  { header: 'Vendor Email', path: 'vendoraddress.email' },
   { header: 'Invoice Item Total', path: 'itemtotal' },
   { header: 'Invoice Discount', path: 'discount' },
   { header: 'Invoice Subtotal', path: 'subtotal' },
@@ -74,31 +63,20 @@ const INVOICE_FIELDS: readonly BulkUploadField[] = [
   { label: 'Invoice Number', sourcePath: 'number' },
   { label: 'Date', sourcePath: 'date' },
   { label: 'Due Date', sourcePath: 'duedate' },
-  { label: 'Customer Name', sourcePath: 'customername' },
+  { label: 'Vendor Name', sourcePath: 'vendorname' },
   { label: 'Currency Code', sourcePath: 'currencycode' },
   { label: 'Description', sourcePath: 'description' },
   { label: 'Tax Option', sourcePath: 'taxoption' },
-  { label: 'Delivery State', sourcePath: 'deliverystate' },
-  { label: 'Billing Address Name', sourcePath: 'billingaddress.name' },
-  { label: 'Billing Address Line 1', sourcePath: 'billingaddress.line1' },
-  { label: 'Billing Address Line 2', sourcePath: 'billingaddress.line2' },
-  { label: 'Billing Street', sourcePath: 'billingaddress.street' },
-  { label: 'Billing City', sourcePath: 'billingaddress.city' },
-  { label: 'Billing State', sourcePath: 'billingaddress.state' },
-  { label: 'Billing Zip', sourcePath: 'billingaddress.zip' },
-  { label: 'Billing Country', sourcePath: 'billingaddress.country' },
-  { label: 'Billing Mobile', sourcePath: 'billingaddress.mobile' },
-  { label: 'Billing Email', sourcePath: 'billingaddress.email' },
-  { label: 'Shipping Address Name', sourcePath: 'shippingaddress.name' },
-  { label: 'Shipping Address Line 1', sourcePath: 'shippingaddress.line1' },
-  { label: 'Shipping Address Line 2', sourcePath: 'shippingaddress.line2' },
-  { label: 'Shipping Street', sourcePath: 'shippingaddress.street' },
-  { label: 'Shipping City', sourcePath: 'shippingaddress.city' },
-  { label: 'Shipping State', sourcePath: 'shippingaddress.state' },
-  { label: 'Shipping Zip', sourcePath: 'shippingaddress.zip' },
-  { label: 'Shipping Country', sourcePath: 'shippingaddress.country' },
-  { label: 'Shipping Mobile', sourcePath: 'shippingaddress.mobile' },
-  { label: 'Shipping Email', sourcePath: 'shippingaddress.email' },
+  { label: 'Vendor Address Name', sourcePath: 'vendoraddress.name' },
+  { label: 'Vendor Address Line 1', sourcePath: 'vendoraddress.line1' },
+  { label: 'Vendor Address Line 2', sourcePath: 'vendoraddress.line2' },
+  { label: 'Vendor Street', sourcePath: 'vendoraddress.street' },
+  { label: 'Vendor City', sourcePath: 'vendoraddress.city' },
+  { label: 'Vendor State', sourcePath: 'vendoraddress.state' },
+  { label: 'Vendor Zip', sourcePath: 'vendoraddress.zip' },
+  { label: 'Vendor Country', sourcePath: 'vendoraddress.country' },
+  { label: 'Vendor Mobile', sourcePath: 'vendoraddress.mobile' },
+  { label: 'Vendor Email', sourcePath: 'vendoraddress.email' },
   { label: 'Invoice Item Total', sourcePath: 'itemtotal' },
   { label: 'Invoice Discount', sourcePath: 'discount' },
   { label: 'Invoice Subtotal', sourcePath: 'subtotal' },
@@ -111,10 +89,33 @@ const INVOICE_REQUIRED_FIELDS: readonly BulkUploadField[] = [
   { label: 'Invoice Number', sourcePath: 'number' },
   { label: 'Date', sourcePath: 'date' },
   { label: 'Due Date', sourcePath: 'duedate' },
-  { label: 'Customer Name', sourcePath: 'customername' },
+  { label: 'Vendor Name', sourcePath: 'vendorname' },
   { label: 'Invoice Item Total', sourcePath: 'itemtotal' },
   { label: 'Invoice Subtotal', sourcePath: 'subtotal' },
   { label: 'Invoice Grand Total', sourcePath: 'grandtotal' },
+];
+
+const VENDOR_ADDRESS_FIELDS: readonly BulkUploadField[] = [
+  { label: 'Vendor Address Name', sourcePath: 'vendoraddress.name' },
+  { label: 'Vendor Address Line 1', sourcePath: 'vendoraddress.line1' },
+  { label: 'Vendor Address Line 2', sourcePath: 'vendoraddress.line2' },
+  { label: 'Vendor Street', sourcePath: 'vendoraddress.street' },
+  { label: 'Vendor City', sourcePath: 'vendoraddress.city' },
+  { label: 'Vendor State', sourcePath: 'vendoraddress.state' },
+  { label: 'Vendor Zip', sourcePath: 'vendoraddress.zip' },
+  { label: 'Vendor Country', sourcePath: 'vendoraddress.country' },
+  { label: 'Vendor Mobile', sourcePath: 'vendoraddress.mobile' },
+  { label: 'Vendor Email', sourcePath: 'vendoraddress.email' },
+];
+
+const VENDOR_ADDRESS_REQUIRED_FIELDS: readonly BulkUploadField[] = [
+  { label: 'Vendor Address Name', sourcePath: 'vendoraddress.name' },
+  { label: 'Vendor Address Line 1', sourcePath: 'vendoraddress.line1' },
+  { label: 'Vendor Street', sourcePath: 'vendoraddress.street' },
+  { label: 'Vendor City', sourcePath: 'vendoraddress.city' },
+  { label: 'Vendor State', sourcePath: 'vendoraddress.state' },
+  { label: 'Vendor Zip', sourcePath: 'vendoraddress.zip' },
+  { label: 'Vendor Country', sourcePath: 'vendoraddress.country' },
 ];
 
 const ITEM_FIELDS: readonly BulkUploadField[] = [
@@ -153,59 +154,44 @@ const TAX_FIELDS: readonly BulkUploadField[] = [
   { label: 'Tax Amount', outputPath: 'amount', sourcePath: 'itemtax.amount' },
 ];
 
-const REQUIRED_SALE_INVOICE_JSON_PATHS = [
+const REQUIRED_PURCHASE_INVOICE_JSON_PATHS = [
   'number',
   'date',
   'duedate',
-  'customername',
+  'vendorname',
   'itemtotal',
   'subtotal',
   'grandtotal',
   'items',
 ] as const;
 
-const SAMPLE_BILLING_ADDRESS = {
-  name: 'Acme Retail',
-  line1: 'Plot 10',
+const SAMPLE_VENDOR_ADDRESS = {
+  name: 'Acme Supplies',
+  line1: 'Plot 42',
   line2: '',
-  street: 'MG Road',
+  street: 'Industrial Layout',
   city: 'Bengaluru',
   state: 'Karnataka',
-  zip: '560001',
+  zip: '560100',
   country: 'India',
-  mobile: '+91 9876543210',
-  email: 'billing@acme.example',
+  mobile: '+91 9876500001',
+  email: 'orders@acmesupplies.example',
 };
 
-const SAMPLE_SHIPPING_ADDRESS = {
-  name: 'Acme Retail Warehouse',
-  line1: 'Warehouse 4',
-  line2: '',
-  street: 'Peenya Industrial Area',
-  city: 'Bengaluru',
-  state: 'Karnataka',
-  zip: '560058',
-  country: 'India',
-  mobile: '+91 9876543211',
-  email: 'warehouse@acme.example',
-};
-
-export const SALE_INVOICE_BULK_UPLOAD_CONFIG: BulkUploadPreviewConfig = {
-  modelName: 'Sale Invoices',
-  requiredPaths: REQUIRED_SALE_INVOICE_JSON_PATHS,
+export const PURCHASE_INVOICE_BULK_UPLOAD_CONFIG: BulkUploadPreviewConfig = {
+  modelName: 'Purchase Invoices',
+  requiredPaths: REQUIRED_PURCHASE_INVOICE_JSON_PATHS,
   rootKey: 'invoices',
   sampleRows: [
     {
-      number: 'SI-001',
+      number: 'PI-001',
       date: '2026-04-01',
       duedate: '2026-04-15',
       currencycode: 'INR',
-      customername: 'Acme Retail',
-      billingaddress: SAMPLE_BILLING_ADDRESS,
-      shippingaddress: SAMPLE_SHIPPING_ADDRESS,
-      description: 'Laptop sale',
-      deliverystate: 'Karnataka',
-      taxoption: 'exclusive',
+      vendorname: 'Acme Supplies',
+      vendoraddress: SAMPLE_VENDOR_ADDRESS,
+      description: 'Business laptop purchase',
+      taxoption: 'Intra State',
       itemtotal: 10000,
       discount: 0,
       subtotal: 10000,
@@ -235,27 +221,25 @@ export const SALE_INVOICE_BULK_UPLOAD_CONFIG: BulkUploadPreviewConfig = {
       ],
     },
   ],
-  xlsxColumns: SALE_INVOICE_XLSX_COLUMNS,
+  xlsxColumns: PURCHASE_INVOICE_XLSX_COLUMNS,
   xlsxDateColumns: [
     { header: 'Date', path: 'date', label: 'Invoice date format' },
     { header: 'Due Date', path: 'duedate', label: 'Due date format' },
   ],
   xlsxHelpText:
-    'Use one row per invoice item or tax line. Put invoice fields on the first row for an invoice, item fields on the first row for an item, and leave invoice/item columns blank on continuation tax rows.',
-  xlsxRequiredHeaders: SALE_INVOICE_XLSX_COLUMNS.map((column) => column.header),
-  xlsxRowsToPayloadRows: saleInvoiceXlsxRowsToPayloadRows,
+    'Use one row per invoice item or tax line. Put invoice and vendor address fields on the first row for an invoice, item fields on the first row for an item, and leave invoice/item columns blank on continuation tax rows. Download the sample XLSX and keep the header row unchanged.',
+  xlsxRequiredHeaders: PURCHASE_INVOICE_XLSX_COLUMNS.map((column) => column.header),
+  xlsxRowsToPayloadRows: purchaseInvoiceXlsxRowsToPayloadRows,
   xlsxSampleRows: [
     {
-      number: 'SI-001',
+      number: 'PI-001',
       date: '2026-04-01',
       duedate: '2026-04-15',
       currencycode: 'INR',
-      customername: 'Acme Retail',
-      description: 'Laptop sale',
-      deliverystate: 'Karnataka',
-      taxoption: 'exclusive',
-      billingaddress: SAMPLE_BILLING_ADDRESS,
-      shippingaddress: SAMPLE_SHIPPING_ADDRESS,
+      vendorname: 'Acme Supplies',
+      vendoraddress: SAMPLE_VENDOR_ADDRESS,
+      description: 'Business laptop purchase',
+      taxoption: 'Intra State',
       itemtotal: 10000,
       discount: 0,
       subtotal: 10000,
@@ -283,11 +267,11 @@ export const SALE_INVOICE_BULK_UPLOAD_CONFIG: BulkUploadPreviewConfig = {
       itemtax: { name: 'SGST 9%', shortname: 'SGST', rate: 9, appliedto: 100, amount: 900 },
     },
   ],
-  xlsxSheetName: 'Sale Invoices',
+  xlsxSheetName: 'Purchase Invoices',
   columns: [
     bulkUploadTextColumn('number', 'Number', 'number', '10rem'),
     bulkUploadTextColumn('date', 'Date', 'date', '9rem'),
-    bulkUploadTextColumn('customername', 'Customer', 'customername', '14rem'),
+    bulkUploadTextColumn('vendorname', 'Vendor', 'vendorname', '14rem'),
     bulkUploadTextColumn('currencycode', 'Currency', 'currencycode', '8rem'),
     bulkUploadCountColumn('items', 'Items', 'items', '7rem'),
     bulkUploadNumberColumn('subtotal', 'Subtotal', 'subtotal', '9rem'),
@@ -296,7 +280,7 @@ export const SALE_INVOICE_BULK_UPLOAD_CONFIG: BulkUploadPreviewConfig = {
   ],
 };
 
-export function saleInvoiceXlsxRowsToPayloadRows(
+export function purchaseInvoiceXlsxRowsToPayloadRows(
   parsedRows: readonly BulkUploadXlsxParsedRow[],
 ): readonly BulkUploadPreviewRow[] | string {
   const invoices: BulkUploadPreviewRow[] = [];
@@ -313,10 +297,10 @@ export function saleInvoiceXlsxRowsToPayloadRows(
     const hasTaxValues = hasAnyValue(row, TAX_FIELDS);
 
     if (startsInvoice) {
-      const previousItemError = validateSaleInvoiceXlsxItem(currentItem, currentItemStartRow);
+      const previousItemError = validatePurchaseInvoiceXlsxItem(currentItem, currentItemStartRow);
       if (previousItemError) return previousItemError;
 
-      currentInvoice = createSaleInvoiceFromXlsxRow(row);
+      currentInvoice = createPurchaseInvoiceFromXlsxRow(row);
       currentInvoiceStartRow = rowNumber;
       currentItem = null;
       currentItemStartRow = 0;
@@ -325,6 +309,11 @@ export function saleInvoiceXlsxRowsToPayloadRows(
       const invoiceMissing = missingRequiredLabels(row, INVOICE_REQUIRED_FIELDS);
       if (invoiceMissing.length) {
         return `Invoice starting at row ${rowNumber} is missing required values: ${invoiceMissing.join(', ')}.`;
+      }
+
+      const vendorAddressMissing = missingVendorAddressLabels(row);
+      if (vendorAddressMissing.length) {
+        return `Vendor address on invoice starting at row ${rowNumber} is missing required values: ${vendorAddressMissing.join(', ')}.`;
       }
 
       if (!startsItem) {
@@ -341,7 +330,7 @@ export function saleInvoiceXlsxRowsToPayloadRows(
     }
 
     if (startsItem) {
-      const previousItemError = validateSaleInvoiceXlsxItem(currentItem, currentItemStartRow);
+      const previousItemError = validatePurchaseInvoiceXlsxItem(currentItem, currentItemStartRow);
       if (previousItemError) return previousItemError;
 
       const itemMissing = missingRequiredLabels(row, ITEM_REQUIRED_FIELDS);
@@ -349,7 +338,7 @@ export function saleInvoiceXlsxRowsToPayloadRows(
         return `Item starting at row ${rowNumber} is missing required values: ${itemMissing.join(', ')}.`;
       }
 
-      currentItem = createSaleInvoiceItemFromXlsxRow(row);
+      currentItem = createPurchaseInvoiceItemFromXlsxRow(row);
       currentItemStartRow = rowNumber;
       (currentInvoice['items'] as BulkUploadPreviewRow[]).push(currentItem);
     } else if (
@@ -373,37 +362,40 @@ export function saleInvoiceXlsxRowsToPayloadRows(
         return `Tax row ${rowNumber} is missing required values: ${taxMissing.join(', ')}.`;
       }
 
-      appendTaxToItem(currentItem, createSaleInvoiceTaxFromXlsxRow(row));
+      appendTaxToItem(currentItem, createPurchaseInvoiceTaxFromXlsxRow(row));
     }
 
-    const currentInvoiceError = validateSaleInvoiceXlsxInvoice(
+    const currentInvoiceError = validatePurchaseInvoiceXlsxInvoice(
       currentInvoice,
       currentInvoiceStartRow,
     );
     if (currentInvoiceError) return currentInvoiceError;
   }
 
-  const finalItemError = validateSaleInvoiceXlsxItem(currentItem, currentItemStartRow);
+  const finalItemError = validatePurchaseInvoiceXlsxItem(currentItem, currentItemStartRow);
   if (finalItemError) return finalItemError;
 
-  const finalInvoiceError = validateSaleInvoiceXlsxInvoice(currentInvoice, currentInvoiceStartRow);
+  const finalInvoiceError = validatePurchaseInvoiceXlsxInvoice(
+    currentInvoice,
+    currentInvoiceStartRow,
+  );
   if (finalInvoiceError) return finalInvoiceError;
 
   return invoices;
 }
 
-function createSaleInvoiceFromXlsxRow(row: BulkUploadPreviewRow): BulkUploadPreviewRow {
+function createPurchaseInvoiceFromXlsxRow(row: BulkUploadPreviewRow): BulkUploadPreviewRow {
   return {
     ...copyFields(row, INVOICE_FIELDS),
     items: [],
   };
 }
 
-function createSaleInvoiceItemFromXlsxRow(row: BulkUploadPreviewRow): BulkUploadPreviewRow {
+function createPurchaseInvoiceItemFromXlsxRow(row: BulkUploadPreviewRow): BulkUploadPreviewRow {
   return copyFields(row, ITEM_FIELDS);
 }
 
-function createSaleInvoiceTaxFromXlsxRow(row: BulkUploadPreviewRow): BulkUploadPreviewRow {
+function createPurchaseInvoiceTaxFromXlsxRow(row: BulkUploadPreviewRow): BulkUploadPreviewRow {
   return copyFields(row, TAX_FIELDS);
 }
 
@@ -417,7 +409,7 @@ function appendTaxToItem(item: BulkUploadPreviewRow, tax: BulkUploadPreviewRow):
   item['taxes'] = [tax];
 }
 
-function validateSaleInvoiceXlsxInvoice(
+function validatePurchaseInvoiceXlsxInvoice(
   invoice: BulkUploadPreviewRow | null,
   rowNumber: number,
 ): string | null {
@@ -431,7 +423,7 @@ function validateSaleInvoiceXlsxInvoice(
   return null;
 }
 
-function validateSaleInvoiceXlsxItem(
+function validatePurchaseInvoiceXlsxItem(
   item: BulkUploadPreviewRow | null,
   rowNumber: number,
 ): string | null {
@@ -443,6 +435,12 @@ function validateSaleInvoiceXlsxItem(
   }
 
   return null;
+}
+
+function missingVendorAddressLabels(row: BulkUploadPreviewRow): readonly string[] {
+  if (!hasAnyValue(row, VENDOR_ADDRESS_FIELDS)) return [];
+
+  return missingRequiredLabels(row, VENDOR_ADDRESS_REQUIRED_FIELDS);
 }
 
 function copyFields(

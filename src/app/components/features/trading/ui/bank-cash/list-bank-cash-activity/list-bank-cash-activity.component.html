@@ -4,31 +4,13 @@
     title="Bank & Cash Activity"
     description="Review receipts, payments, and contra movements across bank and cash accounts."
   >
-    <div class="account-filter">
-      <tng-autocomplete
-        id="bank-cash-activity-account"
-        placeholder="All bank/cash accounts"
-        ariaLabel="Bank/Cash Account"
-        [options]="bankCashStore.items()"
-        [value]="selectedBankCashId()"
-        [getOptionValue]="bankCashOptionValue"
-        [getOptionLabel]="bankCashOptionLabel"
-        [trackBy]="bankCashTrackBy"
-        (valueChange)="onBankCashChange($event)"
-        (queryChange)="onBankCashQueryChange($event)"
-      />
-    </div>
-
-    <div class="date-filter">
-      <app-fiscal-year-date-range-picker
-        id="bank-cash-activity-date-range"
-        placeholder="Select report period"
-        [fullWidth]="false"
-        [value]="pickerValue()"
-        (valueChange)="onDateRangeChange($event)"
-        (closed)="onPickerClosed()"
-      />
-    </div>
+    <app-crud-filter-popover
+      ariaLabel="Bank and cash activity filters"
+      title="Filter bank and cash activity"
+      [fields]="filterFields"
+      [filter]="crudQuery.filter()"
+      syncUrl
+    />
 
     <tng-button type="button" appearance="outline" tone="neutral" (click)="refresh()">
       <tng-icon icon="refreshCw" aria-hidden="true" />

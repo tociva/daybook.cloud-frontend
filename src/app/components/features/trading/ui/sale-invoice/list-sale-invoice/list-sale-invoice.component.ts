@@ -120,7 +120,6 @@ export class ListSaleInvoiceComponent {
       id: 'date',
       label: 'Date',
       type: 'date',
-      fiscalYear: true,
       operators: ['between', '=', '>=', '<='],
     },
     {

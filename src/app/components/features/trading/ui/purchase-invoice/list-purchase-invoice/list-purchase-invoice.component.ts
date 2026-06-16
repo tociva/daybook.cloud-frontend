@@ -29,6 +29,7 @@ import { DateManagementService } from '../../../../../../core/date/date-manageme
 import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
 import { formatAmountWithCurrency } from '../../../../../../shared/format/currency';
+import { PURCHASE_INVOICE_BULK_UPLOAD_CONFIG } from './purchase-invoice-bulk-upload.config';
 
 @Component({
   selector: 'app-list-purchase-invoice',
@@ -60,6 +61,7 @@ export class ListPurchaseInvoiceComponent {
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly vendorStore = inject(VendorStore);
   protected readonly purchaseInvoiceStore = inject(PurchaseInvoiceStore);
+  protected readonly bulkUploadConfig = PURCHASE_INVOICE_BULK_UPLOAD_CONFIG;
   protected readonly hasError = computed(() => this.purchaseInvoiceStore.error() !== null);
   protected readonly generatingJournalInvoiceId = signal<string | null>(null);
   protected readonly journalsLoading = signal(false);
@@ -114,7 +116,6 @@ export class ListPurchaseInvoiceComponent {
       id: 'date',
       label: 'Date',
       type: 'date',
-      fiscalYear: true,
       operators: ['between', '=', '>=', '<='],
     },
     {

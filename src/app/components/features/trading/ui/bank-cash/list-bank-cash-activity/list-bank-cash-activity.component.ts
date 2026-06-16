@@ -2,15 +2,12 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  effect,
   inject,
   signal,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router } from '@angular/router';
-import type { TngDateRangePickerSelectionInput, TngTableColumn } from '@tailng-ui/components';
+import { Router } from '@angular/router';
+import type { TngTableColumn } from '@tailng-ui/components';
 import {
-  TngAutocompleteComponent,
   TngButtonComponent,
   TngCardComponent,
   TngTable,
@@ -21,21 +18,18 @@ import { TngIcon } from '@tailng-ui/icons';
 import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
-import { FiscalYearDateRangePickerComponent } from '../../../../../../shared/fiscal-year-date-range-picker';
-import { FiscalYearDateRangeService } from '../../../../../../shared/fiscal-year-date-range-picker';
 import { formatAmountWithCurrency } from '../../../../../../shared/format/currency';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
+import { CrudFilterPopoverComponent, CrudListQueryService } from '../../../../../../shared/crud';
+import type { CrudFilterField } from '../../../../../../shared/crud';
 import type { BankCash } from '../../../data/bank-cash';
 import { BankCashStore } from '../../../data/bank-cash';
 import { BankCashReportService } from '../../../data/bank-cash-report';
 import type { BankCashReport, BankCashReportQuery } from '../../../data/bank-cash-report';
-import {
-  buildReportDateRouterQueryFromPicker,
-  parseIsoDateToDate,
-} from '../../../../accounting/ui/reports/shared/report-date-query.util';
 import { normalizeBankCashReportTransaction } from './bank-cash-activity.util';
 import type { BankCashActivityRow } from './bank-cash-activity.util';
+import type { Lb4ListQuery, Lb4Where } from '../../../../../../shared/crud';
 
 type ActivityBadgeTone = 'success' | 'warning';
 
@@ -46,10 +40,9 @@ const emptyReportTotals = { payment: 0, receipt: 0 };
   standalone: true,
   imports: [
     PageHeadingComponent,
-    TngAutocompleteComponent,
     TngButtonComponent,
     TngCardComponent,
-    FiscalYearDateRangePickerComponent,
+    CrudFilterPopoverComponent,
     TngIcon,
     TngTag,
     EmptyStateComponent,
@@ -59,29 +52,22 @@ const emptyReportTotals = { payment: 0, receipt: 0 };
   ],
   templateUrl: './list-bank-cash-activity.component.html',
   styleUrl: './list-bank-cash-activity.component.css',
+  providers: [CrudListQueryService],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ListBankCashActivityComponent {
   private readonly bankCashReportService = inject(BankCashReportService);
   private readonly dateManagement = inject(DateManagementService);
-  private readonly fiscalYearDateRange = inject(FiscalYearDateRangeService);
-  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly bankCashStore = inject(BankCashStore);
 
-  private readonly queryParams = toSignal(this.route.queryParamMap, {
-    initialValue: this.route.snapshot.queryParamMap,
-  });
   private bankCashSearchTimer: ReturnType<typeof setTimeout> | null = null;
-  private lastLoadKey = '';
   private loadToken = 0;
 
   protected readonly error = signal<string | null>(null);
   protected readonly isLoading = signal(false);
   protected readonly report = signal<BankCashReport | null>(null);
-  protected readonly selectedBankCashId = signal<string | null>(null);
-  protected readonly pickerValue = signal<TngDateRangePickerSelectionInput<Date>>(null);
-  protected readonly pendingPickerValue = signal<TngDateRangePickerSelectionInput<Date>>(null);
 
   protected readonly hasError = computed(() => this.error() !== null);
   protected readonly rows = computed<readonly BankCashActivityRow[]>(() =>
@@ -93,6 +79,29 @@ export class ListBankCashActivityComponent {
   protected readonly bankCashOptionValue = (bankCash: BankCash): string => bankCash.id ?? '';
   protected readonly bankCashTrackBy = (_index: number, bankCash: BankCash): string =>
     bankCash.id ?? bankCash.name;
+
+  protected readonly filterFields: readonly CrudFilterField[] = [
+    {
+      id: 'bcashid',
+      label: 'Bank/Cash Account',
+      placeholder: 'All bank/cash accounts',
+      type: 'autocomplete',
+      options: () => this.bankCashStore.items(),
+      getOptionLabel: (option) =>
+        this.bankCashOptionLabel(option as BankCash),
+      getOptionValue: (option) =>
+        this.bankCashOptionValue(option as BankCash),
+      trackBy: (index, option) =>
+        this.bankCashTrackBy(index, option as BankCash),
+      queryChange: (query) => this.onBankCashQueryChange(query),
+    },
+    {
+      id: 'date',
+      label: 'Date',
+      defaultOperator: 'between',
+      type: 'date',
+    },
+  ];
 
   protected readonly columns: readonly TngTableColumn<BankCashActivityRow>[] = [
     { id: 'date', label: 'Date', width: '10rem' },
@@ -119,34 +128,7 @@ export class ListBankCashActivityComponent {
 
   constructor() {
     void this.bankCashStore.loadBankCashes({ limit: 1000, offset: 0 });
-
-    effect(() => {
-      const params = this.queryParams();
-      const bcashid = params.get('bcashid');
-      const start = params.get('start');
-      const end = params.get('end');
-
-      this.selectedBankCashId.set(bcashid);
-      this.pickerValue.set({
-        start: parseIsoDateToDate(start),
-        end: parseIsoDateToDate(end),
-      });
-      this.pendingPickerValue.set(this.pickerValue());
-
-      const loadKey = `${bcashid ?? ''}|${start ?? ''}|${end ?? ''}`;
-      if (this.lastLoadKey === loadKey) return;
-      this.lastLoadKey = loadKey;
-
-      const token = ++this.loadToken;
-      void this.loadReport(
-        {
-          ...(bcashid ? { bcashid } : {}),
-          ...(start ? { start } : {}),
-          ...(end ? { end } : {}),
-        },
-        token,
-      );
-    });
+    this.crudQuery.init((filter) => this.loadReport(this.mapFilterToReportQuery(filter), ++this.loadToken));
   }
 
   protected formatDate(value: string | undefined): string {
@@ -188,45 +170,41 @@ export class ListBankCashActivityComponent {
     }, 250);
   }
 
-  protected onBankCashChange(value: unknown): void {
-    const bcashid = typeof value === 'string' && value ? value : null;
-
-    void this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: { bcashid },
-      queryParamsHandling: 'merge',
-    });
-  }
-
-  protected onDateRangeChange(value: TngDateRangePickerSelectionInput<Date>): void {
-    this.pendingPickerValue.set(value);
-  }
-
-  protected onPickerClosed(): void {
-    const queryParams = buildReportDateRouterQueryFromPicker(this.pendingPickerValue(), (value) =>
-      this.fiscalYearDateRange.toIsoDate(value),
-    );
-    if (!queryParams) return;
-
-    void this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams,
-      queryParamsHandling: 'merge',
-    });
-  }
-
   protected refresh(): void {
-    this.lastLoadKey = '';
-    const params = this.queryParams();
-    const token = ++this.loadToken;
-    void this.loadReport(
-      {
-        ...(params.get('bcashid') ? { bcashid: params.get('bcashid') ?? undefined } : {}),
-        ...(params.get('start') ? { start: params.get('start') ?? undefined } : {}),
-        ...(params.get('end') ? { end: params.get('end') ?? undefined } : {}),
-      },
-      token,
-    );
+    void this.loadReport(this.mapFilterToReportQuery(this.crudQuery.filter()), ++this.loadToken);
+  }
+
+  private mapFilterToReportQuery(filter: Lb4ListQuery): BankCashReportQuery {
+    const where = filter.where ?? {};
+    const bcashid = this.readTextValue(where, 'bcashid');
+    const date = where['date'];
+    const [start, end] = this.readDateRange(date);
+
+    return {
+      ...(bcashid ? { bcashid } : {}),
+      ...(start ? { start } : {}),
+      ...(end ? { end } : {}),
+    };
+  }
+
+  private readTextValue(where: Lb4Where, key: string): string | null {
+    const value = where[key];
+    return typeof value === 'string' && value.trim() ? value.trim() : null;
+  }
+
+  private readDateRange(value: unknown): [string | null, string | null] {
+    if (typeof value === 'string' && value) return [value, value];
+    if (!value || typeof value !== 'object') return [null, null];
+
+    const filter = value as { between?: readonly unknown[]; gte?: unknown; lte?: unknown };
+    if (Array.isArray(filter.between)) {
+      const [from, to] = filter.between;
+      return [typeof from === 'string' ? from : null, typeof to === 'string' ? to : null];
+    }
+
+    const start = typeof filter.gte === 'string' ? filter.gte : null;
+    const end = typeof filter.lte === 'string' ? filter.lte : null;
+    return [start, end];
   }
 
   private async loadReport(query: BankCashReportQuery, token: number): Promise<void> {

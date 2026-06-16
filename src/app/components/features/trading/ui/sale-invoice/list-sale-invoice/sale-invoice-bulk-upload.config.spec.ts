@@ -217,16 +217,43 @@ describe('sale invoice bulk upload config', () => {
     );
   });
 
-  it('keeps currency code optional for JSON and XLSX payloads', () => {
-    const { currencycode: _currencycode, ...invoiceWithoutCurrency } = invoiceHeader;
+  it('keeps currency code and addresses optional for JSON and XLSX payloads', () => {
+    const {
+      billingaddress: _billingaddress,
+      currencycode: _currencycode,
+      shippingaddress: _shippingaddress,
+      ...invoiceWithoutOptionalFields
+    } = invoiceHeader;
     const result = saleInvoiceXlsxRowsToPayloadRows([
-      parsed(2, invoiceRow({ currencycode: undefined, itemtax: cgstTax })),
+      parsed(
+        2,
+        invoiceRow({
+          billingaddress: undefined,
+          currencycode: undefined,
+          shippingaddress: undefined,
+          itemtax: cgstTax,
+        }),
+      ),
     ]);
 
     expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.requiredPaths).not.toContain('currencycode');
+    expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.requiredPaths).not.toContain('billingaddress.name');
+    expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.requiredPaths).not.toContain('billingaddress.line1');
+    expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.requiredPaths).not.toContain('billingaddress.street');
+    expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.requiredPaths).not.toContain('billingaddress.city');
+    expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.requiredPaths).not.toContain('billingaddress.state');
+    expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.requiredPaths).not.toContain('billingaddress.zip');
+    expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.requiredPaths).not.toContain('billingaddress.country');
+    expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.requiredPaths).not.toContain('shippingaddress.name');
+    expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.requiredPaths).not.toContain('shippingaddress.line1');
+    expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.requiredPaths).not.toContain('shippingaddress.street');
+    expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.requiredPaths).not.toContain('shippingaddress.city');
+    expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.requiredPaths).not.toContain('shippingaddress.state');
+    expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.requiredPaths).not.toContain('shippingaddress.zip');
+    expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.requiredPaths).not.toContain('shippingaddress.country');
     expect(result).toEqual([
       {
-        ...invoiceWithoutCurrency,
+        ...invoiceWithoutOptionalFields,
         items: [
           {
             ...laptopItem,
