@@ -251,6 +251,28 @@ describe('sale invoice bulk upload config', () => {
     expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.requiredPaths).not.toContain('shippingaddress.state');
     expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.requiredPaths).not.toContain('shippingaddress.zip');
     expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.requiredPaths).not.toContain('shippingaddress.country');
+    expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.xlsxRequiredHeaders).not.toContain(
+      'Billing Address Name',
+    );
+    expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.xlsxRequiredHeaders).not.toContain(
+      'Billing Address Line 1',
+    );
+    expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.xlsxRequiredHeaders).not.toContain('Billing Street');
+    expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.xlsxRequiredHeaders).not.toContain('Billing City');
+    expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.xlsxRequiredHeaders).not.toContain('Billing State');
+    expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.xlsxRequiredHeaders).not.toContain('Billing Zip');
+    expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.xlsxRequiredHeaders).not.toContain('Billing Country');
+    expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.xlsxRequiredHeaders).not.toContain(
+      'Shipping Address Name',
+    );
+    expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.xlsxRequiredHeaders).not.toContain(
+      'Shipping Address Line 1',
+    );
+    expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.xlsxRequiredHeaders).not.toContain('Shipping Street');
+    expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.xlsxRequiredHeaders).not.toContain('Shipping City');
+    expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.xlsxRequiredHeaders).not.toContain('Shipping State');
+    expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.xlsxRequiredHeaders).not.toContain('Shipping Zip');
+    expect(SALE_INVOICE_BULK_UPLOAD_CONFIG.xlsxRequiredHeaders).not.toContain('Shipping Country');
     expect(result).toEqual([
       {
         ...invoiceWithoutOptionalFields,

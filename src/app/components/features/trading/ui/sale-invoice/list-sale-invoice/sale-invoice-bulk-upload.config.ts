@@ -164,6 +164,13 @@ const REQUIRED_SALE_INVOICE_JSON_PATHS = [
   'items',
 ] as const;
 
+const OPTIONAL_XLSX_PATH_PREFIXES = ['billingaddress.', 'shippingaddress.'] as const;
+
+const SALE_INVOICE_XLSX_REQUIRED_HEADERS = SALE_INVOICE_XLSX_COLUMNS.filter(
+  (column) =>
+    !OPTIONAL_XLSX_PATH_PREFIXES.some((prefix) => column.path.startsWith(prefix)),
+).map((column) => column.header);
+
 const SAMPLE_BILLING_ADDRESS = {
   name: 'Acme Retail',
   line1: 'Plot 10',
@@ -242,7 +249,7 @@ export const SALE_INVOICE_BULK_UPLOAD_CONFIG: BulkUploadPreviewConfig = {
   ],
   xlsxHelpText:
     'Use one row per invoice item or tax line. Put invoice fields on the first row for an invoice, item fields on the first row for an item, and leave invoice/item columns blank on continuation tax rows.',
-  xlsxRequiredHeaders: SALE_INVOICE_XLSX_COLUMNS.map((column) => column.header),
+  xlsxRequiredHeaders: SALE_INVOICE_XLSX_REQUIRED_HEADERS,
   xlsxRowsToPayloadRows: saleInvoiceXlsxRowsToPayloadRows,
   xlsxSampleRows: [
     {
