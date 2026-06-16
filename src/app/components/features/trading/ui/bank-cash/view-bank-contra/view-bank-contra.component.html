@@ -1,0 +1,52 @@
+<main class="bank-cash-page">
+  <tng-card variant="outline" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Bank Contra Details</tng-card-title>
+      <tng-card-description
+        >Review the transfer between bank and cash accounts.</tng-card-description
+      >
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (contraTransactionStore.error()) {
+        <div class="notice notice--danger">{{ contraTransactionStore.error() }}</div>
+      }
+
+      @if (contraTransactionStore.isLoading() && !contraTransactionStore.selectedItem()) {
+        <div class="notice">Loading bank contra transaction...</div>
+      } @else if (contraTransactionStore.selectedItem(); as item) {
+        <dl class="details-grid">
+          <div>
+            <dt>Date</dt>
+            <dd>{{ formatDate(item.date) }}</dd>
+          </div>
+          <div>
+            <dt>Amount</dt>
+            <dd>{{ formatAmount(item) }}</dd>
+          </div>
+          <div>
+            <dt>From Bank/Cash</dt>
+            <dd>{{ accountName(item, 'from') }}</dd>
+          </div>
+          <div>
+            <dt>To Bank/Cash</dt>
+            <dd>{{ accountName(item, 'to') }}</dd>
+          </div>
+          <div class="wide">
+            <dt>Description</dt>
+            <dd>{{ item.description || '' }}</dd>
+          </div>
+        </dl>
+      } @else {
+        <div class="notice">Bank contra transaction not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button />
+        <app-burl-edit-button (clicked)="edit()" />
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>

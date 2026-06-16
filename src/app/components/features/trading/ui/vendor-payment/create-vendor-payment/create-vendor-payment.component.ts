@@ -114,7 +114,7 @@ export class CreateVendorPaymentComponent {
 
   protected readonly filteredVendors = computed<Vendor[]>(() => {
     const list = this.vendorStore.items() as Vendor[];
-    return list.slice(0, 15);
+    return this.withSelectedOption(list, this.selectedVendor());
   });
 
   protected readonly vendorOptionValue = (v: Vendor): string => v.id ?? '';
@@ -129,7 +129,7 @@ export class CreateVendorPaymentComponent {
 
   protected readonly filteredBankCashes = computed<BankCash[]>(() => {
     const list = this.bankCashStore.items() as BankCash[];
-    return list.slice(0, 15);
+    return this.withSelectedOption(list, this.selectedBankCash());
   });
 
   protected readonly bankCashOptionValue = (b: BankCash): string => b.id ?? '';
@@ -241,7 +241,7 @@ export class CreateVendorPaymentComponent {
           { relation: 'invoices', scope: { include: [{ relation: 'purchaseinvoice' }] } },
         ],
       });
-      if (payment) this.patchFromPayment(payment);
+      if (payment) await this.patchFromPayment(payment);
       return;
     }
 
@@ -300,22 +300,31 @@ export class CreateVendorPaymentComponent {
 
   // ── Patch signals from loaded payment (edit mode) ─────────────────────────
 
-  private patchFromPayment(p: VendorPayment): void {
-    this.pmtdate.set(p.date ?? this.fiscalYearDateRange.defaultDate());
+  private async patchFromPayment(p: VendorPayment): Promise<void> {
+    const paymentDate = this.fiscalYearDateRange.toIsoDate(p.date);
+    this.pmtdate.set(paymentDate ?? this.fiscalYearDateRange.defaultDate());
     this.amount.set(String(p.amount ?? ''));
     this.currencycode.set(p.currencycode ?? 'INR');
     this.description.set(p.description ?? '');
-    this.vendorid.set(p.vendorid ?? p.vendor?.id ?? '');
 
-    if (p.vendor) {
-      this.selectedVendor.set(p.vendor as Vendor);
+    const vendorId = p.vendorid ?? p.vendor?.id ?? '';
+    const vendor = await this.resolveVendor(p.vendor as Vendor | undefined, vendorId);
+    if (vendor) {
+      this.selectedVendor.set(vendor);
+      this.vendorid.set(vendor.id ?? vendorId);
+    } else {
+      this.selectedVendor.set(null);
+      this.vendorid.set(vendorId);
     }
 
-    if (p.bcash) {
-      this.selectedBankCash.set(p.bcash as BankCash);
-      this.bcashid.set(p.bcash.id ?? '');
-    } else if (p.bcashid) {
-      this.bcashid.set(p.bcashid);
+    const bankCashId = p.bcashid ?? p.bcash?.id ?? '';
+    const bankCash = await this.resolveBankCash(p.bcash as BankCash | undefined, bankCashId);
+    if (bankCash) {
+      this.selectedBankCash.set(bankCash);
+      this.bcashid.set(bankCash.id ?? bankCashId);
+    } else {
+      this.selectedBankCash.set(null);
+      this.bcashid.set(bankCashId);
     }
 
     if (p.invoices?.length) {
@@ -327,6 +336,41 @@ export class CreateVendorPaymentComponent {
         })),
       );
     }
+  }
+
+  private withSelectedOption<T extends { id?: string }>(
+    list: readonly T[],
+    selected: T | null,
+  ): T[] {
+    const options = list.slice(0, 15);
+    if (!selected?.id || options.some((option) => option.id === selected.id)) {
+      return options;
+    }
+
+    return [selected, ...options.slice(0, 14)];
+  }
+
+  private async resolveVendor(candidate: Vendor | undefined, id: string): Promise<Vendor | null> {
+    if (candidate?.name) return candidate;
+
+    const cached = (this.vendorStore.items() as Vendor[]).find((vendor) => vendor.id === id);
+    if (cached) return cached;
+    if (!id) return null;
+
+    return this.vendorStore.loadVendorById(id);
+  }
+
+  private async resolveBankCash(
+    candidate: BankCash | undefined,
+    id: string,
+  ): Promise<BankCash | null> {
+    if (candidate?.name) return candidate;
+
+    const cached = (this.bankCashStore.items() as BankCash[]).find((bankCash) => bankCash.id === id);
+    if (cached) return cached;
+    if (!id) return null;
+
+    return this.bankCashStore.loadBankCashById(id);
   }
 
   // ── Vendor autocomplete ───────────────────────────────────────────────────

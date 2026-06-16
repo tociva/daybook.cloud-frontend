@@ -92,7 +92,7 @@ export class ListPurchaseInvoiceComponent {
       headerAlign: 'end',
       width: '10rem',
     },
-    { id: 'paid', label: 'Paid', align: 'end', headerAlign: 'end', width: '10rem' },
+    { id: 'payments', label: 'Payments', align: 'end', headerAlign: 'end', width: '10rem' },
     { id: 'journals', label: 'Journals', width: '12rem' },
     { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '10rem' },
   ];
@@ -248,6 +248,24 @@ export class ListPurchaseInvoiceComponent {
   private searchVendors(query: string): void {
     const q = query.trim();
     void this.vendorStore.loadVendors(q ? { where: { name: { ilike: `%${q}%` } } } : {});
+  }
+
+  /** Navigate to new vendor payment pre-linked to this invoice. */
+  protected createPaymentForInvoice(item: PurchaseInvoice): void {
+    this.purchaseInvoiceStore.setSelectedItem(item);
+    void this.router.navigate(['/app/trading/vendor-payment/create'], {
+      queryParams: { purchaseinvoiceid: item.id, burl: this.router.url },
+    });
+  }
+
+  /** Navigate to the vendor payment that covers this invoice (first payment). */
+  protected viewPaymentForInvoice(item: PurchaseInvoice): void {
+    const paymentId = item.payments?.[0]?.vendorpaymentid;
+    if (paymentId) {
+      void this.router.navigate(['/app/trading/vendor-payment', paymentId], {
+        queryParams: { burl: this.router.url },
+      });
+    }
   }
 
   protected createPurchaseInvoice(): void {

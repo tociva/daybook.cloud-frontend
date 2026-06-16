@@ -20,6 +20,9 @@ import type { Branch } from '../../data/branch/branch.model';
 import type { FiscalYear } from '../../data/fiscal-year/fiscal-year.model';
 import type { Organization } from '../../data/organization/organization.model';
 
+const compareFiscalYearsByStartDate = (left: FiscalYear, right: FiscalYear): number =>
+  left.startdate.localeCompare(right.startdate);
+
 export type FiscalYearRow = Readonly<{
   rowKey: string;
   organizationId: string | null;
@@ -210,7 +213,7 @@ export class SelectOrganizationComponent {
 
     const branchGroups: BranchGroup[] = branches.map((branch) => {
       const branchKey = branch.id ?? `branch_${branch.name}`;
-      const fiscalYears = branch.fiscalyears ?? [];
+      const fiscalYears = [...(branch.fiscalyears ?? [])].sort(compareFiscalYearsByStartDate);
 
       const rows: FiscalYearRow[] = fiscalYears.map((fy) =>
         this.buildFiscalYearRow(orgKey, branchKey, organization, branch, fy),

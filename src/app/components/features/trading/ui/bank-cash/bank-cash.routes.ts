@@ -14,6 +14,48 @@ export const bankCashRoutes: Routes = [
       ),
   },
   {
+    path: 'activity',
+    loadComponent: () =>
+      import('./list-bank-cash-activity/list-bank-cash-activity.component').then(
+        (m) => m.ListBankCashActivityComponent,
+      ),
+  },
+  {
+    path: 'contra/create',
+    loadComponent: () =>
+      import('./create-bank-contra/create-bank-contra.component').then(
+        (m) => m.CreateBankContraComponent,
+      ),
+  },
+  {
+    path: 'contra/:id/edit',
+    loadComponent: () =>
+      import('./create-bank-contra/create-bank-contra.component').then(
+        (m) => m.CreateBankContraComponent,
+      ),
+  },
+  {
+    path: 'contra/:id/delete',
+    loadComponent: () =>
+      import('./delete-bank-contra/delete-bank-contra.component').then(
+        (m) => m.DeleteBankContraComponent,
+      ),
+  },
+  {
+    path: 'contra/:id',
+    loadComponent: () =>
+      import('./view-bank-contra/view-bank-contra.component').then(
+        (m) => m.ViewBankContraComponent,
+      ),
+  },
+  {
+    path: 'contra',
+    loadComponent: () =>
+      import('./list-bank-contra/list-bank-contra.component').then(
+        (m) => m.ListBankContraComponent,
+      ),
+  },
+  {
     path: ':id',
     loadComponent: () =>
       import('./view-bank-cash/view-bank-cash.component').then((m) => m.ViewBankCashComponent),

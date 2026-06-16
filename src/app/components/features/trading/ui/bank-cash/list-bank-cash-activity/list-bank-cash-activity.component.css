@@ -1,0 +1,83 @@
+.bank-cash-page {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.25rem;
+}
+
+.notice {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  color: var(--tng-semantic-foreground-primary);
+  padding: 1rem;
+}
+
+.notice--danger {
+  border-color: var(--tng-semantic-accent-danger);
+}
+
+.account-filter {
+  min-width: min(20rem, 100%);
+  width: 20rem;
+}
+
+.date-filter {
+  min-width: min(18rem, 100%);
+}
+
+.row-actions {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.35rem;
+  justify-content: flex-end;
+}
+
+.summary-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.summary-metric {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  padding: 0.875rem 1rem;
+}
+
+.summary-metric-title {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  margin: 0 0 0.35rem;
+  text-transform: uppercase;
+}
+
+.summary-metric-value {
+  color: var(--tng-semantic-foreground-primary);
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.table-stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.table-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 700px) {
+  .account-filter,
+  .date-filter {
+    width: 100%;
+  }
+
+  .row-actions {
+    align-items: flex-start;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+}

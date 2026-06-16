@@ -107,11 +107,21 @@
           {{ formatAmountWithCurrency(row.grandtotal, row.currencycode) }}
         </ng-template>
 
-        <ng-template tngTableCellTemplate="paid" let-row="row">
-          @if (totalPaid(row) !== undefined) {
-            {{ formatAmountWithCurrency(totalPaid(row), row.currencycode) }}
+        <ng-template tngTableCellTemplate="payments" let-row="row">
+          @if (totalPaid(row) === undefined) {
+            <button
+              type="button"
+              class="link-button link-button--muted"
+              (click)="createPaymentForInvoice(row)"
+            >
+              Create Payment
+            </button>
+          } @else if (isPaid(row)) {
+            <button type="button" class="link-button" (click)="viewPaymentForInvoice(row)">
+              {{ formatAmountWithCurrency(totalPaid(row), row.currencycode) }}
+            </button>
           } @else {
-            <span class="muted-text">—</span>
+            {{ formatAmountWithCurrency(totalPaid(row), row.currencycode) }}
           }
         </ng-template>
 

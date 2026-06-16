@@ -18,6 +18,16 @@
       (uploaded)="reloadBankCashes()"
     />
 
+    <tng-button type="button" appearance="outline" tone="neutral" (click)="viewActivity()">
+      <tng-icon icon="activity" aria-hidden="true" />
+      Activity
+    </tng-button>
+
+    <tng-button type="button" appearance="outline" tone="neutral" (click)="viewContra()">
+      <tng-icon icon="repeat2" aria-hidden="true" />
+      Contra
+    </tng-button>
+
     <tng-button type="button" appearance="solid" tone="primary" (click)="createBankCash()">
       <tng-icon icon="plus" aria-hidden="true" />
       New account
@@ -30,14 +40,23 @@
     }
 
     <div class="table-stack">
-      @if (!bankCashStore.isLoading() && !hasError() && crudQuery.shouldShowEmptyState(bankCashStore.items().length, bankCashStore.count())) {
+      @if (
+        !bankCashStore.isLoading() &&
+        !hasError() &&
+        crudQuery.shouldShowEmptyState(bankCashStore.items().length, bankCashStore.count())
+      ) {
         @if (crudQuery.hasActiveFilter()) {
           <app-empty-state
             icon="searchX"
             title="No bank & cash accounts match your filter"
             description="Try adjusting or clearing your filter to find what you're looking for."
           >
-            <tng-button type="button" appearance="outline" tone="neutral" (click)="crudQuery.clearFilter()">
+            <tng-button
+              type="button"
+              appearance="outline"
+              tone="neutral"
+              (click)="crudQuery.clearFilter()"
+            >
               Clear filter
             </tng-button>
           </app-empty-state>
@@ -54,70 +73,70 @@
           </app-empty-state>
         }
       } @else {
-      <tng-table
-        ariaLabel="Bank and cash accounts"
-        density="comfortable"
-        [columns]="columns"
-        [items]="bankCashStore.items()"
-        [loading]="bankCashStore.isLoading()"
-        [error]="hasError()"
-        [sortActive]="crudQuery.sortActive()"
-        [sortDirection]="crudQuery.sortDirection()"
-        (sortChange)="crudQuery.applySort($event)"
-      >
-        <ng-template tngTableCellTemplate="name" let-row="row">
-          <button type="button" class="link-button" (click)="viewBankCash(row)">
-            {{ row.name }}
-          </button>
-        </ng-template>
+        <tng-table
+          ariaLabel="Bank and cash accounts"
+          density="comfortable"
+          [columns]="columns"
+          [items]="bankCashStore.items()"
+          [loading]="bankCashStore.isLoading()"
+          [error]="hasError()"
+          [sortActive]="crudQuery.sortActive()"
+          [sortDirection]="crudQuery.sortDirection()"
+          (sortChange)="crudQuery.applySort($event)"
+        >
+          <ng-template tngTableCellTemplate="name" let-row="row">
+            <button type="button" class="link-button" (click)="viewBankCash(row)">
+              {{ row.name }}
+            </button>
+          </ng-template>
 
-        <ng-template tngTableCellTemplate="description" let-row="row">
-          {{ row.description || '' }}
-        </ng-template>
+          <ng-template tngTableCellTemplate="description" let-row="row">
+            {{ row.description || '' }}
+          </ng-template>
 
-        <ng-template tngTableCellTemplate="status" let-row="row">
-          <tng-tag
-            appearance="soft"
-            size="sm"
-            [tone]="getStatusTone(row.status)"
-            [label]="getStatusLabel(row.status)"
-          >
-            <span tngTagIcon class="status-dot" aria-hidden="true"></span>
-            {{ getStatusLabel(row.status) }}
-          </tng-tag>
-        </ng-template>
+          <ng-template tngTableCellTemplate="status" let-row="row">
+            <tng-tag
+              appearance="soft"
+              size="sm"
+              [tone]="getStatusTone(row.status)"
+              [label]="getStatusLabel(row.status)"
+            >
+              <span tngTagIcon class="status-dot" aria-hidden="true"></span>
+              {{ getStatusLabel(row.status) }}
+            </tng-tag>
+          </ng-template>
 
-        <ng-template tngTableCellTemplate="actions" let-row="row">
-          <div class="row-actions">
-            <app-table-row-icon-button
-              icon="eye"
-              ariaLabel="View bank/cash account"
-              (action)="viewBankCash(row)"
-            />
-            <app-table-row-icon-button
-              icon="pencil"
-              ariaLabel="Edit bank/cash account"
-              (action)="editBankCash(row)"
-            />
-            <app-table-row-icon-button
-              icon="trash2"
-              ariaLabel="Delete bank/cash account"
-              tone="danger"
-              (action)="deleteBankCash(row)"
-            />
-          </div>
-        </ng-template>
-      </tng-table>
+          <ng-template tngTableCellTemplate="actions" let-row="row">
+            <div class="row-actions">
+              <app-table-row-icon-button
+                icon="eye"
+                ariaLabel="View bank/cash account"
+                (action)="viewBankCash(row)"
+              />
+              <app-table-row-icon-button
+                icon="pencil"
+                ariaLabel="Edit bank/cash account"
+                (action)="editBankCash(row)"
+              />
+              <app-table-row-icon-button
+                icon="trash2"
+                ariaLabel="Delete bank/cash account"
+                tone="danger"
+                (action)="deleteBankCash(row)"
+              />
+            </div>
+          </ng-template>
+        </tng-table>
 
-      <div class="table-footer">
-        <app-crud-paginator
-          ariaLabel="Bank and cash pagination"
-          [filter]="crudQuery.filter()"
-          [totalItems]="bankCashStore.count()"
-          [pageSizeOptions]="crudQuery.pageSizeOptions()"
-          syncUrl
-        />
-      </div>
+        <div class="table-footer">
+          <app-crud-paginator
+            ariaLabel="Bank and cash pagination"
+            [filter]="crudQuery.filter()"
+            [totalItems]="bankCashStore.count()"
+            [pageSizeOptions]="crudQuery.pageSizeOptions()"
+            syncUrl
+          />
+        </div>
       }
     </div>
   </tng-card>

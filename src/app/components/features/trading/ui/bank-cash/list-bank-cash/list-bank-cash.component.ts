@@ -124,6 +124,18 @@ export class ListBankCashComponent {
     void this.bankCashStore.loadBankCashes(this.crudQuery.filter());
   }
 
+  protected viewActivity(): void {
+    void this.router.navigate(['/app/trading/bank-cash/activity'], {
+      queryParams: { burl: this.router.url },
+    });
+  }
+
+  protected viewContra(): void {
+    void this.router.navigate(['/app/trading/bank-cash/contra'], {
+      queryParams: { burl: this.router.url },
+    });
+  }
+
   protected viewBankCash(item: BankCash): void {
     if (item.id) {
       this.bankCashStore.setSelectedItem(item);

@@ -30,6 +30,7 @@ import { DateManagementService } from '../../../../../../core/date/date-manageme
 import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
 import { formatAmountWithCurrency } from '../../../../../../shared/format/currency';
+import { SALE_INVOICE_BULK_UPLOAD_CONFIG } from './sale-invoice-bulk-upload.config';
 
 const DEFAULT_SALE_INVOICE_ORDER = ['date ASC', 'number ASC'] as const;
 
@@ -64,6 +65,7 @@ export class ListSaleInvoiceComponent {
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly customerStore = inject(CustomerStore);
   protected readonly saleInvoiceStore = inject(SaleInvoiceStore);
+  protected readonly bulkUploadConfig = SALE_INVOICE_BULK_UPLOAD_CONFIG;
   protected readonly hasError = computed(() => this.saleInvoiceStore.error() !== null);
   protected readonly previewingInvoiceId = signal<string | null>(null);
   protected readonly generatingJournalInvoiceId = signal<string | null>(null);

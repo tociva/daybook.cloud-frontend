@@ -14,6 +14,7 @@
 
     <app-bulk-upload-button
       endpoint="/inventory/sale-invoice/bulk-upload"
+      [config]="bulkUploadConfig"
       (uploaded)="reloadSaleInvoices()"
     />
 
@@ -29,7 +30,11 @@
     }
 
     <div class="table-stack">
-      @if (!saleInvoiceStore.isLoading() && !hasError() && crudQuery.shouldShowEmptyState(saleInvoiceStore.items().length, saleInvoiceStore.count())) {
+      @if (
+        !saleInvoiceStore.isLoading() &&
+        !hasError() &&
+        crudQuery.shouldShowEmptyState(saleInvoiceStore.items().length, saleInvoiceStore.count())
+      ) {
         @if (crudQuery.hasActiveFilter()) {
           <app-empty-state
             icon="searchX"
@@ -145,7 +150,10 @@
                 @for (journal of linkedJournals(row); track journal.id; let last = $last) {
                   <button type="button" class="link-button" (click)="viewJournal(journal)">
                     {{ journal.number }}
-                  </button>@if (!last) {<span>, </span>}
+                  </button>
+                  @if (!last) {
+                    <span>, </span>
+                  }
                 }
               </span>
             } @else {

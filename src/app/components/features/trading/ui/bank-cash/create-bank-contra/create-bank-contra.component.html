@@ -1,0 +1,162 @@
+<main class="bank-cash-page">
+  <form novalidate (submit)="submitForm($event)">
+    <tng-card variant="outline" padding="lg">
+      <tng-card-header>
+        <tng-card-title>{{ title() }}</tng-card-title>
+        <tng-card-description>
+          Move funds between bank and cash accounts within the selected branch.
+        </tng-card-description>
+      </tng-card-header>
+
+      <tng-card-content>
+        @if (contraTransactionStore.error()) {
+          <div class="notice notice--danger">{{ contraTransactionStore.error() }}</div>
+        }
+
+        @if (
+          contraTransactionStore.isLoading() &&
+          mode() === 'edit' &&
+          !contraTransactionStore.selectedItem()
+        ) {
+          <div class="notice">Loading bank contra transaction...</div>
+        } @else {
+          <div class="field-grid">
+            <div class="field">
+              <tng-form-field labelPosition="above" [invalid]="dateError() !== null">
+                <tng-label forId="contra-date" required>Date</tng-label>
+                <app-fiscal-year-datepicker
+                  id="contra-date"
+                  [value]="date()"
+                  [invalid]="dateError() !== null"
+                  (valueChange)="onDateChange($event)"
+                />
+                <tng-error [show]="dateError() !== null">{{ dateError() }}</tng-error>
+              </tng-form-field>
+            </div>
+
+            <div class="field">
+              <tng-form-field labelPosition="above" [invalid]="amountError() !== null">
+                <tng-label forId="contra-amount" required>Amount</tng-label>
+                <tng-input
+                  id="contra-amount"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  placeholder="0.00"
+                  [value]="amount()"
+                  (valueChange)="amount.set($any($event) ?? '')"
+                />
+                <tng-error [show]="amountError() !== null">{{ amountError() }}</tng-error>
+              </tng-form-field>
+            </div>
+
+            <div class="field">
+              <tng-form-field labelPosition="above" [invalid]="currencyError() !== null">
+                <tng-label forId="contra-currency" required>Currency</tng-label>
+                <tng-autocomplete
+                  id="contra-currency"
+                  placeholder="Search for a currency"
+                  ariaLabel="Currency"
+                  [options]="filteredCurrencies()"
+                  [value]="currencycode()"
+                  [getOptionValue]="currencyOptionValue"
+                  [getOptionLabel]="currencyOptionLabel"
+                  [trackBy]="currencyTrackBy"
+                  (valueChange)="onCurrencyValueChange($event)"
+                  (queryChange)="onCurrencyQueryChange($event)"
+                />
+                <tng-error [show]="currencyError() !== null">{{ currencyError() }}</tng-error>
+              </tng-form-field>
+            </div>
+
+            <div class="field">
+              <tng-form-field
+                labelPosition="above"
+                [invalid]="fromBankCashError() !== null || sameBankCashError() !== null"
+              >
+                <tng-label forId="contra-from" required>From Bank/Cash</tng-label>
+                <tng-autocomplete
+                  id="contra-from"
+                  placeholder="Search source account..."
+                  ariaLabel="From bank/cash account"
+                  [options]="bankCashOptions()"
+                  [value]="frombcashid()"
+                  [getOptionValue]="bankCashOptionValue"
+                  [getOptionLabel]="bankCashOptionLabel"
+                  [trackBy]="bankCashTrackBy"
+                  (valueChange)="onFromBankCashValueChange($event)"
+                  (queryChange)="onBankCashQueryChange($event)"
+                >
+                  <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
+                    <span>{{ label }}</span>
+                    @if (option.description) {
+                      <span class="muted"> - {{ option.description }}</span>
+                    }
+                  </ng-template>
+                </tng-autocomplete>
+                <tng-error [show]="fromBankCashError() !== null">
+                  {{ fromBankCashError() }}
+                </tng-error>
+                <tng-error [show]="sameBankCashError() !== null">
+                  {{ sameBankCashError() }}
+                </tng-error>
+              </tng-form-field>
+            </div>
+
+            <div class="field">
+              <tng-form-field
+                labelPosition="above"
+                [invalid]="toBankCashError() !== null || sameBankCashError() !== null"
+              >
+                <tng-label forId="contra-to" required>To Bank/Cash</tng-label>
+                <tng-autocomplete
+                  id="contra-to"
+                  placeholder="Search destination account..."
+                  ariaLabel="To bank/cash account"
+                  [options]="bankCashOptions()"
+                  [value]="tobcashid()"
+                  [getOptionValue]="bankCashOptionValue"
+                  [getOptionLabel]="bankCashOptionLabel"
+                  [trackBy]="bankCashTrackBy"
+                  (valueChange)="onToBankCashValueChange($event)"
+                  (queryChange)="onBankCashQueryChange($event)"
+                >
+                  <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
+                    <span>{{ label }}</span>
+                    @if (option.description) {
+                      <span class="muted"> - {{ option.description }}</span>
+                    }
+                  </ng-template>
+                </tng-autocomplete>
+                <tng-error [show]="toBankCashError() !== null">{{ toBankCashError() }}</tng-error>
+              </tng-form-field>
+            </div>
+
+            <div class="field field--wide">
+              <tng-form-field labelPosition="above">
+                <tng-label forId="contra-description">Description</tng-label>
+                <tng-textarea
+                  id="contra-description"
+                  rows="3"
+                  placeholder="Optional transfer notes"
+                  [value]="description()"
+                  (valueChange)="description.set($any($event) ?? '')"
+                />
+              </tng-form-field>
+            </div>
+          </div>
+        }
+      </tng-card-content>
+
+      <tng-card-footer>
+        <tng-card-actions align="end">
+          <app-burl-back-button label="Cancel" />
+          <app-burl-create-button
+            [label]="mode() === 'edit' ? 'Update Contra' : 'Create Contra'"
+            [disabled]="contraTransactionStore.isLoading()"
+          />
+        </tng-card-actions>
+      </tng-card-footer>
+    </tng-card>
+  </form>
+</main>

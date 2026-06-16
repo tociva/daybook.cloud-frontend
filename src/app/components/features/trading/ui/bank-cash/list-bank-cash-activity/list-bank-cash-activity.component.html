@@ -1,0 +1,131 @@
+<main class="bank-cash-page">
+  <app-page-heading
+    eyebrow="Trading"
+    title="Bank & Cash Activity"
+    description="Review receipts, payments, and contra movements across bank and cash accounts."
+  >
+    <div class="account-filter">
+      <tng-autocomplete
+        id="bank-cash-activity-account"
+        placeholder="All bank/cash accounts"
+        ariaLabel="Bank/Cash Account"
+        [options]="bankCashStore.items()"
+        [value]="selectedBankCashId()"
+        [getOptionValue]="bankCashOptionValue"
+        [getOptionLabel]="bankCashOptionLabel"
+        [trackBy]="bankCashTrackBy"
+        (valueChange)="onBankCashChange($event)"
+        (queryChange)="onBankCashQueryChange($event)"
+      />
+    </div>
+
+    <div class="date-filter">
+      <app-fiscal-year-date-range-picker
+        id="bank-cash-activity-date-range"
+        placeholder="Select report period"
+        [fullWidth]="false"
+        [value]="pickerValue()"
+        (valueChange)="onDateRangeChange($event)"
+        (closed)="onPickerClosed()"
+      />
+    </div>
+
+    <tng-button type="button" appearance="outline" tone="neutral" (click)="refresh()">
+      <tng-icon icon="refreshCw" aria-hidden="true" />
+      Refresh
+    </tng-button>
+
+    <tng-button type="button" appearance="outline" tone="neutral" (click)="backToAccounts()">
+      <tng-icon icon="arrowLeft" aria-hidden="true" />
+      Accounts
+    </tng-button>
+  </app-page-heading>
+
+  <tng-card variant="outline" padding="lg">
+    @if (error()) {
+      <div class="notice notice--danger">{{ error() }}</div>
+    }
+
+    <div class="table-stack">
+      @if (!hasError()) {
+        <div class="summary-grid" aria-label="Bank and cash activity totals">
+          <section class="summary-metric">
+            <h3 class="summary-metric-title">Receipt</h3>
+            <div class="summary-metric-value">
+              {{ formatMoney(totals().receipt, undefined) || '0.00' }}
+            </div>
+          </section>
+          <section class="summary-metric">
+            <h3 class="summary-metric-title">Payment</h3>
+            <div class="summary-metric-value">
+              {{ formatMoney(totals().payment, undefined) || '0.00' }}
+            </div>
+          </section>
+        </div>
+      }
+
+      @if (!isLoading() && !hasError() && rows().length === 0) {
+        <app-empty-state
+          icon="activity"
+          title="No bank & cash activity"
+          description="No transactions were found for the selected account and period."
+        />
+      } @else {
+        <tng-table
+          ariaLabel="Bank and cash activity"
+          density="comfortable"
+          [columns]="columns"
+          [items]="rows()"
+          [loading]="isLoading()"
+          [error]="hasError()"
+        >
+          <ng-template tngTableCellTemplate="date" let-row="row">
+            {{ formatDate(row.date) }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="sourceLabel" let-row="row">
+            <tng-tag
+              appearance="soft"
+              size="sm"
+              [tone]="getTypeTone(row)"
+              [label]="row.sourceLabel"
+            >
+              {{ row.sourceLabel }}
+            </tng-tag>
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="contraLeg" let-row="row">
+            {{ row.contraLeg }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="counterpartyName" let-row="row">
+            {{ row.counterpartyName || '' }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="receipt" let-row="row">
+            {{ formatMoney(row.receipt, row.currencycode) }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="payment" let-row="row">
+            {{ formatMoney(row.payment, row.currencycode) }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="description" let-row="row">
+            {{ row.description || '' }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="actions" let-row="row">
+            <div class="row-actions">
+              <app-table-row-icon-button
+                icon="eye"
+                ariaLabel="Open source transaction"
+                [disabled]="!row.sourceRoute"
+                (action)="openSource(row)"
+              />
+            </div>
+          </ng-template>
+        </tng-table>
+      }
+    </div>
+  </tng-card>
+</main>

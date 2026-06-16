@@ -43,6 +43,12 @@
   padding: 0;
 }
 
+.link-button--muted {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
 .muted-text {
   color: var(--tng-semantic-foreground-muted);
 }

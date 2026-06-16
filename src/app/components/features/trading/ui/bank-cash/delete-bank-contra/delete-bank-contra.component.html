@@ -1,0 +1,54 @@
+<main class="bank-cash-page">
+  <tng-card variant="outline" tone="danger" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Delete Bank Contra</tng-card-title>
+      <tng-card-description>This action cannot be undone.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (contraTransactionStore.error()) {
+        <div class="notice notice--danger">{{ contraTransactionStore.error() }}</div>
+      }
+
+      @if (contraTransactionStore.isLoading() && !contraTransactionStore.selectedItem()) {
+        <div class="notice">Loading bank contra transaction...</div>
+      } @else if (contraTransactionStore.selectedItem(); as item) {
+        <dl class="details-grid">
+          <div>
+            <dt>Date</dt>
+            <dd>{{ formatDate(item.date) }}</dd>
+          </div>
+          <div>
+            <dt>Amount</dt>
+            <dd>{{ formatAmount(item) }}</dd>
+          </div>
+          <div>
+            <dt>From Bank/Cash</dt>
+            <dd>{{ accountName(item, 'from') }}</dd>
+          </div>
+          <div>
+            <dt>To Bank/Cash</dt>
+            <dd>{{ accountName(item, 'to') }}</dd>
+          </div>
+        </dl>
+
+        <label class="confirm-row">
+          <tng-checkbox [checked]="confirmed()" (checkedChange)="confirmed.set(!!$event)" />
+          <span>I understand that this bank contra transaction will be permanently deleted.</span>
+        </label>
+      } @else {
+        <div class="notice">Bank contra transaction not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button label="Cancel" />
+        <app-burl-delete-button
+          [disabled]="!confirmed() || contraTransactionStore.isLoading()"
+          (clicked)="deleteContra()"
+        />
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>

@@ -1,0 +1,140 @@
+<main class="bank-cash-page">
+  <app-page-heading
+    eyebrow="Trading"
+    title="Bank Contra"
+    description="Move funds between bank and cash accounts."
+  >
+    <app-crud-filter-popover
+      ariaLabel="Bank contra filters"
+      title="Filter contra transactions"
+      [fields]="filterFields"
+      [filter]="crudQuery.filter()"
+      syncUrl
+    />
+
+    <tng-button
+      type="button"
+      appearance="outline"
+      tone="neutral"
+      (click)="reloadContraTransactions()"
+    >
+      <tng-icon icon="refreshCw" aria-hidden="true" />
+      Refresh
+    </tng-button>
+
+    <tng-button type="button" appearance="solid" tone="primary" (click)="createContra()">
+      <tng-icon icon="plus" aria-hidden="true" />
+      New contra
+    </tng-button>
+  </app-page-heading>
+
+  <tng-card variant="outline" padding="lg">
+    @if (contraTransactionStore.error()) {
+      <div class="notice notice--danger">{{ contraTransactionStore.error() }}</div>
+    }
+
+    <div class="table-stack">
+      @if (
+        !contraTransactionStore.isLoading() &&
+        !hasError() &&
+        crudQuery.shouldShowEmptyState(
+          contraTransactionStore.items().length,
+          contraTransactionStore.count()
+        )
+      ) {
+        @if (crudQuery.hasActiveFilter()) {
+          <app-empty-state
+            icon="searchX"
+            title="No bank contra transactions match your filter"
+            description="Try adjusting or clearing your filter to find the transaction."
+          >
+            <tng-button
+              type="button"
+              appearance="outline"
+              tone="neutral"
+              (click)="crudQuery.clearFilter()"
+            >
+              Clear filter
+            </tng-button>
+          </app-empty-state>
+        } @else {
+          <app-empty-state
+            icon="repeat2"
+            title="No bank contra transactions yet"
+            description="Create a contra transaction to move funds between accounts."
+          >
+            <tng-button type="button" appearance="solid" tone="primary" (click)="createContra()">
+              <tng-icon icon="plus" aria-hidden="true" />
+              New contra
+            </tng-button>
+          </app-empty-state>
+        }
+      } @else {
+        <tng-table
+          ariaLabel="Bank contra transactions"
+          density="comfortable"
+          [columns]="columns"
+          [items]="contraTransactionStore.items()"
+          [loading]="contraTransactionStore.isLoading()"
+          [error]="hasError()"
+          [sortActive]="crudQuery.sortActive()"
+          [sortDirection]="crudQuery.sortDirection()"
+          (sortChange)="crudQuery.applySort($event)"
+        >
+          <ng-template tngTableCellTemplate="date" let-row="row">
+            <button type="button" class="link-button" (click)="viewContra(row)">
+              {{ formatDate(row.date) }}
+            </button>
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="frombcash" let-row="row">
+            {{ row.frombcash?.name || row.frombcashid || '' }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="tobcash" let-row="row">
+            {{ row.tobcash?.name || row.tobcashid || '' }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="amount" let-row="row">
+            {{ formatAmount(row) }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="description" let-row="row">
+            {{ row.description || '' }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="actions" let-row="row">
+            <div class="row-actions">
+              <app-table-row-icon-button
+                icon="eye"
+                ariaLabel="View bank contra transaction"
+                (action)="viewContra(row)"
+              />
+              <app-table-row-icon-button
+                icon="pencil"
+                ariaLabel="Edit bank contra transaction"
+                (action)="editContra(row)"
+              />
+              <app-table-row-icon-button
+                icon="trash2"
+                ariaLabel="Delete bank contra transaction"
+                tone="danger"
+                (action)="deleteContra(row)"
+              />
+            </div>
+          </ng-template>
+        </tng-table>
+
+        <div class="table-footer">
+          <app-crud-paginator
+            ariaLabel="Bank contra pagination"
+            [filter]="crudQuery.filter()"
+            [totalItems]="contraTransactionStore.count()"
+            [pageSizeOptions]="crudQuery.pageSizeOptions()"
+            syncUrl
+          />
+        </div>
+      }
+    </div>
+  </tng-card>
+</main>

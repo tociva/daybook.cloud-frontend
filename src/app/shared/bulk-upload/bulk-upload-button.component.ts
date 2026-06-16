@@ -209,96 +209,6 @@ const BULK_UPLOAD_PREVIEW_CONFIGS: Record<string, BulkUploadPreviewConfig> = {
       numberColumn('grandtotal', 'Grand total', 'grandtotal', '10rem'),
     ],
   },
-  '/inventory/sale-invoice/bulk-upload': {
-    modelName: 'Sale Invoices',
-    requiredPaths: [
-      'number',
-      'date',
-      'duedate',
-      'currencycode',
-      'customername',
-      'billingaddress.name',
-      'billingaddress.line1',
-      'billingaddress.street',
-      'billingaddress.city',
-      'billingaddress.state',
-      'billingaddress.zip',
-      'billingaddress.country',
-      'shippingaddress.name',
-      'shippingaddress.line1',
-      'shippingaddress.street',
-      'shippingaddress.city',
-      'shippingaddress.state',
-      'shippingaddress.zip',
-      'shippingaddress.country',
-      'itemtotal',
-      'subtotal',
-      'grandtotal',
-      'items',
-    ],
-    rootKey: 'invoices',
-    sampleRows: [
-      {
-        number: 'SI-001',
-        date: '2026-04-01',
-        duedate: '2026-04-15',
-        currencycode: 'INR',
-        customername: 'Acme Retail',
-        billingaddress: {
-          name: 'Acme Retail',
-          line1: 'Plot 10',
-          line2: '',
-          street: 'MG Road',
-          city: 'Bengaluru',
-          state: 'Karnataka',
-          zip: '560001',
-          country: 'India',
-        },
-        shippingaddress: {
-          name: 'Acme Retail',
-          line1: 'Plot 10',
-          line2: '',
-          street: 'MG Road',
-          city: 'Bengaluru',
-          state: 'Karnataka',
-          zip: '560001',
-          country: 'India',
-        },
-        itemtotal: 10000,
-        discount: 0,
-        subtotal: 10000,
-        tax: 1800,
-        roundoff: 0,
-        grandtotal: 11800,
-        deliverystate: 'Karnataka',
-        taxoption: 'exclusive',
-        items: [
-          {
-            name: 'Laptop',
-            displayname: 'Laptop',
-            order: 1,
-            code: 'LAP-001',
-            price: 10000,
-            quantity: 1,
-            itemtotal: 10000,
-            subtotal: 10000,
-            taxes: [{ name: 'CGST 9%', shortname: 'CGST', rate: 9, appliedto: 10000, amount: 900 }],
-            taxamount: 900,
-            grandtotal: 10900,
-          },
-        ],
-      },
-    ],
-    columns: [
-      textColumn('number', 'Number', 'number', '10rem'),
-      textColumn('date', 'Date', 'date', '9rem'),
-      textColumn('customername', 'Customer', 'customername', '14rem'),
-      textColumn('currencycode', 'Currency', 'currencycode', '8rem'),
-      countColumn('items', 'Items', 'items', '7rem'),
-      numberColumn('subtotal', 'Subtotal', 'subtotal', '9rem'),
-      numberColumn('grandtotal', 'Grand total', 'grandtotal', '10rem'),
-    ],
-  },
   '/inventory/customer-receipt/bulk-upload': {
     modelName: 'Customer Receipts',
     requiredPaths: ['date', 'amount', 'currencycode', 'customername', 'bcashname', 'invoices'],
@@ -727,7 +637,9 @@ function collectXlsxPaths(row: BulkUploadPreviewRow, prefix = ''): readonly stri
   });
 }
 
-function collectDefaultXlsxColumns(config: BulkUploadPreviewConfig): readonly BulkUploadXlsxColumn[] {
+function collectDefaultXlsxColumns(
+  config: BulkUploadPreviewConfig,
+): readonly BulkUploadXlsxColumn[] {
   const seen = new Set<string>();
   const columns: BulkUploadXlsxColumn[] = [];
 
@@ -771,10 +683,15 @@ function xlsxPathForHeader(config: BulkUploadPreviewConfig, header: string): str
   const normalizedHeader = normalizeXlsxHeader(header);
   if (!config.xlsxColumns) return normalizedHeader;
 
-  return config.xlsxColumns.find((column) => normalizeXlsxHeader(column.header) === normalizedHeader)?.path ?? null;
+  return (
+    config.xlsxColumns.find((column) => normalizeXlsxHeader(column.header) === normalizedHeader)
+      ?.path ?? null
+  );
 }
 
-function xlsxDateColumnsForConfig(config: BulkUploadPreviewConfig): readonly BulkUploadXlsxDateColumn[] {
+function xlsxDateColumnsForConfig(
+  config: BulkUploadPreviewConfig,
+): readonly BulkUploadXlsxDateColumn[] {
   return config.xlsxDateColumns ?? [];
 }
 
@@ -804,7 +721,10 @@ function detectXlsxDateFormat(
     }
 
     if (typeof value !== 'string') {
-      return { ok: false, message: `Row ${rowNumber} column "${header}" must be a date or date text.` };
+      return {
+        ok: false,
+        message: `Row ${rowNumber} column "${header}" must be a date or date text.`,
+      };
     }
 
     const parts = parseDateTextParts(value.trim());
@@ -930,7 +850,10 @@ function parseXlsxDateCell(
   }
 
   if (typeof value !== 'string') {
-    return { ok: false, message: `Row ${rowNumber} column "${header}" must be a date or date text.` };
+    return {
+      ok: false,
+      message: `Row ${rowNumber} column "${header}" must be a date or date text.`,
+    };
   }
 
   const parsed = parseXlsxDateText(value.trim(), format);
@@ -950,7 +873,9 @@ function parseXlsxDateText(value: string, format: DetectedXlsxDateFormat): strin
   const separator = format.separator ?? '-';
   const escapedSeparator = separator.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const yearPattern = format.yearDigits === 2 ? '\\d{2}' : '\\d{4}';
-  const ymdPattern = new RegExp(`^(\\d{4})${escapedSeparator}(\\d{1,2})${escapedSeparator}(\\d{1,2})$`);
+  const ymdPattern = new RegExp(
+    `^(\\d{4})${escapedSeparator}(\\d{1,2})${escapedSeparator}(\\d{1,2})$`,
+  );
   const numericPattern = new RegExp(
     `^(\\d{1,2})${escapedSeparator}(\\d{1,2})${escapedSeparator}(${yearPattern})$`,
   );
@@ -1030,6 +955,8 @@ function isNumericXlsxPath(path: string): boolean {
     'appliedto',
     'credit',
     'debit',
+    'discamount',
+    'discpercent',
     'discount',
     'grandtotal',
     'itemtotal',
@@ -1069,11 +996,17 @@ function parseXlsxCellValue(
     try {
       const parsed = JSON.parse(value) as unknown;
       if (Array.isArray(sampleValue) && !Array.isArray(parsed)) {
-        return { ok: false, message: `Row ${rowNumber} column "${header}" must contain a JSON array.` };
+        return {
+          ok: false,
+          message: `Row ${rowNumber} column "${header}" must contain a JSON array.`,
+        };
       }
 
       if (isRecord(sampleValue) && !isRecord(parsed)) {
-        return { ok: false, message: `Row ${rowNumber} column "${header}" must contain a JSON object.` };
+        return {
+          ok: false,
+          message: `Row ${rowNumber} column "${header}" must contain a JSON object.`,
+        };
       }
 
       return { ok: true, value: parsed };
@@ -1083,9 +1016,9 @@ function parseXlsxCellValue(
   }
 
   if (typeof sampleValue === 'number' || isNumericXlsxPath(path)) {
-    const normalizedNumber =
-      typeof value === 'string' ? value.replace(/[,₹$€£\s]/g, '') : value;
-    const numericValue = typeof normalizedNumber === 'number' ? normalizedNumber : Number(normalizedNumber);
+    const normalizedNumber = typeof value === 'string' ? value.replace(/[,₹$€£\s]/g, '') : value;
+    const numericValue =
+      typeof normalizedNumber === 'number' ? normalizedNumber : Number(normalizedNumber);
     if (!Number.isFinite(numericValue)) {
       return { ok: false, message: `Row ${rowNumber} column "${header}" must be a number.` };
     }
@@ -1123,7 +1056,12 @@ function sampleCellValue(value: unknown): unknown {
 }
 
 function safeFileName(value: string): string {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'bulk-upload';
+  return (
+    value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '') || 'bulk-upload'
+  );
 }
 
 @Component({
@@ -1347,7 +1285,10 @@ export class BulkUploadButtonComponent {
     };
   }
 
-  private async readPayload(file: File, config: BulkUploadPreviewConfig): Promise<BulkUploadReadResult | string> {
+  private async readPayload(
+    file: File,
+    config: BulkUploadPreviewConfig,
+  ): Promise<BulkUploadReadResult | string> {
     const format = this.fileFormat(file);
     if (format === 'xlsx') {
       return this.readXlsxPayload(file, config);
@@ -1376,7 +1317,10 @@ export class BulkUploadButtonComponent {
     }
   }
 
-  private async readXlsxPayload(file: File, config: BulkUploadPreviewConfig): Promise<BulkUploadReadResult | string> {
+  private async readXlsxPayload(
+    file: File,
+    config: BulkUploadPreviewConfig,
+  ): Promise<BulkUploadReadResult | string> {
     let rows: unknown[][];
     try {
       const xlsx = await import('xlsx');
@@ -1400,7 +1344,9 @@ export class BulkUploadButtonComponent {
       return 'Unable to read the XLSX file. Download the sample XLSX and keep the header row format unchanged.';
     }
 
-    const headerIndex = rows.findIndex((row) => Array.isArray(row) && row.some((value) => !valueIsEmpty(value)));
+    const headerIndex = rows.findIndex(
+      (row) => Array.isArray(row) && row.some((value) => !valueIsEmpty(value)),
+    );
     if (headerIndex < 0) {
       return 'XLSX file is empty. Download the sample XLSX and add records below the header row.';
     }
@@ -1545,7 +1491,9 @@ export class BulkUploadButtonComponent {
   }
 
   private previewConfig(): BulkUploadPreviewConfig | null {
-    return this.config() ?? BULK_UPLOAD_PREVIEW_CONFIGS[normalizeEndpointPath(this.endpoint())] ?? null;
+    return (
+      this.config() ?? BULK_UPLOAD_PREVIEW_CONFIGS[normalizeEndpointPath(this.endpoint())] ?? null
+    );
   }
 
   private isAcceptedFile(file: File): boolean {
