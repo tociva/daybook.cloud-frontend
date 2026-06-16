@@ -87,6 +87,12 @@ type BulkUploadPreview = Readonly<{
   uploadFile: File;
 }>;
 
+function isBulkUploadPreviewResult(
+  result: BulkUploadPreview | readonly string[],
+): result is BulkUploadPreview {
+  return !Array.isArray(result);
+}
+
 type BulkUploadInfo = Readonly<{
   modelName: string;
   rootKey: string;
@@ -560,6 +566,14 @@ function isIsoDateString(value: string): boolean {
   const day = Number(match[3]);
   const date = new Date(year, month - 1, day);
   return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
+}
+
+function normalizeValidationResult(result: readonly string[] | string): readonly string[] {
+  if (typeof result === 'string') {
+    return result.trim() ? [result] : [];
+  }
+
+  return result.filter((message) => message.trim());
 }
 
 function normalizeEndpointPath(endpointPath: string): string {
@@ -1092,12 +1106,20 @@ export class BulkUploadButtonComponent {
   readonly uploaded = output<readonly unknown[]>();
 
   protected readonly isUploading = signal(false);
+  protected readonly isValidating = signal(false);
   protected readonly isPreviewOpen = signal(false);
   protected readonly isFormatErrorOpen = signal(false);
   protected readonly isInfoOpen = signal(false);
-  protected readonly formatError = signal<string | null>(null);
+  protected readonly formatErrors = signal<readonly string[]>([]);
   protected readonly pendingUpload = signal<BulkUploadPreview | null>(null);
-  protected readonly isDisabled = computed(() => this.disabled() || this.isUploading());
+  protected readonly isDisabled = computed(
+    () => this.disabled() || this.isUploading() || this.isValidating(),
+  );
+  protected readonly uploadLabel = computed(() => {
+    if (this.isUploading()) return 'Uploading...';
+    if (this.isValidating()) return 'Validating...';
+    return this.label();
+  });
   protected readonly hasSampleConfig = computed(() => this.previewConfig() !== null);
   protected readonly uploadInfo = computed<BulkUploadInfo | null>(() => {
     const config = this.previewConfig();
@@ -1141,28 +1163,33 @@ export class BulkUploadButtonComponent {
     }
 
     const first = event.rejected[0];
-    this.showFormatError(first?.message ?? 'Select one valid JSON or XLSX file to upload.');
+    this.showFormatErrors([first?.message ?? 'Select one valid JSON or XLSX file to upload.']);
   }
 
   private async uploadFile(file: File): Promise<void> {
-    if (this.isDisabled()) return;
+    if (this.disabled() || this.isUploading() || this.isValidating()) return;
 
     this.clearFormatError();
 
     const fileError = this.validateFile(file);
     if (fileError) {
-      this.showFormatError(fileError);
+      this.showFormatErrors([fileError]);
       return;
     }
 
-    const preview = await this.preparePreview(file);
-    if (typeof preview === 'string') {
-      this.showFormatError(preview);
-      return;
-    }
+    this.isValidating.set(true);
+    try {
+      const preview = await this.preparePreview(file);
+      if (!isBulkUploadPreviewResult(preview)) {
+        this.showFormatErrors(preview);
+        return;
+      }
 
-    this.pendingUpload.set(preview);
-    this.isPreviewOpen.set(true);
+      this.pendingUpload.set(preview);
+      this.isPreviewOpen.set(true);
+    } finally {
+      this.isValidating.set(false);
+    }
   }
 
   protected cancelPreview(): void {
@@ -1253,20 +1280,25 @@ export class BulkUploadButtonComponent {
     return null;
   }
 
-  private async preparePreview(file: File): Promise<BulkUploadPreview | string> {
+  private async preparePreview(file: File): Promise<BulkUploadPreview | readonly string[]> {
     const config = this.previewConfig();
     if (!config) {
-      return 'Bulk upload preview is not configured for this model.';
+      return ['Bulk upload preview is not configured for this model.'];
     }
 
     const readResult = await this.readPayload(file, config);
     if (typeof readResult === 'string') {
-      return readResult;
+      return [readResult];
     }
 
     const rows = this.validatePayloadRows(readResult.payload, config);
     if (typeof rows === 'string') {
-      return rows;
+      return [rows];
+    }
+
+    const customValidationErrors = await this.runCustomPayloadValidation(readResult.payload, config);
+    if (customValidationErrors.length) {
+      return customValidationErrors;
     }
 
     return {
@@ -1537,15 +1569,40 @@ export class BulkUploadButtonComponent {
     this.pendingUpload.set(null);
   }
 
-  private showFormatError(message: string): void {
+  private async runCustomPayloadValidation(
+    payload: BulkUploadPayload,
+    config: BulkUploadPreviewConfig,
+  ): Promise<readonly string[]> {
+    if (config.prepareValidation) {
+      await config.prepareValidation();
+    }
+
+    const errors: string[] = [];
+
+    if (config.validatePayload) {
+      errors.push(...normalizeValidationResult(config.validatePayload(payload)));
+    }
+
+    if (errors.length) {
+      return errors;
+    }
+
+    if (config.validatePayloadAsync) {
+      errors.push(...normalizeValidationResult(await config.validatePayloadAsync(payload)));
+    }
+
+    return errors;
+  }
+
+  private showFormatErrors(messages: readonly string[]): void {
     this.clearPreview();
-    this.formatError.set(message);
+    this.formatErrors.set(messages.length ? messages : ['Bulk upload validation failed.']);
     this.isFormatErrorOpen.set(true);
   }
 
   private clearFormatError(): void {
     this.isFormatErrorOpen.set(false);
-    this.formatError.set(null);
+    this.formatErrors.set([]);
   }
 
   private successMessage(created: readonly unknown[]): string {

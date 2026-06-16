@@ -17,8 +17,8 @@
       [disabled]="isDisabled()"
       (click)="chooseFile(fileInput)"
     >
-      <tng-icon [icon]="isUploading() ? 'loaderCircle' : 'upload'" aria-hidden="true" />
-      {{ isUploading() ? 'Uploading...' : label() }}
+      <tng-icon [icon]="isUploading() || isValidating() ? 'loaderCircle' : 'upload'" aria-hidden="true" />
+      {{ uploadLabel() }}
     </tng-button>
   </span>
 
@@ -199,17 +199,21 @@
   </tng-dialog>
 }
 
-@if (formatError(); as message) {
+@if (formatErrors().length) {
   <tng-dialog
     title="Invalid bulk upload file"
     size="md"
-    description="Use the sample files below to match the required upload format."
+    description="Fix the issues below and upload again."
     [open]="isFormatErrorOpen()"
     [closeOnBackdrop]="false"
     (closed)="onFormatErrorClosed()"
   >
     <div class="bulk-upload-error">
-      <p>{{ message }}</p>
+      <ul class="bulk-upload-error-list">
+        @for (message of formatErrors(); track $index) {
+          <li>{{ message }}</li>
+        }
+      </ul>
       <p>
         JSON files must use the expected root key. XLSX files must keep the sample header row.
         @if (uploadInfo()?.usesJsonXlsxCells) {

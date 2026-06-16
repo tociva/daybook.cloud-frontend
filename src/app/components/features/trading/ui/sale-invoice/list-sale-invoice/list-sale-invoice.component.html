@@ -14,7 +14,7 @@
 
     <app-bulk-upload-button
       endpoint="/inventory/sale-invoice/bulk-upload"
-      [config]="bulkUploadConfig"
+      [config]="bulkUploadConfig()"
       (uploaded)="reloadSaleInvoices()"
     />
 

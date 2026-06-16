@@ -41,6 +41,7 @@
   position: absolute;
   right: 0;
   top: 100%;
+  max-height: min(70vh, 36rem);
   z-index: var(--crud-filter-popover-z-index);
 }
 
@@ -111,7 +112,10 @@
 
   display: grid;
   gap: 0.6rem;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   min-width: 24rem;
+  min-height: 0;
+  max-height: calc(min(70vh, 36rem) - 1.7rem);
 }
 
 .filter-form__header,
@@ -129,6 +133,14 @@
   display: grid;
   gap: 0.5rem;
   grid-template-columns: 8.25rem minmax(0, 1fr);
+}
+
+.filter-form__body {
+  display: grid;
+  gap: 0.6rem;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 0.15rem;
 }
 
 .filter-native-input {
@@ -151,7 +163,10 @@
 }
 
 .filter-actions {
+  background: var(--tng-semantic-background-surface);
+  border-top: 1px solid var(--tng-semantic-border-subtle);
   justify-content: flex-end;
+  padding-top: 0.45rem;
 }
 
 @media (max-width: 700px) {

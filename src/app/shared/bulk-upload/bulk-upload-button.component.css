@@ -235,6 +235,18 @@
   margin: 0;
 }
 
+.bulk-upload-error-list {
+  color: var(--tng-semantic-foreground-primary);
+  margin: 0;
+  max-height: min(24rem, 50vh);
+  overflow: auto;
+  padding-left: 1.25rem;
+}
+
+.bulk-upload-error-list li + li {
+  margin-top: 0.35rem;
+}
+
 .bulk-upload-error p + p {
   color: var(--tng-semantic-foreground-muted);
 }

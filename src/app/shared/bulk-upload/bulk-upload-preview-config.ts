@@ -30,6 +30,9 @@ export type BulkUploadPreviewConfig = Readonly<{
   requiredPaths: readonly string[];
   rootKey: string;
   sampleRows: readonly BulkUploadPreviewRow[];
+  validatePayload?: (payload: BulkUploadPayload) => readonly string[] | string;
+  validatePayloadAsync?: (payload: BulkUploadPayload) => Promise<readonly string[] | string>;
+  prepareValidation?: () => Promise<void>;
   xlsxColumns?: readonly BulkUploadXlsxColumn[];
   xlsxDateColumns?: readonly BulkUploadXlsxDateColumn[];
   xlsxHelpText?: string;
