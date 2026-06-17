@@ -43,6 +43,7 @@ import {
 import {
   DEFAULT_INVOICE_NUMBER_FORMAT,
   DEFAULT_JOURNAL_NUMBER_FORMAT,
+  DEFAULT_PAYMENT_NUMBER_FORMAT,
   DEFAULT_RECEIPT_NUMBER_FORMAT,
 } from '../../../../../../util/constants';
 import { OrganizationLogoSectionComponent } from '../organization-logo-section/organization-logo-section.component';
@@ -117,6 +118,7 @@ export class CreateOrganizationComponent implements AfterViewInit {
   protected readonly fiscalYearEnd = signal(getCurrentFiscalYearRange().end);
   protected readonly invnumber = signal(DEFAULT_INVOICE_NUMBER_FORMAT);
   protected readonly recnumber = signal(DEFAULT_RECEIPT_NUMBER_FORMAT);
+  protected readonly paynumber = signal(DEFAULT_PAYMENT_NUMBER_FORMAT);
   protected readonly jnumber = signal(DEFAULT_JOURNAL_NUMBER_FORMAT);
 
   // ── Default branch autocomplete ───────────────────────────────────────────
@@ -243,6 +245,11 @@ export class CreateOrganizationComponent implements AfterViewInit {
       ? 'Receipt number format is required.'
       : null,
   );
+  protected readonly paynumberError = computed(() =>
+    this.submitted() && this.mode() === 'create' && this.paynumber().trim() === ''
+      ? 'Payment number format is required.'
+      : null,
+  );
   protected readonly jnumberError = computed(() =>
     this.submitted() && this.mode() === 'create' && this.jnumber().trim() === ''
       ? 'Journal number format is required.'
@@ -262,6 +269,7 @@ export class CreateOrganizationComponent implements AfterViewInit {
       this.fiscalYearEndError() !== null ||
       this.invnumberError() !== null ||
       this.recnumberError() !== null ||
+      this.paynumberError() !== null ||
       this.jnumberError() !== null,
   );
 
@@ -432,6 +440,7 @@ export class CreateOrganizationComponent implements AfterViewInit {
       enddate: this.fiscalYearEnd().trim(),
       invnumber: this.invnumber().trim(),
       recnumber: this.recnumber().trim(),
+      paynumber: this.paynumber().trim(),
       jnumber: this.jnumber().trim(),
       ...(this.state().trim() && { state: this.state().trim() }),
       ...(this.gstin().trim() && { gstin: this.gstin().trim() }),

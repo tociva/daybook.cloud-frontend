@@ -64,6 +64,7 @@ export type OrganizationBootstrap = Readonly<{
   gstin?: string;
   invnumber: string;
   recnumber: string;
+  paynumber: string;
   currencycode: string;
   jnumber: string;
   dateformat: string;
@@ -83,6 +84,7 @@ export type OrganizationBootstrapFormData = Readonly<{
   gstin?: string;
   invnumber: string;
   recnumber: string;
+  paynumber: string;
   currency: Currency;
   jnumber: string;
   dateformatForm?: DateFormat;

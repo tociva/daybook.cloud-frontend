@@ -341,6 +341,28 @@
               </ul>
             </div>
           </div>
+
+          <div class="field">
+            <tng-form-field labelPosition="above" [invalid]="paynumberError() !== null">
+              <tng-label forId="branch-paynumber" required>Payment Number Format</tng-label>
+              <tng-input
+                id="branch-paynumber"
+                placeholder="e.g. <<YYYY>>/PAY/<<SERIAL3>>"
+                [value]="paynumber()"
+                [ariaInvalid]="paynumberError() !== null"
+                (input)="paynumber.set($any($event.target).value)"
+              />
+              <tng-error [show]="paynumberError() !== null">{{ paynumberError() }}</tng-error>
+            </tng-form-field>
+            <div class="numbering-sequences-preview">
+              <tng-label>Next 5 payment numbers</tng-label>
+              <ul class="numbering-sequences">
+                @for (item of paymentNextSequences(); track item) {
+                  <li>{{ item }}</li>
+                }
+              </ul>
+            </div>
+          </div>
         </div>
 
         <tng-card-footer>

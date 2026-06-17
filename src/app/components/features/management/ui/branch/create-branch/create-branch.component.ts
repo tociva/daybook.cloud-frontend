@@ -33,6 +33,7 @@ import {
 } from '../../../../../../core/date/dayjs-date.utils';
 import {
   DEFAULT_INVOICE_NUMBER_FORMAT,
+  DEFAULT_PAYMENT_NUMBER_FORMAT,
   DEFAULT_RECEIPT_NUMBER_FORMAT,
 } from '../../../../../../util/constants';
 import { BranchSaleInvoiceTemplatesComponent } from '../branch-sale-invoice-templates/branch-sale-invoice-templates.component';
@@ -94,6 +95,7 @@ export class CreateBranchComponent implements AfterViewInit {
   protected readonly timezone = signal('Asia/Kolkata');
   protected readonly invnumber = signal(DEFAULT_INVOICE_NUMBER_FORMAT);
   protected readonly recnumber = signal(DEFAULT_RECEIPT_NUMBER_FORMAT);
+  protected readonly paynumber = signal(DEFAULT_PAYMENT_NUMBER_FORMAT);
 
   // ── Country autocomplete ──────────────────────────────────────────────────
   protected readonly selectedCountry = signal<Country | null>(null);
@@ -183,6 +185,9 @@ export class CreateBranchComponent implements AfterViewInit {
   protected readonly receiptNextSequences = computed(() =>
     this.buildNextNumberingSequences(this.recnumber()),
   );
+  protected readonly paymentNextSequences = computed(() =>
+    this.buildNextNumberingSequences(this.paynumber()),
+  );
 
   // ── Validation ────────────────────────────────────────────────────────────
   protected readonly nameError = computed(() =>
@@ -220,6 +225,11 @@ export class CreateBranchComponent implements AfterViewInit {
       ? 'Receipt number format is required.'
       : null,
   );
+  protected readonly paynumberError = computed(() =>
+    this.submitted() && this.paynumber().trim() === ''
+      ? 'Payment number format is required.'
+      : null,
+  );
   protected readonly hasErrors = computed(
     () =>
       this.nameError() !== null ||
@@ -230,7 +240,8 @@ export class CreateBranchComponent implements AfterViewInit {
       this.organizationError() !== null ||
       this.fiscalstartError() !== null ||
       this.invnumberError() !== null ||
-      this.recnumberError() !== null,
+      this.recnumberError() !== null ||
+      this.paynumberError() !== null,
   );
 
   constructor() {
@@ -265,6 +276,7 @@ export class CreateBranchComponent implements AfterViewInit {
         this.timezone.set(branch.timezone ?? 'Asia/Kolkata');
         this.invnumber.set(branch.invnumber ?? DEFAULT_INVOICE_NUMBER_FORMAT);
         this.recnumber.set(branch.recnumber ?? DEFAULT_RECEIPT_NUMBER_FORMAT);
+        this.paynumber.set(branch.paynumber ?? DEFAULT_PAYMENT_NUMBER_FORMAT);
 
         const addr = branch.address as
           | { line1?: string; line2?: string; city?: string; pincode?: string }
@@ -412,6 +424,7 @@ export class CreateBranchComponent implements AfterViewInit {
       timezone: this.timezone().trim(),
       invnumber: this.invnumber().trim(),
       recnumber: this.recnumber().trim(),
+      paynumber: this.paynumber().trim(),
       ...(this.mobile().trim() && { mobile: this.mobile().trim() }),
       ...(this.description().trim() && { description: this.description().trim() }),
       ...(this.state().trim() && { state: this.state().trim() }),

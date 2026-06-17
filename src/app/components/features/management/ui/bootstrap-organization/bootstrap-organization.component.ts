@@ -61,6 +61,7 @@ import {
   DEFAULT_INVOICE_NUMBER_FORMAT,
   DEFAULT_JOURNAL_NUMBER_FORMAT,
   DEFAULT_NODE_DATE_FORMAT,
+  DEFAULT_PAYMENT_NUMBER_FORMAT,
   DEFAULT_RECEIPT_NUMBER_FORMAT,
 } from '../../../../../util/constants';
 import { OrganizationLogoSectionComponent } from '../organization/organization-logo-section/organization-logo-section.component';
@@ -75,6 +76,7 @@ type OrgValidationFieldKey =
   | 'fiscalname'
   | 'invnumber'
   | 'recnumber'
+  | 'paynumber'
   | 'jnumber'
   | 'address.line1'
   | 'address.line2'
@@ -107,6 +109,7 @@ type OrganizationSignalFormModel = {
   gstin: string;
   invnumber: string;
   recnumber: string;
+  paynumber: string;
   jnumber: string;
   mobile: string;
   name: string;
@@ -131,6 +134,7 @@ type OrganizationFormPayload = Readonly<{
   gstin: string;
   invnumber: string;
   recnumber: string;
+  paynumber: string;
   jnumber: string;
   mobile: string;
   name: string;
@@ -233,6 +237,7 @@ const createInitialForm = (): OrganizationSignalFormModel => ({
   gstin: '',
   invnumber: DEFAULT_INVOICE_NUMBER_FORMAT,
   recnumber: DEFAULT_RECEIPT_NUMBER_FORMAT,
+  paynumber: DEFAULT_PAYMENT_NUMBER_FORMAT,
   jnumber: DEFAULT_JOURNAL_NUMBER_FORMAT,
   mobile: '',
   name: '',
@@ -303,6 +308,7 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
   private readonly browserCountryDefaultApplied = signal(false);
   protected readonly invoiceTemplateDialogOpen = signal(false);
   protected readonly receiptTemplateDialogOpen = signal(false);
+  protected readonly paymentTemplateDialogOpen = signal(false);
   protected readonly journalTemplateDialogOpen = signal(false);
   protected readonly touched = signal<Partial<Record<OrgValidationFieldKey, true>>>({});
 
@@ -376,6 +382,10 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
     buildNextNumberingSequences(this.organizationModel().recnumber, this.fiscalYearRange()),
   );
 
+  protected readonly paymentNextSequences = computed(() =>
+    buildNextNumberingSequences(this.organizationModel().paynumber, this.fiscalYearRange()),
+  );
+
   protected readonly journalNextSequences = computed(() =>
     buildNextNumberingSequences(this.organizationModel().jnumber, this.fiscalYearRange()),
   );
@@ -401,6 +411,7 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
       gstin: model.gstin,
       invnumber: model.invnumber,
       recnumber: model.recnumber,
+      paynumber: model.paynumber,
       jnumber: model.jnumber,
       mobile: model.mobile,
       name: model.name,
@@ -450,6 +461,10 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
       errors.recnumber = 'Receipt No. is required';
     }
 
+    if (!willPassRequiredStringValidation(model.paynumber)) {
+      errors.paynumber = 'Payment No. is required';
+    }
+
     if (!willPassRequiredStringValidation(model.jnumber)) {
       errors.jnumber = 'Journal No. is required';
     }
@@ -486,6 +501,7 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
       willPassRequiredStringValidation(model.dateFormatName) &&
       willPassRequiredStringValidation(model.invnumber) &&
       willPassRequiredStringValidation(model.recnumber) &&
+      willPassRequiredStringValidation(model.paynumber) &&
       willPassRequiredStringValidation(model.jnumber);
 
     return [
@@ -559,6 +575,13 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
     this.organizationModel.update((current) => ({ ...current, recnumber: template }));
     this.markTouched('recnumber');
     this.receiptTemplateDialogOpen.set(false);
+  }
+
+  protected applyPaymentNumberTemplate(template: string): void {
+    this.saved.set(false);
+    this.organizationModel.update((current) => ({ ...current, paynumber: template }));
+    this.markTouched('paynumber');
+    this.paymentTemplateDialogOpen.set(false);
   }
 
   protected selectCountry(value: unknown): void {
@@ -764,6 +787,7 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
       'fiscalname',
       'invnumber',
       'recnumber',
+      'paynumber',
       'jnumber',
       'address.line1',
       'address.line2',
@@ -843,6 +867,7 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
       ...(payload.gstin && { gstin: payload.gstin }),
       invnumber: payload.invnumber,
       recnumber: payload.recnumber,
+      paynumber: payload.paynumber,
       jnumber: payload.jnumber,
       dateformat: payload.dateformatForm?.name ?? '',
       startdate,

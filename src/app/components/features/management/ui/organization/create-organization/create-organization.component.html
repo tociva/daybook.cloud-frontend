@@ -312,6 +312,19 @@
             </div>
 
             <div class="field">
+              <tng-form-field labelPosition="above" [invalid]="paynumberError() !== null">
+                <tng-label forId="org-paynumber" required>Payment Number Format</tng-label>
+                <tng-input
+                  id="org-paynumber"
+                  [value]="paynumber()"
+                  [ariaInvalid]="paynumberError() !== null"
+                  (input)="paynumber.set($any($event.target).value)"
+                />
+                <tng-error [show]="paynumberError() !== null">{{ paynumberError() }}</tng-error>
+              </tng-form-field>
+            </div>
+
+            <div class="field">
               <tng-form-field labelPosition="above" [invalid]="jnumberError() !== null">
                 <tng-label forId="org-jnumber" required>Journal Number Format</tng-label>
                 <tng-input

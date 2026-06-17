@@ -25,6 +25,7 @@ export type BootstrapOrganizationPayload = Readonly<{
   gstin?: string;
   invnumber: string;
   recnumber: string;
+  paynumber: string;
   currencycode: string;
   jnumber: string;
   dateformat: string;

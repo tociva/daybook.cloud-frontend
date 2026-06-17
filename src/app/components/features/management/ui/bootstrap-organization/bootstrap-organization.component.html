@@ -374,6 +374,42 @@
             </div>
 
             <div class="field">
+              <tng-form-field labelPosition="above" [invalid]="isInvalid('paynumber')">
+                <tng-label forId="org-payment-number" required>Payment number format</tng-label>
+                <tng-input-group>
+                  <input
+                    tngInput
+                    id="org-payment-number"
+                    [formField]="organizationForm.paynumber"
+                    [ariaInvalid]="isInvalid('paynumber')"
+                    (valueChange)="markTouched('paynumber')"
+                  />
+                  <tng-icon
+                    tngInputFieldSuffix
+                    icon="external-link"
+                    aria-hidden="true"
+                    role="button"
+                    tabindex="0"
+                    (click)="paymentTemplateDialogOpen.set(true)"
+                    (keydown.enter)="paymentTemplateDialogOpen.set(true)"
+                    (keydown.space)="$event.preventDefault(); paymentTemplateDialogOpen.set(true)"
+                  />
+                </tng-input-group>
+                <tng-error [show]="fieldError('paynumber') !== null">{{
+                  fieldError('paynumber')
+                }}</tng-error>
+              </tng-form-field>
+              <div class="numbering-sequences-preview">
+                <tng-label>Next 5 payment numbers</tng-label>
+                <ul class="numbering-sequences">
+                  @for (item of paymentNextSequences(); track item) {
+                    <li>{{ item }}</li>
+                  }
+                </ul>
+              </div>
+            </div>
+
+            <div class="field">
               <tng-form-field labelPosition="above" [invalid]="isInvalid('jnumber')">
                 <tng-label forId="org-journal-number" required>Journal number format</tng-label>
                 <tng-input-group>
@@ -437,6 +473,21 @@
               [fiscalStartDate]="organizationModel().fiscalDateRange.start"
               [fiscalEndDate]="organizationModel().fiscalDateRange.end"
               (applyTemplate)="applyReceiptNumberTemplate($event)"
+            />
+          </tng-dialog>
+
+          <tng-dialog
+            title="Generate payment numbering template"
+            description="Build a template like <<YYYY>>/PAY/<<SERIAL3>>."
+            [open]="paymentTemplateDialogOpen()"
+            (openChange)="paymentTemplateDialogOpen.set($event)"
+            (closed)="paymentTemplateDialogOpen.set(false)"
+          >
+            <app-auto-numbering-template-generator
+              [initialTemplate]="organizationModel().paynumber"
+              [fiscalStartDate]="organizationModel().fiscalDateRange.start"
+              [fiscalEndDate]="organizationModel().fiscalDateRange.end"
+              (applyTemplate)="applyPaymentNumberTemplate($event)"
             />
           </tng-dialog>
 
