@@ -8,15 +8,7 @@
       <tng-card variant="outline" padding="lg">
         <tng-card-header>
           <tng-card-title>Basic Details</tng-card-title>
-          <tng-card-description>Date, customer, amount and bank/cash account.</tng-card-description>
-        </tng-card-header>
-
-        <tng-card-content>
-          @if (customerReceiptStore.error()) {
-            <div class="notice notice--danger">{{ customerReceiptStore.error() }}</div>
-          }
-
-          <div class="field-grid">
+          <tng-card-description>Date, customer, amount and bank/cash account. 
             <!-- Numbering -->
             <div class="field field--compact">
               <label class="toggle-row">
@@ -26,7 +18,16 @@
                 />
                 Auto numbering
               </label>
-            </div>
+            </div></tng-card-description>
+        </tng-card-header>
+
+        <tng-card-content>
+          @if (customerReceiptStore.error()) {
+            <div class="notice notice--danger">{{ customerReceiptStore.error() }}</div>
+          }
+
+          <div class="field-grid">
+            
 
             @if (!autoNumbering()) {
               <!-- Number -->
