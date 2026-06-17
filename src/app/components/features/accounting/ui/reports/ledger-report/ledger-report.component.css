@@ -4,16 +4,85 @@
   padding: 1.25rem;
 }
 
-.date-filter {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  max-width: 24rem;
+.report-filter-popover {
+  display: inline-flex;
+  position: relative;
 }
 
-.ledger-filter {
-  max-width: 24rem;
-  min-width: 16rem;
+.report-filter-panel {
+  --ledger-report-filter-menu-z-index: 70;
+  --ledger-report-filter-popover-z-index: var(--tng-z-popover, 60);
+
+  background: var(--tng-semantic-background-surface);
+  border: 1px solid var(--tng-semantic-border-strong);
+  border-radius: 0.75rem;
+  box-shadow: 0 18px 28px
+    color-mix(in srgb, var(--tng-semantic-foreground-primary) 18%, transparent);
+  color: var(--tng-semantic-foreground-primary);
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.45rem;
+  min-width: 24rem;
+  padding: 0.85rem;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: var(--ledger-report-filter-popover-z-index);
+}
+
+.report-filter-panel[hidden] {
+  display: none !important;
+}
+
+.report-filter-form {
+  --tng-autocomplete-overlay-z-index: var(--ledger-report-filter-menu-z-index);
+  --tng-autocomplete-z-overlay: var(--ledger-report-filter-menu-z-index);
+  --tng-autocomplete-bg: var(--tng-semantic-background-surface);
+  --tng-autocomplete-surface: var(--tng-semantic-background-base);
+  --tng-autocomplete-fg: var(--tng-semantic-foreground-primary);
+  --tng-autocomplete-muted: var(--tng-semantic-foreground-muted);
+  --tng-autocomplete-brand: var(--tng-semantic-accent-brand);
+  --tng-autocomplete-border: var(--tng-semantic-border-subtle);
+  --tng-autocomplete-border-strong: var(--tng-semantic-border-strong);
+  --tng-autocomplete-border-hover: var(--tng-semantic-accent-brand);
+
+  display: grid;
+  gap: 0.75rem;
+  min-width: 24rem;
+}
+
+.report-filter-form__header,
+.report-filter-actions {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.report-filter-form__header {
+  color: var(--tng-semantic-foreground-primary);
+}
+
+.report-filter-form__body {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.report-filter-field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.report-filter-field label {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.report-filter-actions {
+  background: var(--tng-semantic-background-surface);
+  border-top: 1px solid var(--tng-semantic-border-subtle);
+  justify-content: flex-end;
+  padding-top: 0.5rem;
 }
 
 .notice {
@@ -121,9 +190,8 @@
 }
 
 @media (max-width: 700px) {
-  .date-filter,
-  .ledger-filter {
-    max-width: none;
-    width: 100%;
+  .report-filter-panel,
+  .report-filter-form {
+    min-width: min(24rem, calc(100vw - 2.5rem));
   }
 }

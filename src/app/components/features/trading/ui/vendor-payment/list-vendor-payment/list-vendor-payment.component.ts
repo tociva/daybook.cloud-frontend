@@ -26,6 +26,10 @@ import { DateManagementService } from '../../../../../../core/date/date-manageme
 import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
 import { formatAmountWithCurrency } from '../../../../../../shared/format/currency';
+import { BankCashStore } from '../../../data/bank-cash';
+import type { BankCash } from '../../../data/bank-cash';
+import { VendorStore } from '../../../data/vendor';
+import type { Vendor } from '../../../data/vendor';
 import { VendorPaymentStore } from '../../../data/vendor-payment';
 import type { VendorPayment, VendorPaymentJournal } from '../../../data/vendor-payment';
 import { VENDOR_PAYMENT_BULK_UPLOAD_CONFIG } from './vendor-payment-bulk-upload.config';
@@ -60,6 +64,8 @@ export class ListVendorPaymentComponent {
   private readonly toastStore = inject(ToastStore);
   private readonly bulkUploadValidationService = inject(VendorPaymentBulkUploadValidationService);
   protected readonly crudQuery = inject(CrudListQueryService);
+  protected readonly bankCashStore = inject(BankCashStore);
+  protected readonly vendorStore = inject(VendorStore);
   protected readonly vendorPaymentStore = inject(VendorPaymentStore);
   protected readonly bulkUploadConfig: BulkUploadPreviewConfig = {
     ...VENDOR_PAYMENT_BULK_UPLOAD_CONFIG,
@@ -71,8 +77,27 @@ export class ListVendorPaymentComponent {
   protected readonly journalsByPaymentId = signal<Map<string, readonly VendorPaymentJournal[]>>(
     new Map(),
   );
+  protected readonly vendorOptionValue = (option: unknown): string =>
+    (option as Vendor).id ?? '';
+  protected readonly vendorOptionLabel = (option: unknown): string =>
+    (option as Vendor).name ?? '';
+  protected readonly vendorTrackBy = (_index: number, option: unknown): unknown => {
+    const vendor = option as Vendor;
+
+    return vendor.id ?? vendor.name;
+  };
+  protected readonly bankCashOptionValue = (option: unknown): string =>
+    (option as BankCash).id ?? '';
+  protected readonly bankCashOptionLabel = (option: unknown): string =>
+    (option as BankCash).name ?? '';
+  protected readonly bankCashTrackBy = (_index: number, option: unknown): unknown => {
+    const bankCash = option as BankCash;
+
+    return bankCash.id ?? bankCash.name;
+  };
 
   protected readonly columns: readonly TngTableColumn<VendorPayment>[] = [
+    { id: 'number', label: 'Number', sortable: true, width: '12rem' },
     { id: 'date', label: 'Date', sortable: true, width: '10rem' },
     { id: 'vendor', label: 'Vendor', width: '14rem' },
     {
@@ -90,6 +115,43 @@ export class ListVendorPaymentComponent {
   ];
 
   protected readonly filterFields: readonly CrudFilterField[] = [
+    { id: 'number', label: 'Number', placeholder: 'Search payment number', type: 'text' },
+    {
+      id: 'vendorid',
+      label: 'Vendor',
+      placeholder: 'Search vendor',
+      type: 'autocomplete',
+      options: () => this.vendorStore.items() as readonly Vendor[],
+      getOptionValue: this.vendorOptionValue,
+      getOptionLabel: this.vendorOptionLabel,
+      trackBy: this.vendorTrackBy,
+      queryChange: (query) => this.searchVendors(query),
+    },
+    {
+      id: 'date',
+      label: 'Date',
+      type: 'date',
+      operators: ['between', '=', '>=', '<='],
+    },
+    {
+      id: 'amount',
+      label: 'Amount',
+      placeholder: 'Amount',
+      step: '0.01',
+      type: 'number',
+      operators: ['between', '=', '>=', '<='],
+    },
+    {
+      id: 'bcashid',
+      label: 'Bank/Cash',
+      placeholder: 'Search bank/cash',
+      type: 'autocomplete',
+      options: () => this.bankCashStore.items() as readonly BankCash[],
+      getOptionValue: this.bankCashOptionValue,
+      getOptionLabel: this.bankCashOptionLabel,
+      trackBy: this.bankCashTrackBy,
+      queryChange: (query) => this.searchBankCash(query),
+    },
     { id: 'description', label: 'Description', placeholder: 'Search description', type: 'text' },
   ];
 
@@ -100,6 +162,8 @@ export class ListVendorPaymentComponent {
   protected readonly formatAmountWithCurrency = formatAmountWithCurrency;
 
   constructor() {
+    void this.vendorStore.loadVendors({});
+    void this.bankCashStore.loadBankCashes({});
     this.crudQuery.init((filter) => this.loadVendorPaymentsWithJournals(filter));
   }
 
@@ -174,6 +238,18 @@ export class ListVendorPaymentComponent {
     } finally {
       this.generatingJournalPaymentId.set(null);
     }
+  }
+
+  private searchVendors(query: string): void {
+    const q = query.trim();
+
+    void this.vendorStore.loadVendors(q ? { where: { name: { ilike: `%${q}%` } } } : {});
+  }
+
+  private searchBankCash(query: string): void {
+    const q = query.trim();
+
+    void this.bankCashStore.loadBankCashes(q ? { where: { name: { ilike: `%${q}%` } } } : {});
   }
 
   protected createPayment(): void {

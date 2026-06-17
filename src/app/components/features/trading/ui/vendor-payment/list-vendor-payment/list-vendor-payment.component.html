@@ -65,6 +65,10 @@
         [sortDirection]="crudQuery.sortDirection()"
         (sortChange)="crudQuery.applySort($event)"
       >
+        <ng-template tngTableCellTemplate="number" let-row="row">
+          {{ row.number || '' }}
+        </ng-template>
+
         <ng-template tngTableCellTemplate="date" let-row="row">
           {{ formatDate(row.date) }}
         </ng-template>

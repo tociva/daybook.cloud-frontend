@@ -68,6 +68,9 @@ const report = (
   data: rows,
 });
 
+const localDate = (year: number, month: number, day: number): Date =>
+  new Date(year, month - 1, day);
+
 async function settle(): Promise<void> {
   for (let i = 0; i < 20; i += 1) {
     TestBed.flushEffects();
@@ -218,6 +221,82 @@ describe('LedgerReportFacade', () => {
       },
       queryParamsHandling: 'merge',
       replaceUrl: true,
+    });
+  });
+
+  it('syncs draft filters from the current route when the filter popover opens', async () => {
+    const facade = configure({
+      ledgerid: 'cash',
+      query: {
+        start: '2026-05-01',
+        end: '2026-05-31',
+      },
+    });
+    await settle();
+
+    facade.openFilterPopover();
+
+    expect(facade.draftLedgerId()).toBe('cash');
+    expect(facade.draftPickerValue()).toEqual({
+      start: localDate(2026, 5, 1),
+      end: localDate(2026, 5, 31),
+    });
+  });
+
+  it('does not navigate while draft filter values are changing', async () => {
+    const facade = configure({ ledgerid: 'cash' });
+    await settle();
+    router.navigate.mockClear();
+
+    facade.openFilterPopover();
+    facade.onDraftLedgerChange('bank');
+    facade.onDraftDateRangeChange({
+      start: localDate(2026, 6, 1),
+      end: localDate(2026, 6, 30),
+    });
+
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  it('applies staged filters with one navigation to the selected ledger and period', async () => {
+    const facade = configure({ ledgerid: 'cash' });
+    await settle();
+    router.navigate.mockClear();
+
+    facade.openFilterPopover();
+    facade.onDraftLedgerChange('bank');
+    facade.onDraftDateRangeChange({
+      start: localDate(2026, 6, 1),
+      end: localDate(2026, 6, 30),
+    });
+    facade.applyFilters();
+
+    expect(router.navigate).toHaveBeenCalledTimes(1);
+    expect(router.navigate).toHaveBeenCalledWith(['/app/accounting/reports/ledger', 'bank'], {
+      queryParams: {
+        start: '2026-06-01',
+        end: '2026-06-30',
+      },
+    });
+  });
+
+  it('clears draft filters back to no ledger and the fiscal-year period', async () => {
+    const facade = configure({
+      ledgerid: 'cash',
+      query: {
+        start: '2026-05-01',
+        end: '2026-05-31',
+      },
+    });
+    await settle();
+
+    facade.openFilterPopover();
+    facade.clearFilters();
+
+    expect(facade.draftLedgerId()).toBeNull();
+    expect(facade.draftPickerValue()).toEqual({
+      start: localDate(2026, 4, 1),
+      end: localDate(2027, 3, 31),
     });
   });
 

@@ -4,30 +4,76 @@
     title="Ledger Report"
     description="Account activity and running balance for the selected period"
   >
-    <div class="ledger-filter">
-      <tng-autocomplete
-        id="ledger-report-ledger"
-        placeholder="Search ledger..."
-        ariaLabel="Ledger"
-        [options]="autocompleteLedgers()"
-        [value]="selectedLedgerId()"
-        [getOptionValue]="ledgerOptionValue"
-        [getOptionLabel]="ledgerOptionLabel"
-        [trackBy]="ledgerTrackBy"
-        (valueChange)="onLedgerChange($event)"
-        (queryChange)="onLedgerQueryChange($event)"
-      />
-    </div>
+    <div
+      class="report-filter-popover"
+      tngPopover
+      #filterPopover="tngPopover"
+      [align]="'end'"
+      [side]="'bottom'"
+      [ariaLabel]="'Ledger report filters'"
+      [closeOnOutsidePointer]="false"
+      [open]="filterOpen()"
+      (openChange)="onFilterOpenChange($event)"
+    >
+      <tng-button
+        type="button"
+        [appearance]="activeFilterCount() ? 'solid' : 'outline'"
+        [tone]="activeFilterCount() ? 'primary' : 'neutral'"
+        [tngPopoverTrigger]="filterPopover"
+        [tngBadge]="activeFilterCount()"
+        tngBadgeTone="primary"
+        aria-label="Ledger report filters"
+      >
+        <tng-icon icon="filter" aria-hidden="true" />
+      </tng-button>
 
-    <div class="date-filter">
-      <app-fiscal-year-date-range-picker
-        id="ledger-report-date-range"
-        placeholder="Select report period"
-        [fullWidth]="false"
-        [value]="pickerValue()"
-        (valueChange)="onDateRangeChange($event)"
-        (closed)="onPickerClosed()"
-      />
+      <section tngPopoverPanel class="report-filter-panel">
+        <form class="report-filter-form" (submit)="onApplyFilters($event)">
+          <div class="report-filter-form__header">
+            <tng-icon icon="filter" aria-hidden="true" />
+            <strong>Filter ledger report</strong>
+          </div>
+
+          <div class="report-filter-form__body">
+            <div class="report-filter-field">
+              <label for="ledger-report-filter-ledger">Ledger</label>
+              <tng-autocomplete
+                id="ledger-report-filter-ledger"
+                placeholder="Search ledger..."
+                ariaLabel="Ledger"
+                [options]="autocompleteLedgers()"
+                [value]="draftLedgerId()"
+                [getOptionValue]="ledgerOptionValue"
+                [getOptionLabel]="ledgerOptionLabel"
+                [trackBy]="ledgerTrackBy"
+                (valueChange)="onDraftLedgerChange($event)"
+                (queryChange)="onLedgerQueryChange($event)"
+              />
+            </div>
+
+            <div class="report-filter-field">
+              <label for="ledger-report-filter-date-range">Period</label>
+              <app-fiscal-year-date-range-picker
+                id="ledger-report-filter-date-range"
+                placeholder="Select report period"
+                fullWidth
+                [value]="draftPickerValue()"
+                (valueChange)="onDraftDateRangeChange($event)"
+              />
+            </div>
+          </div>
+
+          <div class="report-filter-actions">
+            <tng-button type="button" appearance="ghost" (click)="onClearFilters()"
+              >Clear</tng-button
+            >
+            <tng-button type="button" appearance="outline" (click)="closeFilterPopover()">
+              Close
+            </tng-button>
+            <tng-button type="submit" appearance="solid" tone="primary">Apply</tng-button>
+          </div>
+        </form>
+      </section>
     </div>
 
     <tng-button
@@ -44,9 +90,7 @@
 
   <tng-card variant="outline" padding="lg">
     @if (!canViewLedgerReport()) {
-      <div class="notice notice--danger">
-        You do not have permission to view the ledger report.
-      </div>
+      <div class="notice notice--danger">You do not have permission to view the ledger report.</div>
     } @else if (hasError()) {
       <div class="notice notice--danger">{{ displayError() }}</div>
     } @else if (showSelectLedgerNotice()) {
@@ -56,10 +100,10 @@
     } @else {
       <div class="summary-grid" aria-label="Ledger report summary">
         @for (metric of summaryMetrics(); track metric.id) {
-        <section class="summary-metric">
-          <h3 class="summary-metric-title">{{ metric.label }}</h3>
-          <div class="summary-metric-value">{{ metric.value }}</div>
-        </section>
+          <section class="summary-metric">
+            <h3 class="summary-metric-title">{{ metric.label }}</h3>
+            <div class="summary-metric-value">{{ metric.value }}</div>
+          </section>
         }
       </div>
 
@@ -129,9 +173,7 @@
 
         @if (!isLoading() && generatedAt()) {
           <div class="table-footer">
-            <span class="updated-info">
-              Generated at: {{ formatGeneratedAt(generatedAt()) }}
-            </span>
+            <span class="updated-info"> Generated at: {{ formatGeneratedAt(generatedAt()) }} </span>
           </div>
         }
       </div>

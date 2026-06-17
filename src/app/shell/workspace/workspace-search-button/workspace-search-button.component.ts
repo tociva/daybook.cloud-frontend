@@ -5,8 +5,19 @@ import { Router } from '@angular/router';
 import { TngButtonComponent, TngCommandPaletteComponent } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { fromEvent } from 'rxjs';
+import { CustomerStore } from '../../../components/features/trading/data/customer';
+import { VendorStore } from '../../../components/features/trading/data/vendor';
+import { LedgerCachePreferencesStore } from '../../../core/preferences/ledger-cache-preferences.store';
 import { isMacPlatform } from '../../../core/system/platform.utils';
+import {
+  createCustomerTradingSearchIndex,
+  searchCustomerTradingEntries,
+} from './customer-trading-search';
 import { SearchIndexService } from './search-index.service';
+import {
+  createVendorTradingSearchIndex,
+  searchVendorTradingEntries,
+} from './vendor-trading-search';
 
 @Component({
   selector: 'app-workspace-search-button',
@@ -18,11 +29,22 @@ import { SearchIndexService } from './search-index.service';
 export class WorkspaceSearchButtonComponent {
   private readonly document = inject(DOCUMENT);
   private readonly router = inject(Router);
+  private readonly cachePreferences = inject(LedgerCachePreferencesStore);
+  private readonly customerStore = inject(CustomerStore);
+  private readonly vendorStore = inject(VendorStore);
   private readonly index = toSignal(inject(SearchIndexService).index$, { initialValue: null });
+  private customerCatalogLoadPromise: Promise<boolean> | null = null;
+  private vendorCatalogLoadPromise: Promise<boolean> | null = null;
 
   protected readonly searchShortcutHint = isMacPlatform() ? '⌘K' : 'Ctrl K';
   protected readonly open = signal(false);
   protected readonly query = signal('');
+  private readonly customerSearchIndex = computed(() =>
+    createCustomerTradingSearchIndex(this.customerStore.catalog()),
+  );
+  private readonly vendorSearchIndex = computed(() =>
+    createVendorTradingSearchIndex(this.vendorStore.catalog()),
+  );
 
   protected readonly results = computed(() => {
     const index = this.index();
@@ -30,12 +52,28 @@ export class WorkspaceSearchButtonComponent {
 
     const q = this.query().trim();
     const entries = q ? index.fuse.search(q).map((r) => r.item) : index.entries;
-
-    return entries.map((entry) => ({
+    const staticResults = entries.map((entry) => ({
       label: entry.title,
       description: entry.description,
       value: entry.url,
     }));
+
+    if (!q || !this.cachePreferences.enabled()) return staticResults;
+
+    const customerResults = searchCustomerTradingEntries(this.customerSearchIndex(), q).map(
+      (entry) => ({
+        label: entry.label,
+        description: entry.description,
+        value: entry.value,
+      }),
+    );
+    const vendorResults = searchVendorTradingEntries(this.vendorSearchIndex(), q).map((entry) => ({
+      label: entry.label,
+      description: entry.description,
+      value: entry.value,
+    }));
+
+    return [...staticResults, ...customerResults, ...vendorResults];
   });
 
   constructor() {
@@ -47,6 +85,8 @@ export class WorkspaceSearchButtonComponent {
   protected openPalette(initialQuery = ''): void {
     this.query.set(initialQuery);
     this.open.set(true);
+    this.ensureCustomerSearchCatalogLoaded();
+    this.ensureVendorSearchCatalogLoaded();
   }
 
   protected onSearchBtnKeydown(event: KeyboardEvent): void {
@@ -74,5 +114,39 @@ export class WorkspaceSearchButtonComponent {
       this.open.set(false);
       this.router.navigateByUrl(url);
     }
+  }
+
+  private ensureCustomerSearchCatalogLoaded(): void {
+    if (
+      !this.cachePreferences.enabled() ||
+      this.customerStore.catalogLoaded() ||
+      this.customerCatalogLoadPromise
+    ) {
+      return;
+    }
+
+    this.customerCatalogLoadPromise = this.customerStore
+      .ensureCustomerCatalogLoaded()
+      .catch(() => false)
+      .finally(() => {
+        this.customerCatalogLoadPromise = null;
+      });
+  }
+
+  private ensureVendorSearchCatalogLoaded(): void {
+    if (
+      !this.cachePreferences.enabled() ||
+      this.vendorStore.catalogLoaded() ||
+      this.vendorCatalogLoadPromise
+    ) {
+      return;
+    }
+
+    this.vendorCatalogLoadPromise = this.vendorStore
+      .ensureVendorCatalogLoaded()
+      .catch(() => false)
+      .finally(() => {
+        this.vendorCatalogLoadPromise = null;
+      });
   }
 }

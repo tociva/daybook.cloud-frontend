@@ -1,0 +1,197 @@
+import { signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import Fuse from 'fuse.js';
+import { of } from 'rxjs';
+import { describe, expect, it, vi } from 'vitest';
+import { CustomerStore, type Customer } from '../../../components/features/trading/data/customer';
+import { VendorStore, type Vendor } from '../../../components/features/trading/data/vendor';
+import { LedgerCachePreferencesStore } from '../../../core/preferences/ledger-cache-preferences.store';
+import { SearchIndexService, type SearchEntry, type SearchIndex } from './search-index.service';
+import { WorkspaceSearchButtonComponent } from './workspace-search-button.component';
+
+type WorkspaceSearchButtonHarness = Readonly<{
+  openPalette: (initialQuery?: string) => void;
+  results: () => readonly { description: string; label: string; value?: string }[];
+}>;
+
+const staticEntries: readonly SearchEntry[] = [
+  {
+    title: 'List Sale Invoice',
+    description: 'View and manage sale invoices.',
+    keywords: ['list sale invoice', 'sale invoice', 'sales', 'billing'],
+    url: '/app/trading/sale-invoice',
+  },
+];
+
+function createStaticSearchIndex(entries: readonly SearchEntry[]): SearchIndex {
+  return {
+    entries,
+    fuse: new Fuse(entries, {
+      keys: [
+        { name: 'title', weight: 2 },
+        { name: 'keywords', weight: 1.5 },
+        { name: 'description', weight: 1 },
+      ],
+      threshold: 0.35,
+      includeScore: false,
+      ignoreLocation: true,
+    }),
+  };
+}
+
+function customer(id: string, name: string): Customer {
+  return {
+    id,
+    name,
+    countrycode: 'US',
+    currencycode: 'USD',
+    address: { name, line1: 'Line 1' },
+  };
+}
+
+function vendor(id: string, name: string): Vendor {
+  return {
+    id,
+    name,
+    countrycode: 'US',
+    currencycode: 'USD',
+    address: { name, line1: 'Line 1' },
+  };
+}
+
+async function setup(options: {
+  cacheEnabled?: boolean;
+  catalogLoaded?: boolean;
+  customers?: readonly Customer[];
+  vendorCatalogLoaded?: boolean;
+  vendors?: readonly Vendor[];
+}): Promise<{
+  component: WorkspaceSearchButtonHarness;
+  ensureCustomerCatalogLoaded: ReturnType<typeof vi.fn>;
+  ensureVendorCatalogLoaded: ReturnType<typeof vi.fn>;
+}> {
+  TestBed.resetTestingModule();
+
+  const customerCatalog = signal(options.customers ?? []);
+  const customerCatalogLoaded = signal(options.catalogLoaded ?? false);
+  const vendorCatalog = signal(options.vendors ?? []);
+  const vendorCatalogLoaded = signal(options.vendorCatalogLoaded ?? false);
+  const enabled = signal(options.cacheEnabled ?? true);
+  const ensureCustomerCatalogLoaded = vi.fn(async () => true);
+  const ensureVendorCatalogLoaded = vi.fn(async () => true);
+
+  TestBed.configureTestingModule({
+    imports: [WorkspaceSearchButtonComponent],
+    providers: [
+      provideRouter([]),
+      {
+        provide: SearchIndexService,
+        useValue: { index$: of(createStaticSearchIndex(staticEntries)) },
+      },
+      {
+        provide: CustomerStore,
+        useValue: {
+          catalog: customerCatalog,
+          catalogLoaded: customerCatalogLoaded,
+          ensureCustomerCatalogLoaded,
+        },
+      },
+      {
+        provide: VendorStore,
+        useValue: {
+          catalog: vendorCatalog,
+          catalogLoaded: vendorCatalogLoaded,
+          ensureVendorCatalogLoaded,
+        },
+      },
+      {
+        provide: LedgerCachePreferencesStore,
+        useValue: { enabled },
+      },
+    ],
+  });
+  TestBed.overrideComponent(WorkspaceSearchButtonComponent, {
+    set: { imports: [], template: '' },
+  });
+  await TestBed.compileComponents();
+
+  const fixture = TestBed.createComponent(WorkspaceSearchButtonComponent);
+  return {
+    component: fixture.componentInstance as unknown as WorkspaceSearchButtonHarness,
+    ensureCustomerCatalogLoaded,
+    ensureVendorCatalogLoaded,
+  };
+}
+
+describe('WorkspaceSearchButtonComponent', () => {
+  it('loads the customer and vendor catalogs when opening search with cache enabled', async () => {
+    const { component, ensureCustomerCatalogLoaded, ensureVendorCatalogLoaded } = await setup({
+      cacheEnabled: true,
+    });
+
+    component.openPalette();
+
+    expect(ensureCustomerCatalogLoaded).toHaveBeenCalledTimes(1);
+    expect(ensureVendorCatalogLoaded).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not load or show customer shortcuts when cache is disabled', async () => {
+    const { component, ensureCustomerCatalogLoaded, ensureVendorCatalogLoaded } = await setup({
+      cacheEnabled: false,
+      customers: [customer('spectrio', 'Spectrio LLC')],
+      vendors: [vendor('acme', 'Acme Supplies')],
+    });
+
+    component.openPalette('Spectrio');
+
+    expect(ensureCustomerCatalogLoaded).not.toHaveBeenCalled();
+    expect(ensureVendorCatalogLoaded).not.toHaveBeenCalled();
+    expect(component.results()).toEqual([]);
+  });
+
+  it('appends matching customer shortcuts after static results for typed queries', async () => {
+    const { component } = await setup({
+      cacheEnabled: true,
+      catalogLoaded: true,
+      customers: [customer('sale-customer', 'Sale Customer')],
+    });
+
+    component.openPalette('Sale');
+
+    expect(component.results().map((result) => result.label)).toEqual([
+      'List Sale Invoice',
+      'Sale Customer - Sale invoice list',
+      'Sale Customer - Customer receipt list',
+    ]);
+  });
+
+  it('appends matching vendor shortcuts for typed queries', async () => {
+    const { component } = await setup({
+      cacheEnabled: true,
+      vendorCatalogLoaded: true,
+      vendors: [vendor('acme', 'Acme Supplies')],
+    });
+
+    component.openPalette('Acme');
+
+    expect(component.results().map((result) => result.label)).toEqual([
+      'Acme Supplies - Purchase invoice list',
+      'Acme Supplies - Vendor payment list',
+    ]);
+  });
+
+  it('does not show customer shortcuts for empty queries', async () => {
+    const { component } = await setup({
+      cacheEnabled: true,
+      catalogLoaded: true,
+      customers: [customer('spectrio', 'Spectrio LLC')],
+      vendorCatalogLoaded: true,
+      vendors: [vendor('acme', 'Acme Supplies')],
+    });
+
+    component.openPalette();
+
+    expect(component.results().map((result) => result.label)).toEqual(['List Sale Invoice']);
+  });
+});

@@ -25,6 +25,10 @@ import { DateManagementService } from '../../../../../../core/date/date-manageme
 import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
 import { formatAmountWithCurrency } from '../../../../../../shared/format/currency';
+import { BankCashStore } from '../../../data/bank-cash';
+import type { BankCash } from '../../../data/bank-cash';
+import { CustomerStore } from '../../../data/customer';
+import type { Customer } from '../../../data/customer';
 import { CustomerReceiptStore } from '../../../data/customer-receipt';
 import type { CustomerReceipt, CustomerReceiptJournal } from '../../../data/customer-receipt';
 import { CUSTOMER_RECEIPT_BULK_UPLOAD_CONFIG } from './customer-receipt-bulk-upload.config';
@@ -57,6 +61,8 @@ export class ListCustomerReceiptComponent {
   private readonly reconciliationMatchService = inject(ReconciliationMatchService);
   private readonly toastStore = inject(ToastStore);
   protected readonly crudQuery = inject(CrudListQueryService);
+  protected readonly bankCashStore = inject(BankCashStore);
+  protected readonly customerStore = inject(CustomerStore);
   protected readonly customerReceiptStore = inject(CustomerReceiptStore);
   protected readonly bulkUploadConfig = CUSTOMER_RECEIPT_BULK_UPLOAD_CONFIG;
   protected readonly hasError = computed(() => this.customerReceiptStore.error() !== null);
@@ -65,6 +71,24 @@ export class ListCustomerReceiptComponent {
   protected readonly journalsByReceiptId = signal<Map<string, readonly CustomerReceiptJournal[]>>(
     new Map(),
   );
+  protected readonly customerOptionValue = (option: unknown): string =>
+    (option as Customer).id ?? '';
+  protected readonly customerOptionLabel = (option: unknown): string =>
+    (option as Customer).name ?? '';
+  protected readonly customerTrackBy = (_index: number, option: unknown): unknown => {
+    const customer = option as Customer;
+
+    return customer.id ?? customer.name;
+  };
+  protected readonly bankCashOptionValue = (option: unknown): string =>
+    (option as BankCash).id ?? '';
+  protected readonly bankCashOptionLabel = (option: unknown): string =>
+    (option as BankCash).name ?? '';
+  protected readonly bankCashTrackBy = (_index: number, option: unknown): unknown => {
+    const bankCash = option as BankCash;
+
+    return bankCash.id ?? bankCash.name;
+  };
 
   protected readonly columns: readonly TngTableColumn<CustomerReceipt>[] = [
     { id: 'number', label: 'Number', sortable: true, width: '12rem' },
@@ -86,6 +110,42 @@ export class ListCustomerReceiptComponent {
 
   protected readonly filterFields: readonly CrudFilterField[] = [
     { id: 'number', label: 'Number', placeholder: 'Search receipt number', type: 'text' },
+    {
+      id: 'customerid',
+      label: 'Customer',
+      placeholder: 'Search customer',
+      type: 'autocomplete',
+      options: () => this.customerStore.items() as readonly Customer[],
+      getOptionValue: this.customerOptionValue,
+      getOptionLabel: this.customerOptionLabel,
+      trackBy: this.customerTrackBy,
+      queryChange: (query) => this.searchCustomers(query),
+    },
+    {
+      id: 'date',
+      label: 'Date',
+      type: 'date',
+      operators: ['between', '=', '>=', '<='],
+    },
+    {
+      id: 'amount',
+      label: 'Amount',
+      placeholder: 'Amount',
+      step: '0.01',
+      type: 'number',
+      operators: ['between', '=', '>=', '<='],
+    },
+    {
+      id: 'bcashid',
+      label: 'Bank/Cash',
+      placeholder: 'Search bank/cash',
+      type: 'autocomplete',
+      options: () => this.bankCashStore.items() as readonly BankCash[],
+      getOptionValue: this.bankCashOptionValue,
+      getOptionLabel: this.bankCashOptionLabel,
+      trackBy: this.bankCashTrackBy,
+      queryChange: (query) => this.searchBankCash(query),
+    },
     { id: 'description', label: 'Description', placeholder: 'Search description', type: 'text' },
   ];
 
@@ -96,6 +156,8 @@ export class ListCustomerReceiptComponent {
   protected readonly formatAmountWithCurrency = formatAmountWithCurrency;
 
   constructor() {
+    void this.customerStore.loadCustomers({});
+    void this.bankCashStore.loadBankCashes({});
     this.crudQuery.init((filter) => this.loadCustomerReceiptsWithJournals(filter));
   }
 
@@ -170,6 +232,18 @@ export class ListCustomerReceiptComponent {
     } finally {
       this.generatingJournalReceiptId.set(null);
     }
+  }
+
+  private searchCustomers(query: string): void {
+    const q = query.trim();
+
+    void this.customerStore.loadCustomers(q ? { where: { name: { ilike: `%${q}%` } } } : {});
+  }
+
+  private searchBankCash(query: string): void {
+    const q = query.trim();
+
+    void this.bankCashStore.loadBankCashes(q ? { where: { name: { ilike: `%${q}%` } } } : {});
   }
 
   protected createReceipt(): void {

@@ -41,6 +41,7 @@ export type VendorPaymentJournal = Readonly<{
 
 export type VendorPayment = Readonly<{
   id?: string;
+  number?: string;
   date: string;
   amount: number;
   currencycode?: string;

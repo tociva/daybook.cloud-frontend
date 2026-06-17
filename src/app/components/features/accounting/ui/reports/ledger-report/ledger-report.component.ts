@@ -1,22 +1,16 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   TngAutocompleteComponent,
+  TngBadge,
   TngButtonComponent,
   TngCardComponent,
   TngTable,
   TngTableCellTpl,
 } from '@tailng-ui/components';
-import type {
-  TngDateRangePickerSelectionInput,
-  TngTableColumn,
-} from '@tailng-ui/components';
+import type { TngDateRangePickerSelectionInput, TngTableColumn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
+import { TngPopover, TngPopoverPanel, TngPopoverTrigger } from '@tailng-ui/primitives';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { FiscalYearDateRangePickerComponent } from '../../../../../../shared/fiscal-year-date-range-picker';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
@@ -35,9 +29,13 @@ import { LedgerReportFacade } from './ledger-report.facade';
   imports: [
     CommonModule,
     PageHeadingComponent,
+    TngBadge,
     TngButtonComponent,
     TngCardComponent,
     TngIcon,
+    TngPopover,
+    TngPopoverPanel,
+    TngPopoverTrigger,
     TngTable,
     TngTableCellTpl,
     TngAutocompleteComponent,
@@ -57,16 +55,18 @@ export class LedgerReportComponent {
   protected readonly displayError = this.facade.displayError;
   protected readonly generatedAt = this.facade.generatedAt;
   protected readonly tableRows = this.facade.tableRows;
-  protected readonly selectedLedgerId = this.facade.selectedLedgerId;
-  protected readonly pickerValue = this.facade.pickerValue;
   protected readonly canViewLedgerReport = this.facade.canViewLedgerReport;
   protected readonly hasError = this.facade.hasError;
   protected readonly hasLedgerSelected = this.facade.hasLedgerSelected;
   protected readonly showSelectLedgerNotice = this.facade.showSelectLedgerNotice;
+  protected readonly draftLedgerId = this.facade.draftLedgerId;
+  protected readonly draftPickerValue = this.facade.draftPickerValue;
+  protected readonly activeFilterCount = this.facade.activeFilterCount;
   protected readonly autocompleteLedgers = this.facade.autocompleteLedgers;
   protected readonly ledgerOptionValue = this.facade.ledgerOptionValue;
   protected readonly ledgerOptionLabel = this.facade.ledgerOptionLabel;
   protected readonly ledgerTrackBy = this.facade.ledgerTrackBy;
+  protected readonly filterOpen = signal(false);
 
   protected readonly currencyMinorUnit = computed(() => {
     const currency = this.userSessionStore.session()?.fiscalyear?.currency;
@@ -100,20 +100,37 @@ export class LedgerReportComponent {
     { id: 'description', label: 'Description', truncate: true },
   ];
 
-  protected onDateRangeChange(value: TngDateRangePickerSelectionInput<Date>): void {
-    this.facade.onDateRangeChange(value);
+  protected onFilterOpenChange(open: boolean): void {
+    this.filterOpen.set(open);
+    if (open) {
+      this.facade.openFilterPopover();
+    }
   }
 
-  protected onPickerClosed(): void {
-    this.facade.onPickerClosed();
+  protected onDraftDateRangeChange(value: TngDateRangePickerSelectionInput<Date>): void {
+    this.facade.onDraftDateRangeChange(value);
+  }
+
+  protected onDraftLedgerChange(ledgerid: string | null): void {
+    this.facade.onDraftLedgerChange(ledgerid);
   }
 
   protected onLedgerQueryChange(query: string): void {
     this.facade.onLedgerQueryChange(query);
   }
 
-  protected onLedgerChange(ledgerid: string | null): void {
-    this.facade.onLedgerChange(ledgerid);
+  protected onApplyFilters(event: SubmitEvent): void {
+    event.preventDefault();
+    this.facade.applyFilters();
+    this.filterOpen.set(false);
+  }
+
+  protected onClearFilters(): void {
+    this.facade.clearFilters();
+  }
+
+  protected closeFilterPopover(): void {
+    this.filterOpen.set(false);
   }
 
   protected onRefresh(): void {
