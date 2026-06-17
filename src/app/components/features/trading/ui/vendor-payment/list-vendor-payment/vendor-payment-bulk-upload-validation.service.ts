@@ -25,7 +25,6 @@ export class VendorPaymentBulkUploadValidationService {
     if (!Array.isArray(payments)) {
       return [];
     }
-
     const [vendorsByName, bankCashByName, purchaseInvoicesByNumber] = await Promise.all([
       this.loadVendorsByName(payments),
       this.loadBankCashByName(payments),
@@ -86,10 +85,8 @@ export class VendorPaymentBulkUploadValidationService {
     }
 
     const vendors = await this.vendorService.list({
-      limit: names.length,
       where: { name: { inq: names } },
     });
-
     return indexByName(vendors);
   }
 
@@ -236,7 +233,7 @@ function indexByName<T extends { name?: string }>(rows: readonly T[]): ReadonlyM
   const map = new Map<string, T>();
   for (const row of rows) {
     const name = row.name?.trim();
-    if (name) {
+    if (name && !map.has(name)) {
       map.set(name, row);
     }
   }

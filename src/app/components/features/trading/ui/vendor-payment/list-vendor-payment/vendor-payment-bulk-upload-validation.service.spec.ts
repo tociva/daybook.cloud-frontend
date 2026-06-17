@@ -134,6 +134,44 @@ describe('VendorPaymentBulkUploadValidationService', () => {
     expect(errors).toEqual([]);
   });
 
+  it('keeps the first duplicate vendor and does not limit vendor name lookups', async () => {
+    const vendors = [
+      { id: 'vendor-1', name: 'Acme Supplies', currencycode: 'INR', status: 1 },
+      { id: 'vendor-2', name: 'Acme Supplies', currencycode: 'USD', status: 1 },
+      { id: 'vendor-3', name: 'Beta Traders', currencycode: 'USD', status: 1 },
+    ];
+
+    vendorService.list.mockImplementation((query?: { limit?: number }) =>
+      Promise.resolve(vendors.slice(0, query?.limit ?? vendors.length)),
+    );
+
+    const errors = await service.validateReferences({
+      payments: [
+        {
+          date: '2026-04-20',
+          amount: 100,
+          vendorname: 'Acme Supplies',
+          bcashname: 'HDFC Current Account',
+          currencycode: 'INR',
+          invoices: [],
+        },
+        {
+          date: '2026-04-21',
+          amount: 100,
+          vendorname: 'Beta Traders',
+          bcashname: 'HDFC Current Account',
+          currencycode: 'USD',
+          invoices: [],
+        },
+      ],
+    });
+
+    expect(vendorService.list).toHaveBeenCalledWith({
+      where: { name: { inq: ['Acme Supplies', 'Beta Traders'] } },
+    });
+    expect(errors).toEqual([]);
+  });
+
   it('skips reference validation until the payload root is structurally valid', async () => {
     await expect(service.validateReferences({ payments: {} })).resolves.toEqual([]);
     expect(vendorService.list).not.toHaveBeenCalled();
