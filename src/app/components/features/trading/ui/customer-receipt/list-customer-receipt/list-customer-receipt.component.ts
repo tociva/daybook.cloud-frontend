@@ -256,6 +256,14 @@ export class ListCustomerReceiptComponent {
     void this.loadCustomerReceiptsWithJournals(this.crudQuery.filter());
   }
 
+  protected viewReceipt(item: CustomerReceipt): void {
+    if (item.id) {
+      void this.router.navigate(['/app/trading/customer-receipt', item.id], {
+        queryParams: { burl: this.router.url },
+      });
+    }
+  }
+
   protected editReceipt(item: CustomerReceipt): void {
     if (item.id) {
       void this.router.navigate(['/app/trading/customer-receipt', item.id, 'edit'], {

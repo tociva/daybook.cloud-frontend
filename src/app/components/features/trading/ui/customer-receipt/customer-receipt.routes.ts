@@ -18,8 +18,8 @@ export const customerReceiptRoutes: Routes = [
   {
     path: ':id',
     loadComponent: () =>
-      import('./create-customer-receipt/create-customer-receipt.component').then(
-        (m) => m.CreateCustomerReceiptComponent,
+      import('./view-customer-receipt/view-customer-receipt.component').then(
+        (m) => m.ViewCustomerReceiptComponent,
       ),
   },
   {

@@ -66,7 +66,9 @@
         (sortChange)="crudQuery.applySort($event)"
       >
         <ng-template tngTableCellTemplate="number" let-row="row">
-          {{ row.number || '' }}
+          <button type="button" class="link-button" (click)="viewReceipt(row)">
+            {{ row.number || '—' }}
+          </button>
         </ng-template>
 
         <ng-template tngTableCellTemplate="date" let-row="row">
@@ -120,6 +122,11 @@
 
         <ng-template tngTableCellTemplate="actions" let-row="row">
           <div class="row-actions">
+            <app-table-row-icon-button
+              icon="eye"
+              ariaLabel="View customer receipt"
+              (action)="viewReceipt(row)"
+            />
             <app-table-row-icon-button
               icon="pencil"
               ariaLabel="Edit customer receipt"

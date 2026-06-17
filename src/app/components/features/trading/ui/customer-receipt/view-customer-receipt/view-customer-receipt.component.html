@@ -1,0 +1,116 @@
+<main class="trading-page">
+  <tng-card variant="outline" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Customer Receipt Details</tng-card-title>
+      <tng-card-description>Review receipt details and linked sale invoices.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (customerReceiptStore.error()) {
+        <div class="notice notice--danger">{{ customerReceiptStore.error() }}</div>
+      }
+
+      @if (customerReceiptStore.isLoading() && !receipt()) {
+        <div class="notice">Loading customer receipt...</div>
+      } @else if (receipt(); as receipt) {
+        <section aria-labelledby="receipt-details-title">
+          <h2 id="receipt-details-title" class="section-title">Receipt Details</h2>
+
+          <dl class="details-grid">
+            <div>
+              <dt>Number</dt>
+              <dd>{{ receipt.number || '—' }}</dd>
+            </div>
+            <div>
+              <dt>Date</dt>
+              <dd>{{ formatDate(receipt.date) }}</dd>
+            </div>
+            <div>
+              <dt>Customer</dt>
+              <dd>{{ receipt.customer?.name || '—' }}</dd>
+            </div>
+            <div>
+              <dt>Amount</dt>
+              <dd>{{ formatAmount(receipt.amount, receipt.currencycode) }}</dd>
+            </div>
+            <div>
+              <dt>Bank/Cash</dt>
+              <dd>{{ receipt.bcash?.name || '—' }}</dd>
+            </div>
+            <div>
+              <dt>Currency</dt>
+              <dd>{{ receipt.currencycode || '—' }}</dd>
+            </div>
+            @if (receipt.cprops?.fx != null) {
+              <div>
+                <dt>Conversion Rate</dt>
+                <dd>{{ formatRate(receipt.cprops?.fx) }}</dd>
+              </div>
+            }
+            @if (receipt.cprops?.lamt != null) {
+              <div>
+                <dt>Local Amount</dt>
+                <dd>{{ formatLocalAmount(receipt) }}</dd>
+              </div>
+            }
+            <div class="wide">
+              <dt>Description</dt>
+              <dd>{{ receipt.description || '—' }}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section aria-labelledby="receipt-invoices-title">
+          <h2 id="receipt-invoices-title" class="section-title">Related Sale Invoices</h2>
+
+          @if (linkedInvoices(receipt).length) {
+            <div class="table-wrap">
+              <table class="invoice-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Invoice</th>
+                    <th scope="col">Date</th>
+                    <th scope="col" class="numeric">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (invoice of linkedInvoices(receipt); track $index) {
+                    <tr>
+                      <td>
+                        @if (invoiceRouteId(invoice)) {
+                          <button
+                            type="button"
+                            class="link-button"
+                            (click)="viewSaleInvoice(invoice)"
+                          >
+                            {{ invoiceNumber(invoice) }}
+                          </button>
+                        } @else {
+                          {{ invoiceNumber(invoice) }}
+                        }
+                      </td>
+                      <td>{{ formatDate(invoice.saleinvoice?.date) }}</td>
+                      <td class="numeric">{{ formatAmount(invoice.amount, receipt.currencycode) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else {
+            <div class="notice">No sale invoices are linked to this receipt.</div>
+          }
+        </section>
+      } @else {
+        <div class="notice">Customer receipt not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button />
+        <app-burl-edit-button [disabled]="!receipt()?.id" (clicked)="editReceipt()" />
+        <app-burl-delete-button [disabled]="!receipt()?.id" (clicked)="deleteReceipt()" />
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>

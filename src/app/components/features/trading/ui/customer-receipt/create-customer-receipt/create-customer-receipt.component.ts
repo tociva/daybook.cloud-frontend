@@ -30,7 +30,11 @@ import type {
   CustomerReceiptInvoiceRequest,
   CustomerReceiptPayload,
 } from '../../../data/customer-receipt';
-import { CustomerReceiptFacade, CustomerReceiptStore } from '../../../data/customer-receipt';
+import {
+  CUSTOMER_RECEIPT_DETAIL_INCLUDES,
+  CustomerReceiptFacade,
+  CustomerReceiptStore,
+} from '../../../data/customer-receipt';
 import type { SaleInvoice } from '../../../data/sale-invoice/sale-invoice.model';
 import { SaleInvoiceStore } from '../../../data/sale-invoice';
 import { FiscalYearDatepickerComponent } from '../../../../../../shared/fiscal-year-datepicker';
@@ -305,11 +309,7 @@ export class CreateCustomerReceiptComponent {
 
     if (id) {
       const receipt = await this.customerReceiptStore.loadCustomerReceiptById(id, {
-        includes: [
-          'customer',
-          'bcash',
-          { relation: 'invoices', scope: { include: [{ relation: 'saleinvoice' }] } },
-        ],
+        includes: CUSTOMER_RECEIPT_DETAIL_INCLUDES,
       });
       if (receipt) this.patchFromReceipt(receipt);
       return;

@@ -74,3 +74,9 @@ export type CustomerReceipt = Readonly<{
 
 export type CustomerReceiptListQuery = Lb4ListQuery;
 export type CustomerReceiptGetQuery = Readonly<{ includes?: readonly Lb4Include[] }>;
+
+export const CUSTOMER_RECEIPT_DETAIL_INCLUDES = [
+  'customer',
+  'bcash',
+  { relation: 'invoices', scope: { include: [{ relation: 'saleinvoice' }] } },
+] as const satisfies readonly Lb4Include[];
