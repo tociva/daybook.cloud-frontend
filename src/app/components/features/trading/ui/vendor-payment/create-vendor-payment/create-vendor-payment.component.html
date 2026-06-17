@@ -8,7 +8,16 @@
       <tng-card variant="outline" padding="lg">
         <tng-card-header>
           <tng-card-title>Basic Details</tng-card-title>
-          <tng-card-description>Date, vendor, amount and bank/cash account.</tng-card-description>
+          <tng-card-description>Date, vendor, amount and bank/cash account.
+            <div class="field field--compact">
+              <label class="toggle-row">
+                <tng-switch
+                  [checked]="autoNumbering()"
+                  (checkedChange)="toggleAutoNumbering(!!$event)"
+                />
+                Auto numbering
+              </label>
+            </div></tng-card-description>
         </tng-card-header>
 
         <tng-card-content>
@@ -17,6 +26,22 @@
           }
 
           <div class="field-grid">
+            @if (!autoNumbering()) {
+              <!-- Number -->
+              <div class="field">
+                <tng-form-field labelPosition="above" [invalid]="numberError() !== null">
+                  <tng-label forId="vpmt-number" required>Payment Number</tng-label>
+                  <tng-input
+                    id="vpmt-number"
+                    [value]="number()"
+                    [ariaInvalid]="numberError() !== null"
+                    (valueChange)="number.set($any($event) ?? '')"
+                  />
+                  <tng-error [show]="numberError() !== null">{{ numberError() }}</tng-error>
+                </tng-form-field>
+              </div>
+            }
+
             <!-- Date -->
             <div class="field">
               <tng-form-field labelPosition="above" [invalid]="dateError() !== null">

@@ -20,12 +20,24 @@ export type VendorPaymentInvoiceRequest = Readonly<{
   amount: number;
 }>;
 
+export type VendorPaymentCustomProperties = Readonly<{
+  autoNumbering?: boolean;
+  [key: string]: unknown;
+}>;
+
+export type VendorPaymentSystemProperties = Readonly<{
+  [key: string]: unknown;
+}>;
+
 export type VendorPaymentPayload = Readonly<{
+  number?: string;
   date: string;
   amount: number;
   currencycode: string;
   vendorid: string;
   bcashid: string;
+  cprops?: VendorPaymentCustomProperties;
+  sprops?: VendorPaymentSystemProperties;
   description?: string;
   invoices?: readonly VendorPaymentInvoiceRequest[];
 }>;
@@ -47,6 +59,8 @@ export type VendorPayment = Readonly<{
   currencycode?: string;
   vendorid?: string;
   bcashid?: string;
+  cprops?: VendorPaymentCustomProperties;
+  sprops?: VendorPaymentSystemProperties;
   description?: string;
   vendor?: Vendor;
   bcash?: BankCash;

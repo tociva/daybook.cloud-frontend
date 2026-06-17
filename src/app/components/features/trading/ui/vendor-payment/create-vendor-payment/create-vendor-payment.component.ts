@@ -12,6 +12,7 @@ import {
   TngInputComponent,
   TngLabelComponent,
   TngStepperComponent,
+  TngSwitchComponent,
   TngTextareaComponent,
 } from '@tailng-ui/components';
 import dayjs from 'dayjs';
@@ -59,6 +60,7 @@ import {
     TngInputComponent,
     TngLabelComponent,
     TngStepperComponent,
+    TngSwitchComponent,
     TngTextareaComponent,
     FiscalYearDatepickerComponent,
     BurlBackButtonComponent,
@@ -102,9 +104,14 @@ export class CreateVendorPaymentComponent {
   // ── Form signals ──────────────────────────────────────────────────────────
 
   protected readonly pmtdate = signal(this.fiscalYearDateRange.defaultDate());
+  protected readonly autoNumbering = signal(true);
+  protected readonly number = signal('Auto Number');
+  protected readonly paymentNumber = signal('');
   protected readonly amount = signal('');
   protected readonly currencycode = signal('');
   protected readonly description = signal('');
+  private readonly customProperties = signal<VendorPayment['cprops']>({});
+  protected readonly numberEnabled = computed(() => !this.autoNumbering());
 
   // ── Vendor autocomplete ───────────────────────────────────────────────────
 
@@ -159,6 +166,11 @@ export class CreateVendorPaymentComponent {
     if (!this.pmtdate()) return 'Date is required.';
     return this.fiscalYearDateRange.errorMessage(this.pmtdate(), 'Payment date');
   });
+  protected readonly numberError = computed(() =>
+    this.submitted() && !this.autoNumbering() && this.number().trim() === ''
+      ? 'Payment number is required.'
+      : null,
+  );
   protected readonly vendorError = computed(() =>
     this.submitted() && !this.vendorid() ? 'Vendor is required.' : null,
   );
@@ -180,6 +192,7 @@ export class CreateVendorPaymentComponent {
 
   protected readonly setupSteps = computed(() => {
     const basicCompleted =
+      (this.autoNumbering() || this.number().trim().length > 0) &&
       !!this.pmtdate() &&
       !!this.vendorid() &&
       !!this.amount() &&
@@ -193,7 +206,7 @@ export class CreateVendorPaymentComponent {
       {
         value: 'basic',
         label: 'Basic Details',
-        description: 'Date, vendor, amount & bank',
+        description: 'Number, date, vendor, amount & bank',
         completed: basicCompleted,
       },
       {
@@ -301,6 +314,12 @@ export class CreateVendorPaymentComponent {
   // ── Patch signals from loaded payment (edit mode) ─────────────────────────
 
   private async patchFromPayment(p: VendorPayment): Promise<void> {
+    const auto = p.cprops?.autoNumbering ?? false;
+    this.customProperties.set(p.cprops ?? {});
+    this.paymentNumber.set(p.number ?? '');
+    this.autoNumbering.set(auto);
+    this.number.set(auto ? (p.number ?? 'Auto Number') : (p.number ?? ''));
+
     const paymentDate = this.fiscalYearDateRange.toIsoDate(p.date);
     this.pmtdate.set(paymentDate ?? this.fiscalYearDateRange.defaultDate());
     this.amount.set(String(p.amount ?? ''));
@@ -466,6 +485,18 @@ export class CreateVendorPaymentComponent {
       this.pmtdate.set(dayjs(value).format(DEFAULT_NODE_DATE_FORMAT));
   }
 
+  protected toggleAutoNumbering(value: boolean): void {
+    this.autoNumbering.set(value);
+    if (value) {
+      this.number.set(this.paymentNumber() || 'Auto Number');
+      return;
+    }
+
+    if (this.number() === 'Auto Number') {
+      this.number.set('');
+    }
+  }
+
   // ── Submit ────────────────────────────────────────────────────────────────
 
   protected async submitForm(event: Event): Promise<void> {
@@ -474,6 +505,7 @@ export class CreateVendorPaymentComponent {
 
     const amountVal = Number(this.amount());
     if (
+      this.numberError() !== null ||
       this.dateError() !== null ||
       !this.vendorid() ||
       !this.amount() ||
@@ -484,6 +516,11 @@ export class CreateVendorPaymentComponent {
       return;
     }
 
+    const cprops = {
+      ...(this.customProperties() ?? {}),
+      autoNumbering: this.autoNumbering(),
+    };
+
     const invoices: VendorPaymentInvoiceRequest[] = this.invoiceRows()
       .filter((r) => r.invoice?.id)
       .map((r) => ({
@@ -492,11 +529,13 @@ export class CreateVendorPaymentComponent {
       }));
 
     const payload: VendorPaymentPayload = {
+      ...(!this.autoNumbering() && this.number().trim() ? { number: this.number().trim() } : {}),
       date: this.pmtdate(),
       amount: amountVal,
       currencycode: this.currencycode().trim(),
       vendorid: this.vendorid(),
       bcashid: this.bcashid(),
+      cprops,
       ...(this.description().trim() ? { description: this.description().trim() } : {}),
       ...(invoices.length ? { invoices } : {}),
     };
