@@ -10,7 +10,11 @@ import { BankCashStore } from '../../../data/bank-cash';
 import type { PurchaseInvoice } from '../../../data/purchase-invoice';
 import { PurchaseInvoiceStore } from '../../../data/purchase-invoice';
 import type { VendorPayment } from '../../../data/vendor-payment';
-import { VendorPaymentFacade, VendorPaymentService, VendorPaymentStore } from '../../../data/vendor-payment';
+import {
+  VendorPaymentFacade,
+  VendorPaymentService,
+  VendorPaymentStore,
+} from '../../../data/vendor-payment';
 import { PurchaseInvoicePaymentsPanelComponent } from './purchase-invoice-payments-panel.component';
 
 const invoice: PurchaseInvoice = {
@@ -73,7 +77,9 @@ async function setup() {
       {
         provide: DateManagementService,
         useValue: {
-          formatDisplayDate: vi.fn((value: string | undefined, fallback = '-') => value ?? fallback),
+          formatDisplayDate: vi.fn(
+            (value: string | undefined, fallback = '-') => value ?? fallback,
+          ),
         },
       },
       {

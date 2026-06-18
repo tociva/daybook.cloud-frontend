@@ -35,6 +35,8 @@ import type { VendorPayment, VendorPaymentJournal } from '../../../data/vendor-p
 import { VENDOR_PAYMENT_BULK_UPLOAD_CONFIG } from './vendor-payment-bulk-upload.config';
 import { VendorPaymentBulkUploadValidationService } from './vendor-payment-bulk-upload-validation.service';
 
+const DEFAULT_VENDOR_PAYMENT_ORDER = ['date ASC'] as const;
+
 @Component({
   selector: 'app-list-vendor-payment',
   standalone: true,
@@ -170,6 +172,7 @@ export class ListVendorPaymentComponent {
   private async loadVendorPaymentsWithJournals(filter: Lb4ListQuery): Promise<void> {
     await this.vendorPaymentStore.loadVendorPayments({
       ...filter,
+      order: filter.order?.length ? filter.order : DEFAULT_VENDOR_PAYMENT_ORDER,
       includes: ['vendor', 'bcash'],
     });
     if (this.vendorPaymentStore.error()) {

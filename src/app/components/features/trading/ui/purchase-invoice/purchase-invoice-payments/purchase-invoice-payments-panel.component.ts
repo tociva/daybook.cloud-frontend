@@ -30,7 +30,11 @@ import type { BankCash } from '../../../data/bank-cash';
 import { BankCashStore } from '../../../data/bank-cash';
 import type { PurchaseInvoice } from '../../../data/purchase-invoice';
 import { PurchaseInvoiceStore } from '../../../data/purchase-invoice';
-import { VendorPaymentFacade, VendorPaymentService, VendorPaymentStore } from '../../../data/vendor-payment';
+import {
+  VendorPaymentFacade,
+  VendorPaymentService,
+  VendorPaymentStore,
+} from '../../../data/vendor-payment';
 import type { VendorPayment } from '../../../data/vendor-payment';
 import {
   buildPurchaseInvoicePaymentPayload,
@@ -247,7 +251,9 @@ export class PurchaseInvoicePaymentsPanelComponent {
     try {
       const created = await this.vendorPaymentFacade.create(payload, { navigateBack: false });
       if (!created) {
-        this.toastStore.danger(this.vendorPaymentStore.error() ?? 'Failed to create vendor payment.');
+        this.toastStore.danger(
+          this.vendorPaymentStore.error() ?? 'Failed to create vendor payment.',
+        );
         return;
       }
 
