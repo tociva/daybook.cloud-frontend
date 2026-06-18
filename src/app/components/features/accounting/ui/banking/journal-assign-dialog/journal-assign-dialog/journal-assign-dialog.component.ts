@@ -154,6 +154,38 @@ export class JournalAssignDialogComponent {
     () => this.selectPanel()?.selectedMatchedTotal() ?? 0,
   );
 
+  protected readonly selectFooterSummary = computed(() => {
+    const remainingBeforeSelection = this.remainingMatchAmount();
+    const selectedTotal = this.selectedMatchedTotal();
+    const remainingAfterSelection =
+      Math.round((remainingBeforeSelection - selectedTotal) * 100) / 100;
+    const selectedCount = this.selectedJournalCount();
+
+    if (selectedCount === 0) {
+      return `No journals selected · Available to match ${formatAmount(remainingBeforeSelection)}`;
+    }
+
+    const journalLabel = selectedCount === 1 ? 'journal' : 'journals';
+    const remainingText =
+      remainingAfterSelection >= 0
+        ? `Remaining after selection ${formatAmount(remainingAfterSelection)}`
+        : `Over selected by ${formatAmount(Math.abs(remainingAfterSelection))}`;
+
+    return [
+      `${selectedCount} ${journalLabel} selected`,
+      `Selected total ${formatAmount(selectedTotal)}`,
+      remainingText,
+    ].join(' · ');
+  });
+
+  protected readonly createExistingFooterSummary = computed(() => {
+    const alreadyMatched = formatAmount(this.existingMatchedTotal());
+    const remaining = formatAmount(this.remainingMatchAmount());
+    const total = formatAmount(this.bankTxnMaxAmount());
+
+    return `Already matched ${alreadyMatched} · Current remaining ${remaining} of ${total} total`;
+  });
+
   protected readonly selectCanAssign = computed(() => this.selectPanel()?.canAssign() ?? false);
 
   protected readonly dialogError = computed(

@@ -107,15 +107,11 @@
         <div class="dialog-footer__row dialog-footer__actions">
           @if (!isCreateMode()) {
             <span class="dialog-footer__summary">
-              {{ selectedJournalCount() }} selected ·
-              {{ formatAmount(selectedMatchedTotal()) }} of
-              {{ formatAmount(remainingMatchAmount()) }} remaining
+              {{ selectFooterSummary() }}
             </span>
           } @else if (hasExistingAssignments()) {
             <span class="dialog-footer__summary">
-              {{ formatAmount(existingMatchedTotal()) }} matched ·
-              {{ formatAmount(remainingMatchAmount()) }} remaining of
-              {{ formatAmount(bankTxnMaxAmount()) }} total
+              {{ createExistingFooterSummary() }}
             </span>
           }
 
