@@ -16,6 +16,7 @@ import { FiscalYearDatepickerComponent } from '../../../../../../shared/fiscal-y
 import { FiscalYearDateRangeService } from '../../../../../../shared/fiscal-year-date-range-picker';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
+import { ToastStore } from '../../../../../../core/toast/toast.store';
 import {
   formatAmountForCurrency,
   formatAmountWithCurrency,
@@ -29,7 +30,7 @@ import type { BankCash } from '../../../data/bank-cash';
 import { BankCashStore } from '../../../data/bank-cash';
 import type { PurchaseInvoice } from '../../../data/purchase-invoice';
 import { PurchaseInvoiceStore } from '../../../data/purchase-invoice';
-import { VendorPaymentFacade, VendorPaymentService } from '../../../data/vendor-payment';
+import { VendorPaymentFacade, VendorPaymentService, VendorPaymentStore } from '../../../data/vendor-payment';
 import type { VendorPayment } from '../../../data/vendor-payment';
 import {
   buildPurchaseInvoicePaymentPayload,
@@ -82,8 +83,10 @@ export class PurchaseInvoicePaymentsPanelComponent {
 
   private readonly router = inject(Router);
   private readonly dateManagement = inject(DateManagementService);
+  private readonly toastStore = inject(ToastStore);
   private readonly vendorPaymentFacade = inject(VendorPaymentFacade);
   private readonly vendorPaymentService = inject(VendorPaymentService);
+  private readonly vendorPaymentStore = inject(VendorPaymentStore);
   private readonly fiscalYearDateRange = inject(FiscalYearDateRangeService);
   private readonly userSession = inject(UserSessionStore);
 
@@ -229,6 +232,7 @@ export class PurchaseInvoicePaymentsPanelComponent {
   }
 
   protected async savePayment(): Promise<void> {
+    this.vendorPaymentStore.clearError();
     this.submitted.set(true);
     if (this.addPaymentError() || this.savingPayment()) return;
 
@@ -242,6 +246,11 @@ export class PurchaseInvoicePaymentsPanelComponent {
     this.savingPayment.set(true);
     try {
       const created = await this.vendorPaymentFacade.create(payload, { navigateBack: false });
+      if (!created) {
+        this.toastStore.danger(this.vendorPaymentStore.error() ?? 'Failed to create vendor payment.');
+        return;
+      }
+
       if (created && invoice.id) {
         this.rememberPaymentDate();
         await this.loadInvoicePayments(invoice.id);
