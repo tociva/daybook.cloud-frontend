@@ -44,13 +44,7 @@
     </aside>
   </div>
 
-  @if (mode() === 'edit' && id(); as saleInvoiceId) {
-    <section class="invoice-receipts-panel" aria-label="Sale invoice receipts">
-      <app-sale-invoice-receipts-panel [invoiceId]="saleInvoiceId" />
-    </section>
-  }
-
-  <!-- ── Footer ─────────────────────────────────────────────────────────── -->
+  <!-- ── Actions ────────────────────────────────────────────────────────── -->
   <div class="invoice-actions">
     <app-burl-back-button label="Cancel" />
     @if (mode() === 'edit') {
@@ -72,4 +66,10 @@
       (clicked)="submitForm($event)"
     />
   </div>
+
+  @if (mode() === 'edit' && id(); as saleInvoiceId) {
+    <section class="invoice-receipts-panel" aria-label="Sale invoice receipts">
+      <app-sale-invoice-receipts-panel [invoiceId]="saleInvoiceId" />
+    </section>
+  }
 </main>

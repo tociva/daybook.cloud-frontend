@@ -88,14 +88,9 @@
       </aside>
     </div>
 
-    @if (mode() === 'edit' && id(); as purchaseInvoiceId) {
-      <section class="invoice-payments-panel" aria-label="Purchase invoice payments">
-        <app-purchase-invoice-payments-panel [invoiceId]="purchaseInvoiceId" />
-      </section>
-    }
   }
 
-  <!-- ── Footer ───────────────────────────────────────────────────────── -->
+  <!-- ── Actions ──────────────────────────────────────────────────────── -->
   <div class="invoice-actions">
     <app-burl-back-button label="Cancel" />
     <app-burl-create-button
@@ -105,4 +100,10 @@
       (clicked)="submitForm($event)"
     />
   </div>
+
+  @if (mode() === 'edit' && id(); as purchaseInvoiceId) {
+    <section class="invoice-payments-panel" aria-label="Purchase invoice payments">
+      <app-purchase-invoice-payments-panel [invoiceId]="purchaseInvoiceId" />
+    </section>
+  }
 </main>
