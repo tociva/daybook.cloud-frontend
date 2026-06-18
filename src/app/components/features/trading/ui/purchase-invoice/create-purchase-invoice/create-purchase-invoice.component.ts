@@ -32,6 +32,7 @@ import { PurchaseInvoiceDraftStore, toNum } from './purchase-invoice-draft.store
 import { PiVendorComponent } from './pi-vendor/pi-vendor.component';
 import { PiInvoiceDetailsComponent } from './pi-invoice-details/pi-invoice-details.component';
 import { PiLineItemsComponent } from './pi-line-items/pi-line-items.component';
+import { PurchaseInvoicePaymentsPanelComponent } from '../purchase-invoice-payments/purchase-invoice-payments-panel.component';
 
 @Component({
   selector: 'app-create-purchase-invoice',
@@ -46,6 +47,7 @@ import { PiLineItemsComponent } from './pi-line-items/pi-line-items.component';
     PiVendorComponent,
     PiLineItemsComponent,
     PiInvoiceDetailsComponent,
+    PurchaseInvoicePaymentsPanelComponent,
   ],
   templateUrl: './create-purchase-invoice.component.html',
   styleUrl: './create-purchase-invoice.component.css',

@@ -16,6 +16,13 @@ export const purchaseInvoiceRoutes: Routes = [
       ),
   },
   {
+    path: ':id/payments',
+    loadComponent: () =>
+      import('./purchase-invoice-payments/purchase-invoice-payments.component').then(
+        (m) => m.PurchaseInvoicePaymentsComponent,
+      ),
+  },
+  {
     path: ':id',
     loadComponent: () =>
       import('./view-purchase-invoice/view-purchase-invoice.component').then(

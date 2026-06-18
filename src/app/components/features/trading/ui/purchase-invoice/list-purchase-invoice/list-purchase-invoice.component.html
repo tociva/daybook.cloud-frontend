@@ -118,7 +118,7 @@
               Create Payment
             </button>
           } @else if (isPaid(row)) {
-            <button type="button" class="link-button" (click)="viewPaymentForInvoice(row)">
+            <button type="button" class="link-button" (click)="viewPaymentsForInvoice(row)">
               {{ formatAmountWithCurrency(totalPaid(row), row.currencycode) }}
             </button>
           } @else {
@@ -161,6 +161,11 @@
               icon="eye"
               ariaLabel="View purchase invoice"
               (action)="viewPurchaseInvoice(row)"
+            />
+            <app-table-row-icon-button
+              icon="creditCard"
+              ariaLabel="View purchase invoice payments"
+              (action)="viewPaymentsForInvoice(row)"
             />
             <app-table-row-icon-button
               icon="pencil"

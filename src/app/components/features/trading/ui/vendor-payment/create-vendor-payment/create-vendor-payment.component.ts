@@ -42,6 +42,11 @@ import {
   DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS,
   DEFAULT_NODE_DATE_FORMAT,
 } from '../../../../../../util/constants';
+import {
+  formatMoneyAmount,
+  outstandingBalance,
+  validateVendorPaymentInvoiceAllocations,
+} from './vendor-payment-invoice-allocation.util';
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -187,6 +192,17 @@ export class CreateVendorPaymentComponent {
   protected readonly currencyError = computed(() =>
     this.submitted() && !this.currencycode().trim() ? 'Currency is required.' : null,
   );
+  protected readonly invoiceAllocationError = computed(() => {
+    if (!this.submitted()) return null;
+
+    const amount = Number(this.amount());
+    if (!Number.isFinite(amount) || amount <= 0) return null;
+
+    return validateVendorPaymentInvoiceAllocations(this.invoiceRows(), amount, {
+      currencycode: this.currencycode().trim(),
+      currentVendorPaymentId: this.id(),
+    });
+  });
 
   // ── Stepper ───────────────────────────────────────────────────────────────
 
@@ -270,7 +286,7 @@ export class CreateVendorPaymentComponent {
       } else {
         // Fallback: user opened the URL directly (bookmark, shared link).
         const invoice = await this.purchaseInvoiceStore.loadPurchaseInvoiceById(purchaseinvoiceid, {
-          includes: ['vendor'],
+          includes: ['vendor', 'payments'],
         });
         if (invoice) this.applyInvoicePrefill(invoice);
       }
@@ -284,10 +300,9 @@ export class CreateVendorPaymentComponent {
   private applyInvoicePrefill(invoice: PurchaseInvoice): void {
     this.currencycode.set(invoice.currencycode ?? 'INR');
 
-    // Remaining balance = grand total minus whatever has already been paid.
-    const paid = invoice.payments?.reduce((sum, p) => sum + p.amount, 0) ?? 0;
-    const remaining = Math.max((invoice.grandtotal ?? 0) - paid, 0);
-    this.amount.set((remaining || invoice.grandtotal || 0).toFixed(2));
+    // Outstanding balance = grand total minus whatever has already been paid.
+    const remaining = outstandingBalance(invoice);
+    this.amount.set(formatMoneyAmount(remaining));
 
     // Vendor — prefer embedded relation, fall back to the already-loaded list.
     const vendor =
@@ -303,8 +318,7 @@ export class CreateVendorPaymentComponent {
     }
 
     // Pre-fill the invoice row.
-    const rowAmount = remaining || (invoice.grandtotal ?? 0);
-    this.invoiceRows.set([{ invoice, invoiceSearch: invoice.number ?? '', amount: rowAmount }]);
+    this.invoiceRows.set([{ invoice, invoiceSearch: invoice.number ?? '', amount: remaining }]);
 
     // Suppress VpmtInvoiceLinesComponent's auto-load effect so it doesn't
     // overwrite the row we just set when vendorid is applied.
@@ -385,7 +399,9 @@ export class CreateVendorPaymentComponent {
   ): Promise<BankCash | null> {
     if (candidate?.name) return candidate;
 
-    const cached = (this.bankCashStore.items() as BankCash[]).find((bankCash) => bankCash.id === id);
+    const cached = (this.bankCashStore.items() as BankCash[]).find(
+      (bankCash) => bankCash.id === id,
+    );
     if (cached) return cached;
     if (!id) return null;
 
@@ -480,7 +496,8 @@ export class CreateVendorPaymentComponent {
 
   protected onDateChange(value: unknown): void {
     if (typeof value === 'string') this.pmtdate.set(value);
-    else if (dayjs.isDayjs(value) && value.isValid()) this.pmtdate.set(value.format(DEFAULT_NODE_DATE_FORMAT));
+    else if (dayjs.isDayjs(value) && value.isValid())
+      this.pmtdate.set(value.format(DEFAULT_NODE_DATE_FORMAT));
     else if (value instanceof Date && !Number.isNaN(value.getTime()))
       this.pmtdate.set(dayjs(value).format(DEFAULT_NODE_DATE_FORMAT));
   }
@@ -511,7 +528,8 @@ export class CreateVendorPaymentComponent {
       !this.amount() ||
       amountVal <= 0 ||
       !this.bcashid() ||
-      !this.currencycode().trim()
+      !this.currencycode().trim() ||
+      this.invoiceAllocationError() !== null
     ) {
       return;
     }

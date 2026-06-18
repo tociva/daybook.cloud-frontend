@@ -3,6 +3,7 @@ import type { StoredDocument } from '../invoice-document';
 import type { Vendor } from '../vendor/vendor.model';
 import type { Item } from '../item/item.model';
 import type { Tax } from '../tax/tax.model';
+import type { BankCash } from '../bank-cash/bank-cash.model';
 
 // ── Embedded address shape ──────────────────────────────────────────────────
 
@@ -76,6 +77,18 @@ export type PurchaseInvoicePaymentLink = Readonly<{
   amount: number;
   vendorpaymentid?: string;
   purchaseinvoiceid?: string;
+  vendorpayment?: PurchaseInvoicePaymentVendorPayment;
+}>;
+
+export type PurchaseInvoicePaymentVendorPayment = Readonly<{
+  id?: string;
+  number?: string;
+  date?: string;
+  amount?: number;
+  currencycode?: string;
+  description?: string;
+  bcashid?: string;
+  bcash?: BankCash;
 }>;
 
 // ── API request shapes ──────────────────────────────────────────────────────

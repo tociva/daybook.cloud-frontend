@@ -13,6 +13,15 @@ import type { VendorPaymentInvoiceRequest } from '../../../../data/vendor-paymen
 import type { PurchaseInvoice } from '../../../../data/purchase-invoice/purchase-invoice.model';
 import { PurchaseInvoiceStore } from '../../../../data/purchase-invoice';
 import { DateManagementService } from '../../../../../../../core/date/date-management.service';
+import {
+  allocationTotal,
+  formatCurrencyAmount,
+  formatMoneyAmount,
+  invoiceBalanceSummary,
+  invoiceTotal,
+  outstandingBalance,
+  paymentRemaining,
+} from '../vendor-payment-invoice-allocation.util';
 
 // ── Row model (exported so parent can type invoiceRows signal) ────────────────
 
@@ -63,17 +72,17 @@ export class VpmtInvoiceLinesComponent {
     return (vendorId ? items.filter((inv) => inv.vendorid === vendorId) : items).slice(0, 15);
   });
 
-  protected readonly invoicesTotal = computed(() =>
-    this.rows()
-      .reduce((s, r) => s + (Number(r.amount) || 0), 0)
-      .toFixed(2),
+  protected readonly allocatedTotal = computed(() =>
+    formatMoneyAmount(allocationTotal(this.rows())),
   );
 
-  protected readonly remaining = computed(() =>
-    (this.paymentAmount() - Number(this.invoicesTotal())).toFixed(2),
+  protected readonly paymentRemaining = computed(() =>
+    formatMoneyAmount(paymentRemaining(this.paymentAmount(), this.rows())),
   );
 
-  protected readonly remainingIsNegative = computed(() => Number(this.remaining()) < 0);
+  protected readonly paymentRemainingIsNegative = computed(
+    () => paymentRemaining(this.paymentAmount(), this.rows()) < 0,
+  );
 
   /** Exposed so the parent stepper can track completion. */
   readonly hasLinkedInvoices = computed(() => this.rows().some((r) => r.invoice !== null));
@@ -110,14 +119,17 @@ export class VpmtInvoiceLinesComponent {
   // ── Private helpers ─────────────────────────────────────────────────────────
 
   private async loadAndPrefill(vendorId: string): Promise<void> {
-    await this.purchaseInvoiceStore.loadPurchaseInvoices({ where: { vendorid: vendorId } });
+    await this.purchaseInvoiceStore.loadPurchaseInvoices({
+      includes: [{ relation: 'payments' }],
+      where: { vendorid: vendorId },
+    });
     const invoices = this.purchaseInvoiceStore.items() as PurchaseInvoice[];
     this.rows.set(
       invoices.length
         ? invoices.map((inv) => ({
             invoice: inv,
             invoiceSearch: this.invoiceDisplayName(inv),
-            amount: inv.grandtotal ?? 0,
+            amount: outstandingBalance(inv),
           }))
         : [this.emptyRow()],
     );
@@ -149,16 +161,14 @@ export class VpmtInvoiceLinesComponent {
     void this.purchaseInvoiceStore.loadPurchaseInvoices(
       q
         ? {
+            includes: [{ relation: 'payments' }],
             where: {
-              and: [
-                { number: { ilike: `%${q}%` } },
-                ...(vendorId ? [{ vendorid: vendorId }] : []),
-              ],
+              and: [{ number: { ilike: `%${q}%` } }, ...(vendorId ? [{ vendorid: vendorId }] : [])],
             },
           }
         : vendorId
-          ? { where: { vendorid: vendorId } }
-          : {},
+          ? { includes: [{ relation: 'payments' }], where: { vendorid: vendorId } }
+          : { includes: [{ relation: 'payments' }] },
     );
   }
 
@@ -195,8 +205,16 @@ export class VpmtInvoiceLinesComponent {
     const formattedDate = this.dateManagement.formatDisplayDate(invoice.date, '');
     if (formattedDate) parts.push(`dated ${formattedDate}`);
     if (invoice.grandtotal != null)
-      parts.push(`(${this.currencycode()} ${invoice.grandtotal.toFixed(2)})`);
+      parts.push(`(${invoiceBalanceSummary(invoice, this.currencycode())})`);
     return parts.join(' ');
+  }
+
+  protected invoiceTotalText(invoice: PurchaseInvoice | null): string {
+    return invoice ? formatCurrencyAmount(this.currencycode(), invoiceTotal(invoice)) : '-';
+  }
+
+  protected outstandingBalanceText(invoice: PurchaseInvoice | null): string {
+    return invoice ? formatCurrencyAmount(this.currencycode(), outstandingBalance(invoice)) : '-';
   }
 
   // ── Public API for parent submit ────────────────────────────────────────────

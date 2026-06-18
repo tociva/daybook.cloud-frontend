@@ -159,6 +159,10 @@ app-fiscal-year-datepicker {
   color: var(--tng-semantic-accent-danger);
 }
 
+.invoice-allocation-error {
+  margin-top: -0.75rem;
+}
+
 .muted {
   color: var(--tng-semantic-foreground-muted);
   font-size: 0.8rem;

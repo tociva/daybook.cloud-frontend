@@ -1,0 +1,201 @@
+@if (purchaseInvoiceStore.error()) {
+  <div class="notice notice--danger">{{ purchaseInvoiceStore.error() }}</div>
+}
+
+@if (purchaseInvoiceStore.isLoading() && !invoice()) {
+  <tng-card variant="outline" padding="lg">
+    <div class="loading-row">
+      <tng-progress-spinner
+        [indeterminate]="true"
+        [size]="20"
+        [strokeWidth]="2"
+        ariaLabel="Loading purchase invoice payments"
+      />
+      <span>Loading payments…</span>
+    </div>
+  </tng-card>
+} @else if (invoice(); as inv) {
+  <tng-card variant="outline" padding="lg">
+    <section class="invoice-summary" aria-label="Purchase invoice summary">
+      <div class="summary-item">
+        <span class="summary-label">Invoice</span>
+        <strong>{{ inv.number || '—' }}</strong>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Vendor</span>
+        <strong>{{ inv.vendor?.name || inv.vendorid || '—' }}</strong>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Grand Total</span>
+        <strong>{{ formatAmountWithCurrency(inv.grandtotal, inv.currencycode) }}</strong>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Paid</span>
+        <strong>{{ formatAmountWithCurrency(paidTotal(), inv.currencycode) }}</strong>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Outstanding</span>
+        <strong>{{ formatAmountWithCurrency(outstandingBalance(), inv.currencycode) }}</strong>
+      </div>
+    </section>
+  </tng-card>
+
+  <tng-card variant="outline" padding="lg">
+    <div class="payments-card-header">
+      <h2>Payments</h2>
+      @if (fallbackPaymentsLoading()) {
+        <span class="loading-inline">
+          <tng-progress-spinner
+            [indeterminate]="true"
+            [size]="16"
+            [strokeWidth]="2"
+            ariaLabel="Loading payment details"
+          />
+          Loading payment details
+        </span>
+      }
+    </div>
+
+    <div class="payments-table-scroll">
+      <table class="payments-table" aria-label="Purchase invoice payments">
+        <thead>
+          <tr>
+            <th class="col-number">Payment Number</th>
+            <th class="col-date">Date</th>
+            <th class="col-account">Bank/Cash</th>
+            <th class="col-amount text-right">Amount</th>
+            <th class="col-description">Description</th>
+            <th class="col-actions text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of paymentRows(); track row.allocationId || row.paymentId || $index) {
+            <tr>
+              <td>
+                <button
+                  type="button"
+                  class="link-button"
+                  [disabled]="!row.paymentId"
+                  (click)="viewPayment(row)"
+                >
+                  {{ rowPaymentNumber(row) }}
+                </button>
+              </td>
+              <td>{{ formatDate(row.date) }}</td>
+              <td>{{ rowBankCashName(row) }}</td>
+              <td class="text-right">{{ formatAmountWithCurrency(row.amount, row.currencycode) }}</td>
+              <td>{{ row.description || '—' }}</td>
+              <td class="text-right">
+                <app-table-row-icon-button
+                  icon="pencil"
+                  ariaLabel="Edit vendor payment"
+                  [disabled]="!row.paymentId"
+                  (action)="viewPayment(row)"
+                />
+              </td>
+            </tr>
+          } @empty {
+            @if (!canAddPayment()) {
+              <tr>
+                <td colspan="6" class="empty-cell">No payments recorded for this invoice.</td>
+              </tr>
+            }
+          }
+
+          @if (canAddPayment()) {
+            <tr class="new-payment-row">
+              <td class="new-payment-number">
+                <label class="switch-row">
+                  <tng-switch
+                    [checked]="autoNumbering()"
+                    (checkedChange)="toggleAutoNumbering(!!$event)"
+                  />
+                  <span>Auto</span>
+                </label>
+                @if (!autoNumbering()) {
+                  <tng-input
+                    ariaLabel="Payment number"
+                    placeholder="Payment number"
+                    [value]="number()"
+                    (valueChange)="number.set($any($event) ?? '')"
+                  />
+                } @else {
+                  <span class="muted-text">Auto Number</span>
+                }
+              </td>
+              <td>
+                <app-fiscal-year-datepicker
+                  inputAriaLabel="Payment date"
+                  [value]="paymentDate()"
+                  [invalid]="submitted() && getPaymentDateError() !== null"
+                  (valueChange)="onPaymentDateChange($event)"
+                />
+              </td>
+              <td>
+                <tng-autocomplete
+                  placeholder="Search bank/cash"
+                  ariaLabel="Bank/Cash account"
+                  [options]="filteredBankCashes()"
+                  [value]="bankCashId()"
+                  [getOptionValue]="bankCashOptionValue"
+                  [getOptionLabel]="bankCashOptionLabel"
+                  [trackBy]="bankCashTrackBy"
+                  (queryChange)="onBankCashQueryChange($event)"
+                  (valueChange)="onBankCashValueChange($event)"
+                />
+              </td>
+              <td>
+                <tng-input
+                  ariaLabel="Payment amount"
+                  type="number"
+                  inputmode="decimal"
+                  min="0.01"
+                  step="0.01"
+                  [value]="amount()"
+                  (valueChange)="amount.set($any($event) ?? '')"
+                />
+              </td>
+              <td>
+                <tng-textarea
+                  ariaLabel="Payment description"
+                  rows="1"
+                  resize="none"
+                  [value]="description()"
+                  (valueChange)="description.set($any($event) ?? '')"
+                />
+              </td>
+              <td class="text-right">
+                <tng-button
+                  type="button"
+                  appearance="solid"
+                  tone="primary"
+                  size="sm"
+                  [disabled]="savingPayment()"
+                  (click)="savePayment()"
+                >
+                  <tng-icon icon="save" aria-hidden="true" />
+                  Save
+                </tng-button>
+              </td>
+            </tr>
+            @if (addPaymentError(); as error) {
+              <tr>
+                <td colspan="6">
+                  <div class="notice notice--danger inline-error">{{ error }}</div>
+                </td>
+              </tr>
+            }
+          } @else if (paymentRows().length > 0) {
+            <tr>
+              <td colspan="6" class="paid-cell">This invoice is paid in full.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </tng-card>
+} @else {
+  <tng-card variant="outline" padding="lg">
+    <div class="notice">Invoice not found.</div>
+  </tng-card>
+}

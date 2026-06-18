@@ -76,13 +76,27 @@
 }
 
 /* ── Utility ────────────────────────────────────────────────────────────────── */
-.text-left   { text-align: left; }
-.text-center { text-align: center; }
-.text-right  { text-align: right; }
+.text-left {
+  text-align: left;
+}
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+}
 
-.p-0  { padding: 0; }
-.px-2 { padding-left: 2px;  padding-right: 2px; }
-.px-4 { padding-left: 4px;  padding-right: 4px; }
+.p-0 {
+  padding: 0;
+}
+.px-2 {
+  padding-left: 2px;
+  padding-right: 2px;
+}
+.px-4 {
+  padding-left: 4px;
+  padding-right: 4px;
+}
 
 /* ── Scroll wrapper ─────────────────────────────────────────────────────────── */
 .si-li-scroll {
@@ -99,7 +113,7 @@
   color: var(--tng-semantic-foreground-primary);
   font-family: 'Roboto', system-ui, sans-serif;
   font-size: 13px;
-  min-width: 100%;
+  min-width: 760px;
   table-layout: fixed;
   width: 100%;
 }
@@ -130,13 +144,28 @@
 }
 
 /* ── Column definitions ─────────────────────────────────────────────────────── */
-.vpmt-inv-col-serial  { width: 4%; }
-.vpmt-inv-col-amount  { width: 22%; }
-.vpmt-inv-col-actions { width: 7%; }
+.vpmt-inv-col-serial {
+  width: 4%;
+}
+.vpmt-inv-col-invoice {
+  width: 39%;
+}
+.vpmt-inv-col-total,
+.vpmt-inv-col-outstanding {
+  width: 16%;
+}
+.vpmt-inv-col-allocation {
+  width: 18%;
+}
+.vpmt-inv-col-actions {
+  width: 7%;
+}
 
 .vpmt-inv-col-serial,
 .vpmt-inv-col-invoice,
-.vpmt-inv-col-amount,
+.vpmt-inv-col-total,
+.vpmt-inv-col-outstanding,
+.vpmt-inv-col-allocation,
 .vpmt-inv-col-actions {
   border-right-color: var(--tng-semantic-border-strong);
 }
@@ -166,18 +195,26 @@
   background: var(--tng-semantic-background-canvas);
 }
 
-:host ::ng-deep .vpmt-inv-col-invoice > tng-autocomplete [data-slot='autocomplete-trigger-container'] {
+:host
+  ::ng-deep
+  .vpmt-inv-col-invoice
+  > tng-autocomplete
+  [data-slot='autocomplete-trigger-container'] {
   border-color: transparent;
   border-radius: 0;
   box-shadow: none;
 }
 
-:host ::ng-deep .vpmt-inv-col-invoice > tng-autocomplete [data-slot='autocomplete-trigger-container']:focus-within {
+:host
+  ::ng-deep
+  .vpmt-inv-col-invoice
+  > tng-autocomplete
+  [data-slot='autocomplete-trigger-container']:focus-within {
   border-bottom-color: var(--tng-semantic-accent-brand, var(--tng-semantic-focus-ring));
 }
 
-/* ── Amount input (flush, borderless inside cell) ───────────────────────────── */
-.vpmt-inv-col-amount > tng-input {
+/* ── Allocation input (flush, borderless inside cell) ───────────────────────── */
+.vpmt-inv-col-allocation > tng-input {
   --tng-input-bg: var(--tng-semantic-background-canvas);
   --tng-input-border: transparent;
   --tng-input-focus-ring: transparent;
@@ -190,23 +227,23 @@
   width: 100%;
 }
 
-:host ::ng-deep .vpmt-inv-col-amount > tng-input [data-slot='input-group'] {
+:host ::ng-deep .vpmt-inv-col-allocation > tng-input [data-slot='input-group'] {
   border-color: transparent;
   border-radius: 0;
   box-shadow: none;
 }
 
-:host ::ng-deep .vpmt-inv-col-amount > tng-input [data-slot='input-group'][data-focused] {
+:host ::ng-deep .vpmt-inv-col-allocation > tng-input [data-slot='input-group'][data-focused] {
   border-bottom-color: var(--tng-semantic-accent-brand, var(--tng-semantic-focus-ring));
 }
 
-:host ::ng-deep .vpmt-inv-col-amount input[type='number'] {
+:host ::ng-deep .vpmt-inv-col-allocation input[type='number'] {
   appearance: textfield;
   -moz-appearance: textfield;
 }
 
-:host ::ng-deep .vpmt-inv-col-amount input[type='number']::-webkit-inner-spin-button,
-:host ::ng-deep .vpmt-inv-col-amount input[type='number']::-webkit-outer-spin-button {
+:host ::ng-deep .vpmt-inv-col-allocation input[type='number']::-webkit-inner-spin-button,
+:host ::ng-deep .vpmt-inv-col-allocation input[type='number']::-webkit-outer-spin-button {
   -webkit-appearance: none;
   appearance: none;
   margin: 0;

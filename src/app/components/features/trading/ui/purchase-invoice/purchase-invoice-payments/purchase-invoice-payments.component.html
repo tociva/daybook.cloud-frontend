@@ -1,0 +1,13 @@
+<main class="trading-page">
+  <app-page-heading
+    eyebrow="Trading"
+    title="Purchase Invoice Payments"
+    description="View and add vendor payments linked to this purchase invoice."
+  >
+    <app-burl-back-button label="Back" />
+  </app-page-heading>
+
+  @if (invoiceId()) {
+    <app-purchase-invoice-payments-panel [invoiceId]="invoiceId()" />
+  }
+</main>

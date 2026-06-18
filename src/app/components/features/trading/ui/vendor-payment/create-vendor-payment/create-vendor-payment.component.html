@@ -1,14 +1,13 @@
 <main class="trading-page">
   <section class="setup-layout" aria-labelledby="vpmt-setup-title">
-
     <!-- ══ Form ═══════════════════════════════════════════════════════════════ -->
     <form class="payment-form" novalidate (submit)="submitForm($event)">
-
       <!-- ── Basic Details ───────────────────────────────────────────────── -->
       <tng-card variant="outline" padding="lg">
         <tng-card-header>
           <tng-card-title>Basic Details</tng-card-title>
-          <tng-card-description>Date, vendor, amount and bank/cash account.
+          <tng-card-description
+            >Date, vendor, amount and bank/cash account.
             <div class="field field--compact">
               <label class="toggle-row">
                 <tng-switch
@@ -17,7 +16,8 @@
                 />
                 Auto numbering
               </label>
-            </div></tng-card-description>
+            </div></tng-card-description
+          >
         </tng-card-header>
 
         <tng-card-content>
@@ -173,6 +173,11 @@
         [rows]="invoiceRows()"
         (rowsChange)="invoiceRows.set($event)"
       />
+      @if (invoiceAllocationError()) {
+        <div class="notice notice--danger invoice-allocation-error" role="alert">
+          {{ invoiceAllocationError() }}
+        </div>
+      }
 
       <!-- ── Form actions ────────────────────────────────────────────────── -->
       <div class="form-actions">
@@ -184,7 +189,6 @@
           (clicked)="submitForm($event)"
         />
       </div>
-
     </form>
 
     <!-- ══ Right: Stepper ═════════════════════════════════════════════════════ -->
@@ -193,8 +197,8 @@
         <p class="eyebrow">Vendor Payment</p>
         <h1 id="vpmt-setup-title">{{ title() }}</h1>
         <p>
-          Record a payment made to a vendor. Link to the relevant purchase invoices to keep
-          your books accurate.
+          Record a payment made to a vendor. Link to the relevant purchase invoices to keep your
+          books accurate.
         </p>
         <tng-stepper
           class="setup-stepper"
@@ -205,6 +209,5 @@
         />
       </div>
     </aside>
-
   </section>
 </main>

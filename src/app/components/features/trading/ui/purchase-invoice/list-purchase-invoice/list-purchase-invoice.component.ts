@@ -34,6 +34,8 @@ import { PurchaseInvoiceBulkUploadValidationService } from './purchase-invoice-b
 import { validatePurchaseInvoiceBulkUploadPayload } from './purchase-invoice-bulk-upload.validator';
 import type { BulkUploadPreviewConfig } from '../../../../../../shared/bulk-upload/bulk-upload-preview-config';
 
+const DEFAULT_PURCHASE_INVOICE_ORDER = ['date ASC'] as const;
+
 @Component({
   selector: 'app-list-purchase-invoice',
   standalone: true,
@@ -108,7 +110,7 @@ export class ListPurchaseInvoiceComponent {
     },
     { id: 'payments', label: 'Payments', align: 'end', headerAlign: 'end', width: '10rem' },
     { id: 'journals', label: 'Journals', width: '12rem' },
-    { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '10rem' },
+    { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '12rem' },
   ];
 
   protected readonly filterFields: readonly CrudFilterField[] = [
@@ -188,6 +190,7 @@ export class ListPurchaseInvoiceComponent {
   private async loadPurchaseInvoicesWithJournals(filter: Lb4ListQuery): Promise<void> {
     await this.purchaseInvoiceStore.loadPurchaseInvoices({
       ...filter,
+      order: filter.order?.length ? filter.order : DEFAULT_PURCHASE_INVOICE_ORDER,
       includes: ['vendor', 'payments'],
     });
     if (this.purchaseInvoiceStore.error()) {
@@ -271,11 +274,10 @@ export class ListPurchaseInvoiceComponent {
     });
   }
 
-  /** Navigate to the vendor payment that covers this invoice (first payment). */
-  protected viewPaymentForInvoice(item: PurchaseInvoice): void {
-    const paymentId = item.payments?.[0]?.vendorpaymentid;
-    if (paymentId) {
-      void this.router.navigate(['/app/trading/vendor-payment', paymentId], {
+  /** Navigate to all vendor payments linked to this invoice. */
+  protected viewPaymentsForInvoice(item: PurchaseInvoice): void {
+    if (item.id) {
+      void this.router.navigate(['/app/trading/purchase-invoice', item.id, 'payments'], {
         queryParams: { burl: this.router.url },
       });
     }

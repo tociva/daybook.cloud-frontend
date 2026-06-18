@@ -87,6 +87,12 @@
         <app-pi-invoice-details />
       </aside>
     </div>
+
+    @if (mode() === 'edit' && id(); as purchaseInvoiceId) {
+      <section class="invoice-payments-panel" aria-label="Purchase invoice payments">
+        <app-purchase-invoice-payments-panel [invoiceId]="purchaseInvoiceId" />
+      </section>
+    }
   }
 
   <!-- ── Footer ───────────────────────────────────────────────────────── -->
