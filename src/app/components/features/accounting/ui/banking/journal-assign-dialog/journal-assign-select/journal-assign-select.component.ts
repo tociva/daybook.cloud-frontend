@@ -36,8 +36,8 @@ import type { Lb4Where } from '../../../../../../../shared/crud/lb4-query';
 import { JournalAssignLedgerNamesService } from '../shared/journal-assign-ledger-names';
 import {
   collectLedgerIds,
+  defaultMatchAmountForJournalSelection,
   formatAmount,
-  formatAmountForInput,
   parseMatchedAmount,
   toAssignJournalRows,
 } from '../shared/journal-assign-table.util';
@@ -326,8 +326,14 @@ export class JournalAssignSelectComponent {
 
     if (checked) {
       nextSelected.add(journalId);
-      if (!parseMatchedAmount(nextAmounts.get(journalId) ?? '') && defaultAmount > 0) {
-        nextAmounts.set(journalId, formatAmountForInput(defaultAmount));
+      const selectedDefaultAmount = defaultMatchAmountForJournalSelection(
+        nextAmounts.get(journalId) ?? '',
+        defaultAmount,
+        this.remainingMatchAmount(),
+        this.selectedMatchedTotal(),
+      );
+      if (selectedDefaultAmount) {
+        nextAmounts.set(journalId, selectedDefaultAmount);
       }
     } else {
       nextSelected.delete(journalId);

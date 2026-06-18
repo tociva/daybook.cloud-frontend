@@ -1,4 +1,7 @@
-import { formatAmountForInput, roundMoney } from '../../../../data/bank-txn';
+import {
+  formatAmountForInput,
+  roundMoney,
+} from '../../../../data/bank-txn/bank-txn-journal-match.util';
 import type { Journal, JournalEntry } from '../../../../data/journal';
 import type { AssignJournalRowCandidate, AssignJournalTableRow } from './journal-assign.types';
 
@@ -10,6 +13,21 @@ export function parseMatchedAmount(raw: string): number | null {
   const value = Number.parseFloat(trimmed);
   if (!Number.isFinite(value) || value <= 0) return null;
   return value;
+}
+
+export function defaultMatchAmountForJournalSelection(
+  currentRawAmount: string,
+  journalAmount: number,
+  remainingAmount: number,
+  selectedMatchedTotal: number,
+): string | null {
+  if (parseMatchedAmount(currentRawAmount) !== null) return null;
+
+  const availableAmount = roundMoney(Math.max(remainingAmount - selectedMatchedTotal, 0));
+  const candidateAmount = roundMoney(Math.max(journalAmount, 0));
+  const defaultAmount = roundMoney(Math.min(candidateAmount, availableAmount));
+
+  return defaultAmount > 0 ? formatAmountForInput(defaultAmount) : null;
 }
 
 export function formatAmount(value: number): string {
