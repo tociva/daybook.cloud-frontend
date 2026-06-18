@@ -30,6 +30,7 @@ import {
 import { TaxStore } from '../../../data/tax';
 import { TaxGroupStore } from '../../../data/tax-group';
 import { SaleInvoiceDraftStore, toNum } from './sale-invoice-draft.store';
+import { SaleInvoiceReceiptsPanelComponent } from '../sale-invoice-receipts/sale-invoice-receipts-panel.component';
 import { SiCustomerComponent } from './si-customer/si-customer.component';
 import { SiInvoiceDetailsComponent } from './si-invoice-details/si-invoice-details.component';
 import { SiLineItemsComponent } from './si-line-items/si-line-items.component';
@@ -44,6 +45,7 @@ import { SiLineItemsComponent } from './si-line-items/si-line-items.component';
     TngButtonComponent,
     TngIcon,
     TngFileUploadDirective,
+    SaleInvoiceReceiptsPanelComponent,
     SiCustomerComponent,
     SiLineItemsComponent,
     SiInvoiceDetailsComponent,

@@ -16,6 +16,13 @@ export const saleInvoiceRoutes: Routes = [
       ),
   },
   {
+    path: ':id/receipts',
+    loadComponent: () =>
+      import('./sale-invoice-receipts/sale-invoice-receipts.component').then(
+        (m) => m.SaleInvoiceReceiptsComponent,
+      ),
+  },
+  {
     path: ':id',
     loadComponent: () =>
       import('./view-sale-invoice/view-sale-invoice.component').then(

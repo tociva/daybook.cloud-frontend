@@ -72,6 +72,11 @@
   display: flex;
 }
 
+.invoice-receipts-panel {
+  display: grid;
+  gap: 1rem;
+}
+
 .invoice-drop-overlay__inner {
   align-items: center;
   background: color-mix(in srgb, var(--tng-semantic-accent-brand) 10%, var(--tng-semantic-surface-base));

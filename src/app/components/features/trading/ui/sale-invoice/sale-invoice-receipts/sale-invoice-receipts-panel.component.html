@@ -1,0 +1,201 @@
+@if (invoiceError()) {
+  <div class="notice notice--danger">{{ invoiceError() }}</div>
+}
+
+@if (invoiceLoading() && !invoice()) {
+  <tng-card variant="outline" padding="lg">
+    <div class="loading-row">
+      <tng-progress-spinner
+        [indeterminate]="true"
+        [size]="20"
+        [strokeWidth]="2"
+        ariaLabel="Loading sale invoice receipts"
+      />
+      <span>Loading receipts...</span>
+    </div>
+  </tng-card>
+} @else if (invoice(); as inv) {
+  <tng-card variant="outline" padding="lg">
+    <section class="invoice-summary" aria-label="Sale invoice summary">
+      <div class="summary-item">
+        <span class="summary-label">Invoice</span>
+        <strong>{{ inv.number || '—' }}</strong>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Customer</span>
+        <strong>{{ inv.customer?.name || inv.customerid || '—' }}</strong>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Grand Total</span>
+        <strong>{{ formatAmountWithCurrency(inv.grandtotal, inv.currencycode) }}</strong>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Received</span>
+        <strong>{{ formatAmountWithCurrency(receivedTotal(), inv.currencycode) }}</strong>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Outstanding</span>
+        <strong>{{ formatAmountWithCurrency(outstandingBalance(), inv.currencycode) }}</strong>
+      </div>
+    </section>
+  </tng-card>
+
+  <tng-card variant="outline" padding="lg">
+    <div class="receipts-card-header">
+      <h2>Receipts</h2>
+      @if (fallbackReceiptsLoading()) {
+        <span class="loading-inline">
+          <tng-progress-spinner
+            [indeterminate]="true"
+            [size]="16"
+            [strokeWidth]="2"
+            ariaLabel="Loading receipt details"
+          />
+          Loading receipt details
+        </span>
+      }
+    </div>
+
+    <div class="receipts-table-scroll">
+      <table class="receipts-table" aria-label="Sale invoice receipts">
+        <thead>
+          <tr>
+            <th class="col-number">Receipt Number</th>
+            <th class="col-date">Date</th>
+            <th class="col-account">Bank/Cash</th>
+            <th class="col-amount text-right">Amount</th>
+            <th class="col-description">Description</th>
+            <th class="col-actions text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of receiptRows(); track row.allocationId || row.receiptId || $index) {
+            <tr>
+              <td>
+                <button
+                  type="button"
+                  class="link-button"
+                  [disabled]="!row.receiptId"
+                  (click)="viewReceipt(row)"
+                >
+                  {{ rowReceiptNumber(row) }}
+                </button>
+              </td>
+              <td>{{ formatDate(row.date) }}</td>
+              <td>{{ rowBankCashName(row) }}</td>
+              <td class="text-right">{{ formatAmountWithCurrency(row.amount, row.currencycode) }}</td>
+              <td>{{ row.description || '—' }}</td>
+              <td class="text-right">
+                <app-table-row-icon-button
+                  icon="pencil"
+                  ariaLabel="Edit customer receipt"
+                  [disabled]="!row.receiptId"
+                  (action)="viewReceipt(row)"
+                />
+              </td>
+            </tr>
+          } @empty {
+            @if (!canAddReceipt()) {
+              <tr>
+                <td colspan="6" class="empty-cell">No receipts recorded for this invoice.</td>
+              </tr>
+            }
+          }
+
+          @if (canAddReceipt()) {
+            <tr class="new-receipt-row">
+              <td class="new-receipt-number">
+                <label class="switch-row">
+                  <tng-switch
+                    [checked]="autoNumbering()"
+                    (checkedChange)="toggleAutoNumbering(!!$event)"
+                  />
+                  <span>Auto</span>
+                </label>
+                @if (!autoNumbering()) {
+                  <tng-input
+                    ariaLabel="Receipt number"
+                    placeholder="Receipt number"
+                    [value]="number()"
+                    (valueChange)="number.set($any($event) ?? '')"
+                  />
+                } @else {
+                  <span class="muted-text">Auto Number</span>
+                }
+              </td>
+              <td>
+                <app-fiscal-year-datepicker
+                  inputAriaLabel="Receipt date"
+                  [value]="receiptDate()"
+                  [invalid]="submitted() && getReceiptDateError() !== null"
+                  (valueChange)="onReceiptDateChange($event)"
+                />
+              </td>
+              <td>
+                <tng-autocomplete
+                  placeholder="Search bank/cash"
+                  ariaLabel="Bank/Cash account"
+                  [options]="filteredBankCashes()"
+                  [value]="bankCashId()"
+                  [getOptionValue]="bankCashOptionValue"
+                  [getOptionLabel]="bankCashOptionLabel"
+                  [trackBy]="bankCashTrackBy"
+                  (queryChange)="onBankCashQueryChange($event)"
+                  (valueChange)="onBankCashValueChange($event)"
+                />
+              </td>
+              <td>
+                <tng-input
+                  ariaLabel="Receipt amount"
+                  type="number"
+                  inputmode="decimal"
+                  min="0.01"
+                  step="0.01"
+                  [value]="amount()"
+                  (valueChange)="amount.set($any($event) ?? '')"
+                />
+              </td>
+              <td>
+                <tng-textarea
+                  ariaLabel="Receipt description"
+                  rows="1"
+                  resize="none"
+                  [value]="description()"
+                  (valueChange)="description.set($any($event) ?? '')"
+                />
+              </td>
+              <td class="text-right">
+                <tng-button
+                  type="button"
+                  appearance="solid"
+                  tone="primary"
+                  size="sm"
+                  [disabled]="savingReceipt()"
+                  (click)="saveReceipt()"
+                >
+                  <tng-icon icon="save" aria-hidden="true" />
+                  Save
+                </tng-button>
+              </td>
+            </tr>
+            @if (addReceiptError(); as error) {
+              <tr>
+                <td colspan="6">
+                  <div class="notice notice--danger inline-error">{{ error }}</div>
+                </td>
+              </tr>
+            }
+          } @else if (receiptRows().length > 0) {
+            <tr>
+              <td colspan="6" class="paid-cell">This invoice is paid in full.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </tng-card>
+} @else {
+  <tng-card variant="outline" padding="lg">
+    <div class="notice">Invoice not found.</div>
+  </tng-card>
+}

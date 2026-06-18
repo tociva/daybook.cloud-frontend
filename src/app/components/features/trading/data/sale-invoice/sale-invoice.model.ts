@@ -1,4 +1,5 @@
 import type { Lb4Include, Lb4ListQuery } from '../../../../../shared/crud';
+import type { BankCash } from '../bank-cash/bank-cash.model';
 import type { Customer } from '../customer/customer.model';
 import type { StoredDocument } from '../invoice-document';
 import type { Item } from '../item/item.model';
@@ -139,6 +140,18 @@ export type SaleInvoiceReceiptLink = Readonly<{
   amount: number;
   customerreceiptid?: string;
   saleinvoiceid?: string;
+  customerreceipt?: SaleInvoiceReceiptCustomerReceipt;
+}>;
+
+export type SaleInvoiceReceiptCustomerReceipt = Readonly<{
+  id?: string;
+  number?: string;
+  date?: string;
+  amount?: number;
+  currencycode?: string;
+  description?: string;
+  bcashid?: string;
+  bcash?: BankCash;
 }>;
 
 // ── Read model (includes embedded relations) ─────────────────────────────────

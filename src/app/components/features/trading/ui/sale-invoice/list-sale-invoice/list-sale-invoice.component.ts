@@ -112,7 +112,7 @@ export class ListSaleInvoiceComponent {
     },
     { id: 'received', label: 'Received', align: 'end', headerAlign: 'end', width: '10rem' },
     { id: 'journals', label: 'Journals', width: '12rem' },
-    { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '10rem' },
+    { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '12rem' },
   ];
 
   protected readonly filterFields: readonly CrudFilterField[] = [
@@ -281,11 +281,10 @@ export class ListSaleInvoiceComponent {
     });
   }
 
-  /** Navigate to the customer receipt that covers this invoice (first receipt). */
-  protected viewReceiptForInvoice(item: SaleInvoice): void {
-    const receiptId = item.receipts?.[0]?.customerreceiptid;
-    if (receiptId) {
-      void this.router.navigate(['/app/trading/customer-receipt', receiptId], {
+  /** Navigate to all customer receipts linked to this invoice. */
+  protected viewReceiptsForInvoice(item: SaleInvoice): void {
+    if (item.id) {
+      void this.router.navigate(['/app/trading/sale-invoice', item.id, 'receipts'], {
         queryParams: { burl: this.router.url },
       });
     }

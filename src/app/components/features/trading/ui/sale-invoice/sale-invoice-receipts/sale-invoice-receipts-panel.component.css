@@ -1,0 +1,148 @@
+.notice {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  color: var(--tng-semantic-foreground-primary);
+  padding: 1rem;
+}
+
+.notice--danger {
+  border-color: var(--tng-semantic-accent-danger);
+}
+
+.loading-row,
+.loading-inline {
+  align-items: center;
+  color: var(--tng-semantic-foreground-muted);
+  display: inline-flex;
+  gap: 0.5rem;
+}
+
+.invoice-summary {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+}
+
+.summary-item {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.summary-label,
+.muted-text {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.8rem;
+}
+
+.receipts-card-header {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.receipts-card-header h2 {
+  font-size: 1rem;
+  line-height: 1.25;
+  margin: 0;
+}
+
+.receipts-table-scroll {
+  overflow-x: auto;
+}
+
+.receipts-table {
+  border-collapse: collapse;
+  min-width: 64rem;
+  width: 100%;
+}
+
+.receipts-table th,
+.receipts-table td {
+  border-bottom: 1px solid var(--tng-semantic-border-subtle);
+  padding: 0.75rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.receipts-table th {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.receipts-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.col-number {
+  width: 12rem;
+}
+
+.col-date {
+  width: 12rem;
+}
+
+.col-account {
+  width: 14rem;
+}
+
+.col-amount {
+  width: 10rem;
+}
+
+.col-description {
+  width: 16rem;
+}
+
+.col-actions {
+  width: 8rem;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.link-button {
+  background: transparent;
+  border: 0;
+  color: var(--tng-semantic-accent-brand);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  padding: 0;
+}
+
+.link-button:disabled {
+  color: var(--tng-semantic-foreground-muted);
+  cursor: default;
+}
+
+.empty-cell,
+.paid-cell {
+  color: var(--tng-semantic-foreground-muted);
+  text-align: center;
+}
+
+.new-receipt-row td {
+  background: var(--tng-semantic-surface-subtle, transparent);
+}
+
+.new-receipt-number {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.switch-row {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.45rem;
+  min-height: 2rem;
+}
+
+.inline-error {
+  margin: 0.25rem 0;
+  padding: 0.75rem;
+}

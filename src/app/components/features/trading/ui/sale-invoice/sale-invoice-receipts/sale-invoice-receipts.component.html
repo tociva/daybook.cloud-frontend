@@ -1,0 +1,13 @@
+<main class="trading-page">
+  <app-page-heading
+    eyebrow="Trading"
+    title="Sale Invoice Receipts"
+    description="Review and add receipts for this sale invoice."
+  >
+    <app-burl-back-button label="Back" />
+  </app-page-heading>
+
+  @if (invoiceId()) {
+    <app-sale-invoice-receipts-panel [invoiceId]="invoiceId()" />
+  }
+</main>
