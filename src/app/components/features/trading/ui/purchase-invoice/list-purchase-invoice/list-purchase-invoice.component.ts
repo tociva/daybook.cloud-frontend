@@ -33,6 +33,11 @@ import { PURCHASE_INVOICE_BULK_UPLOAD_CONFIG } from './purchase-invoice-bulk-upl
 import { PurchaseInvoiceBulkUploadValidationService } from './purchase-invoice-bulk-upload-validation.service';
 import { validatePurchaseInvoiceBulkUploadPayload } from './purchase-invoice-bulk-upload.validator';
 import type { BulkUploadPreviewConfig } from '../../../../../../shared/bulk-upload/bulk-upload-preview-config';
+import {
+  isPurchaseInvoiceOverdue,
+  isPurchaseInvoicePaid,
+  totalPurchaseInvoicePaid,
+} from './list-purchase-invoice-status.util';
 
 const DEFAULT_PURCHASE_INVOICE_ORDER = ['date ASC'] as const;
 
@@ -83,10 +88,8 @@ export class ListPurchaseInvoiceComponent {
     new Map(),
   );
 
-  protected readonly vendorOptionValue = (option: unknown): string =>
-    (option as Vendor).id ?? '';
-  protected readonly vendorOptionLabel = (option: unknown): string =>
-    (option as Vendor).name ?? '';
+  protected readonly vendorOptionValue = (option: unknown): string => (option as Vendor).id ?? '';
+  protected readonly vendorOptionLabel = (option: unknown): string => (option as Vendor).name ?? '';
   protected readonly vendorTrackBy = (_index: number, option: unknown): unknown => {
     const vendor = option as Vendor;
     return vendor.id ?? vendor.name;
@@ -166,20 +169,15 @@ export class ListPurchaseInvoiceComponent {
 
   /** Sum of payment amounts linked to this invoice. */
   protected totalPaid(row: PurchaseInvoice): number | undefined {
-    if (!row.payments?.length) return undefined;
-    return row.payments.reduce((sum, p) => sum + p.amount, 0);
+    return totalPurchaseInvoicePaid(row);
   }
 
   protected isPaid(row: PurchaseInvoice): boolean {
-    const grandtotal = row.grandtotal ?? 0;
-    if (grandtotal <= 0) return false;
-    const paid = row.payments?.reduce((sum, p) => sum + p.amount, 0) ?? 0;
-    return paid >= grandtotal;
+    return isPurchaseInvoicePaid(row);
   }
 
   protected isOverdue(row: PurchaseInvoice): boolean {
-    if (this.isPaid(row) || !row.duedate) return false;
-    return new Date() > new Date(row.duedate);
+    return isPurchaseInvoiceOverdue(row);
   }
 
   constructor() {
@@ -191,7 +189,7 @@ export class ListPurchaseInvoiceComponent {
     await this.purchaseInvoiceStore.loadPurchaseInvoices({
       ...filter,
       order: filter.order?.length ? filter.order : DEFAULT_PURCHASE_INVOICE_ORDER,
-      includes: ['vendor', 'payments'],
+      includes: ['vendor', 'payments', 'currency'],
     });
     if (this.purchaseInvoiceStore.error()) {
       this.journalsByInvoiceId.set(new Map());

@@ -30,14 +30,26 @@
     }
 
     <div class="table-stack">
-      @if (!purchaseInvoiceStore.isLoading() && !hasError() && crudQuery.shouldShowEmptyState(purchaseInvoiceStore.items().length, purchaseInvoiceStore.count())) {
+      @if (
+        !purchaseInvoiceStore.isLoading() &&
+        !hasError() &&
+        crudQuery.shouldShowEmptyState(
+          purchaseInvoiceStore.items().length,
+          purchaseInvoiceStore.count()
+        )
+      ) {
         @if (crudQuery.hasActiveFilter()) {
           <app-empty-state
             icon="searchX"
             title="No purchase invoices match your filter"
             description="Try adjusting or clearing your filter to find what you're looking for."
           >
-            <tng-button type="button" appearance="outline" tone="neutral" (click)="crudQuery.clearFilter()">
+            <tng-button
+              type="button"
+              appearance="outline"
+              tone="neutral"
+              (click)="crudQuery.clearFilter()"
+            >
               Clear filter
             </tng-button>
           </app-empty-state>
@@ -47,150 +59,158 @@
             title="No purchase invoices yet"
             description="Get started by creating your first purchase invoice."
           >
-            <tng-button type="button" appearance="solid" tone="primary" (click)="createPurchaseInvoice()">
+            <tng-button
+              type="button"
+              appearance="solid"
+              tone="primary"
+              (click)="createPurchaseInvoice()"
+            >
               <tng-icon icon="plus" aria-hidden="true" />
               New purchase invoice
             </tng-button>
           </app-empty-state>
         }
       } @else {
-      <tng-table
-        ariaLabel="Purchase invoices"
-        density="comfortable"
-        [columns]="columns"
-        [items]="purchaseInvoiceStore.items()"
-        [loading]="purchaseInvoiceStore.isLoading()"
-        [error]="hasError()"
-        [sortActive]="crudQuery.sortActive()"
-        [sortDirection]="crudQuery.sortDirection()"
-        (sortChange)="crudQuery.applySort($event)"
-      >
-        <ng-template tngTableCellTemplate="number" let-row="row">
-          <div class="number-cell">
-            <button type="button" class="link-button" (click)="viewPurchaseInvoice(row)">
-              {{ row.number || '—' }}
-            </button>
-            @if (isPaid(row)) {
-              <span class="status-badge status-badge--paid" title="Paid in full">
-                <tng-icon icon="check" aria-hidden="true" />
-              </span>
-            } @else if (isOverdue(row)) {
-              <span class="status-badge status-badge--overdue" title="Overdue">!</span>
-            }
-          </div>
-        </ng-template>
-
-        <ng-template tngTableCellTemplate="vendor" let-row="row">
-          {{ row.vendor?.name || '—' }}
-        </ng-template>
-
-        <ng-template tngTableCellTemplate="date" let-row="row">
-          {{ formatDate(row.date) }}
-        </ng-template>
-
-        <ng-template tngTableCellTemplate="duedate" let-row="row">
-          {{ formatDate(row.duedate) }}
-        </ng-template>
-
-        <ng-template tngTableCellTemplate="itemtotal" let-row="row">
-          {{ formatAmount(row.itemtotal) }}
-        </ng-template>
-
-        <ng-template tngTableCellTemplate="discount" let-row="row">
-          {{ formatOptionalAmount(row.discount) }}
-        </ng-template>
-
-        <ng-template tngTableCellTemplate="tax" let-row="row">
-          {{ formatOptionalAmount(row.tax) }}
-        </ng-template>
-
-        <ng-template tngTableCellTemplate="grandtotal" let-row="row">
-          {{ formatAmountWithCurrency(row.grandtotal, row.currencycode) }}
-        </ng-template>
-
-        <ng-template tngTableCellTemplate="payments" let-row="row">
-          @if (totalPaid(row) === undefined) {
-            <button
-              type="button"
-              class="link-button link-button--muted"
-              (click)="createPaymentForInvoice(row)"
-            >
-              Create Payment
-            </button>
-          } @else if (isPaid(row)) {
-            <button type="button" class="link-button" (click)="viewPaymentsForInvoice(row)">
-              {{ formatAmountWithCurrency(totalPaid(row), row.currencycode) }}
-            </button>
-          } @else {
-            {{ formatAmountWithCurrency(totalPaid(row), row.currencycode) }}
-          }
-        </ng-template>
-
-        <ng-template tngTableCellTemplate="journals" let-row="row">
-          @if (journalsLoading()) {
-            <tng-progress-spinner
-              class="journal-cell-spinner"
-              [indeterminate]="true"
-              [size]="16"
-              [strokeWidth]="2"
-              ariaLabel="Loading journals"
-            />
-          } @else if (hasJournals(row)) {
-            <span class="journal-links">
-              @for (journal of linkedJournals(row); track journal.id; let last = $last) {
-                <button type="button" class="link-button" (click)="viewJournal(journal)">
-                  {{ journal.number }}
-                </button>@if (!last) {<span>, </span>}
+        <tng-table
+          ariaLabel="Purchase invoices"
+          density="comfortable"
+          [columns]="columns"
+          [items]="purchaseInvoiceStore.items()"
+          [loading]="purchaseInvoiceStore.isLoading()"
+          [error]="hasError()"
+          [sortActive]="crudQuery.sortActive()"
+          [sortDirection]="crudQuery.sortDirection()"
+          (sortChange)="crudQuery.applySort($event)"
+        >
+          <ng-template tngTableCellTemplate="number" let-row="row">
+            <div class="number-cell">
+              <button type="button" class="link-button" (click)="viewPurchaseInvoice(row)">
+                {{ row.number || '—' }}
+              </button>
+              @if (isPaid(row)) {
+                <span class="status-badge status-badge--paid" title="Paid in full">
+                  <tng-icon icon="check" aria-hidden="true" />
+                </span>
+              } @else if (isOverdue(row)) {
+                <span class="status-badge status-badge--overdue" title="Overdue">!</span>
               }
-            </span>
-          } @else {
-            <button
-              type="button"
-              class="link-button"
-              [disabled]="generatingJournalInvoiceId() === row.id"
-              (click)="generateJournal(row)"
-            >
-              Generate
-            </button>
-          }
-        </ng-template>
+            </div>
+          </ng-template>
 
-        <ng-template tngTableCellTemplate="actions" let-row="row">
-          <div class="row-actions">
-            <app-table-row-icon-button
-              icon="eye"
-              ariaLabel="View purchase invoice"
-              (action)="viewPurchaseInvoice(row)"
-            />
-            <app-table-row-icon-button
-              icon="creditCard"
-              ariaLabel="View purchase invoice payments"
-              (action)="viewPaymentsForInvoice(row)"
-            />
-            <app-table-row-icon-button
-              icon="pencil"
-              ariaLabel="Edit purchase invoice"
-              (action)="editPurchaseInvoice(row)"
-            />
-            <app-table-row-icon-button
-              icon="trash2"
-              ariaLabel="Delete purchase invoice"
-              tone="danger"
-              (action)="deletePurchaseInvoice(row)"
-            />
-          </div>
-        </ng-template>
-      </tng-table>
+          <ng-template tngTableCellTemplate="vendor" let-row="row">
+            {{ row.vendor?.name || '—' }}
+          </ng-template>
 
-      <div class="table-footer">
-        <app-crud-paginator
-          ariaLabel="Purchase invoice pagination"
-          [filter]="crudQuery.filter()"
-          [totalItems]="purchaseInvoiceStore.count()"
-          [pageSizeOptions]="crudQuery.pageSizeOptions()"
-          syncUrl
-        />
-      </div>
+          <ng-template tngTableCellTemplate="date" let-row="row">
+            {{ formatDate(row.date) }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="duedate" let-row="row">
+            {{ formatDate(row.duedate) }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="itemtotal" let-row="row">
+            {{ formatAmount(row.itemtotal) }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="discount" let-row="row">
+            {{ formatOptionalAmount(row.discount) }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="tax" let-row="row">
+            {{ formatOptionalAmount(row.tax) }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="grandtotal" let-row="row">
+            {{ formatAmountWithCurrency(row.grandtotal, row.currencycode, row.currency) }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="payments" let-row="row">
+            @if (totalPaid(row) === undefined) {
+              <button
+                type="button"
+                class="link-button link-button--muted"
+                (click)="createPaymentForInvoice(row)"
+              >
+                Create Payment
+              </button>
+            } @else if (isPaid(row)) {
+              <button type="button" class="link-button" (click)="viewPaymentsForInvoice(row)">
+                {{ formatAmountWithCurrency(totalPaid(row), row.currencycode, row.currency) }}
+              </button>
+            } @else {
+              {{ formatAmountWithCurrency(totalPaid(row), row.currencycode, row.currency) }}
+            }
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="journals" let-row="row">
+            @if (journalsLoading()) {
+              <tng-progress-spinner
+                class="journal-cell-spinner"
+                [indeterminate]="true"
+                [size]="16"
+                [strokeWidth]="2"
+                ariaLabel="Loading journals"
+              />
+            } @else if (hasJournals(row)) {
+              <span class="journal-links">
+                @for (journal of linkedJournals(row); track journal.id; let last = $last) {
+                  <button type="button" class="link-button" (click)="viewJournal(journal)">
+                    {{ journal.number }}
+                  </button>
+                  @if (!last) {
+                    <span>, </span>
+                  }
+                }
+              </span>
+            } @else {
+              <button
+                type="button"
+                class="link-button"
+                [disabled]="generatingJournalInvoiceId() === row.id"
+                (click)="generateJournal(row)"
+              >
+                Generate
+              </button>
+            }
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="actions" let-row="row">
+            <div class="row-actions">
+              <app-table-row-icon-button
+                icon="eye"
+                ariaLabel="View purchase invoice"
+                (action)="viewPurchaseInvoice(row)"
+              />
+              <app-table-row-icon-button
+                icon="creditCard"
+                ariaLabel="View purchase invoice payments"
+                (action)="viewPaymentsForInvoice(row)"
+              />
+              <app-table-row-icon-button
+                icon="pencil"
+                ariaLabel="Edit purchase invoice"
+                (action)="editPurchaseInvoice(row)"
+              />
+              <app-table-row-icon-button
+                icon="trash2"
+                ariaLabel="Delete purchase invoice"
+                tone="danger"
+                (action)="deletePurchaseInvoice(row)"
+              />
+            </div>
+          </ng-template>
+        </tng-table>
+
+        <div class="table-footer">
+          <app-crud-paginator
+            ariaLabel="Purchase invoice pagination"
+            [filter]="crudQuery.filter()"
+            [totalItems]="purchaseInvoiceStore.count()"
+            [pageSizeOptions]="crudQuery.pageSizeOptions()"
+            syncUrl
+          />
+        </div>
       }
     </div>
   </tng-card>

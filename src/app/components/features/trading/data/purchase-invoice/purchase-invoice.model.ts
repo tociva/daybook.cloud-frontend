@@ -152,7 +152,7 @@ export type PurchaseInvoiceCurrency = Readonly<{
   code: string;
   name?: string;
   symbol?: string;
-  minorunit?: number;
+  minorunit?: number | null;
 }>;
 
 export type PurchaseInvoice = Readonly<{

@@ -16,7 +16,10 @@ import { FiscalYearDatepickerComponent } from '../../../../../../shared/fiscal-y
 import { FiscalYearDateRangeService } from '../../../../../../shared/fiscal-year-date-range-picker';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
-import { formatAmountWithCurrency } from '../../../../../../shared/format/currency';
+import {
+  formatAmountForCurrency,
+  formatAmountWithCurrency,
+} from '../../../../../../shared/format/currency';
 import {
   DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS,
   DEFAULT_NODE_DATE_FORMAT,
@@ -308,7 +311,15 @@ export class PurchaseInvoicePaymentsPanelComponent {
     this.autoNumbering.set(true);
     this.number.set('Auto Number');
     this.paymentDate.set(this.readRememberedPaymentDate() ?? this.defaultPaymentDate());
-    this.amount.set(outstanding > 0 ? outstanding.toFixed(2) : '');
+    this.amount.set(
+      outstanding > 0
+        ? formatAmountForCurrency(
+            outstanding,
+            invoice.currencycode ?? invoice.currency?.code,
+            invoice.currency,
+          )
+        : '',
+    );
     this.description.set('');
     this.selectedBankCash.set(null);
     this.bankCashId.set('');

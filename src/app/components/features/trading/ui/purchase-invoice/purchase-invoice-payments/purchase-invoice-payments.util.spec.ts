@@ -117,6 +117,38 @@ describe('purchase invoice payments helpers', () => {
     expect(calculatePurchaseInvoiceOutstanding(source)).toBe(649.54);
   });
 
+  it('treats the reported floating-point INR total as fully paid', () => {
+    const source = invoice({
+      currency: { code: 'INR', minorunit: 2 },
+      grandtotal: 1585.68,
+      payments: [
+        { amount: 1343.8, vendorpaymentid: 'payment-1' },
+        { amount: 241.88, vendorpaymentid: 'payment-2' },
+      ],
+    });
+
+    expect(calculatePurchaseInvoicePaidTotal(source)).toBe(1585.68);
+    expect(calculatePurchaseInvoiceOutstanding(source)).toBe(0);
+  });
+
+  it('uses the purchase invoice currency minor unit for totals and validation', () => {
+    const source = invoice({
+      currencycode: 'JPY',
+      currency: { code: 'JPY', minorunit: 0 },
+      grandtotal: 1000.4,
+      payments: [
+        { amount: 500.4, vendorpaymentid: 'payment-1' },
+        { amount: 499.6, vendorpaymentid: 'payment-2' },
+      ],
+    });
+
+    expect(calculatePurchaseInvoicePaidTotal(source)).toBe(1000);
+    expect(calculatePurchaseInvoiceOutstanding(source)).toBe(0);
+    expect(getPurchaseInvoicePaymentDraftError(source, draft({ amount: '1' }))).toBe(
+      'Amount cannot exceed outstanding balance.',
+    );
+  });
+
   it('builds an auto-numbered vendor payment payload', () => {
     expect(buildPurchaseInvoicePaymentPayload(invoice(), draft())).toEqual({
       amount: 250,
@@ -163,10 +195,7 @@ describe('purchase invoice payments helpers', () => {
       'Amount cannot exceed outstanding balance.',
     );
     expect(
-      getPurchaseInvoicePaymentDraftError(
-        invoice(),
-        draft({ autoNumbering: false, number: '' }),
-      ),
+      getPurchaseInvoicePaymentDraftError(invoice(), draft({ autoNumbering: false, number: '' })),
     ).toBe('Payment number is required.');
   });
 });

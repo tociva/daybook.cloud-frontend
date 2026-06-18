@@ -27,15 +27,19 @@
       </div>
       <div class="summary-item">
         <span class="summary-label">Grand Total</span>
-        <strong>{{ formatAmountWithCurrency(inv.grandtotal, inv.currencycode) }}</strong>
+        <strong>{{
+          formatAmountWithCurrency(inv.grandtotal, inv.currencycode, inv.currency)
+        }}</strong>
       </div>
       <div class="summary-item">
         <span class="summary-label">Paid</span>
-        <strong>{{ formatAmountWithCurrency(paidTotal(), inv.currencycode) }}</strong>
+        <strong>{{ formatAmountWithCurrency(paidTotal(), inv.currencycode, inv.currency) }}</strong>
       </div>
       <div class="summary-item">
         <span class="summary-label">Outstanding</span>
-        <strong>{{ formatAmountWithCurrency(outstandingBalance(), inv.currencycode) }}</strong>
+        <strong>{{
+          formatAmountWithCurrency(outstandingBalance(), inv.currencycode, inv.currency)
+        }}</strong>
       </div>
     </section>
   </tng-card>
@@ -83,7 +87,9 @@
               </td>
               <td>{{ formatDate(row.date) }}</td>
               <td>{{ rowBankCashName(row) }}</td>
-              <td class="text-right">{{ formatAmountWithCurrency(row.amount, row.currencycode) }}</td>
+              <td class="text-right">
+                {{ formatAmountWithCurrency(row.amount, row.currencycode) }}
+              </td>
               <td>{{ row.description || '—' }}</td>
               <td class="text-right">
                 <app-table-row-icon-button

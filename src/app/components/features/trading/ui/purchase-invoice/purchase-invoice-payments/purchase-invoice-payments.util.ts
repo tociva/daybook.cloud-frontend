@@ -1,8 +1,7 @@
 import type { BankCash } from '../../../data/bank-cash';
 import type { PurchaseInvoice } from '../../../data/purchase-invoice';
 import type { VendorPayment, VendorPaymentPayload } from '../../../data/vendor-payment';
-
-const EPSILON = 0.000001;
+import { roundMoneyForCurrency, toMinorUnits } from '../../../../../../shared/format/currency';
 
 export type PurchaseInvoicePaymentRow = Readonly<{
   allocationId?: string;
@@ -52,21 +51,22 @@ export function normalizePurchaseInvoicePaymentRows(
             bcashid: link.vendorpayment?.bcashid ?? fallback?.bcashid,
           }
         : undefined;
+    const currencycode = payment?.currencycode ?? invoice?.currencycode ?? invoice?.currency?.code;
 
     return {
       allocationId: link.id,
-      amount: roundMoney(Number(link.amount) || 0),
+      amount: roundMoneyForCurrency(Number(link.amount) || 0, currencycode, invoice?.currency),
       bankCash: payment?.bcash,
       bankCashId: payment?.bcashid,
-      currencycode: payment?.currencycode ?? invoice?.currencycode ?? invoice?.currency?.code,
+      currencycode,
       date: payment?.date,
       description: payment?.description,
       hasPaymentDetail: Boolean(
         payment?.number ||
-          payment?.date ||
-          payment?.bcashid ||
-          payment?.bcash ||
-          payment?.description,
+        payment?.date ||
+        payment?.bcashid ||
+        payment?.bcash ||
+        payment?.description,
       ),
       number: payment?.number,
       paymentId,
@@ -77,16 +77,20 @@ export function normalizePurchaseInvoicePaymentRows(
 export function calculatePurchaseInvoicePaidTotal(
   invoice: PurchaseInvoice | null | undefined,
 ): number {
-  return roundMoney(
+  return roundMoneyForCurrency(
     (invoice?.payments ?? []).reduce((sum, payment) => sum + (Number(payment.amount) || 0), 0),
+    invoiceCurrencyCode(invoice),
+    invoice?.currency,
   );
 }
 
 export function calculatePurchaseInvoiceOutstanding(
   invoice: PurchaseInvoice | null | undefined,
 ): number {
-  return roundMoney(
+  return roundMoneyForCurrency(
     Math.max((Number(invoice?.grandtotal) || 0) - calculatePurchaseInvoicePaidTotal(invoice), 0),
+    invoiceCurrencyCode(invoice),
+    invoice?.currency,
   );
 }
 
@@ -105,8 +109,12 @@ export function getPurchaseInvoicePaymentDraftError(
   const amount = Number(draft.amount);
   if (!Number.isFinite(amount) || amount <= 0) return 'Amount must be greater than 0.';
 
+  const currencycode = invoiceCurrencyCode(invoice);
   const outstanding = calculatePurchaseInvoiceOutstanding(invoice);
-  if (roundMoney(amount) - outstanding > EPSILON) {
+  if (
+    toMinorUnits(amount, currencycode, invoice.currency) >
+    toMinorUnits(outstanding, currencycode, invoice.currency)
+  ) {
     return 'Amount cannot exceed outstanding balance.';
   }
 
@@ -121,7 +129,8 @@ export function buildPurchaseInvoicePaymentPayload(
   const error = getPurchaseInvoicePaymentDraftError(invoice, draft, options);
   if (error) throw new Error(error);
 
-  const amount = roundMoney(Number(draft.amount));
+  const currencycode = invoice.currencycode ?? invoice.currency?.code ?? 'INR';
+  const amount = roundMoneyForCurrency(Number(draft.amount), currencycode, invoice.currency);
   const description = draft.description.trim();
   const number = draft.number.trim();
 
@@ -130,7 +139,7 @@ export function buildPurchaseInvoicePaymentPayload(
     amount,
     bcashid: draft.bankCashId.trim(),
     cprops: { autoNumbering: draft.autoNumbering },
-    currencycode: invoice.currencycode ?? invoice.currency?.code ?? 'INR',
+    currencycode,
     date: draft.date.trim(),
     ...(description ? { description } : {}),
     invoices: [{ amount, purchaseinvoiceid: invoice.id as string }],
@@ -138,6 +147,6 @@ export function buildPurchaseInvoicePaymentPayload(
   };
 }
 
-function roundMoney(value: number): number {
-  return Math.round((value + Number.EPSILON) * 100) / 100;
+function invoiceCurrencyCode(invoice: PurchaseInvoice | null | undefined): string | undefined {
+  return invoice?.currencycode ?? invoice?.currency?.code;
 }
