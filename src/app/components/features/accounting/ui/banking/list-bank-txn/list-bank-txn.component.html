@@ -90,7 +90,19 @@
           </ng-template>
 
           <ng-template tngTableCellTemplate="description" let-row="row">
-            {{ row.description }}
+            @if (isLongDescription(row.description)) {
+              <tng-tooltip
+                class="description-tooltip"
+                side="top"
+                [openDelay]="150"
+                [ariaLabel]="descriptionText(row.description)"
+              >
+                <span trigger>{{ truncatedDescription(row.description) }}</span>
+                <span>{{ descriptionText(row.description) }}</span>
+              </tng-tooltip>
+            } @else {
+              {{ descriptionText(row.description) }}
+            }
           </ng-template>
 
           <ng-template tngTableCellTemplate="bankref" let-row="row">

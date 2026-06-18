@@ -6,6 +6,7 @@ import {
   TngProgressSpinnerComponent,
   TngTable,
   TngTableCellTpl,
+  TngTooltipComponent,
 } from '@tailng-ui/components';
 import type { TngTableColumn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
@@ -43,6 +44,7 @@ import { JournalAssignDialogComponent } from '../journal-assign-dialog/journal-a
     TngProgressSpinnerComponent,
     TngTable,
     TngTableCellTpl,
+    TngTooltipComponent,
     TableRowIconButtonComponent,
     BankStatementUploadComponent,
     JournalAssignDialogComponent,
@@ -279,6 +281,19 @@ export class ListBankTxnComponent {
 
     const fromMap = this.bankNameByMapId().get(mapId);
     return fromMap || mapId;
+  }
+
+  protected descriptionText(value: string | undefined): string {
+    return value ?? '';
+  }
+
+  protected isLongDescription(value: string | undefined): boolean {
+    return this.descriptionText(value).length > 20;
+  }
+
+  protected truncatedDescription(value: string | undefined): string {
+    const description = this.descriptionText(value);
+    return this.isLongDescription(description) ? `${description.slice(0, 20)}...` : description;
   }
 
   protected formatDisplayDate(value: string | undefined): string {
