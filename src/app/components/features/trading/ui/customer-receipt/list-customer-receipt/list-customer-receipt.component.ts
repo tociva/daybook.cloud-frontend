@@ -33,6 +33,8 @@ import { CustomerReceiptStore } from '../../../data/customer-receipt';
 import type { CustomerReceipt, CustomerReceiptJournal } from '../../../data/customer-receipt';
 import { CUSTOMER_RECEIPT_BULK_UPLOAD_CONFIG } from './customer-receipt-bulk-upload.config';
 
+const DEFAULT_CUSTOMER_RECEIPT_ORDER = ['date ASC'] as const;
+
 @Component({
   selector: 'app-list-customer-receipt',
   standalone: true,
@@ -164,6 +166,7 @@ export class ListCustomerReceiptComponent {
   private async loadCustomerReceiptsWithJournals(filter: Lb4ListQuery): Promise<void> {
     await this.customerReceiptStore.loadCustomerReceipts({
       ...filter,
+      order: filter.order?.length ? filter.order : DEFAULT_CUSTOMER_RECEIPT_ORDER,
       includes: ['customer', 'bcash'],
     });
     if (this.customerReceiptStore.error()) {
