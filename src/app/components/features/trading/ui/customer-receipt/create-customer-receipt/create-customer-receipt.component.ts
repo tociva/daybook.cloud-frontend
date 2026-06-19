@@ -47,6 +47,7 @@ import {
   DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS,
   DEFAULT_NODE_DATE_FORMAT,
 } from '../../../../../../util/constants';
+import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -76,8 +77,12 @@ import {
   styleUrl: './create-customer-receipt.component.css',
 })
 export class CreateCustomerReceiptComponent {
+  private static readonly CONVERSION_RATE_KEY_PREFIX = 'daybook:customer-receipt:conversion-rate';
+  private static readonly LAST_DATE_KEY_PREFIX = 'daybook:customer-receipt:last-date';
+
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(CustomerReceiptFacade);
+  private readonly navigation = inject(BurlNavigationService);
   private readonly fiscalYearDateRange = inject(FiscalYearDateRangeService);
 
   protected readonly customerReceiptStore = inject(CustomerReceiptStore);
@@ -243,9 +248,7 @@ export class CreateCustomerReceiptComponent {
     if (!value) return 'Conversion rate is required.';
 
     const rate = Number(value);
-    return Number.isFinite(rate) && rate > 0
-      ? null
-      : 'Conversion rate must be greater than 0.';
+    return Number.isFinite(rate) && rate > 0 ? null : 'Conversion rate must be greater than 0.';
   });
 
   // ── Stepper ───────────────────────────────────────────────────────────────
@@ -315,6 +318,8 @@ export class CreateCustomerReceiptComponent {
       return;
     }
 
+    this.applyRememberedReceiptDate();
+
     // ── Create mode: check for pre-fill from a sale invoice ──────────────────
     const saleinvoiceid = this.route.snapshot.queryParamMap.get('saleinvoiceid');
 
@@ -334,12 +339,12 @@ export class CreateCustomerReceiptComponent {
     } else {
       // Set default currency after options are loaded so the autocomplete
       // can resolve the label (Name + Symbol) instead of showing the raw code.
-      this.currencycode.set('INR');
+      this.setCurrencyCode('INR');
     }
   }
 
   private applyInvoicePrefill(invoice: SaleInvoice): void {
-    this.currencycode.set(invoice.currencycode ?? 'INR');
+    this.setCurrencyCode(invoice.currencycode ?? 'INR', { useRememberedConversionRate: false });
     this.conversionrate.set(String(invoice.cprops?.fx ?? 1));
 
     // Remaining balance = grand total minus whatever has already been received.
@@ -379,7 +384,7 @@ export class CreateCustomerReceiptComponent {
     this.number.set(auto ? (r.number ?? 'Auto Number') : (r.number ?? ''));
     this.rcptdate.set(r.date ?? this.fiscalYearDateRange.defaultDate());
     this.amount.set(String(r.amount ?? ''));
-    this.currencycode.set(r.currencycode ?? 'INR');
+    this.setCurrencyCode(r.currencycode ?? 'INR', { useRememberedConversionRate: false });
     this.conversionrate.set(String(r.cprops?.fx ?? 1));
     this.description.set(r.description ?? '');
     this.customerid.set(r.customerid ?? r.customer?.id ?? '');
@@ -448,7 +453,7 @@ export class CreateCustomerReceiptComponent {
 
     this.selectedCustomer.set(customer);
     this.customerid.set(customer.id ?? '');
-    this.currencycode.set(customer.currencycode ?? this.currencycode());
+    this.setCurrencyCode(customer.currencycode ?? this.currencycode());
     // Invoice pre-fill is handled by RcptInvoiceLinesComponent via its effect()
   }
 
@@ -460,7 +465,7 @@ export class CreateCustomerReceiptComponent {
 
   protected onCurrencyValueChange(value: unknown): void {
     const code = typeof value === 'string' ? value : '';
-    if (code) this.currencycode.set(code);
+    this.setCurrencyCode(code);
   }
 
   protected onBankCashQueryChange(event: unknown): void {
@@ -494,7 +499,8 @@ export class CreateCustomerReceiptComponent {
 
   protected onDateChange(value: unknown): void {
     if (typeof value === 'string') this.rcptdate.set(value);
-    else if (dayjs.isDayjs(value) && value.isValid()) this.rcptdate.set(value.format(DEFAULT_NODE_DATE_FORMAT));
+    else if (dayjs.isDayjs(value) && value.isValid())
+      this.rcptdate.set(value.format(DEFAULT_NODE_DATE_FORMAT));
     else if (value instanceof Date && !Number.isNaN(value.getTime()))
       this.rcptdate.set(dayjs(value).format(DEFAULT_NODE_DATE_FORMAT));
   }
@@ -562,10 +568,138 @@ export class CreateCustomerReceiptComponent {
     };
 
     const id = this.id();
-    if (id) {
-      await this.facade.update(id, payload);
+    const saved = id
+      ? await this.facade.update(id, payload, { navigateBack: false })
+      : !!(await this.facade.create(payload, { navigateBack: false }));
+
+    if (!saved) return;
+    this.rememberReceiptDate();
+    this.rememberConversionRate();
+    await this.navigation.navigateBack();
+  }
+
+  private setCurrencyCode(
+    value: string,
+    options: Readonly<{ useRememberedConversionRate?: boolean }> = {},
+  ): void {
+    const currencyCode = value.trim();
+    if (!currencyCode) return;
+
+    const { useRememberedConversionRate = true } = options;
+    this.currencycode.set(currencyCode);
+    if (this.isForeignCurrency(currencyCode)) {
+      if (useRememberedConversionRate) {
+        this.applyRememberedConversionRate(currencyCode);
+      }
     } else {
-      await this.facade.create(payload);
+      this.conversionrate.set('1');
     }
+  }
+
+  private applyRememberedReceiptDate(): void {
+    try {
+      const raw = localStorage.getItem(this.rememberedReceiptDateKey());
+      const rememberedDate = this.normalizeRememberedDate(raw);
+      if (!rememberedDate) return;
+
+      this.rcptdate.set(rememberedDate);
+    } catch {
+      // localStorage may be unavailable (private browsing, quota, etc.)
+    }
+  }
+
+  private rememberReceiptDate(): void {
+    try {
+      const rememberedDate = this.normalizeRememberedDate(this.rcptdate());
+      if (!rememberedDate) return;
+
+      localStorage.setItem(this.rememberedReceiptDateKey(), rememberedDate);
+    } catch {
+      // localStorage may be unavailable (private browsing, quota, etc.)
+    }
+  }
+
+  private rememberConversionRate(): void {
+    try {
+      const key = this.rememberedConversionRateKey(this.currencycode());
+      const rate = this.normalizeConversionRate(this.conversionrate());
+      if (!key || !rate) return;
+
+      localStorage.setItem(key, rate);
+    } catch {
+      // localStorage may be unavailable (private browsing, quota, etc.)
+    }
+  }
+
+  private normalizeRememberedDate(value: unknown): string | null {
+    const isoDate = this.fiscalYearDateRange.toIsoDate(value);
+    return isoDate ? this.fiscalYearDateRange.defaultDate(isoDate) : null;
+  }
+
+  private applyRememberedConversionRate(currencyCode: string): void {
+    this.conversionrate.set(this.readRememberedConversionRate(currencyCode) ?? '1');
+  }
+
+  private readRememberedConversionRate(currencyCode: string): string | null {
+    const key = this.rememberedConversionRateKey(currencyCode);
+    if (!key) return null;
+
+    try {
+      return this.normalizeConversionRate(localStorage.getItem(key));
+    } catch {
+      return null;
+    }
+  }
+
+  private normalizeConversionRate(value: unknown): string | null {
+    const rate = typeof value === 'string' ? value.trim() : '';
+    if (!rate) return null;
+
+    const numericRate = Number(rate);
+    return Number.isFinite(numericRate) && numericRate > 0 ? rate : null;
+  }
+
+  private rememberedConversionRateKey(currencyCode: string): string | null {
+    const receiptCurrency = currencyCode.trim().toUpperCase();
+    const branchCurrency = this.branchCurrencyCode().trim().toUpperCase();
+    if (!receiptCurrency || !branchCurrency || receiptCurrency === branchCurrency) return null;
+
+    return [
+      ...this.scopedStorageKeyParts(CreateCustomerReceiptComponent.CONVERSION_RATE_KEY_PREFIX),
+      `${this.storageKeyPart(receiptCurrency)}-${this.storageKeyPart(branchCurrency)}`,
+    ].join(':');
+  }
+
+  private rememberedReceiptDateKey(): string {
+    return this.scopedStorageKeyParts(CreateCustomerReceiptComponent.LAST_DATE_KEY_PREFIX).join(
+      ':',
+    );
+  }
+
+  private scopedStorageKeyParts(prefix: string): string[] {
+    const session = this.userSessionStore.session();
+    const organizationId = session?.organization?.id ?? session?.branch?.organizationid;
+    return [
+      prefix,
+      this.storageKeyPart(session?.userid),
+      this.storageKeyPart(organizationId),
+      this.storageKeyPart(session?.branch?.id),
+      this.storageKeyPart(session?.fiscalyear?.id),
+    ];
+  }
+
+  private storageKeyPart(value: unknown): string {
+    const text = typeof value === 'string' || typeof value === 'number' ? String(value).trim() : '';
+    return text ? encodeURIComponent(text) : 'global';
+  }
+
+  private isForeignCurrency(currencyCode: string): boolean {
+    const branchCurrencyCode = this.branchCurrencyCode().trim();
+    const selectedCurrencyCode = currencyCode.trim();
+    return (
+      !!branchCurrencyCode &&
+      !!selectedCurrencyCode &&
+      selectedCurrencyCode.toUpperCase() !== branchCurrencyCode.toUpperCase()
+    );
   }
 }

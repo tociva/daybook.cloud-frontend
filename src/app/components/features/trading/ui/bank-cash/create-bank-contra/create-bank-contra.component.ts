@@ -22,6 +22,7 @@ import { UserSessionStore } from '../../../../management/data/user-session/user-
 import { FiscalYearDatepickerComponent } from '../../../../../../shared/fiscal-year-datepicker';
 import { FiscalYearDateRangeService } from '../../../../../../shared/fiscal-year-date-range-picker';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
+import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
 import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
 import {
   DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS,
@@ -58,8 +59,11 @@ import { ContraTransactionFacade, ContraTransactionStore } from '../../../data/c
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CreateBankContraComponent {
+  private static readonly LAST_DATE_KEY_PREFIX = 'daybook:bank-contra:last-date';
+
   private readonly facade = inject(ContraTransactionFacade);
   private readonly fiscalYearDateRange = inject(FiscalYearDateRangeService);
+  private readonly navigation = inject(BurlNavigationService);
   private readonly route = inject(ActivatedRoute);
   private readonly userSessionStore = inject(UserSessionStore);
   protected readonly bankCashStore = inject(BankCashStore);
@@ -147,6 +151,7 @@ export class CreateBankContraComponent {
     if (!id) {
       this.contraTransactionStore.clearSelectedItem();
       this.currencycode.set(this.defaultCurrencyCode());
+      this.applyRememberedContraDate();
       return;
     }
 
@@ -253,11 +258,13 @@ export class CreateBankContraComponent {
     };
 
     const id = this.id();
-    if (id) {
-      await this.facade.update(id, payload);
-    } else {
-      await this.facade.create(payload);
-    }
+    const saved = id
+      ? await this.facade.update(id, payload, { navigateBack: false })
+      : !!(await this.facade.create(payload, { navigateBack: false }));
+
+    if (!saved) return;
+    this.rememberContraDate();
+    await this.navigation.navigateBack();
   }
 
   private filterCurrencies(currencies: readonly Currency[], query: string): Currency[] {
@@ -297,5 +304,54 @@ export class CreateBankContraComponent {
       this.userSessionStore.session()?.fiscalyear?.currencycode ??
       'INR'
     );
+  }
+
+  private applyRememberedContraDate(): void {
+    try {
+      const raw = localStorage.getItem(this.rememberedContraDateKey());
+      const rememberedDate = this.normalizeRememberedDate(raw);
+      if (!rememberedDate) return;
+
+      this.date.set(rememberedDate);
+    } catch {
+      // localStorage may be unavailable (private browsing, quota, etc.)
+    }
+  }
+
+  private rememberContraDate(): void {
+    try {
+      const rememberedDate = this.normalizeRememberedDate(this.date());
+      if (!rememberedDate) return;
+
+      localStorage.setItem(this.rememberedContraDateKey(), rememberedDate);
+    } catch {
+      // localStorage may be unavailable (private browsing, quota, etc.)
+    }
+  }
+
+  private normalizeRememberedDate(value: unknown): string | null {
+    const isoDate = this.fiscalYearDateRange.toIsoDate(value);
+    return isoDate ? this.fiscalYearDateRange.defaultDate(isoDate) : null;
+  }
+
+  private rememberedContraDateKey(): string {
+    return this.scopedStorageKeyParts(CreateBankContraComponent.LAST_DATE_KEY_PREFIX).join(':');
+  }
+
+  private scopedStorageKeyParts(prefix: string): string[] {
+    const session = this.userSessionStore.session();
+    const organizationId = session?.organization?.id ?? session?.branch?.organizationid;
+    return [
+      prefix,
+      this.storageKeyPart(session?.userid),
+      this.storageKeyPart(organizationId),
+      this.storageKeyPart(session?.branch?.id),
+      this.storageKeyPart(session?.fiscalyear?.id),
+    ];
+  }
+
+  private storageKeyPart(value: unknown): string {
+    const text = typeof value === 'string' || typeof value === 'number' ? String(value).trim() : '';
+    return text ? encodeURIComponent(text) : 'global';
   }
 }
