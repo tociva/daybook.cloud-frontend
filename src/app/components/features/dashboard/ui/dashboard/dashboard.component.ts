@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject } from '@a
 import { Router } from '@angular/router';
 import {
   TngButtonComponent,
-  TngCardComponent,
   TngProgressSpinnerComponent,
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
@@ -14,8 +13,6 @@ import { hasAccountingReportPermission } from '../../../accounting/shared/accoun
 import { UserSessionStore } from '../../../management/data/user-session/user-session.store';
 import type {
   AccountantDashboardActionKey,
-  AccountantDashboardAmountMetric,
-  AccountantDashboardBankReconciliationMetric,
   AccountantDashboardComplianceMetric,
 } from '../../data';
 import {
@@ -23,27 +20,13 @@ import {
   resolveAccountantDashboardNavigationTarget,
 } from '../../data';
 
-type DashboardMetricCard = Readonly<{
+type DashboardStatusRow = Readonly<{
   actionKey: AccountantDashboardActionKey;
-  amount: number;
+  actionLabel: string;
+  area: string;
   count: number;
-  description: string;
-  icon: string;
-  metric: AccountantDashboardAmountMetric;
-  title: string;
-}>;
-
-type DashboardComplianceCard = Readonly<{
-  actionKey: AccountantDashboardActionKey;
-  icon: string;
-  metric: AccountantDashboardComplianceMetric;
-  title: string;
-}>;
-
-type DashboardBankCard = Readonly<{
-  actionKey: AccountantDashboardActionKey;
-  icon: string;
-  metric: AccountantDashboardBankReconciliationMetric;
+  detail: string;
+  oldestDate: string | null;
   title: string;
 }>;
 
@@ -52,7 +35,6 @@ type DashboardBankCard = Readonly<{
   imports: [
     PageHeadingComponent,
     TngButtonComponent,
-    TngCardComponent,
     TngIcon,
     TngProgressSpinnerComponent,
   ],
@@ -103,104 +85,120 @@ export class DashboardComponent {
       ? this.dashboardStore.summary()
       : null,
   );
-  protected readonly complianceCards = computed<readonly DashboardComplianceCard[]>(() => {
+  protected readonly statusRows = computed<readonly DashboardStatusRow[]>(() => {
     const summary = this.summary();
     if (!summary) return [];
 
-    return [
-      {
-        actionKey: summary.compliance.gstr1.actionKey,
-        icon: 'file-check-2',
-        metric: summary.compliance.gstr1,
-        title: 'GSTR-1',
-      },
-      {
-        actionKey: summary.compliance.gstr2b.actionKey,
-        icon: 'file-search',
-        metric: summary.compliance.gstr2b,
-        title: 'GSTR-2B',
-      },
-    ];
-  });
-  protected readonly pendingAllocationCards = computed<readonly DashboardMetricCard[]>(() => {
-    const summary = this.summary();
-    if (!summary) return [];
+    const gstr1Pending = this.pendingComplianceMonths(summary.compliance.gstr1);
+    const gstr2bPending = this.pendingComplianceMonths(summary.compliance.gstr2b);
+    const bankTransactions = summary.pendingReconciliation.bankTransactions;
 
-    return [
-      {
-        actionKey: summary.pendingAllocations.receipts.actionKey,
-        amount: summary.pendingAllocations.receipts.amount,
-        count: summary.pendingAllocations.receipts.count,
-        description: 'Unallocated receipt balance',
-        icon: 'receipt',
-        metric: summary.pendingAllocations.receipts,
-        title: 'Receipts',
-      },
-      {
-        actionKey: summary.pendingAllocations.payments.actionKey,
-        amount: summary.pendingAllocations.payments.amount,
-        count: summary.pendingAllocations.payments.count,
-        description: 'Unallocated payment balance',
-        icon: 'wallet-cards',
-        metric: summary.pendingAllocations.payments,
-        title: 'Payments',
-      },
+    const rows: ReadonlyArray<DashboardStatusRow | null> = [
+      gstr1Pending > 0
+        ? {
+            actionKey: summary.compliance.gstr1.actionKey,
+            actionLabel: 'View GSTR-1 GST compliance',
+            area: 'GST compliance',
+            count: gstr1Pending,
+            detail: `${summary.compliance.gstr1.partialMonths} partial / ${summary.compliance.gstr1.notStartedMonths} not started`,
+            oldestDate: null,
+            title: 'GSTR-1',
+          }
+        : null,
+      gstr2bPending > 0
+        ? {
+            actionKey: summary.compliance.gstr2b.actionKey,
+            actionLabel: 'View GSTR-2B GST compliance',
+            area: 'GST compliance',
+            count: gstr2bPending,
+            detail: `${summary.compliance.gstr2b.partialMonths} partial / ${summary.compliance.gstr2b.notStartedMonths} not started`,
+            oldestDate: null,
+            title: 'GSTR-2B',
+          }
+        : null,
+      summary.pendingAllocations.receipts.count > 0
+        ? {
+            actionKey: summary.pendingAllocations.receipts.actionKey,
+            actionLabel: 'View Receipts pending allocations',
+            area: 'Pending allocations',
+            count: summary.pendingAllocations.receipts.count,
+            detail: this.formatAmount(summary.pendingAllocations.receipts.amount),
+            oldestDate: summary.pendingAllocations.receipts.oldestDate,
+            title: 'Receipts',
+          }
+        : null,
+      summary.pendingAllocations.payments.count > 0
+        ? {
+            actionKey: summary.pendingAllocations.payments.actionKey,
+            actionLabel: 'View Payments pending allocations',
+            area: 'Pending allocations',
+            count: summary.pendingAllocations.payments.count,
+            detail: this.formatAmount(summary.pendingAllocations.payments.amount),
+            oldestDate: summary.pendingAllocations.payments.oldestDate,
+            title: 'Payments',
+          }
+        : null,
+      summary.pendingJournals.saleInvoices.count > 0
+        ? {
+            actionKey: summary.pendingJournals.saleInvoices.actionKey,
+            actionLabel: 'View Sale invoices pending journals',
+            area: 'Pending journals',
+            count: summary.pendingJournals.saleInvoices.count,
+            detail: this.formatAmount(summary.pendingJournals.saleInvoices.amount),
+            oldestDate: summary.pendingJournals.saleInvoices.oldestDate,
+            title: 'Sale invoices',
+          }
+        : null,
+      summary.pendingJournals.purchaseInvoices.count > 0
+        ? {
+            actionKey: summary.pendingJournals.purchaseInvoices.actionKey,
+            actionLabel: 'View Purchase invoices pending journals',
+            area: 'Pending journals',
+            count: summary.pendingJournals.purchaseInvoices.count,
+            detail: this.formatAmount(summary.pendingJournals.purchaseInvoices.amount),
+            oldestDate: summary.pendingJournals.purchaseInvoices.oldestDate,
+            title: 'Purchase invoices',
+          }
+        : null,
+      summary.pendingJournals.receipts.count > 0
+        ? {
+            actionKey: summary.pendingJournals.receipts.actionKey,
+            actionLabel: 'View Receipts pending journals',
+            area: 'Pending journals',
+            count: summary.pendingJournals.receipts.count,
+            detail: this.formatAmount(summary.pendingJournals.receipts.amount),
+            oldestDate: summary.pendingJournals.receipts.oldestDate,
+            title: 'Receipts',
+          }
+        : null,
+      summary.pendingJournals.payments.count > 0
+        ? {
+            actionKey: summary.pendingJournals.payments.actionKey,
+            actionLabel: 'View Payments pending journals',
+            area: 'Pending journals',
+            count: summary.pendingJournals.payments.count,
+            detail: this.formatAmount(summary.pendingJournals.payments.amount),
+            oldestDate: summary.pendingJournals.payments.oldestDate,
+            title: 'Payments',
+          }
+        : null,
+      bankTransactions.count > 0
+        ? {
+            actionKey: bankTransactions.actionKey,
+            actionLabel: 'View Bank transactions pending reconciliation',
+            area: 'Bank reconciliation',
+            count: bankTransactions.count,
+            detail: `Debit ${this.formatAmount(bankTransactions.debitAmount)} / Credit ${this.formatAmount(bankTransactions.creditAmount)}`,
+            oldestDate: bankTransactions.oldestDate,
+            title: 'Bank transactions',
+          }
+        : null,
     ];
-  });
-  protected readonly pendingJournalCards = computed<readonly DashboardMetricCard[]>(() => {
-    const summary = this.summary();
-    if (!summary) return [];
 
-    return [
-      {
-        actionKey: summary.pendingJournals.saleInvoices.actionKey,
-        amount: summary.pendingJournals.saleInvoices.amount,
-        count: summary.pendingJournals.saleInvoices.count,
-        description: 'Sale invoices without journals',
-        icon: 'file-text',
-        metric: summary.pendingJournals.saleInvoices,
-        title: 'Sale invoices',
-      },
-      {
-        actionKey: summary.pendingJournals.purchaseInvoices.actionKey,
-        amount: summary.pendingJournals.purchaseInvoices.amount,
-        count: summary.pendingJournals.purchaseInvoices.count,
-        description: 'Purchase invoices without journals',
-        icon: 'file-input',
-        metric: summary.pendingJournals.purchaseInvoices,
-        title: 'Purchase invoices',
-      },
-      {
-        actionKey: summary.pendingJournals.receipts.actionKey,
-        amount: summary.pendingJournals.receipts.amount,
-        count: summary.pendingJournals.receipts.count,
-        description: 'Receipts without journals',
-        icon: 'receipt-text',
-        metric: summary.pendingJournals.receipts,
-        title: 'Receipts',
-      },
-      {
-        actionKey: summary.pendingJournals.payments.actionKey,
-        amount: summary.pendingJournals.payments.amount,
-        count: summary.pendingJournals.payments.count,
-        description: 'Payments without journals',
-        icon: 'wallet',
-        metric: summary.pendingJournals.payments,
-        title: 'Payments',
-      },
-    ];
+    return rows.filter((row): row is DashboardStatusRow => row !== null);
   });
-  protected readonly bankReconciliationCard = computed<DashboardBankCard | null>(() => {
-    const metric = this.summary()?.pendingReconciliation.bankTransactions;
-    if (!metric) return null;
 
-    return {
-      actionKey: metric.actionKey,
-      icon: 'landmark',
-      metric,
-      title: 'Bank transactions',
-    };
-  });
+  protected readonly hasPendingTasks = computed(() => this.statusRows().length > 0);
 
   constructor() {
     effect(() => {
@@ -263,12 +261,7 @@ export class DashboardComponent {
     return this.dateManagement.formatDisplayDateTime(value, '—');
   }
 
-  protected totalComplianceMonths(metric: AccountantDashboardComplianceMetric): number {
-    return metric.greenMonths + metric.partialMonths + metric.notStartedMonths;
-  }
-
-  protected needsComplianceWork(metric: AccountantDashboardComplianceMetric): boolean {
-    return metric.partialMonths + metric.notStartedMonths > 0;
+  private pendingComplianceMonths(metric: AccountantDashboardComplianceMetric): number {
+    return metric.partialMonths + metric.notStartedMonths;
   }
 }
-

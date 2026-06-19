@@ -126,6 +126,73 @@ const summary: AccountantDashboardSummary = {
   },
 };
 
+const noPendingSummary: AccountantDashboardSummary = {
+  ...summary,
+  compliance: {
+    gstr1: {
+      ...summary.compliance.gstr1,
+      greenMonths: 3,
+      notStartedMonths: 0,
+      partialMonths: 0,
+    },
+    gstr2b: {
+      ...summary.compliance.gstr2b,
+      greenMonths: 3,
+      notStartedMonths: 0,
+      partialMonths: 0,
+    },
+  },
+  pendingAllocations: {
+    payments: {
+      ...summary.pendingAllocations.payments,
+      amount: 0,
+      count: 0,
+      oldestDate: null,
+    },
+    receipts: {
+      ...summary.pendingAllocations.receipts,
+      amount: 0,
+      count: 0,
+      oldestDate: null,
+    },
+  },
+  pendingJournals: {
+    payments: {
+      ...summary.pendingJournals.payments,
+      amount: 0,
+      count: 0,
+      oldestDate: null,
+    },
+    purchaseInvoices: {
+      ...summary.pendingJournals.purchaseInvoices,
+      amount: 0,
+      count: 0,
+      oldestDate: null,
+    },
+    receipts: {
+      ...summary.pendingJournals.receipts,
+      amount: 0,
+      count: 0,
+      oldestDate: null,
+    },
+    saleInvoices: {
+      ...summary.pendingJournals.saleInvoices,
+      amount: 0,
+      count: 0,
+      oldestDate: null,
+    },
+  },
+  pendingReconciliation: {
+    bankTransactions: {
+      ...summary.pendingReconciliation.bankTransactions,
+      count: 0,
+      creditAmount: 0,
+      debitAmount: 0,
+      oldestDate: null,
+    },
+  },
+};
+
 type SetupOptions = Readonly<{
   error?: string | null;
   isLoading?: boolean;
@@ -221,31 +288,53 @@ describe('DashboardComponent', () => {
     expect(loadSummary).not.toHaveBeenCalled();
   });
 
-  it('renders all dashboard metric groups from a loaded summary', () => {
+  it('renders a single compact pending tasks table from a loaded summary', () => {
     const { fixture } = setup({ summary });
-    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    const host = fixture.nativeElement as HTMLElement;
+    const text = host.textContent ?? '';
 
+    expect(text).toContain('Pending Tasks');
+    expect(text).toContain('Area');
+    expect(text).toContain('Item');
+    expect(text).toContain('Count');
+    expect(text).toContain('Status / amount');
+    expect(text).toContain('Oldest');
     expect(text).toContain('GST compliance');
+    expect(text).toContain('1 partial / 0 not started');
     expect(text).toContain('GSTR-1');
-    expect(text).toContain('GSTR-2B');
+    expect(text).not.toContain('GSTR-2B');
     expect(text).toContain('Pending allocations');
     expect(text).toContain('Receipts');
-    expect(text).toContain('Payments');
+    expect(text).not.toContain('Payments');
     expect(text).toContain('Pending journals');
     expect(text).toContain('Sale invoices');
     expect(text).toContain('Purchase invoices');
-    expect(text).toContain('Pending bank reconciliation');
+    expect(text).not.toContain('Bank reconciliation');
+    expect(text).not.toContain('Debit');
+    expect(text).not.toContain('Credit');
     expect(text).toContain('date:2026-06-19');
     expect(text).toContain('May 2026');
+    expect(host.querySelectorAll('table.status-table')).toHaveLength(1);
+    expect(host.querySelector('.dashboard-section--compact')).toBeTruthy();
   });
 
-  it('renders null oldest dates and zero-count cards cleanly', () => {
+  it('renders null oldest dates without muted zero-count rows', () => {
     const { fixture } = setup({ summary });
     const host = fixture.nativeElement as HTMLElement;
     const text = host.textContent ?? '';
 
     expect(text).toContain('—');
-    expect(host.querySelectorAll('.metric-card--muted').length).toBeGreaterThan(0);
+    expect(host.querySelectorAll('.status-row--muted')).toHaveLength(0);
+  });
+
+  it('shows an empty pending-tasks state when every row is resolved', () => {
+    const { fixture } = setup({ summary: noPendingSummary });
+    const host = fixture.nativeElement as HTMLElement;
+    const text = host.textContent ?? '';
+
+    expect(text).toContain('Pending Tasks');
+    expect(text).toContain('No pending tasks through the last completed month.');
+    expect(host.querySelectorAll('table.status-table')).toHaveLength(0);
   });
 
   it('retries loading after an error', () => {
@@ -264,15 +353,15 @@ describe('DashboardComponent', () => {
     expect(loadSummary).toHaveBeenCalledOnce();
   });
 
-  it('navigates action cards with dashboard handoff query params', () => {
+  it('navigates table row actions with dashboard handoff query params', () => {
     const { fixture, navigate } = setup({ summary });
 
-    const receiptCard = Array.from(
-      (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>('[role="button"]'),
-    ).find((element) => element.getAttribute('aria-label') === 'Receipts pending allocations');
+    const receiptAction = (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>(
+      'tng-button[aria-label="View Receipts pending allocations"]',
+    );
 
-    expect(receiptCard).toBeTruthy();
-    receiptCard?.click();
+    expect(receiptAction).toBeTruthy();
+    receiptAction?.click();
 
     expect(navigate).toHaveBeenCalledWith(['/app/trading/customer-receipt'], {
       queryParams: {
