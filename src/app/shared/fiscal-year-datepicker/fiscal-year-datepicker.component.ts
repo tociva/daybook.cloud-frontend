@@ -2,6 +2,7 @@ import {
   booleanAttribute,
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   computed,
   inject,
   input,
@@ -21,6 +22,7 @@ import { FiscalYearDateRangeService } from '../fiscal-year-date-range-picker/fis
   host: { style: 'display: block; width: 100%;' },
 })
 export class FiscalYearDatepickerComponent {
+  private readonly hostElement = inject<ElementRef<HTMLElement>>(ElementRef);
   protected readonly datepickerAdapter = inject(DatepickerDateAdapterService);
   protected readonly dateRange = inject(FiscalYearDateRangeService);
 
@@ -45,4 +47,10 @@ export class FiscalYearDatepickerComponent {
       (date: Date): boolean =>
         !this.dateRange.isWithinFiscalYear(date),
   );
+
+  focusInput(): void {
+    this.hostElement.nativeElement
+      .querySelector<HTMLInputElement>('input[data-slot="datepicker-input"]')
+      ?.focus();
+  }
 }

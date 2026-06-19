@@ -131,6 +131,7 @@
               </td>
               <td>
                 <app-fiscal-year-datepicker
+                  #paymentDatepicker
                   inputAriaLabel="Payment date"
                   [value]="paymentDate()"
                   [invalid]="submitted() && getPaymentDateError() !== null"

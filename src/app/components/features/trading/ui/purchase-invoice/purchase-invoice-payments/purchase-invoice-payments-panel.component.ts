@@ -1,4 +1,14 @@
-import { Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  ViewChild,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+  untracked,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import {
   TngAutocompleteComponent,
@@ -85,6 +95,9 @@ const LAST_PAYMENT_DATE_KEY_PREFIX = 'daybook:purchase-invoice-payment:last-date
 export class PurchaseInvoicePaymentsPanelComponent {
   readonly invoiceId = input.required<string>();
 
+  @ViewChild('paymentDatepicker') private paymentDatepicker?: FiscalYearDatepickerComponent;
+
+  private readonly hostElement = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly router = inject(Router);
   private readonly dateManagement = inject(DateManagementService);
   private readonly toastStore = inject(ToastStore);
@@ -339,6 +352,10 @@ export class PurchaseInvoicePaymentsPanelComponent {
     this.selectedBankCash.set(null);
     this.bankCashId.set('');
     this.bankCashQuery.set('');
+
+    if (outstanding > 0) {
+      this.queuePaymentDateFocus();
+    }
   }
 
   private currentDraft(): PurchaseInvoicePaymentDraft {
@@ -355,6 +372,39 @@ export class PurchaseInvoicePaymentsPanelComponent {
   protected getPaymentDateError(): string | null {
     if (!this.paymentDate()) return null;
     return this.fiscalYearDateRange.errorMessage(this.paymentDate(), 'Payment date');
+  }
+
+  private queuePaymentDateFocus(): void {
+    globalThis.setTimeout(() => {
+      if (!this.shouldFocusPaymentDate()) return;
+
+      this.paymentDatepicker?.focusInput();
+    });
+  }
+
+  private shouldFocusPaymentDate(): boolean {
+    const host = this.hostElement.nativeElement;
+    const activeElement = host.ownerDocument.activeElement;
+
+    if (!activeElement || activeElement === host.ownerDocument.body) return true;
+    if (!(activeElement instanceof HTMLElement)) return true;
+    if (host.contains(activeElement)) return true;
+
+    return !this.isFormControl(activeElement);
+  }
+
+  private isFormControl(element: HTMLElement): boolean {
+    return element.matches(
+      [
+        'button',
+        'input',
+        'select',
+        'textarea',
+        '[contenteditable="true"]',
+        '[role="combobox"]',
+        '[role="textbox"]',
+      ].join(','),
+    );
   }
 
   private defaultPaymentDate(): string {

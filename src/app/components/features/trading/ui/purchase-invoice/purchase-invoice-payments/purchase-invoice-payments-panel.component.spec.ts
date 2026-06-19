@@ -1,9 +1,10 @@
-import { signal } from '@angular/core';
+import { Component, ElementRef, inject, input, output, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
+import { FiscalYearDatepickerComponent } from '../../../../../../shared/fiscal-year-datepicker';
 import { FiscalYearDateRangeService } from '../../../../../../shared/fiscal-year-date-range-picker';
 import { UserSessionStore } from '../../../../management/data/user-session/user-session.store';
 import { BankCashStore } from '../../../data/bank-cash';
@@ -36,11 +37,55 @@ const payment: VendorPayment = {
   vendorid: 'vendor-1',
 };
 
+const paidInvoice: PurchaseInvoice = {
+  ...invoice,
+  payments: [{ amount: 1000, vendorpaymentid: 'payment-1' }],
+};
+
+const focusTemplate = `
+  @if (canAddPayment()) {
+    <app-fiscal-year-datepicker
+      #paymentDatepicker
+      inputAriaLabel="Payment date"
+      [value]="paymentDate()"
+      [invalid]="submitted() && getPaymentDateError() !== null"
+      (valueChange)="onPaymentDateChange($event)"
+    />
+  }
+`;
+
+@Component({
+  selector: 'app-fiscal-year-datepicker',
+  standalone: true,
+  template: '<input data-slot="datepicker-input" />',
+})
+class TestFiscalYearDatepickerComponent {
+  private readonly hostElement = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  readonly inputAriaLabel = input('Choose date');
+  readonly invalid = input(false);
+  readonly value = input<unknown>(null);
+
+  readonly valueChange = output<unknown>();
+
+  focusInput(): void {
+    this.hostElement.nativeElement
+      .querySelector<HTMLInputElement>('input[data-slot="datepicker-input"]')
+      ?.focus();
+  }
+}
+
 type PaymentPanelHarness = Readonly<{
   amount: { set(value: string): void };
   bankCashId: { set(value: string): void };
   paymentDate: { set(value: string): void };
   savePayment(): Promise<void>;
+}>;
+
+type SetupOptions = Readonly<{
+  selectedInvoice?: PurchaseInvoice;
+  stubDatepicker?: boolean;
+  template?: string;
 }>;
 
 function asHarness(component: PurchaseInvoicePaymentsPanelComponent): PaymentPanelHarness {
@@ -54,8 +99,18 @@ function setValidDraft(component: PurchaseInvoicePaymentsPanelComponent): void {
   panel.paymentDate.set('2026-06-18');
 }
 
-async function setup() {
-  const selectedItem = signal<PurchaseInvoice | null>(invoice);
+async function flushDeferredFocus(): Promise<void> {
+  await Promise.resolve();
+  await Promise.resolve();
+  await new Promise<void>((resolve) => {
+    globalThis.setTimeout(resolve);
+  });
+  await Promise.resolve();
+}
+
+async function setup(options: SetupOptions = {}) {
+  const selectedInvoice = options.selectedInvoice ?? invoice;
+  const selectedItem = signal<PurchaseInvoice | null>(selectedInvoice);
   const purchaseInvoiceError = signal<string | null>(null);
   const purchaseInvoiceLoading = signal(false);
   const bankCashItems = signal([]);
@@ -63,7 +118,7 @@ async function setup() {
   const create = vi.fn();
   const danger = vi.fn();
 
-  await TestBed.configureTestingModule({
+  const testingModule = TestBed.configureTestingModule({
     imports: [PurchaseInvoicePaymentsPanelComponent],
     providers: [
       provideRouter([]),
@@ -77,6 +132,7 @@ async function setup() {
       {
         provide: DateManagementService,
         useValue: {
+          displayDateFormat: signal('DD/MM/YYYY'),
           formatDisplayDate: vi.fn(
             (value: string | undefined, fallback = '-') => value ?? fallback,
           ),
@@ -87,6 +143,9 @@ async function setup() {
         useValue: {
           defaultDate: vi.fn((value?: string) => value ?? '2026-06-18'),
           errorMessage: vi.fn(() => null),
+          isWithinFiscalYear: vi.fn(() => true),
+          maxDate: signal(null),
+          minDate: signal(null),
           toIsoDate: vi.fn((value: unknown) => (typeof value === 'string' ? value : null)),
         },
       },
@@ -97,7 +156,7 @@ async function setup() {
           clearSelectedItem: vi.fn(() => selectedItem.set(null)),
           error: purchaseInvoiceError,
           isLoading: purchaseInvoiceLoading,
-          loadPurchaseInvoiceById: vi.fn(async () => invoice),
+          loadPurchaseInvoiceById: vi.fn(async () => selectedInvoice),
           selectedItem,
         },
       },
@@ -133,20 +192,27 @@ async function setup() {
         },
       },
     ],
-  })
-    .overrideComponent(PurchaseInvoicePaymentsPanelComponent, {
-      set: { template: '' },
-    })
-    .compileComponents();
+  });
+
+  if (options.stubDatepicker) {
+    testingModule.overrideComponent(PurchaseInvoicePaymentsPanelComponent, {
+      remove: { imports: [FiscalYearDatepickerComponent] },
+      add: { imports: [TestFiscalYearDatepickerComponent] },
+    });
+  }
+  testingModule.overrideTemplate(PurchaseInvoicePaymentsPanelComponent, options.template ?? '');
+
+  await testingModule.compileComponents();
 
   const fixture = TestBed.createComponent(PurchaseInvoicePaymentsPanelComponent);
-  fixture.componentRef.setInput('invoiceId', invoice.id);
+  fixture.componentRef.setInput('invoiceId', selectedInvoice.id);
   setValidDraft(fixture.componentInstance);
 
   return {
     component: fixture.componentInstance,
     create,
     danger,
+    fixture,
     vendorPaymentError,
   };
 }
@@ -176,5 +242,80 @@ describe('PurchaseInvoicePaymentsPanelComponent', () => {
     await asHarness(component).savePayment();
 
     expect(danger).not.toHaveBeenCalled();
+  });
+
+  it('focuses the payment date input after the add-payment row resets', async () => {
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+
+    const { fixture } = await setup({ stubDatepicker: true, template: focusTemplate });
+
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    await flushDeferredFocus();
+
+    const host = fixture.nativeElement as HTMLElement;
+    const dateInput = host.querySelector<HTMLInputElement>(
+      'input[data-slot="datepicker-input"]',
+    );
+
+    expect(dateInput).not.toBeNull();
+    expect(fixture.nativeElement.ownerDocument.activeElement).toBe(dateInput);
+  });
+
+  it('keeps focus on an outside form control when the add-payment row resets', async () => {
+    const outsideInput = document.createElement('input');
+    document.body.appendChild(outsideInput);
+    outsideInput.focus();
+
+    try {
+      const { fixture } = await setup({ stubDatepicker: true, template: focusTemplate });
+
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      await flushDeferredFocus();
+
+      const host = fixture.nativeElement as HTMLElement;
+      const dateInput = host.querySelector<HTMLInputElement>(
+        'input[data-slot="datepicker-input"]',
+      );
+
+      expect(dateInput).not.toBeNull();
+      expect(fixture.nativeElement.ownerDocument.activeElement).toBe(outsideInput);
+    } finally {
+      outsideInput.remove();
+    }
+  });
+
+  it('does not focus payment date when the invoice is already paid', async () => {
+    const outsideInput = document.createElement('input');
+    document.body.appendChild(outsideInput);
+    outsideInput.focus();
+
+    try {
+      const { fixture } = await setup({
+        selectedInvoice: paidInvoice,
+        stubDatepicker: true,
+        template: focusTemplate,
+      });
+
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      await flushDeferredFocus();
+
+      const host = fixture.nativeElement as HTMLElement;
+      const dateInput = host.querySelector<HTMLInputElement>(
+        'input[data-slot="datepicker-input"]',
+      );
+
+      expect(dateInput).toBeNull();
+      expect(fixture.nativeElement.ownerDocument.activeElement).toBe(outsideInput);
+    } finally {
+      outsideInput.remove();
+    }
   });
 });
