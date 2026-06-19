@@ -1,16 +1,302 @@
-<main class="page-shell">
-  <tng-card variant="outline" tone="success" padding="lg">
-    <tng-card-header>
-      <tng-card-title>Dashboard</tng-card-title>
-      <tng-card-description> Your Daybook Cloud session is ready. </tng-card-description>
-    </tng-card-header>
-    <tng-card-content>
-      <p>
-        We found {{ organizationCount() }} organization{{
-          organizationCount() === 1 ? '' : 's'
-        }}
-        linked to this account.
-      </p>
-    </tng-card-content>
-  </tng-card>
+<main class="dashboard-page">
+  <app-page-heading
+    eyebrow="Accounting"
+    title="Dashboard"
+    [description]="headerDescription()"
+  >
+    @if (summary(); as data) {
+      <div class="heading-meta" aria-label="Dashboard reporting period">
+        <span>As of {{ formatDate(data.asOfDate) }}</span>
+        <span>Through {{ formatMonth(data.lastCompletedMonth) }}</span>
+      </div>
+    }
+
+    <tng-button
+      type="button"
+      appearance="outline"
+      tone="neutral"
+      [disabled]="dashboardStore.isLoading() || !canViewDashboard() || !!missingContextMessage()"
+      (click)="retry()"
+    >
+      @if (dashboardStore.isLoading()) {
+        <tng-progress-spinner
+          [indeterminate]="true"
+          [size]="16"
+          [strokeWidth]="2"
+          ariaLabel="Loading dashboard"
+        />
+      } @else {
+        <tng-icon icon="refresh-cw" aria-hidden="true" />
+      }
+      Refresh
+    </tng-button>
+  </app-page-heading>
+
+  @if (!canViewDashboard()) {
+    <div class="notice notice--danger" role="alert">
+      You do not have permission to view the accountant dashboard.
+    </div>
+  } @else if (missingContextMessage()) {
+    <div class="notice notice--warning" role="status">
+      {{ missingContextMessage() }}
+    </div>
+  } @else {
+    @if (dashboardStore.error()) {
+      <div class="notice notice--danger" role="alert">
+        <span>{{ dashboardStore.error() }}</span>
+        <tng-button
+          type="button"
+          appearance="outline"
+          tone="neutral"
+          [disabled]="dashboardStore.isLoading()"
+          (click)="retry()"
+        >
+          Retry
+        </tng-button>
+      </div>
+    }
+
+    @if (dashboardStore.isLoading()) {
+      <div class="loading-panel" role="status" aria-live="polite">
+        <tng-progress-spinner
+          [indeterminate]="true"
+          [size]="24"
+          [strokeWidth]="2"
+          ariaLabel="Loading dashboard"
+        />
+        <span>Loading dashboard...</span>
+      </div>
+    }
+
+    @if (summary(); as data) {
+      <section class="dashboard-summary" aria-label="Dashboard context">
+        <div>
+          <span class="summary-label">Reporting date</span>
+          <strong>{{ formatDate(data.asOfDate) }}</strong>
+        </div>
+        <div>
+          <span class="summary-label">Last completed month</span>
+          <strong>{{ formatMonth(data.lastCompletedMonth) }}</strong>
+        </div>
+        @if (dashboardStore.loadedAt()) {
+          <div>
+            <span class="summary-label">Loaded</span>
+            <strong>{{ formatLoadedAt(dashboardStore.loadedAt()) }}</strong>
+          </div>
+        }
+      </section>
+
+      <section class="dashboard-section" aria-labelledby="gst-compliance-title">
+        <div class="section-heading">
+          <h2 id="gst-compliance-title">GST compliance</h2>
+          <p>Return reconciliation status through the last completed month.</p>
+        </div>
+
+        <div class="metric-grid metric-grid--two">
+          @for (card of complianceCards(); track card.actionKey) {
+            <tng-card
+              class="metric-card compliance-card"
+              [class.metric-card--muted]="totalComplianceMonths(card.metric) === 0"
+              [class.metric-card--resolved]="
+                totalComplianceMonths(card.metric) > 0 && !needsComplianceWork(card.metric)
+              "
+              variant="outline"
+              padding="sm"
+              interactive
+              role="button"
+              tabindex="0"
+              [attr.aria-label]="card.title + ' GST compliance'"
+              (click)="openAction(card.actionKey)"
+              (keydown.enter)="openAction(card.actionKey)"
+              (keydown.space.prevent)="openAction(card.actionKey)"
+            >
+              <div class="metric-card__header">
+                <span class="metric-card__icon" aria-hidden="true">
+                  <tng-icon [icon]="card.icon" />
+                </span>
+                <div>
+                  <h3>{{ card.title }}</h3>
+                  <p>{{ totalComplianceMonths(card.metric) }} months tracked</p>
+                </div>
+                <tng-icon class="metric-card__chevron" icon="chevron-right" aria-hidden="true" />
+              </div>
+
+              <div class="compliance-stats">
+                <div class="compliance-stat compliance-stat--green">
+                  <span>{{ card.metric.greenMonths }}</span>
+                  <small>Green</small>
+                </div>
+                <div class="compliance-stat compliance-stat--partial">
+                  <span>{{ card.metric.partialMonths }}</span>
+                  <small>Partial</small>
+                </div>
+                <div class="compliance-stat compliance-stat--not-started">
+                  <span>{{ card.metric.notStartedMonths }}</span>
+                  <small>Not started</small>
+                </div>
+              </div>
+            </tng-card>
+          }
+        </div>
+      </section>
+
+      <section class="dashboard-section" aria-labelledby="pending-allocations-title">
+        <div class="section-heading">
+          <h2 id="pending-allocations-title">Pending allocations</h2>
+          <p>Receipts and payments with unallocated balances.</p>
+        </div>
+
+        <div class="metric-grid metric-grid--two">
+          @for (card of pendingAllocationCards(); track card.actionKey) {
+            <tng-card
+              class="metric-card"
+              [class.metric-card--muted]="card.count === 0"
+              variant="outline"
+              padding="sm"
+              interactive
+              role="button"
+              tabindex="0"
+              [attr.aria-label]="card.title + ' pending allocations'"
+              (click)="openAction(card.actionKey)"
+              (keydown.enter)="openAction(card.actionKey)"
+              (keydown.space.prevent)="openAction(card.actionKey)"
+            >
+              <div class="metric-card__header">
+                <span class="metric-card__icon" aria-hidden="true">
+                  <tng-icon [icon]="card.icon" />
+                </span>
+                <div>
+                  <h3>{{ card.title }}</h3>
+                  <p>{{ card.description }}</p>
+                </div>
+                <tng-icon class="metric-card__chevron" icon="chevron-right" aria-hidden="true" />
+              </div>
+
+              <div class="metric-values">
+                <div>
+                  <span class="metric-value">{{ card.count }}</span>
+                  <span class="metric-label">Count</span>
+                </div>
+                <div>
+                  <span class="metric-value">{{ formatAmount(card.amount) }}</span>
+                  <span class="metric-label">Amount</span>
+                </div>
+                <div>
+                  <span class="metric-value">{{ formatDate(card.metric.oldestDate) }}</span>
+                  <span class="metric-label">Oldest</span>
+                </div>
+              </div>
+            </tng-card>
+          }
+        </div>
+      </section>
+
+      <section class="dashboard-section" aria-labelledby="pending-journals-title">
+        <div class="section-heading">
+          <h2 id="pending-journals-title">Pending journals</h2>
+          <p>Source records that do not have linked journals.</p>
+        </div>
+
+        <div class="metric-grid">
+          @for (card of pendingJournalCards(); track card.actionKey) {
+            <tng-card
+              class="metric-card"
+              [class.metric-card--muted]="card.count === 0"
+              variant="outline"
+              padding="sm"
+              interactive
+              role="button"
+              tabindex="0"
+              [attr.aria-label]="card.title + ' pending journals'"
+              (click)="openAction(card.actionKey)"
+              (keydown.enter)="openAction(card.actionKey)"
+              (keydown.space.prevent)="openAction(card.actionKey)"
+            >
+              <div class="metric-card__header">
+                <span class="metric-card__icon" aria-hidden="true">
+                  <tng-icon [icon]="card.icon" />
+                </span>
+                <div>
+                  <h3>{{ card.title }}</h3>
+                  <p>{{ card.description }}</p>
+                </div>
+                <tng-icon class="metric-card__chevron" icon="chevron-right" aria-hidden="true" />
+              </div>
+
+              <div class="metric-values">
+                <div>
+                  <span class="metric-value">{{ card.count }}</span>
+                  <span class="metric-label">Count</span>
+                </div>
+                <div>
+                  <span class="metric-value">{{ formatAmount(card.amount) }}</span>
+                  <span class="metric-label">Amount</span>
+                </div>
+                <div>
+                  <span class="metric-value">{{ formatDate(card.metric.oldestDate) }}</span>
+                  <span class="metric-label">Oldest</span>
+                </div>
+              </div>
+            </tng-card>
+          }
+        </div>
+      </section>
+
+      @if (bankReconciliationCard(); as card) {
+        <section class="dashboard-section" aria-labelledby="pending-reconciliation-title">
+          <div class="section-heading">
+            <h2 id="pending-reconciliation-title">Pending bank reconciliation</h2>
+            <p>Bank transactions that do not have linked journals.</p>
+          </div>
+
+          <div class="metric-grid metric-grid--single">
+            <tng-card
+              class="metric-card bank-card"
+              [class.metric-card--muted]="card.metric.count === 0"
+              variant="outline"
+              padding="sm"
+              interactive
+              role="button"
+              tabindex="0"
+              [attr.aria-label]="card.title + ' pending reconciliation'"
+              (click)="openAction(card.actionKey)"
+              (keydown.enter)="openAction(card.actionKey)"
+              (keydown.space.prevent)="openAction(card.actionKey)"
+            >
+              <div class="metric-card__header">
+                <span class="metric-card__icon" aria-hidden="true">
+                  <tng-icon [icon]="card.icon" />
+                </span>
+                <div>
+                  <h3>{{ card.title }}</h3>
+                  <p>Unreconciled bank statement activity</p>
+                </div>
+                <tng-icon class="metric-card__chevron" icon="chevron-right" aria-hidden="true" />
+              </div>
+
+              <div class="metric-values metric-values--four">
+                <div>
+                  <span class="metric-value">{{ card.metric.count }}</span>
+                  <span class="metric-label">Count</span>
+                </div>
+                <div>
+                  <span class="metric-value">{{ formatAmount(card.metric.debitAmount) }}</span>
+                  <span class="metric-label">Debit</span>
+                </div>
+                <div>
+                  <span class="metric-value">{{ formatAmount(card.metric.creditAmount) }}</span>
+                  <span class="metric-label">Credit</span>
+                </div>
+                <div>
+                  <span class="metric-value">{{ formatDate(card.metric.oldestDate) }}</span>
+                  <span class="metric-label">Oldest</span>
+                </div>
+              </div>
+            </tng-card>
+          </div>
+        </section>
+      }
+    }
+  }
 </main>
+
