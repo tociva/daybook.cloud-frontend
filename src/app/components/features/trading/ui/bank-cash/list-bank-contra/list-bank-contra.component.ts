@@ -1,14 +1,17 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   TngButtonComponent,
   TngCardComponent,
+  TngProgressSpinnerComponent,
   TngTable,
   TngTableCellTpl,
 } from '@tailng-ui/components';
 import type { TngTableColumn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
+import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
+import { ToastStore } from '../../../../../../core/toast/toast.store';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { formatAmountWithCurrency } from '../../../../../../shared/format/currency';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
@@ -19,8 +22,10 @@ import {
   CrudPaginatorComponent,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField, Lb4ListQuery } from '../../../../../../shared/crud';
+import { JournalService, JournalSourceType } from '../../../../accounting/data/journal';
+import { ReconciliationMatchService } from '../../../../accounting/data/reconciliation-match';
 import { ContraTransactionStore } from '../../../data/contra-transaction';
-import type { ContraTransaction } from '../../../data/contra-transaction';
+import type { ContraTransaction, ContraTransactionJournal } from '../../../data/contra-transaction';
 
 @Component({
   selector: 'app-list-bank-contra',
@@ -33,6 +38,7 @@ import type { ContraTransaction } from '../../../data/contra-transaction';
     CrudPaginatorComponent,
     TngIcon,
     EmptyStateComponent,
+    TngProgressSpinnerComponent,
     TngTable,
     TngTableCellTpl,
     TableRowIconButtonComponent,
@@ -44,10 +50,18 @@ import type { ContraTransaction } from '../../../data/contra-transaction';
 })
 export class ListBankContraComponent {
   private readonly dateManagement = inject(DateManagementService);
+  private readonly journalService = inject(JournalService);
+  private readonly reconciliationMatchService = inject(ReconciliationMatchService);
   private readonly router = inject(Router);
+  private readonly toastStore = inject(ToastStore);
   protected readonly contraTransactionStore = inject(ContraTransactionStore);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly hasError = computed(() => this.contraTransactionStore.error() !== null);
+  protected readonly generatingJournalContraId = signal<string | null>(null);
+  protected readonly journalsLoading = signal(false);
+  protected readonly journalsByContraId = signal<Map<string, readonly ContraTransactionJournal[]>>(
+    new Map(),
+  );
 
   protected readonly columns: readonly TngTableColumn<ContraTransaction>[] = [
     { id: 'date', label: 'Date', sortable: true, width: '10rem' },
@@ -62,6 +76,7 @@ export class ListBankContraComponent {
       width: '12rem',
     },
     { id: 'description', label: 'Description', truncate: true },
+    { id: 'journals', label: 'Journals', width: '12rem' },
     { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '10rem' },
   ];
 
@@ -71,7 +86,7 @@ export class ListBankContraComponent {
   ];
 
   constructor() {
-    this.crudQuery.init((filter) => this.loadContraTransactions(filter));
+    this.crudQuery.init((filter) => this.loadContraTransactionsWithJournals(filter));
   }
 
   protected formatDate(value: string | undefined): string {
@@ -89,7 +104,45 @@ export class ListBankContraComponent {
   }
 
   protected reloadContraTransactions(): void {
-    void this.loadContraTransactions(this.crudQuery.filter());
+    void this.loadContraTransactionsWithJournals(this.crudQuery.filter());
+  }
+
+  protected linkedJournals(row: ContraTransaction): readonly ContraTransactionJournal[] {
+    const id = row.id;
+    if (!id) return [];
+    return this.journalsByContraId().get(id) ?? [];
+  }
+
+  protected hasJournals(row: ContraTransaction): boolean {
+    return this.linkedJournals(row).length > 0;
+  }
+
+  protected isGeneratingJournal(row: ContraTransaction): boolean {
+    return Boolean(row.id && this.generatingJournalContraId() === row.id);
+  }
+
+  protected viewJournal(journal: ContraTransactionJournal): void {
+    void this.router.navigate(['/app/accounting/journal', journal.id], {
+      queryParams: { burl: this.router.url },
+    });
+  }
+
+  protected async assignJournal(row: ContraTransaction): Promise<void> {
+    if (!row.id || this.hasJournals(row) || this.isGeneratingJournal(row)) return;
+
+    this.generatingJournalContraId.set(row.id);
+    try {
+      const journal = await this.journalService.createFromContraTransaction(row.id);
+      this.toastStore.success('Journal generated.');
+      const ref: ContraTransactionJournal = { id: journal.id, number: journal.number };
+      const map = new Map(this.journalsByContraId());
+      map.set(row.id, [ref]);
+      this.journalsByContraId.set(map);
+    } catch (error) {
+      this.toastStore.danger(getApiErrorMessage(error, 'Failed to generate journal.'));
+    } finally {
+      this.generatingJournalContraId.set(null);
+    }
   }
 
   protected viewContra(item: ContraTransaction): void {
@@ -116,10 +169,42 @@ export class ListBankContraComponent {
     });
   }
 
-  private async loadContraTransactions(filter: Lb4ListQuery): Promise<void> {
+  private async loadContraTransactionsWithJournals(filter: Lb4ListQuery): Promise<void> {
     await this.contraTransactionStore.loadContraTransactions({
       ...filter,
       includes: ['frombcash', 'tobcash'],
     });
+    if (this.contraTransactionStore.error()) {
+      this.journalsByContraId.set(new Map());
+      this.journalsLoading.set(false);
+      return;
+    }
+    await this.loadLinkedJournals(this.contraTransactionStore.items());
+  }
+
+  private async loadLinkedJournals(contras: readonly ContraTransaction[]): Promise<void> {
+    const ids = contras.map((contra) => contra.id).filter((id): id is string => Boolean(id));
+    if (!ids.length) {
+      this.journalsByContraId.set(new Map());
+      this.journalsLoading.set(false);
+      return;
+    }
+
+    this.journalsLoading.set(true);
+    try {
+      const groups = await this.reconciliationMatchService.findJournalsBySourceIds(
+        JournalSourceType.CONTRA_TRANSACTION,
+        ids,
+      );
+      const map = new Map<string, readonly ContraTransactionJournal[]>();
+      for (const group of groups) {
+        map.set(group.sourceid, group.journals);
+      }
+      this.journalsByContraId.set(map);
+    } catch {
+      this.journalsByContraId.set(new Map());
+    } finally {
+      this.journalsLoading.set(false);
+    }
   }
 }

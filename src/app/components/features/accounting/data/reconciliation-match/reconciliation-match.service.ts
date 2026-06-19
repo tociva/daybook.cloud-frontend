@@ -19,6 +19,7 @@ const UNLINK_SOURCE_PATH_BY_TYPE: Readonly<Record<JournalSourceType, string>> = 
   [JournalSourceType.PURCHASE_INVOICE]: 'purchase-invoice',
   [JournalSourceType.RECEIPT]: 'receipt',
   [JournalSourceType.PAYMENT]: 'payment',
+  [JournalSourceType.CONTRA_TRANSACTION]: 'contra-transaction',
 };
 
 @Injectable({ providedIn: 'root' })

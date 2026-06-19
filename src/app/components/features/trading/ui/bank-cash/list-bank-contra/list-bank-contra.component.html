@@ -103,8 +103,43 @@
             {{ row.description || '' }}
           </ng-template>
 
+          <ng-template tngTableCellTemplate="journals" let-row="row">
+            @if (journalsLoading()) {
+              <tng-progress-spinner
+                class="journal-cell-spinner"
+                [indeterminate]="true"
+                [size]="16"
+                [strokeWidth]="2"
+                ariaLabel="Loading journals"
+              />
+            } @else if (hasJournals(row)) {
+              <span class="journal-links">
+                @for (journal of linkedJournals(row); track journal.id; let last = $last) {
+                  <button type="button" class="link-button" (click)="viewJournal(journal)">
+                    {{ journal.number }}
+                  </button>@if (!last) {<span>, </span>}
+                }
+              </span>
+            } @else {
+              <button
+                type="button"
+                class="link-button"
+                [disabled]="isGeneratingJournal(row)"
+                (click)="assignJournal(row)"
+              >
+                Assign
+              </button>
+            }
+          </ng-template>
+
           <ng-template tngTableCellTemplate="actions" let-row="row">
             <div class="row-actions">
+              <app-table-row-icon-button
+                icon="bookOpen"
+                ariaLabel="Assign journal"
+                [disabled]="hasJournals(row) || isGeneratingJournal(row)"
+                (action)="assignJournal(row)"
+              />
               <app-table-row-icon-button
                 icon="eye"
                 ariaLabel="View bank contra transaction"

@@ -6,6 +6,7 @@ const JOURNAL_SOURCE_TYPE_LABELS: Readonly<Record<JournalSourceType, string>> = 
   [JournalSourceType.RECEIPT]: 'Customer Receipt',
   [JournalSourceType.PAYMENT]: 'Vendor Payment',
   [JournalSourceType.BANK_TXN]: 'Bank Transaction',
+  [JournalSourceType.CONTRA_TRANSACTION]: 'Bank Contra',
 };
 
 function formatUnknownSourceType(value: string): string {

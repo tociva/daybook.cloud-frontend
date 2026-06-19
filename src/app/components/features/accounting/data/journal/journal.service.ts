@@ -84,6 +84,22 @@ export class JournalService {
     return firstValueFrom(this.http.post<Journal[]>(url, { vendorpaymentids }));
   }
 
+  async createFromContraTransaction(contraTransactionId: string): Promise<Journal> {
+    const journals = await this.createFromContraTransactions([contraTransactionId]);
+    const journal = journals[0];
+    if (!journal) {
+      throw new Error('No journal returned.');
+    }
+    return journal;
+  }
+
+  async createFromContraTransactions(
+    contratransactionids: readonly string[],
+  ): Promise<readonly Journal[]> {
+    const url = `${await this.collectionUrl()}/contra-transactions`;
+    return firstValueFrom(this.http.post<Journal[]>(url, { contratransactionids }));
+  }
+
   /** Backend returns 204 No Content. */
   async delete(id: string): Promise<void> {
     const url = `${await this.collectionUrl()}/${id}`;

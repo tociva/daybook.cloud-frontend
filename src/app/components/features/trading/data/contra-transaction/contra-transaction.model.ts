@@ -28,5 +28,10 @@ export type ContraTransaction = ContraTransactionPayload &
     tobcash?: BankCash;
   }>;
 
+export type ContraTransactionJournal = Readonly<{
+  id: string;
+  number: string;
+}>;
+
 export type ContraTransactionListQuery = Lb4ListQuery;
 export type ContraTransactionGetQuery = Readonly<{ includes?: readonly Lb4Include[] }>;

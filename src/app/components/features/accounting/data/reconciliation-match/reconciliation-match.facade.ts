@@ -15,6 +15,7 @@ const UNLINKABLE_SOURCE_TYPES = new Set<JournalSourceType>([
   JournalSourceType.PURCHASE_INVOICE,
   JournalSourceType.RECEIPT,
   JournalSourceType.PAYMENT,
+  JournalSourceType.CONTRA_TRANSACTION,
 ]);
 
 @Injectable({ providedIn: 'root' })
