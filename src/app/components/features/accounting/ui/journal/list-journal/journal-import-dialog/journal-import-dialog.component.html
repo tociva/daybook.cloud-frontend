@@ -1,0 +1,81 @@
+<tng-dialog
+  [title]="config()?.dialogTitle ?? 'Import Journals'"
+  size="lg"
+  [open]="open()"
+  [closeOnBackdrop]="!generating()"
+  [closeOnEscape]="!generating()"
+  (closed)="onDialogClosed()"
+>
+  <div class="journal-import-dialog">
+    @if (error(); as errorMessage) {
+      <div class="notice notice--danger">{{ errorMessage }}</div>
+    }
+
+    @if (loading()) {
+      <div class="notice">Loading source documents...</div>
+    } @else if (candidates().length === 0) {
+      <app-empty-state
+        icon="fileText"
+        [title]="config()?.emptyTitle ?? 'No documents to import'"
+        [description]="config()?.emptyDescription ?? 'All documents already have journals generated.'"
+      />
+    } @else {
+      <tng-table
+        ariaLabel="Source documents without journals"
+        density="comfortable"
+        [columns]="columns()"
+        [items]="candidates()"
+        [loading]="loading()"
+        [error]="false"
+      >
+        <ng-template tngTableCellTemplate="number" let-row="row">
+          {{ row.number }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="party" let-row="row">
+          {{ row.party }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="date" let-row="row">
+          {{ formatDisplayDate(row.date) }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="amount" let-row="row">
+          {{ formatAmount(row) }}
+        </ng-template>
+      </tng-table>
+    }
+
+    <div class="dialog-actions">
+      <span class="dialog-actions__summary">
+        {{ candidates().length }}
+        {{ config()?.itemLabel ?? 'document' }}{{ candidates().length === 1 ? '' : 's' }}
+      </span>
+
+      <tng-button
+        type="button"
+        appearance="ghost"
+        tone="neutral"
+        [disabled]="generating()"
+        (click)="onCancel()"
+      >
+        Cancel
+      </tng-button>
+
+      <tng-button
+        type="button"
+        appearance="solid"
+        tone="primary"
+        [disabled]="createDisabled()"
+        (click)="onCreate()"
+      >
+        @if (generating()) {
+          <tng-icon icon="loaderCircle" aria-hidden="true" />
+          Creating...
+        } @else {
+          {{ config()?.actionLabel ?? 'Create Journals' }}
+        }
+      </tng-button>
+    </div>
+  </div>
+</tng-dialog>

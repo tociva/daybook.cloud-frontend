@@ -32,7 +32,6 @@ import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
-import { formatAmountWithCurrency } from '../../../../../../shared/format/currency';
 import { JournalService, JournalSourceType, JournalStore, journalSourceTypeLabel } from '../../../data/journal';
 import type { Journal, JournalEntry } from '../../../data/journal';
 import { LedgerStore } from '../../../data/ledger';
@@ -52,6 +51,11 @@ import {
   ReconciliationMatchFacade,
   ReconciliationMatchService,
 } from '../../../data/reconciliation-match';
+import {
+  JournalImportDialogComponent,
+  type JournalImportDialogCandidate,
+  type JournalImportDialogConfig,
+} from './journal-import-dialog/journal-import-dialog.component';
 
 type JournalSourceMatch = Readonly<{
   sourceid: string;
@@ -79,22 +83,9 @@ type JournalImportSource =
   | 'vendorPayment'
   | 'contraTransaction';
 
-type JournalImportCandidate = Readonly<{
-  id: string;
-  amount: number | undefined;
-  currencycode: string | undefined;
-  date: string;
-  number: string;
-  party: string;
-}>;
+type JournalImportCandidate = JournalImportDialogCandidate;
 
-type JournalImportConfig = Readonly<{
-  actionLabel: string;
-  amountLabel: string;
-  dialogTitle: string;
-  emptyDescription: string;
-  emptyTitle: string;
-  itemLabel: string;
+type JournalImportConfig = JournalImportDialogConfig & Readonly<{
   sourceType: JournalSourceType;
 }>;
 
@@ -162,6 +153,7 @@ const JOURNAL_IMPORT_CONFIG: Record<JournalImportSource, JournalImportConfig> = 
     TngMenuItem,
     EmptyStateComponent,
     BulkUploadButtonComponent,
+    JournalImportDialogComponent,
     TngTable,
     TngTableCellTpl,
     TableRowIconButtonComponent,
@@ -254,20 +246,6 @@ export class ListJournalComponent {
       width: '10rem',
     },
   ];
-
-  protected readonly journalImportColumns = computed<readonly TngTableColumn<JournalImportCandidate>[]>(
-    () => [
-    { id: 'number', label: 'Document', width: '11rem' },
-    { id: 'party', label: 'Party', width: '15rem' },
-    { id: 'date', label: 'Date', width: '9rem' },
-    {
-      id: 'amount',
-      label: this.journalImportConfig()?.amountLabel ?? 'Amount',
-      align: 'end',
-      headerAlign: 'end',
-      width: '11rem',
-    },
-  ]);
 
   protected readonly rows = computed<readonly JournalTableRow[]>(() =>
     this.journalStore.items().flatMap((journal, index) => this.toJournalRows(journal, index)),
@@ -512,10 +490,6 @@ export class ListJournalComponent {
 
   protected sortedEntries(entries: readonly JournalEntry[] | undefined): readonly JournalEntry[] {
     return [...(entries ?? [])].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-  }
-
-  protected formatJournalImportAmount(item: JournalImportCandidate): string {
-    return formatAmountWithCurrency(item.amount, item.currencycode);
   }
 
   protected async openJournalImportDialog(source: JournalImportSource): Promise<void> {

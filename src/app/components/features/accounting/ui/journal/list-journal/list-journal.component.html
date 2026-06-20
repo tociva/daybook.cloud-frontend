@@ -241,89 +241,15 @@
     </div>
   </tng-dialog>
 
-  <tng-dialog
-    [title]="journalImportConfig()?.dialogTitle ?? 'Import Journals'"
-    size="lg"
+  <app-journal-import-dialog
     [open]="journalImportSource() !== null"
-    [closeOnBackdrop]="!journalImportGenerating()"
-    [closeOnEscape]="!journalImportGenerating()"
+    [config]="journalImportConfig()"
+    [candidates]="journalImportCandidates()"
+    [error]="journalImportError()"
+    [loading]="journalImportLoading()"
+    [generating]="journalImportGenerating()"
     (closed)="closeJournalImportDialog()"
-  >
-    <div class="journal-import-dialog">
-      @if (journalImportError(); as error) {
-        <div class="notice notice--danger">{{ error }}</div>
-      }
-
-      @if (journalImportLoading()) {
-        <div class="notice">Loading source documents...</div>
-      } @else if (journalImportCandidates().length === 0) {
-        <app-empty-state
-          icon="fileText"
-          [title]="journalImportConfig()?.emptyTitle ?? 'No documents to import'"
-          [description]="journalImportConfig()?.emptyDescription ?? 'All documents already have journals generated.'"
-        />
-      } @else {
-        <tng-table
-          ariaLabel="Source documents without journals"
-          density="comfortable"
-          [columns]="journalImportColumns()"
-          [items]="journalImportCandidates()"
-          [loading]="journalImportLoading()"
-          [error]="false"
-        >
-          <ng-template tngTableCellTemplate="number" let-row="row">
-            {{ row.number }}
-          </ng-template>
-
-          <ng-template tngTableCellTemplate="party" let-row="row">
-            {{ row.party }}
-          </ng-template>
-
-          <ng-template tngTableCellTemplate="date" let-row="row">
-            {{ row.date }}
-          </ng-template>
-
-          <ng-template tngTableCellTemplate="amount" let-row="row">
-            {{ formatJournalImportAmount(row) }}
-          </ng-template>
-        </tng-table>
-      }
-
-      <div class="dialog-actions">
-        <span class="dialog-actions__summary">
-          {{ journalImportCandidates().length }}
-          {{ journalImportConfig()?.itemLabel ?? 'document' }}{{ journalImportCandidates().length === 1 ? '' : 's' }}
-        </span>
-
-        <tng-button
-          type="button"
-          appearance="ghost"
-          tone="neutral"
-          [disabled]="journalImportGenerating()"
-          (click)="closeJournalImportDialog()"
-        >
-          Cancel
-        </tng-button>
-
-        <tng-button
-          type="button"
-          appearance="solid"
-          tone="primary"
-          [disabled]="
-            journalImportLoading() ||
-            journalImportGenerating() ||
-            journalImportCandidates().length === 0
-          "
-          (click)="createImportedJournals()"
-        >
-          @if (journalImportGenerating()) {
-            <tng-icon icon="loaderCircle" aria-hidden="true" />
-            Creating...
-          } @else {
-            {{ journalImportConfig()?.actionLabel ?? 'Create Journals' }}
-          }
-        </tng-button>
-      </div>
-    </div>
-  </tng-dialog>
+    (cancelled)="closeJournalImportDialog()"
+    (createRequested)="createImportedJournals()"
+  />
 </main>

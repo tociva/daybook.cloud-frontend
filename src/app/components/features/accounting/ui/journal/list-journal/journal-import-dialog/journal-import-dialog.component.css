@@ -1,0 +1,30 @@
+.journal-import-dialog {
+  display: grid;
+  gap: 1rem;
+}
+
+.notice {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  color: var(--tng-semantic-foreground-primary);
+  padding: 1rem;
+}
+
+.notice--danger {
+  border-color: var(--tng-semantic-accent-danger);
+}
+
+.dialog-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.dialog-actions__summary {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-right: auto;
+}
