@@ -9,6 +9,7 @@ const AUTH_RETURN_URI_KEY_PREFIX = 'daybook.auth.return-uri.';
 const DEFAULT_POST_LOGIN_RETURN_PATH = '/handle-login-return';
 const DEFAULT_POST_LOGOUT_PATH = '/auth/logout';
 const DEFAULT_POST_LOGIN_ROUTE = '/app/dashboard';
+const ACCESS_TOKEN_RENEWAL_WINDOW_SECONDS = 60;
 
 type OidcErrorResponseLike = Error & {
   error?: string;
@@ -22,7 +23,12 @@ export class AuthService {
 
   async hasActiveSession(authConfig: AuthConfig): Promise<boolean> {
     const manager = this.oidcUserManagerFactory.create(authConfig);
-    const user = await manager.getUser();
+    let user = await manager.getUser();
+
+    if (user && this.shouldRenewAccessToken(user)) {
+      user = await this.renewWithRefreshTokenOnce(authConfig, manager);
+    }
+
     return Boolean(user && !user.expired);
   }
 
@@ -30,34 +36,29 @@ export class AuthService {
     const manager = this.oidcUserManagerFactory.create(authConfig);
     let user = await manager.getUser();
 
-    if (user && user.expired) {
-      user = await this.renewSilentlyOnce(authConfig, manager);
+    if (user && this.shouldRenewAccessToken(user)) {
+      user = await this.renewWithRefreshTokenOnce(authConfig, manager);
     }
 
     return user && !user.expired ? user.access_token : null;
   }
 
   /**
-   * Triggers signinSilent() but de-duplicates concurrent calls for the same
-   * authority so a burst of requests hitting an expired token only fires one
-   * renewal. Resolves to null (rather than throwing) so callers can fall
-   * through to their existing 401 handling.
+   * Refreshes the stored token set using a refresh token. We deliberately
+   * avoid calling signinSilent() unless a refresh token exists because
+   * oidc-client-ts otherwise falls back to iframe-based prompt=none auth.
    */
-  renewSilentlyOnce(authConfig: AuthConfig, manager?: UserManager): Promise<User | null> {
-    const key = authConfig.authority;
+  renewWithRefreshTokenOnce(authConfig: AuthConfig, manager?: UserManager): Promise<User | null> {
+    const key = this.getRenewalKey(authConfig);
     const existing = this.inflightSilentRenewals.get(key);
     if (existing) {
       return existing;
     }
 
     const userManager = manager ?? this.oidcUserManagerFactory.create(authConfig);
-    const renewal = userManager
-      .signinSilent()
-      .then((user) => user ?? null)
-      .catch(() => null)
-      .finally(() => {
-        this.inflightSilentRenewals.delete(key);
-      });
+    const renewal = this.renewWithRefreshToken(userManager).finally(() => {
+      this.inflightSilentRenewals.delete(key);
+    });
 
     this.inflightSilentRenewals.set(key, renewal);
     return renewal;
@@ -129,9 +130,7 @@ export class AuthService {
   }
 
   async renewSessionSilently(authConfig: AuthConfig): Promise<User | null> {
-    const manager = this.oidcUserManagerFactory.create(authConfig);
-    const user = await manager.signinSilent();
-    return user ?? null;
+    return this.renewWithRefreshTokenOnce(authConfig);
   }
 
   async startLogin(authConfig: AuthConfig): Promise<void> {
@@ -256,6 +255,31 @@ export class AuthService {
 
   private isOidcErrorResponse(error: unknown): error is OidcErrorResponseLike {
     return error instanceof Error && 'error' in error;
+  }
+
+  private shouldRenewAccessToken(user: User): boolean {
+    if (user.expired) {
+      return true;
+    }
+
+    return user.expires_in !== undefined && user.expires_in <= ACCESS_TOKEN_RENEWAL_WINDOW_SECONDS;
+  }
+
+  private async renewWithRefreshToken(manager: UserManager): Promise<User | null> {
+    try {
+      const user = await manager.getUser();
+      if (!user?.refresh_token) {
+        return null;
+      }
+
+      return (await manager.signinSilent()) ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  private getRenewalKey(authConfig: AuthConfig): string {
+    return `${authConfig.authority}|${authConfig.clientId}`;
   }
 
   private isConfiguredRedirectPath(authConfig: AuthConfig): boolean {

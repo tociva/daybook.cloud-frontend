@@ -4,13 +4,6 @@
     title="Dashboard"
     [description]="headerDescription()"
   >
-    @if (summary(); as data) {
-      <div class="heading-meta" aria-label="Dashboard reporting period">
-        <span>As of {{ formatDate(data.asOfDate) }}</span>
-        <span>Through {{ formatMonth(data.lastCompletedMonth) }}</span>
-      </div>
-    }
-
     <tng-button
       type="button"
       appearance="outline"
@@ -69,30 +62,32 @@
     }
 
     @if (summary(); as data) {
-      <section class="dashboard-summary" aria-label="Dashboard context">
-        <div>
-          <span class="summary-label">Reporting date</span>
-          <strong>{{ formatDate(data.asOfDate) }}</strong>
-        </div>
-        <div>
-          <span class="summary-label">Last completed month</span>
-          <strong>{{ formatMonth(data.lastCompletedMonth) }}</strong>
-        </div>
-        @if (dashboardStore.loadedAt()) {
-          <div>
-            <span class="summary-label">Loaded</span>
-            <strong>{{ formatLoadedAt(dashboardStore.loadedAt()) }}</strong>
-          </div>
-        }
-      </section>
-
       <section
         class="dashboard-section dashboard-section--compact"
         aria-labelledby="dashboard-status-title"
       >
         <div class="section-heading">
-          <h2 id="dashboard-status-title">Pending Tasks</h2>
-          <p>Items that need review through the last completed month.</p>
+          <div class="section-heading-copy">
+            <h2 id="dashboard-status-title">Pending Tasks</h2>
+            <p>Items that need review through the last completed month.</p>
+          </div>
+
+          <div class="section-meta" aria-label="Dashboard context">
+            <div class="section-meta-item">
+              <span class="section-meta-label">Reporting date</span>
+              <strong>{{ formatDate(data.asOfDate) }}</strong>
+            </div>
+            <div class="section-meta-item">
+              <span class="section-meta-label">Last completed month</span>
+              <strong>{{ formatMonth(data.lastCompletedMonth) }}</strong>
+            </div>
+            @if (dashboardStore.loadedAt()) {
+              <div class="section-meta-item">
+                <span class="section-meta-label">Loaded</span>
+                <strong>{{ formatLoadedAt(dashboardStore.loadedAt()) }}</strong>
+              </div>
+            }
+          </div>
         </div>
 
         @if (hasPendingTasks()) {

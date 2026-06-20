@@ -290,6 +290,16 @@ describe('DashboardComponent', () => {
     expect(text).not.toContain('Credit');
     expect(text).toContain('date:2026-06-19');
     expect(text).toContain('May 2026');
+    const sectionHeadingText = host.querySelector('.section-heading')?.textContent ?? '';
+    expect(sectionHeadingText).toContain('Reporting date');
+    expect(sectionHeadingText).toContain('date:2026-06-19');
+    expect(sectionHeadingText).toContain('Last completed month');
+    expect(sectionHeadingText).toContain('May 2026');
+    expect(sectionHeadingText).toContain('Loaded');
+    expect(sectionHeadingText).toContain('datetime:2026-06-19T10:00:00.000Z');
+    expect(host.querySelector('.heading-meta')).toBeNull();
+    expect(host.querySelector('.dashboard-summary')).toBeNull();
+    expect(host.querySelector('.section-meta')).toBeTruthy();
     expect(host.querySelectorAll('table.status-table')).toHaveLength(1);
     expect(host.querySelector('.dashboard-section--compact')).toBeTruthy();
   });
@@ -308,6 +318,13 @@ describe('DashboardComponent', () => {
 
     expect(text).toContain('Pending Tasks');
     expect(text).toContain('No pending tasks through the last completed month.');
+    const sectionHeadingText = host.querySelector('.section-heading')?.textContent ?? '';
+    expect(sectionHeadingText).toContain('Reporting date');
+    expect(sectionHeadingText).toContain('date:2026-06-19');
+    expect(sectionHeadingText).toContain('Last completed month');
+    expect(sectionHeadingText).toContain('May 2026');
+    expect(sectionHeadingText).toContain('Loaded');
+    expect(sectionHeadingText).toContain('datetime:2026-06-19T10:00:00.000Z');
     expect(host.querySelectorAll('table.status-table')).toHaveLength(0);
   });
 

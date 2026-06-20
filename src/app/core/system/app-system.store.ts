@@ -183,7 +183,11 @@ export const AppSystemStore = signalStore(
         } catch (error) {
           if (isUnauthorizedSessionError(error)) {
             try {
-              await authService.renewSessionSilently(config.auth);
+              const renewedUser = await authService.renewWithRefreshTokenOnce(config.auth);
+              if (!renewedUser || renewedUser.expired) {
+                throw new Error('Refresh token renewal failed.');
+              }
+
               const renewedSession = await userSessionService.createUserSession(config.apiBaseUrl);
               userSessionStore.setSession(renewedSession);
               appThemeStore.initFromSession(renewedSession);

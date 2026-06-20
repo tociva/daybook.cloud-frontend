@@ -4,22 +4,6 @@
   padding: 1.25rem;
 }
 
-.heading-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--tng-semantic-foreground-muted);
-  font-size: 0.8rem;
-}
-
-.heading-meta span {
-  border: 1px solid var(--tng-semantic-border-subtle);
-  border-radius: 999px;
-  padding: 0.25rem 0.55rem;
-  white-space: nowrap;
-}
-
 .notice {
   display: flex;
   align-items: center;
@@ -48,35 +32,6 @@
   font-size: 0.9rem;
 }
 
-.dashboard-summary {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.75rem;
-  border-block: 1px solid var(--tng-semantic-border-subtle);
-  padding-block: 0.85rem;
-}
-
-.dashboard-summary div {
-  display: grid;
-  gap: 0.15rem;
-  min-inline-size: 0;
-}
-
-.summary-label {
-  color: var(--tng-semantic-foreground-muted);
-  font-size: 0.72rem;
-  text-transform: uppercase;
-}
-
-.dashboard-summary strong {
-  overflow: hidden;
-  color: var(--tng-semantic-foreground-primary);
-  font-size: 0.9rem;
-  font-weight: 650;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .dashboard-section {
   display: grid;
   gap: 0.75rem;
@@ -87,8 +42,18 @@
 }
 
 .section-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+}
+
+.section-heading-copy {
   display: grid;
+  flex: 1 1 14rem;
   gap: 0.2rem;
+  min-inline-size: 0;
 }
 
 .section-heading h2 {
@@ -102,6 +67,36 @@
   margin: 0;
   color: var(--tng-semantic-foreground-muted);
   font-size: 0.8rem;
+}
+
+.section-meta {
+  display: flex;
+  flex: 1 1 22rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem 0.85rem;
+  min-inline-size: min(100%, 22rem);
+}
+
+.section-meta-item {
+  display: grid;
+  gap: 0.15rem;
+  min-inline-size: 0;
+}
+
+.section-meta-label {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+
+.section-meta strong {
+  overflow: hidden;
+  color: var(--tng-semantic-foreground-primary);
+  font-size: 0.85rem;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .status-table-wrap {
@@ -233,8 +228,13 @@
     flex-direction: column;
   }
 
-  .dashboard-summary {
-    grid-template-columns: minmax(0, 1fr);
+  .section-heading {
+    align-items: stretch;
+  }
+
+  .section-meta {
+    justify-content: flex-start;
+    min-inline-size: 0;
   }
 
   .status-table {

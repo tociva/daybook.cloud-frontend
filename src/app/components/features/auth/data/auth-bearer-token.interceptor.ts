@@ -75,7 +75,7 @@ function sendWithToken(
         return throwError(() => error);
       }
 
-      return from(authService.renewSilentlyOnce(authConfig)).pipe(
+      return from(authService.renewWithRefreshTokenOnce(authConfig)).pipe(
         switchMap((user) => {
           const refreshedToken = user && !user.expired ? user.access_token : null;
           if (!refreshedToken) {
