@@ -1,6 +1,6 @@
 <header class="workspace-header">
   <div class="workspace-header-leading">
-    <div class="header-logo" role="img" aria-label="Daybook.Cloud">
+    <a class="header-logo" routerLink="/app/dashboard" aria-label="Go to home">
       @if (brandLogoSvg(); as logoSvg) {
         <span
           class="header-logo-inline header-logo-inline--full"
@@ -30,7 +30,7 @@
           aria-hidden="true"
         />
       }
-    </div>
+    </a>
 
     <div class="workspace-header-copy">
       <h1 class="workspace-title">{{ currentPageTitle() }}</h1>

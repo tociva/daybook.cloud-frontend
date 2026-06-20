@@ -1,6 +1,6 @@
 import { Component, effect, inject, input, output, signal } from '@angular/core';
 import { DomSanitizer, type SafeHtml } from '@angular/platform-browser';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import {
   TngAvatarComponent,
   TngBreadcrumbComponent,
@@ -27,6 +27,7 @@ const BRAND_SMALL_LOGO_SOURCE = '/assets/logo/daybook-cloud-logo-small.svg';
 @Component({
   selector: 'app-workspace-header',
   imports: [
+    RouterLink,
     WorkspaceSearchButtonComponent,
     TngAvatarComponent,
     TngBreadcrumbComponent,

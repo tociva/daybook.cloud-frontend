@@ -47,9 +47,18 @@
   --daybook-logo-shadow: var(--tng-semantic-accent-brand);
   --daybook-logo-title: var(--tng-semantic-foreground-primary);
   align-items: center;
+  color: inherit;
+  cursor: pointer;
   display: flex;
   flex: 0 0 auto;
   min-height: 3.75rem;
+  text-decoration: none;
+}
+
+.header-logo:focus-visible {
+  border-radius: 0.5rem;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--tng-semantic-accent-brand) 24%, transparent);
+  outline: none;
 }
 
 .header-logo-inline {
