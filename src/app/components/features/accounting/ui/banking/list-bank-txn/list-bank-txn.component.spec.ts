@@ -1,6 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
+import type { TngTableColumn } from '@tailng-ui/components';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { CrudListQueryService } from '../../../../../../shared/crud';
@@ -14,6 +15,7 @@ import { JournalCreateDraftStagingService } from '../../journal/create-journal/j
 import { ListBankTxnComponent } from './list-bank-txn.component';
 
 type BankTxnListHarness = Readonly<{
+  columns(): readonly TngTableColumn<BankTxn>[];
   filterFields: readonly CrudFilterField[];
   loadBankTxnsWithJournals(filter: Lb4ListQuery): Promise<void>;
 }>;
@@ -25,6 +27,7 @@ function asHarness(component: ListBankTxnComponent): BankTxnListHarness {
 function setup(
   options: Readonly<{
     bankTxns?: readonly BankTxn[];
+    hasActiveFilter?: boolean;
     storeError?: string | null;
   }> = {},
 ): {
@@ -36,6 +39,7 @@ function setup(
   const storeError = signal<string | null>(
     options.storeError === undefined ? 'Stop after query assertion.' : options.storeError,
   );
+  const hasActiveFilter = signal(options.hasActiveFilter ?? false);
   const loadBankTxns = vi.fn(async () => undefined);
   const findJournalsBySourceIds = vi.fn(async () => []);
 
@@ -62,7 +66,7 @@ function setup(
         provide: CrudListQueryService,
         useValue: {
           filter: signal({ limit: 10, offset: 0 }),
-          hasActiveFilter: signal(false),
+          hasActiveFilter,
           init: vi.fn(),
           pageSizeOptions: signal([10, 25, 50]),
           shouldShowEmptyState: vi.fn(() => false),
@@ -154,6 +158,18 @@ describe('ListBankTxnComponent', () => {
     });
 
     expect(findJournalsBySourceIds).toHaveBeenCalledWith('bank_txn', ['bank-txn-1']);
+  });
+
+  it('shows the balance column when no filter is active', () => {
+    const { component } = setup();
+
+    expect(component.columns().map((column) => column.id)).toContain('balance');
+  });
+
+  it('hides the balance column when a filter is active', () => {
+    const { component } = setup({ hasActiveFilter: true });
+
+    expect(component.columns().map((column) => column.id)).not.toContain('balance');
   });
 
   it('exposes journal link status as a standard bank transaction filter field', () => {

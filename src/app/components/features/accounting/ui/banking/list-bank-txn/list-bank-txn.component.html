@@ -63,7 +63,7 @@
         <tng-table
           ariaLabel="Bank transactions"
           density="comfortable"
-          [columns]="columns"
+          [columns]="columns()"
           [items]="bankTxnStore.items()"
           [loading]="bankTxnStore.isLoading()"
           [error]="hasError()"

@@ -89,35 +89,39 @@ export class ListBankTxnComponent {
     new Map(),
   );
 
-  protected readonly columns: readonly TngTableColumn<BankTxn>[] = [
-    { id: 'txndate', label: 'Date', width: '9rem' },
-    { id: 'bank', label: 'Bank', width: '14rem' },
-    {
-      id: 'debit',
-      label: 'Deposit',
-      align: 'end',
-      headerAlign: 'end',
-      width: '9rem',
-    },
-    {
-      id: 'credit',
-      label: 'Withdrawal',
-      align: 'end',
-      headerAlign: 'end',
-      width: '9rem',
-    },
-    {
+  protected readonly columns = computed<readonly TngTableColumn<BankTxn>[]>(() => {
+    const balanceColumn: TngTableColumn<BankTxn> = {
       id: 'balance',
       label: 'Balance',
       align: 'end',
       headerAlign: 'end',
       width: '9rem',
-    },
-    { id: 'description', label: 'Description', truncate: true },
-    { id: 'bankref', label: 'Reference', width: '12rem' },
-    { id: 'journals', label: 'Journals', width: '12rem' },
-    { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '10rem' },
-  ];
+    };
+
+    return [
+      { id: 'txndate', label: 'Date', width: '9rem' },
+      { id: 'bank', label: 'Bank', width: '14rem' },
+      {
+        id: 'debit',
+        label: 'Deposit',
+        align: 'end',
+        headerAlign: 'end',
+        width: '9rem',
+      },
+      {
+        id: 'credit',
+        label: 'Withdrawal',
+        align: 'end',
+        headerAlign: 'end',
+        width: '9rem',
+      },
+      ...(this.crudQuery.hasActiveFilter() ? [] : [balanceColumn]),
+      { id: 'description', label: 'Description', truncate: true },
+      { id: 'bankref', label: 'Reference', width: '12rem' },
+      { id: 'journals', label: 'Journals', width: '12rem' },
+      { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '10rem' },
+    ];
+  });
 
   protected readonly bankLedgerMapOptionValue = (option: unknown): string =>
     (option as InventoryLedgerMap).id ?? '';

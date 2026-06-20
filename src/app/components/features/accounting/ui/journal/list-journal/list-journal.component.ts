@@ -46,6 +46,8 @@ import { CustomerReceiptService } from '../../../../trading/data/customer-receip
 import type { CustomerReceipt } from '../../../../trading/data/customer-receipt';
 import { VendorPaymentService } from '../../../../trading/data/vendor-payment';
 import type { VendorPayment } from '../../../../trading/data/vendor-payment';
+import { ContraTransactionService } from '../../../../trading/data/contra-transaction';
+import type { ContraTransaction } from '../../../../trading/data/contra-transaction';
 import {
   ReconciliationMatchFacade,
   ReconciliationMatchService,
@@ -74,7 +76,8 @@ type JournalImportSource =
   | 'saleInvoice'
   | 'purchaseInvoice'
   | 'customerReceipt'
-  | 'vendorPayment';
+  | 'vendorPayment'
+  | 'contraTransaction';
 
 type JournalImportCandidate = Readonly<{
   id: string;
@@ -132,6 +135,15 @@ const JOURNAL_IMPORT_CONFIG: Record<JournalImportSource, JournalImportConfig> = 
     itemLabel: 'vendor payment',
     sourceType: JournalSourceType.PAYMENT,
   },
+  contraTransaction: {
+    actionLabel: 'Create Journals',
+    amountLabel: 'Amount',
+    dialogTitle: 'Import Contra Transaction Journals',
+    emptyDescription: 'All contra transactions already have journals generated.',
+    emptyTitle: 'No contra transactions to import',
+    itemLabel: 'contra transaction',
+    sourceType: JournalSourceType.CONTRA_TRANSACTION,
+  },
 };
 
 @Component({
@@ -170,6 +182,7 @@ export class ListJournalComponent {
   private readonly purchaseInvoiceService = inject(PurchaseInvoiceService);
   private readonly customerReceiptService = inject(CustomerReceiptService);
   private readonly vendorPaymentService = inject(VendorPaymentService);
+  private readonly contraTransactionService = inject(ContraTransactionService);
   private readonly toastStore = inject(ToastStore);
   private readonly reconciliationMatchFacade = inject(ReconciliationMatchFacade);
   private readonly reconciliationMatchService = inject(ReconciliationMatchService);
@@ -583,6 +596,8 @@ export class ListJournalComponent {
         return this.fetchCustomerReceiptImportCandidates();
       case 'vendorPayment':
         return this.fetchVendorPaymentImportCandidates();
+      case 'contraTransaction':
+        return this.fetchContraTransactionImportCandidates();
     }
   }
 
@@ -678,6 +693,38 @@ export class ListJournalComponent {
       }));
   }
 
+  private async fetchContraTransactionImportCandidates(): Promise<
+    readonly JournalImportCandidate[]
+  > {
+    const count = await this.contraTransactionService.count({});
+    const contraTransactions =
+      count > 0
+        ? await this.contraTransactionService.list({
+            includes: ['frombcash', 'tobcash'],
+            limit: count,
+            order: ['date DESC'],
+          })
+        : [];
+
+    return contraTransactions
+      .filter((contraTransaction) => Boolean(contraTransaction.id))
+      .map((contraTransaction) => ({
+        id: contraTransaction.id ?? '',
+        amount: contraTransaction.amount,
+        currencycode: contraTransaction.currencycode,
+        date: contraTransaction.date,
+        number: '—',
+        party: this.formatContraTransactionAccounts(contraTransaction),
+      }));
+  }
+
+  private formatContraTransactionAccounts(contraTransaction: ContraTransaction): string {
+    const fromAccount =
+      contraTransaction.frombcash?.name || contraTransaction.frombcashid || '—';
+    const toAccount = contraTransaction.tobcash?.name || contraTransaction.tobcashid || '—';
+    return `${fromAccount} -> ${toAccount}`;
+  }
+
   private hasGeneratedJournal(
     document: Pick<SaleInvoice | PurchaseInvoice, 'sprops'>,
   ): boolean {
@@ -714,6 +761,8 @@ export class ListJournalComponent {
         return this.journalService.createFromCustomerReceipts(ids);
       case 'vendorPayment':
         return this.journalService.createFromVendorPayments(ids);
+      case 'contraTransaction':
+        return this.journalService.createFromContraTransactions(ids);
     }
   }
 
