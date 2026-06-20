@@ -28,10 +28,12 @@ import {
   DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS,
   DEFAULT_NODE_DATE_FORMAT,
 } from '../../../../../../util/constants';
-import type { BankCash } from '../../../data/bank-cash';
-import { BankCashStore } from '../../../data/bank-cash';
+import type { BankCash, BankCashListQuery } from '../../../data/bank-cash';
+import { BankCashService } from '../../../data/bank-cash';
 import type { ContraTransaction, ContraTransactionPayload } from '../../../data/contra-transaction';
 import { ContraTransactionFacade, ContraTransactionStore } from '../../../data/contra-transaction';
+
+type BankCashAutocompleteSide = 'from' | 'to';
 
 @Component({
   selector: 'app-create-bank-contra',
@@ -66,11 +68,21 @@ export class CreateBankContraComponent {
   private readonly navigation = inject(BurlNavigationService);
   private readonly route = inject(ActivatedRoute);
   private readonly userSessionStore = inject(UserSessionStore);
-  protected readonly bankCashStore = inject(BankCashStore);
+  private readonly bankCashService = inject(BankCashService);
   protected readonly contraTransactionStore = inject(ContraTransactionStore);
   protected readonly currencyStore = inject(CurrencyStore);
 
-  private bankCashSearchTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly bankCashSearchTimers: Record<
+    BankCashAutocompleteSide,
+    ReturnType<typeof setTimeout> | null
+  > = {
+    from: null,
+    to: null,
+  };
+  private readonly bankCashSearchSequences: Record<BankCashAutocompleteSide, number> = {
+    from: 0,
+    to: 0,
+  };
 
   protected readonly id = signal<string | null>(null);
   protected readonly mode = computed(() => (this.id() ? 'edit' : 'create'));
@@ -88,6 +100,8 @@ export class CreateBankContraComponent {
   protected readonly selectedToBankCash = signal<BankCash | null>(null);
   protected readonly frombcashid = signal('');
   protected readonly tobcashid = signal('');
+  protected readonly fromBankCashSearchOptions = signal<readonly BankCash[]>([]);
+  protected readonly toBankCashSearchOptions = signal<readonly BankCash[]>([]);
 
   protected readonly currencyQuery = signal('');
   protected readonly filteredCurrencies = computed<Currency[]>(() =>
@@ -99,8 +113,17 @@ export class CreateBankContraComponent {
   protected readonly currencyTrackBy = (_index: number, currency: Currency): string =>
     currency.code;
 
-  protected readonly bankCashOptions = computed<BankCash[]>(() =>
-    this.withSelectedBankCashOptions(this.bankCashStore.items() as BankCash[]),
+  protected readonly fromBankCashOptions = computed<BankCash[]>(() =>
+    this.withSelectedBankCashOption(
+      this.fromBankCashSearchOptions(),
+      this.selectedFromBankCash(),
+    ),
+  );
+  protected readonly toBankCashOptions = computed<BankCash[]>(() =>
+    this.withSelectedBankCashOption(
+      this.toBankCashSearchOptions(),
+      this.selectedToBankCash(),
+    ),
   );
   protected readonly bankCashOptionValue = (bankCash: BankCash): string => bankCash.id ?? '';
   protected readonly bankCashOptionLabel = (bankCash: BankCash): string => bankCash.name;
@@ -140,10 +163,11 @@ export class CreateBankContraComponent {
   private async loadInitialState(): Promise<void> {
     this.contraTransactionStore.clearError();
 
-    await Promise.all([
-      this.bankCashStore.loadBankCashes({ limit: 1000, offset: 0 }),
+    const [bankCashOptions] = await Promise.all([
+      this.fetchBankCashOptions(''),
       this.currencyStore.load(),
     ]);
+    this.seedBankCashSearchOptions(bankCashOptions ?? []);
 
     const id = this.route.snapshot.paramMap.get('id');
     this.id.set(id);
@@ -256,28 +280,26 @@ export class CreateBankContraComponent {
     this.currencycode.set(code);
   }
 
-  protected onBankCashQueryChange(event: unknown): void {
+  protected onBankCashQueryChange(side: BankCashAutocompleteSide, event: unknown): void {
     const query = typeof event === 'string' ? event.trim() : '';
-    if (this.bankCashSearchTimer) clearTimeout(this.bankCashSearchTimer);
-    this.bankCashSearchTimer = setTimeout(() => {
-      void this.bankCashStore.loadBankCashes(
-        query
-          ? { limit: 50, offset: 0, where: { name: { ilike: `%${query}%` } } }
-          : { limit: 1000, offset: 0 },
-      );
+    const sequence = ++this.bankCashSearchSequences[side];
+
+    if (this.bankCashSearchTimers[side]) clearTimeout(this.bankCashSearchTimers[side]);
+    this.bankCashSearchTimers[side] = setTimeout(() => {
+      void this.searchBankCashOptions(side, query, sequence);
     }, DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS);
   }
 
   protected onFromBankCashValueChange(value: unknown): void {
     const id = typeof value === 'string' ? value : '';
-    const bankCash = this.bankCashOptions().find((item) => item.id === id) ?? null;
+    const bankCash = this.fromBankCashOptions().find((item) => item.id === id) ?? null;
     this.selectedFromBankCash.set(bankCash);
     this.frombcashid.set(id);
   }
 
   protected onToBankCashValueChange(value: unknown): void {
     const id = typeof value === 'string' ? value : '';
-    const bankCash = this.bankCashOptions().find((item) => item.id === id) ?? null;
+    const bankCash = this.toBankCashOptions().find((item) => item.id === id) ?? null;
     this.selectedToBankCash.set(bankCash);
     this.tobcashid.set(id);
   }
@@ -324,15 +346,56 @@ export class CreateBankContraComponent {
     );
   }
 
-  private withSelectedBankCashOptions(items: readonly BankCash[]): BankCash[] {
+  private withSelectedBankCashOption(
+    items: readonly BankCash[],
+    selected: BankCash | null,
+  ): BankCash[] {
     const options = items.slice(0, 25);
-    for (const selected of [this.selectedFromBankCash(), this.selectedToBankCash()]) {
-      if (selected?.id && !options.some((option) => option.id === selected.id)) {
-        options.unshift(selected);
-      }
+    if (selected?.id && !options.some((option) => option.id === selected.id)) {
+      options.unshift(selected);
     }
 
     return options.slice(0, 25);
+  }
+
+  private seedBankCashSearchOptions(options: readonly BankCash[]): void {
+    this.fromBankCashSearchOptions.set([...options]);
+    this.toBankCashSearchOptions.set([...options]);
+  }
+
+  private async searchBankCashOptions(
+    side: BankCashAutocompleteSide,
+    query: string,
+    sequence: number,
+  ): Promise<void> {
+    const options = await this.fetchBankCashOptions(query);
+    if (options === null || sequence !== this.bankCashSearchSequences[side]) return;
+
+    this.setBankCashSearchOptions(side, options);
+  }
+
+  private setBankCashSearchOptions(
+    side: BankCashAutocompleteSide,
+    options: readonly BankCash[],
+  ): void {
+    if (side === 'from') {
+      this.fromBankCashSearchOptions.set([...options]);
+      return;
+    }
+
+    this.toBankCashSearchOptions.set([...options]);
+  }
+
+  private async fetchBankCashOptions(query: string): Promise<readonly BankCash[] | null> {
+    const filter: BankCashListQuery = query
+      ? { limit: 50, offset: 0, where: { name: { ilike: `%${query}%` } } }
+      : { limit: 1000, offset: 0 };
+
+    try {
+      return await this.bankCashService.list(filter);
+    } catch {
+      return null;
+    }
   }
 
   private async resolveBankCash(
@@ -341,11 +404,29 @@ export class CreateBankContraComponent {
   ): Promise<BankCash | null> {
     if (candidate?.name) return candidate;
 
-    const cached = (this.bankCashStore.items() as BankCash[]).find((item) => item.id === id);
+    const cached = this.findBankCashOptionById(id);
     if (cached) return cached;
     if (!id) return null;
 
-    return this.bankCashStore.loadBankCashById(id);
+    try {
+      return await this.bankCashService.getById(id);
+    } catch {
+      return null;
+    }
+  }
+
+  private findBankCashOptionById(id: string): BankCash | null {
+    const selectedFrom = this.selectedFromBankCash();
+    if (selectedFrom?.id === id) return selectedFrom;
+
+    const selectedTo = this.selectedToBankCash();
+    if (selectedTo?.id === id) return selectedTo;
+
+    return (
+      this.fromBankCashSearchOptions().find((item) => item.id === id) ??
+      this.toBankCashSearchOptions().find((item) => item.id === id) ??
+      null
+    );
   }
 
   private defaultCurrencyCode(): string {

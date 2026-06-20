@@ -79,13 +79,13 @@
                   id="contra-from"
                   placeholder="Search source account..."
                   ariaLabel="From bank/cash account"
-                  [options]="bankCashOptions()"
+                  [options]="fromBankCashOptions()"
                   [value]="frombcashid()"
                   [getOptionValue]="bankCashOptionValue"
                   [getOptionLabel]="bankCashOptionLabel"
                   [trackBy]="bankCashTrackBy"
                   (valueChange)="onFromBankCashValueChange($event)"
-                  (queryChange)="onBankCashQueryChange($event)"
+                  (queryChange)="onBankCashQueryChange('from', $event)"
                 >
                   <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
                     <span>{{ label }}</span>
@@ -113,13 +113,13 @@
                   id="contra-to"
                   placeholder="Search destination account..."
                   ariaLabel="To bank/cash account"
-                  [options]="bankCashOptions()"
+                  [options]="toBankCashOptions()"
                   [value]="tobcashid()"
                   [getOptionValue]="bankCashOptionValue"
                   [getOptionLabel]="bankCashOptionLabel"
                   [trackBy]="bankCashTrackBy"
                   (valueChange)="onToBankCashValueChange($event)"
-                  (queryChange)="onBankCashQueryChange($event)"
+                  (queryChange)="onBankCashQueryChange('to', $event)"
                 >
                   <ng-template #tngAutocompleteOptionTpl let-option="option" let-label="label">
                     <span>{{ label }}</span>
