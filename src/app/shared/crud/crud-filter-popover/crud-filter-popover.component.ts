@@ -28,6 +28,7 @@ import type {
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { TngPopover, TngPopoverPanel, TngPopoverTrigger } from '@tailng-ui/primitives';
+import type { TngPopoverCloseReason } from '@tailng-ui/primitives';
 import type {
   Lb4ComparisonFilterOperator,
   Lb4ListQuery,
@@ -188,6 +189,7 @@ export class CrudFilterPopoverComponent {
   protected readonly trackByOperatorValue = (_: number, option: OperatorOption): string =>
     option.value;
 
+  private ignoreNextOutsidePointerClose = false;
   private readonly currentFilter = computed(() => this.filter() ?? {});
   private readonly currentWhere = computed(() => this.where() ?? this.currentFilter().where);
 
@@ -211,7 +213,20 @@ export class CrudFilterPopoverComponent {
     }
   }
 
+  protected onPopoverClosed(reason: TngPopoverCloseReason): void {
+    if (reason === 'outside-pointer' && this.open()) {
+      this.ignoreNextOutsidePointerClose = true;
+    }
+  }
+
   protected onOpenChange(open: boolean): void {
+    if (!open && this.ignoreNextOutsidePointerClose) {
+      this.ignoreNextOutsidePointerClose = false;
+      this.open.set(true);
+      return;
+    }
+
+    this.ignoreNextOutsidePointerClose = false;
     this.open.set(open);
 
     if (open) {
