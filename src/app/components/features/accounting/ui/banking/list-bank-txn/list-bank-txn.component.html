@@ -136,27 +136,26 @@
 
           <ng-template tngTableCellTemplate="actions" let-row="row">
             <div class="row-actions">
-              <app-table-row-icon-button
-                icon="bookOpen"
-                ariaLabel="Assign journal"
-                (action)="assignJournal(row)"
-              />
-              <app-table-row-icon-button
-                icon="eye"
-                ariaLabel="View bank transaction"
-                (action)="viewBankTxn(row)"
-              />
-              <app-table-row-icon-button
-                icon="pencil"
-                ariaLabel="Edit bank transaction"
-                (action)="editBankTxn(row)"
-              />
-              <app-table-row-icon-button
-                icon="trash2"
-                ariaLabel="Delete bank transaction"
-                tone="danger"
-                (action)="deleteBankTxn(row)"
-              />
+              <button
+                type="button"
+                class="row-action-menu-trigger"
+                aria-label="Bank transaction actions"
+                [tngMenuTriggerFor]="bankTxnActionMenu"
+              >
+                <tng-icon icon="ellipsis" aria-hidden="true" />
+              </button>
+
+              <tng-menu #bankTxnActionMenu="tngMenu" ariaLabel="Bank transaction actions">
+                <button type="button" tngMenuItem (click)="assignJournal(row)">
+                  Assign journal
+                </button>
+                <button type="button" tngMenuItem (click)="createContraEntry(row)">
+                  Create contra entry
+                </button>
+                <button type="button" tngMenuItem (click)="viewBankTxn(row)">View</button>
+                <button type="button" tngMenuItem (click)="editBankTxn(row)">Edit</button>
+                <button type="button" tngMenuItem (click)="deleteBankTxn(row)">Delete</button>
+              </tng-menu>
             </div>
           </ng-template>
         </tng-table>

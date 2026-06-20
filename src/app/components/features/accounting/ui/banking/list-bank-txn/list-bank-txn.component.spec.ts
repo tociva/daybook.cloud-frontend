@@ -16,6 +16,7 @@ import { ListBankTxnComponent } from './list-bank-txn.component';
 
 type BankTxnListHarness = Readonly<{
   columns(): readonly TngTableColumn<BankTxn>[];
+  createContraEntry(item: BankTxn): void;
   filterFields: readonly CrudFilterField[];
   loadBankTxnsWithJournals(filter: Lb4ListQuery): Promise<void>;
 }>;
@@ -34,6 +35,7 @@ function setup(
   component: BankTxnListHarness;
   findJournalsBySourceIds: ReturnType<typeof vi.fn>;
   loadBankTxns: ReturnType<typeof vi.fn>;
+  navigate: ReturnType<typeof vi.fn>;
 } {
   const bankTxns = signal<readonly BankTxn[]>(options.bankTxns ?? []);
   const storeError = signal<string | null>(
@@ -42,6 +44,7 @@ function setup(
   const hasActiveFilter = signal(options.hasActiveFilter ?? false);
   const loadBankTxns = vi.fn(async () => undefined);
   const findJournalsBySourceIds = vi.fn(async () => []);
+  const navigate = vi.fn();
 
   TestBed.configureTestingModule({
     providers: [
@@ -100,7 +103,7 @@ function setup(
       {
         provide: Router,
         useValue: {
-          navigate: vi.fn(),
+          navigate,
           url: '/app/accounting/banking',
         },
       },
@@ -113,6 +116,7 @@ function setup(
     component: asHarness(component),
     findJournalsBySourceIds,
     loadBankTxns,
+    navigate,
   };
 }
 
@@ -187,6 +191,79 @@ describe('ListBankTxnComponent', () => {
         { label: 'Partially linked', value: 'partial' },
         { label: 'Fully linked', value: 'linked' },
       ],
+    });
+  });
+
+  it('prefills a contra entry from a deposit bank transaction', () => {
+    const { component, navigate } = setup();
+
+    component.createContraEntry({
+      id: 'bank-txn-1',
+      inventoryledgermapid: 'map-1',
+      inventoryledgermap: {
+        entityid: 'bank-1',
+        entitytype: 'bankCash',
+        ledgerid: 'ledger-1',
+      },
+      debit: 1250.5,
+      description: 'Cash deposit',
+      txndate: '2026-06-19',
+    });
+
+    expect(navigate).toHaveBeenCalledWith(['/app/trading/bank-cash/contra/create'], {
+      queryParams: {
+        amount: '1250.5',
+        burl: '/app/accounting/banking',
+        date: '2026-06-19',
+        description: 'Cash deposit',
+        tobcashid: 'bank-1',
+      },
+    });
+  });
+
+  it('prefills a contra entry from a withdrawal bank transaction', () => {
+    const { component, navigate } = setup();
+
+    component.createContraEntry({
+      id: 'bank-txn-1',
+      inventoryledgermapid: 'map-1',
+      inventoryledgermap: {
+        entityid: 'bank-1',
+        entitytype: 'bankCash',
+        ledgerid: 'ledger-1',
+      },
+      credit: 750,
+      description: 'ATM withdrawal',
+      txndate: '2026-06-19',
+    });
+
+    expect(navigate).toHaveBeenCalledWith(['/app/trading/bank-cash/contra/create'], {
+      queryParams: {
+        amount: '750',
+        burl: '/app/accounting/banking',
+        date: '2026-06-19',
+        description: 'ATM withdrawal',
+        frombcashid: 'bank-1',
+      },
+    });
+  });
+
+  it('navigates to contra create with derivable fields when the bank mapping is missing', () => {
+    const { component, navigate } = setup();
+
+    component.createContraEntry({
+      id: 'bank-txn-1',
+      inventoryledgermapid: 'map-1',
+      debit: 500,
+      txndate: '2026-06-19',
+    });
+
+    expect(navigate).toHaveBeenCalledWith(['/app/trading/bank-cash/contra/create'], {
+      queryParams: {
+        amount: '500',
+        burl: '/app/accounting/banking',
+        date: '2026-06-19',
+      },
     });
   });
 });

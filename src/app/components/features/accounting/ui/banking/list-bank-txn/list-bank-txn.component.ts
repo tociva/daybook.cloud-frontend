@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import {
   TngButtonComponent,
   TngCardComponent,
+  TngMenuComponent,
+  TngMenuTriggerFor,
   TngProgressSpinnerComponent,
   TngTable,
   TngTableCellTpl,
@@ -10,6 +12,7 @@ import {
 } from '@tailng-ui/components';
 import type { TngTableColumn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
+import { TngMenuItem } from '@tailng-ui/primitives';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import {
   CrudFilterPopoverComponent,
@@ -18,7 +21,6 @@ import {
 } from '../../../../../../shared/crud';
 import type { CrudFilterField, Lb4ListQuery } from '../../../../../../shared/crud';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
-import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import { BankCashStore } from '../../../../trading/data/bank-cash';
 import { InventoryLedgerMapStore } from '../../../data/inventory-ledger-map';
 import type { InventoryLedgerMap } from '../../../data/inventory-ledger-map';
@@ -53,11 +55,13 @@ const BANK_TXN_FILTER_CLEAR_QUERY_PARAMS = [
     CrudPaginatorComponent,
     TngIcon,
     EmptyStateComponent,
+    TngMenuComponent,
+    TngMenuTriggerFor,
+    TngMenuItem,
     TngProgressSpinnerComponent,
     TngTable,
     TngTableCellTpl,
     TngTooltipComponent,
-    TableRowIconButtonComponent,
     BankStatementUploadComponent,
     JournalAssignDialogComponent,
   ],
@@ -119,7 +123,7 @@ export class ListBankTxnComponent {
       { id: 'description', label: 'Description', truncate: true },
       { id: 'bankref', label: 'Reference', width: '12rem' },
       { id: 'journals', label: 'Journals', width: '12rem' },
-      { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '10rem' },
+      { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '5rem' },
     ];
   });
 
@@ -285,6 +289,38 @@ export class ListBankTxnComponent {
         queryParams: { burl: this.router.url },
       });
     }
+  }
+
+  protected createContraEntry(item: BankTxn): void {
+    const debit = Number(item.debit ?? 0);
+    const credit = Number(item.credit ?? 0);
+    const queryParams: Record<string, string> = { burl: this.router.url };
+
+    const txndate = item.txndate?.trim();
+    if (txndate) {
+      queryParams['date'] = txndate;
+    }
+
+    const amount = debit > 0 ? debit : credit > 0 ? credit : null;
+    if (amount !== null && Number.isFinite(amount) && amount > 0) {
+      queryParams['amount'] = String(amount);
+    }
+
+    const description = item.description?.trim();
+    if (description) {
+      queryParams['description'] = description;
+    }
+
+    const bankCashId = item.inventoryledgermap?.entityid?.trim();
+    if (bankCashId) {
+      if (debit > 0) {
+        queryParams['tobcashid'] = bankCashId;
+      } else if (credit > 0) {
+        queryParams['frombcashid'] = bankCashId;
+      }
+    }
+
+    void this.router.navigate(['/app/trading/bank-cash/contra/create'], { queryParams });
   }
 
   protected linkedJournals(item: BankTxn): readonly BankTxnJournal[] {

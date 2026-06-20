@@ -11,6 +11,32 @@
   justify-content: flex-end;
 }
 
+.row-action-menu-trigger[data-slot='menu-trigger'] {
+  align-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--tng-radius-control, 0.5rem);
+  color: var(--tng-semantic-foreground-muted);
+  cursor: pointer;
+  display: inline-flex;
+  height: 2rem;
+  justify-content: center;
+  padding: 0;
+  width: 2rem;
+}
+
+.row-action-menu-trigger[data-slot='menu-trigger']:hover,
+.row-action-menu-trigger[data-slot='menu-trigger'][aria-expanded='true'] {
+  background: var(--tng-semantic-background-muted);
+  border-color: var(--tng-semantic-border-subtle);
+  color: var(--tng-semantic-foreground-primary);
+}
+
+.row-action-menu-trigger[data-slot='menu-trigger']:focus-visible {
+  box-shadow: var(--tng-focus-ring, 0 0 0 3px var(--tng-semantic-focus-ring));
+  outline: 0;
+}
+
 .notice {
   border: 1px solid var(--tng-semantic-border-subtle);
   border-radius: 0.5rem;

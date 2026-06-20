@@ -152,6 +152,7 @@ export class CreateBankContraComponent {
       this.contraTransactionStore.clearSelectedItem();
       this.currencycode.set(this.defaultCurrencyCode());
       this.applyRememberedContraDate();
+      await this.applyQueryPrefill();
       return;
     }
 
@@ -185,6 +186,55 @@ export class CreateBankContraComponent {
     const toBankCash = await this.resolveBankCash(contra.tobcash, toId);
     this.selectedToBankCash.set(toBankCash);
     this.tobcashid.set(toBankCash?.id ?? toId);
+  }
+
+  private async applyQueryPrefill(): Promise<void> {
+    const params = this.route.snapshot.queryParamMap;
+    const date = this.normalizeContraDate(params.get('date'));
+    if (date) {
+      this.date.set(date);
+    }
+
+    const amount = this.normalizePositiveAmount(params.get('amount'));
+    if (amount) {
+      this.amount.set(amount);
+    }
+
+    const description = params.get('description')?.trim();
+    if (description) {
+      this.description.set(description);
+    }
+
+    await Promise.all([
+      this.applyPrefillBankCash('from', params.get('frombcashid')),
+      this.applyPrefillBankCash('to', params.get('tobcashid')),
+    ]);
+  }
+
+  private async applyPrefillBankCash(
+    side: 'from' | 'to',
+    value: string | null,
+  ): Promise<void> {
+    const id = value?.trim();
+    if (!id) return;
+
+    const bankCash = await this.resolveBankCash(undefined, id);
+    if (side === 'from') {
+      this.selectedFromBankCash.set(bankCash);
+      this.frombcashid.set(bankCash?.id ?? id);
+      return;
+    }
+
+    this.selectedToBankCash.set(bankCash);
+    this.tobcashid.set(bankCash?.id ?? id);
+  }
+
+  private normalizePositiveAmount(value: string | null): string | null {
+    const trimmed = value?.trim();
+    if (!trimmed) return null;
+
+    const amount = Number(trimmed);
+    return Number.isFinite(amount) && amount > 0 ? trimmed : null;
   }
 
   protected onDateChange(value: unknown): void {
@@ -309,7 +359,7 @@ export class CreateBankContraComponent {
   private applyRememberedContraDate(): void {
     try {
       const raw = localStorage.getItem(this.rememberedContraDateKey());
-      const rememberedDate = this.normalizeRememberedDate(raw);
+      const rememberedDate = this.normalizeContraDate(raw);
       if (!rememberedDate) return;
 
       this.date.set(rememberedDate);
@@ -320,7 +370,7 @@ export class CreateBankContraComponent {
 
   private rememberContraDate(): void {
     try {
-      const rememberedDate = this.normalizeRememberedDate(this.date());
+      const rememberedDate = this.normalizeContraDate(this.date());
       if (!rememberedDate) return;
 
       localStorage.setItem(this.rememberedContraDateKey(), rememberedDate);
@@ -329,7 +379,7 @@ export class CreateBankContraComponent {
     }
   }
 
-  private normalizeRememberedDate(value: unknown): string | null {
+  private normalizeContraDate(value: unknown): string | null {
     const isoDate = this.fiscalYearDateRange.toIsoDate(value);
     return isoDate ? this.fiscalYearDateRange.defaultDate(isoDate) : null;
   }
