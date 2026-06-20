@@ -135,16 +135,13 @@
           </ng-template>
 
           <ng-template tngTableCellTemplate="actions" let-row="row">
-            <div class="row-actions">
-              <button
+            <div>
+              <tng-button
                 type="button"
-                class="link-button row-action-menu-link"
-                aria-label="Bank transaction actions"
                 [tngMenuTriggerFor]="bankTxnActionMenu"
               >
-                <tng-icon icon="moreHorizontal" aria-hidden="true" />
-                <span>...</span>
-              </button>
+                More...
+              </tng-button>
 
               <tng-menu #bankTxnActionMenu="tngMenu" ariaLabel="Bank transaction actions">
                 <button

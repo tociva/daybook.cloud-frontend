@@ -4,25 +4,6 @@
   padding: 1.25rem;
 }
 
-.row-actions {
-  align-items: center;
-  display: inline-flex;
-  gap: 0.35rem;
-  justify-content: flex-end;
-}
-
-.row-action-menu-link[data-slot='menu-trigger'] {
-  align-items: center;
-  display: inline-flex;
-  gap: 0.2rem;
-  justify-content: flex-end;
-}
-
-.row-action-menu-link[data-slot='menu-trigger'] tng-icon {
-  height: 1rem;
-  width: 1rem;
-}
-
 .row-action-menu-item[data-slot='menu-item'] {
   justify-content: flex-start;
 }
