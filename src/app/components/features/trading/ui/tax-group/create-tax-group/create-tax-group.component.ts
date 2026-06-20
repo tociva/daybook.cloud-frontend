@@ -220,8 +220,8 @@ export class CreateTaxGroupComponent implements AfterViewInit {
     }
   }
 
-  protected onModeSearch(value: string): void {
-    const q = value.trim().toLowerCase();
+  protected onModeSearch(value: string | null): void {
+    const q = (value ?? '').trim().toLowerCase();
     this.filteredModes.set(
       q
         ? TAX_GROUP_MODE_SUGGESTIONS.filter((m) => m.toLowerCase().includes(q))

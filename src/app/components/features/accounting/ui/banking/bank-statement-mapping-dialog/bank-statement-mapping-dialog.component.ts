@@ -127,8 +127,8 @@ export class BankStatementMappingDialogComponent {
   protected readonly bankCashOptionLabel = (bank: BankCash): string => bank.name;
   protected readonly bankCashTrackBy = (_index: number, bank: BankCash): string => bank.id ?? bank.name;
 
-  protected setStartingRow(value: string): void {
-    this.startingRowChange.emit(Number(value));
+  protected setStartingRow(value: string | null): void {
+    this.startingRowChange.emit(Number(value ?? ''));
   }
 
   protected setBankCash(value: unknown): void {

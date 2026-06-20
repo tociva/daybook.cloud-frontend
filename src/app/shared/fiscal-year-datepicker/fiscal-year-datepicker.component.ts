@@ -53,4 +53,16 @@ export class FiscalYearDatepickerComponent {
       .querySelector<HTMLInputElement>('input[data-slot="datepicker-input"]')
       ?.focus();
   }
+
+  protected onValueChange(value: TngDateSelectionInput<Date>): void {
+    this.valueChange.emit(this.toDateValue(value));
+  }
+
+  private toDateValue(value: TngDateSelectionInput<Date>): TngDateValue<Date> {
+    if (value == null) return null;
+    if (value instanceof Date) return value;
+    if (typeof value === 'string') return this.datepickerAdapter.adapter().parse(value);
+
+    return null;
+  }
 }

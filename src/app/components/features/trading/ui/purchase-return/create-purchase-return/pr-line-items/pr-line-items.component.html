@@ -282,7 +282,7 @@
               fullWidth
               ariaLabel="Round off"
               [value]="draft.roundoff()"
-              (valueChange)="draft.roundoff.set($event)"
+              (valueChange)="onRoundoffChange($event)"
               (blur)="normalizeRoundoffOnBlur()"
             />
           }

@@ -52,4 +52,32 @@ export class FiscalYearDateRangePickerComponent {
       (date: Date): boolean =>
         !this.dateRange.isWithinFiscalYear(date),
   );
+
+  protected onValueChange(value: TngDateRangePickerSelectionInput<Date>): void {
+    this.valueChange.emit(this.toRangeValue(value));
+  }
+
+  private toRangeValue(
+    value: TngDateRangePickerSelectionInput<Date>,
+  ): TngDateRangePickerValue<Date> {
+    if (value == null) return null;
+    if (value instanceof Date) {
+      return { start: value, end: value };
+    }
+    if (typeof value === 'object') {
+      return {
+        start: this.resolveDate(value.start),
+        end: this.resolveDate(value.end),
+      };
+    }
+
+    return null;
+  }
+
+  private resolveDate(value: unknown): Date | null {
+    if (value instanceof Date) return value;
+    if (typeof value === 'string') return this.datepickerAdapter.adapter().parse(value);
+
+    return null;
+  }
 }

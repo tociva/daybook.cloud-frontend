@@ -156,6 +156,10 @@ export class PiLineItemsComponent {
     this.draft.roundoff.set(this.normalizeRoundoffValue(this.draft.roundoff()));
   }
 
+  protected onRoundoffChange(value: string | null): void {
+    this.draft.roundoff.set(this.normalizeRoundoffValue(value ?? ''));
+  }
+
   private focusTableControl(event: MouseEvent, selector: string): void {
     if (event.defaultPrevented) return;
 

@@ -23,7 +23,7 @@ import {
   TngSelectComponent,
 } from '@tailng-ui/components';
 import type {
-  TngDateRangePickerValue,
+  TngDateRangePickerSelectionInput,
   TngNumberRangeValue,
 } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
@@ -361,15 +361,20 @@ export class CrudFilterPopoverComponent {
 
   protected setDateRangeValue(
     field: CrudFilterField,
-    value: TngDateRangePickerValue<Date>,
+    value: TngDateRangePickerSelectionInput<Date> | null | undefined,
   ): void {
     if (!this.isComparisonField(field)) return;
+
+    const range =
+      value != null && typeof value === 'object' && !(value instanceof Date) ? value : null;
+    const start = range ? this.resolveDateInput(range.start) : null;
+    const end = range ? this.resolveDateInput(range.end) : null;
 
     this.patchDraft(field.id, {
       operator: 'between',
       value: {
-        from: value?.start ? this.dateToIsoString(value.start) : '',
-        to: value?.end ? this.dateToIsoString(value.end) : '',
+        from: start ? this.dateToIsoString(start) : '',
+        to: end ? this.dateToIsoString(end) : '',
       },
     });
   }
@@ -390,14 +395,14 @@ export class CrudFilterPopoverComponent {
     };
   }
 
-  protected setNumberRangeValue(field: CrudFilterField, value: TngNumberRangeValue): void {
+  protected setNumberRangeValue(field: CrudFilterField, value: TngNumberRangeValue | null): void {
     if (!this.isComparisonField(field)) return;
 
     this.patchDraft(field.id, {
       operator: 'between',
       value: {
-        from: value.min !== null ? String(value.min) : '',
-        to: value.max !== null ? String(value.max) : '',
+        from: value?.min !== null && value?.min !== undefined ? String(value.min) : '',
+        to: value?.max !== null && value?.max !== undefined ? String(value.max) : '',
       },
     });
   }
@@ -417,10 +422,10 @@ export class CrudFilterPopoverComponent {
     return [emptyOption, ...field.options];
   }
 
-  protected setTextValue(field: CrudTextFilterField, value: string): void {
+  protected setTextValue(field: CrudTextFilterField, value: string | null): void {
     this.patchDraft(field.id, {
       operator: this.getOperatorValueForField(field) as Lb4TextFilterOperator,
-      value,
+      value: value ?? '',
     });
   }
 
@@ -451,17 +456,18 @@ export class CrudFilterPopoverComponent {
   protected setComparisonValue(
     field: CrudFilterField,
     side: 'from' | 'single' | 'to',
-    value: string,
+    value: string | null,
   ): void {
     if (!this.isComparisonField(field)) return;
 
+    const normalizedValue = value ?? '';
     const currentValue = this.draft()[field.id]?.value;
     const nextValue =
       side === 'single'
-        ? value
+        ? normalizedValue
         : {
             ...this.normalizeRangeValue(currentValue),
-            [side]: value,
+            [side]: normalizedValue,
           };
 
     this.patchDraft(field.id, {
@@ -779,5 +785,12 @@ export class CrudFilterPopoverComponent {
     const d = String(date.getDate()).padStart(2, '0');
 
     return `${y}-${m}-${d}`;
+  }
+
+  private resolveDateInput(value: unknown): Date | null {
+    if (value instanceof Date) return value;
+    if (typeof value === 'string') return this.datepickerAdapter.adapter().parse(value);
+
+    return null;
   }
 }

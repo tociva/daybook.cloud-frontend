@@ -281,6 +281,13 @@ export class CreateFiscalYearComponent implements AfterViewInit {
   }
 
   // ── Currency handlers ─────────────────────────────────────────────────────
+  protected onStartYearChange(value: string | number | undefined): void {
+    const year = typeof value === 'number' ? value : Number(value ?? 0);
+    if (Number.isFinite(year) && year > 0) {
+      this.startYear.set(year);
+    }
+  }
+
   protected onCurrencyChange(value: unknown): void {
     this.selectedCurrencyCode.set(value as string | null);
   }
