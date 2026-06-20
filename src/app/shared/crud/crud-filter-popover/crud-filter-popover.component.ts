@@ -164,6 +164,7 @@ export class CrudFilterPopoverComponent {
   private readonly crudUrl = inject(CrudUrlService);
 
   readonly ariaLabel = input('Filters');
+  readonly clearQueryParams = input<readonly string[]>([]);
   readonly defaultPageSize = input(DEFAULT_LB4_PAGE_SIZE);
   readonly fields = input<readonly CrudFilterField[]>([]);
   readonly title = input('Filter');
@@ -499,6 +500,7 @@ export class CrudFilterPopoverComponent {
     }
 
     await this.crudUrl.updateFilterInUrl(filter, {
+      clearQueryParams: this.clearQueryParams(),
       defaultPageSize: this.defaultPageSize(),
       replaceUrl: this.replaceUrl(),
       route: this.route,

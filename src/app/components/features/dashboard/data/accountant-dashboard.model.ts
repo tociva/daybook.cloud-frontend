@@ -14,43 +14,29 @@ export type AccountantDashboardComplianceActionKey = Extract<
   'gst.gstr1' | 'gst.gstr2b'
 >;
 
-export type AccountantDashboardAmountActionKey = Exclude<
-  AccountantDashboardActionKey,
-  AccountantDashboardComplianceActionKey | 'bankTransactions.pendingReconciliation'
->;
+export type AccountantDashboardSummaryQuery = Readonly<{
+  asOfDate?: string;
+  branchid?: string;
+  fiscalyearid?: string;
+}>;
 
-export type AccountantDashboardBankReconciliationActionKey = Extract<
-  AccountantDashboardActionKey,
-  'bankTransactions.pendingReconciliation'
->;
+export type AccountantDashboardMetric<
+  TActionKey extends AccountantDashboardActionKey = AccountantDashboardActionKey,
+> = Readonly<{
+  actionKey: TActionKey;
+  pendingCount: number;
+  totalCount: number;
+}>;
 
 export type AccountantDashboardComplianceMetric<
   TActionKey extends AccountantDashboardComplianceActionKey =
     AccountantDashboardComplianceActionKey,
-> = Readonly<{
-  actionKey: TActionKey;
-  greenMonths: number;
-  notStartedMonths: number;
-  partialMonths: number;
-}>;
+> = AccountantDashboardMetric<TActionKey>;
 
-export type AccountantDashboardAmountMetric<
-  TActionKey extends AccountantDashboardAmountActionKey =
-    AccountantDashboardAmountActionKey,
-> = Readonly<{
-  actionKey: TActionKey;
-  amount: number;
-  count: number;
-  oldestDate: string | null;
-}>;
-
-export type AccountantDashboardBankReconciliationMetric = Readonly<{
-  actionKey: AccountantDashboardBankReconciliationActionKey;
-  count: number;
-  creditAmount: number;
-  debitAmount: number;
-  oldestDate: string | null;
-}>;
+export type AccountantDashboardWorkMetric<
+  TActionKey extends Exclude<AccountantDashboardActionKey, AccountantDashboardComplianceActionKey> =
+    Exclude<AccountantDashboardActionKey, AccountantDashboardComplianceActionKey>,
+> = AccountantDashboardMetric<TActionKey>;
 
 export type AccountantDashboardSummary = Readonly<{
   asOfDate: string;
@@ -62,17 +48,16 @@ export type AccountantDashboardSummary = Readonly<{
   fiscalyearid: string;
   lastCompletedMonth: string;
   pendingAllocations: Readonly<{
-    payments: AccountantDashboardAmountMetric<'payments.pendingAllocation'>;
-    receipts: AccountantDashboardAmountMetric<'receipts.pendingAllocation'>;
+    payments: AccountantDashboardWorkMetric<'payments.pendingAllocation'>;
+    receipts: AccountantDashboardWorkMetric<'receipts.pendingAllocation'>;
   }>;
   pendingJournals: Readonly<{
-    payments: AccountantDashboardAmountMetric<'payments.pendingJournal'>;
-    purchaseInvoices: AccountantDashboardAmountMetric<'purchaseInvoices.pendingJournal'>;
-    receipts: AccountantDashboardAmountMetric<'receipts.pendingJournal'>;
-    saleInvoices: AccountantDashboardAmountMetric<'saleInvoices.pendingJournal'>;
+    payments: AccountantDashboardWorkMetric<'payments.pendingJournal'>;
+    purchaseInvoices: AccountantDashboardWorkMetric<'purchaseInvoices.pendingJournal'>;
+    receipts: AccountantDashboardWorkMetric<'receipts.pendingJournal'>;
+    saleInvoices: AccountantDashboardWorkMetric<'saleInvoices.pendingJournal'>;
   }>;
   pendingReconciliation: Readonly<{
-    bankTransactions: AccountantDashboardBankReconciliationMetric;
+    bankTransactions: AccountantDashboardWorkMetric<'bankTransactions.pendingReconciliation'>;
   }>;
 }>;
-

@@ -1,14 +1,15 @@
 <main class="trading-page">
   <app-page-heading
     eyebrow="Trading"
-    title="Sale Invoices"
-    description="Manage your sale invoices and billing records."
+    [title]="pageTitle()"
+    [description]="pageDescription()"
   >
     <app-crud-filter-popover
       ariaLabel="Sale invoice filters"
       title="Filter sale invoices"
       [fields]="filterFields"
       [filter]="crudQuery.filter()"
+      [clearQueryParams]="journalLinkWorkItemClearQueryParams"
       syncUrl
     />
 
@@ -25,11 +26,17 @@
   </app-page-heading>
 
   <tng-card variant="outline" padding="lg">
-    @if (saleInvoiceStore.error()) {
-      <div class="notice notice--danger">{{ saleInvoiceStore.error() }}</div>
-    }
+    @if (isJournalLinkWorkItemMode()) {
+      <app-journal-link-work-item-list
+        [sourceType]="journalLinkWorkItemSourceType"
+        [hideSourceType]="true"
+      />
+    } @else {
+      @if (saleInvoiceStore.error()) {
+        <div class="notice notice--danger">{{ saleInvoiceStore.error() }}</div>
+      }
 
-    <div class="table-stack">
+      <div class="table-stack">
       @if (
         !saleInvoiceStore.isLoading() &&
         !hasError() &&
@@ -207,10 +214,12 @@
             [filter]="crudQuery.filter()"
             [totalItems]="saleInvoiceStore.count()"
             [pageSizeOptions]="crudQuery.pageSizeOptions()"
+            [clearQueryParams]="journalLinkWorkItemClearQueryParams"
             syncUrl
           />
         </div>
       }
-    </div>
+      </div>
+    }
   </tng-card>
 </main>

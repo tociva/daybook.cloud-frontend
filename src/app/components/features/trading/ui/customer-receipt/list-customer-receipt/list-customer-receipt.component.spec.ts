@@ -1,6 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
+import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
@@ -21,12 +22,20 @@ function asHarness(component: ListCustomerReceiptComponent): CustomerReceiptList
   return component as unknown as CustomerReceiptListHarness;
 }
 
-function setup() {
+function setup(options: Readonly<{ queryParams?: Record<string, string> }> = {}) {
   const loadCustomerReceipts = vi.fn(async () => undefined);
   const storeError = signal<string | null>('Stop after query assertion.');
+  const queryParamMap = convertToParamMap(options.queryParams ?? {});
 
   TestBed.configureTestingModule({
     providers: [
+      {
+        provide: ActivatedRoute,
+        useValue: {
+          queryParamMap: of(queryParamMap),
+          snapshot: { queryParamMap },
+        },
+      },
       {
         provide: BankCashStore,
         useValue: {
@@ -136,5 +145,18 @@ describe('ListCustomerReceiptComponent', () => {
       where: { customerid: 'customer-1' },
       includes: ['customer', 'bcash'],
     });
+  });
+
+  it('skips normal receipt loading when dashboard journal-link mode is active', async () => {
+    const { component, loadCustomerReceipts } = setup({
+      queryParams: {
+        sourceType: 'receipt',
+        status: 'not_fully_linked',
+      },
+    });
+
+    await component.loadCustomerReceiptsWithJournals({ limit: 10, offset: 0 });
+
+    expect(loadCustomerReceipts).not.toHaveBeenCalled();
   });
 });

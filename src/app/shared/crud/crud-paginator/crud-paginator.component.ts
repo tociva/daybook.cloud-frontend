@@ -26,6 +26,7 @@ export class CrudPaginatorComponent {
   private readonly inferredUnfilteredTotalItems = signal<number | null>(null);
 
   readonly ariaLabel = input('Pagination');
+  readonly clearQueryParams = input<readonly string[]>([]);
   readonly defaultPageSize = input(DEFAULT_LB4_PAGE_SIZE);
   readonly filter = input<Lb4ListQuery>({});
   readonly maxPageButtons = input(3);
@@ -104,6 +105,7 @@ export class CrudPaginatorComponent {
     }
 
     await this.crudUrl.updateFilterInUrl(filter, {
+      clearQueryParams: this.clearQueryParams(),
       defaultPageSize: this.defaultPageSize(),
       replaceUrl: this.replaceUrl(),
       route: this.route,

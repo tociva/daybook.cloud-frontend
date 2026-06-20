@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   TngButtonComponent,
   TngCardComponent,
@@ -23,7 +24,13 @@ import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-
 import { CustomerStore } from '../../../data/customer';
 import type { Customer } from '../../../data/customer';
 import { JournalService, JournalSourceType } from '../../../../accounting/data/journal';
+import {
+  JOURNAL_LINK_WORK_ITEM_CLEAR_QUERY_PARAMS,
+  isJournalLinkWorkItemMode as hasJournalLinkWorkItemMode,
+} from '../../../../accounting/data/journal-link-work-item';
+import type { JournalLinkWorkItemSourceType } from '../../../../accounting/data/journal-link-work-item';
 import { ReconciliationMatchService } from '../../../../accounting/data/reconciliation-match';
+import { JournalLinkWorkItemListComponent } from '../../../../accounting/shared/journal-link-work-items';
 import { SaleInvoicePrintService, SaleInvoiceStore } from '../../../data/sale-invoice';
 import type { SaleInvoice, SaleInvoiceJournal } from '../../../data/sale-invoice';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
@@ -53,12 +60,14 @@ const DEFAULT_SALE_INVOICE_ORDER = ['date ASC', 'number ASC'] as const;
     TngTableCellTpl,
     TableRowIconButtonComponent,
     BulkUploadButtonComponent,
+    JournalLinkWorkItemListComponent,
   ],
   templateUrl: './list-sale-invoice.component.html',
   styleUrl: './list-sale-invoice.component.css',
   providers: [CrudListQueryService],
 })
 export class ListSaleInvoiceComponent {
+  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly dateManagement = inject(DateManagementService);
   private readonly journalService = inject(JournalService);
@@ -79,6 +88,23 @@ export class ListSaleInvoiceComponent {
     validatePayloadAsync: (payload) => this.bulkUploadValidationService.validateReferences(payload),
   }));
   protected readonly hasError = computed(() => this.saleInvoiceStore.error() !== null);
+  private readonly queryParams = toSignal(this.route.queryParamMap, {
+    initialValue: this.route.snapshot.queryParamMap,
+  });
+  protected readonly journalLinkWorkItemSourceType: JournalLinkWorkItemSourceType = 'sale_invoice';
+  protected readonly journalLinkWorkItemClearQueryParams =
+    JOURNAL_LINK_WORK_ITEM_CLEAR_QUERY_PARAMS;
+  protected readonly isJournalLinkWorkItemMode = computed(() =>
+    hasJournalLinkWorkItemMode(this.queryParams(), this.journalLinkWorkItemSourceType),
+  );
+  protected readonly pageTitle = computed(() =>
+    this.isJournalLinkWorkItemMode() ? 'Sale invoices pending journal links' : 'Sale Invoices',
+  );
+  protected readonly pageDescription = computed(() =>
+    this.isJournalLinkWorkItemMode()
+      ? 'Review sale invoices that are not fully linked to journals.'
+      : 'Manage your sale invoices and billing records.',
+  );
   protected readonly previewingInvoiceId = signal<string | null>(null);
   protected readonly generatingJournalInvoiceId = signal<string | null>(null);
   protected readonly journalsLoading = signal(false);
@@ -193,6 +219,12 @@ export class ListSaleInvoiceComponent {
   }
 
   private async loadSaleInvoicesWithJournals(filter: Lb4ListQuery): Promise<void> {
+    if (this.isJournalLinkWorkItemMode()) {
+      this.journalsByInvoiceId.set(new Map());
+      this.journalsLoading.set(false);
+      return;
+    }
+
     const query: SaleInvoiceListQuery = {
       ...filter,
       order: filter.order?.length ? filter.order : DEFAULT_SALE_INVOICE_ORDER,

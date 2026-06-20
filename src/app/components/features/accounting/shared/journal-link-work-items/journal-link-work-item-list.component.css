@@ -1,0 +1,67 @@
+:host {
+  display: grid;
+  gap: 1rem;
+}
+
+.notice {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  color: var(--tng-semantic-foreground-primary);
+  padding: 1rem;
+}
+
+.notice--danger {
+  border-color: var(--tng-semantic-accent-danger);
+}
+
+.link-button {
+  background: transparent;
+  border: 0;
+  color: var(--tng-semantic-accent-brand);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  padding: 0;
+}
+
+.journal-links {
+  display: inline;
+}
+
+.row-actions {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.35rem;
+  justify-content: flex-end;
+}
+
+.status-badge {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.25rem 0.5rem;
+  white-space: nowrap;
+}
+
+.status-badge[data-status='linked'] {
+  border-color: var(--tng-semantic-accent-success, #16a34a);
+  color: var(--tng-semantic-accent-success, #16a34a);
+}
+
+.status-badge[data-status='partial'] {
+  border-color: var(--tng-semantic-accent-warning, #ca8a04);
+  color: var(--tng-semantic-accent-warning, #ca8a04);
+}
+
+.status-badge[data-status='unlinked'] {
+  border-color: var(--tng-semantic-accent-danger, #dc2626);
+  color: var(--tng-semantic-accent-danger, #dc2626);
+}
+
+.table-footer {
+  display: flex;
+  justify-content: flex-end;
+}

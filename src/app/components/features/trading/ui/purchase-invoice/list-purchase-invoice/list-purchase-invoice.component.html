@@ -1,14 +1,15 @@
 <main class="trading-page">
   <app-page-heading
     eyebrow="Trading"
-    title="Purchase Invoices"
-    description="Manage your purchase invoices and vendor billing records."
+    [title]="pageTitle()"
+    [description]="pageDescription()"
   >
     <app-crud-filter-popover
       ariaLabel="Purchase invoice filters"
       title="Filter purchase invoices"
       [fields]="filterFields"
       [filter]="crudQuery.filter()"
+      [clearQueryParams]="journalLinkWorkItemClearQueryParams"
       syncUrl
     />
 
@@ -25,11 +26,17 @@
   </app-page-heading>
 
   <tng-card variant="outline" padding="lg">
-    @if (purchaseInvoiceStore.error()) {
-      <div class="notice notice--danger">{{ purchaseInvoiceStore.error() }}</div>
-    }
+    @if (isJournalLinkWorkItemMode()) {
+      <app-journal-link-work-item-list
+        [sourceType]="journalLinkWorkItemSourceType"
+        [hideSourceType]="true"
+      />
+    } @else {
+      @if (purchaseInvoiceStore.error()) {
+        <div class="notice notice--danger">{{ purchaseInvoiceStore.error() }}</div>
+      }
 
-    <div class="table-stack">
+      <div class="table-stack">
       @if (
         !purchaseInvoiceStore.isLoading() &&
         !hasError() &&
@@ -208,10 +215,12 @@
             [filter]="crudQuery.filter()"
             [totalItems]="purchaseInvoiceStore.count()"
             [pageSizeOptions]="crudQuery.pageSizeOptions()"
+            [clearQueryParams]="journalLinkWorkItemClearQueryParams"
             syncUrl
           />
         </div>
       }
-    </div>
+      </div>
+    }
   </tng-card>
 </main>

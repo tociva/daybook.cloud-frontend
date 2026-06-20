@@ -1,14 +1,15 @@
 <main class="trading-page">
   <app-page-heading
     eyebrow="Trading"
-    title="Vendor Payments"
-    description="Manage payments made to vendors."
+    [title]="pageTitle()"
+    [description]="pageDescription()"
   >
     <app-crud-filter-popover
       ariaLabel="Vendor payment filters"
       title="Filter payments"
       [fields]="filterFields"
       [filter]="crudQuery.filter()"
+      [clearQueryParams]="journalLinkWorkItemClearQueryParams"
       syncUrl
     />
 
@@ -25,11 +26,17 @@
   </app-page-heading>
 
   <tng-card variant="outline" padding="lg">
-    @if (vendorPaymentStore.error()) {
-      <div class="notice notice--danger">{{ vendorPaymentStore.error() }}</div>
-    }
+    @if (isJournalLinkWorkItemMode()) {
+      <app-journal-link-work-item-list
+        [sourceType]="journalLinkWorkItemSourceType"
+        [hideSourceType]="true"
+      />
+    } @else {
+      @if (vendorPaymentStore.error()) {
+        <div class="notice notice--danger">{{ vendorPaymentStore.error() }}</div>
+      }
 
-    <div class="table-stack">
+      <div class="table-stack">
       @if (!vendorPaymentStore.isLoading() && !hasError() && crudQuery.shouldShowEmptyState(vendorPaymentStore.items().length, vendorPaymentStore.count())) {
         @if (crudQuery.hasActiveFilter()) {
           <app-empty-state
@@ -141,10 +148,12 @@
           [filter]="crudQuery.filter()"
           [totalItems]="vendorPaymentStore.count()"
           [pageSizeOptions]="crudQuery.pageSizeOptions()"
+          [clearQueryParams]="journalLinkWorkItemClearQueryParams"
           syncUrl
         />
       </div>
       }
-    </div>
+      </div>
+    }
   </tng-card>
 </main>

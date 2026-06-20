@@ -1,3 +1,4 @@
+import type { HttpParams } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -28,64 +29,54 @@ const summary: AccountantDashboardSummary = {
   compliance: {
     gstr1: {
       actionKey: 'gst.gstr1',
-      greenMonths: 2,
-      notStartedMonths: 1,
-      partialMonths: 0,
+      pendingCount: 1,
+      totalCount: 3,
     },
     gstr2b: {
       actionKey: 'gst.gstr2b',
-      greenMonths: 1,
-      notStartedMonths: 1,
-      partialMonths: 1,
+      pendingCount: 2,
+      totalCount: 3,
     },
   },
   pendingAllocations: {
     payments: {
       actionKey: 'payments.pendingAllocation',
-      amount: 0,
-      count: 0,
-      oldestDate: null,
+      pendingCount: 0,
+      totalCount: 2,
     },
     receipts: {
       actionKey: 'receipts.pendingAllocation',
-      amount: 1200,
-      count: 2,
-      oldestDate: '2026-04-02',
+      pendingCount: 2,
+      totalCount: 3,
     },
   },
   pendingJournals: {
     payments: {
       actionKey: 'payments.pendingJournal',
-      amount: 0,
-      count: 0,
-      oldestDate: null,
+      pendingCount: 0,
+      totalCount: 1,
     },
     purchaseInvoices: {
       actionKey: 'purchaseInvoices.pendingJournal',
-      amount: 400,
-      count: 1,
-      oldestDate: '2026-04-10',
+      pendingCount: 1,
+      totalCount: 2,
     },
     receipts: {
       actionKey: 'receipts.pendingJournal',
-      amount: 100,
-      count: 1,
-      oldestDate: '2026-04-12',
+      pendingCount: 1,
+      totalCount: 2,
     },
     saleInvoices: {
       actionKey: 'saleInvoices.pendingJournal',
-      amount: 800,
-      count: 3,
-      oldestDate: '2026-04-01',
+      pendingCount: 3,
+      totalCount: 4,
     },
   },
   pendingReconciliation: {
     bankTransactions: {
       actionKey: 'bankTransactions.pendingReconciliation',
-      count: 2,
-      creditAmount: 50,
-      debitAmount: 75,
-      oldestDate: '2026-04-07',
+      pendingCount: 2,
+      totalCount: 4,
     },
   },
 };
@@ -96,8 +87,8 @@ describe('AccountantDashboardService', () => {
     vi.clearAllMocks();
   });
 
-  it('loads summary from the exact endpoint without branch or fiscal-year query params', async () => {
-    const get = vi.fn(async () => summary);
+  it('loads summary from the endpoint with branch and fiscal-year guardrail params', async () => {
+    const get = vi.fn(async (_url: string, _options?: { params: HttpParams }) => summary);
 
     TestBed.configureTestingModule({
       providers: [
@@ -114,13 +105,49 @@ describe('AccountantDashboardService', () => {
     });
 
     const service = TestBed.inject(AccountantDashboardService);
-    await expect(service.loadSummary()).resolves.toBe(summary);
+    await expect(
+      service.loadSummary({ branchid: 'branch-1', fiscalyearid: 'fy-1' }),
+    ).resolves.toBe(summary);
 
     expect(get).toHaveBeenCalledOnce();
-    expect(get).toHaveBeenCalledWith(
+    expect(get.mock.calls[0][0]).toBe(
       'https://api.example.com/accounting/accountant-dashboard/summary',
     );
-    expect(get.mock.calls[0]).toHaveLength(1);
+    expect(get.mock.calls[0]).toHaveLength(2);
+
+    const params = get.mock.calls[0][1]?.params as HttpParams;
+    expect(params.get('branchid')).toBe('branch-1');
+    expect(params.get('fiscalyearid')).toBe('fy-1');
+    expect(params.has('asOfDate')).toBe(false);
+  });
+
+  it('serializes optional as-of date query params', async () => {
+    const get = vi.fn(async (_url: string, _options?: { params: HttpParams }) => summary);
+
+    TestBed.configureTestingModule({
+      providers: [
+        AccountantDashboardService,
+        { provide: ApiClientService, useValue: { get } },
+        {
+          provide: AppConfigStore,
+          useValue: {
+            config: signal(config('https://api.example.com/')),
+            load: vi.fn(),
+          },
+        },
+      ],
+    });
+
+    const service = TestBed.inject(AccountantDashboardService);
+    await service.loadSummary({
+      asOfDate: '2026-06-19',
+      branchid: 'branch-1',
+      fiscalyearid: 'fy-1',
+    });
+
+    const params = get.mock.calls[0][1]?.params as HttpParams;
+    expect(params.get('asOfDate')).toBe('2026-06-19');
+    expect(params.get('branchid')).toBe('branch-1');
+    expect(params.get('fiscalyearid')).toBe('fy-1');
   });
 });
-

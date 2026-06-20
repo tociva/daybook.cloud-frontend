@@ -1,6 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
+import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
@@ -22,12 +23,20 @@ function asHarness(component: ListVendorPaymentComponent): VendorPaymentListHarn
   return component as unknown as VendorPaymentListHarness;
 }
 
-function setup() {
+function setup(options: Readonly<{ queryParams?: Record<string, string> }> = {}) {
   const loadVendorPayments = vi.fn(async () => undefined);
   const storeError = signal<string | null>('Stop after query assertion.');
+  const queryParamMap = convertToParamMap(options.queryParams ?? {});
 
   TestBed.configureTestingModule({
     providers: [
+      {
+        provide: ActivatedRoute,
+        useValue: {
+          queryParamMap: of(queryParamMap),
+          snapshot: { queryParamMap },
+        },
+      },
       {
         provide: BankCashStore,
         useValue: {
@@ -143,5 +152,18 @@ describe('ListVendorPaymentComponent', () => {
       where: { vendorid: 'vendor-1' },
       includes: ['vendor', 'bcash'],
     });
+  });
+
+  it('skips normal payment loading when dashboard journal-link mode is active', async () => {
+    const { component, loadVendorPayments } = setup({
+      queryParams: {
+        sourceType: 'payment',
+        status: 'not_fully_linked',
+      },
+    });
+
+    await component.loadVendorPaymentsWithJournals({ limit: 10, offset: 0 });
+
+    expect(loadVendorPayments).not.toHaveBeenCalled();
   });
 });

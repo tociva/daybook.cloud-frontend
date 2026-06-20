@@ -28,64 +28,54 @@ const summary: AccountantDashboardSummary = {
   compliance: {
     gstr1: {
       actionKey: 'gst.gstr1',
-      greenMonths: 1,
-      notStartedMonths: 0,
-      partialMonths: 0,
+      pendingCount: 0,
+      totalCount: 1,
     },
     gstr2b: {
       actionKey: 'gst.gstr2b',
-      greenMonths: 0,
-      notStartedMonths: 1,
-      partialMonths: 0,
+      pendingCount: 1,
+      totalCount: 1,
     },
   },
   pendingAllocations: {
     payments: {
       actionKey: 'payments.pendingAllocation',
-      amount: 0,
-      count: 0,
-      oldestDate: null,
+      pendingCount: 0,
+      totalCount: 0,
     },
     receipts: {
       actionKey: 'receipts.pendingAllocation',
-      amount: 250,
-      count: 1,
-      oldestDate: '2026-05-01',
+      pendingCount: 1,
+      totalCount: 2,
     },
   },
   pendingJournals: {
     payments: {
       actionKey: 'payments.pendingJournal',
-      amount: 0,
-      count: 0,
-      oldestDate: null,
+      pendingCount: 0,
+      totalCount: 0,
     },
     purchaseInvoices: {
       actionKey: 'purchaseInvoices.pendingJournal',
-      amount: 0,
-      count: 0,
-      oldestDate: null,
+      pendingCount: 0,
+      totalCount: 0,
     },
     receipts: {
       actionKey: 'receipts.pendingJournal',
-      amount: 0,
-      count: 0,
-      oldestDate: null,
+      pendingCount: 0,
+      totalCount: 0,
     },
     saleInvoices: {
       actionKey: 'saleInvoices.pendingJournal',
-      amount: 0,
-      count: 0,
-      oldestDate: null,
+      pendingCount: 0,
+      totalCount: 0,
     },
   },
   pendingReconciliation: {
     bankTransactions: {
       actionKey: 'bankTransactions.pendingReconciliation',
-      count: 0,
-      creditAmount: 0,
-      debitAmount: 0,
-      oldestDate: null,
+      pendingCount: 0,
+      totalCount: 0,
     },
   },
 };
@@ -108,11 +98,13 @@ describe('AccountantDashboardStore', () => {
     });
 
     const store = TestBed.inject(AccountantDashboardStore);
-    const load = store.loadSummary();
+    const query = { branchid: 'branch-1', fiscalyearid: 'fy-1' };
+    const load = store.loadSummary(query);
 
     expect(store.isLoading()).toBe(true);
     expect(store.error()).toBeNull();
     expect(store.summary()).toBeNull();
+    expect(loadSummary).toHaveBeenCalledWith(query);
 
     response.resolve(summary);
     await load;
@@ -148,4 +140,3 @@ describe('AccountantDashboardStore', () => {
     expect(store.error()).toBeNull();
   });
 });
-

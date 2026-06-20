@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   TngButtonComponent,
   TngCardComponent,
@@ -23,7 +24,13 @@ import {
 } from '../../../../../../shared/crud';
 import type { CrudFilterField, Lb4ListQuery } from '../../../../../../shared/crud';
 import { JournalService, JournalSourceType } from '../../../../accounting/data/journal';
+import {
+  JOURNAL_LINK_WORK_ITEM_CLEAR_QUERY_PARAMS,
+  isJournalLinkWorkItemMode as hasJournalLinkWorkItemMode,
+} from '../../../../accounting/data/journal-link-work-item';
+import type { JournalLinkWorkItemSourceType } from '../../../../accounting/data/journal-link-work-item';
 import { ReconciliationMatchService } from '../../../../accounting/data/reconciliation-match';
+import { JournalLinkWorkItemListComponent } from '../../../../accounting/shared/journal-link-work-items';
 import { ContraTransactionStore } from '../../../data/contra-transaction';
 import type { ContraTransaction, ContraTransactionJournal } from '../../../data/contra-transaction';
 
@@ -42,6 +49,7 @@ import type { ContraTransaction, ContraTransactionJournal } from '../../../data/
     TngTable,
     TngTableCellTpl,
     TableRowIconButtonComponent,
+    JournalLinkWorkItemListComponent,
   ],
   templateUrl: './list-bank-contra.component.html',
   styleUrl: './list-bank-contra.component.css',
@@ -52,11 +60,31 @@ export class ListBankContraComponent {
   private readonly dateManagement = inject(DateManagementService);
   private readonly journalService = inject(JournalService);
   private readonly reconciliationMatchService = inject(ReconciliationMatchService);
+  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly toastStore = inject(ToastStore);
   protected readonly contraTransactionStore = inject(ContraTransactionStore);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly hasError = computed(() => this.contraTransactionStore.error() !== null);
+  private readonly queryParams = toSignal(this.route.queryParamMap, {
+    initialValue: this.route.snapshot.queryParamMap,
+  });
+  protected readonly journalLinkWorkItemSourceType: JournalLinkWorkItemSourceType = 'contra';
+  protected readonly journalLinkWorkItemClearQueryParams =
+    JOURNAL_LINK_WORK_ITEM_CLEAR_QUERY_PARAMS;
+  protected readonly isJournalLinkWorkItemMode = computed(() =>
+    hasJournalLinkWorkItemMode(this.queryParams(), this.journalLinkWorkItemSourceType),
+  );
+  protected readonly pageTitle = computed(() =>
+    this.isJournalLinkWorkItemMode()
+      ? 'Contra transactions pending journal links'
+      : 'Bank Contra',
+  );
+  protected readonly pageDescription = computed(() =>
+    this.isJournalLinkWorkItemMode()
+      ? 'Review contra transactions that are not fully linked to journals.'
+      : 'Move funds between bank and cash accounts.',
+  );
   protected readonly generatingJournalContraId = signal<string | null>(null);
   protected readonly journalsLoading = signal(false);
   protected readonly journalsByContraId = signal<Map<string, readonly ContraTransactionJournal[]>>(
@@ -170,6 +198,12 @@ export class ListBankContraComponent {
   }
 
   private async loadContraTransactionsWithJournals(filter: Lb4ListQuery): Promise<void> {
+    if (this.isJournalLinkWorkItemMode()) {
+      this.journalsByContraId.set(new Map());
+      this.journalsLoading.set(false);
+      return;
+    }
+
     await this.contraTransactionStore.loadContraTransactions({
       ...filter,
       includes: ['frombcash', 'tobcash'],

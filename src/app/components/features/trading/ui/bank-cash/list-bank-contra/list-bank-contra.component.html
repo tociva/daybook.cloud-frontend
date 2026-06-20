@@ -1,14 +1,15 @@
 <main class="bank-cash-page">
   <app-page-heading
     eyebrow="Trading"
-    title="Bank Contra"
-    description="Move funds between bank and cash accounts."
+    [title]="pageTitle()"
+    [description]="pageDescription()"
   >
     <app-crud-filter-popover
       ariaLabel="Bank contra filters"
       title="Filter contra transactions"
       [fields]="filterFields"
       [filter]="crudQuery.filter()"
+      [clearQueryParams]="journalLinkWorkItemClearQueryParams"
       syncUrl
     />
 
@@ -29,11 +30,17 @@
   </app-page-heading>
 
   <tng-card variant="outline" padding="lg">
-    @if (contraTransactionStore.error()) {
-      <div class="notice notice--danger">{{ contraTransactionStore.error() }}</div>
-    }
+    @if (isJournalLinkWorkItemMode()) {
+      <app-journal-link-work-item-list
+        [sourceType]="journalLinkWorkItemSourceType"
+        [hideSourceType]="true"
+      />
+    } @else {
+      @if (contraTransactionStore.error()) {
+        <div class="notice notice--danger">{{ contraTransactionStore.error() }}</div>
+      }
 
-    <div class="table-stack">
+      <div class="table-stack">
       @if (
         !contraTransactionStore.isLoading() &&
         !hasError() &&
@@ -166,10 +173,12 @@
             [filter]="crudQuery.filter()"
             [totalItems]="contraTransactionStore.count()"
             [pageSizeOptions]="crudQuery.pageSizeOptions()"
+            [clearQueryParams]="journalLinkWorkItemClearQueryParams"
             syncUrl
           />
         </div>
       }
-    </div>
+      </div>
+    }
   </tng-card>
 </main>

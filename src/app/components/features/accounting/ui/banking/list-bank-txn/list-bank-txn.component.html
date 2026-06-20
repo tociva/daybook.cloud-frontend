@@ -1,14 +1,15 @@
 <main class="management-page">
   <app-page-heading
     eyebrow="Accounting"
-    title="Banking"
-    description="Manage bank statement transactions for reconciliation and audit trails."
+    [title]="pageTitle()"
+    [description]="pageDescription()"
   >
     <app-crud-filter-popover
       ariaLabel="Bank transaction filters"
       title="Filter bank transactions"
       [fields]="filterFields"
       [filter]="crudQuery.filter()"
+      [clearQueryParams]="filterClearQueryParams"
       syncUrl
     />
 
@@ -166,6 +167,7 @@
             [filter]="crudQuery.filter()"
             [totalItems]="bankTxnStore.count()"
             [pageSizeOptions]="crudQuery.pageSizeOptions()"
+            [clearQueryParams]="filterClearQueryParams"
             syncUrl
           />
         </div>

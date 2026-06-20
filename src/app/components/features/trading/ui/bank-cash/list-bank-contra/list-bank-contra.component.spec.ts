@@ -1,6 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
+import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
@@ -53,10 +54,16 @@ function journal(overrides: Partial<Journal> = {}): Journal {
   };
 }
 
-function setup(options: Readonly<{ items?: readonly ContraTransaction[] }> = {}) {
+function setup(
+  options: Readonly<{
+    items?: readonly ContraTransaction[];
+    queryParams?: Record<string, string>;
+  }> = {},
+) {
   const rows = options.items ?? [contra()];
   const items = signal<readonly ContraTransaction[]>([]);
   const storeError = signal<string | null>(null);
+  const queryParamMap = convertToParamMap(options.queryParams ?? {});
   const loadContraTransactions = vi.fn(async () => {
     items.set(rows);
   });
@@ -71,6 +78,13 @@ function setup(options: Readonly<{ items?: readonly ContraTransaction[] }> = {})
 
   TestBed.configureTestingModule({
     providers: [
+      {
+        provide: ActivatedRoute,
+        useValue: {
+          queryParamMap: of(queryParamMap),
+          snapshot: { queryParamMap },
+        },
+      },
       {
         provide: ContraTransactionStore,
         useValue: {
@@ -156,6 +170,20 @@ describe('ListBankContraComponent', () => {
       JournalSourceType.CONTRA_TRANSACTION,
       ['contra-1'],
     );
+  });
+
+  it('skips normal contra loading when dashboard journal-link mode is active', async () => {
+    const { component, findJournalsBySourceIds, loadContraTransactions } = setup({
+      queryParams: {
+        sourceType: 'contra',
+        status: 'not_fully_linked',
+      },
+    });
+
+    await component.loadContraTransactionsWithJournals({ limit: 10, offset: 0 });
+
+    expect(loadContraTransactions).not.toHaveBeenCalled();
+    expect(findJournalsBySourceIds).not.toHaveBeenCalled();
   });
 
   it('maps returned source journal groups by contra id', async () => {

@@ -113,7 +113,7 @@
 
 .status-table {
   width: 100%;
-  min-width: 34rem;
+  min-width: 30rem;
   border-collapse: collapse;
   color: var(--tng-semantic-foreground-primary);
   font-size: 0.82rem;
@@ -134,12 +134,12 @@
 
 .status-table th:nth-child(1),
 .status-table td:nth-child(1) {
-  width: 18%;
+  width: 22%;
 }
 
 .status-table th:nth-child(2),
 .status-table td:nth-child(2) {
-  width: 17%;
+  width: 20%;
 }
 
 .status-table th:nth-child(3),
@@ -154,20 +154,13 @@
 
 .status-table th:nth-child(5),
 .status-table td:nth-child(5) {
-  width: 6.8rem;
-}
-
-.status-table th:nth-child(6),
-.status-table td:nth-child(6) {
   width: 6.5rem;
 }
 
 .status-table th:nth-child(3),
 .status-table td:nth-child(3),
 .status-table th:nth-child(5),
-.status-table td:nth-child(5),
-.status-table th:nth-child(6),
-.status-table td:nth-child(6) {
+.status-table td:nth-child(5) {
   overflow-wrap: normal;
   white-space: nowrap;
   word-break: normal;
@@ -245,7 +238,7 @@
   }
 
   .status-table {
-    min-width: 32rem;
+    min-width: 30rem;
     font-size: 0.78rem;
   }
 

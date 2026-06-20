@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   TngButtonComponent,
   TngCardComponent,
@@ -20,7 +21,13 @@ import { PageHeadingComponent } from '../../../../../../shared/page-heading/page
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import { JournalService, JournalSourceType } from '../../../../accounting/data/journal';
+import {
+  JOURNAL_LINK_WORK_ITEM_CLEAR_QUERY_PARAMS,
+  isJournalLinkWorkItemMode as hasJournalLinkWorkItemMode,
+} from '../../../../accounting/data/journal-link-work-item';
+import type { JournalLinkWorkItemSourceType } from '../../../../accounting/data/journal-link-work-item';
 import { ReconciliationMatchService } from '../../../../accounting/data/reconciliation-match';
+import { JournalLinkWorkItemListComponent } from '../../../../accounting/shared/journal-link-work-items';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
@@ -51,12 +58,14 @@ const DEFAULT_CUSTOMER_RECEIPT_ORDER = ['date ASC'] as const;
     TngTableCellTpl,
     TableRowIconButtonComponent,
     BulkUploadButtonComponent,
+    JournalLinkWorkItemListComponent,
   ],
   templateUrl: './list-customer-receipt.component.html',
   styleUrl: './list-customer-receipt.component.css',
   providers: [CrudListQueryService],
 })
 export class ListCustomerReceiptComponent {
+  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly dateManagement = inject(DateManagementService);
   private readonly journalService = inject(JournalService);
@@ -68,6 +77,25 @@ export class ListCustomerReceiptComponent {
   protected readonly customerReceiptStore = inject(CustomerReceiptStore);
   protected readonly bulkUploadConfig = CUSTOMER_RECEIPT_BULK_UPLOAD_CONFIG;
   protected readonly hasError = computed(() => this.customerReceiptStore.error() !== null);
+  private readonly queryParams = toSignal(this.route.queryParamMap, {
+    initialValue: this.route.snapshot.queryParamMap,
+  });
+  protected readonly journalLinkWorkItemSourceType: JournalLinkWorkItemSourceType = 'receipt';
+  protected readonly journalLinkWorkItemClearQueryParams =
+    JOURNAL_LINK_WORK_ITEM_CLEAR_QUERY_PARAMS;
+  protected readonly isJournalLinkWorkItemMode = computed(() =>
+    hasJournalLinkWorkItemMode(this.queryParams(), this.journalLinkWorkItemSourceType),
+  );
+  protected readonly pageTitle = computed(() =>
+    this.isJournalLinkWorkItemMode()
+      ? 'Receipts pending journal links'
+      : 'Customer Receipts',
+  );
+  protected readonly pageDescription = computed(() =>
+    this.isJournalLinkWorkItemMode()
+      ? 'Review customer receipts that are not fully linked to journals.'
+      : 'Manage payments received from customers.',
+  );
   protected readonly generatingJournalReceiptId = signal<string | null>(null);
   protected readonly journalsLoading = signal(false);
   protected readonly journalsByReceiptId = signal<Map<string, readonly CustomerReceiptJournal[]>>(
@@ -164,6 +192,12 @@ export class ListCustomerReceiptComponent {
   }
 
   private async loadCustomerReceiptsWithJournals(filter: Lb4ListQuery): Promise<void> {
+    if (this.isJournalLinkWorkItemMode()) {
+      this.journalsByReceiptId.set(new Map());
+      this.journalsLoading.set(false);
+      return;
+    }
+
     await this.customerReceiptStore.loadCustomerReceipts({
       ...filter,
       order: filter.order?.length ? filter.order : DEFAULT_CUSTOMER_RECEIPT_ORDER,

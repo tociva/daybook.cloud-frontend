@@ -1,6 +1,7 @@
 import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { getApiErrorMessage } from '../../../../core/api/api-error.util';
+import type { AccountantDashboardSummaryQuery } from './accountant-dashboard.model';
 import { AccountantDashboardService } from './accountant-dashboard.service';
 import { initialAccountantDashboardState } from './accountant-dashboard.state';
 
@@ -23,7 +24,7 @@ export const AccountantDashboardStore = signalStore(
       }));
     },
 
-    async loadSummary(): Promise<void> {
+    async loadSummary(query?: AccountantDashboardSummaryQuery): Promise<void> {
       patchState(store, (state) => ({
         accountantDashboard: {
           ...state.accountantDashboard,
@@ -34,7 +35,7 @@ export const AccountantDashboardStore = signalStore(
       }));
 
       try {
-        const summary = await service.loadSummary();
+        const summary = await service.loadSummary(query);
         patchState(store, {
           accountantDashboard: {
             error: null,
@@ -55,4 +56,3 @@ export const AccountantDashboardStore = signalStore(
     },
   })),
 );
-

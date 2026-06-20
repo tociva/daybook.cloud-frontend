@@ -1,4 +1,9 @@
 import type { Params } from '@angular/router';
+import { JOURNAL_LINK_WORK_ITEM_DEFAULT_LIMIT } from '../../accounting/data/journal-link-work-item';
+import type {
+  JournalLinkWorkItemQuery,
+  JournalLinkWorkItemSourceType,
+} from '../../accounting/data/journal-link-work-item';
 import type { AccountantDashboardActionKey } from './accountant-dashboard.model';
 
 export const ACCOUNTANT_DASHBOARD_HOME = '/app/dashboard';
@@ -17,6 +22,15 @@ export const ACCOUNTANT_DASHBOARD_ROUTE_BY_ACTION_KEY: Readonly<
   'saleInvoices.pendingJournal': '/app/trading/sale-invoice',
 };
 
+export const ACCOUNTANT_DASHBOARD_JOURNAL_LINK_SOURCE_BY_ACTION_KEY: Readonly<
+  Partial<Record<AccountantDashboardActionKey, JournalLinkWorkItemSourceType>>
+> = {
+  'payments.pendingJournal': 'payment',
+  'purchaseInvoices.pendingJournal': 'purchase_invoice',
+  'receipts.pendingJournal': 'receipt',
+  'saleInvoices.pendingJournal': 'sale_invoice',
+};
+
 export type AccountantDashboardNavigationTarget = Readonly<{
   queryParams: Params;
   route: string;
@@ -31,9 +45,33 @@ export function resolveAccountantDashboardActionRoute(
 export function buildAccountantDashboardActionQueryParams(
   actionKey: AccountantDashboardActionKey,
 ): Params {
+  if (actionKey === 'bankTransactions.pendingReconciliation') {
+    return {
+      burl: ACCOUNTANT_DASHBOARD_HOME,
+      dashboardAction: actionKey,
+      filter: JSON.stringify({
+        where: {
+          journallinkstatus: 'not_fully_linked',
+        },
+      }),
+    };
+  }
+
+  const journalLinkSourceType = ACCOUNTANT_DASHBOARD_JOURNAL_LINK_SOURCE_BY_ACTION_KEY[actionKey];
+  const journalLinkQuery: JournalLinkWorkItemQuery | undefined = journalLinkSourceType
+    ? {
+        limit: JOURNAL_LINK_WORK_ITEM_DEFAULT_LIMIT,
+        order: 'date ASC',
+        skip: 0,
+        sourceType: journalLinkSourceType,
+        status: 'not_fully_linked',
+      }
+    : undefined;
+
   return {
     burl: ACCOUNTANT_DASHBOARD_HOME,
     dashboardAction: actionKey,
+    ...(journalLinkQuery ?? {}),
   };
 }
 
@@ -45,4 +83,3 @@ export function resolveAccountantDashboardNavigationTarget(
     route: resolveAccountantDashboardActionRoute(actionKey),
   };
 }
-

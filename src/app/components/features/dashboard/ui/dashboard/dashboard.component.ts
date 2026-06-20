@@ -8,12 +8,12 @@ import { TngIcon } from '@tailng-ui/icons';
 import { DateManagementService } from '../../../../../core/date/date-management.service';
 import { PermissionsStore } from '../../../../../core/permissions/permissions.store';
 import { PageHeadingComponent } from '../../../../../shared/page-heading/page-heading.component';
-import { formatAmountWithCurrency } from '../../../../../shared/format/currency';
 import { hasAccountingReportPermission } from '../../../accounting/shared/accounting-report-permissions';
 import { UserSessionStore } from '../../../management/data/user-session/user-session.store';
 import type {
   AccountantDashboardActionKey,
-  AccountantDashboardComplianceMetric,
+  AccountantDashboardMetric,
+  AccountantDashboardSummaryQuery,
 } from '../../data';
 import {
   AccountantDashboardStore,
@@ -26,7 +26,12 @@ type DashboardStatusRow = Readonly<{
   area: string;
   count: number;
   detail: string;
-  oldestDate: string | null;
+  title: string;
+}>;
+
+type DashboardStatusRowOptions = Readonly<{
+  actionLabel: string;
+  area: string;
   title: string;
 }>;
 
@@ -55,12 +60,17 @@ export class DashboardComponent {
   protected readonly canViewDashboard = computed(() =>
     hasAccountingReportPermission(this.permissionsStore.all(), 'accountantDashboard'),
   );
-  protected readonly contextKey = computed(() => {
+  protected readonly summaryQuery = computed<AccountantDashboardSummaryQuery | null>(() => {
     const session = this.session();
-    const branchId = session?.branch?.id;
-    const fiscalYearId = session?.fiscalyear?.id;
+    const branchid = session?.branch?.id;
+    const fiscalyearid = session?.fiscalyear?.id;
 
-    return branchId && fiscalYearId ? `${branchId}:${fiscalYearId}` : null;
+    return branchid && fiscalyearid ? { branchid, fiscalyearid } : null;
+  });
+  protected readonly contextKey = computed(() => {
+    const query = this.summaryQuery();
+
+    return query ? `${query.branchid}:${query.fiscalyearid}` : null;
   });
   protected readonly missingContextMessage = computed(() => {
     const session = this.session();
@@ -89,110 +99,52 @@ export class DashboardComponent {
     const summary = this.summary();
     if (!summary) return [];
 
-    const gstr1Pending = this.pendingComplianceMonths(summary.compliance.gstr1);
-    const gstr2bPending = this.pendingComplianceMonths(summary.compliance.gstr2b);
-    const bankTransactions = summary.pendingReconciliation.bankTransactions;
-
     const rows: ReadonlyArray<DashboardStatusRow | null> = [
-      gstr1Pending > 0
-        ? {
-            actionKey: summary.compliance.gstr1.actionKey,
-            actionLabel: 'View GSTR-1 GST compliance',
-            area: 'GST compliance',
-            count: gstr1Pending,
-            detail: `${summary.compliance.gstr1.partialMonths} partial / ${summary.compliance.gstr1.notStartedMonths} not started`,
-            oldestDate: null,
-            title: 'GSTR-1',
-          }
-        : null,
-      gstr2bPending > 0
-        ? {
-            actionKey: summary.compliance.gstr2b.actionKey,
-            actionLabel: 'View GSTR-2B GST compliance',
-            area: 'GST compliance',
-            count: gstr2bPending,
-            detail: `${summary.compliance.gstr2b.partialMonths} partial / ${summary.compliance.gstr2b.notStartedMonths} not started`,
-            oldestDate: null,
-            title: 'GSTR-2B',
-          }
-        : null,
-      summary.pendingAllocations.receipts.count > 0
-        ? {
-            actionKey: summary.pendingAllocations.receipts.actionKey,
-            actionLabel: 'View Receipts pending allocations',
-            area: 'Pending allocations',
-            count: summary.pendingAllocations.receipts.count,
-            detail: this.formatAmount(summary.pendingAllocations.receipts.amount),
-            oldestDate: summary.pendingAllocations.receipts.oldestDate,
-            title: 'Receipts',
-          }
-        : null,
-      summary.pendingAllocations.payments.count > 0
-        ? {
-            actionKey: summary.pendingAllocations.payments.actionKey,
-            actionLabel: 'View Payments pending allocations',
-            area: 'Pending allocations',
-            count: summary.pendingAllocations.payments.count,
-            detail: this.formatAmount(summary.pendingAllocations.payments.amount),
-            oldestDate: summary.pendingAllocations.payments.oldestDate,
-            title: 'Payments',
-          }
-        : null,
-      summary.pendingJournals.saleInvoices.count > 0
-        ? {
-            actionKey: summary.pendingJournals.saleInvoices.actionKey,
-            actionLabel: 'View Sale invoices pending journals',
-            area: 'Pending journals',
-            count: summary.pendingJournals.saleInvoices.count,
-            detail: this.formatAmount(summary.pendingJournals.saleInvoices.amount),
-            oldestDate: summary.pendingJournals.saleInvoices.oldestDate,
-            title: 'Sale invoices',
-          }
-        : null,
-      summary.pendingJournals.purchaseInvoices.count > 0
-        ? {
-            actionKey: summary.pendingJournals.purchaseInvoices.actionKey,
-            actionLabel: 'View Purchase invoices pending journals',
-            area: 'Pending journals',
-            count: summary.pendingJournals.purchaseInvoices.count,
-            detail: this.formatAmount(summary.pendingJournals.purchaseInvoices.amount),
-            oldestDate: summary.pendingJournals.purchaseInvoices.oldestDate,
-            title: 'Purchase invoices',
-          }
-        : null,
-      summary.pendingJournals.receipts.count > 0
-        ? {
-            actionKey: summary.pendingJournals.receipts.actionKey,
-            actionLabel: 'View Receipts pending journals',
-            area: 'Pending journals',
-            count: summary.pendingJournals.receipts.count,
-            detail: this.formatAmount(summary.pendingJournals.receipts.amount),
-            oldestDate: summary.pendingJournals.receipts.oldestDate,
-            title: 'Receipts',
-          }
-        : null,
-      summary.pendingJournals.payments.count > 0
-        ? {
-            actionKey: summary.pendingJournals.payments.actionKey,
-            actionLabel: 'View Payments pending journals',
-            area: 'Pending journals',
-            count: summary.pendingJournals.payments.count,
-            detail: this.formatAmount(summary.pendingJournals.payments.amount),
-            oldestDate: summary.pendingJournals.payments.oldestDate,
-            title: 'Payments',
-          }
-        : null,
-      bankTransactions.count > 0
-        ? {
-            actionKey: bankTransactions.actionKey,
-            actionLabel: 'View Bank transactions pending reconciliation',
-            area: 'Bank reconciliation',
-            count: bankTransactions.count,
-            detail: `Debit ${this.formatAmount(bankTransactions.debitAmount)} / Credit ${this.formatAmount(bankTransactions.creditAmount)}`,
-            oldestDate: bankTransactions.oldestDate,
-            title: 'Bank transactions',
-          }
-        : null,
+      this.statusRow(summary.compliance.gstr1, {
+        actionLabel: 'View GSTR-1 GST compliance',
+        area: 'GST compliance',
+        title: 'GSTR-1',
+      }),
+      this.statusRow(summary.compliance.gstr2b, {
+        actionLabel: 'View GSTR-2B GST compliance',
+        area: 'GST compliance',
+        title: 'GSTR-2B',
+      }),
+      this.statusRow(summary.pendingAllocations.receipts, {
+        actionLabel: 'View Receipts pending allocations',
+        area: 'Pending allocations',
+        title: 'Receipts',
+      }),
+      this.statusRow(summary.pendingAllocations.payments, {
+        actionLabel: 'View Payments pending allocations',
+        area: 'Pending allocations',
+        title: 'Payments',
+      }),
+      this.statusRow(summary.pendingJournals.saleInvoices, {
+        actionLabel: 'View Sale invoices pending journals',
+        area: 'Pending journals',
+        title: 'Sale invoices',
+      }),
+      this.statusRow(summary.pendingJournals.purchaseInvoices, {
+        actionLabel: 'View Purchase invoices pending journals',
+        area: 'Pending journals',
+        title: 'Purchase invoices',
+      }),
+      this.statusRow(summary.pendingJournals.receipts, {
+        actionLabel: 'View Receipts pending journals',
+        area: 'Pending journals',
+        title: 'Receipts',
+      }),
+      this.statusRow(summary.pendingJournals.payments, {
+        actionLabel: 'View Payments pending journals',
+        area: 'Pending journals',
+        title: 'Payments',
+      }),
+      this.statusRow(summary.pendingReconciliation.bankTransactions, {
+        actionLabel: 'View Bank transactions pending reconciliation',
+        area: 'Bank reconciliation',
+        title: 'Bank transactions',
+      }),
     ];
 
     return rows.filter((row): row is DashboardStatusRow => row !== null);
@@ -212,7 +164,7 @@ export class DashboardComponent {
       }
 
       this.loadedContextKey = contextKey;
-      void this.dashboardStore.loadSummary();
+      void this.dashboardStore.loadSummary(this.summaryQuery() ?? undefined);
     });
   }
 
@@ -221,7 +173,7 @@ export class DashboardComponent {
     if (!contextKey || !this.canViewDashboard()) return;
 
     this.loadedContextKey = contextKey;
-    await this.dashboardStore.loadSummary();
+    await this.dashboardStore.loadSummary(this.summaryQuery() ?? undefined);
   }
 
   protected openAction(actionKey: AccountantDashboardActionKey): void {
@@ -229,14 +181,6 @@ export class DashboardComponent {
     void this.router.navigate([target.route], {
       queryParams: target.queryParams,
     });
-  }
-
-  protected formatAmount(value: number): string {
-    const fiscalYear = this.session()?.fiscalyear;
-    const branch = this.session()?.branch;
-    const currencyCode = fiscalYear?.currencycode ?? branch?.currencycode ?? 'INR';
-
-    return formatAmountWithCurrency(value, currencyCode, fiscalYear?.currency ?? null);
   }
 
   protected formatDate(value: string | null): string {
@@ -261,7 +205,19 @@ export class DashboardComponent {
     return this.dateManagement.formatDisplayDateTime(value, '—');
   }
 
-  private pendingComplianceMonths(metric: AccountantDashboardComplianceMetric): number {
-    return metric.partialMonths + metric.notStartedMonths;
+  private statusRow(
+    metric: AccountantDashboardMetric,
+    options: DashboardStatusRowOptions,
+  ): DashboardStatusRow | null {
+    if (metric.pendingCount <= 0) return null;
+
+    return {
+      actionKey: metric.actionKey,
+      actionLabel: options.actionLabel,
+      area: options.area,
+      count: metric.pendingCount,
+      detail: `${metric.pendingCount} / ${metric.totalCount} pending`,
+      title: options.title,
+    };
   }
 }

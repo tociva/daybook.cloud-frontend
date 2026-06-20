@@ -103,8 +103,7 @@
                   <th scope="col">Area</th>
                   <th scope="col">Item</th>
                   <th scope="col" class="numeric">Count</th>
-                  <th scope="col">Status / amount</th>
-                  <th scope="col">Oldest</th>
+                  <th scope="col">Progress</th>
                   <th scope="col" class="action-column">Action</th>
                 </tr>
               </thead>
@@ -115,7 +114,6 @@
                     <th scope="row">{{ row.title }}</th>
                     <td class="numeric">{{ row.count }}</td>
                     <td class="status-detail">{{ row.detail }}</td>
-                    <td>{{ formatDate(row.oldestDate) }}</td>
                     <td class="action-cell">
                       <tng-button
                         type="button"

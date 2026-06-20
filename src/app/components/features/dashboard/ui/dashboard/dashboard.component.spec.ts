@@ -64,64 +64,54 @@ const summary: AccountantDashboardSummary = {
   compliance: {
     gstr1: {
       actionKey: 'gst.gstr1',
-      greenMonths: 2,
-      notStartedMonths: 0,
-      partialMonths: 1,
+      pendingCount: 1,
+      totalCount: 3,
     },
     gstr2b: {
       actionKey: 'gst.gstr2b',
-      greenMonths: 3,
-      notStartedMonths: 0,
-      partialMonths: 0,
+      pendingCount: 0,
+      totalCount: 3,
     },
   },
   pendingAllocations: {
     payments: {
       actionKey: 'payments.pendingAllocation',
-      amount: 0,
-      count: 0,
-      oldestDate: null,
+      pendingCount: 0,
+      totalCount: 2,
     },
     receipts: {
       actionKey: 'receipts.pendingAllocation',
-      amount: 1500,
-      count: 2,
-      oldestDate: '2026-04-04',
+      pendingCount: 2,
+      totalCount: 3,
     },
   },
   pendingJournals: {
     payments: {
       actionKey: 'payments.pendingJournal',
-      amount: 0,
-      count: 0,
-      oldestDate: null,
+      pendingCount: 0,
+      totalCount: 1,
     },
     purchaseInvoices: {
       actionKey: 'purchaseInvoices.pendingJournal',
-      amount: 750,
-      count: 1,
-      oldestDate: '2026-04-08',
+      pendingCount: 1,
+      totalCount: 2,
     },
     receipts: {
       actionKey: 'receipts.pendingJournal',
-      amount: 250,
-      count: 1,
-      oldestDate: '2026-04-06',
+      pendingCount: 1,
+      totalCount: 2,
     },
     saleInvoices: {
       actionKey: 'saleInvoices.pendingJournal',
-      amount: 3000,
-      count: 4,
-      oldestDate: '2026-04-01',
+      pendingCount: 4,
+      totalCount: 5,
     },
   },
   pendingReconciliation: {
     bankTransactions: {
       actionKey: 'bankTransactions.pendingReconciliation',
-      count: 0,
-      creditAmount: 0,
-      debitAmount: 0,
-      oldestDate: null,
+      pendingCount: 0,
+      totalCount: 4,
     },
   },
 };
@@ -131,64 +121,45 @@ const noPendingSummary: AccountantDashboardSummary = {
   compliance: {
     gstr1: {
       ...summary.compliance.gstr1,
-      greenMonths: 3,
-      notStartedMonths: 0,
-      partialMonths: 0,
+      pendingCount: 0,
     },
     gstr2b: {
       ...summary.compliance.gstr2b,
-      greenMonths: 3,
-      notStartedMonths: 0,
-      partialMonths: 0,
+      pendingCount: 0,
     },
   },
   pendingAllocations: {
     payments: {
       ...summary.pendingAllocations.payments,
-      amount: 0,
-      count: 0,
-      oldestDate: null,
+      pendingCount: 0,
     },
     receipts: {
       ...summary.pendingAllocations.receipts,
-      amount: 0,
-      count: 0,
-      oldestDate: null,
+      pendingCount: 0,
     },
   },
   pendingJournals: {
     payments: {
       ...summary.pendingJournals.payments,
-      amount: 0,
-      count: 0,
-      oldestDate: null,
+      pendingCount: 0,
     },
     purchaseInvoices: {
       ...summary.pendingJournals.purchaseInvoices,
-      amount: 0,
-      count: 0,
-      oldestDate: null,
+      pendingCount: 0,
     },
     receipts: {
       ...summary.pendingJournals.receipts,
-      amount: 0,
-      count: 0,
-      oldestDate: null,
+      pendingCount: 0,
     },
     saleInvoices: {
       ...summary.pendingJournals.saleInvoices,
-      amount: 0,
-      count: 0,
-      oldestDate: null,
+      pendingCount: 0,
     },
   },
   pendingReconciliation: {
     bankTransactions: {
       ...summary.pendingReconciliation.bankTransactions,
-      count: 0,
-      creditAmount: 0,
-      debitAmount: 0,
-      oldestDate: null,
+      pendingCount: 0,
     },
   },
 };
@@ -289,26 +260,31 @@ describe('DashboardComponent', () => {
   });
 
   it('renders a single compact pending tasks table from a loaded summary', () => {
-    const { fixture } = setup({ summary });
+    const { fixture, loadSummary } = setup({ summary });
     const host = fixture.nativeElement as HTMLElement;
     const text = host.textContent ?? '';
 
+    expect(loadSummary).toHaveBeenCalledWith({ branchid: 'branch-1', fiscalyearid: 'fy-1' });
     expect(text).toContain('Pending Tasks');
     expect(text).toContain('Area');
     expect(text).toContain('Item');
     expect(text).toContain('Count');
-    expect(text).toContain('Status / amount');
-    expect(text).toContain('Oldest');
+    expect(text).toContain('Progress');
+    expect(text).not.toContain('Status / amount');
+    expect(text).not.toContain('Oldest');
     expect(text).toContain('GST compliance');
-    expect(text).toContain('1 partial / 0 not started');
+    expect(text).toContain('1 / 3 pending');
     expect(text).toContain('GSTR-1');
     expect(text).not.toContain('GSTR-2B');
     expect(text).toContain('Pending allocations');
     expect(text).toContain('Receipts');
+    expect(text).toContain('2 / 3 pending');
     expect(text).not.toContain('Payments');
     expect(text).toContain('Pending journals');
     expect(text).toContain('Sale invoices');
+    expect(text).toContain('4 / 5 pending');
     expect(text).toContain('Purchase invoices');
+    expect(text).toContain('1 / 2 pending');
     expect(text).not.toContain('Bank reconciliation');
     expect(text).not.toContain('Debit');
     expect(text).not.toContain('Credit');
@@ -318,12 +294,10 @@ describe('DashboardComponent', () => {
     expect(host.querySelector('.dashboard-section--compact')).toBeTruthy();
   });
 
-  it('renders null oldest dates without muted zero-count rows', () => {
+  it('does not render muted zero-pending rows', () => {
     const { fixture } = setup({ summary });
     const host = fixture.nativeElement as HTMLElement;
-    const text = host.textContent ?? '';
 
-    expect(text).toContain('—');
     expect(host.querySelectorAll('.status-row--muted')).toHaveLength(0);
   });
 
@@ -351,6 +325,7 @@ describe('DashboardComponent', () => {
     retryButton?.click();
 
     expect(loadSummary).toHaveBeenCalledOnce();
+    expect(loadSummary).toHaveBeenCalledWith({ branchid: 'branch-1', fiscalyearid: 'fy-1' });
   });
 
   it('navigates table row actions with dashboard handoff query params', () => {

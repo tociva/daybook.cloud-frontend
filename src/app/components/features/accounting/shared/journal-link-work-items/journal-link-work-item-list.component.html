@@ -1,0 +1,111 @@
+@if (!canViewDashboard()) {
+  <div class="notice notice--danger" role="alert">
+    You do not have permission to view accountant dashboard work items.
+  </div>
+} @else {
+  <div class="notice" role="status">
+    {{ noticeText() }}
+  </div>
+
+  @if (error()) {
+    <div class="notice notice--danger" role="alert">{{ error() }}</div>
+  }
+
+  @if (!isLoading() && !error() && items().length === 0) {
+    <app-empty-state
+      icon="searchX"
+      title="No records match the dashboard journal-link filter"
+      description="Apply a standard filter to return to the full list."
+    />
+  } @else {
+    <tng-table
+      ariaLabel="Journal link work items"
+      density="comfortable"
+      [columns]="columns()"
+      [items]="items()"
+      [loading]="isLoading()"
+      [error]="error() !== null"
+      [sortActive]="sortActive()"
+      [sortDirection]="sortDirection()"
+      (sortChange)="applySort($event)"
+    >
+      <ng-template tngTableCellTemplate="sourceType" let-row="row">
+        {{ sourceLabel(row.sourceType) }}
+      </ng-template>
+
+      <ng-template tngTableCellTemplate="date" let-row="row">
+        {{ formatDate(row.date) }}
+      </ng-template>
+
+      <ng-template tngTableCellTemplate="number" let-row="row">
+        <button type="button" class="link-button" (click)="viewSource(row)">
+          {{ row.number || '-' }}
+        </button>
+      </ng-template>
+
+      <ng-template tngTableCellTemplate="partyName" let-row="row">
+        {{ row.partyName || '-' }}
+      </ng-template>
+
+      <ng-template tngTableCellTemplate="sourceAmount" let-row="row">
+        {{ formatAmount(row.sourceAmount) }}
+      </ng-template>
+
+      <ng-template tngTableCellTemplate="matchedAmount" let-row="row">
+        {{ formatAmount(row.matchedAmount) }}
+      </ng-template>
+
+      <ng-template tngTableCellTemplate="pendingAmount" let-row="row">
+        {{ formatAmount(row.pendingAmount) }}
+      </ng-template>
+
+      <ng-template tngTableCellTemplate="linkStatus" let-row="row">
+        <span class="status-badge" [attr.data-status]="row.linkStatus">
+          {{ linkStatusLabel(row.linkStatus) }}
+        </span>
+      </ng-template>
+
+      <ng-template tngTableCellTemplate="journals" let-row="row">
+        @if (row.journals.length) {
+          <span class="journal-links">
+            @for (journal of row.journals; track journal.id; let last = $last) {
+              <button type="button" class="link-button" (click)="viewJournal(journal)">
+                {{ journal.number }}
+              </button>
+              @if (!last) {
+                <span>, </span>
+              }
+            }
+          </span>
+        } @else {
+          <span>-</span>
+        }
+      </ng-template>
+
+      <ng-template tngTableCellTemplate="actions" let-row="row">
+        <div class="row-actions">
+          <app-table-row-icon-button
+            icon="eye"
+            ariaLabel="View source record"
+            (action)="viewSource(row)"
+          />
+        </div>
+      </ng-template>
+    </tng-table>
+
+    <div class="table-footer">
+      <tng-paginator
+        ariaLabel="Journal link work item pagination"
+        mode="server"
+        size="sm"
+        [pageIndex]="pageIndex()"
+        [pageSize]="pageSize()"
+        [pageSizeOptions]="pageSizeOptions"
+        [totalItems]="totalItems()"
+        [maxPageButtons]="3"
+        (pageIndexChange)="onPageIndexChange($event)"
+        (pageSizeChange)="onPageSizeChange($event)"
+      />
+    </div>
+  }
+}

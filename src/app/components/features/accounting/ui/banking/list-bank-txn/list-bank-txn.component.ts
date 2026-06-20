@@ -21,6 +21,7 @@ import { PageHeadingComponent } from '../../../../../../shared/page-heading/page
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import { BankCashStore } from '../../../../trading/data/bank-cash';
 import { InventoryLedgerMapStore } from '../../../data/inventory-ledger-map';
+import type { InventoryLedgerMap } from '../../../data/inventory-ledger-map';
 import { JournalSourceType } from '../../../data/journal';
 import { ReconciliationMatchService } from '../../../data/reconciliation-match';
 import { BankTxnStore } from '../../../data/bank-txn';
@@ -29,6 +30,17 @@ import { DateManagementService } from '../../../../../../core/date/date-manageme
 import { BankStatementUploadComponent } from '../bank-statement-upload/bank-statement-upload.component';
 import { JournalCreateDraftStagingService } from '../../journal/create-journal/journal-create-draft-staging.service';
 import { JournalAssignDialogComponent } from '../journal-assign-dialog/journal-assign-dialog/journal-assign-dialog.component';
+
+const BANK_TXN_FILTER_CLEAR_QUERY_PARAMS = [
+  'dashboardAction',
+  'fromDate',
+  'limit',
+  'order',
+  'skip',
+  'sourceType',
+  'status',
+  'toDate',
+] as const;
 
 @Component({
   selector: 'app-list-bank-txn',
@@ -64,6 +76,11 @@ export class ListBankTxnComponent {
   protected readonly bankCashStore = inject(BankCashStore);
   private readonly journalDraftStaging = inject(JournalCreateDraftStagingService);
   protected readonly hasError = computed(() => this.bankTxnStore.error() !== null);
+  protected readonly filterClearQueryParams = BANK_TXN_FILTER_CLEAR_QUERY_PARAMS;
+  protected readonly pageTitle = computed(() => 'Banking');
+  protected readonly pageDescription = computed(
+    () => 'Manage bank statement transactions for reconciliation and audit trails.',
+  );
 
   protected readonly journalDialogOpen = signal(false);
   protected readonly journalDialogBankTxn = signal<BankTxn | null>(null);
@@ -102,11 +119,61 @@ export class ListBankTxnComponent {
     { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '10rem' },
   ];
 
+  protected readonly bankLedgerMapOptionValue = (option: unknown): string =>
+    (option as InventoryLedgerMap).id ?? '';
+  protected readonly bankLedgerMapOptionLabel = (option: unknown): string => {
+    const map = option as InventoryLedgerMap;
+
+    return (map.id ? this.bankNameByMapId().get(map.id) : '') || map.id || '';
+  };
+  protected readonly bankLedgerMapTrackBy = (_index: number, option: unknown): unknown => {
+    const map = option as InventoryLedgerMap;
+
+    return map.id ?? map.entityid ?? map.ledgerid;
+  };
+
   protected readonly filterFields: readonly CrudFilterField[] = [
     { id: 'txndate', label: 'Date', defaultOperator: 'between', type: 'date' },
-    { id: 'inventoryledgermapid', label: 'Bank ledger map', placeholder: 'Map id', type: 'text' },
-    { id: 'description', label: 'Description', placeholder: 'Narration text', type: 'text' },
+    {
+      id: 'debit',
+      label: 'Deposit',
+      placeholder: 'Amount',
+      step: '0.01',
+      type: 'number',
+      operators: ['between', '=', '>=', '<='],
+    },
+    {
+      id: 'credit',
+      label: 'Withdrawal',
+      placeholder: 'Amount',
+      step: '0.01',
+      type: 'number',
+      operators: ['between', '=', '>=', '<='],
+    },
     { id: 'bankref', label: 'Reference', placeholder: 'UTR / cheque no', type: 'text' },
+    { id: 'description', label: 'Description', placeholder: 'Narration text', type: 'text' },
+    {
+      id: 'journallinkstatus',
+      label: 'Journal link status',
+      placeholder: 'Any journal link status',
+      type: 'enum',
+      options: [
+        { label: 'Not fully linked', value: 'not_fully_linked' },
+        { label: 'No journals', value: 'unlinked' },
+        { label: 'Partially linked', value: 'partial' },
+        { label: 'Fully linked', value: 'linked' },
+      ],
+    },
+    {
+      id: 'inventoryledgermapid',
+      label: 'Bank',
+      placeholder: 'Search bank/cash',
+      type: 'autocomplete',
+      options: () => this.inventoryLedgerMapStore.items(),
+      getOptionValue: this.bankLedgerMapOptionValue,
+      getOptionLabel: this.bankLedgerMapOptionLabel,
+      trackBy: this.bankLedgerMapTrackBy,
+    },
   ];
 
   private readonly bankCashNameById = computed(() => {
