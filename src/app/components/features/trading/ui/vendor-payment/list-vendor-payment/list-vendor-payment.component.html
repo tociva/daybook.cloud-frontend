@@ -9,7 +9,7 @@
       title="Filter payments"
       [fields]="filterFields"
       [filter]="crudQuery.filter()"
-      [clearQueryParams]="journalLinkWorkItemClearQueryParams"
+      [clearQueryParams]="filterClearQueryParams"
       syncUrl
     />
 
@@ -26,17 +26,11 @@
   </app-page-heading>
 
   <tng-card variant="outline" padding="lg">
-    @if (isJournalLinkWorkItemMode()) {
-      <app-journal-link-work-item-list
-        [sourceType]="journalLinkWorkItemSourceType"
-        [hideSourceType]="true"
-      />
-    } @else {
-      @if (vendorPaymentStore.error()) {
-        <div class="notice notice--danger">{{ vendorPaymentStore.error() }}</div>
-      }
+    @if (vendorPaymentStore.error()) {
+      <div class="notice notice--danger">{{ vendorPaymentStore.error() }}</div>
+    }
 
-      <div class="table-stack">
+    <div class="table-stack">
       @if (!vendorPaymentStore.isLoading() && !hasError() && crudQuery.shouldShowEmptyState(vendorPaymentStore.items().length, vendorPaymentStore.count())) {
         @if (crudQuery.hasActiveFilter()) {
           <app-empty-state
@@ -148,12 +142,11 @@
           [filter]="crudQuery.filter()"
           [totalItems]="vendorPaymentStore.count()"
           [pageSizeOptions]="crudQuery.pageSizeOptions()"
-          [clearQueryParams]="journalLinkWorkItemClearQueryParams"
+          [clearQueryParams]="filterClearQueryParams"
           syncUrl
         />
       </div>
       }
-      </div>
-    }
+    </div>
   </tng-card>
 </main>

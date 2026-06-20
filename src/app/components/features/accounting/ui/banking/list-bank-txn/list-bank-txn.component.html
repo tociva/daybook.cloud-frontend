@@ -138,23 +138,60 @@
             <div class="row-actions">
               <button
                 type="button"
-                class="row-action-menu-trigger"
+                class="link-button row-action-menu-link"
                 aria-label="Bank transaction actions"
                 [tngMenuTriggerFor]="bankTxnActionMenu"
               >
-                <tng-icon icon="ellipsis" aria-hidden="true" />
+                <tng-icon icon="moreHorizontal" aria-hidden="true" />
+                <span>...</span>
               </button>
 
               <tng-menu #bankTxnActionMenu="tngMenu" ariaLabel="Bank transaction actions">
-                <button type="button" tngMenuItem (click)="assignJournal(row)">
-                  Assign journal
+                <button
+                  type="button"
+                  class="row-action-menu-item"
+                  tngMenuItem
+                  (click)="assignJournal(row)"
+                >
+                  <tng-icon class="row-action-menu-item-icon" icon="bookOpen" aria-hidden="true" />
+                  <span>Assign journal</span>
                 </button>
-                <button type="button" tngMenuItem (click)="createContraEntry(row)">
-                  Create contra entry
+                <button
+                  type="button"
+                  class="row-action-menu-item"
+                  tngMenuItem
+                  (click)="createContraEntry(row)"
+                >
+                  <tng-icon class="row-action-menu-item-icon" icon="repeat2" aria-hidden="true" />
+                  <span>Create contra entry</span>
                 </button>
-                <button type="button" tngMenuItem (click)="viewBankTxn(row)">View</button>
-                <button type="button" tngMenuItem (click)="editBankTxn(row)">Edit</button>
-                <button type="button" tngMenuItem (click)="deleteBankTxn(row)">Delete</button>
+                <button
+                  type="button"
+                  class="row-action-menu-item"
+                  tngMenuItem
+                  (click)="viewBankTxn(row)"
+                >
+                  <tng-icon class="row-action-menu-item-icon" icon="eye" aria-hidden="true" />
+                  <span>View</span>
+                </button>
+                <button
+                  type="button"
+                  class="row-action-menu-item"
+                  tngMenuItem
+                  (click)="editBankTxn(row)"
+                >
+                  <tng-icon class="row-action-menu-item-icon" icon="pencil" aria-hidden="true" />
+                  <span>Edit</span>
+                </button>
+                <button
+                  type="button"
+                  class="row-action-menu-item"
+                  tngMenuItem
+                  (click)="deleteBankTxn(row)"
+                >
+                  <tng-icon class="row-action-menu-item-icon" icon="trash2" aria-hidden="true" />
+                  <span>Delete</span>
+                </button>
               </tng-menu>
             </div>
           </ng-template>

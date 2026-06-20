@@ -1,6 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import {
   TngButtonComponent,
   TngCardComponent,
@@ -23,12 +22,10 @@ import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import { JournalService, JournalSourceType } from '../../../../accounting/data/journal';
 import {
-  JOURNAL_LINK_WORK_ITEM_CLEAR_QUERY_PARAMS,
-  isJournalLinkWorkItemMode as hasJournalLinkWorkItemMode,
-} from '../../../../accounting/data/journal-link-work-item';
-import type { JournalLinkWorkItemSourceType } from '../../../../accounting/data/journal-link-work-item';
+  JOURNAL_LINK_STATUS_FILTER_CLEAR_QUERY_PARAMS,
+  JOURNAL_LINK_STATUS_FILTER_FIELD,
+} from '../../../../accounting/shared/journal-link-status-filter';
 import { ReconciliationMatchService } from '../../../../accounting/data/reconciliation-match';
-import { JournalLinkWorkItemListComponent } from '../../../../accounting/shared/journal-link-work-items';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
@@ -60,14 +57,12 @@ const DEFAULT_VENDOR_PAYMENT_ORDER = ['date ASC'] as const;
     TngTableCellTpl,
     TableRowIconButtonComponent,
     BulkUploadButtonComponent,
-    JournalLinkWorkItemListComponent,
   ],
   templateUrl: './list-vendor-payment.component.html',
   styleUrl: './list-vendor-payment.component.css',
   providers: [CrudListQueryService],
 })
 export class ListVendorPaymentComponent {
-  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly dateManagement = inject(DateManagementService);
   private readonly journalService = inject(JournalService);
@@ -83,24 +78,10 @@ export class ListVendorPaymentComponent {
     validatePayloadAsync: (payload) => this.bulkUploadValidationService.validateReferences(payload),
   };
   protected readonly hasError = computed(() => this.vendorPaymentStore.error() !== null);
-  private readonly queryParams = toSignal(this.route.queryParamMap, {
-    initialValue: this.route.snapshot.queryParamMap,
-  });
-  protected readonly journalLinkWorkItemSourceType: JournalLinkWorkItemSourceType = 'payment';
-  protected readonly journalLinkWorkItemClearQueryParams =
-    JOURNAL_LINK_WORK_ITEM_CLEAR_QUERY_PARAMS;
-  protected readonly isJournalLinkWorkItemMode = computed(() =>
-    hasJournalLinkWorkItemMode(this.queryParams(), this.journalLinkWorkItemSourceType),
-  );
-  protected readonly pageTitle = computed(() =>
-    this.isJournalLinkWorkItemMode()
-      ? 'Payments pending journal links'
-      : 'Vendor Payments',
-  );
+  protected readonly filterClearQueryParams = JOURNAL_LINK_STATUS_FILTER_CLEAR_QUERY_PARAMS;
+  protected readonly pageTitle = computed(() => 'Vendor Payments');
   protected readonly pageDescription = computed(() =>
-    this.isJournalLinkWorkItemMode()
-      ? 'Review vendor payments that are not fully linked to journals.'
-      : 'Manage payments made to vendors.',
+    'Manage payments made to vendors.',
   );
   protected readonly generatingJournalPaymentId = signal<string | null>(null);
   protected readonly journalsLoading = signal(false);
@@ -182,6 +163,7 @@ export class ListVendorPaymentComponent {
       trackBy: this.bankCashTrackBy,
       queryChange: (query) => this.searchBankCash(query),
     },
+    JOURNAL_LINK_STATUS_FILTER_FIELD,
     { id: 'description', label: 'Description', placeholder: 'Search description', type: 'text' },
   ];
 
@@ -198,12 +180,6 @@ export class ListVendorPaymentComponent {
   }
 
   private async loadVendorPaymentsWithJournals(filter: Lb4ListQuery): Promise<void> {
-    if (this.isJournalLinkWorkItemMode()) {
-      this.journalsByPaymentId.set(new Map());
-      this.journalsLoading.set(false);
-      return;
-    }
-
     await this.vendorPaymentStore.loadVendorPayments({
       ...filter,
       order: filter.order?.length ? filter.order : DEFAULT_VENDOR_PAYMENT_ORDER,

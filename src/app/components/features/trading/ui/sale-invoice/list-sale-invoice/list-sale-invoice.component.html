@@ -9,7 +9,7 @@
       title="Filter sale invoices"
       [fields]="filterFields"
       [filter]="crudQuery.filter()"
-      [clearQueryParams]="journalLinkWorkItemClearQueryParams"
+      [clearQueryParams]="filterClearQueryParams"
       syncUrl
     />
 
@@ -26,17 +26,11 @@
   </app-page-heading>
 
   <tng-card variant="outline" padding="lg">
-    @if (isJournalLinkWorkItemMode()) {
-      <app-journal-link-work-item-list
-        [sourceType]="journalLinkWorkItemSourceType"
-        [hideSourceType]="true"
-      />
-    } @else {
-      @if (saleInvoiceStore.error()) {
-        <div class="notice notice--danger">{{ saleInvoiceStore.error() }}</div>
-      }
+    @if (saleInvoiceStore.error()) {
+      <div class="notice notice--danger">{{ saleInvoiceStore.error() }}</div>
+    }
 
-      <div class="table-stack">
+    <div class="table-stack">
       @if (
         !saleInvoiceStore.isLoading() &&
         !hasError() &&
@@ -214,12 +208,11 @@
             [filter]="crudQuery.filter()"
             [totalItems]="saleInvoiceStore.count()"
             [pageSizeOptions]="crudQuery.pageSizeOptions()"
-            [clearQueryParams]="journalLinkWorkItemClearQueryParams"
+            [clearQueryParams]="filterClearQueryParams"
             syncUrl
           />
         </div>
       }
-      </div>
-    }
+    </div>
   </tng-card>
 </main>

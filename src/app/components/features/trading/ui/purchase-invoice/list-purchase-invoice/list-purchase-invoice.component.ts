@@ -1,6 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import {
   TngButtonComponent,
   TngCardComponent,
@@ -24,12 +23,10 @@ import { VendorStore } from '../../../data/vendor';
 import type { Vendor } from '../../../data/vendor';
 import { JournalService, JournalSourceType } from '../../../../accounting/data/journal';
 import {
-  JOURNAL_LINK_WORK_ITEM_CLEAR_QUERY_PARAMS,
-  isJournalLinkWorkItemMode as hasJournalLinkWorkItemMode,
-} from '../../../../accounting/data/journal-link-work-item';
-import type { JournalLinkWorkItemSourceType } from '../../../../accounting/data/journal-link-work-item';
+  JOURNAL_LINK_STATUS_FILTER_CLEAR_QUERY_PARAMS,
+  JOURNAL_LINK_STATUS_FILTER_FIELD,
+} from '../../../../accounting/shared/journal-link-status-filter';
 import { ReconciliationMatchService } from '../../../../accounting/data/reconciliation-match';
-import { JournalLinkWorkItemListComponent } from '../../../../accounting/shared/journal-link-work-items';
 import { PurchaseInvoiceStore } from '../../../data/purchase-invoice';
 import type { PurchaseInvoice, PurchaseInvoiceJournal } from '../../../data/purchase-invoice';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
@@ -64,14 +61,12 @@ const DEFAULT_PURCHASE_INVOICE_ORDER = ['date ASC'] as const;
     TngTableCellTpl,
     TableRowIconButtonComponent,
     BulkUploadButtonComponent,
-    JournalLinkWorkItemListComponent,
   ],
   templateUrl: './list-purchase-invoice.component.html',
   styleUrl: './list-purchase-invoice.component.css',
   providers: [CrudListQueryService],
 })
 export class ListPurchaseInvoiceComponent {
-  private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly dateManagement = inject(DateManagementService);
   private readonly journalService = inject(JournalService);
@@ -91,25 +86,10 @@ export class ListPurchaseInvoiceComponent {
     validatePayloadAsync: (payload) => this.bulkUploadValidationService.validateReferences(payload),
   }));
   protected readonly hasError = computed(() => this.purchaseInvoiceStore.error() !== null);
-  private readonly queryParams = toSignal(this.route.queryParamMap, {
-    initialValue: this.route.snapshot.queryParamMap,
-  });
-  protected readonly journalLinkWorkItemSourceType: JournalLinkWorkItemSourceType =
-    'purchase_invoice';
-  protected readonly journalLinkWorkItemClearQueryParams =
-    JOURNAL_LINK_WORK_ITEM_CLEAR_QUERY_PARAMS;
-  protected readonly isJournalLinkWorkItemMode = computed(() =>
-    hasJournalLinkWorkItemMode(this.queryParams(), this.journalLinkWorkItemSourceType),
-  );
-  protected readonly pageTitle = computed(() =>
-    this.isJournalLinkWorkItemMode()
-      ? 'Purchase invoices pending journal links'
-      : 'Purchase Invoices',
-  );
+  protected readonly filterClearQueryParams = JOURNAL_LINK_STATUS_FILTER_CLEAR_QUERY_PARAMS;
+  protected readonly pageTitle = computed(() => 'Purchase Invoices');
   protected readonly pageDescription = computed(() =>
-    this.isJournalLinkWorkItemMode()
-      ? 'Review purchase invoices that are not fully linked to journals.'
-      : 'Manage your purchase invoices and vendor billing records.',
+    'Manage your purchase invoices and vendor billing records.',
   );
   protected readonly generatingJournalInvoiceId = signal<string | null>(null);
   protected readonly journalsLoading = signal(false);
@@ -178,6 +158,7 @@ export class ListPurchaseInvoiceComponent {
       type: 'number',
       operators: ['between', '=', '>=', '<='],
     },
+    JOURNAL_LINK_STATUS_FILTER_FIELD,
   ];
 
   protected formatDate(value: string | undefined): string {
@@ -215,12 +196,6 @@ export class ListPurchaseInvoiceComponent {
   }
 
   private async loadPurchaseInvoicesWithJournals(filter: Lb4ListQuery): Promise<void> {
-    if (this.isJournalLinkWorkItemMode()) {
-      this.journalsByInvoiceId.set(new Map());
-      this.journalsLoading.set(false);
-      return;
-    }
-
     await this.purchaseInvoiceStore.loadPurchaseInvoices({
       ...filter,
       order: filter.order?.length ? filter.order : DEFAULT_PURCHASE_INVOICE_ORDER,

@@ -32,17 +32,10 @@ import { DateManagementService } from '../../../../../../core/date/date-manageme
 import { BankStatementUploadComponent } from '../bank-statement-upload/bank-statement-upload.component';
 import { JournalCreateDraftStagingService } from '../../journal/create-journal/journal-create-draft-staging.service';
 import { JournalAssignDialogComponent } from '../journal-assign-dialog/journal-assign-dialog/journal-assign-dialog.component';
-
-const BANK_TXN_FILTER_CLEAR_QUERY_PARAMS = [
-  'dashboardAction',
-  'fromDate',
-  'limit',
-  'order',
-  'skip',
-  'sourceType',
-  'status',
-  'toDate',
-] as const;
+import {
+  JOURNAL_LINK_STATUS_FILTER_CLEAR_QUERY_PARAMS,
+  JOURNAL_LINK_STATUS_FILTER_FIELD,
+} from '../../../shared/journal-link-status-filter';
 
 @Component({
   selector: 'app-list-bank-txn',
@@ -80,7 +73,7 @@ export class ListBankTxnComponent {
   protected readonly bankCashStore = inject(BankCashStore);
   private readonly journalDraftStaging = inject(JournalCreateDraftStagingService);
   protected readonly hasError = computed(() => this.bankTxnStore.error() !== null);
-  protected readonly filterClearQueryParams = BANK_TXN_FILTER_CLEAR_QUERY_PARAMS;
+  protected readonly filterClearQueryParams = JOURNAL_LINK_STATUS_FILTER_CLEAR_QUERY_PARAMS;
   protected readonly pageTitle = computed(() => 'Banking');
   protected readonly pageDescription = computed(
     () => 'Manage bank statement transactions for reconciliation and audit trails.',
@@ -160,18 +153,7 @@ export class ListBankTxnComponent {
     },
     { id: 'bankref', label: 'Reference', placeholder: 'UTR / cheque no', type: 'text' },
     { id: 'description', label: 'Description', placeholder: 'Narration text', type: 'text' },
-    {
-      id: 'journallinkstatus',
-      label: 'Journal link status',
-      placeholder: 'Any journal link status',
-      type: 'enum',
-      options: [
-        { label: 'Not fully linked', value: 'not_fully_linked' },
-        { label: 'No journals', value: 'unlinked' },
-        { label: 'Partially linked', value: 'partial' },
-        { label: 'Fully linked', value: 'linked' },
-      ],
-    },
+    JOURNAL_LINK_STATUS_FILTER_FIELD,
     {
       id: 'inventoryledgermapid',
       label: 'Bank',

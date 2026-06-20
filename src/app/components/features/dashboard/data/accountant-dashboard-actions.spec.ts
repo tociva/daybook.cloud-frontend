@@ -18,6 +18,32 @@ const expectedRoutes: Readonly<Record<AccountantDashboardActionKey, string>> = {
   'saleInvoices.pendingJournal': '/app/trading/sale-invoice',
 };
 
+const journalLinkFilterActionKeys = [
+  'bankTransactions.pendingReconciliation',
+  'payments.pendingJournal',
+  'purchaseInvoices.pendingJournal',
+  'receipts.pendingJournal',
+  'saleInvoices.pendingJournal',
+] as const satisfies readonly AccountantDashboardActionKey[];
+
+function expectJournalLinkStatusFilterQueryParams(
+  queryParams: ReturnType<typeof buildAccountantDashboardActionQueryParams>,
+  actionKey: AccountantDashboardActionKey,
+): void {
+  expect(queryParams['burl']).toBe('/app/dashboard');
+  expect(queryParams['dashboardAction']).toBe(actionKey);
+  expect(JSON.parse(String(queryParams['filter']))).toEqual({
+    where: {
+      journallinkstatus: 'not_fully_linked',
+    },
+  });
+  expect(queryParams['sourceType']).toBeUndefined();
+  expect(queryParams['status']).toBeUndefined();
+  expect(queryParams['limit']).toBeUndefined();
+  expect(queryParams['skip']).toBeUndefined();
+  expect(queryParams['order']).toBeUndefined();
+}
+
 describe('accountant dashboard action navigation', () => {
   it('resolves every action key to its target route', () => {
     for (const [actionKey, route] of Object.entries(expectedRoutes)) {
@@ -31,11 +57,11 @@ describe('accountant dashboard action navigation', () => {
     expect(buildAccountantDashboardActionQueryParams('receipts.pendingJournal')).toEqual({
       burl: '/app/dashboard',
       dashboardAction: 'receipts.pendingJournal',
-      limit: 50,
-      order: 'date ASC',
-      skip: 0,
-      sourceType: 'receipt',
-      status: 'not_fully_linked',
+      filter: JSON.stringify({
+        where: {
+          journallinkstatus: 'not_fully_linked',
+        },
+      }),
     });
     expect(resolveAccountantDashboardNavigationTarget('gst.gstr1')).toEqual({
       queryParams: {
@@ -46,39 +72,16 @@ describe('accountant dashboard action navigation', () => {
     });
   });
 
-  it('adds journal-link work item params only for supported actions', () => {
-    const bankTarget = resolveAccountantDashboardNavigationTarget(
-      'bankTransactions.pendingReconciliation',
-    );
-    expect(bankTarget.route).toBe('/app/accounting/banking');
-    expect(bankTarget.queryParams['burl']).toBe('/app/dashboard');
-    expect(bankTarget.queryParams['dashboardAction']).toBe(
-      'bankTransactions.pendingReconciliation',
-    );
-    expect(JSON.parse(String(bankTarget.queryParams['filter']))).toEqual({
-      where: {
-        journallinkstatus: 'not_fully_linked',
-      },
-    });
-    expect(bankTarget.queryParams['sourceType']).toBeUndefined();
-    expect(bankTarget.queryParams['status']).toBeUndefined();
-    expect(bankTarget.queryParams['limit']).toBeUndefined();
-    expect(bankTarget.queryParams['skip']).toBeUndefined();
-    expect(bankTarget.queryParams['order']).toBeUndefined();
+  it('adds normal journal-link status filter params for pending journal actions', () => {
+    for (const actionKey of journalLinkFilterActionKeys) {
+      const target = resolveAccountantDashboardNavigationTarget(actionKey);
 
-    expect(resolveAccountantDashboardNavigationTarget('saleInvoices.pendingJournal')).toEqual({
-      queryParams: {
-        burl: '/app/dashboard',
-        dashboardAction: 'saleInvoices.pendingJournal',
-        limit: 50,
-        order: 'date ASC',
-        skip: 0,
-        sourceType: 'sale_invoice',
-        status: 'not_fully_linked',
-      },
-      route: '/app/trading/sale-invoice',
-    });
+      expect(target.route).toBe(expectedRoutes[actionKey]);
+      expectJournalLinkStatusFilterQueryParams(target.queryParams, actionKey);
+    }
+  });
 
+  it('does not add journal-link filter params for unrelated dashboard actions', () => {
     expect(resolveAccountantDashboardNavigationTarget('receipts.pendingAllocation')).toEqual({
       queryParams: {
         burl: '/app/dashboard',

@@ -8,47 +8,30 @@ import { CrudListQueryService } from '../../../../../../shared/crud';
 import type { CrudFilterField, Lb4ListQuery } from '../../../../../../shared/crud';
 import { JournalService } from '../../../../accounting/data/journal';
 import { ReconciliationMatchService } from '../../../../accounting/data/reconciliation-match';
-import { BankCashStore } from '../../../data/bank-cash';
 import { CustomerStore } from '../../../data/customer';
-import { CustomerReceiptStore } from '../../../data/customer-receipt';
-import { ListCustomerReceiptComponent } from './list-customer-receipt.component';
+import { SaleInvoicePrintService, SaleInvoiceStore } from '../../../data/sale-invoice';
+import { ListSaleInvoiceComponent } from './list-sale-invoice.component';
+import { SaleInvoiceBulkUploadValidationService } from './sale-invoice-bulk-upload-validation.service';
 
-type CustomerReceiptListHarness = Readonly<{
+type SaleInvoiceListHarness = Readonly<{
   filterFields: readonly CrudFilterField[];
-  loadCustomerReceiptsWithJournals(filter: Lb4ListQuery): Promise<void>;
+  loadSaleInvoicesWithJournals(filter: Lb4ListQuery): Promise<void>;
 }>;
 
-function asHarness(component: ListCustomerReceiptComponent): CustomerReceiptListHarness {
-  return component as unknown as CustomerReceiptListHarness;
+function asHarness(component: ListSaleInvoiceComponent): SaleInvoiceListHarness {
+  return component as unknown as SaleInvoiceListHarness;
 }
 
 function setup() {
-  const loadCustomerReceipts = vi.fn(async () => undefined);
+  const loadSaleInvoices = vi.fn(async () => undefined);
   const storeError = signal<string | null>('Stop after query assertion.');
 
   TestBed.configureTestingModule({
     providers: [
       {
-        provide: BankCashStore,
-        useValue: {
-          items: signal([]),
-          loadBankCashes: vi.fn(async () => undefined),
-        },
-      },
-      {
         provide: CrudListQueryService,
         useValue: {
           init: vi.fn(),
-        },
-      },
-      {
-        provide: CustomerReceiptStore,
-        useValue: {
-          count: signal(0),
-          error: storeError,
-          isLoading: signal(false),
-          items: signal([]),
-          loadCustomerReceipts,
         },
       },
       {
@@ -67,7 +50,7 @@ function setup() {
       {
         provide: JournalService,
         useValue: {
-          createFromCustomerReceipt: vi.fn(),
+          createFromSaleInvoice: vi.fn(),
         },
       },
       {
@@ -80,7 +63,32 @@ function setup() {
         provide: Router,
         useValue: {
           navigate: vi.fn(),
-          url: '/app/trading/customer-receipt',
+          url: '/app/trading/sale-invoice',
+        },
+      },
+      {
+        provide: SaleInvoiceBulkUploadValidationService,
+        useValue: {
+          branchMinorUnit: signal(2),
+          prepare: vi.fn(async () => undefined),
+          validateReferences: vi.fn(async () => []),
+        },
+      },
+      {
+        provide: SaleInvoicePrintService,
+        useValue: {
+          previewInvoicePdf: vi.fn(async () => undefined),
+        },
+      },
+      {
+        provide: SaleInvoiceStore,
+        useValue: {
+          count: signal(0),
+          error: storeError,
+          isLoading: signal(false),
+          items: signal([]),
+          loadSaleInvoices,
+          setSelectedItem: vi.fn(),
         },
       },
       {
@@ -93,71 +101,71 @@ function setup() {
     ],
   });
 
-  const component = TestBed.runInInjectionContext(() => new ListCustomerReceiptComponent());
+  const component = TestBed.runInInjectionContext(() => new ListSaleInvoiceComponent());
 
   return {
     component: asHarness(component),
-    loadCustomerReceipts,
+    loadSaleInvoices,
   };
 }
 
-describe('ListCustomerReceiptComponent', () => {
+describe('ListSaleInvoiceComponent', () => {
   beforeEach(() => {
     TestBed.resetTestingModule();
     vi.clearAllMocks();
   });
 
-  it('loads customer receipts by ascending date when no sort order is specified', async () => {
-    const { component, loadCustomerReceipts } = setup();
+  it('loads sale invoices by ascending date and number when no sort order is specified', async () => {
+    const { component, loadSaleInvoices } = setup();
 
-    await component.loadCustomerReceiptsWithJournals({ limit: 10, offset: 0 });
+    await component.loadSaleInvoicesWithJournals({ limit: 10, offset: 0 });
 
-    expect(loadCustomerReceipts).toHaveBeenCalledWith({
+    expect(loadSaleInvoices).toHaveBeenCalledWith({
       limit: 10,
       offset: 0,
-      order: ['date ASC'],
-      includes: ['customer', 'bcash'],
+      order: ['date ASC', 'number ASC'],
+      includes: ['customer', 'receipts'],
     });
   });
 
   it('preserves an explicitly specified sort order', async () => {
-    const { component, loadCustomerReceipts } = setup();
+    const { component, loadSaleInvoices } = setup();
 
-    await component.loadCustomerReceiptsWithJournals({
+    await component.loadSaleInvoicesWithJournals({
       limit: 10,
       offset: 0,
-      order: ['amount DESC'],
+      order: ['grandtotal DESC'],
       where: { customerid: 'customer-1' },
     });
 
-    expect(loadCustomerReceipts).toHaveBeenCalledWith({
+    expect(loadSaleInvoices).toHaveBeenCalledWith({
       limit: 10,
       offset: 0,
-      order: ['amount DESC'],
+      order: ['grandtotal DESC'],
       where: { customerid: 'customer-1' },
-      includes: ['customer', 'bcash'],
+      includes: ['customer', 'receipts'],
     });
   });
 
-  it('loads customer receipts with the dashboard journal-link status in the normal list filter', async () => {
-    const { component, loadCustomerReceipts } = setup();
+  it('loads sale invoices with the dashboard journal-link status in the normal list filter', async () => {
+    const { component, loadSaleInvoices } = setup();
 
-    await component.loadCustomerReceiptsWithJournals({
+    await component.loadSaleInvoicesWithJournals({
       limit: 10,
       offset: 0,
       where: { journallinkstatus: 'not_fully_linked' },
     });
 
-    expect(loadCustomerReceipts).toHaveBeenCalledWith({
+    expect(loadSaleInvoices).toHaveBeenCalledWith({
       limit: 10,
       offset: 0,
-      order: ['date ASC'],
+      order: ['date ASC', 'number ASC'],
       where: { journallinkstatus: 'not_fully_linked' },
-      includes: ['customer', 'bcash'],
+      includes: ['customer', 'receipts'],
     });
   });
 
-  it('exposes journal link status as a standard customer receipt filter field', () => {
+  it('exposes journal link status as a standard sale invoice filter field', () => {
     const { component } = setup();
     const field = component.filterFields.find((item) => item.id === 'journallinkstatus');
 

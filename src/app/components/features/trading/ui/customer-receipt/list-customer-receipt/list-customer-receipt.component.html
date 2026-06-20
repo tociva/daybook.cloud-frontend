@@ -9,7 +9,7 @@
       title="Filter receipts"
       [fields]="filterFields"
       [filter]="crudQuery.filter()"
-      [clearQueryParams]="journalLinkWorkItemClearQueryParams"
+      [clearQueryParams]="filterClearQueryParams"
       syncUrl
     />
 
@@ -26,17 +26,11 @@
   </app-page-heading>
 
   <tng-card variant="outline" padding="lg">
-    @if (isJournalLinkWorkItemMode()) {
-      <app-journal-link-work-item-list
-        [sourceType]="journalLinkWorkItemSourceType"
-        [hideSourceType]="true"
-      />
-    } @else {
-      @if (customerReceiptStore.error()) {
-        <div class="notice notice--danger">{{ customerReceiptStore.error() }}</div>
-      }
+    @if (customerReceiptStore.error()) {
+      <div class="notice notice--danger">{{ customerReceiptStore.error() }}</div>
+    }
 
-      <div class="table-stack">
+    <div class="table-stack">
       @if (!customerReceiptStore.isLoading() && !hasError() && crudQuery.shouldShowEmptyState(customerReceiptStore.items().length, customerReceiptStore.count())) {
         @if (crudQuery.hasActiveFilter()) {
           <app-empty-state
@@ -155,12 +149,11 @@
           [filter]="crudQuery.filter()"
           [totalItems]="customerReceiptStore.count()"
           [pageSizeOptions]="crudQuery.pageSizeOptions()"
-          [clearQueryParams]="journalLinkWorkItemClearQueryParams"
+          [clearQueryParams]="filterClearQueryParams"
           syncUrl
         />
       </div>
       }
-      </div>
-    }
+    </div>
   </tng-card>
 </main>

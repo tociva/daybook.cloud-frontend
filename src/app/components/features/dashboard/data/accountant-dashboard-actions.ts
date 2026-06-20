@@ -1,9 +1,5 @@
 import type { Params } from '@angular/router';
-import { JOURNAL_LINK_WORK_ITEM_DEFAULT_LIMIT } from '../../accounting/data/journal-link-work-item';
-import type {
-  JournalLinkWorkItemQuery,
-  JournalLinkWorkItemSourceType,
-} from '../../accounting/data/journal-link-work-item';
+import { JOURNAL_LINK_STATUS_NOT_FULLY_LINKED_FILTER } from '../../accounting/shared/journal-link-status-filter';
 import type { AccountantDashboardActionKey } from './accountant-dashboard.model';
 
 export const ACCOUNTANT_DASHBOARD_HOME = '/app/dashboard';
@@ -22,14 +18,13 @@ export const ACCOUNTANT_DASHBOARD_ROUTE_BY_ACTION_KEY: Readonly<
   'saleInvoices.pendingJournal': '/app/trading/sale-invoice',
 };
 
-export const ACCOUNTANT_DASHBOARD_JOURNAL_LINK_SOURCE_BY_ACTION_KEY: Readonly<
-  Partial<Record<AccountantDashboardActionKey, JournalLinkWorkItemSourceType>>
-> = {
-  'payments.pendingJournal': 'payment',
-  'purchaseInvoices.pendingJournal': 'purchase_invoice',
-  'receipts.pendingJournal': 'receipt',
-  'saleInvoices.pendingJournal': 'sale_invoice',
-};
+const ACCOUNTANT_DASHBOARD_JOURNAL_LINK_FILTER_ACTION_KEYS = new Set<AccountantDashboardActionKey>([
+  'bankTransactions.pendingReconciliation',
+  'payments.pendingJournal',
+  'purchaseInvoices.pendingJournal',
+  'receipts.pendingJournal',
+  'saleInvoices.pendingJournal',
+]);
 
 export type AccountantDashboardNavigationTarget = Readonly<{
   queryParams: Params;
@@ -45,33 +40,17 @@ export function resolveAccountantDashboardActionRoute(
 export function buildAccountantDashboardActionQueryParams(
   actionKey: AccountantDashboardActionKey,
 ): Params {
-  if (actionKey === 'bankTransactions.pendingReconciliation') {
+  if (ACCOUNTANT_DASHBOARD_JOURNAL_LINK_FILTER_ACTION_KEYS.has(actionKey)) {
     return {
       burl: ACCOUNTANT_DASHBOARD_HOME,
       dashboardAction: actionKey,
-      filter: JSON.stringify({
-        where: {
-          journallinkstatus: 'not_fully_linked',
-        },
-      }),
+      filter: JSON.stringify(JOURNAL_LINK_STATUS_NOT_FULLY_LINKED_FILTER),
     };
   }
-
-  const journalLinkSourceType = ACCOUNTANT_DASHBOARD_JOURNAL_LINK_SOURCE_BY_ACTION_KEY[actionKey];
-  const journalLinkQuery: JournalLinkWorkItemQuery | undefined = journalLinkSourceType
-    ? {
-        limit: JOURNAL_LINK_WORK_ITEM_DEFAULT_LIMIT,
-        order: 'date ASC',
-        skip: 0,
-        sourceType: journalLinkSourceType,
-        status: 'not_fully_linked',
-      }
-    : undefined;
 
   return {
     burl: ACCOUNTANT_DASHBOARD_HOME,
     dashboardAction: actionKey,
-    ...(journalLinkQuery ?? {}),
   };
 }
 
