@@ -34,6 +34,8 @@ import { JournalLinkWorkItemListComponent } from '../../../../accounting/shared/
 import { ContraTransactionStore } from '../../../data/contra-transaction';
 import type { ContraTransaction, ContraTransactionJournal } from '../../../data/contra-transaction';
 
+const DEFAULT_BANK_CONTRA_ORDER = ['date ASC'] as const;
+
 @Component({
   selector: 'app-list-bank-contra',
   standalone: true,
@@ -206,6 +208,7 @@ export class ListBankContraComponent {
 
     await this.contraTransactionStore.loadContraTransactions({
       ...filter,
+      order: filter.order?.length ? filter.order : DEFAULT_BANK_CONTRA_ORDER,
       includes: ['frombcash', 'tobcash'],
     });
     if (this.contraTransactionStore.error()) {

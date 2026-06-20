@@ -156,7 +156,7 @@ describe('ListBankContraComponent', () => {
     vi.clearAllMocks();
   });
 
-  it('loads contra transactions with bank/cash includes and requests linked journals', async () => {
+  it('loads contra transactions by ascending date with bank/cash includes and requests linked journals', async () => {
     const { component, findJournalsBySourceIds, loadContraTransactions } = setup();
 
     await component.loadContraTransactionsWithJournals({ limit: 10, offset: 0 });
@@ -164,12 +164,32 @@ describe('ListBankContraComponent', () => {
     expect(loadContraTransactions).toHaveBeenCalledWith({
       limit: 10,
       offset: 0,
+      order: ['date ASC'],
       includes: ['frombcash', 'tobcash'],
     });
     expect(findJournalsBySourceIds).toHaveBeenCalledWith(
       JournalSourceType.CONTRA_TRANSACTION,
       ['contra-1'],
     );
+  });
+
+  it('preserves an explicitly specified sort order', async () => {
+    const { component, loadContraTransactions } = setup();
+
+    await component.loadContraTransactionsWithJournals({
+      limit: 10,
+      offset: 0,
+      order: ['amount DESC'],
+      where: { description: { ilike: '%deposit%' } },
+    });
+
+    expect(loadContraTransactions).toHaveBeenCalledWith({
+      limit: 10,
+      offset: 0,
+      order: ['amount DESC'],
+      where: { description: { ilike: '%deposit%' } },
+      includes: ['frombcash', 'tobcash'],
+    });
   });
 
   it('skips normal contra loading when dashboard journal-link mode is active', async () => {
