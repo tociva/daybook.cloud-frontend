@@ -208,6 +208,7 @@
             ariaLabel="Purchase invoice pagination"
             [filter]="crudQuery.filter()"
             [totalItems]="purchaseInvoiceStore.count()"
+            [unfilteredTotalItems]="unfilteredTotalItems()"
             [pageSizeOptions]="crudQuery.pageSizeOptions()"
             [clearQueryParams]="filterClearQueryParams"
             syncUrl

@@ -13,6 +13,7 @@ import {
   CrudFilterPopoverComponent,
   CrudListQueryService,
   CrudPaginatorComponent,
+  createCrudUnfilteredTotalCounter,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField, Lb4ListQuery } from '../../../../../../shared/crud';
 import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload';
@@ -27,7 +28,7 @@ import {
   JOURNAL_LINK_STATUS_FILTER_FIELD,
 } from '../../../../accounting/shared/journal-link-status-filter';
 import { ReconciliationMatchService } from '../../../../accounting/data/reconciliation-match';
-import { PurchaseInvoiceStore } from '../../../data/purchase-invoice';
+import { PurchaseInvoiceService, PurchaseInvoiceStore } from '../../../data/purchase-invoice';
 import type { PurchaseInvoice, PurchaseInvoiceJournal } from '../../../data/purchase-invoice';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
@@ -71,6 +72,7 @@ export class ListPurchaseInvoiceComponent {
   private readonly dateManagement = inject(DateManagementService);
   private readonly journalService = inject(JournalService);
   private readonly reconciliationMatchService = inject(ReconciliationMatchService);
+  private readonly purchaseInvoiceService = inject(PurchaseInvoiceService);
   private readonly toastStore = inject(ToastStore);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly vendorStore = inject(VendorStore);
@@ -87,9 +89,13 @@ export class ListPurchaseInvoiceComponent {
   }));
   protected readonly hasError = computed(() => this.purchaseInvoiceStore.error() !== null);
   protected readonly filterClearQueryParams = JOURNAL_LINK_STATUS_FILTER_CLEAR_QUERY_PARAMS;
+  private readonly unfilteredTotalCounter = createCrudUnfilteredTotalCounter((query) =>
+    this.purchaseInvoiceService.count(query),
+  );
+  protected readonly unfilteredTotalItems = this.unfilteredTotalCounter.totalItems;
   protected readonly pageTitle = computed(() => 'Purchase Invoices');
-  protected readonly pageDescription = computed(() =>
-    'Manage your purchase invoices and vendor billing records.',
+  protected readonly pageDescription = computed(
+    () => 'Manage your purchase invoices and vendor billing records.',
   );
   protected readonly generatingJournalInvoiceId = signal<string | null>(null);
   protected readonly journalsLoading = signal(false);
@@ -196,6 +202,8 @@ export class ListPurchaseInvoiceComponent {
   }
 
   private async loadPurchaseInvoicesWithJournals(filter: Lb4ListQuery): Promise<void> {
+    void this.unfilteredTotalCounter.refresh(filter);
+
     await this.purchaseInvoiceStore.loadPurchaseInvoices({
       ...filter,
       order: filter.order?.length ? filter.order : DEFAULT_PURCHASE_INVOICE_ORDER,

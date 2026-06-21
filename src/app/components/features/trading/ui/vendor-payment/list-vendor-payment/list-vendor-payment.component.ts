@@ -13,6 +13,7 @@ import {
   CrudFilterPopoverComponent,
   CrudListQueryService,
   CrudPaginatorComponent,
+  createCrudUnfilteredTotalCounter,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField, Lb4ListQuery } from '../../../../../../shared/crud';
 import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload';
@@ -34,7 +35,7 @@ import { BankCashStore } from '../../../data/bank-cash';
 import type { BankCash } from '../../../data/bank-cash';
 import { VendorStore } from '../../../data/vendor';
 import type { Vendor } from '../../../data/vendor';
-import { VendorPaymentStore } from '../../../data/vendor-payment';
+import { VendorPaymentService, VendorPaymentStore } from '../../../data/vendor-payment';
 import type { VendorPayment, VendorPaymentJournal } from '../../../data/vendor-payment';
 import { VENDOR_PAYMENT_BULK_UPLOAD_CONFIG } from './vendor-payment-bulk-upload.config';
 import { VendorPaymentBulkUploadValidationService } from './vendor-payment-bulk-upload-validation.service';
@@ -67,6 +68,7 @@ export class ListVendorPaymentComponent {
   private readonly dateManagement = inject(DateManagementService);
   private readonly journalService = inject(JournalService);
   private readonly reconciliationMatchService = inject(ReconciliationMatchService);
+  private readonly vendorPaymentService = inject(VendorPaymentService);
   private readonly toastStore = inject(ToastStore);
   private readonly bulkUploadValidationService = inject(VendorPaymentBulkUploadValidationService);
   protected readonly crudQuery = inject(CrudListQueryService);
@@ -79,19 +81,19 @@ export class ListVendorPaymentComponent {
   };
   protected readonly hasError = computed(() => this.vendorPaymentStore.error() !== null);
   protected readonly filterClearQueryParams = JOURNAL_LINK_STATUS_FILTER_CLEAR_QUERY_PARAMS;
-  protected readonly pageTitle = computed(() => 'Vendor Payments');
-  protected readonly pageDescription = computed(() =>
-    'Manage payments made to vendors.',
+  private readonly unfilteredTotalCounter = createCrudUnfilteredTotalCounter((query) =>
+    this.vendorPaymentService.count(query),
   );
+  protected readonly unfilteredTotalItems = this.unfilteredTotalCounter.totalItems;
+  protected readonly pageTitle = computed(() => 'Vendor Payments');
+  protected readonly pageDescription = computed(() => 'Manage payments made to vendors.');
   protected readonly generatingJournalPaymentId = signal<string | null>(null);
   protected readonly journalsLoading = signal(false);
   protected readonly journalsByPaymentId = signal<Map<string, readonly VendorPaymentJournal[]>>(
     new Map(),
   );
-  protected readonly vendorOptionValue = (option: unknown): string =>
-    (option as Vendor).id ?? '';
-  protected readonly vendorOptionLabel = (option: unknown): string =>
-    (option as Vendor).name ?? '';
+  protected readonly vendorOptionValue = (option: unknown): string => (option as Vendor).id ?? '';
+  protected readonly vendorOptionLabel = (option: unknown): string => (option as Vendor).name ?? '';
   protected readonly vendorTrackBy = (_index: number, option: unknown): unknown => {
     const vendor = option as Vendor;
 
@@ -180,6 +182,8 @@ export class ListVendorPaymentComponent {
   }
 
   private async loadVendorPaymentsWithJournals(filter: Lb4ListQuery): Promise<void> {
+    void this.unfilteredTotalCounter.refresh(filter);
+
     await this.vendorPaymentStore.loadVendorPayments({
       ...filter,
       order: filter.order?.length ? filter.order : DEFAULT_VENDOR_PAYMENT_ORDER,

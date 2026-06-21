@@ -199,6 +199,7 @@
             ariaLabel="Bank transaction pagination"
             [filter]="crudQuery.filter()"
             [totalItems]="bankTxnStore.count()"
+            [unfilteredTotalItems]="unfilteredTotalItems()"
             [pageSizeOptions]="crudQuery.pageSizeOptions()"
             [clearQueryParams]="filterClearQueryParams"
             syncUrl

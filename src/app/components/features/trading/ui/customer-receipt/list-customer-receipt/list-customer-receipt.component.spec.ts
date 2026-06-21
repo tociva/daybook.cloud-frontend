@@ -10,7 +10,7 @@ import { JournalService } from '../../../../accounting/data/journal';
 import { ReconciliationMatchService } from '../../../../accounting/data/reconciliation-match';
 import { BankCashStore } from '../../../data/bank-cash';
 import { CustomerStore } from '../../../data/customer';
-import { CustomerReceiptStore } from '../../../data/customer-receipt';
+import { CustomerReceiptService, CustomerReceiptStore } from '../../../data/customer-receipt';
 import { ListCustomerReceiptComponent } from './list-customer-receipt.component';
 
 type CustomerReceiptListHarness = Readonly<{
@@ -52,6 +52,12 @@ function setup() {
         },
       },
       {
+        provide: CustomerReceiptService,
+        useValue: {
+          count: vi.fn(async () => 301),
+        },
+      },
+      {
         provide: CustomerStore,
         useValue: {
           items: signal([]),
@@ -61,7 +67,9 @@ function setup() {
       {
         provide: DateManagementService,
         useValue: {
-          formatDisplayDate: vi.fn((value: string | undefined, fallback = '-') => value ?? fallback),
+          formatDisplayDate: vi.fn(
+            (value: string | undefined, fallback = '-') => value ?? fallback,
+          ),
         },
       },
       {

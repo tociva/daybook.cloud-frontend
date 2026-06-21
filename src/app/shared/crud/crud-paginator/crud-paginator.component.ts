@@ -117,11 +117,16 @@ export class CrudPaginatorComponent {
   }
 
   private filteredFromSuffix(label: string): string {
-    const unfilteredTotalItems =
+    const rawUnfilteredTotalItems =
       this.unfilteredTotalItems() ?? this.inferredUnfilteredTotalItems();
 
     if (!this.hasActiveWhere()) return label;
-    if (unfilteredTotalItems === null) return `${label} filtered`;
+    if (rawUnfilteredTotalItems === null || !Number.isFinite(rawUnfilteredTotalItems)) {
+      return `${label} filtered`;
+    }
+
+    const unfilteredTotalItems = Math.max(0, rawUnfilteredTotalItems);
+    if (unfilteredTotalItems < Math.max(0, this.totalItems())) return `${label} filtered`;
 
     return `${label} filtered (${unfilteredTotalItems} total)`;
   }

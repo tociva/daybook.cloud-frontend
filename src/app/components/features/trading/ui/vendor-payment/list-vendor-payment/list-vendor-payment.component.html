@@ -141,6 +141,7 @@
           ariaLabel="Vendor payment pagination"
           [filter]="crudQuery.filter()"
           [totalItems]="vendorPaymentStore.count()"
+          [unfilteredTotalItems]="unfilteredTotalItems()"
           [pageSizeOptions]="crudQuery.pageSizeOptions()"
           [clearQueryParams]="filterClearQueryParams"
           syncUrl

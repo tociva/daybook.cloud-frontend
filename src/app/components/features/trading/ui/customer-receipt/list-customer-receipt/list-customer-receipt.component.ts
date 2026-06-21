@@ -13,6 +13,7 @@ import {
   CrudFilterPopoverComponent,
   CrudListQueryService,
   CrudPaginatorComponent,
+  createCrudUnfilteredTotalCounter,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField, Lb4ListQuery } from '../../../../../../shared/crud';
 import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload';
@@ -33,7 +34,7 @@ import { BankCashStore } from '../../../data/bank-cash';
 import type { BankCash } from '../../../data/bank-cash';
 import { CustomerStore } from '../../../data/customer';
 import type { Customer } from '../../../data/customer';
-import { CustomerReceiptStore } from '../../../data/customer-receipt';
+import { CustomerReceiptService, CustomerReceiptStore } from '../../../data/customer-receipt';
 import type { CustomerReceipt, CustomerReceiptJournal } from '../../../data/customer-receipt';
 import { CUSTOMER_RECEIPT_BULK_UPLOAD_CONFIG } from './customer-receipt-bulk-upload.config';
 
@@ -65,6 +66,7 @@ export class ListCustomerReceiptComponent {
   private readonly dateManagement = inject(DateManagementService);
   private readonly journalService = inject(JournalService);
   private readonly reconciliationMatchService = inject(ReconciliationMatchService);
+  private readonly customerReceiptService = inject(CustomerReceiptService);
   private readonly toastStore = inject(ToastStore);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly bankCashStore = inject(BankCashStore);
@@ -73,10 +75,12 @@ export class ListCustomerReceiptComponent {
   protected readonly bulkUploadConfig = CUSTOMER_RECEIPT_BULK_UPLOAD_CONFIG;
   protected readonly hasError = computed(() => this.customerReceiptStore.error() !== null);
   protected readonly filterClearQueryParams = JOURNAL_LINK_STATUS_FILTER_CLEAR_QUERY_PARAMS;
-  protected readonly pageTitle = computed(() => 'Customer Receipts');
-  protected readonly pageDescription = computed(() =>
-    'Manage payments received from customers.',
+  private readonly unfilteredTotalCounter = createCrudUnfilteredTotalCounter((query) =>
+    this.customerReceiptService.count(query),
   );
+  protected readonly unfilteredTotalItems = this.unfilteredTotalCounter.totalItems;
+  protected readonly pageTitle = computed(() => 'Customer Receipts');
+  protected readonly pageDescription = computed(() => 'Manage payments received from customers.');
   protected readonly generatingJournalReceiptId = signal<string | null>(null);
   protected readonly journalsLoading = signal(false);
   protected readonly journalsByReceiptId = signal<Map<string, readonly CustomerReceiptJournal[]>>(
@@ -174,6 +178,8 @@ export class ListCustomerReceiptComponent {
   }
 
   private async loadCustomerReceiptsWithJournals(filter: Lb4ListQuery): Promise<void> {
+    void this.unfilteredTotalCounter.refresh(filter);
+
     await this.customerReceiptStore.loadCustomerReceipts({
       ...filter,
       order: filter.order?.length ? filter.order : DEFAULT_CUSTOMER_RECEIPT_ORDER,

@@ -3,6 +3,7 @@ export * from './cached-crud';
 export * from './crud-filter-popover/crud-filter-popover.component';
 export * from './crud-list-query.service';
 export * from './crud-paginator/crud-paginator.component';
+export * from './crud-unfiltered-total-counter';
 export * from './crud-api.service';
 export * from './crud-list-state';
 export * from './crud-url.service';

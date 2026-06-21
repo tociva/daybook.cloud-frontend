@@ -148,6 +148,7 @@
           ariaLabel="Customer receipt pagination"
           [filter]="crudQuery.filter()"
           [totalItems]="customerReceiptStore.count()"
+          [unfilteredTotalItems]="unfilteredTotalItems()"
           [pageSizeOptions]="crudQuery.pageSizeOptions()"
           [clearQueryParams]="filterClearQueryParams"
           syncUrl

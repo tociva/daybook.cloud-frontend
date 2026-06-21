@@ -18,6 +18,7 @@ import {
   CrudFilterPopoverComponent,
   CrudListQueryService,
   CrudPaginatorComponent,
+  createCrudUnfilteredTotalCounter,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField, Lb4ListQuery } from '../../../../../../shared/crud';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
@@ -26,7 +27,7 @@ import { InventoryLedgerMapStore } from '../../../data/inventory-ledger-map';
 import type { InventoryLedgerMap } from '../../../data/inventory-ledger-map';
 import { JournalSourceType } from '../../../data/journal';
 import { ReconciliationMatchService } from '../../../data/reconciliation-match';
-import { BankTxnStore } from '../../../data/bank-txn';
+import { BankTxnService, BankTxnStore } from '../../../data/bank-txn';
 import type { BankTxn, BankTxnJournal } from '../../../data/bank-txn';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { BankStatementUploadComponent } from '../bank-statement-upload/bank-statement-upload.component';
@@ -71,9 +72,14 @@ export class ListBankTxnComponent {
   protected readonly bankTxnStore = inject(BankTxnStore);
   protected readonly inventoryLedgerMapStore = inject(InventoryLedgerMapStore);
   protected readonly bankCashStore = inject(BankCashStore);
+  private readonly bankTxnService = inject(BankTxnService);
   private readonly journalDraftStaging = inject(JournalCreateDraftStagingService);
   protected readonly hasError = computed(() => this.bankTxnStore.error() !== null);
   protected readonly filterClearQueryParams = JOURNAL_LINK_STATUS_FILTER_CLEAR_QUERY_PARAMS;
+  private readonly unfilteredTotalCounter = createCrudUnfilteredTotalCounter((query) =>
+    this.bankTxnService.count(query),
+  );
+  protected readonly unfilteredTotalItems = this.unfilteredTotalCounter.totalItems;
   protected readonly pageTitle = computed(() => 'Banking');
   protected readonly pageDescription = computed(
     () => 'Manage bank statement transactions for reconciliation and audit trails.',
@@ -180,10 +186,7 @@ export class ListBankTxnComponent {
       this.inventoryLedgerMapStore
         .items()
         .filter((map) => map.id)
-        .map((map) => [
-          map.id as string,
-          map.entityid ? (banksById.get(map.entityid) ?? '') : '',
-        ]),
+        .map((map) => [map.id as string, map.entityid ? (banksById.get(map.entityid) ?? '') : '']),
     );
   });
 
@@ -205,6 +208,8 @@ export class ListBankTxnComponent {
   }
 
   private async loadBankTxnsWithJournals(filter: Lb4ListQuery): Promise<void> {
+    void this.unfilteredTotalCounter.refresh(filter);
+
     await this.bankTxnStore.loadBankTxns({
       ...filter,
       includes: ['inventoryledgermap'],

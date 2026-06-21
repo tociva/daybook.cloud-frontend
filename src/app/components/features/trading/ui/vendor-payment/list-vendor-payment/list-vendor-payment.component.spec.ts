@@ -10,7 +10,7 @@ import { JournalService } from '../../../../accounting/data/journal';
 import { ReconciliationMatchService } from '../../../../accounting/data/reconciliation-match';
 import { BankCashStore } from '../../../data/bank-cash';
 import { VendorStore } from '../../../data/vendor';
-import { VendorPaymentStore } from '../../../data/vendor-payment';
+import { VendorPaymentService, VendorPaymentStore } from '../../../data/vendor-payment';
 import { ListVendorPaymentComponent } from './list-vendor-payment.component';
 import { VendorPaymentBulkUploadValidationService } from './vendor-payment-bulk-upload-validation.service';
 
@@ -45,7 +45,9 @@ function setup() {
       {
         provide: DateManagementService,
         useValue: {
-          formatDisplayDate: vi.fn((value: string | undefined, fallback = '-') => value ?? fallback),
+          formatDisplayDate: vi.fn(
+            (value: string | undefined, fallback = '-') => value ?? fallback,
+          ),
         },
       },
       {
@@ -78,6 +80,12 @@ function setup() {
         provide: VendorPaymentBulkUploadValidationService,
         useValue: {
           validateReferences: vi.fn(async () => []),
+        },
+      },
+      {
+        provide: VendorPaymentService,
+        useValue: {
+          count: vi.fn(async () => 301),
         },
       },
       {

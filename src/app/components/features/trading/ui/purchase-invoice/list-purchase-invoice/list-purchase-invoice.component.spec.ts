@@ -8,7 +8,7 @@ import { CrudListQueryService } from '../../../../../../shared/crud';
 import type { CrudFilterField, Lb4ListQuery } from '../../../../../../shared/crud';
 import { JournalService } from '../../../../accounting/data/journal';
 import { ReconciliationMatchService } from '../../../../accounting/data/reconciliation-match';
-import { PurchaseInvoiceStore } from '../../../data/purchase-invoice';
+import { PurchaseInvoiceService, PurchaseInvoiceStore } from '../../../data/purchase-invoice';
 import { VendorStore } from '../../../data/vendor';
 import { ListPurchaseInvoiceComponent } from './list-purchase-invoice.component';
 import { PurchaseInvoiceBulkUploadValidationService } from './purchase-invoice-bulk-upload-validation.service';
@@ -37,7 +37,9 @@ function setup() {
       {
         provide: DateManagementService,
         useValue: {
-          formatDisplayDate: vi.fn((value: string | undefined, fallback = '-') => value ?? fallback),
+          formatDisplayDate: vi.fn(
+            (value: string | undefined, fallback = '-') => value ?? fallback,
+          ),
         },
       },
       {
@@ -52,6 +54,12 @@ function setup() {
           branchMinorUnit: signal(2),
           prepare: vi.fn(async () => undefined),
           validateReferences: vi.fn(async () => []),
+        },
+      },
+      {
+        provide: PurchaseInvoiceService,
+        useValue: {
+          count: vi.fn(async () => 301),
         },
       },
       {

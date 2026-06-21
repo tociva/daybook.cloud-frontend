@@ -9,7 +9,11 @@ import type { CrudFilterField, Lb4ListQuery } from '../../../../../../shared/cru
 import { JournalService } from '../../../../accounting/data/journal';
 import { ReconciliationMatchService } from '../../../../accounting/data/reconciliation-match';
 import { CustomerStore } from '../../../data/customer';
-import { SaleInvoicePrintService, SaleInvoiceStore } from '../../../data/sale-invoice';
+import {
+  SaleInvoicePrintService,
+  SaleInvoiceService,
+  SaleInvoiceStore,
+} from '../../../data/sale-invoice';
 import { ListSaleInvoiceComponent } from './list-sale-invoice.component';
 import { SaleInvoiceBulkUploadValidationService } from './sale-invoice-bulk-upload-validation.service';
 
@@ -44,7 +48,9 @@ function setup() {
       {
         provide: DateManagementService,
         useValue: {
-          formatDisplayDate: vi.fn((value: string | undefined, fallback = '-') => value ?? fallback),
+          formatDisplayDate: vi.fn(
+            (value: string | undefined, fallback = '-') => value ?? fallback,
+          ),
         },
       },
       {
@@ -78,6 +84,12 @@ function setup() {
         provide: SaleInvoicePrintService,
         useValue: {
           previewInvoicePdf: vi.fn(async () => undefined),
+        },
+      },
+      {
+        provide: SaleInvoiceService,
+        useValue: {
+          count: vi.fn(async () => 301),
         },
       },
       {

@@ -207,6 +207,7 @@
             ariaLabel="Sale invoice pagination"
             [filter]="crudQuery.filter()"
             [totalItems]="saleInvoiceStore.count()"
+            [unfilteredTotalItems]="unfilteredTotalItems()"
             [pageSizeOptions]="crudQuery.pageSizeOptions()"
             [clearQueryParams]="filterClearQueryParams"
             syncUrl

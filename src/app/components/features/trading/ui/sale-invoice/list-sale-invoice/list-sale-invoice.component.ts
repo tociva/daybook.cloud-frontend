@@ -13,6 +13,7 @@ import {
   CrudFilterPopoverComponent,
   CrudListQueryService,
   CrudPaginatorComponent,
+  createCrudUnfilteredTotalCounter,
 } from '../../../../../../shared/crud';
 import type { CrudFilterField, Lb4ListQuery } from '../../../../../../shared/crud';
 import type { SaleInvoiceListQuery } from '../../../data/sale-invoice/sale-invoice.model';
@@ -28,7 +29,11 @@ import {
   JOURNAL_LINK_STATUS_FILTER_FIELD,
 } from '../../../../accounting/shared/journal-link-status-filter';
 import { ReconciliationMatchService } from '../../../../accounting/data/reconciliation-match';
-import { SaleInvoicePrintService, SaleInvoiceStore } from '../../../data/sale-invoice';
+import {
+  SaleInvoicePrintService,
+  SaleInvoiceService,
+  SaleInvoiceStore,
+} from '../../../data/sale-invoice';
 import type { SaleInvoice, SaleInvoiceJournal } from '../../../data/sale-invoice';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
@@ -68,6 +73,7 @@ export class ListSaleInvoiceComponent {
   private readonly journalService = inject(JournalService);
   private readonly reconciliationMatchService = inject(ReconciliationMatchService);
   private readonly printService = inject(SaleInvoicePrintService);
+  private readonly saleInvoiceService = inject(SaleInvoiceService);
   private readonly toastStore = inject(ToastStore);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly customerStore = inject(CustomerStore);
@@ -84,9 +90,13 @@ export class ListSaleInvoiceComponent {
   }));
   protected readonly hasError = computed(() => this.saleInvoiceStore.error() !== null);
   protected readonly filterClearQueryParams = JOURNAL_LINK_STATUS_FILTER_CLEAR_QUERY_PARAMS;
+  private readonly unfilteredTotalCounter = createCrudUnfilteredTotalCounter((query) =>
+    this.saleInvoiceService.count(query),
+  );
+  protected readonly unfilteredTotalItems = this.unfilteredTotalCounter.totalItems;
   protected readonly pageTitle = computed(() => 'Sale Invoices');
-  protected readonly pageDescription = computed(() =>
-    'Manage your sale invoices and billing records.',
+  protected readonly pageDescription = computed(
+    () => 'Manage your sale invoices and billing records.',
   );
   protected readonly previewingInvoiceId = signal<string | null>(null);
   protected readonly generatingJournalInvoiceId = signal<string | null>(null);
@@ -203,6 +213,8 @@ export class ListSaleInvoiceComponent {
   }
 
   private async loadSaleInvoicesWithJournals(filter: Lb4ListQuery): Promise<void> {
+    void this.unfilteredTotalCounter.refresh(filter);
+
     const query: SaleInvoiceListQuery = {
       ...filter,
       order: filter.order?.length ? filter.order : DEFAULT_SALE_INVOICE_ORDER,

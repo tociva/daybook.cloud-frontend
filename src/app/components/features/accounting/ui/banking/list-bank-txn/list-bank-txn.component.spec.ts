@@ -7,7 +7,7 @@ import { DateManagementService } from '../../../../../../core/date/date-manageme
 import { CrudListQueryService } from '../../../../../../shared/crud';
 import type { CrudFilterField, Lb4ListQuery } from '../../../../../../shared/crud';
 import { BankCashStore } from '../../../../trading/data/bank-cash';
-import { BankTxnStore } from '../../../data/bank-txn';
+import { BankTxnService, BankTxnStore } from '../../../data/bank-txn';
 import type { BankTxn } from '../../../data/bank-txn';
 import { InventoryLedgerMapStore } from '../../../data/inventory-ledger-map';
 import { ReconciliationMatchService } from '../../../data/reconciliation-match';
@@ -66,6 +66,12 @@ function setup(
         },
       },
       {
+        provide: BankTxnService,
+        useValue: {
+          count: vi.fn(async () => 301),
+        },
+      },
+      {
         provide: CrudListQueryService,
         useValue: {
           filter: signal({ limit: 10, offset: 0 }),
@@ -78,7 +84,9 @@ function setup(
       {
         provide: DateManagementService,
         useValue: {
-          formatDisplayDate: vi.fn((value: string | undefined, fallback = '-') => value ?? fallback),
+          formatDisplayDate: vi.fn(
+            (value: string | undefined, fallback = '-') => value ?? fallback,
+          ),
         },
       },
       {
