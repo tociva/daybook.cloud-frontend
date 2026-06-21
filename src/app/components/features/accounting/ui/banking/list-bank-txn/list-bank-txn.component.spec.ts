@@ -284,19 +284,59 @@ describe('ListBankTxnComponent', () => {
     ]);
   });
 
-  it('hides opening balance summary when no date lower bound is in the filter', () => {
+  it('shows opening balance from API when only bank filter is active', () => {
     const { component } = setup({
       filter: {
         limit: 10,
         offset: 0,
         where: { inventoryledgermapid: 'map-1' },
       },
-      openingBalances: [{ inventoryledgermapid: 'map-1', balance: 500 }],
-      period: { startDate: '2025-06-01', endDate: '2025-06-30' },
+      openingBalances: [{ inventoryledgermapid: 'map-1', balance: 10133.26 }],
     });
 
-    expect(component.showOpeningSummary()).toBe(false);
-    expect(component.summaryMetrics()).toEqual([]);
+    expect(component.showOpeningSummary()).toBe(true);
+    expect(component.summaryMetrics()).toEqual([
+      {
+        id: 'map-1',
+        label: 'Opening balance',
+        value: '10,133.26',
+      },
+    ]);
+  });
+
+  it('always shows opening balance summary with zero when no balances are available', () => {
+    const { component } = setup({
+      filter: {
+        limit: 10,
+        offset: 0,
+        where: { inventoryledgermapid: 'map-1' },
+      },
+      openingBalances: [],
+    });
+
+    expect(component.showOpeningSummary()).toBe(true);
+    expect(component.summaryMetrics()).toEqual([
+      {
+        id: 'map-1',
+        label: 'Opening balance',
+        value: '0.00',
+      },
+    ]);
+  });
+
+  it('shows a default zero opening balance when unfiltered and no API balances exist', () => {
+    const { component } = setup({
+      openingBalances: [],
+    });
+
+    expect(component.showOpeningSummary()).toBe(true);
+    expect(component.summaryMetrics()).toEqual([
+      {
+        id: 'opening-balance',
+        label: 'Opening balance',
+        value: '0.00',
+      },
+    ]);
   });
 
   it('computes running balances on table rows', () => {

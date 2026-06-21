@@ -154,24 +154,19 @@ export class ListBankTxnComponent {
   );
 
   protected readonly summaryMetrics = computed(() => {
-    if (!hasDateLowerBound(this.filterWhere())) {
-      return [];
-    }
-
     const openingBalances = this.bankTxnStore.openingBalances();
     const filteredBankId = this.filteredBankMapId();
 
     if (filteredBankId) {
       const balance = getOpeningBalanceForBank(openingBalances, filteredBankId);
-      const entry: BankTxnOpeningBalance = {
-        inventoryledgermapid: filteredBankId,
-        balance,
-      };
 
       return [
         {
           id: filteredBankId,
-          label: this.openingBalanceLabel(entry, filteredBankId),
+          label: this.openingBalanceLabel(
+            { inventoryledgermapid: filteredBankId, balance },
+            filteredBankId,
+          ),
           value: this.formatBalance(balance),
         },
       ];
@@ -182,8 +177,18 @@ export class ListBankTxnComponent {
         ? openingBalances
         : this.uniqueBankMapIdsFromItems().map((mapId) => ({
             inventoryledgermapid: mapId,
-            balance: 0,
+            balance: getOpeningBalanceForBank(openingBalances, mapId),
           }));
+
+    if (entries.length === 0) {
+      return [
+        {
+          id: 'opening-balance',
+          label: 'Opening balance',
+          value: this.formatBalance(0),
+        },
+      ];
+    }
 
     return entries.map((entry) => ({
       id: entry.inventoryledgermapid,
@@ -196,9 +201,7 @@ export class ListBankTxnComponent {
     this.periodLabel(this.effectivePeriod()),
   );
 
-  protected readonly showOpeningSummary = computed(
-    () => hasDateLowerBound(this.filterWhere()) && this.summaryMetrics().length > 0,
-  );
+  protected readonly showOpeningSummary = computed(() => this.summaryMetrics().length > 0);
 
   protected readonly showTableContent = computed(() => {
     if (this.bankTxnStore.isLoading() || this.hasError()) {
