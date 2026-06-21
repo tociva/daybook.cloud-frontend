@@ -223,7 +223,9 @@ export class LedgerReportFacade {
   }
 
   viewJournal(journalid: string): void {
-    void this.router.navigate(journalPath(journalid));
+    void this.router.navigate(journalPath(journalid), {
+      queryParams: { burl: this.router.url },
+    });
   }
 
   openOppositeLedger(ledgerid: string): void {

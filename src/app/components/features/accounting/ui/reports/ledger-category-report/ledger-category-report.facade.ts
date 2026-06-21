@@ -232,7 +232,9 @@ export class LedgerCategoryReportFacade {
   }
 
   viewJournal(journalid: string): void {
-    void this.router.navigate(journalPath(journalid));
+    void this.router.navigate(journalPath(journalid), {
+      queryParams: { burl: this.router.url },
+    });
   }
 
   openRowLedger(ledgerid: string): void {
