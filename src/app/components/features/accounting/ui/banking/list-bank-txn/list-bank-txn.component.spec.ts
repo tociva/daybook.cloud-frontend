@@ -19,6 +19,10 @@ type BankTxnListHarness = Readonly<{
   createContraEntry(item: BankTxn): void;
   filterFields: readonly CrudFilterField[];
   loadBankTxnsWithJournals(filter: Lb4ListQuery): Promise<void>;
+  showOpeningSummary(): boolean;
+  summaryMetrics(): readonly { id: string; label: string; value: string }[];
+  summaryPeriodLabel(): string | null;
+  tableRows(): readonly BankTxn[];
 }>;
 
 function asHarness(component: ListBankTxnComponent): BankTxnListHarness {
@@ -28,7 +32,10 @@ function asHarness(component: ListBankTxnComponent): BankTxnListHarness {
 function setup(
   options: Readonly<{
     bankTxns?: readonly BankTxn[];
+    filter?: Lb4ListQuery;
     hasActiveFilter?: boolean;
+    openingBalances?: readonly { inventoryledgermapid: string; balance: number }[];
+    period?: { startDate?: string; endDate?: string } | null;
     storeError?: string | null;
   }> = {},
 ): {
@@ -38,10 +45,13 @@ function setup(
   navigate: ReturnType<typeof vi.fn>;
 } {
   const bankTxns = signal<readonly BankTxn[]>(options.bankTxns ?? []);
+  const openingBalances = signal(options.openingBalances ?? []);
+  const period = signal(options.period ?? null);
   const storeError = signal<string | null>(
     options.storeError === undefined ? 'Stop after query assertion.' : options.storeError,
   );
   const hasActiveFilter = signal(options.hasActiveFilter ?? false);
+  const filter = signal<Lb4ListQuery>(options.filter ?? { limit: 10, offset: 0 });
   const loadBankTxns = vi.fn(async () => undefined);
   const findJournalsBySourceIds = vi.fn(async () => []);
   const navigate = vi.fn();
@@ -62,6 +72,8 @@ function setup(
           error: storeError,
           isLoading: signal(false),
           items: bankTxns,
+          openingBalances,
+          period,
           loadBankTxns,
         },
       },
@@ -74,7 +86,7 @@ function setup(
       {
         provide: CrudListQueryService,
         useValue: {
-          filter: signal({ limit: 10, offset: 0 }),
+          filter,
           hasActiveFilter,
           init: vi.fn(),
           pageSizeOptions: signal([10, 25, 50]),
@@ -134,7 +146,28 @@ describe('ListBankTxnComponent', () => {
     vi.clearAllMocks();
   });
 
-  it('loads bank transactions with the dashboard journal-link status in the normal list filter', async () => {
+  it('loads bank transactions without pagination when a date lower bound is present', async () => {
+    const { component, loadBankTxns } = setup();
+
+    await component.loadBankTxnsWithJournals({
+      limit: 10,
+      offset: 0,
+      where: {
+        inventoryledgermapid: 'map-1',
+        txndate: { gte: '2025-06-01', lte: '2025-06-30' },
+      },
+    });
+
+    expect(loadBankTxns).toHaveBeenCalledWith({
+      includes: ['inventoryledgermap'],
+      where: {
+        inventoryledgermapid: 'map-1',
+        txndate: { gte: '2025-06-01', lte: '2025-06-30' },
+      },
+    });
+  });
+
+  it('keeps pagination in the list query when no date lower bound is present', async () => {
     const { component, loadBankTxns } = setup();
 
     await component.loadBankTxnsWithJournals({
@@ -172,16 +205,131 @@ describe('ListBankTxnComponent', () => {
     expect(findJournalsBySourceIds).toHaveBeenCalledWith('bank_txn', ['bank-txn-1']);
   });
 
-  it('shows the balance column when no filter is active', () => {
+  it('always shows the balance column', () => {
     const { component } = setup();
 
     expect(component.columns().map((column) => column.id)).toContain('balance');
   });
 
-  it('hides the balance column when a filter is active', () => {
+  it('shows the balance column even when a filter is active', () => {
     const { component } = setup({ hasActiveFilter: true });
 
-    expect(component.columns().map((column) => column.id)).not.toContain('balance');
+    expect(component.columns().map((column) => column.id)).toContain('balance');
+  });
+
+  it('shows opening balance summary when date filter and opening balances are present', () => {
+    const { component } = setup({
+      filter: {
+        limit: 10,
+        offset: 0,
+        where: {
+          inventoryledgermapid: 'map-1',
+          txndate: { gte: '2025-06-01', lte: '2025-06-30' },
+        },
+      },
+      openingBalances: [{ inventoryledgermapid: 'map-1', balance: 500 }],
+      period: { startDate: '2025-06-01', endDate: '2025-06-30' },
+    });
+
+    expect(component.showOpeningSummary()).toBe(true);
+    expect(component.summaryPeriodLabel()).toBe('2025-06-01 – 2025-06-30');
+    expect(component.summaryMetrics()).toEqual([
+      {
+        id: 'map-1',
+        label: 'Opening balance',
+        value: '500.00',
+      },
+    ]);
+  });
+
+  it('shows opening balance summary using filter dates when API period is missing', () => {
+    const { component } = setup({
+      filter: {
+        limit: 10,
+        offset: 0,
+        where: {
+          inventoryledgermapid: 'map-1',
+          txndate: { gte: '2025-06-01', lte: '2025-06-30' },
+        },
+      },
+      openingBalances: [{ inventoryledgermapid: 'map-1', balance: 500 }],
+      period: null,
+    });
+
+    expect(component.showOpeningSummary()).toBe(true);
+    expect(component.summaryPeriodLabel()).toBe('2025-06-01 – 2025-06-30');
+  });
+
+  it('shows zero opening balance for a filtered bank with no API opening entry', () => {
+    const { component } = setup({
+      filter: {
+        limit: 10,
+        offset: 0,
+        where: {
+          inventoryledgermapid: 'map-1',
+          txndate: { gte: '2025-06-01', lte: '2025-06-30' },
+        },
+      },
+      openingBalances: [],
+      period: { startDate: '2025-06-01', endDate: '2025-06-30' },
+    });
+
+    expect(component.showOpeningSummary()).toBe(true);
+    expect(component.summaryMetrics()).toEqual([
+      {
+        id: 'map-1',
+        label: 'Opening balance',
+        value: '0.00',
+      },
+    ]);
+  });
+
+  it('hides opening balance summary when no date lower bound is in the filter', () => {
+    const { component } = setup({
+      filter: {
+        limit: 10,
+        offset: 0,
+        where: { inventoryledgermapid: 'map-1' },
+      },
+      openingBalances: [{ inventoryledgermapid: 'map-1', balance: 500 }],
+      period: { startDate: '2025-06-01', endDate: '2025-06-30' },
+    });
+
+    expect(component.showOpeningSummary()).toBe(false);
+    expect(component.summaryMetrics()).toEqual([]);
+  });
+
+  it('computes running balances on table rows', () => {
+    const { component } = setup({
+      filter: {
+        limit: 10,
+        offset: 0,
+        where: {
+          inventoryledgermapid: 'map-1',
+          txndate: { gte: '2025-06-01', lte: '2025-06-30' },
+        },
+      },
+      bankTxns: [
+        {
+          id: 'txn-1',
+          inventoryledgermapid: 'map-1',
+          txndate: '2025-06-05',
+          debit: 0,
+          credit: 200,
+        },
+        {
+          id: 'txn-2',
+          inventoryledgermapid: 'map-1',
+          txndate: '2025-06-15',
+          debit: 1000,
+          credit: 0,
+        },
+      ],
+      openingBalances: [{ inventoryledgermapid: 'map-1', balance: 500 }],
+      period: { startDate: '2025-06-01', endDate: '2025-06-30' },
+    });
+
+    expect(component.tableRows().map((row) => row.balance)).toEqual([300, 1300]);
   });
 
   it('exposes journal link status as a standard bank transaction filter field', () => {

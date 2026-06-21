@@ -28,6 +28,22 @@ export type BankTxn = BankTxnPayload &
     inventoryledgermap?: InventoryLedgerMap;
   }>;
 
+export type BankTxnOpeningBalance = Readonly<{
+  inventoryledgermapid: string;
+  balance: number;
+}>;
+
+export type BankTxnListPeriod = Readonly<{
+  startDate?: string;
+  endDate?: string;
+}>;
+
+export type BankTxnListResponse = Readonly<{
+  period?: BankTxnListPeriod;
+  openingBalances: readonly BankTxnOpeningBalance[];
+  transactions: readonly BankTxn[];
+}>;
+
 export type BankTxnListQuery = Lb4ListQuery;
 
 export type BankTxnGetQuery = Readonly<{

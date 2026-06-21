@@ -1,4 +1,4 @@
-import type { BankTxn } from './bank-txn.model';
+import type { BankTxn, BankTxnListPeriod, BankTxnOpeningBalance } from './bank-txn.model';
 
 export type BankTxnState = Readonly<{
   bankTxn: Readonly<{
@@ -6,6 +6,8 @@ export type BankTxnState = Readonly<{
     error: string | null;
     isLoading: boolean;
     items: readonly BankTxn[];
+    openingBalances: readonly BankTxnOpeningBalance[];
+    period: BankTxnListPeriod | null;
     selectedItem: BankTxn | null;
   }>;
 }>;
@@ -16,6 +18,8 @@ export const initialBankTxnState: BankTxnState = {
     error: null,
     isLoading: false,
     items: [],
+    openingBalances: [],
+    period: null,
     selectedItem: null,
   },
 };

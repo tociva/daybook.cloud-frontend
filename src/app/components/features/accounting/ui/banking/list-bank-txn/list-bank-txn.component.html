@@ -30,7 +30,7 @@
       @if (
         !bankTxnStore.isLoading() &&
         !hasError() &&
-        crudQuery.shouldShowEmptyState(bankTxnStore.items().length, bankTxnStore.count())
+        !showTableContent()
       ) {
         @if (crudQuery.hasActiveFilter()) {
           <app-empty-state
@@ -60,11 +60,27 @@
           </app-empty-state>
         }
       } @else {
+        @if (showOpeningSummary()) {
+          <div class="opening-summary" aria-label="Bank transaction opening balances">
+            @if (summaryPeriodLabel()) {
+              <p class="opening-summary-period">{{ summaryPeriodLabel() }}</p>
+            }
+            <div class="summary-grid">
+              @for (metric of summaryMetrics(); track metric.id) {
+                <section class="summary-metric">
+                  <h3 class="summary-metric-title">{{ metric.label }}</h3>
+                  <div class="summary-metric-value">{{ metric.value }}</div>
+                </section>
+              }
+            </div>
+          </div>
+        }
+
         <tng-table
           ariaLabel="Bank transactions"
           density="comfortable"
           [columns]="columns()"
-          [items]="bankTxnStore.items()"
+          [items]="tableRows()"
           [loading]="bankTxnStore.isLoading()"
           [error]="hasError()"
         >
@@ -198,7 +214,7 @@
           <app-crud-paginator
             ariaLabel="Bank transaction pagination"
             [filter]="crudQuery.filter()"
-            [totalItems]="bankTxnStore.count()"
+            [totalItems]="paginatorTotalItems()"
             [unfilteredTotalItems]="unfilteredTotalItems()"
             [pageSizeOptions]="crudQuery.pageSizeOptions()"
             [clearQueryParams]="filterClearQueryParams"

@@ -5,14 +5,25 @@ import { Router } from '@angular/router';
 import { TngButtonComponent, TngCommandPaletteComponent } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { fromEvent } from 'rxjs';
+import { LedgerStore } from '../../../components/features/accounting/data/ledger';
+import { LedgerCategoryStore } from '../../../components/features/accounting/data/ledger-category';
 import { CustomerStore } from '../../../components/features/trading/data/customer';
 import { VendorStore } from '../../../components/features/trading/data/vendor';
 import { LedgerCachePreferencesStore } from '../../../core/preferences/ledger-cache-preferences.store';
 import { isMacPlatform } from '../../../core/system/platform.utils';
+import { FiscalYearDateRangeService } from '../../../shared/fiscal-year-date-range-picker';
 import {
   createCustomerTradingSearchIndex,
   searchCustomerTradingEntries,
 } from './customer-trading-search';
+import {
+  createLedgerCategoryReportSearchIndex,
+  searchLedgerCategoryReportEntries,
+} from './ledger-category-report-search';
+import {
+  createLedgerReportSearchIndex,
+  searchLedgerReportEntries,
+} from './ledger-report-search';
 import { SearchIndexService } from './search-index.service';
 import {
   createVendorTradingSearchIndex,
@@ -32,9 +43,14 @@ export class WorkspaceSearchButtonComponent {
   private readonly cachePreferences = inject(LedgerCachePreferencesStore);
   private readonly customerStore = inject(CustomerStore);
   private readonly vendorStore = inject(VendorStore);
+  private readonly ledgerStore = inject(LedgerStore);
+  private readonly ledgerCategoryStore = inject(LedgerCategoryStore);
+  private readonly fiscalYearDateRange = inject(FiscalYearDateRangeService);
   private readonly index = toSignal(inject(SearchIndexService).index$, { initialValue: null });
   private customerCatalogLoadPromise: Promise<boolean> | null = null;
   private vendorCatalogLoadPromise: Promise<boolean> | null = null;
+  private ledgerCatalogLoadPromise: Promise<boolean> | null = null;
+  private ledgerCategoryCatalogLoadPromise: Promise<boolean> | null = null;
 
   protected readonly searchShortcutHint = isMacPlatform() ? '⌘K' : 'Ctrl K';
   protected readonly open = signal(false);
@@ -44,6 +60,19 @@ export class WorkspaceSearchButtonComponent {
   );
   private readonly vendorSearchIndex = computed(() =>
     createVendorTradingSearchIndex(this.vendorStore.catalog()),
+  );
+  private readonly reportDateQuery = computed(() => {
+    const range = this.fiscalYearDateRange.range();
+    return range ? { start: range.startdate, end: range.enddate } : undefined;
+  });
+  private readonly ledgerReportSearchIndex = computed(() =>
+    createLedgerReportSearchIndex(this.ledgerStore.catalog(), this.reportDateQuery()),
+  );
+  private readonly ledgerCategoryReportSearchIndex = computed(() =>
+    createLedgerCategoryReportSearchIndex(
+      this.ledgerCategoryStore.catalog(),
+      this.reportDateQuery(),
+    ),
   );
 
   protected readonly results = computed(() => {
@@ -72,8 +101,23 @@ export class WorkspaceSearchButtonComponent {
       description: entry.description,
       value: entry.value,
     }));
+    const ledgerResults = searchLedgerReportEntries(this.ledgerReportSearchIndex(), q).map(
+      (entry) => ({
+        label: entry.label,
+        description: entry.description,
+        value: entry.value,
+      }),
+    );
+    const categoryResults = searchLedgerCategoryReportEntries(
+      this.ledgerCategoryReportSearchIndex(),
+      q,
+    ).map((entry) => ({
+      label: entry.label,
+      description: entry.description,
+      value: entry.value,
+    }));
 
-    return [...staticResults, ...customerResults, ...vendorResults];
+    return [...staticResults, ...customerResults, ...vendorResults, ...ledgerResults, ...categoryResults];
   });
 
   constructor() {
@@ -87,6 +131,8 @@ export class WorkspaceSearchButtonComponent {
     this.open.set(true);
     this.ensureCustomerSearchCatalogLoaded();
     this.ensureVendorSearchCatalogLoaded();
+    this.ensureLedgerSearchCatalogLoaded();
+    this.ensureLedgerCategorySearchCatalogLoaded();
   }
 
   protected onSearchBtnKeydown(event: KeyboardEvent): void {
@@ -147,6 +193,40 @@ export class WorkspaceSearchButtonComponent {
       .catch(() => false)
       .finally(() => {
         this.vendorCatalogLoadPromise = null;
+      });
+  }
+
+  private ensureLedgerSearchCatalogLoaded(): void {
+    if (
+      !this.cachePreferences.enabled() ||
+      this.ledgerStore.catalogLoaded() ||
+      this.ledgerCatalogLoadPromise
+    ) {
+      return;
+    }
+
+    this.ledgerCatalogLoadPromise = this.ledgerStore
+      .ensureLedgerCatalogLoaded()
+      .catch(() => false)
+      .finally(() => {
+        this.ledgerCatalogLoadPromise = null;
+      });
+  }
+
+  private ensureLedgerCategorySearchCatalogLoaded(): void {
+    if (
+      !this.cachePreferences.enabled() ||
+      this.ledgerCategoryStore.catalogLoaded() ||
+      this.ledgerCategoryCatalogLoadPromise
+    ) {
+      return;
+    }
+
+    this.ledgerCategoryCatalogLoadPromise = this.ledgerCategoryStore
+      .ensureLedgerCategoryCatalogLoaded()
+      .catch(() => false)
+      .finally(() => {
+        this.ledgerCategoryCatalogLoadPromise = null;
       });
   }
 }

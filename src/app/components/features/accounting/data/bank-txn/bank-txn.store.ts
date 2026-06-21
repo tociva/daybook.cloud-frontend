@@ -20,6 +20,8 @@ export const BankTxnStore = signalStore(
     error: computed(() => bankTxn().error),
     isLoading: computed(() => bankTxn().isLoading),
     items: computed(() => bankTxn().items),
+    openingBalances: computed(() => bankTxn().openingBalances),
+    period: computed(() => bankTxn().period),
     selectedItem: computed(() => bankTxn().selectedItem),
   })),
   withMethods((store, service = inject(BankTxnService)) => {
@@ -114,17 +116,7 @@ export const BankTxnStore = signalStore(
       async loadBankTxnById(id: string, query?: BankTxnGetQuery): Promise<BankTxn | null> {
         setLoading();
         try {
-          const items = await service.list({
-            where: { id },
-            limit: 1,
-            ...(query?.includes?.length ? { includes: query.includes } : {}),
-          });
-          const item = items[0] ?? null;
-          if (!item) {
-            setError('Bank transaction not found.');
-            return null;
-          }
-
+          const item = await service.getById(id, query);
           patchState(store, (state) => ({
             bankTxn: {
               ...state.bankTxn,
@@ -143,14 +135,16 @@ export const BankTxnStore = signalStore(
       async loadBankTxns(query?: BankTxnListQuery): Promise<void> {
         setLoading();
         try {
-          const [items, count] = await Promise.all([service.list(query), service.count(query)]);
+          const [response, count] = await Promise.all([service.list(query), service.count(query)]);
           patchState(store, (state) => ({
             bankTxn: {
               ...state.bankTxn,
               count,
               error: null,
               isLoading: false,
-              items,
+              items: response.transactions,
+              openingBalances: response.openingBalances,
+              period: response.period ?? null,
             },
           }));
         } catch (error) {

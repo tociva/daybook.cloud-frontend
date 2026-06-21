@@ -28,7 +28,14 @@ import type { InventoryLedgerMap } from '../../../data/inventory-ledger-map';
 import { JournalSourceType } from '../../../data/journal';
 import { ReconciliationMatchService } from '../../../data/reconciliation-match';
 import { BankTxnService, BankTxnStore } from '../../../data/bank-txn';
-import type { BankTxn, BankTxnJournal } from '../../../data/bank-txn';
+import type { BankTxn, BankTxnJournal, BankTxnOpeningBalance } from '../../../data/bank-txn';
+import {
+  attachRunningBalances,
+  getOpeningBalanceForBank,
+  hasDateLowerBound,
+  periodFromFilter,
+  stripPaginationFromQuery,
+} from '../../../data/bank-txn/bank-txn-running-balance.util';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { BankStatementUploadComponent } from '../bank-statement-upload/bank-statement-upload.component';
 import { JournalCreateDraftStagingService } from '../../journal/create-journal/journal-create-draft-staging.service';
@@ -92,38 +99,119 @@ export class ListBankTxnComponent {
     new Map(),
   );
 
-  protected readonly columns = computed<readonly TngTableColumn<BankTxn>[]>(() => {
-    const balanceColumn: TngTableColumn<BankTxn> = {
+  protected readonly columns = computed<readonly TngTableColumn<BankTxn>[]>(() => [
+    { id: 'txndate', label: 'Date', width: '9rem' },
+    { id: 'bank', label: 'Bank', width: '14rem' },
+    {
+      id: 'debit',
+      label: 'Deposit',
+      align: 'end',
+      headerAlign: 'end',
+      width: '9rem',
+    },
+    {
+      id: 'credit',
+      label: 'Withdrawal',
+      align: 'end',
+      headerAlign: 'end',
+      width: '9rem',
+    },
+    {
       id: 'balance',
       label: 'Balance',
       align: 'end',
       headerAlign: 'end',
       width: '9rem',
-    };
+    },
+    { id: 'description', label: 'Description', truncate: true },
+    { id: 'bankref', label: 'Reference', width: '12rem' },
+    { id: 'journals', label: 'Journals', width: '12rem' },
+    { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '5rem' },
+  ]);
 
-    return [
-      { id: 'txndate', label: 'Date', width: '9rem' },
-      { id: 'bank', label: 'Bank', width: '14rem' },
-      {
-        id: 'debit',
-        label: 'Deposit',
-        align: 'end',
-        headerAlign: 'end',
-        width: '9rem',
-      },
-      {
-        id: 'credit',
-        label: 'Withdrawal',
-        align: 'end',
-        headerAlign: 'end',
-        width: '9rem',
-      },
-      ...(this.crudQuery.hasActiveFilter() ? [] : [balanceColumn]),
-      { id: 'description', label: 'Description', truncate: true },
-      { id: 'bankref', label: 'Reference', width: '12rem' },
-      { id: 'journals', label: 'Journals', width: '12rem' },
-      { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '5rem' },
-    ];
+  protected readonly useClientPagination = computed(() =>
+    hasDateLowerBound(this.filterWhere()),
+  );
+
+  protected readonly allTransactionsWithBalance = computed(() =>
+    attachRunningBalances(this.bankTxnStore.items(), this.bankTxnStore.openingBalances()),
+  );
+
+  protected readonly tableRows = computed(() => {
+    const rows = this.allTransactionsWithBalance();
+    if (!this.useClientPagination()) {
+      return rows;
+    }
+
+    const filter = this.crudQuery.filter();
+    const offset = filter.offset ?? 0;
+    const limit = filter.limit ?? 10;
+    return rows.slice(offset, offset + limit);
+  });
+
+  protected readonly paginatorTotalItems = computed(() =>
+    this.useClientPagination() ? this.bankTxnStore.items().length : this.bankTxnStore.count(),
+  );
+
+  protected readonly summaryMetrics = computed(() => {
+    if (!hasDateLowerBound(this.filterWhere())) {
+      return [];
+    }
+
+    const openingBalances = this.bankTxnStore.openingBalances();
+    const filteredBankId = this.filteredBankMapId();
+
+    if (filteredBankId) {
+      const balance = getOpeningBalanceForBank(openingBalances, filteredBankId);
+      const entry: BankTxnOpeningBalance = {
+        inventoryledgermapid: filteredBankId,
+        balance,
+      };
+
+      return [
+        {
+          id: filteredBankId,
+          label: this.openingBalanceLabel(entry, filteredBankId),
+          value: this.formatBalance(balance),
+        },
+      ];
+    }
+
+    const entries =
+      openingBalances.length > 0
+        ? openingBalances
+        : this.uniqueBankMapIdsFromItems().map((mapId) => ({
+            inventoryledgermapid: mapId,
+            balance: 0,
+          }));
+
+    return entries.map((entry) => ({
+      id: entry.inventoryledgermapid,
+      label: this.openingBalanceLabel(entry, filteredBankId),
+      value: this.formatBalance(entry.balance),
+    }));
+  });
+
+  protected readonly summaryPeriodLabel = computed(() =>
+    this.periodLabel(this.effectivePeriod()),
+  );
+
+  protected readonly showOpeningSummary = computed(
+    () => hasDateLowerBound(this.filterWhere()) && this.summaryMetrics().length > 0,
+  );
+
+  protected readonly showTableContent = computed(() => {
+    if (this.bankTxnStore.isLoading() || this.hasError()) {
+      return true;
+    }
+
+    const itemCount = this.bankTxnStore.items().length;
+    const totalCount = this.paginatorTotalItems();
+    if (itemCount > 0 || this.crudQuery.shouldShowEmptyState(itemCount, totalCount)) {
+      return true;
+    }
+
+    return this.showOpeningSummary();
   });
 
   protected readonly bankLedgerMapOptionValue = (option: unknown): string =>
@@ -210,16 +298,23 @@ export class ListBankTxnComponent {
   private async loadBankTxnsWithJournals(filter: Lb4ListQuery): Promise<void> {
     void this.unfilteredTotalCounter.refresh(filter);
 
-    await this.bankTxnStore.loadBankTxns({
-      ...filter,
-      includes: ['inventoryledgermap'],
-    });
+    const listQuery = hasDateLowerBound(filter.where as Record<string, unknown> | undefined)
+      ? stripPaginationFromQuery({
+          ...filter,
+          includes: ['inventoryledgermap'],
+        })
+      : {
+          ...filter,
+          includes: ['inventoryledgermap'],
+        };
+
+    await this.bankTxnStore.loadBankTxns(listQuery);
     if (this.bankTxnStore.error()) {
       this.journalsByBankTxnId.set(new Map());
       this.journalsLoading.set(false);
       return;
     }
-    await this.loadLinkedJournals(this.bankTxnStore.items());
+    await this.loadLinkedJournals(this.tableRows());
   }
 
   private async loadLinkedJournals(txns: readonly BankTxn[]): Promise<void> {
@@ -341,15 +436,22 @@ export class ListBankTxnComponent {
   protected async onAssignmentsChanged(): Promise<void> {
     const id = this.journalDialogBankTxn()?.id;
     const filter = this.crudQuery.filter();
-    await this.bankTxnStore.loadBankTxns({
-      ...filter,
-      includes: ['inventoryledgermap'],
-    });
-    await this.loadLinkedJournals(this.bankTxnStore.items());
+    const listQuery = hasDateLowerBound(filter.where as Record<string, unknown> | undefined)
+      ? stripPaginationFromQuery({
+          ...filter,
+          includes: ['inventoryledgermap'],
+        })
+      : {
+          ...filter,
+          includes: ['inventoryledgermap'],
+        };
+
+    await this.bankTxnStore.loadBankTxns(listQuery);
+    await this.loadLinkedJournals(this.tableRows());
 
     if (!id) return;
 
-    const updated = this.bankTxnStore.items().find((item) => item.id === id) ?? null;
+    const updated = this.tableRows().find((item) => item.id === id) ?? null;
     if (updated) {
       this.journalDialogBankTxn.set(updated);
     }
@@ -409,5 +511,52 @@ export class ListBankTxnComponent {
       maximumFractionDigits: 2,
       minimumFractionDigits: 2,
     }).format(Number(value ?? 0));
+  }
+
+  private filterWhere(): Record<string, unknown> | undefined {
+    return this.crudQuery.filter().where as Record<string, unknown> | undefined;
+  }
+
+  private effectivePeriod(): { startDate?: string; endDate?: string } | null {
+    return this.bankTxnStore.period() ?? periodFromFilter(this.filterWhere());
+  }
+
+  private uniqueBankMapIdsFromItems(): readonly string[] {
+    const ids = new Set<string>();
+    for (const item of this.bankTxnStore.items()) {
+      if (item.inventoryledgermapid) {
+        ids.add(item.inventoryledgermapid);
+      }
+    }
+    return [...ids];
+  }
+
+  private filteredBankMapId(): string | null {
+    const mapId = this.crudQuery.filter().where?.['inventoryledgermapid'];
+    return typeof mapId === 'string' && mapId.length > 0 ? mapId : null;
+  }
+
+  private openingBalanceLabel(
+    entry: BankTxnOpeningBalance,
+    filteredBankId: string | null,
+  ): string {
+    if (filteredBankId) {
+      return 'Opening balance';
+    }
+
+    const bankName = this.bankNameByMapId().get(entry.inventoryledgermapid);
+    return bankName ? `Opening balance (${bankName})` : 'Opening balance';
+  }
+
+  private periodLabel(period: { startDate?: string; endDate?: string } | null): string | null {
+    if (!period?.startDate) return null;
+
+    const start = this.dateManagement.formatDisplayDate(period.startDate, period.startDate);
+    if (!period.endDate) {
+      return `From ${start}`;
+    }
+
+    const end = this.dateManagement.formatDisplayDate(period.endDate, period.endDate);
+    return `${start} – ${end}`;
   }
 }

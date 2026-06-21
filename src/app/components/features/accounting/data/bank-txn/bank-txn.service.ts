@@ -1,14 +1,16 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { AppConfigStore } from '../../../../../core/config/app-config.store';
 import { CrudApiService } from '../../../../../shared/crud';
+import { normalizeLb4Filter, toLb4ListRequestFilterBody } from '../../../../../shared/crud/lb4-query';
 import type { Journal } from '../journal';
 import type {
   BankTxn,
   BankTxnGetQuery,
   BankTxnJournalCreatePayload,
   BankTxnListQuery,
+  BankTxnListResponse,
   BankTxnPayload,
 } from './bank-txn.model';
 
@@ -32,8 +34,14 @@ export class BankTxnService {
     return this.crudApi.getById<BankTxn>(ENDPOINT, id, query);
   }
 
-  async list(query: BankTxnListQuery = {}): Promise<readonly BankTxn[]> {
-    return this.crudApi.list<BankTxn>(ENDPOINT, query);
+  async list(query: BankTxnListQuery = {}): Promise<BankTxnListResponse> {
+    const normalized = normalizeLb4Filter(query);
+    const params = new HttpParams().set(
+      'filter',
+      JSON.stringify(toLb4ListRequestFilterBody(normalized)),
+    );
+    const url = await this.collectionUrl();
+    return firstValueFrom(this.http.get<BankTxnListResponse>(url, { params }));
   }
 
   async count(query: BankTxnListQuery = {}): Promise<number> {
