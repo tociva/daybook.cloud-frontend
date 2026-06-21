@@ -150,7 +150,9 @@ export class JournalDraftStore {
     this.journalDescription.set(journal.description ?? '');
     this.ledgerDefaultOptions.set(this.ledgerStore.items());
 
-    const entries = journal.entries ?? [];
+    const entries = [...(journal.entries ?? [])].sort(
+      (a, b) => (a.order ?? 0) - (b.order ?? 0),
+    );
     if (entries.length === 0) {
       this.rows.set([newRow(), newRow()]);
       return;

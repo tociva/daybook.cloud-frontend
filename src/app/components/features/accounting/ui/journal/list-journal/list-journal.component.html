@@ -107,8 +107,11 @@
           [loading]="journalStore.isLoading()"
           [error]="hasError()"
           [rowClass]="rowClassFn()"
+          [sortActive]="crudQuery.sortActive()"
+          [sortDirection]="crudQuery.sortDirection()"
+          (sortChange)="crudQuery.applySort($event)"
         >
-          <ng-template tngTableCellTemplate="journalGroupKey" let-row="row">
+          <ng-template tngTableCellTemplate="number" let-row="row">
             <span class="journal-cell">
               <button type="button" class="link-button" (click)="viewJournal(row.journal)">
                 {{ row.number }}

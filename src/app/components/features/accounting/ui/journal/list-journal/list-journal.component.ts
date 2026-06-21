@@ -137,6 +137,8 @@ const JOURNAL_IMPORT_CONFIG: Record<JournalImportSource, JournalImportConfig> = 
   },
 };
 
+const DEFAULT_JOURNAL_ORDER = ['date DESC'] as const;
+
 @Component({
   selector: 'app-list-journal',
   standalone: true,
@@ -201,11 +203,12 @@ export class ListJournalComponent {
 
   protected readonly columns: readonly TngTableColumn<JournalTableRow>[] = [
     {
-      id: 'journalGroupKey',
+      id: 'number',
       label: 'Number',
       accessor: 'journalGroupKey',
       groupBy: true,
       groupByAlign: 'top',
+      sortable: true,
       width: '11rem',
     },
     {
@@ -214,6 +217,7 @@ export class ListJournalComponent {
       accessor: 'journalGroupKey',
       groupBy: true,
       groupByAlign: 'top',
+      sortable: true,
       width: '9rem',
     },
     {
@@ -222,6 +226,7 @@ export class ListJournalComponent {
       accessor: 'journalGroupKey',
       groupBy: true,
       groupByAlign: 'top',
+      sortable: true,
       width: '11rem',
     },
     { id: 'ledgerid', label: 'Ledger', width: '15rem' },
@@ -233,6 +238,7 @@ export class ListJournalComponent {
       accessor: 'journalGroupKey',
       groupBy: true,
       groupByAlign: 'top',
+      sortable: true,
       truncate: true,
     },
     {
@@ -283,7 +289,7 @@ export class ListJournalComponent {
       const query = {
         ...filter,
         includes: ['entries'] as const,
-        order: filter.order?.length ? filter.order : (['date DESC'] as const),
+        order: filter.order?.length ? filter.order : DEFAULT_JOURNAL_ORDER,
       };
       void this.journalStore.loadJournals(query);
       void this.refreshUnfilteredJournalCount(filter);
@@ -751,7 +757,7 @@ export class ListJournalComponent {
     void this.journalStore.loadJournals({
       ...filter,
       includes: ['entries'],
-      order: filter.order?.length ? filter.order : ['date DESC'],
+      order: filter.order?.length ? filter.order : DEFAULT_JOURNAL_ORDER,
     });
   }
 
