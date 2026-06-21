@@ -19,6 +19,7 @@ import {
   upsertCachedEntity,
 } from '../../../../../shared/crud';
 import { UserSessionStore } from '../../../management/data/user-session/user-session.store';
+import { sortLedgersByAccountingOrder } from '../ledger-category/ledger-category.ordering';
 import type { Ledger, LedgerGetQuery, LedgerListQuery, LedgerPayload } from './ledger.model';
 import { applyLedgerListQuery } from './ledger.query';
 import { LedgerService } from './ledger.service';
@@ -99,12 +100,13 @@ export const LedgerStore = signalStore(
       };
 
       const saveCatalog = (catalog: readonly Ledger[]): void => {
+        const orderedCatalog = sortLedgersByAccountingOrder(catalog);
         patchState(store, (state) => ({
           ledger: {
             ...state.ledger,
-            catalog,
+            catalog: orderedCatalog,
             catalogLoaded: true,
-            catalogTotalCount: catalog.length,
+            catalogTotalCount: orderedCatalog.length,
             error: null,
           },
         }));
@@ -122,15 +124,17 @@ export const LedgerStore = signalStore(
       });
 
       const cacheCatalogEntry = (ledger: Ledger): void => {
-        if (!cachePrefs.enabled()) return;
+        if (!cachePrefs.enabled() && !store.ledger().catalogLoaded) return;
 
         patchState(store, (state) => ({
           ledger: {
             ...state.ledger,
-            catalog: upsertCachedEntity(state.ledger.catalog, ledger),
+            catalog: sortLedgersByAccountingOrder(upsertCachedEntity(state.ledger.catalog, ledger)),
           },
         }));
-        void catalogCacheStore.persistCatalog(CACHE_NAME, store.ledger().catalog);
+        if (cachePrefs.enabled()) {
+          void catalogCacheStore.persistCatalog(CACHE_NAME, store.ledger().catalog);
+        }
       };
 
       const readIncludeRelation = (include: Lb4Include): string | null => {
@@ -208,7 +212,9 @@ export const LedgerStore = signalStore(
         if (store.ledger().catalogLoaded) return true;
 
         const catalog = await fetchFullCatalog();
-        await catalogCacheStore.persistCatalog(CACHE_NAME, catalog);
+        if (cachePrefs.enabled()) {
+          await catalogCacheStore.persistCatalog(CACHE_NAME, catalog);
+        }
         saveCatalog(catalog);
         return true;
       };
@@ -276,17 +282,21 @@ export const LedgerStore = signalStore(
           setLoading();
           try {
             const item = await service.create(payload);
-            if (cachePrefs.enabled() && store.ledger().catalogLoaded) {
+            if (store.ledger().catalogLoaded) {
               patchState(store, (state) => ({
                 ledger: {
                   ...state.ledger,
-                  catalog: upsertCachedEntity(state.ledger.catalog, item),
+                  catalog: sortLedgersByAccountingOrder(
+                    upsertCachedEntity(state.ledger.catalog, item),
+                  ),
                   catalogTotalCount: state.ledger.catalogTotalCount + 1,
                   selectedItem: item,
                 },
               }));
               reapplyCachedView();
-              void catalogCacheStore.persistCatalog(CACHE_NAME, store.ledger().catalog);
+              if (cachePrefs.enabled()) {
+                void catalogCacheStore.persistCatalog(CACHE_NAME, store.ledger().catalog);
+              }
             } else {
               patchState(store, (state) => ({
                 ledger: {
@@ -310,7 +320,7 @@ export const LedgerStore = signalStore(
           setLoading();
           try {
             await service.delete(id);
-            if (cachePrefs.enabled() && store.ledger().catalogLoaded) {
+            if (store.ledger().catalogLoaded) {
               patchState(store, (state) => ({
                 ledger: {
                   ...state.ledger,
@@ -321,7 +331,9 @@ export const LedgerStore = signalStore(
                 },
               }));
               reapplyCachedView();
-              void catalogCacheStore.persistCatalog(CACHE_NAME, store.ledger().catalog);
+              if (cachePrefs.enabled()) {
+                void catalogCacheStore.persistCatalog(CACHE_NAME, store.ledger().catalog);
+              }
             } else {
               patchState(store, (state) => ({
                 ledger: {
@@ -345,10 +357,6 @@ export const LedgerStore = signalStore(
         async loadLedgerById(id: string, query?: LedgerGetQuery): Promise<Ledger | null> {
           setLoading();
           try {
-            if (!cachePrefs.enabled()) {
-              return loadLedgerByIdFromApi(id, query);
-            }
-
             const cached = selectCachedLedgerById(id, query);
             if (cached) {
               return cached;
@@ -369,7 +377,9 @@ export const LedgerStore = signalStore(
         async loadLedgers(query?: LedgerListQuery): Promise<void> {
           setLoading();
           try {
-            const cacheReady = await ensureCatalogLoaded();
+            const cacheReady = cachePrefs.enabled()
+              ? await ensureCatalogLoaded()
+              : await loadFullCatalogFromApi();
             if (cacheReady) {
               applyViewQuery(query);
               return;
@@ -392,7 +402,9 @@ export const LedgerStore = signalStore(
         async refreshLedgers(query?: LedgerListQuery): Promise<void> {
           setLoading();
           try {
-            const cacheReady = await ensureCatalogLoaded(true);
+            const cacheReady = cachePrefs.enabled()
+              ? await ensureCatalogLoaded(true)
+              : await loadFullCatalogFromApi(true);
             if (cacheReady) {
               applyViewQuery(query);
               return;
@@ -411,11 +423,13 @@ export const LedgerStore = signalStore(
             const mergeEntry = (entry: Ledger): Ledger =>
               entry.id === id ? { ...entry, ...payload, ...updated } : entry;
 
-            if (cachePrefs.enabled() && store.ledger().catalogLoaded) {
+            if (store.ledger().catalogLoaded) {
               patchState(store, (state) => ({
                 ledger: {
                   ...state.ledger,
-                  catalog: updateCachedEntityById(state.ledger.catalog, id, mergeEntry),
+                  catalog: sortLedgersByAccountingOrder(
+                    updateCachedEntityById(state.ledger.catalog, id, mergeEntry),
+                  ),
                   selectedItem:
                     state.ledger.selectedItem?.id === id
                       ? mergeEntry(state.ledger.selectedItem)
@@ -423,7 +437,9 @@ export const LedgerStore = signalStore(
                 },
               }));
               reapplyCachedView();
-              void catalogCacheStore.persistCatalog(CACHE_NAME, store.ledger().catalog);
+              if (cachePrefs.enabled()) {
+                void catalogCacheStore.persistCatalog(CACHE_NAME, store.ledger().catalog);
+              }
             } else {
               patchState(store, (state) => ({
                 ledger: {

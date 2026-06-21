@@ -25,6 +25,7 @@ import type {
   LedgerCategoryPayload,
 } from './ledger-category.model';
 import { UserSessionStore } from '../../../management/data/user-session/user-session.store';
+import { sortLedgerCategoriesByAccountingOrder } from './ledger-category.ordering';
 import { applyLedgerCategoryListQuery } from './ledger-category.query';
 import { LedgerCategoryService } from './ledger-category.service';
 import { initialLedgerCategoryState } from './ledger-category.state';
@@ -103,12 +104,13 @@ export const LedgerCategoryStore = signalStore(
       };
 
       const saveCatalog = (catalog: readonly LedgerCategory[]): void => {
+        const orderedCatalog = sortLedgerCategoriesByAccountingOrder(catalog);
         patchState(store, (state) => ({
           ledgerCategory: {
             ...state.ledgerCategory,
-            catalog,
+            catalog: orderedCatalog,
             catalogLoaded: true,
-            catalogTotalCount: catalog.length,
+            catalogTotalCount: orderedCatalog.length,
             error: null,
           },
         }));
@@ -136,15 +138,19 @@ export const LedgerCategoryStore = signalStore(
         });
 
       const cacheCatalogEntry = (item: LedgerCategory): void => {
-        if (!cachePrefs.enabled()) return;
+        if (!cachePrefs.enabled() && !store.ledgerCategory().catalogLoaded) return;
 
         patchState(store, (state) => ({
           ledgerCategory: {
             ...state.ledgerCategory,
-            catalog: upsertCachedEntity(state.ledgerCategory.catalog, item),
+            catalog: sortLedgerCategoriesByAccountingOrder(
+              upsertCachedEntity(state.ledgerCategory.catalog, item),
+            ),
           },
         }));
-        void catalogCacheStore.persistCatalog(CACHE_NAME, store.ledgerCategory().catalog);
+        if (cachePrefs.enabled()) {
+          void catalogCacheStore.persistCatalog(CACHE_NAME, store.ledgerCategory().catalog);
+        }
       };
 
       const selectItem = (item: LedgerCategory | null): void => {
@@ -172,6 +178,18 @@ export const LedgerCategoryStore = signalStore(
         return catalogCache.ensureLoaded();
       };
 
+      const loadFullCatalogFromApi = async (forceReload = false): Promise<boolean> => {
+        if (forceReload) clearCatalogState();
+        if (store.ledgerCategory().catalogLoaded) return true;
+
+        const catalog = await fetchFullCatalog();
+        if (cachePrefs.enabled()) {
+          await catalogCacheStore.persistCatalog(CACHE_NAME, catalog);
+        }
+        saveCatalog(catalog);
+        return true;
+      };
+
       const reapplyCachedView = (): void => applyViewQuery(activeViewQuery);
 
       return {
@@ -191,7 +209,9 @@ export const LedgerCategoryStore = signalStore(
         async ensureLedgerCategoryCatalogLoaded(forceReload = false): Promise<boolean> {
           setLoading();
           try {
-            const loaded = await ensureCatalogLoaded(forceReload);
+            const loaded = cachePrefs.enabled()
+              ? await ensureCatalogLoaded(forceReload)
+              : await loadFullCatalogFromApi(forceReload);
             patchState(store, (state) => ({
               ledgerCategory: { ...state.ledgerCategory, error: null, isLoading: false },
             }));
@@ -202,7 +222,19 @@ export const LedgerCategoryStore = signalStore(
           }
         },
         async refreshLedgerCategoryCatalog(): Promise<boolean> {
-          return ensureCatalogLoaded(true);
+          setLoading();
+          try {
+            const loaded = cachePrefs.enabled()
+              ? await ensureCatalogLoaded(true)
+              : await loadFullCatalogFromApi(true);
+            patchState(store, (state) => ({
+              ledgerCategory: { ...state.ledgerCategory, error: null, isLoading: false },
+            }));
+            return loaded;
+          } catch (error) {
+            setError(getApiErrorMessage(error, 'Failed to load ledger categories.'));
+            return false;
+          }
         },
         async createLedgerCategory(payload: LedgerCategoryPayload): Promise<LedgerCategory | null> {
           setLoading();
@@ -212,13 +244,17 @@ export const LedgerCategoryStore = signalStore(
               patchState(store, (state) => ({
                 ledgerCategory: {
                   ...state.ledgerCategory,
-                  catalog: upsertCachedEntity(state.ledgerCategory.catalog, item),
+                  catalog: sortLedgerCategoriesByAccountingOrder(
+                    upsertCachedEntity(state.ledgerCategory.catalog, item),
+                  ),
                   catalogTotalCount: state.ledgerCategory.catalogTotalCount + 1,
                   selectedItem: item,
                 },
               }));
               reapplyCachedView();
-              void catalogCacheStore.persistCatalog(CACHE_NAME, store.ledgerCategory().catalog);
+              if (cachePrefs.enabled()) {
+                void catalogCacheStore.persistCatalog(CACHE_NAME, store.ledgerCategory().catalog);
+              }
             } else {
               patchState(store, (state) => ({
                 ledgerCategory: {
@@ -254,7 +290,9 @@ export const LedgerCategoryStore = signalStore(
                 },
               }));
               reapplyCachedView();
-              void catalogCacheStore.persistCatalog(CACHE_NAME, store.ledgerCategory().catalog);
+              if (cachePrefs.enabled()) {
+                void catalogCacheStore.persistCatalog(CACHE_NAME, store.ledgerCategory().catalog);
+              }
             } else {
               patchState(store, (state) => ({
                 ledgerCategory: {
@@ -303,7 +341,9 @@ export const LedgerCategoryStore = signalStore(
         async loadLedgerCategories(query?: LedgerCategoryListQuery): Promise<void> {
           setLoading();
           try {
-            const cacheReady = await ensureCatalogLoaded();
+            const cacheReady = cachePrefs.enabled()
+              ? await ensureCatalogLoaded()
+              : await loadFullCatalogFromApi();
             if (cacheReady) {
               applyViewQuery(query);
               return;
@@ -322,7 +362,9 @@ export const LedgerCategoryStore = signalStore(
         async refreshLedgerCategories(query?: LedgerCategoryListQuery): Promise<void> {
           setLoading();
           try {
-            const cacheReady = await ensureCatalogLoaded(true);
+            const cacheReady = cachePrefs.enabled()
+              ? await ensureCatalogLoaded(true)
+              : await loadFullCatalogFromApi(true);
             if (cacheReady) {
               applyViewQuery(query);
               return;
@@ -342,7 +384,9 @@ export const LedgerCategoryStore = signalStore(
               patchState(store, (state) => ({
                 ledgerCategory: {
                   ...state.ledgerCategory,
-                  catalog: updateCachedEntityById(state.ledgerCategory.catalog, id, mergeEntry),
+                  catalog: sortLedgerCategoriesByAccountingOrder(
+                    updateCachedEntityById(state.ledgerCategory.catalog, id, mergeEntry),
+                  ),
                   selectedItem:
                     state.ledgerCategory.selectedItem?.id === id
                       ? mergeEntry(state.ledgerCategory.selectedItem)
@@ -350,7 +394,9 @@ export const LedgerCategoryStore = signalStore(
                 },
               }));
               reapplyCachedView();
-              void catalogCacheStore.persistCatalog(CACHE_NAME, store.ledgerCategory().catalog);
+              if (cachePrefs.enabled()) {
+                void catalogCacheStore.persistCatalog(CACHE_NAME, store.ledgerCategory().catalog);
+              }
             } else {
               patchState(store, (state) => ({
                 ledgerCategory: {

@@ -21,7 +21,11 @@ import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { LedgerStore } from '../../../data/ledger';
 import type { Ledger } from '../../../data/ledger';
-import { LedgerCategoryStore } from '../../../data/ledger-category';
+import {
+  LedgerCategoryStore,
+  sortLedgerCategoriesByAccountingOrder,
+  sortLedgersByAccountingOrder,
+} from '../../../data/ledger-category';
 import type { LedgerCategory } from '../../../data/ledger-category';
 
 type LedgerTreeRow = {
@@ -89,8 +93,8 @@ export class TreeViewLedgerComponent implements OnInit {
   );
 
   protected readonly treeData = computed<readonly LedgerTreeRow[]>(() => {
-    const categories = this.ledgerCategoryStore.catalog();
-    const ledgers = this.ledgerStore.catalog();
+    const categories = sortLedgerCategoriesByAccountingOrder(this.ledgerCategoryStore.catalog());
+    const ledgers = sortLedgersByAccountingOrder(this.ledgerStore.catalog(), categories);
     const categoryNodes = new Map<string, LedgerTreeRow>();
     const categoriesById = new Map<string, LedgerCategory>();
     const rootRows: LedgerTreeRow[] = [];
@@ -119,7 +123,7 @@ export class TreeViewLedgerComponent implements OnInit {
     for (const ledger of ledgers) {
       if (!ledger.id) continue;
       const categoryId = ledger.categoryid ?? ledger.category?.id ?? null;
-      const category = categoryId ? categoriesById.get(categoryId) ?? ledger.category : undefined;
+      const category = categoryId ? (categoriesById.get(categoryId) ?? ledger.category) : undefined;
       const categoryNode = category?.id ? categoryNodes.get(category.id) : null;
       const row = this.createLedgerRow(ledger);
 
@@ -187,8 +191,7 @@ export class TreeViewLedgerComponent implements OnInit {
         {
           key: 'openingdr',
           label: 'Debit',
-          accessor: (row) =>
-            this.shouldHideBranchOpening(row) ? '' : formatAmount(row.openingdr),
+          accessor: (row) => (this.shouldHideBranchOpening(row) ? '' : formatAmount(row.openingdr)),
           align: 'end',
           width: '10rem',
           cellClass: amountCellClass,
@@ -196,8 +199,7 @@ export class TreeViewLedgerComponent implements OnInit {
         {
           key: 'openingcr',
           label: 'Credit',
-          accessor: (row) =>
-            this.shouldHideBranchOpening(row) ? '' : formatAmount(row.openingcr),
+          accessor: (row) => (this.shouldHideBranchOpening(row) ? '' : formatAmount(row.openingcr)),
           align: 'end',
           width: '10rem',
           cellClass: amountCellClass,

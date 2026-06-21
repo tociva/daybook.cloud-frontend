@@ -20,7 +20,13 @@ export type CachedCrudQueryResult<TEntity> = Readonly<{
   items: readonly TEntity[];
 }>;
 
+export type CachedCrudSort = Readonly<{
+  direction: 'ASC' | 'DESC';
+  field: string;
+}>;
+
 export type CachedCrudQueryOptions<TEntity> = Readonly<{
+  compareRows?: (left: TEntity, right: TEntity, sort: CachedCrudSort | null) => number;
   defaultLimit?: number;
   readFieldValue?: (entity: TEntity, field: string) => unknown;
   readSortValue?: (entity: TEntity, field: string) => unknown;
@@ -336,15 +342,18 @@ function sortCachedCrudRows<TEntity>(
   order: readonly string[] | undefined,
   options: CachedCrudQueryOptions<TEntity>,
 ): TEntity[] {
-  const sort = order?.[0];
-  if (!sort) return rows;
+  const sort = parseCachedCrudSort(order?.[0]);
+  if (!sort && !options.compareRows) return rows;
 
-  const [field, rawDirection] = sort.split(/\s+/);
-  const direction = rawDirection?.toUpperCase() === 'DESC' ? -1 : 1;
+  const direction = sort?.direction === 'DESC' ? -1 : 1;
 
   return [...rows].sort((left, right) => {
-    const a = readCachedCrudSortValue(left, field, options);
-    const b = readCachedCrudSortValue(right, field, options);
+    const customComparison = options.compareRows?.(left, right, sort ?? null) ?? 0;
+    if (customComparison !== 0) return customComparison;
+    if (!sort) return 0;
+
+    const a = readCachedCrudSortValue(left, sort.field, options);
+    const b = readCachedCrudSortValue(right, sort.field, options);
 
     if (typeof a === 'number' && typeof b === 'number') {
       return (a - b) * direction;
@@ -364,4 +373,16 @@ function readCachedCrudSortValue<TEntity>(
   return options.readSortValue
     ? options.readSortValue(entity, field)
     : readCachedCrudFieldValue(entity, field, options);
+}
+
+function parseCachedCrudSort(sort: string | undefined): CachedCrudSort | null {
+  if (!sort) return null;
+
+  const [field, rawDirection] = sort.split(/\s+/);
+  if (!field) return null;
+
+  return {
+    direction: rawDirection?.toUpperCase() === 'DESC' ? 'DESC' : 'ASC',
+    field,
+  };
 }

@@ -16,10 +16,7 @@ import {
   TngTreeTable,
   TngTreeTableCellTpl,
 } from '@tailng-ui/components';
-import type {
-  TngDateRangePickerSelectionInput,
-  TngTreeTableColumn,
-} from '@tailng-ui/components';
+import type { TngDateRangePickerSelectionInput, TngTreeTableColumn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import {
@@ -33,9 +30,16 @@ import { TrialBalanceService } from '../../../data/trial-balance/trial-balance.s
 import { hasAccountingReportPermission } from '../../../shared/accounting-report-permissions';
 import { LedgerStore } from '../../../data/ledger';
 import type { Ledger } from '../../../data/ledger';
-import { LedgerCategoryStore } from '../../../data/ledger-category';
+import {
+  LedgerCategoryStore,
+  sortLedgerCategoriesByAccountingOrder,
+  sortLedgersByAccountingOrder,
+} from '../../../data/ledger-category';
 import type { LedgerCategory } from '../../../data/ledger-category';
-import type { TrialBalanceItem, TrialBalanceListQuery } from '../../../data/trial-balance/trial-balance.model';
+import type {
+  TrialBalanceItem,
+  TrialBalanceListQuery,
+} from '../../../data/trial-balance/trial-balance.model';
 
 type TrialBalanceAmountKey =
   | 'openingDebit'
@@ -191,8 +195,8 @@ export class TrialBalanceComponent implements OnInit {
   });
 
   protected readonly trialBalanceTreeData = computed<readonly TrialBalanceTreeRow[]>(() => {
-    const categories = this.ledgerCategoryStore.catalog();
-    const ledgers = this.ledgerStore.catalog();
+    const categories = sortLedgerCategoriesByAccountingOrder(this.ledgerCategoryStore.catalog());
+    const ledgers = sortLedgersByAccountingOrder(this.ledgerStore.catalog(), categories);
     const balances = this.trialBalanceByLedgerId();
     const categoryNodes = new Map<string, TrialBalanceTreeRow>();
     const rootRows: TrialBalanceTreeRow[] = [];
@@ -384,10 +388,7 @@ export class TrialBalanceComponent implements OnInit {
   protected onRefresh(): void {
     const params = this.queryParams();
     void this.loadReferenceData();
-    void this.loadTrialBalance(
-      params.get('start') ?? undefined,
-      params.get('end') ?? undefined,
-    );
+    void this.loadTrialBalance(params.get('start') ?? undefined, params.get('end') ?? undefined);
   }
 
   protected readonly getTreeRowKey = (row: TrialBalanceTreeRow): string => row.key;
@@ -424,15 +425,12 @@ export class TrialBalanceComponent implements OnInit {
     if (!row.ledgercategoryid || !this.canOpenLedgerCategoryReport()) return;
 
     const params = this.queryParams();
-    void this.router.navigate(
-      ['/app/accounting/reports/ledger-category', row.ledgercategoryid],
-      {
-        queryParams: {
-          start: params.get('start'),
-          end: params.get('end'),
-        },
+    void this.router.navigate(['/app/accounting/reports/ledger-category', row.ledgercategoryid], {
+      queryParams: {
+        start: params.get('start'),
+        end: params.get('end'),
       },
-    );
+    });
   }
 
   private amountColumn(

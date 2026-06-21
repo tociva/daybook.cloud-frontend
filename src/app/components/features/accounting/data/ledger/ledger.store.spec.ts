@@ -60,6 +60,8 @@ const ledgers: readonly Ledger[] = [
   },
 ];
 
+const orderedLedgers: readonly Ledger[] = [ledgers[1], ledgers[0], ledgers[2]];
+
 function sessionForOrganization(id: string): UserSession {
   return {
     name: 'Test User',
@@ -137,7 +139,7 @@ describe('LedgerStore cache', () => {
       includes: ['category'],
     });
     expect(store.catalogLoaded()).toBe(true);
-    expect(store.catalog()).toEqual(ledgers);
+    expect(store.catalog()).toEqual(orderedLedgers);
     expect(store.count()).toBe(2);
     expect(store.items().map((ledger) => ledger.id)).toEqual(['petty-cash']);
 
@@ -169,7 +171,7 @@ describe('LedgerStore cache', () => {
     await Promise.all([first, second]);
 
     expect(store.catalogLoaded()).toBe(true);
-    expect(store.catalog()).toEqual(ledgers);
+    expect(store.catalog()).toEqual(orderedLedgers);
   });
 
   it('reloads the full catalog on refresh', async () => {
@@ -183,25 +185,27 @@ describe('LedgerStore cache', () => {
 
     expect(service.count).toHaveBeenCalledTimes(2);
     expect(service.list).toHaveBeenCalledTimes(2);
-    expect(store.catalog()).toEqual(ledgers.slice(0, 2));
+    expect(store.catalog()).toEqual([ledgers[1], ledgers[0]]);
     expect(store.catalogTotalCount()).toBe(2);
   });
 
-  it('uses backend list/count directly when cache is disabled', async () => {
+  it('uses a full in-memory catalog for list queries when cache is disabled', async () => {
     const store = configure({ cacheEnabled: false });
     const query = { limit: 1, offset: 0, where: { name: { ilike: '%cash%' } } };
-    service.count.mockResolvedValueOnce(2);
-    service.list.mockResolvedValueOnce(ledgers.slice(0, 1));
 
     await store.loadLedgers(query);
 
     expect(service.count).toHaveBeenCalledTimes(1);
-    expect(service.count).toHaveBeenCalledWith(query);
+    expect(service.count).toHaveBeenCalledWith({});
     expect(service.list).toHaveBeenCalledTimes(1);
-    expect(service.list).toHaveBeenCalledWith(query);
-    expect(store.catalogLoaded()).toBe(false);
-    expect(store.catalog()).toEqual([]);
-    expect(store.items()).toEqual(ledgers.slice(0, 1));
+    expect(service.list).toHaveBeenCalledWith({
+      limit: ledgers.length,
+      offset: 0,
+      includes: ['category'],
+    });
+    expect(store.catalogLoaded()).toBe(true);
+    expect(store.catalog()).toEqual(orderedLedgers);
+    expect(store.items()).toEqual([ledgers[0]]);
     expect(store.count()).toBe(2);
   });
 
@@ -218,7 +222,7 @@ describe('LedgerStore cache', () => {
       includes: ['category'],
     });
     expect(store.catalogLoaded()).toBe(true);
-    expect(store.catalog()).toEqual(ledgers);
+    expect(store.catalog()).toEqual(orderedLedgers);
     expect(store.items()).toEqual([]);
   });
 
@@ -261,8 +265,8 @@ describe('LedgerStore cache', () => {
     await settle();
 
     expect(store.catalogLoaded()).toBe(true);
-    expect(store.catalog()).toEqual(ledgers);
-    expect(store.items().map((ledger) => ledger.id)).toEqual(['cash']);
+    expect(store.catalog()).toEqual(orderedLedgers);
+    expect(store.items().map((ledger) => ledger.id)).toEqual(['bank']);
   });
 
   it('updates cached catalog and reapplies the active query after mutations', async () => {

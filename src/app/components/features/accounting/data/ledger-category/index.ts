@@ -18,6 +18,20 @@ export {
   normalizeTypeAfterParentChange,
   validateLedgerCategoryClassification,
 } from './ledger-category.classification';
+export {
+  LEDGER_CATEGORY_ACCOUNTING_ORDER,
+  buildLedgerCategoryLookup,
+  compareAccountingText,
+  compareLedgerAccountingRanks,
+  compareLedgerCategoryAccountingRanks,
+  compareLedgerCategoriesByAccountingOrder,
+  compareLedgerSourcesByAccountingOrder,
+  getLedgerAccountingRank,
+  getLedgerCategoryAccountingBucket,
+  getLedgerCategoryAccountingRank,
+  sortLedgerCategoriesByAccountingOrder,
+  sortLedgersByAccountingOrder,
+} from './ledger-category.ordering';
 export type {
   LedgerCategory,
   LedgerCategoryCapitalChildType,
@@ -29,3 +43,8 @@ export type {
   LedgerCategoryRootType,
   LedgerCategoryType,
 } from './ledger-category.model';
+export type {
+  LedgerAccountingSource,
+  LedgerCategoryAccountingBucket,
+  LedgerCategoryLookup,
+} from './ledger-category.ordering';
