@@ -74,6 +74,9 @@ const report = (
   data: rows,
 });
 
+const localDate = (year: number, month: number, day: number): Date =>
+  new Date(year, month - 1, day);
+
 async function settle(): Promise<void> {
   for (let i = 0; i < 20; i += 1) {
     TestBed.flushEffects();
@@ -227,6 +230,85 @@ describe('LedgerCategoryReportFacade', () => {
       },
       queryParamsHandling: 'merge',
       replaceUrl: true,
+    });
+  });
+
+  it('syncs draft filters from the current route when the filter popover opens', async () => {
+    const facade = configure({
+      ledgercategoryid: 'bank',
+      query: {
+        start: '2026-05-01',
+        end: '2026-05-31',
+      },
+    });
+    await settle();
+
+    facade.openFilterPopover();
+
+    expect(facade.draftCategoryId()).toBe('bank');
+    expect(facade.draftPickerValue()).toEqual({
+      start: localDate(2026, 5, 1),
+      end: localDate(2026, 5, 31),
+    });
+  });
+
+  it('does not navigate while draft filter values are changing', async () => {
+    const facade = configure({ ledgercategoryid: 'bank' });
+    await settle();
+    router.navigate.mockClear();
+
+    facade.openFilterPopover();
+    facade.onDraftCategoryChange('cash');
+    facade.onDraftDateRangeChange({
+      start: localDate(2026, 6, 1),
+      end: localDate(2026, 6, 30),
+    });
+
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  it('applies staged filters with one navigation to the selected category and period', async () => {
+    const facade = configure({ ledgercategoryid: 'bank' });
+    await settle();
+    router.navigate.mockClear();
+
+    facade.openFilterPopover();
+    facade.onDraftCategoryChange('cash');
+    facade.onDraftDateRangeChange({
+      start: localDate(2026, 6, 1),
+      end: localDate(2026, 6, 30),
+    });
+    facade.applyFilters();
+
+    expect(router.navigate).toHaveBeenCalledTimes(1);
+    expect(router.navigate).toHaveBeenCalledWith(
+      ['/app/accounting/reports/ledger-category', 'cash'],
+      {
+        queryParams: {
+          start: '2026-06-01',
+          end: '2026-06-30',
+        },
+      },
+    );
+  });
+
+  it('clears draft filters back to no category and the fiscal-year period', async () => {
+    const facade = configure({
+      ledgercategoryid: 'bank',
+      query: {
+        start: '2026-05-01',
+        end: '2026-05-31',
+      },
+    });
+    await settle();
+
+    facade.openFilterPopover();
+    facade.clearFilters();
+
+    expect(facade.draftCategoryId()).toBeNull();
+    expect(facade.draftPickerValue()).toEqual({
+      start: localDate(2026, 4, 1),
+      end: localDate(2027, 3, 31),
     });
   });
 

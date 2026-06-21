@@ -29,6 +29,10 @@ const ledgerCategoryReportPath = (ledgercategoryid: string): readonly string[] =
   ledgercategoryid,
 ];
 
+const ledgerCategoryReportPathRoot = (): readonly string[] => [
+  '/app/accounting/reports/ledger-category',
+];
+
 const ledgerReportPath = (ledgerid: string): readonly string[] => [
   '/app/accounting/reports/ledger',
   ledgerid,
@@ -77,7 +81,8 @@ export class LedgerCategoryReportFacade {
   readonly selectedCategoryId = signal<string | null>(null);
   readonly categoryQuery = signal('');
   readonly pickerValue = signal<TngDateRangePickerSelectionInput<Date>>(null);
-  readonly pendingPickerValue = signal<TngDateRangePickerSelectionInput<Date>>(null);
+  readonly draftCategoryId = signal<string | null>(null);
+  readonly draftPickerValue = signal<TngDateRangePickerSelectionInput<Date>>(null);
 
   private readonly selectedCategoryMeta = signal<LedgerCategoryReportCategory | null>(null);
 
@@ -96,6 +101,12 @@ export class LedgerCategoryReportFacade {
   readonly showSelectCategoryNotice = computed(
     () => !this.hasCategorySelected() && !this.isLoading() && !this.hasError(),
   );
+  readonly activeFilterCount = computed<number | null>(() => {
+    let count = 0;
+    if (this.selectedCategoryId()) count += 1;
+    if (this.hasDateRange(this.pickerValue())) count += 1;
+    return count || null;
+  });
 
   readonly autocompleteCategories = computed(() => {
     const query = this.categoryQuery().trim().toLowerCase();
@@ -166,40 +177,43 @@ export class LedgerCategoryReportFacade {
     });
   }
 
-  onDateRangeChange(value: TngDateRangePickerSelectionInput<Date>): void {
-    this.pendingPickerValue.set(value);
+  openFilterPopover(): void {
+    this.draftCategoryId.set(this.routeParams().get('ledgercategoryid'));
+    this.draftPickerValue.set(this.currentPickerValueFromQuery());
   }
 
-  onPickerClosed(): void {
-    const queryParams = buildReportDateRouterQueryFromPicker(
-      this.pendingPickerValue(),
-      (value) => this.fiscalYearDateRange.toIsoDate(value),
-    );
-    if (!queryParams) return;
+  onDraftDateRangeChange(value: TngDateRangePickerSelectionInput<Date>): void {
+    this.draftPickerValue.set(value);
+  }
 
-    void this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams,
-      queryParamsHandling: 'merge',
-    });
+  onDraftCategoryChange(ledgercategoryid: string | null): void {
+    this.draftCategoryId.set(ledgercategoryid);
+  }
+
+  applyFilters(): void {
+    const queryParams =
+      buildReportDateRouterQueryFromPicker(this.draftPickerValue(), (value) =>
+        this.fiscalYearDateRange.toIsoDate(value),
+      ) ?? this.defaultReportDateRouterQuery();
+    const ledgercategoryid = this.draftCategoryId();
+
+    void this.router.navigate(
+      ledgercategoryid
+        ? ledgerCategoryReportPath(ledgercategoryid)
+        : ledgerCategoryReportPathRoot(),
+      {
+        queryParams,
+      },
+    );
+  }
+
+  clearFilters(): void {
+    this.draftCategoryId.set(null);
+    this.draftPickerValue.set(this.fiscalYearPickerValue());
   }
 
   onCategoryQueryChange(query: string): void {
     this.categoryQuery.set(query);
-  }
-
-  onCategoryChange(ledgercategoryid: string | null): void {
-    if (!ledgercategoryid || ledgercategoryid === this.routeParams().get('ledgercategoryid')) {
-      return;
-    }
-
-    const params = this.queryParams();
-    void this.router.navigate(ledgerCategoryReportPath(ledgercategoryid), {
-      queryParams: {
-        start: params.get('start'),
-        end: params.get('end'),
-      },
-    });
   }
 
   onRefresh(): void {
@@ -257,6 +271,45 @@ export class LedgerCategoryReportFacade {
     });
   }
 
+  private currentPickerValueFromQuery(): TngDateRangePickerSelectionInput<Date> {
+    const params = this.queryParams();
+    const range = this.fiscalYearDateRange.range();
+    const start = params.get('start') ?? range?.startdate ?? null;
+    const end = params.get('end') ?? range?.enddate ?? null;
+
+    return {
+      start: parseIsoDateToDate(start),
+      end: parseIsoDateToDate(end),
+    };
+  }
+
+  private fiscalYearPickerValue(): TngDateRangePickerSelectionInput<Date> {
+    const range = this.fiscalYearDateRange.range();
+    if (!range) return null;
+
+    return {
+      start: parseIsoDateToDate(range.startdate),
+      end: parseIsoDateToDate(range.enddate),
+    };
+  }
+
+  private defaultReportDateRouterQuery(): { end: string | null; start: string | null } {
+    const range = this.fiscalYearDateRange.range();
+    return {
+      start: range?.startdate ?? null,
+      end: range?.enddate ?? null,
+    };
+  }
+
+  private hasDateRange(value: TngDateRangePickerSelectionInput<Date>): boolean {
+    return !!(
+      value &&
+      typeof value === 'object' &&
+      !(value instanceof Date) &&
+      (value.start || value.end)
+    );
+  }
+
   private clearReport(): void {
     this.error.set(null);
     this.clearReportData();
@@ -272,29 +325,29 @@ export class LedgerCategoryReportFacade {
   private mergeSelectedCategoryOption(
     options: readonly LedgerCategory[],
   ): readonly LedgerCategory[] {
-    const ledgercategoryid = this.selectedCategoryId();
-    if (!ledgercategoryid) return options;
-
     const map = new Map<string, LedgerCategory>();
     for (const category of options) {
       if (category.id) map.set(category.id, category);
     }
-    if (map.has(ledgercategoryid)) return [...map.values()];
 
-    const fromCatalog = this.ledgerCategoryStore
-      .catalog()
-      .find((category) => category.id === ledgercategoryid);
-    if (fromCatalog) {
-      map.set(ledgercategoryid, fromCatalog);
-      return [...map.values()];
-    }
+    for (const ledgercategoryid of [this.selectedCategoryId(), this.draftCategoryId()]) {
+      if (!ledgercategoryid || map.has(ledgercategoryid)) continue;
 
-    const meta = this.selectedCategoryMeta();
-    if (meta?.ledgercategoryid === ledgercategoryid && meta.ledgerCategoryName) {
-      map.set(ledgercategoryid, {
-        id: meta.ledgercategoryid,
-        name: meta.ledgerCategoryName,
-      });
+      const fromCatalog = this.ledgerCategoryStore
+        .catalog()
+        .find((category) => category.id === ledgercategoryid);
+      if (fromCatalog) {
+        map.set(ledgercategoryid, fromCatalog);
+        continue;
+      }
+
+      const meta = this.selectedCategoryMeta();
+      if (meta?.ledgercategoryid === ledgercategoryid && meta.ledgerCategoryName) {
+        map.set(ledgercategoryid, {
+          id: meta.ledgercategoryid,
+          name: meta.ledgerCategoryName,
+        });
+      }
     }
 
     return [...map.values()];
