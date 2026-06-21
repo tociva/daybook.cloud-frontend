@@ -18,7 +18,10 @@ import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload'
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
-import { LedgerCategoryStore } from '../../../data/ledger-category';
+import {
+  LEDGER_CATEGORY_FILTER_TYPES,
+  LedgerCategoryStore,
+} from '../../../data/ledger-category';
 import type { LedgerCategory } from '../../../data/ledger-category';
 
 @Component({
@@ -61,13 +64,10 @@ export class ListLedgerCategoryComponent {
     {
       id: 'props.type',
       label: 'Type',
-      options: [
-        { label: 'Asset', value: 'Asset' },
-        { label: 'Liability', value: 'Liability' },
-        { label: 'Equity', value: 'Equity' },
-        { label: 'Income', value: 'Income' },
-        { label: 'Expense', value: 'Expense' },
-      ],
+      options: LEDGER_CATEGORY_FILTER_TYPES.map((type) => ({
+        label: type === 'Equity' ? 'Equity (legacy)' : type,
+        value: type,
+      })),
       placeholder: 'Any type',
       type: 'enum',
     },

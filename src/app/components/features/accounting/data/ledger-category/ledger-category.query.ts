@@ -23,6 +23,9 @@ function readFieldValue(category: LedgerCategory, field: string): unknown {
   switch (field) {
     case 'parent':
       return category.parent?.name ?? '';
+    case 'props.type':
+    case 'type':
+      return category.props?.type ?? '';
     default:
       return (category as Record<string, unknown>)[field] ?? '';
   }

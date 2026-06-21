@@ -19,6 +19,10 @@ import { DateManagementService } from '../../../../../../core/date/date-manageme
 import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
 import { BalanceSheetService } from '../../../data/balance-sheet/balance-sheet.service';
 import type { BalanceSheetItem, BalanceSheetReport, BalanceSheetQuery } from '../../../data/balance-sheet/balance-sheet.model';
+import {
+  getBalanceSheetCapitalRows,
+  shouldShowLegacyCurrentYearLoss,
+} from './balance-sheet.view-model';
 
 const amountFormatter = new Intl.NumberFormat('en-IN', {
   minimumFractionDigits: 2,
@@ -34,10 +38,12 @@ const formatAmount = (value: number | null | undefined): string =>
 const emptyData = (): BalanceSheetReport['data'] => ({
   assets: [],
   liabilities: [],
+  capital: [],
   adjustments: { currentYearProfit: 0, currentYearLoss: 0 },
   totals: {
     assets: 0,
     liabilities: 0,
+    capital: 0,
     liabilitiesAndEquity: 0,
     currentYearProfit: 0,
     currentYearLoss: 0,
@@ -82,9 +88,9 @@ export class BalanceSheetComponent {
   protected readonly data = computed(() => this.reportData());
   protected readonly totals = computed(() => this.reportData().totals);
   protected readonly adjustments = computed(() => this.reportData().adjustments);
-
-  protected readonly isCurrentYearProfit = computed(
-    () => this.adjustments().currentYearProfit > 0,
+  protected readonly capitalRows = computed(() => getBalanceSheetCapitalRows(this.reportData()));
+  protected readonly shouldShowLegacyCurrentYearLoss = computed(() =>
+    shouldShowLegacyCurrentYearLoss(this.reportData()),
   );
 
   protected readonly formatAmount = formatAmount;
@@ -133,6 +139,10 @@ export class BalanceSheetComponent {
 
   protected itemAmount(item: BalanceSheetItem): string {
     return formatAmount(item.amount);
+  }
+
+  protected trackItem(index: number, item: BalanceSheetItem): string {
+    return item.ledgerid || `${item.name}:${item.category}:${index}`;
   }
 
   private async loadReport(end?: string): Promise<void> {

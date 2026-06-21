@@ -280,6 +280,12 @@ const BULK_UPLOAD_PREVIEW_CONFIGS: Record<string, BulkUploadPreviewConfig> = {
         description: 'Root level ledger category for Liabilities',
       },
       {
+        name: 'Capital / Equity',
+        parent: '',
+        type: 'Capital',
+        description: 'Root level ledger category for Capital / Equity',
+      },
+      {
         name: 'Income',
         parent: '',
         type: 'Income',
@@ -314,6 +320,30 @@ const BULK_UPLOAD_PREVIEW_CONFIGS: Record<string, BulkUploadPreviewConfig> = {
         parent: 'Liabilities',
         type: 'Long-Term Liability',
         description: 'Groups long-term liability ledger categories under Liabilities',
+      },
+      {
+        name: 'Owner Capital',
+        parent: 'Capital / Equity',
+        type: 'Owner Capital',
+        description: 'Owner contributions under Capital / Equity',
+      },
+      {
+        name: 'Current Year Profit',
+        parent: 'Capital / Equity',
+        type: 'Current Year Profit',
+        description: 'Computed current-year profit or loss under Capital / Equity',
+      },
+      {
+        name: 'Drawings',
+        parent: 'Capital / Equity',
+        type: 'Drawings',
+        description: 'Owner withdrawals under Capital / Equity',
+      },
+      {
+        name: 'Reserves and Surplus',
+        parent: 'Capital / Equity',
+        type: 'Reserves and Surplus',
+        description: 'Retained reserves under Capital / Equity',
       },
       {
         name: 'Sundry Debtors',

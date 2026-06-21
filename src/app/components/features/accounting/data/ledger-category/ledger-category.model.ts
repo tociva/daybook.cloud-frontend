@@ -1,13 +1,47 @@
 import type { Lb4ListQuery } from '../../../../../shared/crud';
 
-export type LedgerCategoryType = 'Asset' | 'Liability' | 'Equity' | 'Income' | 'Expense';
+export type LedgerCategoryRootType = 'Asset' | 'Liability' | 'Capital' | 'Income' | 'Expense';
 
-export const LEDGER_CATEGORY_TYPES: readonly LedgerCategoryType[] = [
+export type LedgerCategoryCapitalChildType =
+  | 'Owner Capital'
+  | 'Current Year Profit'
+  | 'Drawings'
+  | 'Reserves and Surplus';
+
+export type LedgerCategoryLegacyType = 'Equity';
+
+export type LedgerCategoryKnownType =
+  | LedgerCategoryRootType
+  | LedgerCategoryCapitalChildType
+  | LedgerCategoryLegacyType;
+
+export type LedgerCategoryType = LedgerCategoryKnownType | (string & {});
+
+export const LEDGER_CATEGORY_ROOT_TYPES: readonly LedgerCategoryRootType[] = [
   'Asset',
   'Liability',
-  'Equity',
+  'Capital',
   'Income',
   'Expense',
+];
+
+export const LEDGER_CATEGORY_CAPITAL_CHILD_TYPES: readonly LedgerCategoryCapitalChildType[] = [
+  'Owner Capital',
+  'Current Year Profit',
+  'Drawings',
+  'Reserves and Surplus',
+];
+
+export const LEDGER_CATEGORY_LEGACY_TYPES: readonly LedgerCategoryLegacyType[] = ['Equity'];
+
+export const LEDGER_CATEGORY_TYPES: readonly LedgerCategoryKnownType[] = [
+  ...LEDGER_CATEGORY_ROOT_TYPES,
+  ...LEDGER_CATEGORY_CAPITAL_CHILD_TYPES,
+];
+
+export const LEDGER_CATEGORY_FILTER_TYPES: readonly LedgerCategoryKnownType[] = [
+  ...LEDGER_CATEGORY_TYPES,
+  ...LEDGER_CATEGORY_LEGACY_TYPES,
 ];
 
 export type LedgerCategoryProps = Readonly<{
