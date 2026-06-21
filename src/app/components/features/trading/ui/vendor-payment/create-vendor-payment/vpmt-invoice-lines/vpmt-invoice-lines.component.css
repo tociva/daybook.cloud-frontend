@@ -291,3 +291,7 @@
 .si-li-summary-negative td {
   color: var(--tng-semantic-accent-danger);
 }
+
+.si-li-summary-excess td {
+  color: var(--tng-semantic-accent-warning);
+}

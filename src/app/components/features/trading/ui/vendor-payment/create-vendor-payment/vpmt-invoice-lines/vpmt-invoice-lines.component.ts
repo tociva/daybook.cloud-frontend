@@ -19,8 +19,10 @@ import {
   formatMoneyAmount,
   invoiceBalanceSummary,
   invoiceTotal,
+  isExcessPayment,
   outstandingBalance,
   paymentRemaining,
+  paymentRemainingSummaryLabel,
 } from '../vendor-payment-invoice-allocation.util';
 
 // ── Row model (exported so parent can type invoiceRows signal) ────────────────
@@ -58,6 +60,7 @@ export class VpmtInvoiceLinesComponent {
   readonly vendorId = input('');
   readonly currencycode = input('INR');
   readonly paymentAmount = input(0);
+  readonly currentVendorPaymentId = input<string | null>(null);
   /** Set to true in edit mode so the effect does not auto-load and overwrite
    *  the rows that were patched in by the parent from the payment data. */
   readonly editMode = input(false);
@@ -82,6 +85,18 @@ export class VpmtInvoiceLinesComponent {
 
   protected readonly paymentRemainingIsNegative = computed(
     () => paymentRemaining(this.paymentAmount(), this.rows()) < 0,
+  );
+
+  protected readonly paymentRemainingSummaryLabel = computed(() =>
+    paymentRemainingSummaryLabel(this.paymentAmount(), this.rows(), {
+      currentVendorPaymentId: this.currentVendorPaymentId(),
+    }),
+  );
+
+  protected readonly paymentIsExcess = computed(() =>
+    isExcessPayment(this.paymentAmount(), this.rows(), {
+      currentVendorPaymentId: this.currentVendorPaymentId(),
+    }),
   );
 
   /** Exposed so the parent stepper can track completion. */

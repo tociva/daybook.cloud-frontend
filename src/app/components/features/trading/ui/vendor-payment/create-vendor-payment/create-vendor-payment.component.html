@@ -169,6 +169,7 @@
         [vendorId]="vendorid()"
         [currencycode]="currencycode()"
         [paymentAmount]="amount() ? +amount() : 0"
+        [currentVendorPaymentId]="id()"
         [editMode]="mode() === 'edit' || prefillMode()"
         [rows]="invoiceRows()"
         (rowsChange)="invoiceRows.set($event)"

@@ -101,8 +101,9 @@
               <tr
                 class="si-li-summary-total-row"
                 [class.si-li-summary-negative]="paymentRemainingIsNegative()"
+                [class.si-li-summary-excess]="paymentIsExcess()"
               >
-                <td class="si-li-summary-label">Payment Remaining</td>
+                <td class="si-li-summary-label">{{ paymentRemainingSummaryLabel() }}</td>
                 <td class="si-li-summary-value">{{ currencycode() }} {{ paymentRemaining() }}</td>
               </tr>
             }

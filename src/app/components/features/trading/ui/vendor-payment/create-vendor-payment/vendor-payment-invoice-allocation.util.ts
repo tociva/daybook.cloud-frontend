@@ -61,6 +61,34 @@ export function isPaymentRemainingNegative(
   return paymentRemaining(paymentAmount, rows) < 0;
 }
 
+export function isExcessPayment(
+  paymentAmount: number,
+  rows: readonly VendorPaymentInvoiceAllocationRow[],
+  options: VendorPaymentInvoiceAllocationOptions = {},
+): boolean {
+  const remaining = paymentRemaining(paymentAmount, rows);
+  if (remaining <= EPSILON) return false;
+
+  const selectedRows = rows.filter((row) => row.invoice?.id);
+  if (!selectedRows.length) return false;
+
+  return selectedRows.every((row) => {
+    const allocation = Number(row.amount) || 0;
+    const available = outstandingBalance(row.invoice, options);
+    return Math.abs(allocation - available) <= EPSILON;
+  });
+}
+
+export function paymentRemainingSummaryLabel(
+  paymentAmount: number,
+  rows: readonly VendorPaymentInvoiceAllocationRow[],
+  options: VendorPaymentInvoiceAllocationOptions = {},
+): string {
+  if (isPaymentRemainingNegative(paymentAmount, rows)) return 'Payment Remaining';
+  if (isExcessPayment(paymentAmount, rows, options)) return 'Excess Paid';
+  return 'Payment Remaining';
+}
+
 export function formatMoneyAmount(amount: number): string {
   return amount.toFixed(2);
 }

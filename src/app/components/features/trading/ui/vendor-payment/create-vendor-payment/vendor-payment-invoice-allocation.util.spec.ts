@@ -3,9 +3,11 @@ import type { PurchaseInvoice } from '../../../data/purchase-invoice/purchase-in
 import {
   allocationTotal,
   invoiceBalanceSummary,
+  isExcessPayment,
   isPaymentRemainingNegative,
   outstandingBalance,
   paymentRemaining,
+  paymentRemainingSummaryLabel,
   validateVendorPaymentInvoiceAllocations,
 } from './vendor-payment-invoice-allocation.util';
 
@@ -52,6 +54,37 @@ describe('vendor payment invoice allocation helpers', () => {
     expect(allocationTotal(rows)).toBe(2000);
     expect(paymentRemaining(2500, rows)).toBe(500);
     expect(isPaymentRemainingNegative(1000, rows)).toBe(true);
+  });
+
+  it('detects excess payment when invoices are fully allocated', () => {
+    const rows = [{ invoice: invoice(), amount: 3000 }];
+
+    expect(paymentRemaining(10000, rows)).toBe(7000);
+    expect(isExcessPayment(10000, rows)).toBe(true);
+    expect(paymentRemainingSummaryLabel(10000, rows)).toBe('Excess Paid');
+  });
+
+  it('keeps payment remaining label when invoices still have unallocated balance', () => {
+    const rows = [{ invoice: invoice(), amount: 1500 }];
+
+    expect(paymentRemaining(10000, rows)).toBe(8500);
+    expect(isExcessPayment(10000, rows)).toBe(false);
+    expect(paymentRemainingSummaryLabel(10000, rows)).toBe('Payment Remaining');
+  });
+
+  it('uses editable outstanding balance when detecting excess payment in edit mode', () => {
+    const editableInvoice = invoice({
+      payments: [
+        { amount: 7000, vendorpaymentid: 'vpmt-old' },
+        { amount: 2000, vendorpaymentid: 'vpmt-current' },
+      ],
+    });
+    const rows = [{ invoice: editableInvoice, amount: 3000 }];
+
+    expect(isExcessPayment(10000, rows)).toBe(false);
+    expect(
+      isExcessPayment(10000, rows, { currentVendorPaymentId: 'vpmt-current' }),
+    ).toBe(true);
   });
 
   it('formats invoice option balance text with total and outstanding values', () => {
