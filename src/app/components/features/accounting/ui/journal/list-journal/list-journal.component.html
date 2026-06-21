@@ -103,7 +103,7 @@
           hoverMode="group"
           layout="fixed"
           [columns]="columns"
-          [items]="rows()"
+          [items]="displayRows()"
           [loading]="journalStore.isLoading()"
           [error]="hasError()"
           [rowClass]="rowClassFn()"
@@ -137,6 +137,28 @@
                 {{ getLedgerName(row.ledgerid) }}
               } @else {
                 —
+              }
+              @if (showMoreLink(row)) {
+                <button
+                  type="button"
+                  class="link-button journal-entry-toggle"
+                  [attr.aria-expanded]="false"
+                  [attr.aria-label]="'Show ' + hiddenEntryCount(row) + ' more entries'"
+                  (click)="expandJournal(row.journalGroupKey)"
+                >
+                  +{{ hiddenEntryCount(row) }} more
+                </button>
+              }
+              @if (showLessLink(row)) {
+                <button
+                  type="button"
+                  class="link-button journal-entry-toggle"
+                  [attr.aria-expanded]="true"
+                  aria-label="Show fewer entries"
+                  (click)="collapseJournal(row.journalGroupKey)"
+                >
+                  less
+                </button>
               }
             </span>
           </ng-template>

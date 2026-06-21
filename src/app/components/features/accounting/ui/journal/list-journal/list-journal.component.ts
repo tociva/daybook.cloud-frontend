@@ -68,6 +68,8 @@ type JournalTableRow = Readonly<{
   debit: number | null | undefined;
   description: string;
   entry: JournalEntry | null;
+  entryCount: number;
+  entryIndex: number;
   journal: Journal;
   journalGroupKey: string;
   ledgerid: string;
@@ -138,6 +140,7 @@ const JOURNAL_IMPORT_CONFIG: Record<JournalImportSource, JournalImportConfig> = 
 };
 
 const DEFAULT_JOURNAL_ORDER = ['date DESC'] as const;
+const COLLAPSED_ENTRY_LIMIT = 2;
 
 @Component({
   selector: 'app-list-journal',
@@ -256,6 +259,17 @@ export class ListJournalComponent {
   protected readonly rows = computed<readonly JournalTableRow[]>(() =>
     this.journalStore.items().flatMap((journal, index) => this.toJournalRows(journal, index)),
   );
+
+  private readonly expandedJournalGroups = signal<ReadonlySet<string>>(new Set());
+
+  protected readonly displayRows = computed<readonly JournalTableRow[]>(() => {
+    const expanded = this.expandedJournalGroups();
+    return this.rows().filter((row) => {
+      if (row.entryCount <= COLLAPSED_ENTRY_LIMIT) return true;
+      if (expanded.has(row.journalGroupKey)) return true;
+      return row.entryIndex < COLLAPSED_ENTRY_LIMIT;
+    });
+  });
 
   /** Maps each journalGroupKey to its 0-based group index across the current page. */
   private readonly journalGroupOrder = computed(() => {
@@ -466,17 +480,23 @@ export class ListJournalComponent {
           credit: null,
           debit: null,
           entry: null,
+          entryCount: 1,
+          entryIndex: 0,
           ledgerid: '',
           rowKey: `${groupKey}:empty`,
         },
       ];
     }
 
+    const entryCount = entries.length;
+
     return entries.map((entry, entryIndex) => ({
       ...common,
       credit: entry.credit,
       debit: entry.debit,
       entry,
+      entryCount,
+      entryIndex,
       ledgerid: entry.ledgerid,
       rowKey: entry.id ?? `${groupKey}:${entry.ledgerid}:${entry.order ?? entryIndex}`,
     }));
@@ -488,6 +508,38 @@ export class ListJournalComponent {
 
   protected getLedgerName(ledgerid: string): string {
     return this.ledgerNames().get(ledgerid) ?? ledgerid;
+  }
+
+  protected hiddenEntryCount(row: JournalTableRow): number {
+    return Math.max(row.entryCount - COLLAPSED_ENTRY_LIMIT, 0);
+  }
+
+  protected showMoreLink(row: JournalTableRow): boolean {
+    return (
+      row.entryCount > COLLAPSED_ENTRY_LIMIT &&
+      row.entryIndex === COLLAPSED_ENTRY_LIMIT - 1 &&
+      !this.expandedJournalGroups().has(row.journalGroupKey)
+    );
+  }
+
+  protected showLessLink(row: JournalTableRow): boolean {
+    return (
+      row.entryCount > COLLAPSED_ENTRY_LIMIT &&
+      row.entryIndex === row.entryCount - 1 &&
+      this.expandedJournalGroups().has(row.journalGroupKey)
+    );
+  }
+
+  protected expandJournal(groupKey: string): void {
+    this.expandedJournalGroups.update((current) => new Set([...current, groupKey]));
+  }
+
+  protected collapseJournal(groupKey: string): void {
+    this.expandedJournalGroups.update((current) => {
+      const next = new Set(current);
+      next.delete(groupKey);
+      return next;
+    });
   }
 
   protected getSourceTypeLabel(sourcetype: JournalSourceType | string | undefined): string {
