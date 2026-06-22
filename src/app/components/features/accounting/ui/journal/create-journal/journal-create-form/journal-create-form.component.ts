@@ -73,6 +73,10 @@ export class JournalCreateFormComponent {
     return this.draft.buildCloneSnapshot();
   }
 
+  rememberJournalDate(): void {
+    this.draft.rememberJournalDate();
+  }
+
   buildPayload(): JournalCreatePayload | null {
     this.draft.submitted.set(true);
 

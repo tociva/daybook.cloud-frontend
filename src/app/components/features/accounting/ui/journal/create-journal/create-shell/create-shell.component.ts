@@ -88,6 +88,7 @@ export class CreateShellComponent {
     if (!savedJournal?.id) return;
     if (!(await form.attachPendingDocuments(savedJournal.id, savedJournal))) return;
 
+    form.rememberJournalDate();
     void this.navigation.navigateBack();
   }
 }

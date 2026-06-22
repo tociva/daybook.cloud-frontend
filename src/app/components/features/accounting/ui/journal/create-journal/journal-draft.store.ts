@@ -1,5 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import dayjs from 'dayjs';
+import { UserSessionStore } from '../../../../management/data/user-session/user-session.store';
 import { FiscalYearDateRangeService } from '../../../../../../shared/fiscal-year-date-range-picker/fiscal-year-date-range.service';
 import { toIsoDate } from '../../../../../../core/date/dayjs-date.utils';
 import { DEFAULT_NODE_DATE_FORMAT } from '../../../../../../util/constants';
@@ -42,8 +43,11 @@ const newRow = newJournalLineRow;
 
 @Injectable()
 export class JournalDraftStore {
+  private static readonly LAST_DATE_KEY_PREFIX = 'daybook:journal:last-date';
+
   private readonly fiscalYearDateRange = inject(FiscalYearDateRangeService);
   private readonly ledgerStore = inject(LedgerStore);
+  private readonly userSession = inject(UserSessionStore);
   private readonly ledgerSearchVersions = new Map<string, number>();
 
   readonly submitted = signal(false);
@@ -232,6 +236,30 @@ export class JournalDraftStore {
     this.journalDescription.set('');
     this.ledgerDefaultOptions.set([]);
     this.rows.set([newRow(), newRow()]);
+    this.applyRememberedJournalDate();
+  }
+
+  applyRememberedJournalDate(): void {
+    try {
+      const raw = localStorage.getItem(this.rememberedJournalDateKey());
+      const rememberedDate = this.normalizeRememberedDate(raw);
+      if (!rememberedDate) return;
+
+      this.journalDateModel.set(rememberedDate);
+    } catch {
+      // localStorage may be unavailable (private browsing, quota, etc.)
+    }
+  }
+
+  rememberJournalDate(): void {
+    try {
+      const rememberedDate = this.normalizeRememberedDate(this.journalDateModel());
+      if (!rememberedDate) return;
+
+      localStorage.setItem(this.rememberedJournalDateKey(), rememberedDate);
+    } catch {
+      // localStorage may be unavailable (private browsing, quota, etc.)
+    }
   }
 
   toggleAutoNumbering(value: boolean): void {
@@ -418,5 +446,31 @@ export class JournalDraftStore {
     const n = Number.parseFloat(t);
     if (!Number.isFinite(n) || n <= 0) return null;
     return n;
+  }
+
+  private normalizeRememberedDate(value: unknown): string | null {
+    const isoDate = this.fiscalYearDateRange.toIsoDate(value);
+    return isoDate ? this.fiscalYearDateRange.defaultDate(isoDate) : null;
+  }
+
+  private rememberedJournalDateKey(): string {
+    return this.scopedStorageKeyParts(JournalDraftStore.LAST_DATE_KEY_PREFIX).join(':');
+  }
+
+  private scopedStorageKeyParts(prefix: string): string[] {
+    const session = this.userSession.session();
+    const organizationId = session?.organization?.id ?? session?.branch?.organizationid;
+    return [
+      prefix,
+      this.storageKeyPart(session?.userid),
+      this.storageKeyPart(organizationId),
+      this.storageKeyPart(session?.branch?.id),
+      this.storageKeyPart(session?.fiscalyear?.id),
+    ];
+  }
+
+  private storageKeyPart(value: unknown): string {
+    const text = typeof value === 'string' || typeof value === 'number' ? String(value).trim() : '';
+    return text ? encodeURIComponent(text) : 'global';
   }
 }
