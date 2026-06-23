@@ -1,18 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
-  TngAutocompleteComponent,
-  TngBadge,
   TngButtonComponent,
   TngCardComponent,
   TngTable,
   TngTableCellTpl,
 } from '@tailng-ui/components';
-import type { TngDateRangePickerSelectionInput, TngTableColumn } from '@tailng-ui/components';
+import type { TngTableColumn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
-import { TngPopover, TngPopoverPanel, TngPopoverTrigger } from '@tailng-ui/primitives';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
-import { FiscalYearDateRangePickerComponent } from '../../../../../../shared/fiscal-year-date-range-picker';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { UserSessionStore } from '../../../../management/data/user-session/user-session.store';
 import type { LedgerReportRow } from '../../../data/ledger-report/ledger-report.model';
@@ -21,6 +17,7 @@ import {
   type AccountingReportSummaryMetric,
 } from '../../../shared/accounting-report-summary.util';
 import { createReportAmountFormatter, formatNetBalance } from '../../../shared/report-amount.util';
+import { LedgerReportFilterPopoverComponent } from './ledger-report-filter-popover/ledger-report-filter-popover.component';
 import { LedgerReportFacade } from './ledger-report.facade';
 
 @Component({
@@ -29,17 +26,12 @@ import { LedgerReportFacade } from './ledger-report.facade';
   imports: [
     CommonModule,
     PageHeadingComponent,
-    TngBadge,
     TngButtonComponent,
     TngCardComponent,
     TngIcon,
-    TngPopover,
-    TngPopoverPanel,
-    TngPopoverTrigger,
     TngTable,
     TngTableCellTpl,
-    TngAutocompleteComponent,
-    FiscalYearDateRangePickerComponent,
+    LedgerReportFilterPopoverComponent,
   ],
   templateUrl: './ledger-report.component.html',
   styleUrl: './ledger-report.component.css',
@@ -54,19 +46,12 @@ export class LedgerReportComponent {
   protected readonly isLoading = this.facade.isLoading;
   protected readonly displayError = this.facade.displayError;
   protected readonly generatedAt = this.facade.generatedAt;
+  protected readonly reportTitle = this.facade.title;
   protected readonly tableRows = this.facade.tableRows;
   protected readonly canViewLedgerReport = this.facade.canViewLedgerReport;
   protected readonly hasError = this.facade.hasError;
   protected readonly hasLedgerSelected = this.facade.hasLedgerSelected;
   protected readonly showSelectLedgerNotice = this.facade.showSelectLedgerNotice;
-  protected readonly draftLedgerId = this.facade.draftLedgerId;
-  protected readonly draftPickerValue = this.facade.draftPickerValue;
-  protected readonly activeFilterCount = this.facade.activeFilterCount;
-  protected readonly autocompleteLedgers = this.facade.autocompleteLedgers;
-  protected readonly ledgerOptionValue = this.facade.ledgerOptionValue;
-  protected readonly ledgerOptionLabel = this.facade.ledgerOptionLabel;
-  protected readonly ledgerTrackBy = this.facade.ledgerTrackBy;
-  protected readonly filterOpen = signal(false);
 
   protected readonly currencyMinorUnit = computed(() => {
     const currency = this.userSessionStore.session()?.fiscalyear?.currency;
@@ -99,39 +84,6 @@ export class LedgerReportComponent {
     { id: 'balance', label: 'Balance', align: 'end', headerAlign: 'end', width: '9rem' },
     { id: 'description', label: 'Description', truncate: true },
   ];
-
-  protected onFilterOpenChange(open: boolean): void {
-    this.filterOpen.set(open);
-    if (open) {
-      this.facade.openFilterPopover();
-    }
-  }
-
-  protected onDraftDateRangeChange(value: TngDateRangePickerSelectionInput<Date>): void {
-    this.facade.onDraftDateRangeChange(value);
-  }
-
-  protected onDraftLedgerChange(ledgerid: string | null): void {
-    this.facade.onDraftLedgerChange(ledgerid);
-  }
-
-  protected onLedgerQueryChange(query: string): void {
-    this.facade.onLedgerQueryChange(query);
-  }
-
-  protected onApplyFilters(event: SubmitEvent): void {
-    event.preventDefault();
-    this.facade.applyFilters();
-    this.filterOpen.set(false);
-  }
-
-  protected onClearFilters(): void {
-    this.facade.clearFilters();
-  }
-
-  protected closeFilterPopover(): void {
-    this.filterOpen.set(false);
-  }
 
   protected onRefresh(): void {
     this.facade.onRefresh();

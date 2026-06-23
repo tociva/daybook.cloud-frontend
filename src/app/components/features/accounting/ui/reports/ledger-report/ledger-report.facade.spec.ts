@@ -303,15 +303,24 @@ describe('LedgerReportFacade', () => {
   it('clears report data and loads the ledger catalog when no ledger is selected', async () => {
     const facade = configure();
     facade.error.set('old error');
+    facade.title.set('old title');
     facade.generatedAt.set('old generated');
     facade.tableRows.set([reportRow('old')]);
 
     await settle();
 
     expect(facade.error()).toBeNull();
+    expect(facade.title()).toBe('');
     expect(facade.generatedAt()).toBe('');
     expect(facade.tableRows()).toEqual([]);
     expect(ledgerStore.ensureLedgerCatalogLoaded).toHaveBeenCalledWith(false);
+  });
+
+  it('stores the report title from the API response', async () => {
+    const facade = configure({ ledgerid: 'cash' });
+    await settle();
+
+    expect(facade.title()).toBe('Ledger Report');
   });
 
   it('shows the permission error and does not call the report API when permission is missing', async () => {
@@ -361,24 +370,25 @@ describe('LedgerReportFacade', () => {
     expect(facade.tableRows().map((row) => row.journalid)).toEqual(['bank-row']);
   });
 
-  it('retries catalog loading after a failed catalog promise', async () => {
-    const facade = configure();
-    ledgerStore.ensureLedgerCatalogLoaded = vi
-      .fn()
-      .mockResolvedValueOnce(false)
-      .mockResolvedValueOnce(true);
-    ledgerError.set('catalog failed');
-
+  it('onRefresh reloads report without forcing catalog reload', async () => {
+    const facade = configure({ ledgerid: 'cash' });
     await settle();
-    expect(facade.error()).toBe('catalog failed');
 
-    ledgerError.set(null);
+    const catalogCallsAfterBootstrap = ledgerStore.ensureLedgerCatalogLoaded.mock.calls.length;
+    ledgerReportService.getLedgerReport.mockClear();
+
     facade.onRefresh();
     await settle();
 
-    expect(ledgerStore.ensureLedgerCatalogLoaded).toHaveBeenCalledTimes(2);
-    expect(ledgerStore.ensureLedgerCatalogLoaded).toHaveBeenLastCalledWith(true);
-    expect(facade.error()).toBeNull();
+    expect(ledgerReportService.getLedgerReport).toHaveBeenCalledTimes(1);
+    expect(ledgerReportService.getLedgerReport).toHaveBeenCalledWith('cash', {
+      start: '2026-04-01',
+      end: '2027-03-31',
+    });
+    expect(ledgerStore.ensureLedgerCatalogLoaded.mock.calls.length).toBe(
+      catalogCallsAfterBootstrap,
+    );
+    expect(ledgerStore.ensureLedgerCatalogLoaded).not.toHaveBeenCalledWith(true);
   });
 
   it('preserves the selected ledger option from report metadata before the catalog contains it', async () => {
