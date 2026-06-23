@@ -1,27 +1,14 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
-  TngAutocompleteComponent,
-  TngBadge,
   TngButtonComponent,
   TngCardComponent,
   TngTable,
   TngTableCellTpl,
 } from '@tailng-ui/components';
-import type {
-  TngDateRangePickerSelectionInput,
-  TngTableColumn,
-} from '@tailng-ui/components';
+import type { TngTableColumn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
-import { TngPopover, TngPopoverPanel, TngPopoverTrigger } from '@tailng-ui/primitives';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
-import { FiscalYearDateRangePickerComponent } from '../../../../../../shared/fiscal-year-date-range-picker';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { UserSessionStore } from '../../../../management/data/user-session/user-session.store';
 import type { LedgerCategoryReportRow } from '../../../data/ledger-category-report/ledger-category-report.model';
@@ -30,6 +17,7 @@ import {
   type AccountingReportSummaryMetric,
 } from '../../../shared/accounting-report-summary.util';
 import { createReportAmountFormatter, formatNetBalance } from '../../../shared/report-amount.util';
+import { LedgerCategoryReportFilterPopoverComponent } from './ledger-category-report-filter-popover/ledger-category-report-filter-popover.component';
 import { LedgerCategoryReportFacade } from './ledger-category-report.facade';
 
 @Component({
@@ -38,17 +26,12 @@ import { LedgerCategoryReportFacade } from './ledger-category-report.facade';
   imports: [
     CommonModule,
     PageHeadingComponent,
-    TngBadge,
     TngButtonComponent,
     TngCardComponent,
     TngIcon,
-    TngPopover,
-    TngPopoverPanel,
-    TngPopoverTrigger,
     TngTable,
     TngTableCellTpl,
-    TngAutocompleteComponent,
-    FiscalYearDateRangePickerComponent,
+    LedgerCategoryReportFilterPopoverComponent,
   ],
   templateUrl: './ledger-category-report.component.html',
   styleUrl: './ledger-category-report.component.css',
@@ -63,20 +46,13 @@ export class LedgerCategoryReportComponent {
   protected readonly isLoading = this.facade.isLoading;
   protected readonly displayError = this.facade.displayError;
   protected readonly generatedAt = this.facade.generatedAt;
+  protected readonly reportTitle = this.facade.title;
   protected readonly tableRows = this.facade.tableRows;
   protected readonly canViewLedgerCategoryReport = this.facade.canViewLedgerCategoryReport;
   protected readonly canOpenLedgerReport = this.facade.canOpenLedgerReport;
   protected readonly hasError = this.facade.hasError;
   protected readonly hasCategorySelected = this.facade.hasCategorySelected;
   protected readonly showSelectCategoryNotice = this.facade.showSelectCategoryNotice;
-  protected readonly draftCategoryId = this.facade.draftCategoryId;
-  protected readonly draftPickerValue = this.facade.draftPickerValue;
-  protected readonly activeFilterCount = this.facade.activeFilterCount;
-  protected readonly autocompleteCategories = this.facade.autocompleteCategories;
-  protected readonly categoryOptionValue = this.facade.categoryOptionValue;
-  protected readonly categoryOptionLabel = this.facade.categoryOptionLabel;
-  protected readonly categoryTrackBy = this.facade.categoryTrackBy;
-  protected readonly filterOpen = signal(false);
 
   protected readonly currencyMinorUnit = computed(() => {
     const currency = this.userSessionStore.session()?.fiscalyear?.currency;
@@ -104,46 +80,12 @@ export class LedgerCategoryReportComponent {
     { id: 'date', label: 'Date', width: '7.5rem' },
     { id: 'journalNumber', label: 'Journal #', width: '10rem' },
     { id: 'ledgerName', label: 'Ledger', width: '12rem' },
-    { id: 'ledgerCategoryName', label: 'Category', width: '12rem' },
     { id: 'oppositeLedgers', label: 'Against', width: '12rem' },
     { id: 'debit', label: 'Debit', align: 'end', headerAlign: 'end', width: '7.5rem' },
     { id: 'credit', label: 'Credit', align: 'end', headerAlign: 'end', width: '7.5rem' },
     { id: 'balance', label: 'Balance', align: 'end', headerAlign: 'end', width: '8.5rem' },
     { id: 'description', label: 'Description', truncate: true },
   ];
-
-  protected onFilterOpenChange(open: boolean): void {
-    this.filterOpen.set(open);
-    if (open) {
-      this.facade.openFilterPopover();
-    }
-  }
-
-  protected onDraftDateRangeChange(value: TngDateRangePickerSelectionInput<Date>): void {
-    this.facade.onDraftDateRangeChange(value);
-  }
-
-  protected onDraftCategoryChange(ledgercategoryid: string | null): void {
-    this.facade.onDraftCategoryChange(ledgercategoryid);
-  }
-
-  protected onCategoryQueryChange(query: string): void {
-    this.facade.onCategoryQueryChange(query);
-  }
-
-  protected onApplyFilters(event: SubmitEvent): void {
-    event.preventDefault();
-    this.facade.applyFilters();
-    this.filterOpen.set(false);
-  }
-
-  protected onClearFilters(): void {
-    this.facade.clearFilters();
-  }
-
-  protected closeFilterPopover(): void {
-    this.filterOpen.set(false);
-  }
 
   protected onRefresh(): void {
     this.facade.onRefresh();

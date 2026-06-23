@@ -315,15 +315,24 @@ describe('LedgerCategoryReportFacade', () => {
   it('clears report data and loads the category catalog when no category is selected', async () => {
     const facade = configure();
     facade.error.set('old error');
+    facade.title.set('old title');
     facade.generatedAt.set('old generated');
     facade.tableRows.set([reportRow('old')]);
 
     await settle();
 
     expect(facade.error()).toBeNull();
+    expect(facade.title()).toBe('');
     expect(facade.generatedAt()).toBe('');
     expect(facade.tableRows()).toEqual([]);
     expect(ledgerCategoryStore.ensureLedgerCategoryCatalogLoaded).toHaveBeenCalledWith(false);
+  });
+
+  it('stores the report title from the API response', async () => {
+    const facade = configure({ ledgercategoryid: 'bank' });
+    await settle();
+
+    expect(facade.title()).toBe('Ledger Category Report');
   });
 
   it('shows the permission error and does not call the report API when permission is missing', async () => {
@@ -375,6 +384,28 @@ describe('LedgerCategoryReportFacade', () => {
     await settle();
     expect(facade.generatedAt()).toBe('generated-cash');
     expect(facade.tableRows().map((row) => row.journalid)).toEqual(['cash-row']);
+  });
+
+  it('onRefresh reloads report without forcing catalog reload', async () => {
+    const facade = configure({ ledgercategoryid: 'bank' });
+    await settle();
+
+    const catalogCallsAfterBootstrap =
+      ledgerCategoryStore.ensureLedgerCategoryCatalogLoaded.mock.calls.length;
+    ledgerCategoryReportService.getLedgerCategoryReport.mockClear();
+
+    facade.onRefresh();
+    await settle();
+
+    expect(ledgerCategoryReportService.getLedgerCategoryReport).toHaveBeenCalledTimes(1);
+    expect(ledgerCategoryReportService.getLedgerCategoryReport).toHaveBeenCalledWith('bank', {
+      start: '2026-04-01',
+      end: '2027-03-31',
+    });
+    expect(ledgerCategoryStore.ensureLedgerCategoryCatalogLoaded.mock.calls.length).toBe(
+      catalogCallsAfterBootstrap,
+    );
+    expect(ledgerCategoryStore.ensureLedgerCategoryCatalogLoaded).not.toHaveBeenCalledWith(true);
   });
 
   it('preserves the selected category option from report metadata before the catalog contains it', async () => {

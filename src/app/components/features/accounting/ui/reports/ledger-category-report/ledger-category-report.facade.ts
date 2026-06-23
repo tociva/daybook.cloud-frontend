@@ -75,6 +75,7 @@ export class LedgerCategoryReportFacade {
 
   readonly isLoading = signal(false);
   readonly error = signal<string | null>(null);
+  readonly title = signal('');
   readonly generatedAt = signal('');
   readonly summary = signal<LedgerCategoryReportSummary>(emptyLedgerCategoryReportSummary());
   readonly tableRows = signal<readonly LedgerCategoryReportRow[]>([]);
@@ -218,14 +219,7 @@ export class LedgerCategoryReportFacade {
 
   onRefresh(): void {
     const ledgercategoryid = this.selectedCategoryId();
-    this.lastBootstrapKey = null;
-
-    if (!ledgercategoryid) {
-      this.nextLoadToken();
-      this.clearReport();
-      void this.loadCategoryCatalogOnly(true);
-      return;
-    }
+    if (!ledgercategoryid) return;
 
     if (!this.canViewLedgerCategoryReport()) {
       this.nextLoadToken();
@@ -236,12 +230,11 @@ export class LedgerCategoryReportFacade {
 
     const token = this.nextLoadToken();
     const params = this.queryParams();
-    void this.bootstrapLedgerCategoryReport(
+    void this.loadReport(
       token,
       ledgercategoryid,
       params.get('start'),
       params.get('end'),
-      true,
     );
   }
 
@@ -317,6 +310,7 @@ export class LedgerCategoryReportFacade {
 
   private clearReportData(): void {
     this.selectedCategoryMeta.set(null);
+    this.title.set('');
     this.generatedAt.set('');
     this.summary.set(emptyLedgerCategoryReportSummary());
     this.tableRows.set([]);
@@ -358,10 +352,9 @@ export class LedgerCategoryReportFacade {
     ledgercategoryid: string,
     start: string | null,
     end: string | null,
-    forceCatalogReload = false,
   ): Promise<void> {
     try {
-      await this.ensureCategoryCatalogLoaded(forceCatalogReload);
+      await this.ensureCategoryCatalogLoaded();
       if (!this.isActiveLoad(token)) return;
       await this.loadReport(token, ledgercategoryid, start, end);
     } catch (err) {
@@ -372,13 +365,9 @@ export class LedgerCategoryReportFacade {
     }
   }
 
-  private async ensureCategoryCatalogLoaded(forceReload = false): Promise<void> {
-    if (forceReload) {
-      this.categoryCatalogPromise = null;
-    }
-
+  private async ensureCategoryCatalogLoaded(): Promise<void> {
     if (!this.categoryCatalogPromise) {
-      this.categoryCatalogPromise = this.fetchCategoryCatalog(forceReload).finally(() => {
+      this.categoryCatalogPromise = this.fetchCategoryCatalog().finally(() => {
         this.categoryCatalogPromise = null;
       });
     }
@@ -386,16 +375,16 @@ export class LedgerCategoryReportFacade {
     await this.categoryCatalogPromise;
   }
 
-  private async loadCategoryCatalogOnly(forceReload = false): Promise<void> {
+  private async loadCategoryCatalogOnly(): Promise<void> {
     try {
-      await this.ensureCategoryCatalogLoaded(forceReload);
+      await this.ensureCategoryCatalogLoaded();
     } catch (err) {
       this.error.set(getApiErrorMessage(err, 'Failed to load ledger category catalog.'));
     }
   }
 
-  private async fetchCategoryCatalog(forceReload: boolean): Promise<void> {
-    const loaded = await this.ledgerCategoryStore.ensureLedgerCategoryCatalogLoaded(forceReload);
+  private async fetchCategoryCatalog(): Promise<void> {
+    const loaded = await this.ledgerCategoryStore.ensureLedgerCategoryCatalogLoaded(false);
     if (!loaded) {
       throw new Error(
         this.ledgerCategoryStore.error() ?? 'Failed to load ledger category catalog.',
@@ -437,6 +426,7 @@ export class LedgerCategoryReportFacade {
 
   private applyReport(report: LedgerCategoryReport): void {
     this.selectedCategoryMeta.set(report.ledgerCategory);
+    this.title.set(report.title);
     this.generatedAt.set(report.generatedAt);
     this.summary.set(report.summary);
     this.tableRows.set(report.data);

@@ -1,0 +1,69 @@
+<div
+  class="report-filter-popover"
+  tngPopover
+  #filterPopover="tngPopover"
+  [align]="'end'"
+  [side]="'bottom'"
+  [ariaLabel]="'Ledger category report filters'"
+  [closeOnOutsidePointer]="false"
+  [open]="filterOpen()"
+  (openChange)="onFilterOpenChange($event)"
+>
+  <tng-button
+    type="button"
+    [appearance]="activeFilterCount() ? 'solid' : 'outline'"
+    [tone]="activeFilterCount() ? 'primary' : 'neutral'"
+    [tngPopoverTrigger]="filterPopover"
+    [tngBadge]="activeFilterCount()"
+    tngBadgeTone="primary"
+    aria-label="Ledger category report filters"
+  >
+    <tng-icon icon="filter" aria-hidden="true" />
+  </tng-button>
+
+  <section tngPopoverPanel class="report-filter-panel">
+    <form class="report-filter-form" (submit)="onApplyFilters($event)">
+      <div class="report-filter-form__header">
+        <tng-icon icon="filter" aria-hidden="true" />
+        <strong>Filter ledger category report</strong>
+      </div>
+
+      <div class="report-filter-form__body">
+        <div class="report-filter-field">
+          <label for="ledger-category-report-filter-category">Ledger category</label>
+          <tng-autocomplete
+            id="ledger-category-report-filter-category"
+            placeholder="Search ledger category..."
+            ariaLabel="Ledger category"
+            [options]="autocompleteCategories()"
+            [value]="draftCategoryId()"
+            [getOptionValue]="categoryOptionValue"
+            [getOptionLabel]="categoryOptionLabel"
+            [trackBy]="categoryTrackBy"
+            (valueChange)="onDraftCategoryChange($event)"
+            (queryChange)="onCategoryQueryChange($event)"
+          />
+        </div>
+
+        <div class="report-filter-field">
+          <label for="ledger-category-report-filter-date-range">Period</label>
+          <app-fiscal-year-date-range-picker
+            id="ledger-category-report-filter-date-range"
+            placeholder="Select report period"
+            fullWidth
+            [value]="draftPickerValue()"
+            (valueChange)="onDraftDateRangeChange($event)"
+          />
+        </div>
+      </div>
+
+      <div class="report-filter-actions">
+        <tng-button type="button" appearance="ghost" (click)="onClearFilters()">Clear</tng-button>
+        <tng-button type="button" appearance="outline" (click)="closeFilterPopover()">
+          Close
+        </tng-button>
+        <tng-button type="submit" appearance="solid" tone="primary">Apply</tng-button>
+      </div>
+    </form>
+  </section>
+</div>
