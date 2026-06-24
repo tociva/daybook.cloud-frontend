@@ -28,6 +28,7 @@ import {
   JOURNAL_LINK_STATUS_FILTER_CLEAR_QUERY_PARAMS,
   JOURNAL_LINK_STATUS_FILTER_FIELD,
 } from '../../../../accounting/shared/journal-link-status-filter';
+import { RECEIPT_STATUS_FILTER_FIELD } from '../../../shared/receipt-status-filter';
 import { ReconciliationMatchService } from '../../../../accounting/data/reconciliation-match';
 import {
   SaleInvoicePrintService,
@@ -167,6 +168,7 @@ export class ListSaleInvoiceComponent {
       type: 'number',
       operators: ['between', '=', '>=', '<='],
     },
+    RECEIPT_STATUS_FILTER_FIELD,
     JOURNAL_LINK_STATUS_FILTER_FIELD,
   ];
 

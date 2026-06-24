@@ -159,6 +159,42 @@ describe('ListSaleInvoiceComponent', () => {
     });
   });
 
+  it('loads sale invoices with receipt status in the normal list filter', async () => {
+    const { component, loadSaleInvoices } = setup();
+
+    await component.loadSaleInvoicesWithJournals({
+      limit: 10,
+      offset: 0,
+      where: { receiptstatus: 'not_paid' },
+    });
+
+    expect(loadSaleInvoices).toHaveBeenCalledWith({
+      limit: 10,
+      offset: 0,
+      order: ['date ASC', 'number ASC'],
+      where: { receiptstatus: 'not_paid' },
+      includes: ['customer', 'receipts'],
+    });
+  });
+
+  it('loads sale invoices with receipt status and journal link status combined', async () => {
+    const { component, loadSaleInvoices } = setup();
+
+    await component.loadSaleInvoicesWithJournals({
+      limit: 10,
+      offset: 0,
+      where: { receiptstatus: 'partially_paid', journallinkstatus: 'linked' },
+    });
+
+    expect(loadSaleInvoices).toHaveBeenCalledWith({
+      limit: 10,
+      offset: 0,
+      order: ['date ASC', 'number ASC'],
+      where: { receiptstatus: 'partially_paid', journallinkstatus: 'linked' },
+      includes: ['customer', 'receipts'],
+    });
+  });
+
   it('loads sale invoices with the dashboard journal-link status in the normal list filter', async () => {
     const { component, loadSaleInvoices } = setup();
 
@@ -174,6 +210,23 @@ describe('ListSaleInvoiceComponent', () => {
       order: ['date ASC', 'number ASC'],
       where: { journallinkstatus: 'not_fully_linked' },
       includes: ['customer', 'receipts'],
+    });
+  });
+
+  it('exposes receipt status as a standard sale invoice filter field', () => {
+    const { component } = setup();
+    const field = component.filterFields.find((item) => item.id === 'receiptstatus');
+
+    expect(field).toEqual({
+      id: 'receiptstatus',
+      label: 'Receipt status',
+      placeholder: 'Any receipt status',
+      type: 'enum',
+      options: [
+        { label: 'Fully paid', value: 'fully_paid' },
+        { label: 'Partially paid', value: 'partially_paid' },
+        { label: 'Not paid', value: 'not_paid' },
+      ],
     });
   });
 
