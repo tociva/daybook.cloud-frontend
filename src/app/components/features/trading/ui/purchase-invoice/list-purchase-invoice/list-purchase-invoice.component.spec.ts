@@ -167,6 +167,42 @@ describe('ListPurchaseInvoiceComponent', () => {
     });
   });
 
+  it('loads purchase invoices with payment status in the normal list filter', async () => {
+    const { component, loadPurchaseInvoices } = setup();
+
+    await component.loadPurchaseInvoicesWithJournals({
+      limit: 10,
+      offset: 0,
+      where: { paymentstatus: 'not_paid' },
+    });
+
+    expect(loadPurchaseInvoices).toHaveBeenCalledWith({
+      limit: 10,
+      offset: 0,
+      order: ['date ASC'],
+      where: { paymentstatus: 'not_paid' },
+      includes: ['vendor', 'payments', 'currency'],
+    });
+  });
+
+  it('loads purchase invoices with payment status and journal link status combined', async () => {
+    const { component, loadPurchaseInvoices } = setup();
+
+    await component.loadPurchaseInvoicesWithJournals({
+      limit: 10,
+      offset: 0,
+      where: { paymentstatus: 'partially_paid', journallinkstatus: 'linked' },
+    });
+
+    expect(loadPurchaseInvoices).toHaveBeenCalledWith({
+      limit: 10,
+      offset: 0,
+      order: ['date ASC'],
+      where: { paymentstatus: 'partially_paid', journallinkstatus: 'linked' },
+      includes: ['vendor', 'payments', 'currency'],
+    });
+  });
+
   it('exposes journal link status as a standard purchase invoice filter field', () => {
     const { component } = setup();
     const field = component.filterFields.find((item) => item.id === 'journallinkstatus');
@@ -181,6 +217,23 @@ describe('ListPurchaseInvoiceComponent', () => {
         { label: 'No journals', value: 'unlinked' },
         { label: 'Partially linked', value: 'partial' },
         { label: 'Fully linked', value: 'linked' },
+      ],
+    });
+  });
+
+  it('exposes payment status as a standard purchase invoice filter field', () => {
+    const { component } = setup();
+    const field = component.filterFields.find((item) => item.id === 'paymentstatus');
+
+    expect(field).toEqual({
+      id: 'paymentstatus',
+      label: 'Payment status',
+      placeholder: 'Any payment status',
+      type: 'enum',
+      options: [
+        { label: 'Fully paid', value: 'fully_paid' },
+        { label: 'Partially paid', value: 'partially_paid' },
+        { label: 'Not paid', value: 'not_paid' },
       ],
     });
   });

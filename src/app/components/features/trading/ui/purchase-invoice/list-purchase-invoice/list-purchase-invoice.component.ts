@@ -27,6 +27,7 @@ import {
   JOURNAL_LINK_STATUS_FILTER_CLEAR_QUERY_PARAMS,
   JOURNAL_LINK_STATUS_FILTER_FIELD,
 } from '../../../../accounting/shared/journal-link-status-filter';
+import { PAYMENT_STATUS_FILTER_FIELD } from '../../../shared/payment-status-filter';
 import { ReconciliationMatchService } from '../../../../accounting/data/reconciliation-match';
 import { PurchaseInvoiceService, PurchaseInvoiceStore } from '../../../data/purchase-invoice';
 import type { PurchaseInvoice, PurchaseInvoiceJournal } from '../../../data/purchase-invoice';
@@ -164,6 +165,7 @@ export class ListPurchaseInvoiceComponent {
       type: 'number',
       operators: ['between', '=', '>=', '<='],
     },
+    PAYMENT_STATUS_FILTER_FIELD,
     JOURNAL_LINK_STATUS_FILTER_FIELD,
   ];
 
