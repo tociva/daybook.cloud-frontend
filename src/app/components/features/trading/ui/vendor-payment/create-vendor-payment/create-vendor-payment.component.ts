@@ -17,11 +17,13 @@ import {
 } from '@tailng-ui/components';
 import dayjs from 'dayjs';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
+import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
 import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
 import type { BankCash } from '../../../data/bank-cash/bank-cash.model';
 import { BankCashStore } from '../../../data/bank-cash';
 import type { Currency } from '../../../../../features/management/data/currency/currency.model';
 import { CurrencyStore } from '../../../../../features/management/data/currency/currency.store';
+import { UserSessionStore } from '../../../../../features/management/data/user-session/user-session.store';
 import type { Vendor } from '../../../data/vendor/vendor.model';
 import { VendorStore } from '../../../data/vendor';
 import type {
@@ -76,9 +78,14 @@ import {
   styleUrl: './create-vendor-payment.component.css',
 })
 export class CreateVendorPaymentComponent {
+  private static readonly LAST_VENDOR_PAYMENT_DATE_KEY_PREFIX =
+    'daybook:vendor-payment:create:last-date';
+
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(VendorPaymentFacade);
   private readonly fiscalYearDateRange = inject(FiscalYearDateRangeService);
+  private readonly navigation = inject(BurlNavigationService);
+  private readonly userSessionStore = inject(UserSessionStore);
 
   protected readonly vendorPaymentStore = inject(VendorPaymentStore);
   protected readonly vendorStore = inject(VendorStore);
@@ -273,6 +280,8 @@ export class CreateVendorPaymentComponent {
       if (payment) await this.patchFromPayment(payment);
       return;
     }
+
+    this.applyRememberedPaymentDate();
 
     // ── Create mode: check for pre-fill from a purchase invoice ──────────────
     const purchaseinvoiceid = this.route.snapshot.queryParamMap.get('purchaseinvoiceid');
@@ -561,8 +570,64 @@ export class CreateVendorPaymentComponent {
     const id = this.id();
     if (id) {
       await this.facade.update(id, payload);
-    } else {
-      await this.facade.create(payload);
+      return;
     }
+
+    const saved = await this.facade.create(payload, { navigateBack: false });
+    if (!saved) return;
+
+    this.rememberPaymentDate();
+    await this.navigation.navigateBack();
+  }
+
+  private applyRememberedPaymentDate(): void {
+    try {
+      const raw = localStorage.getItem(this.rememberedVendorPaymentDateKey());
+      const rememberedDate = this.normalizeRememberedPaymentDate(raw);
+      if (!rememberedDate) return;
+
+      this.pmtdate.set(rememberedDate);
+    } catch {
+      // localStorage may be unavailable (private browsing, quota, etc.)
+    }
+  }
+
+  private rememberPaymentDate(): void {
+    try {
+      const rememberedDate = this.normalizeRememberedPaymentDate(this.pmtdate());
+      if (!rememberedDate) return;
+
+      localStorage.setItem(this.rememberedVendorPaymentDateKey(), rememberedDate);
+    } catch {
+      // localStorage may be unavailable (private browsing, quota, etc.)
+    }
+  }
+
+  private normalizeRememberedPaymentDate(value: unknown): string | null {
+    const isoDate = this.fiscalYearDateRange.toIsoDate(value);
+    return isoDate ? this.fiscalYearDateRange.defaultDate(isoDate) : null;
+  }
+
+  private rememberedVendorPaymentDateKey(): string {
+    return this.scopedStorageKeyParts(
+      CreateVendorPaymentComponent.LAST_VENDOR_PAYMENT_DATE_KEY_PREFIX,
+    ).join(':');
+  }
+
+  private scopedStorageKeyParts(prefix: string): string[] {
+    const session = this.userSessionStore.session();
+    const organizationId = session?.organization?.id ?? session?.branch?.organizationid;
+    return [
+      prefix,
+      this.storageKeyPart(session?.userid),
+      this.storageKeyPart(organizationId),
+      this.storageKeyPart(session?.branch?.id),
+      this.storageKeyPart(session?.fiscalyear?.id),
+    ];
+  }
+
+  private storageKeyPart(value: unknown): string {
+    const text = typeof value === 'string' || typeof value === 'number' ? String(value).trim() : '';
+    return text ? encodeURIComponent(text) : 'global';
   }
 }
