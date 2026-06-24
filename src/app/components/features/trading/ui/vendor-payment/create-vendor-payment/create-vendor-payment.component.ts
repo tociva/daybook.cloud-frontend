@@ -80,6 +80,8 @@ import {
 export class CreateVendorPaymentComponent {
   private static readonly LAST_VENDOR_PAYMENT_DATE_KEY_PREFIX =
     'daybook:vendor-payment:create:last-date';
+  private static readonly LAST_VENDOR_PAYMENT_BCASH_KEY_PREFIX =
+    'daybook:vendor-payment:create:last-bcash';
 
   private readonly route = inject(ActivatedRoute);
   private readonly facade = inject(VendorPaymentFacade);
@@ -282,6 +284,7 @@ export class CreateVendorPaymentComponent {
     }
 
     this.applyRememberedPaymentDate();
+    await this.applyRememberedBankCash();
 
     // ── Create mode: check for pre-fill from a purchase invoice ──────────────
     const purchaseinvoiceid = this.route.snapshot.queryParamMap.get('purchaseinvoiceid');
@@ -577,7 +580,47 @@ export class CreateVendorPaymentComponent {
     if (!saved) return;
 
     this.rememberPaymentDate();
+    this.rememberBankCash();
     await this.navigation.navigateBack();
+  }
+
+  private async applyRememberedBankCash(): Promise<void> {
+    try {
+      const bcashId = this.normalizeRememberedBankCashId(
+        localStorage.getItem(this.rememberedVendorPaymentBankCashKey()),
+      );
+      if (!bcashId) return;
+
+      const bankCash = await this.resolveBankCash(undefined, bcashId);
+      if (!bankCash) return;
+
+      this.selectedBankCash.set(bankCash);
+      this.bcashid.set(bankCash.id ?? bcashId);
+    } catch {
+      // localStorage may be unavailable (private browsing, quota, etc.)
+    }
+  }
+
+  private rememberBankCash(): void {
+    try {
+      const bcashId = this.normalizeRememberedBankCashId(this.bcashid());
+      if (!bcashId) return;
+
+      localStorage.setItem(this.rememberedVendorPaymentBankCashKey(), bcashId);
+    } catch {
+      // localStorage may be unavailable (private browsing, quota, etc.)
+    }
+  }
+
+  private normalizeRememberedBankCashId(value: unknown): string | null {
+    const id = typeof value === 'string' ? value.trim() : '';
+    return id || null;
+  }
+
+  private rememberedVendorPaymentBankCashKey(): string {
+    return this.scopedStorageKeyParts(
+      CreateVendorPaymentComponent.LAST_VENDOR_PAYMENT_BCASH_KEY_PREFIX,
+    ).join(':');
   }
 
   private applyRememberedPaymentDate(): void {
