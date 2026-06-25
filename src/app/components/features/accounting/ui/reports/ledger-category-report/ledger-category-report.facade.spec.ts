@@ -325,7 +325,69 @@ describe('LedgerCategoryReportFacade', () => {
     expect(facade.title()).toBe('');
     expect(facade.generatedAt()).toBe('');
     expect(facade.tableRows()).toEqual([]);
+    expect(facade.draftCategoryId()).toBeNull();
     expect(ledgerCategoryStore.ensureLedgerCategoryCatalogLoaded).toHaveBeenCalledWith(false);
+  });
+
+  it('resets draft category selection when the route has no ledgercategoryid', async () => {
+    const facade = configure({ ledgercategoryid: 'bank' });
+    await settle();
+
+    facade.onDraftCategoryChange('cash');
+    expect(facade.draftCategoryId()).toBe('cash');
+
+    updateRoute({}, { start: '2026-04-01', end: '2027-03-31' });
+    await settle();
+
+    expect(facade.draftCategoryId()).toBeNull();
+  });
+
+  it('keeps empty-state draft category selection when the route effect re-runs without a category route change', async () => {
+    const facade = configure();
+    await settle();
+
+    facade.onDraftCategoryChange('bank');
+    expect(facade.draftCategoryId()).toBe('bank');
+
+    updateRoute({}, { start: '2026-05-01', end: '2026-05-31' });
+    await settle();
+
+    expect(facade.draftCategoryId()).toBe('bank');
+  });
+
+  it('applies empty-state category selection with the current period query params', async () => {
+    const facade = configure({
+      query: {
+        start: '2025-04-01',
+        end: '2026-03-31',
+      },
+    });
+    await settle();
+    router.navigate.mockClear();
+
+    facade.onDraftCategoryChange('bank');
+    facade.applyCategorySelection();
+
+    expect(router.navigate).toHaveBeenCalledTimes(1);
+    expect(router.navigate).toHaveBeenCalledWith(
+      ['/app/accounting/reports/ledger-category', 'bank'],
+      {
+        queryParams: {
+          start: '2025-04-01',
+          end: '2026-03-31',
+        },
+      },
+    );
+  });
+
+  it('does not navigate when empty-state category selection has no category', async () => {
+    const facade = configure();
+    await settle();
+    router.navigate.mockClear();
+
+    facade.applyCategorySelection();
+
+    expect(router.navigate).not.toHaveBeenCalled();
   });
 
   it('stores the report title from the API response', async () => {

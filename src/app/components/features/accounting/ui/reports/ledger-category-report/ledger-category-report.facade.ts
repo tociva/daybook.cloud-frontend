@@ -70,6 +70,7 @@ export class LedgerCategoryReportFacade {
   });
 
   private lastBootstrapKey: string | null = null;
+  private lastRouteCategoryId: string | null | undefined = undefined;
   private categoryCatalogPromise: Promise<void> | null = null;
   private loadToken = 0;
 
@@ -129,6 +130,8 @@ export class LedgerCategoryReportFacade {
       const routeParams = this.routeParams();
       const range = this.fiscalYearDateRange.range();
       const ledgercategoryid = routeParams.get('ledgercategoryid');
+      const previousRouteCategoryId = this.lastRouteCategoryId;
+      this.lastRouteCategoryId = ledgercategoryid;
 
       this.selectedCategoryId.set(ledgercategoryid);
 
@@ -156,6 +159,10 @@ export class LedgerCategoryReportFacade {
       if (!ledgercategoryid) {
         this.lastBootstrapKey = null;
         this.nextLoadToken();
+        if (previousRouteCategoryId) {
+          this.draftCategoryId.set(null);
+          this.categoryQuery.set('');
+        }
         this.clearReport();
         void this.loadCategoryCatalogOnly();
         return;
@@ -215,6 +222,19 @@ export class LedgerCategoryReportFacade {
 
   onCategoryQueryChange(query: string): void {
     this.categoryQuery.set(query);
+  }
+
+  applyCategorySelection(): void {
+    const ledgercategoryid = this.draftCategoryId();
+    if (!ledgercategoryid) return;
+
+    const params = this.queryParams();
+    void this.router.navigate(ledgerCategoryReportPath(ledgercategoryid), {
+      queryParams: {
+        start: params.get('start'),
+        end: params.get('end'),
+      },
+    });
   }
 
   onRefresh(): void {

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
+  TngAutocompleteComponent,
   TngButtonComponent,
   TngCardComponent,
   TngTable,
@@ -28,6 +29,7 @@ import { LedgerCategoryReportFacade } from './ledger-category-report.facade';
     CommonModule,
     PageHeadingComponent,
     BurlBackButtonComponent,
+    TngAutocompleteComponent,
     TngButtonComponent,
     TngCardComponent,
     TngIcon,
@@ -55,6 +57,11 @@ export class LedgerCategoryReportComponent {
   protected readonly hasError = this.facade.hasError;
   protected readonly hasCategorySelected = this.facade.hasCategorySelected;
   protected readonly showSelectCategoryNotice = this.facade.showSelectCategoryNotice;
+  protected readonly autocompleteCategories = this.facade.autocompleteCategories;
+  protected readonly draftCategoryId = this.facade.draftCategoryId;
+  protected readonly categoryOptionValue = this.facade.categoryOptionValue;
+  protected readonly categoryOptionLabel = this.facade.categoryOptionLabel;
+  protected readonly categoryTrackBy = this.facade.categoryTrackBy;
 
   protected readonly currencyMinorUnit = computed(() => {
     const currency = this.userSessionStore.session()?.fiscalyear?.currency;
@@ -91,6 +98,19 @@ export class LedgerCategoryReportComponent {
 
   protected onRefresh(): void {
     this.facade.onRefresh();
+  }
+
+  protected onDraftCategoryChange(ledgercategoryid: string | null): void {
+    this.facade.onDraftCategoryChange(ledgercategoryid);
+  }
+
+  protected onCategoryQueryChange(query: string): void {
+    this.facade.onCategoryQueryChange(query);
+  }
+
+  protected onApplyCategorySelection(event: SubmitEvent): void {
+    event.preventDefault();
+    this.facade.applyCategorySelection();
   }
 
   protected formatDisplayDate(value: string | null | undefined): string {

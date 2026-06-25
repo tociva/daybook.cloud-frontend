@@ -27,9 +27,38 @@
     } @else if (hasError()) {
       <div class="notice notice--danger">{{ displayError() }}</div>
     } @else if (showSelectCategoryNotice()) {
-      <div class="notice notice--info">
-        Select a ledger category to view its report for the chosen period.
-      </div>
+      <form class="select-category-form" (submit)="onApplyCategorySelection($event)">
+        <p class="select-category-form__message">
+          Select a ledger category to view its report for the chosen period.
+        </p>
+
+        <div class="select-category-form__field">
+          <label for="ledger-category-report-empty-category">Ledger category</label>
+          <tng-autocomplete
+            id="ledger-category-report-empty-category"
+            placeholder="Search ledger category..."
+            ariaLabel="Ledger category"
+            [options]="autocompleteCategories()"
+            [value]="draftCategoryId()"
+            [getOptionValue]="categoryOptionValue"
+            [getOptionLabel]="categoryOptionLabel"
+            [trackBy]="categoryTrackBy"
+            (valueChange)="onDraftCategoryChange($event)"
+            (queryChange)="onCategoryQueryChange($event)"
+          />
+        </div>
+
+        <div class="select-category-form__actions">
+          <tng-button
+            type="submit"
+            appearance="solid"
+            tone="primary"
+            [disabled]="!draftCategoryId()"
+          >
+            Submit
+          </tng-button>
+        </div>
+      </form>
     } @else {
       <div class="summary-grid" aria-label="Ledger category report summary">
         @for (metric of summaryMetrics(); track metric.id) {
