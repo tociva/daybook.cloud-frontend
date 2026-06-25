@@ -21,10 +21,12 @@ const localDate = (year: number, month: number, day: number): Date =>
 describe('report date query utilities', () => {
   it('seeds missing start/end dates from the fiscal year range', () => {
     expect(seedMissingReportDateQuery(null, null, fiscalYearRange)).toEqual({
+      dateOperator: 'between',
       start: '2026-04-01',
       end: '2027-03-31',
     });
     expect(seedMissingReportDateQuery('2026-05-01', null, fiscalYearRange)).toEqual({
+      dateOperator: 'between',
       start: '2026-05-01',
       end: '2027-03-31',
     });
@@ -32,22 +34,22 @@ describe('report date query utilities', () => {
   });
 
   it('does not expand operator-specific single-bound date queries', () => {
-    expect(seedMissingReportDateQuery('2026-05-01', null, fiscalYearRange, '>=')).toBeNull();
-    expect(seedMissingReportDateQuery(null, '2026-05-31', fiscalYearRange, '<=')).toBeNull();
-    expect(seedMissingReportDateQuery('2026-05-15', null, fiscalYearRange, '=')).toBeNull();
+    expect(seedMissingReportDateQuery('2026-05-01', null, fiscalYearRange, 'ge')).toBeNull();
+    expect(seedMissingReportDateQuery(null, '2026-05-31', fiscalYearRange, 'le')).toBeNull();
+    expect(seedMissingReportDateQuery('2026-05-15', null, fiscalYearRange, 'eq')).toBeNull();
   });
 
   it('seeds missing operator-specific dates from the fiscal year range', () => {
-    expect(seedMissingReportDateQuery(null, null, fiscalYearRange, '>=')).toEqual({
-      dateOperator: '>=',
+    expect(seedMissingReportDateQuery(null, null, fiscalYearRange, 'ge')).toEqual({
+      dateOperator: 'ge',
       start: '2026-04-01',
     });
-    expect(seedMissingReportDateQuery(null, null, fiscalYearRange, '<=')).toEqual({
-      dateOperator: '<=',
+    expect(seedMissingReportDateQuery(null, null, fiscalYearRange, 'le')).toEqual({
+      dateOperator: 'le',
       end: '2027-03-31',
     });
-    expect(seedMissingReportDateQuery(null, null, fiscalYearRange, '=')).toEqual({
-      dateOperator: '=',
+    expect(seedMissingReportDateQuery(null, null, fiscalYearRange, 'eq')).toEqual({
+      dateOperator: 'eq',
       start: '2026-04-01',
     });
   });
@@ -64,14 +66,14 @@ describe('report date query utilities', () => {
   it('builds sparse API date queries', () => {
     expect(buildReportDateQuery('2026-04-01', null)).toEqual({ start: '2026-04-01' });
     expect(buildReportDateQuery(undefined, '2027-03-31')).toEqual({ end: '2027-03-31' });
-    expect(buildReportDateQuery('2026-04-15', null, '=')).toEqual({
+    expect(buildReportDateQuery('2026-04-15', null, 'eq')).toEqual({
       start: '2026-04-15',
       end: '2026-04-15',
     });
-    expect(buildReportDateQuery('2026-04-15', '2026-04-30', '>=')).toEqual({
+    expect(buildReportDateQuery('2026-04-15', '2026-04-30', 'ge')).toEqual({
       start: '2026-04-15',
     });
-    expect(buildReportDateQuery('2026-04-15', '2026-04-30', '<=')).toEqual({
+    expect(buildReportDateQuery('2026-04-15', '2026-04-30', 'le')).toEqual({
       end: '2026-04-30',
     });
   });
@@ -105,42 +107,62 @@ describe('report date query utilities', () => {
     };
 
     expect(
-      buildReportDateRouterQueryFromSelection('=', null, new Date(2026, 3, 15), toIsoDate),
+      buildReportDateRouterQueryFromSelection(
+        'between',
+        {
+          start: new Date(2026, 3, 1),
+          end: new Date(2026, 3, 30),
+        },
+        null,
+        toIsoDate,
+      ),
     ).toEqual({
-      dateOperator: '=',
+      dateOperator: 'between',
+      start: '2026-04-01',
+      end: '2026-04-30',
+    });
+    expect(
+      buildReportDateRouterQueryFromSelection('eq', null, new Date(2026, 3, 15), toIsoDate),
+    ).toEqual({
+      dateOperator: 'eq',
       start: '2026-04-15',
     });
     expect(
-      buildReportDateRouterQueryFromSelection('>=', null, new Date(2026, 3, 15), toIsoDate),
+      buildReportDateRouterQueryFromSelection('ge', null, new Date(2026, 3, 15), toIsoDate),
     ).toEqual({
-      dateOperator: '>=',
+      dateOperator: 'ge',
       start: '2026-04-15',
     });
     expect(
-      buildReportDateRouterQueryFromSelection('<=', null, new Date(2026, 3, 30), toIsoDate),
+      buildReportDateRouterQueryFromSelection('le', null, new Date(2026, 3, 30), toIsoDate),
     ).toEqual({
-      dateOperator: '<=',
+      dateOperator: 'le',
       end: '2026-04-30',
     });
   });
 
   it('parses and maps report date operators from route params', () => {
-    expect(parseReportDateOperator('=')).toBe('=');
-    expect(parseReportDateOperator('>=')).toBe('>=');
-    expect(parseReportDateOperator('<=')).toBe('<=');
+    expect(parseReportDateOperator('eq')).toBe('eq');
+    expect(parseReportDateOperator('ge')).toBe('ge');
+    expect(parseReportDateOperator('le')).toBe('le');
+    expect(parseReportDateOperator('=')).toBe('eq');
+    expect(parseReportDateOperator('>=')).toBe('ge');
+    expect(parseReportDateOperator('<=')).toBe('le');
+    expect(parseReportDateOperator('gte')).toBe('ge');
+    expect(parseReportDateOperator('lte')).toBe('le');
     expect(parseReportDateOperator('unknown')).toBe('between');
   });
 
   it('converts route query params into picker ranges for each operator', () => {
-    expect(reportDatePickerValueFromQuery('=', '2026-04-15', null)).toEqual({
+    expect(reportDatePickerValueFromQuery('eq', '2026-04-15', null)).toEqual({
       start: localDate(2026, 4, 15),
       end: localDate(2026, 4, 15),
     });
-    expect(reportDatePickerValueFromQuery('>=', '2026-04-15', null)).toEqual({
+    expect(reportDatePickerValueFromQuery('ge', '2026-04-15', null)).toEqual({
       start: localDate(2026, 4, 15),
       end: null,
     });
-    expect(reportDatePickerValueFromQuery('<=', null, '2026-04-30')).toEqual({
+    expect(reportDatePickerValueFromQuery('le', null, '2026-04-30')).toEqual({
       start: null,
       end: localDate(2026, 4, 30),
     });

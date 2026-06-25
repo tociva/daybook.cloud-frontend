@@ -380,7 +380,7 @@ export class LedgerCategoryReportFacade {
     const start = params.get('start');
     const end = params.get('end');
 
-    if (operator === '<=') {
+    if (operator === 'le') {
       return parseIsoDateToDate(end ?? start ?? range?.enddate);
     }
 
@@ -416,7 +416,7 @@ export class LedgerCategoryReportFacade {
       const start = this.resolveDateInput(value.start);
       const end = this.resolveDateInput(value.end);
 
-      if (operator === '<=') {
+      if (operator === 'le') {
         return end ?? start ?? this.fiscalYearSingleDate();
       }
 

@@ -216,6 +216,7 @@ describe('LedgerReportFacade', () => {
     expect(router.navigate).toHaveBeenCalledWith([], {
       relativeTo: route,
       queryParams: {
+        dateOperator: 'between',
         start: '2026-05-01',
         end: '2027-03-31',
       },
@@ -227,7 +228,7 @@ describe('LedgerReportFacade', () => {
   it('does not seed a missing end date for greater-or-equal date filters', async () => {
     configure({
       query: {
-        dateOperator: '>=',
+        dateOperator: 'ge',
         start: '2026-05-01',
       },
     });
@@ -269,7 +270,7 @@ describe('LedgerReportFacade', () => {
 
     facade.openFilterPopover();
 
-    expect(facade.draftDateOperator()).toBe('=');
+    expect(facade.draftDateOperator()).toBe('eq');
     expect(facade.draftSingleDate()).toEqual(localDate(2026, 5, 1));
     expect(facade.draftPickerValue()).toEqual({
       start: localDate(2026, 5, 1),
@@ -308,6 +309,7 @@ describe('LedgerReportFacade', () => {
     expect(router.navigate).toHaveBeenCalledTimes(1);
     expect(router.navigate).toHaveBeenCalledWith(['/app/accounting/reports/ledger', 'bank'], {
       queryParams: {
+        dateOperator: 'between',
         start: '2026-06-01',
         end: '2026-06-30',
       },
@@ -320,14 +322,14 @@ describe('LedgerReportFacade', () => {
     router.navigate.mockClear();
 
     facade.openFilterPopover();
-    facade.onDraftDateOperatorChange('=');
+    facade.onDraftDateOperatorChange('eq');
     facade.onDraftSingleDateChange(localDate(2026, 6, 15));
     facade.applyFilters();
 
     expect(router.navigate).toHaveBeenCalledTimes(1);
     expect(router.navigate).toHaveBeenCalledWith(['/app/accounting/reports/ledger', 'cash'], {
       queryParams: {
-        dateOperator: '=',
+        dateOperator: 'eq',
         start: '2026-06-15',
       },
     });
@@ -413,6 +415,7 @@ describe('LedgerReportFacade', () => {
     expect(router.navigate).toHaveBeenCalledTimes(1);
     expect(router.navigate).toHaveBeenCalledWith(['/app/accounting/reports/ledger', 'cash'], {
       queryParams: {
+        dateOperator: 'between',
         start: '2025-04-01',
         end: '2026-03-31',
       },
@@ -422,7 +425,7 @@ describe('LedgerReportFacade', () => {
   it('applies empty-state ledger selection with the current date operator query params', async () => {
     const facade = configure({
       query: {
-        dateOperator: '>=',
+        dateOperator: 'ge',
         start: '2025-04-01',
       },
     });
@@ -435,7 +438,7 @@ describe('LedgerReportFacade', () => {
     expect(router.navigate).toHaveBeenCalledTimes(1);
     expect(router.navigate).toHaveBeenCalledWith(['/app/accounting/reports/ledger', 'cash'], {
       queryParams: {
-        dateOperator: '>=',
+        dateOperator: 'ge',
         start: '2025-04-01',
       },
     });
@@ -563,7 +566,7 @@ describe('LedgerReportFacade', () => {
     const facade = configure({
       ledgerid: 'cash',
       query: {
-        dateOperator: '>=',
+        dateOperator: 'ge',
         start: '2026-05-01',
       },
     });
@@ -586,7 +589,7 @@ describe('LedgerReportFacade', () => {
     const facade = configure({
       ledgerid: 'cash',
       query: {
-        dateOperator: '<=',
+        dateOperator: 'le',
         end: '2026-05-31',
       },
     });
@@ -597,7 +600,7 @@ describe('LedgerReportFacade', () => {
 
     expect(router.navigate).toHaveBeenCalledWith(['/app/accounting/reports/ledger', 'bank'], {
       queryParams: {
-        dateOperator: '<=',
+        dateOperator: 'le',
         end: '2026-05-31',
       },
     });

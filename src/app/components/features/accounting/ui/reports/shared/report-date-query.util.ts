@@ -1,7 +1,7 @@
 import type { TngDateRangePickerSelectionInput } from '@tailng-ui/components';
 import type { FiscalYearDateRange } from '../../../../../../shared/fiscal-year-date-range-picker';
 
-export type ReportDateOperator = 'between' | '=' | '>=' | '<=';
+export type ReportDateOperator = 'between' | 'eq' | 'ge' | 'le';
 
 export type ReportDateQuery = Readonly<{
   end?: string;
@@ -24,13 +24,17 @@ export const REPORT_DATE_OPERATOR_QUERY_PARAM = 'dateOperator';
 
 export const REPORT_DATE_OPERATOR_OPTIONS: readonly ReportDateOperatorOption[] = [
   { label: 'Between', value: 'between' },
-  { label: 'Equal to', value: '=' },
-  { label: 'Greater or equal', value: '>=' },
-  { label: 'Less or equal', value: '<=' },
+  { label: 'Equal to', value: 'eq' },
+  { label: 'Greater or equal', value: 'ge' },
+  { label: 'Less or equal', value: 'le' },
 ];
 
 export function parseReportDateOperator(value: string | null | undefined): ReportDateOperator {
-  return value === '=' || value === '>=' || value === '<=' ? value : DEFAULT_REPORT_DATE_OPERATOR;
+  if (value === '=' || value === 'eq') return 'eq';
+  if (value === '>=' || value === 'ge' || value === 'gte') return 'ge';
+  if (value === '<=' || value === 'le' || value === 'lte') return 'le';
+
+  return DEFAULT_REPORT_DATE_OPERATOR;
 }
 
 export function seedMissingReportDateQuery(
@@ -39,7 +43,7 @@ export function seedMissingReportDateQuery(
   range: FiscalYearDateRange,
   operator: ReportDateOperator = DEFAULT_REPORT_DATE_OPERATOR,
 ): ReportDateRouterQuery | null {
-  if (operator === '=') {
+  if (operator === 'eq') {
     return start || end
       ? null
       : {
@@ -48,7 +52,7 @@ export function seedMissingReportDateQuery(
         };
   }
 
-  if (operator === '>=') {
+  if (operator === 'ge') {
     return start
       ? null
       : {
@@ -57,7 +61,7 @@ export function seedMissingReportDateQuery(
         };
   }
 
-  if (operator === '<=') {
+  if (operator === 'le') {
     return end
       ? null
       : {
@@ -69,6 +73,7 @@ export function seedMissingReportDateQuery(
   if (start && end) return null;
 
   return {
+    dateOperator: operator,
     start: start ?? range.startdate,
     end: end ?? range.enddate,
   };
@@ -88,17 +93,17 @@ export function buildReportDateQuery(
   end: string | null | undefined,
   operator: ReportDateOperator = DEFAULT_REPORT_DATE_OPERATOR,
 ): ReportDateQuery {
-  if (operator === '=') {
+  if (operator === 'eq') {
     const date = start ?? end;
 
     return date ? { start: date, end: date } : {};
   }
 
-  if (operator === '>=') {
+  if (operator === 'ge') {
     return start ? { start } : {};
   }
 
-  if (operator === '<=') {
+  if (operator === 'le') {
     return end ? { end } : {};
   }
 
@@ -127,13 +132,20 @@ export function buildReportDateRouterQueryFromSelection(
   toIsoDate: (value: unknown) => string | null,
 ): ReportDateRouterQuery | null {
   if (operator === DEFAULT_REPORT_DATE_OPERATOR) {
-    return buildReportDateRouterQueryFromPicker(rangeValue, toIsoDate);
+    const query = buildReportDateRouterQueryFromPicker(rangeValue, toIsoDate);
+
+    return query
+      ? {
+          dateOperator: operator,
+          ...query,
+        }
+      : null;
   }
 
   const date = singleValue ? toIsoDate(singleValue) : null;
   if (!date) return null;
 
-  if (operator === '<=') {
+  if (operator === 'le') {
     return {
       dateOperator: operator,
       end: date,
@@ -151,7 +163,7 @@ export function reportDatePickerValueFromQuery(
   start: string | null | undefined,
   end: string | null | undefined,
 ): TngDateRangePickerSelectionInput<Date> {
-  if (operator === '=') {
+  if (operator === 'eq') {
     const date = parseIsoDateToDate(start ?? end);
 
     return {
@@ -160,14 +172,14 @@ export function reportDatePickerValueFromQuery(
     };
   }
 
-  if (operator === '>=') {
+  if (operator === 'ge') {
     return {
       start: parseIsoDateToDate(start),
       end: null,
     };
   }
 
-  if (operator === '<=') {
+  if (operator === 'le') {
     return {
       start: null,
       end: parseIsoDateToDate(end),
