@@ -23,7 +23,7 @@ export type BankTxn = BankTxnPayload &
   Readonly<{
     id?: string;
     fiscalyearid?: string;
-    balance?: number;
+    balance: number;
     journals?: readonly BankTxnJournal[];
     inventoryledgermap?: InventoryLedgerMap;
   }>;

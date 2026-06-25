@@ -1,57 +1,10 @@
-import type { BankTxn, BankTxnListPeriod, BankTxnOpeningBalance } from './bank-txn.model';
+import type { BankTxnListPeriod, BankTxnOpeningBalance } from './bank-txn.model';
 
 export function getOpeningBalanceForBank(
   openingBalances: readonly BankTxnOpeningBalance[],
   mapId: string,
 ): number {
   return openingBalances.find((entry) => entry.inventoryledgermapid === mapId)?.balance ?? 0;
-}
-
-export function computeRunningBalances(
-  openingBalances: readonly BankTxnOpeningBalance[],
-  transactions: readonly Pick<BankTxn, 'inventoryledgermapid' | 'debit' | 'credit'>[],
-): Map<string, number[]> {
-  const openingByBank = new Map(
-    openingBalances.map((entry) => [entry.inventoryledgermapid, entry.balance]),
-  );
-  const runningByBank = new Map<string, number>();
-  const result = new Map<string, number[]>();
-
-  for (const txn of transactions) {
-    const bankId = txn.inventoryledgermapid;
-    if (!runningByBank.has(bankId)) {
-      runningByBank.set(bankId, openingByBank.get(bankId) ?? 0);
-    }
-
-    const next =
-      (runningByBank.get(bankId) ?? 0) + (txn.debit ?? 0) - (txn.credit ?? 0);
-    runningByBank.set(bankId, next);
-
-    if (!result.has(bankId)) {
-      result.set(bankId, []);
-    }
-    result.get(bankId)!.push(next);
-  }
-
-  return result;
-}
-
-export function attachRunningBalances(
-  transactions: readonly BankTxn[],
-  openingBalances: readonly BankTxnOpeningBalance[],
-): readonly BankTxn[] {
-  const runningByBank = computeRunningBalances(openingBalances, transactions);
-  const indexByBank = new Map<string, number>();
-
-  return transactions.map((txn) => {
-    const bankId = txn.inventoryledgermapid;
-    const index = indexByBank.get(bankId) ?? 0;
-    indexByBank.set(bankId, index + 1);
-    const balances = runningByBank.get(bankId);
-    const balance = balances?.[index];
-
-    return balance === undefined ? txn : { ...txn, balance };
-  });
 }
 
 export function hasDateLowerBound(where: Record<string, unknown> | undefined): boolean {

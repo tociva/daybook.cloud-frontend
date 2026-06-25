@@ -30,7 +30,6 @@ import { ReconciliationMatchService } from '../../../data/reconciliation-match';
 import { BankTxnService, BankTxnStore } from '../../../data/bank-txn';
 import type { BankTxn, BankTxnJournal, BankTxnOpeningBalance } from '../../../data/bank-txn';
 import {
-  attachRunningBalances,
   getOpeningBalanceForBank,
   hasDateLowerBound,
   periodFromFilter,
@@ -135,12 +134,8 @@ export class ListBankTxnComponent {
     hasDateLowerBound(this.filterWhere()),
   );
 
-  protected readonly allTransactionsWithBalance = computed(() =>
-    attachRunningBalances(this.bankTxnStore.items(), this.bankTxnStore.openingBalances()),
-  );
-
   protected readonly tableRows = computed(() => {
-    const rows = this.allTransactionsWithBalance();
+    const rows = this.bankTxnStore.items();
     if (!this.useClientPagination()) {
       return rows;
     }

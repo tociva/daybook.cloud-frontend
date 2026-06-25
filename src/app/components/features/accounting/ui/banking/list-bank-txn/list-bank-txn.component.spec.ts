@@ -191,6 +191,7 @@ describe('ListBankTxnComponent', () => {
           id: 'bank-txn-1',
           inventoryledgermapid: 'map-1',
           txndate: '2026-06-19',
+          balance: 2500,
         },
       ],
       storeError: null,
@@ -339,7 +340,7 @@ describe('ListBankTxnComponent', () => {
     ]);
   });
 
-  it('computes running balances on table rows', () => {
+  it('preserves backend-provided balances on table rows', () => {
     const { component } = setup({
       filter: {
         limit: 10,
@@ -356,6 +357,7 @@ describe('ListBankTxnComponent', () => {
           txndate: '2025-06-05',
           debit: 0,
           credit: 200,
+          balance: 780,
         },
         {
           id: 'txn-2',
@@ -363,13 +365,14 @@ describe('ListBankTxnComponent', () => {
           txndate: '2025-06-15',
           debit: 1000,
           credit: 0,
+          balance: 1780,
         },
       ],
       openingBalances: [{ inventoryledgermapid: 'map-1', balance: 500 }],
       period: { startDate: '2025-06-01', endDate: '2025-06-30' },
     });
 
-    expect(component.tableRows().map((row) => row.balance)).toEqual([300, 1300]);
+    expect(component.tableRows().map((row) => row.balance)).toEqual([780, 1780]);
   });
 
   it('exposes journal link status as a standard bank transaction filter field', () => {
@@ -402,6 +405,7 @@ describe('ListBankTxnComponent', () => {
         ledgerid: 'ledger-1',
       },
       debit: 1250.5,
+      balance: 3500.5,
       description: 'Cash deposit',
       txndate: '2026-06-19',
     });
@@ -429,6 +433,7 @@ describe('ListBankTxnComponent', () => {
         ledgerid: 'ledger-1',
       },
       credit: 750,
+      balance: 2250,
       description: 'ATM withdrawal',
       txndate: '2026-06-19',
     });
@@ -451,6 +456,7 @@ describe('ListBankTxnComponent', () => {
       id: 'bank-txn-1',
       inventoryledgermapid: 'map-1',
       debit: 500,
+      balance: 1500,
       txndate: '2026-06-19',
     });
 
