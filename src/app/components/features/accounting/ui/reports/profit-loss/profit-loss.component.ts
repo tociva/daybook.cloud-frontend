@@ -13,6 +13,7 @@ import { TngButtonComponent, TngCardComponent } from '@tailng-ui/components';
 import type { TngDateRangePickerSelectionInput } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
+import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 import {
   FiscalYearDateRangePickerComponent,
   FiscalYearDateRangeService,
@@ -60,6 +61,7 @@ const emptyData = (): ProfitLossReport['data'] => ({
   imports: [
     CommonModule,
     PageHeadingComponent,
+    BurlBackButtonComponent,
     TngButtonComponent,
     TngCardComponent,
     TngIcon,

@@ -31,10 +31,12 @@ import { TngTagIcon } from '../../bank-cash/tng-tag-icon.directive';
 
 type StatusTagTone = 'danger' | 'success' | 'warning';
 
+import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 @Component({
   selector: 'app-list-tax',
   imports: [
     PageHeadingComponent,
+    BurlBackButtonComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,
@@ -125,7 +127,9 @@ export class ListTaxComponent {
   }
 
   protected openTaxGroups(): void {
-    void this.router.navigate(['/app/trading/tax-group']);
+    void this.router.navigate(['/app/trading/tax-group'], {
+      queryParams: { burl: this.router.url },
+    });
   }
 
   protected reloadTaxes(): void {

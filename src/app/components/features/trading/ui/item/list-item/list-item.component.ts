@@ -26,11 +26,13 @@ import { PageHeadingComponent } from '../../../../../../shared/page-heading/page
 import { ItemStore } from '../../../data/item';
 import type { Item } from '../../../data/item';
 
+import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 @Component({
   selector: 'app-list-item',
   imports: [
     EmptyStateComponent,
     PageHeadingComponent,
+    BurlBackButtonComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,
@@ -119,7 +121,9 @@ export class ListItemComponent {
   }
 
   protected openItemCategories(): void {
-    void this.router.navigate(['/app/trading/item-category']);
+    void this.router.navigate(['/app/trading/item-category'], {
+      queryParams: { burl: this.router.url },
+    });
   }
 
   protected showAllItems(): void {

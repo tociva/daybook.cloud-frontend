@@ -21,11 +21,13 @@ import { FiscalYearStore } from '../../../data/fiscal-year';
 import type { FiscalYear } from '../../../data/fiscal-year';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 
+import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 @Component({
   selector: 'app-list-fiscal-year',
   standalone: true,
   imports: [
     PageHeadingComponent,
+    BurlBackButtonComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,

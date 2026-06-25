@@ -13,6 +13,7 @@ import { TngButtonComponent, TngCardComponent } from '@tailng-ui/components';
 import type { TngDateValue } from '@tailng-ui/primitives';
 import { TngIcon } from '@tailng-ui/icons';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
+import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 import { FiscalYearDateRangeService } from '../../../../../../shared/fiscal-year-date-range-picker';
 import { FiscalYearDatepickerComponent } from '../../../../../../shared/fiscal-year-datepicker';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
@@ -56,6 +57,7 @@ const emptyData = (): BalanceSheetReport['data'] => ({
   imports: [
     CommonModule,
     PageHeadingComponent,
+    BurlBackButtonComponent,
     TngButtonComponent,
     TngCardComponent,
     TngIcon,

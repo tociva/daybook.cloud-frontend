@@ -22,11 +22,13 @@ import type { PurchaseReturn } from '../../../data/purchase-return';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { formatAmountWithCurrency } from '../../../../../../shared/format/currency';
 
+import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 @Component({
   selector: 'app-list-purchase-return',
   standalone: true,
   imports: [
     PageHeadingComponent,
+    BurlBackButtonComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,

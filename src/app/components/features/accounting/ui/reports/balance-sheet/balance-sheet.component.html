@@ -4,6 +4,7 @@
     title="Balance Sheet"
     description="Financial position as of the selected date"
   >
+    <app-burl-back-button [fallbackUrl]="'/app/accounting/reports'" />
     <div class="date-filter">
       <app-fiscal-year-datepicker
         id="end-date"

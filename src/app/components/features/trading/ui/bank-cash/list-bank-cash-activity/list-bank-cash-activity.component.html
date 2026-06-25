@@ -4,6 +4,7 @@
     title="Bank & Cash Activity"
     description="Review receipts, payments, and contra movements across bank and cash accounts."
   >
+    <app-burl-back-button [fallbackUrl]="'/app/trading/bank-cash'" />
     <app-crud-filter-popover
       ariaLabel="Bank and cash activity filters"
       title="Filter bank and cash activity"
@@ -17,10 +18,6 @@
       Refresh
     </tng-button>
 
-    <tng-button type="button" appearance="outline" tone="neutral" (click)="backToAccounts()">
-      <tng-icon icon="arrowLeft" aria-hidden="true" />
-      Accounts
-    </tng-button>
   </app-page-heading>
 
   <tng-card variant="outline" padding="lg">

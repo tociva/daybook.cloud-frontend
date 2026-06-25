@@ -30,11 +30,13 @@ import type { Ledger } from '../../../data/ledger';
 const openingHeaderBorder =
   '1px solid color-mix(in srgb, var(--tng-semantic-border-subtle) 70%, var(--tng-semantic-foreground-muted) 30%)';
 
+import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 @Component({
   selector: 'app-list-ledger',
   standalone: true,
   imports: [
     PageHeadingComponent,
+    BurlBackButtonComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,

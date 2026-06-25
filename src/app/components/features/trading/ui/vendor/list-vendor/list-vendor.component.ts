@@ -25,11 +25,13 @@ import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-
 import { VendorStore } from '../../../data/vendor';
 import type { Vendor } from '../../../data/vendor';
 
+import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 @Component({
   selector: 'app-list-vendor',
   standalone: true,
   imports: [
     PageHeadingComponent,
+    BurlBackButtonComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,

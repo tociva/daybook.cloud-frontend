@@ -4,6 +4,7 @@
     [title]="pageTitle()"
     [description]="pageDescription()"
   >
+    <app-burl-back-button [fallbackUrl]="'/app/trading/bank-cash'" />
     <app-crud-filter-popover
       ariaLabel="Bank contra filters"
       title="Filter contra transactions"

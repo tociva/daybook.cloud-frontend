@@ -142,11 +142,13 @@ const JOURNAL_IMPORT_CONFIG: Record<JournalImportSource, JournalImportConfig> = 
 const DEFAULT_JOURNAL_ORDER = ['date DESC'] as const;
 const COLLAPSED_ENTRY_LIMIT = 2;
 
+import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 @Component({
   selector: 'app-list-journal',
   standalone: true,
   imports: [
     PageHeadingComponent,
+    BurlBackButtonComponent,
     TngButtonComponent,
     TngCardComponent,
     TngDialogComponent,

@@ -9,6 +9,7 @@ import {
 import type { TngTableColumn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
+import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { UserSessionStore } from '../../../../management/data/user-session/user-session.store';
 import type { LedgerCategoryReportRow } from '../../../data/ledger-category-report/ledger-category-report.model';
@@ -26,6 +27,7 @@ import { LedgerCategoryReportFacade } from './ledger-category-report.facade';
   imports: [
     CommonModule,
     PageHeadingComponent,
+    BurlBackButtonComponent,
     TngButtonComponent,
     TngCardComponent,
     TngIcon,

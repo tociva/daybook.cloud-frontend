@@ -35,11 +35,13 @@ type ActivityBadgeTone = 'success' | 'warning';
 
 const emptyReportTotals = { payment: 0, receipt: 0 };
 
+import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 @Component({
   selector: 'app-list-bank-cash-activity',
   standalone: true,
   imports: [
     PageHeadingComponent,
+    BurlBackButtonComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,
@@ -146,9 +148,6 @@ export class ListBankCashActivityComponent {
     return row.receipt > 0 ? 'success' : 'warning';
   }
 
-  protected backToAccounts(): void {
-    void this.router.navigate(['/app/trading/bank-cash']);
-  }
 
   protected openSource(row: BankCashActivityRow): void {
     if (!row.sourceRoute) return;

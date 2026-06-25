@@ -40,11 +40,13 @@ import { CUSTOMER_RECEIPT_BULK_UPLOAD_CONFIG } from './customer-receipt-bulk-upl
 
 const DEFAULT_CUSTOMER_RECEIPT_ORDER = ['date ASC'] as const;
 
+import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 @Component({
   selector: 'app-list-customer-receipt',
   standalone: true,
   imports: [
     PageHeadingComponent,
+    BurlBackButtonComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,

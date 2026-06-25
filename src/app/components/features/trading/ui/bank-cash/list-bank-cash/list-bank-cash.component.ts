@@ -30,10 +30,12 @@ import { TngTagIcon } from '../tng-tag-icon.directive';
 
 type StatusBadgeTone = 'danger' | 'success' | 'warning';
 
+import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 @Component({
   selector: 'app-list-bank-cash',
   imports: [
     PageHeadingComponent,
+    BurlBackButtonComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,

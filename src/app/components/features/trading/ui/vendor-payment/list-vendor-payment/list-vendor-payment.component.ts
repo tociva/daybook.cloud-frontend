@@ -42,11 +42,13 @@ import { VendorPaymentBulkUploadValidationService } from './vendor-payment-bulk-
 
 const DEFAULT_VENDOR_PAYMENT_ORDER = ['date ASC'] as const;
 
+import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 @Component({
   selector: 'app-list-vendor-payment',
   standalone: true,
   imports: [
     PageHeadingComponent,
+    BurlBackButtonComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,

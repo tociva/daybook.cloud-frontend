@@ -28,10 +28,12 @@ import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-
 import { TaxGroupStore } from '../../../data/tax-group';
 import type { TaxGroup } from '../../../data/tax-group';
 
+import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 @Component({
   selector: 'app-list-tax-group',
   imports: [
     PageHeadingComponent,
+    BurlBackButtonComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,
@@ -102,7 +104,9 @@ export class ListTaxGroupComponent {
   }
 
   protected openTaxes(): void {
-    void this.router.navigate(['/app/trading/tax']);
+    void this.router.navigate(['/app/trading/tax'], {
+      queryParams: { burl: this.router.url },
+    });
   }
 
   protected reloadTaxGroups(): void {

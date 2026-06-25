@@ -47,11 +47,13 @@ import {
 
 const DEFAULT_PURCHASE_INVOICE_ORDER = ['date ASC'] as const;
 
+import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 @Component({
   selector: 'app-list-purchase-invoice',
   standalone: true,
   imports: [
     PageHeadingComponent,
+    BurlBackButtonComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,

@@ -45,11 +45,13 @@ import {
   JOURNAL_LINK_STATUS_FILTER_FIELD,
 } from '../../../shared/journal-link-status-filter';
 
+import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 @Component({
   selector: 'app-list-bank-txn',
   standalone: true,
   imports: [
     PageHeadingComponent,
+    BurlBackButtonComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,

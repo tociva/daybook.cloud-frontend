@@ -36,11 +36,13 @@ import type { ContraTransaction, ContraTransactionJournal } from '../../../data/
 
 const DEFAULT_BANK_CONTRA_ORDER = ['date ASC'] as const;
 
+import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 @Component({
   selector: 'app-list-bank-contra',
   standalone: true,
   imports: [
     PageHeadingComponent,
+    BurlBackButtonComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,

@@ -4,6 +4,7 @@
     title="Trial Balance Report"
     description="Ledger balances for the selected period"
   >
+    <app-burl-back-button [fallbackUrl]="'/app/accounting/reports'" />
     <div class="date-filter">
       <app-fiscal-year-date-range-picker
         id="date-range"

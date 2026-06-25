@@ -15,11 +15,13 @@ import { UserSessionStore } from '../../../../management/data/user-session/user-
 import { StoredDocumentStore } from '../../../data/stored-document';
 import type { StoredDocument } from '../../../data/stored-document';
 
+import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 @Component({
   selector: 'app-list-document',
   standalone: true,
   imports: [
     PageHeadingComponent,
+    BurlBackButtonComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,

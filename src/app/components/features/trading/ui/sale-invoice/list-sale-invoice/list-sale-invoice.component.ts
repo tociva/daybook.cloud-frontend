@@ -47,11 +47,13 @@ import type { BulkUploadPreviewConfig } from '../../../../../../shared/bulk-uplo
 
 const DEFAULT_SALE_INVOICE_ORDER = ['date ASC', 'number ASC'] as const;
 
+import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 @Component({
   selector: 'app-list-sale-invoice',
   standalone: true,
   imports: [
     PageHeadingComponent,
+    BurlBackButtonComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,

@@ -4,6 +4,7 @@
     title="Profit & Loss Report"
     description="Income and expense summary for the selected period"
   >
+    <app-burl-back-button [fallbackUrl]="'/app/accounting/reports'" />
     <div class="date-filter">
       <app-fiscal-year-date-range-picker
         id="date-range"

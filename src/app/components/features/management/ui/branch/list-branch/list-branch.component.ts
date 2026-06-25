@@ -22,11 +22,13 @@ import type { Branch } from '../../../data/branch';
 import { CountryStore } from '../../../data/country/country.store';
 import { CurrencyStore } from '../../../data/currency/currency.store';
 
+import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 @Component({
   selector: 'app-list-branch',
   standalone: true,
   imports: [
     PageHeadingComponent,
+    BurlBackButtonComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,

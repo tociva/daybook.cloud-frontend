@@ -24,11 +24,13 @@ import {
 } from '../../../data/ledger-category';
 import type { LedgerCategory } from '../../../data/ledger-category';
 
+import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 @Component({
   selector: 'app-list-ledger-category',
   standalone: true,
   imports: [
     PageHeadingComponent,
+    BurlBackButtonComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,
@@ -112,7 +114,9 @@ export class ListLedgerCategoryComponent {
   }
 
   protected openLedgers(): void {
-    void this.router.navigate(['/app/accounting/ledger']);
+    void this.router.navigate(['/app/accounting/ledger'], {
+      queryParams: { burl: this.router.url },
+    });
   }
 
   protected reloadLedgerCategories(): void {

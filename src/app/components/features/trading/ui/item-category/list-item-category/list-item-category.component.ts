@@ -26,11 +26,13 @@ import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-
 import { ItemCategoryStore } from '../../../data/item-category';
 import type { ItemCategory } from '../../../data/item-category';
 
+import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 @Component({
   selector: 'app-list-item-category',
   standalone: true,
   imports: [
     PageHeadingComponent,
+    BurlBackButtonComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,

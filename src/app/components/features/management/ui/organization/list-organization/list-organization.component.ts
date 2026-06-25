@@ -20,11 +20,13 @@ import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-
 import { OrganizationStore } from '../../../data/organization';
 import type { Organization } from '../../../data/organization';
 
+import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 @Component({
   selector: 'app-list-organization',
   standalone: true,
   imports: [
     PageHeadingComponent,
+    BurlBackButtonComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,
