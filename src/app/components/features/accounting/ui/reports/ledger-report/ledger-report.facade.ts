@@ -89,6 +89,18 @@ export class LedgerReportFacade {
   readonly displayError = computed(() => this.error() ?? this.catalogError());
   readonly hasError = computed(() => this.displayError() !== null);
   readonly hasLedgerSelected = computed(() => !!this.selectedLedgerId());
+  readonly selectedLedgerName = computed(() => {
+    const ledgerid = this.selectedLedgerId();
+    if (!ledgerid) return '';
+
+    const meta = this.selectedLedgerMeta();
+    if (meta?.ledgerid === ledgerid && meta.ledgerName) {
+      return meta.ledgerName;
+    }
+
+    const fromCatalog = this.ledgerStore.catalog().find((ledger) => ledger.id === ledgerid);
+    return fromCatalog?.name ?? '';
+  });
   readonly showSelectLedgerNotice = computed(
     () => !this.hasLedgerSelected() && !this.isLoading() && !this.hasError(),
   );

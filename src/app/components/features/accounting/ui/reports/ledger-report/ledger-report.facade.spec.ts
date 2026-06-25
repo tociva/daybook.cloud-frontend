@@ -382,6 +382,39 @@ describe('LedgerReportFacade', () => {
     expect(facade.title()).toBe('Ledger Report');
   });
 
+  it('returns an empty selected ledger name when no ledger is in the route', async () => {
+    const facade = configure();
+    await settle();
+
+    expect(facade.selectedLedgerName()).toBe('');
+  });
+
+  it('resolves selected ledger name from the catalog while the report is loading', async () => {
+    const getLedgerReport = vi.fn(() => deferred<LedgerReport>().promise);
+    const facade = configure({ ledgerid: 'cash', getLedgerReport });
+    ledgerCatalog.set([
+      {
+        id: 'cash',
+        name: 'Cash Account',
+        categoryid: 'assets',
+      },
+    ]);
+
+    await settle();
+
+    expect(facade.selectedLedgerName()).toBe('Cash Account');
+  });
+
+  it('resolves selected ledger name from the report after load', async () => {
+    const facade = configure({
+      ledgerid: 'cash',
+      getLedgerReport: vi.fn(async () => report('cash', 'Cash Account')),
+    });
+    await settle();
+
+    expect(facade.selectedLedgerName()).toBe('Cash Account');
+  });
+
   it('shows the permission error and does not call the report API when permission is missing', async () => {
     const facade = configure({
       ledgerid: 'cash',

@@ -100,6 +100,20 @@ export class LedgerCategoryReportFacade {
   readonly displayError = computed(() => this.error() ?? this.catalogError());
   readonly hasError = computed(() => this.displayError() !== null);
   readonly hasCategorySelected = computed(() => !!this.selectedCategoryId());
+  readonly selectedCategoryName = computed(() => {
+    const ledgercategoryid = this.selectedCategoryId();
+    if (!ledgercategoryid) return '';
+
+    const meta = this.selectedCategoryMeta();
+    if (meta?.ledgercategoryid === ledgercategoryid && meta.ledgerCategoryName) {
+      return meta.ledgerCategoryName;
+    }
+
+    const fromCatalog = this.ledgerCategoryStore
+      .catalog()
+      .find((category) => category.id === ledgercategoryid);
+    return fromCatalog?.name ?? '';
+  });
   readonly showSelectCategoryNotice = computed(
     () => !this.hasCategorySelected() && !this.isLoading() && !this.hasError(),
   );

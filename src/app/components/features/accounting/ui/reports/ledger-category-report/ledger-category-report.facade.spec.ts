@@ -397,6 +397,38 @@ describe('LedgerCategoryReportFacade', () => {
     expect(facade.title()).toBe('Ledger Category Report');
   });
 
+  it('returns an empty selected category name when no category is in the route', async () => {
+    const facade = configure();
+    await settle();
+
+    expect(facade.selectedCategoryName()).toBe('');
+  });
+
+  it('resolves selected category name from the catalog while the report is loading', async () => {
+    const getLedgerCategoryReport = vi.fn(() => deferred<LedgerCategoryReport>().promise);
+    const facade = configure({ ledgercategoryid: 'bank', getLedgerCategoryReport });
+    categoryCatalog.set([
+      {
+        id: 'bank',
+        name: 'Bank Accounts',
+      },
+    ]);
+
+    await settle();
+
+    expect(facade.selectedCategoryName()).toBe('Bank Accounts');
+  });
+
+  it('resolves selected category name from the report after load', async () => {
+    const facade = configure({
+      ledgercategoryid: 'bank',
+      getLedgerCategoryReport: vi.fn(async () => report('bank', 'Bank Accounts')),
+    });
+    await settle();
+
+    expect(facade.selectedCategoryName()).toBe('Bank Accounts');
+  });
+
   it('shows the permission error and does not call the report API when permission is missing', async () => {
     const facade = configure({
       ledgercategoryid: 'bank',

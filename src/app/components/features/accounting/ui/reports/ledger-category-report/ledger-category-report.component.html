@@ -1,7 +1,7 @@
 <main class="management-page">
   <app-page-heading
-    eyebrow="Accounting"
-    title="Ledger Category Report"
+    eyebrow="Ledger Category Report"
+    [title]="selectedCategoryName()"
     description="Activity and running balance for a ledger category group in the selected period"
   >
     <app-burl-back-button [fallbackUrl]="'/app/accounting/reports'" />

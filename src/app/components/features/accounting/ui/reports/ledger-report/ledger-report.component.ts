@@ -51,6 +51,7 @@ export class LedgerReportComponent {
   protected readonly displayError = this.facade.displayError;
   protected readonly generatedAt = this.facade.generatedAt;
   protected readonly reportTitle = this.facade.title;
+  protected readonly selectedLedgerName = this.facade.selectedLedgerName;
   protected readonly tableRows = this.facade.tableRows;
   protected readonly canViewLedgerReport = this.facade.canViewLedgerReport;
   protected readonly hasError = this.facade.hasError;
