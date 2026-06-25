@@ -19,6 +19,37 @@
   color: var(--tng-semantic-foreground-muted);
 }
 
+.select-ledger-form {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  color: var(--tng-semantic-foreground-primary);
+  display: grid;
+  gap: 1rem;
+  max-width: 24rem;
+  padding: 1rem;
+}
+
+.select-ledger-form__message {
+  color: var(--tng-semantic-foreground-muted);
+  margin: 0;
+}
+
+.select-ledger-form__field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.select-ledger-form__field label {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.select-ledger-form__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .table-stack {
   display: grid;
   gap: 1rem;

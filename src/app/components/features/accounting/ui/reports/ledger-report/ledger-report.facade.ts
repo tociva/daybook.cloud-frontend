@@ -63,6 +63,7 @@ export class LedgerReportFacade {
   });
 
   private lastBootstrapKey: string | null = null;
+  private lastRouteLedgerId: string | null | undefined = undefined;
   private ledgerCatalogPromise: Promise<void> | null = null;
   private loadToken = 0;
 
@@ -117,6 +118,8 @@ export class LedgerReportFacade {
       const routeParams = this.routeParams();
       const range = this.fiscalYearDateRange.range();
       const ledgerid = routeParams.get('ledgerid');
+      const previousRouteLedgerId = this.lastRouteLedgerId;
+      this.lastRouteLedgerId = ledgerid;
 
       this.selectedLedgerId.set(ledgerid);
 
@@ -144,6 +147,10 @@ export class LedgerReportFacade {
       if (!ledgerid) {
         this.lastBootstrapKey = null;
         this.nextLoadToken();
+        if (previousRouteLedgerId) {
+          this.draftLedgerId.set(null);
+          this.ledgerQuery.set('');
+        }
         this.clearReport();
         void this.loadLedgerCatalogOnly();
         return;
@@ -198,6 +205,19 @@ export class LedgerReportFacade {
 
   onLedgerQueryChange(query: string): void {
     this.ledgerQuery.set(query);
+  }
+
+  applyLedgerSelection(): void {
+    const ledgerid = this.draftLedgerId();
+    if (!ledgerid) return;
+
+    const params = this.queryParams();
+    void this.router.navigate(ledgerReportPath(ledgerid), {
+      queryParams: {
+        start: params.get('start'),
+        end: params.get('end'),
+      },
+    });
   }
 
   onRefresh(): void {

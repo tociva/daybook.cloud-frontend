@@ -313,7 +313,66 @@ describe('LedgerReportFacade', () => {
     expect(facade.title()).toBe('');
     expect(facade.generatedAt()).toBe('');
     expect(facade.tableRows()).toEqual([]);
+    expect(facade.draftLedgerId()).toBeNull();
     expect(ledgerStore.ensureLedgerCatalogLoaded).toHaveBeenCalledWith(false);
+  });
+
+  it('resets draft ledger selection when the route has no ledgerid', async () => {
+    const facade = configure({ ledgerid: 'cash' });
+    await settle();
+
+    facade.onDraftLedgerChange('bank');
+    expect(facade.draftLedgerId()).toBe('bank');
+
+    updateRoute({}, { start: '2026-04-01', end: '2027-03-31' });
+    await settle();
+
+    expect(facade.draftLedgerId()).toBeNull();
+  });
+
+  it('keeps empty-state draft ledger selection when the route effect re-runs without a ledger route change', async () => {
+    const facade = configure();
+    await settle();
+
+    facade.onDraftLedgerChange('cash');
+    expect(facade.draftLedgerId()).toBe('cash');
+
+    updateRoute({}, { start: '2026-05-01', end: '2026-05-31' });
+    await settle();
+
+    expect(facade.draftLedgerId()).toBe('cash');
+  });
+
+  it('applies empty-state ledger selection with the current period query params', async () => {
+    const facade = configure({
+      query: {
+        start: '2025-04-01',
+        end: '2026-03-31',
+      },
+    });
+    await settle();
+    router.navigate.mockClear();
+
+    facade.onDraftLedgerChange('cash');
+    facade.applyLedgerSelection();
+
+    expect(router.navigate).toHaveBeenCalledTimes(1);
+    expect(router.navigate).toHaveBeenCalledWith(['/app/accounting/reports/ledger', 'cash'], {
+      queryParams: {
+        start: '2025-04-01',
+        end: '2026-03-31',
+      },
+    });
+  });
+
+  it('does not navigate when empty-state ledger selection has no ledger', async () => {
+    const facade = configure();
+    await settle();
+    router.navigate.mockClear();
+
+    facade.applyLedgerSelection();
+
+    expect(router.navigate).not.toHaveBeenCalled();
   });
 
   it('stores the report title from the API response', async () => {

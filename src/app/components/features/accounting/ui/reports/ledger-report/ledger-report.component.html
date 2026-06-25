@@ -25,9 +25,38 @@
     } @else if (hasError()) {
       <div class="notice notice--danger">{{ displayError() }}</div>
     } @else if (showSelectLedgerNotice()) {
-      <div class="notice notice--info">
-        Select a ledger to view its report for the chosen period.
-      </div>
+      <form class="select-ledger-form" (submit)="onApplyLedgerSelection($event)">
+        <p class="select-ledger-form__message">
+          Select a ledger to view its report for the chosen period.
+        </p>
+
+        <div class="select-ledger-form__field">
+          <label for="ledger-report-empty-ledger">Ledger</label>
+          <tng-autocomplete
+            id="ledger-report-empty-ledger"
+            placeholder="Search ledger..."
+            ariaLabel="Ledger"
+            [options]="autocompleteLedgers()"
+            [value]="draftLedgerId()"
+            [getOptionValue]="ledgerOptionValue"
+            [getOptionLabel]="ledgerOptionLabel"
+            [trackBy]="ledgerTrackBy"
+            (valueChange)="onDraftLedgerChange($event)"
+            (queryChange)="onLedgerQueryChange($event)"
+          />
+        </div>
+
+        <div class="select-ledger-form__actions">
+          <tng-button
+            type="submit"
+            appearance="solid"
+            tone="primary"
+            [disabled]="!draftLedgerId()"
+          >
+            Submit
+          </tng-button>
+        </div>
+      </form>
     } @else {
       <div class="summary-grid" aria-label="Ledger report summary">
         @for (metric of summaryMetrics(); track metric.id) {

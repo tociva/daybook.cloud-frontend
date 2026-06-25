@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
+  TngAutocompleteComponent,
   TngButtonComponent,
   TngCardComponent,
   TngTable,
@@ -28,6 +29,7 @@ import { LedgerReportFacade } from './ledger-report.facade';
     CommonModule,
     PageHeadingComponent,
     BurlBackButtonComponent,
+    TngAutocompleteComponent,
     TngButtonComponent,
     TngCardComponent,
     TngIcon,
@@ -54,6 +56,11 @@ export class LedgerReportComponent {
   protected readonly hasError = this.facade.hasError;
   protected readonly hasLedgerSelected = this.facade.hasLedgerSelected;
   protected readonly showSelectLedgerNotice = this.facade.showSelectLedgerNotice;
+  protected readonly autocompleteLedgers = this.facade.autocompleteLedgers;
+  protected readonly draftLedgerId = this.facade.draftLedgerId;
+  protected readonly ledgerOptionValue = this.facade.ledgerOptionValue;
+  protected readonly ledgerOptionLabel = this.facade.ledgerOptionLabel;
+  protected readonly ledgerTrackBy = this.facade.ledgerTrackBy;
 
   protected readonly currencyMinorUnit = computed(() => {
     const currency = this.userSessionStore.session()?.fiscalyear?.currency;
@@ -89,6 +96,19 @@ export class LedgerReportComponent {
 
   protected onRefresh(): void {
     this.facade.onRefresh();
+  }
+
+  protected onDraftLedgerChange(ledgerid: string | null): void {
+    this.facade.onDraftLedgerChange(ledgerid);
+  }
+
+  protected onLedgerQueryChange(query: string): void {
+    this.facade.onLedgerQueryChange(query);
+  }
+
+  protected onApplyLedgerSelection(event: SubmitEvent): void {
+    event.preventDefault();
+    this.facade.applyLedgerSelection();
   }
 
   protected formatDisplayDate(value: string | null | undefined): string {
