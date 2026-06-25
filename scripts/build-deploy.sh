@@ -14,3 +14,5 @@ pnpm run build --configuration production
 pnpm dlx wrangler pages deploy "${DIST}" \
   --project-name "${CF_PAGES_PROJECT_NAME}" \
   --branch "${CF_PAGES_BRANCH}"
+
+echo "Deploy finished at $(date '+%Y-%m-%d %H:%M:%S %Z')"

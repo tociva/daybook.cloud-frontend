@@ -3,11 +3,16 @@ import {
   TngAutocompleteComponent,
   TngBadge,
   TngButtonComponent,
+  TngFormFieldComponent,
+  TngLabelComponent,
+  TngSelectComponent,
 } from '@tailng-ui/components';
 import type { TngDateRangePickerSelectionInput } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { TngPopover, TngPopoverPanel, TngPopoverTrigger } from '@tailng-ui/primitives';
+import { FiscalYearDatepickerComponent } from '../../../../../../../shared/fiscal-year-datepicker';
 import { FiscalYearDateRangePickerComponent } from '../../../../../../../shared/fiscal-year-date-range-picker';
+import type { ReportDateOperator } from '../../shared/report-date-query.util';
 import { LedgerCategoryReportFacade } from '../ledger-category-report.facade';
 
 @Component({
@@ -17,10 +22,14 @@ import { LedgerCategoryReportFacade } from '../ledger-category-report.facade';
     TngAutocompleteComponent,
     TngBadge,
     TngButtonComponent,
+    TngFormFieldComponent,
     TngIcon,
+    TngLabelComponent,
+    TngSelectComponent,
     TngPopover,
     TngPopoverPanel,
     TngPopoverTrigger,
+    FiscalYearDatepickerComponent,
     FiscalYearDateRangePickerComponent,
   ],
   templateUrl: './ledger-category-report-filter-popover.component.html',
@@ -32,8 +41,15 @@ export class LedgerCategoryReportFilterPopoverComponent {
 
   protected readonly activeFilterCount = this.facade.activeFilterCount;
   protected readonly autocompleteCategories = this.facade.autocompleteCategories;
+  protected readonly dateOperatorOptionLabel = this.facade.dateOperatorOptionLabel;
+  protected readonly dateOperatorOptions = this.facade.dateOperatorOptions;
+  protected readonly dateOperatorOptionValue = this.facade.dateOperatorOptionValue;
+  protected readonly dateOperatorTrackBy = this.facade.dateOperatorTrackBy;
   protected readonly draftCategoryId = this.facade.draftCategoryId;
+  protected readonly draftDateOperator = this.facade.draftDateOperator;
   protected readonly draftPickerValue = this.facade.draftPickerValue;
+  protected readonly draftSingleDate = this.facade.draftSingleDate;
+  protected readonly isDraftDateBetween = this.facade.isDraftDateBetween;
   protected readonly categoryOptionValue = this.facade.categoryOptionValue;
   protected readonly categoryOptionLabel = this.facade.categoryOptionLabel;
   protected readonly categoryTrackBy = this.facade.categoryTrackBy;
@@ -48,6 +64,14 @@ export class LedgerCategoryReportFilterPopoverComponent {
 
   protected onDraftDateRangeChange(value: TngDateRangePickerSelectionInput<Date>): void {
     this.facade.onDraftDateRangeChange(value);
+  }
+
+  protected onDraftDateOperatorChange(operator: ReportDateOperator | string | null): void {
+    this.facade.onDraftDateOperatorChange(operator);
+  }
+
+  protected onDraftSingleDateChange(value: unknown): void {
+    this.facade.onDraftSingleDateChange(value instanceof Date ? value : null);
   }
 
   protected onDraftCategoryChange(ledgercategoryid: string | null): void {

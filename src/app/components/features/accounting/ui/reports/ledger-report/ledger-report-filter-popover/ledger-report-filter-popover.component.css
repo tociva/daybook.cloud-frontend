@@ -29,6 +29,18 @@
 }
 
 .report-filter-form {
+  --tng-select-overlay-z-index: var(--ledger-report-filter-menu-z-index);
+  --tng-select-z-overlay: var(--ledger-report-filter-menu-z-index);
+  --tng-select-bg: var(--tng-semantic-background-surface);
+  --tng-select-surface: var(--tng-semantic-background-base);
+  --tng-select-fg: var(--tng-semantic-foreground-primary);
+  --tng-select-muted: var(--tng-semantic-foreground-muted);
+  --tng-select-brand: var(--tng-semantic-accent-brand);
+  --tng-select-border: var(--tng-semantic-border-subtle);
+  --tng-select-border-strong: var(--tng-semantic-border-strong);
+  --tng-select-border-hover: var(--tng-semantic-accent-brand);
+  --tng-form-field-frame-min-height: 2.25rem;
+  --tng-form-field-label-gap: 0.35rem;
   --tng-autocomplete-overlay-z-index: var(--ledger-report-filter-menu-z-index);
   --tng-autocomplete-z-overlay: var(--ledger-report-filter-menu-z-index);
   --tng-autocomplete-bg: var(--tng-semantic-background-surface);
@@ -61,15 +73,10 @@
   gap: 0.75rem;
 }
 
-.report-filter-field {
+.report-filter-comparison {
   display: grid;
-  gap: 0.4rem;
-}
-
-.report-filter-field label {
-  color: var(--tng-semantic-foreground-muted);
-  font-size: 0.75rem;
-  font-weight: 700;
+  gap: 0.5rem;
+  grid-template-columns: 8.25rem minmax(0, 1fr);
 }
 
 .report-filter-actions {
@@ -83,5 +90,9 @@
   .report-filter-panel,
   .report-filter-form {
     min-width: min(24rem, calc(100vw - 2.5rem));
+  }
+
+  .report-filter-comparison {
+    grid-template-columns: 1fr;
   }
 }

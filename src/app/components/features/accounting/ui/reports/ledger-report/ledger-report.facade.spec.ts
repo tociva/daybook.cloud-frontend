@@ -224,6 +224,19 @@ describe('LedgerReportFacade', () => {
     });
   });
 
+  it('does not seed a missing end date for greater-or-equal date filters', async () => {
+    configure({
+      query: {
+        dateOperator: '>=',
+        start: '2026-05-01',
+      },
+    });
+
+    await settle();
+
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
   it('syncs draft filters from the current route when the filter popover opens', async () => {
     const facade = configure({
       ledgerid: 'cash',
@@ -237,9 +250,30 @@ describe('LedgerReportFacade', () => {
     facade.openFilterPopover();
 
     expect(facade.draftLedgerId()).toBe('cash');
+    expect(facade.draftDateOperator()).toBe('between');
     expect(facade.draftPickerValue()).toEqual({
       start: localDate(2026, 5, 1),
       end: localDate(2026, 5, 31),
+    });
+  });
+
+  it('syncs draft single-date filters from the current route when the filter popover opens', async () => {
+    const facade = configure({
+      ledgerid: 'cash',
+      query: {
+        dateOperator: '=',
+        start: '2026-05-01',
+      },
+    });
+    await settle();
+
+    facade.openFilterPopover();
+
+    expect(facade.draftDateOperator()).toBe('=');
+    expect(facade.draftSingleDate()).toEqual(localDate(2026, 5, 1));
+    expect(facade.draftPickerValue()).toEqual({
+      start: localDate(2026, 5, 1),
+      end: localDate(2026, 5, 1),
     });
   });
 
@@ -280,6 +314,25 @@ describe('LedgerReportFacade', () => {
     });
   });
 
+  it('applies staged equal-to date filters with a single date in the route', async () => {
+    const facade = configure({ ledgerid: 'cash' });
+    await settle();
+    router.navigate.mockClear();
+
+    facade.openFilterPopover();
+    facade.onDraftDateOperatorChange('=');
+    facade.onDraftSingleDateChange(localDate(2026, 6, 15));
+    facade.applyFilters();
+
+    expect(router.navigate).toHaveBeenCalledTimes(1);
+    expect(router.navigate).toHaveBeenCalledWith(['/app/accounting/reports/ledger', 'cash'], {
+      queryParams: {
+        dateOperator: '=',
+        start: '2026-06-15',
+      },
+    });
+  });
+
   it('clears draft filters back to no ledger and the fiscal-year period', async () => {
     const facade = configure({
       ledgerid: 'cash',
@@ -294,6 +347,7 @@ describe('LedgerReportFacade', () => {
     facade.clearFilters();
 
     expect(facade.draftLedgerId()).toBeNull();
+    expect(facade.draftDateOperator()).toBe('between');
     expect(facade.draftPickerValue()).toEqual({
       start: localDate(2026, 4, 1),
       end: localDate(2027, 3, 31),
@@ -361,6 +415,28 @@ describe('LedgerReportFacade', () => {
       queryParams: {
         start: '2025-04-01',
         end: '2026-03-31',
+      },
+    });
+  });
+
+  it('applies empty-state ledger selection with the current date operator query params', async () => {
+    const facade = configure({
+      query: {
+        dateOperator: '>=',
+        start: '2025-04-01',
+      },
+    });
+    await settle();
+    router.navigate.mockClear();
+
+    facade.onDraftLedgerChange('cash');
+    facade.applyLedgerSelection();
+
+    expect(router.navigate).toHaveBeenCalledTimes(1);
+    expect(router.navigate).toHaveBeenCalledWith(['/app/accounting/reports/ledger', 'cash'], {
+      queryParams: {
+        dateOperator: '>=',
+        start: '2025-04-01',
       },
     });
   });
@@ -481,6 +557,50 @@ describe('LedgerReportFacade', () => {
       catalogCallsAfterBootstrap,
     );
     expect(ledgerStore.ensureLedgerCatalogLoaded).not.toHaveBeenCalledWith(true);
+  });
+
+  it('loads and refreshes greater-or-equal date filters as sparse API queries', async () => {
+    const facade = configure({
+      ledgerid: 'cash',
+      query: {
+        dateOperator: '>=',
+        start: '2026-05-01',
+      },
+    });
+    await settle();
+
+    expect(ledgerReportService.getLedgerReport).toHaveBeenCalledWith('cash', {
+      start: '2026-05-01',
+    });
+
+    ledgerReportService.getLedgerReport.mockClear();
+    facade.onRefresh();
+    await settle();
+
+    expect(ledgerReportService.getLedgerReport).toHaveBeenCalledWith('cash', {
+      start: '2026-05-01',
+    });
+  });
+
+  it('preserves date operator query params when opening an opposite ledger', async () => {
+    const facade = configure({
+      ledgerid: 'cash',
+      query: {
+        dateOperator: '<=',
+        end: '2026-05-31',
+      },
+    });
+    await settle();
+    router.navigate.mockClear();
+
+    facade.openOppositeLedger('bank');
+
+    expect(router.navigate).toHaveBeenCalledWith(['/app/accounting/reports/ledger', 'bank'], {
+      queryParams: {
+        dateOperator: '<=',
+        end: '2026-05-31',
+      },
+    });
   });
 
   it('preserves the selected ledger option from report metadata before the catalog contains it', async () => {

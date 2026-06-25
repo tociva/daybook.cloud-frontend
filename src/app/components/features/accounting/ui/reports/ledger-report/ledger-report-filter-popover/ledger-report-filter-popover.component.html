@@ -29,8 +29,8 @@
       </div>
 
       <div class="report-filter-form__body">
-        <div class="report-filter-field">
-          <label for="ledger-report-filter-ledger">Ledger</label>
+        <tng-form-field labelPosition="outline">
+          <tng-label forId="ledger-report-filter-ledger">Ledger</tng-label>
           <tng-autocomplete
             id="ledger-report-filter-ledger"
             placeholder="Search ledger..."
@@ -43,18 +43,42 @@
             (valueChange)="onDraftLedgerChange($event)"
             (queryChange)="onLedgerQueryChange($event)"
           />
-        </div>
+        </tng-form-field>
 
-        <div class="report-filter-field">
-          <label for="ledger-report-filter-date-range">Period</label>
-          <app-fiscal-year-date-range-picker
-            id="ledger-report-filter-date-range"
-            placeholder="Select report period"
-            fullWidth
-            [value]="draftPickerValue()"
-            (valueChange)="onDraftDateRangeChange($event)"
-          />
-        </div>
+        <tng-form-field labelPosition="outline">
+          <tng-label forId="ledger-report-filter-date-operator">Date</tng-label>
+          <div class="report-filter-comparison">
+            <tng-select
+              id="ledger-report-filter-date-operator"
+              aria-label="Date filter operator"
+              [options]="dateOperatorOptions"
+              [getOptionLabel]="dateOperatorOptionLabel"
+              [getOptionValue]="dateOperatorOptionValue"
+              [trackBy]="dateOperatorTrackBy"
+              [value]="draftDateOperator()"
+              (valueChange)="onDraftDateOperatorChange($event)"
+            />
+
+            @if (isDraftDateBetween()) {
+              <app-fiscal-year-date-range-picker
+                id="ledger-report-filter-date-range"
+                placeholder="Select report period"
+                fullWidth
+                [value]="draftPickerValue()"
+                (valueChange)="onDraftDateRangeChange($event)"
+              />
+            } @else {
+              <app-fiscal-year-datepicker
+                id="ledger-report-filter-date"
+                inputAriaLabel="Date"
+                placeholder="Select date"
+                fullWidth
+                [value]="draftSingleDate()"
+                (valueChange)="onDraftSingleDateChange($event)"
+              />
+            }
+          </div>
+        </tng-form-field>
       </div>
 
       <div class="report-filter-actions">

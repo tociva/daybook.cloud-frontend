@@ -16,9 +16,16 @@ import type {
 import { LedgerCategoryReportService } from '../../../data/ledger-category-report/ledger-category-report.service';
 import { hasAccountingReportPermission } from '../../../shared/accounting-report-permissions';
 import {
+  DEFAULT_REPORT_DATE_OPERATOR,
+  REPORT_DATE_OPERATOR_OPTIONS,
+  REPORT_DATE_OPERATOR_QUERY_PARAM,
+  type ReportDateOperator,
   buildReportDateQuery,
+  buildReportDateRouterQueryFromSelection,
   buildReportDateRouterQueryFromPicker,
   parseIsoDateToDate,
+  parseReportDateOperator,
+  reportDatePickerValueFromQuery,
   seedMissingReportDateQuery,
 } from '../shared/report-date-query.util';
 
@@ -84,7 +91,9 @@ export class LedgerCategoryReportFacade {
   readonly categoryQuery = signal('');
   readonly pickerValue = signal<TngDateRangePickerSelectionInput<Date>>(null);
   readonly draftCategoryId = signal<string | null>(null);
+  readonly draftDateOperator = signal<ReportDateOperator>(DEFAULT_REPORT_DATE_OPERATOR);
   readonly draftPickerValue = signal<TngDateRangePickerSelectionInput<Date>>(null);
+  readonly draftSingleDate = signal<Date | null>(null);
 
   private readonly selectedCategoryMeta = signal<LedgerCategoryReportCategory | null>(null);
 
@@ -137,6 +146,18 @@ export class LedgerCategoryReportFacade {
   readonly categoryOptionLabel = (category: LedgerCategory): string => category.name ?? '';
   readonly categoryTrackBy = (_index: number, category: LedgerCategory): string =>
     category.id ?? '';
+  readonly dateOperatorOptions = REPORT_DATE_OPERATOR_OPTIONS;
+  readonly dateOperatorOptionLabel = (option: (typeof REPORT_DATE_OPERATOR_OPTIONS)[number]) =>
+    option.label;
+  readonly dateOperatorOptionValue = (option: (typeof REPORT_DATE_OPERATOR_OPTIONS)[number]) =>
+    option.value;
+  readonly dateOperatorTrackBy = (
+    _index: number,
+    option: (typeof REPORT_DATE_OPERATOR_OPTIONS)[number],
+  ) => option.value;
+  readonly isDraftDateBetween = computed(
+    () => this.draftDateOperator() === DEFAULT_REPORT_DATE_OPERATOR,
+  );
 
   constructor() {
     effect(() => {
@@ -151,10 +172,11 @@ export class LedgerCategoryReportFacade {
 
       const start = params.get('start');
       const end = params.get('end');
+      const dateOperator = parseReportDateOperator(params.get(REPORT_DATE_OPERATOR_QUERY_PARAM));
 
       if (!range) return;
 
-      const seededQuery = seedMissingReportDateQuery(start, end, range);
+      const seededQuery = seedMissingReportDateQuery(start, end, range, dateOperator);
       if (seededQuery) {
         void this.router.navigate([], {
           relativeTo: this.route,
@@ -165,10 +187,7 @@ export class LedgerCategoryReportFacade {
         return;
       }
 
-      this.pickerValue.set({
-        start: parseIsoDateToDate(start),
-        end: parseIsoDateToDate(end),
-      });
+      this.pickerValue.set(reportDatePickerValueFromQuery(dateOperator, start, end));
 
       if (!ledgercategoryid) {
         this.lastBootstrapKey = null;
@@ -190,22 +209,48 @@ export class LedgerCategoryReportFacade {
         return;
       }
 
-      const bootstrapKey = `${ledgercategoryid}|${start}|${end}`;
+      const bootstrapKey = `${ledgercategoryid}|${dateOperator}|${start}|${end}`;
       if (this.lastBootstrapKey === bootstrapKey) return;
       this.lastBootstrapKey = bootstrapKey;
 
       const token = this.nextLoadToken();
-      void this.bootstrapLedgerCategoryReport(token, ledgercategoryid, start, end);
+      void this.bootstrapLedgerCategoryReport(token, ledgercategoryid, start, end, dateOperator);
     });
   }
 
   openFilterPopover(): void {
+    const operator = this.currentDateOperatorFromQuery();
+
     this.draftCategoryId.set(this.routeParams().get('ledgercategoryid'));
-    this.draftPickerValue.set(this.currentPickerValueFromQuery());
+    this.draftDateOperator.set(operator);
+    this.draftPickerValue.set(this.currentPickerValueFromQuery(operator));
+    this.draftSingleDate.set(this.currentSingleDateFromQuery(operator));
+  }
+
+  onDraftDateOperatorChange(operator: ReportDateOperator | string | null): void {
+    const nextOperator = parseReportDateOperator(operator);
+    const currentOperator = this.draftDateOperator();
+    if (nextOperator === currentOperator) return;
+
+    this.draftDateOperator.set(nextOperator);
+
+    if (nextOperator === DEFAULT_REPORT_DATE_OPERATOR) {
+      const singleDate = this.draftSingleDate();
+      if (singleDate) {
+        this.draftPickerValue.set({ start: singleDate, end: singleDate });
+      }
+      return;
+    }
+
+    this.draftSingleDate.set(this.singleDateFromDraftPicker(nextOperator));
   }
 
   onDraftDateRangeChange(value: TngDateRangePickerSelectionInput<Date>): void {
     this.draftPickerValue.set(value);
+  }
+
+  onDraftSingleDateChange(value: Date | null): void {
+    this.draftSingleDate.set(value);
   }
 
   onDraftCategoryChange(ledgercategoryid: string | null): void {
@@ -214,8 +259,11 @@ export class LedgerCategoryReportFacade {
 
   applyFilters(): void {
     const queryParams =
-      buildReportDateRouterQueryFromPicker(this.draftPickerValue(), (value) =>
-        this.fiscalYearDateRange.toIsoDate(value),
+      buildReportDateRouterQueryFromSelection(
+        this.draftDateOperator(),
+        this.draftPickerValue(),
+        this.draftSingleDate(),
+        (value) => this.fiscalYearDateRange.toIsoDate(value),
       ) ?? this.defaultReportDateRouterQuery();
     const ledgercategoryid = this.draftCategoryId();
 
@@ -231,7 +279,9 @@ export class LedgerCategoryReportFacade {
 
   clearFilters(): void {
     this.draftCategoryId.set(null);
+    this.draftDateOperator.set(DEFAULT_REPORT_DATE_OPERATOR);
     this.draftPickerValue.set(this.fiscalYearPickerValue());
+    this.draftSingleDate.set(this.fiscalYearSingleDate());
   }
 
   onCategoryQueryChange(query: string): void {
@@ -242,12 +292,8 @@ export class LedgerCategoryReportFacade {
     const ledgercategoryid = this.draftCategoryId();
     if (!ledgercategoryid) return;
 
-    const params = this.queryParams();
     void this.router.navigate(ledgerCategoryReportPath(ledgercategoryid), {
-      queryParams: {
-        start: params.get('start'),
-        end: params.get('end'),
-      },
+      queryParams: this.currentReportDateRouterQuery(),
     });
   }
 
@@ -269,6 +315,7 @@ export class LedgerCategoryReportFacade {
       ledgercategoryid,
       params.get('start'),
       params.get('end'),
+      parseReportDateOperator(params.get(REPORT_DATE_OPERATOR_QUERY_PARAM)),
     );
   }
 
@@ -279,35 +326,65 @@ export class LedgerCategoryReportFacade {
   }
 
   openRowLedger(ledgerid: string): void {
-    const params = this.queryParams();
     void this.router.navigate(ledgerReportPath(ledgerid), {
-      queryParams: {
-        start: params.get('start'),
-        end: params.get('end'),
-      },
+      queryParams: this.currentReportDateRouterQuery(),
     });
   }
 
   openOppositeLedger(ledgerid: string): void {
-    const params = this.queryParams();
     void this.router.navigate(ledgerReportPath(ledgerid), {
-      queryParams: {
-        start: params.get('start'),
-        end: params.get('end'),
-      },
+      queryParams: this.currentReportDateRouterQuery(),
     });
   }
 
-  private currentPickerValueFromQuery(): TngDateRangePickerSelectionInput<Date> {
+  private currentDateOperatorFromQuery(): ReportDateOperator {
+    return parseReportDateOperator(this.queryParams().get(REPORT_DATE_OPERATOR_QUERY_PARAM));
+  }
+
+  private currentReportDateRouterQuery(): {
+    dateOperator?: ReportDateOperator;
+    end?: string | null;
+    start?: string | null;
+  } {
+    const params = this.queryParams();
+    const operator = parseReportDateOperator(params.get(REPORT_DATE_OPERATOR_QUERY_PARAM));
+
+    return (
+      buildReportDateRouterQueryFromSelection(
+        operator,
+        reportDatePickerValueFromQuery(operator, params.get('start'), params.get('end')),
+        this.currentSingleDateFromQuery(operator),
+        (value) => this.fiscalYearDateRange.toIsoDate(value),
+      ) ??
+      buildReportDateRouterQueryFromPicker(this.pickerValue(), (value) =>
+        this.fiscalYearDateRange.toIsoDate(value),
+      ) ??
+      this.defaultReportDateRouterQuery()
+    );
+  }
+
+  private currentPickerValueFromQuery(
+    operator: ReportDateOperator,
+  ): TngDateRangePickerSelectionInput<Date> {
     const params = this.queryParams();
     const range = this.fiscalYearDateRange.range();
     const start = params.get('start') ?? range?.startdate ?? null;
     const end = params.get('end') ?? range?.enddate ?? null;
 
-    return {
-      start: parseIsoDateToDate(start),
-      end: parseIsoDateToDate(end),
-    };
+    return reportDatePickerValueFromQuery(operator, start, end);
+  }
+
+  private currentSingleDateFromQuery(operator: ReportDateOperator): Date | null {
+    const params = this.queryParams();
+    const range = this.fiscalYearDateRange.range();
+    const start = params.get('start');
+    const end = params.get('end');
+
+    if (operator === '<=') {
+      return parseIsoDateToDate(end ?? start ?? range?.enddate);
+    }
+
+    return parseIsoDateToDate(start ?? end ?? range?.startdate);
   }
 
   private fiscalYearPickerValue(): TngDateRangePickerSelectionInput<Date> {
@@ -320,12 +397,40 @@ export class LedgerCategoryReportFacade {
     };
   }
 
+  private fiscalYearSingleDate(): Date | null {
+    const range = this.fiscalYearDateRange.range();
+    return parseIsoDateToDate(range?.startdate);
+  }
+
   private defaultReportDateRouterQuery(): { end: string | null; start: string | null } {
     const range = this.fiscalYearDateRange.range();
     return {
       start: range?.startdate ?? null,
       end: range?.enddate ?? null,
     };
+  }
+
+  private singleDateFromDraftPicker(operator: ReportDateOperator): Date | null {
+    const value = this.draftPickerValue();
+    if (value && typeof value === 'object' && !(value instanceof Date)) {
+      const start = this.resolveDateInput(value.start);
+      const end = this.resolveDateInput(value.end);
+
+      if (operator === '<=') {
+        return end ?? start ?? this.fiscalYearSingleDate();
+      }
+
+      return start ?? end ?? this.fiscalYearSingleDate();
+    }
+
+    return this.fiscalYearSingleDate();
+  }
+
+  private resolveDateInput(value: unknown): Date | null {
+    if (value instanceof Date) return value;
+    if (typeof value === 'string') return parseIsoDateToDate(value);
+
+    return null;
   }
 
   private hasDateRange(value: TngDateRangePickerSelectionInput<Date>): boolean {
@@ -386,11 +491,12 @@ export class LedgerCategoryReportFacade {
     ledgercategoryid: string,
     start: string | null,
     end: string | null,
+    operator: ReportDateOperator,
   ): Promise<void> {
     try {
       await this.ensureCategoryCatalogLoaded();
       if (!this.isActiveLoad(token)) return;
-      await this.loadReport(token, ledgercategoryid, start, end);
+      await this.loadReport(token, ledgercategoryid, start, end, operator);
     } catch (err) {
       if (!this.isActiveLoad(token)) return;
       this.error.set(getApiErrorMessage(err, 'Failed to load ledger category catalog.'));
@@ -431,6 +537,7 @@ export class LedgerCategoryReportFacade {
     ledgercategoryid: string,
     start: string | null,
     end: string | null,
+    operator: ReportDateOperator,
   ): Promise<void> {
     if (!this.isActiveLoad(token)) return;
 
@@ -440,7 +547,7 @@ export class LedgerCategoryReportFacade {
     try {
       const report = await this.ledgerCategoryReportService.getLedgerCategoryReport(
         ledgercategoryid,
-        buildReportDateQuery(start, end),
+        buildReportDateQuery(start, end, operator),
       );
       if (!this.isActiveLoad(token)) return;
 

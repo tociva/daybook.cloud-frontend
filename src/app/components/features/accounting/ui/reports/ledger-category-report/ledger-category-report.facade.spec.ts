@@ -233,6 +233,19 @@ describe('LedgerCategoryReportFacade', () => {
     });
   });
 
+  it('does not seed a missing end date for greater-or-equal date filters', async () => {
+    configure({
+      query: {
+        dateOperator: '>=',
+        start: '2026-05-01',
+      },
+    });
+
+    await settle();
+
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
   it('syncs draft filters from the current route when the filter popover opens', async () => {
     const facade = configure({
       ledgercategoryid: 'bank',
@@ -246,9 +259,30 @@ describe('LedgerCategoryReportFacade', () => {
     facade.openFilterPopover();
 
     expect(facade.draftCategoryId()).toBe('bank');
+    expect(facade.draftDateOperator()).toBe('between');
     expect(facade.draftPickerValue()).toEqual({
       start: localDate(2026, 5, 1),
       end: localDate(2026, 5, 31),
+    });
+  });
+
+  it('syncs draft single-date filters from the current route when the filter popover opens', async () => {
+    const facade = configure({
+      ledgercategoryid: 'bank',
+      query: {
+        dateOperator: '=',
+        start: '2026-05-01',
+      },
+    });
+    await settle();
+
+    facade.openFilterPopover();
+
+    expect(facade.draftDateOperator()).toBe('=');
+    expect(facade.draftSingleDate()).toEqual(localDate(2026, 5, 1));
+    expect(facade.draftPickerValue()).toEqual({
+      start: localDate(2026, 5, 1),
+      end: localDate(2026, 5, 1),
     });
   });
 
@@ -292,6 +326,28 @@ describe('LedgerCategoryReportFacade', () => {
     );
   });
 
+  it('applies staged equal-to date filters with a single date in the route', async () => {
+    const facade = configure({ ledgercategoryid: 'bank' });
+    await settle();
+    router.navigate.mockClear();
+
+    facade.openFilterPopover();
+    facade.onDraftDateOperatorChange('=');
+    facade.onDraftSingleDateChange(localDate(2026, 6, 15));
+    facade.applyFilters();
+
+    expect(router.navigate).toHaveBeenCalledTimes(1);
+    expect(router.navigate).toHaveBeenCalledWith(
+      ['/app/accounting/reports/ledger-category', 'bank'],
+      {
+        queryParams: {
+          dateOperator: '=',
+          start: '2026-06-15',
+        },
+      },
+    );
+  });
+
   it('clears draft filters back to no category and the fiscal-year period', async () => {
     const facade = configure({
       ledgercategoryid: 'bank',
@@ -306,6 +362,7 @@ describe('LedgerCategoryReportFacade', () => {
     facade.clearFilters();
 
     expect(facade.draftCategoryId()).toBeNull();
+    expect(facade.draftDateOperator()).toBe('between');
     expect(facade.draftPickerValue()).toEqual({
       start: localDate(2026, 4, 1),
       end: localDate(2027, 3, 31),
@@ -380,6 +437,31 @@ describe('LedgerCategoryReportFacade', () => {
     );
   });
 
+  it('applies empty-state category selection with the current date operator query params', async () => {
+    const facade = configure({
+      query: {
+        dateOperator: '>=',
+        start: '2025-04-01',
+      },
+    });
+    await settle();
+    router.navigate.mockClear();
+
+    facade.onDraftCategoryChange('bank');
+    facade.applyCategorySelection();
+
+    expect(router.navigate).toHaveBeenCalledTimes(1);
+    expect(router.navigate).toHaveBeenCalledWith(
+      ['/app/accounting/reports/ledger-category', 'bank'],
+      {
+        queryParams: {
+          dateOperator: '>=',
+          start: '2025-04-01',
+        },
+      },
+    );
+  });
+
   it('does not navigate when empty-state category selection has no category', async () => {
     const facade = configure();
     await settle();
@@ -437,9 +519,7 @@ describe('LedgerCategoryReportFacade', () => {
 
     await settle();
 
-    expect(facade.error()).toBe(
-      'You do not have permission to view the ledger category report.',
-    );
+    expect(facade.error()).toBe('You do not have permission to view the ledger category report.');
     expect(ledgerCategoryStore.ensureLedgerCategoryCatalogLoaded).not.toHaveBeenCalled();
     expect(ledgerCategoryReportService.getLedgerCategoryReport).not.toHaveBeenCalled();
   });
@@ -467,9 +547,7 @@ describe('LedgerCategoryReportFacade', () => {
     );
     await settle();
 
-    cashReport.resolve(
-      report('cash', 'Cash', [reportRow('cash-row')]),
-    );
+    cashReport.resolve(report('cash', 'Cash', [reportRow('cash-row')]));
     await settle();
     expect(facade.generatedAt()).toBe('generated-cash');
     expect(facade.tableRows().map((row) => row.journalid)).toEqual(['cash-row']);
@@ -500,6 +578,50 @@ describe('LedgerCategoryReportFacade', () => {
       catalogCallsAfterBootstrap,
     );
     expect(ledgerCategoryStore.ensureLedgerCategoryCatalogLoaded).not.toHaveBeenCalledWith(true);
+  });
+
+  it('loads and refreshes greater-or-equal date filters as sparse API queries', async () => {
+    const facade = configure({
+      ledgercategoryid: 'bank',
+      query: {
+        dateOperator: '>=',
+        start: '2026-05-01',
+      },
+    });
+    await settle();
+
+    expect(ledgerCategoryReportService.getLedgerCategoryReport).toHaveBeenCalledWith('bank', {
+      start: '2026-05-01',
+    });
+
+    ledgerCategoryReportService.getLedgerCategoryReport.mockClear();
+    facade.onRefresh();
+    await settle();
+
+    expect(ledgerCategoryReportService.getLedgerCategoryReport).toHaveBeenCalledWith('bank', {
+      start: '2026-05-01',
+    });
+  });
+
+  it('preserves date operator query params when opening a ledger report', async () => {
+    const facade = configure({
+      ledgercategoryid: 'bank',
+      query: {
+        dateOperator: '<=',
+        end: '2026-05-31',
+      },
+    });
+    await settle();
+    router.navigate.mockClear();
+
+    facade.openRowLedger('cash');
+
+    expect(router.navigate).toHaveBeenCalledWith(['/app/accounting/reports/ledger', 'cash'], {
+      queryParams: {
+        dateOperator: '<=',
+        end: '2026-05-31',
+      },
+    });
   });
 
   it('preserves the selected category option from report metadata before the catalog contains it', async () => {
