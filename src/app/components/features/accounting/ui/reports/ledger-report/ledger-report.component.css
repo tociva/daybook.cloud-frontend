@@ -105,6 +105,11 @@
   gap: 0.25rem 0;
 }
 
+.opposite-ledger-toggle {
+  margin-left: 0.35rem;
+  white-space: nowrap;
+}
+
 .summary-grid {
   display: grid;
   gap: 1rem;

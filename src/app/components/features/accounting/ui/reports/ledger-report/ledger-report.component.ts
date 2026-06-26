@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   TngAutocompleteComponent,
@@ -22,6 +22,8 @@ import {
 import { createReportAmountFormatter, formatNetBalance } from '../../../shared/report-amount.util';
 import { LedgerReportFilterPopoverComponent } from './ledger-report-filter-popover/ledger-report-filter-popover.component';
 import { LedgerReportFacade } from './ledger-report.facade';
+
+const COLLAPSED_OPPOSITE_LEDGER_LIMIT = 1;
 
 @Component({
   selector: 'app-ledger-report',
@@ -63,6 +65,7 @@ export class LedgerReportComponent {
   protected readonly ledgerOptionValue = this.facade.ledgerOptionValue;
   protected readonly ledgerOptionLabel = this.facade.ledgerOptionLabel;
   protected readonly ledgerTrackBy = this.facade.ledgerTrackBy;
+  private readonly expandedOppositeLedgerRows = signal<ReadonlySet<string>>(new Set());
 
   protected readonly currencyMinorUnit = computed(() => {
     const currency = this.userSessionStore.session()?.fiscalyear?.currency;
@@ -129,11 +132,50 @@ export class LedgerReportComponent {
     return formatNetBalance(row.balanceDebit, row.balanceCredit, this.formatAmount());
   }
 
+  protected visibleOppositeLedgers(row: LedgerReportRow): LedgerReportRow['oppositeLedgers'] {
+    if (this.isOppositeLedgerRowExpanded(row)) return row.oppositeLedgers;
+    return row.oppositeLedgers.slice(0, COLLAPSED_OPPOSITE_LEDGER_LIMIT);
+  }
+
+  protected hiddenOppositeLedgerCount(row: LedgerReportRow): number {
+    return Math.max(row.oppositeLedgers.length - COLLAPSED_OPPOSITE_LEDGER_LIMIT, 0);
+  }
+
+  protected showOppositeLedgerMore(row: LedgerReportRow): boolean {
+    return this.hiddenOppositeLedgerCount(row) > 0 && !this.isOppositeLedgerRowExpanded(row);
+  }
+
+  protected showOppositeLedgerLess(row: LedgerReportRow): boolean {
+    return this.hiddenOppositeLedgerCount(row) > 0 && this.isOppositeLedgerRowExpanded(row);
+  }
+
+  protected expandOppositeLedgers(row: LedgerReportRow): void {
+    const key = this.oppositeLedgerRowKey(row);
+    this.expandedOppositeLedgerRows.update((current) => new Set([...current, key]));
+  }
+
+  protected collapseOppositeLedgers(row: LedgerReportRow): void {
+    const key = this.oppositeLedgerRowKey(row);
+    this.expandedOppositeLedgerRows.update((current) => {
+      const next = new Set(current);
+      next.delete(key);
+      return next;
+    });
+  }
+
   protected viewJournal(journalid: string): void {
     this.facade.viewJournal(journalid);
   }
 
   protected openOppositeLedger(ledgerid: string): void {
     this.facade.openOppositeLedger(ledgerid);
+  }
+
+  private isOppositeLedgerRowExpanded(row: LedgerReportRow): boolean {
+    return this.expandedOppositeLedgerRows().has(this.oppositeLedgerRowKey(row));
+  }
+
+  private oppositeLedgerRowKey(row: LedgerReportRow): string {
+    return `${row.journalid}:${row.date}:${row.order}`;
   }
 }

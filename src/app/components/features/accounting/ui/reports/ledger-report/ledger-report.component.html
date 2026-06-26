@@ -47,12 +47,7 @@
         </div>
 
         <div class="select-ledger-form__actions">
-          <tng-button
-            type="submit"
-            appearance="solid"
-            tone="primary"
-            [disabled]="!draftLedgerId()"
-          >
+          <tng-button type="submit" appearance="solid" tone="primary" [disabled]="!draftLedgerId()">
             Submit
           </tng-button>
         </div>
@@ -118,7 +113,11 @@
               @if (row.oppositeLedgers.length === 0) {
                 —
               } @else {
-                @for (opposite of row.oppositeLedgers; track opposite.ledgerid; let last = $last) {
+                @for (
+                  opposite of visibleOppositeLedgers(row);
+                  track opposite.ledgerid;
+                  let last = $last
+                ) {
                   <button
                     type="button"
                     class="link-button"
@@ -129,6 +128,28 @@
                   @if (!last) {
                     <span class="opposite-separator" aria-hidden="true">, </span>
                   }
+                }
+                @if (showOppositeLedgerMore(row)) {
+                  <button
+                    type="button"
+                    class="link-button opposite-ledger-toggle"
+                    [attr.aria-expanded]="false"
+                    [attr.aria-label]="'Show ' + hiddenOppositeLedgerCount(row) + ' more ledgers'"
+                    (click)="expandOppositeLedgers(row)"
+                  >
+                    +{{ hiddenOppositeLedgerCount(row) }} more
+                  </button>
+                }
+                @if (showOppositeLedgerLess(row)) {
+                  <button
+                    type="button"
+                    class="link-button opposite-ledger-toggle"
+                    [attr.aria-expanded]="true"
+                    aria-label="Show fewer ledgers"
+                    (click)="collapseOppositeLedgers(row)"
+                  >
+                    less
+                  </button>
                 }
               }
             </span>
