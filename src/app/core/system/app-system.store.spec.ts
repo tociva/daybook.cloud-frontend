@@ -5,6 +5,10 @@ import type { User } from 'oidc-client-ts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthService } from '../../components/features/auth/data/auth.service';
 import { AuthStore } from '../../components/features/auth/data/auth.store';
+import {
+  OrganizationMemberStatus,
+  UserRoles,
+} from '../../components/features/management/data/organization-member/organization-member.enums';
 import type { UserSession } from '../../components/features/management/data/user-session/user-session.model';
 import { UserSessionService } from '../../components/features/management/data/user-session/user-session.service';
 import { UserSessionStore } from '../../components/features/management/data/user-session/user-session.store';
@@ -127,6 +131,176 @@ describe('AppSystemStore refresh-token session recovery', () => {
     expect(renewWithRefreshTokenOnce).toHaveBeenCalledOnce();
     expect(renewWithRefreshTokenOnce).toHaveBeenCalledWith(appConfig.auth);
     expect(navigateByUrl).toHaveBeenCalledWith('/app/dashboard');
+    expect(store.startupStatus()).toBe('user-session-ready');
+  });
+
+  it('routes pending-invite-only sessions to bootstrap', async () => {
+    const pendingInviteSession = {
+      ...userSession,
+      member: null,
+      memberorgs: [
+        {
+          organization: { id: 'org-2', name: 'Invited Org' },
+          organizationid: 'org-2',
+          role: UserRoles.USER,
+          status: OrganizationMemberStatus.INVITED,
+          userid: 'user-1',
+        },
+      ],
+      organization: null,
+      ownorgs: [],
+    } as unknown as UserSession;
+    const createUserSession = vi.fn().mockResolvedValue(pendingInviteSession);
+    const navigateByUrl = vi.fn(async () => true);
+
+    TestBed.configureTestingModule({
+      providers: [
+        AppSystemStore,
+        { provide: Router, useValue: { navigateByUrl } },
+        {
+          provide: AppConfigStore,
+          useValue: {
+            config: vi.fn(() => appConfig),
+            load: vi.fn(async () => appConfig),
+          },
+        },
+        {
+          provide: AuthStore,
+          useValue: {
+            resetSessionState: vi.fn(),
+            setSessionState: vi.fn(),
+          },
+        },
+        {
+          provide: AuthService,
+          useValue: {
+            clearPausedProvider: vi.fn(),
+            consumeReturnUri: vi.fn(() => '/app/dashboard'),
+            getCurrentReturnUri: vi.fn(() => '/app/dashboard'),
+            getLoginErrorMessage: vi.fn(() => null),
+            getPausedProviderMessage: vi.fn(() => null),
+            hasActiveSession: vi.fn(async () => true),
+            isAuthServerOrigin: vi.fn(() => false),
+            isAuthServerRoute: vi.fn(() => false),
+            isLoginCallbackRoute: vi.fn(() => false),
+            isOutsideClientRedirectOrigin: vi.fn(() => false),
+            isPostLoginReturnRoute: vi.fn(() => false),
+            isPostLogoutRedirectRoute: vi.fn(() => false),
+            renewWithRefreshTokenOnce: vi.fn(),
+            startLogin: vi.fn(),
+          },
+        },
+        {
+          provide: UserSessionService,
+          useValue: { createUserSession },
+        },
+        {
+          provide: UserSessionStore,
+          useValue: {
+            resetSession: vi.fn(),
+            setError: vi.fn(),
+            setLoading: vi.fn(),
+            setSession: vi.fn(),
+          },
+        },
+        { provide: AppThemeStore, useValue: { initFromSession: vi.fn() } },
+        { provide: LedgerCachePreferencesStore, useValue: { initFromSession: vi.fn() } },
+        {
+          provide: CatalogCacheCoordinatorService,
+          useValue: { clearAllPersistedCatalogsForUser: vi.fn() },
+        },
+      ],
+    });
+
+    const store = TestBed.inject(AppSystemStore);
+    await store.initialize();
+
+    expect(navigateByUrl).toHaveBeenCalledWith('/bootstrap/bootstrap-organization');
+    expect(store.startupStatus()).toBe('user-session-ready');
+  });
+
+  it('routes accepted member-only sessions without an active organization to organization selection', async () => {
+    const acceptedMemberSession = {
+      ...userSession,
+      member: null,
+      memberorgs: [
+        {
+          organization: { id: 'org-2', name: 'Accepted Org' },
+          organizationid: 'org-2',
+          role: UserRoles.USER,
+          status: OrganizationMemberStatus.ACCEPTED,
+          userid: 'user-1',
+        },
+      ],
+      organization: null,
+      ownorgs: [],
+    } as unknown as UserSession;
+    const createUserSession = vi.fn().mockResolvedValue(acceptedMemberSession);
+    const navigateByUrl = vi.fn(async () => true);
+
+    TestBed.configureTestingModule({
+      providers: [
+        AppSystemStore,
+        { provide: Router, useValue: { navigateByUrl } },
+        {
+          provide: AppConfigStore,
+          useValue: {
+            config: vi.fn(() => appConfig),
+            load: vi.fn(async () => appConfig),
+          },
+        },
+        {
+          provide: AuthStore,
+          useValue: {
+            resetSessionState: vi.fn(),
+            setSessionState: vi.fn(),
+          },
+        },
+        {
+          provide: AuthService,
+          useValue: {
+            clearPausedProvider: vi.fn(),
+            consumeReturnUri: vi.fn(() => '/app/dashboard'),
+            getCurrentReturnUri: vi.fn(() => '/app/dashboard'),
+            getLoginErrorMessage: vi.fn(() => null),
+            getPausedProviderMessage: vi.fn(() => null),
+            hasActiveSession: vi.fn(async () => true),
+            isAuthServerOrigin: vi.fn(() => false),
+            isAuthServerRoute: vi.fn(() => false),
+            isLoginCallbackRoute: vi.fn(() => false),
+            isOutsideClientRedirectOrigin: vi.fn(() => false),
+            isPostLoginReturnRoute: vi.fn(() => false),
+            isPostLogoutRedirectRoute: vi.fn(() => false),
+            renewWithRefreshTokenOnce: vi.fn(),
+            startLogin: vi.fn(),
+          },
+        },
+        {
+          provide: UserSessionService,
+          useValue: { createUserSession },
+        },
+        {
+          provide: UserSessionStore,
+          useValue: {
+            resetSession: vi.fn(),
+            setError: vi.fn(),
+            setLoading: vi.fn(),
+            setSession: vi.fn(),
+          },
+        },
+        { provide: AppThemeStore, useValue: { initFromSession: vi.fn() } },
+        { provide: LedgerCachePreferencesStore, useValue: { initFromSession: vi.fn() } },
+        {
+          provide: CatalogCacheCoordinatorService,
+          useValue: { clearAllPersistedCatalogsForUser: vi.fn() },
+        },
+      ],
+    });
+
+    const store = TestBed.inject(AppSystemStore);
+    await store.initialize();
+
+    expect(navigateByUrl).toHaveBeenCalledWith('/app/select-organization');
     expect(store.startupStatus()).toBe('user-session-ready');
   });
 });

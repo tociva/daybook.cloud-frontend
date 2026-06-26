@@ -8,6 +8,7 @@ import { AppConfigStore } from '../config/app-config.store';
 import { UserSession } from '../../components/features/management/data/user-session/user-session.model';
 import { UserSessionService } from '../../components/features/management/data/user-session/user-session.service';
 import { UserSessionStore } from '../../components/features/management/data/user-session/user-session.store';
+import { OrganizationMemberStatus } from '../../components/features/management/data/organization-member/organization-member.enums';
 import { getApiErrorMessage, isApiErrorStatus } from '../api/api-error.util';
 import { CatalogCacheCoordinatorService } from '../cache/catalog-cache-coordinator.service';
 import { LedgerCachePreferencesStore } from '../preferences/ledger-cache-preferences.store';
@@ -16,6 +17,7 @@ import { AppStartupStatus, AppSystemModel } from './app-system.model';
 import { initialAppSystemState } from './app-system.state';
 
 const BOOTSTRAP_ORGANIZATION_ROUTE = '/bootstrap/bootstrap-organization';
+const SELECT_ORGANIZATION_ROUTE = '/app/select-organization';
 
 type SessionReturnRouteStrategy = 'consume-login-return-uri' | 'preserve-current-uri';
 
@@ -88,8 +90,20 @@ function hasOwnOrganizations(session: UserSession): boolean {
   return Boolean(session.ownorgs?.length);
 }
 
-function hasMemberOrganizations(session: UserSession): boolean {
-  return Boolean(session.memberorgs?.length);
+function hasAcceptedMemberOrganizations(session: UserSession): boolean {
+  return Boolean(
+    session.memberorgs?.some((member) => member.status === OrganizationMemberStatus.ACCEPTED),
+  );
+}
+
+function resolvePostSessionRoute(session: UserSession, returnUri: string): string {
+  if (hasOwnOrganizations(session) || session.organization?.id) {
+    return returnUri;
+  }
+  if (hasAcceptedMemberOrganizations(session)) {
+    return SELECT_ORGANIZATION_ROUTE;
+  }
+  return BOOTSTRAP_ORGANIZATION_ROUTE;
 }
 
 export const AppSystemStore = signalStore(
@@ -169,9 +183,7 @@ export const AppSystemStore = signalStore(
           ledgerCachePrefsStore.initFromSession(session);
 
           const returnUri = resolveSessionReturnUri(config, strategy);
-          const hasOrganizationAccess =
-            hasOwnOrganizations(session) || hasMemberOrganizations(session);
-          const targetRoute = hasOrganizationAccess ? returnUri : BOOTSTRAP_ORGANIZATION_ROUTE;
+          const targetRoute = resolvePostSessionRoute(session, returnUri);
           const redirectStatus: AppStartupStatus =
             targetRoute === BOOTSTRAP_ORGANIZATION_ROUTE
               ? 'redirecting-to-bootstrap'
@@ -194,9 +206,7 @@ export const AppSystemStore = signalStore(
               ledgerCachePrefsStore.initFromSession(renewedSession);
 
               const returnUri = resolveSessionReturnUri(config, strategy);
-              const hasOrganizationAccess =
-                hasOwnOrganizations(renewedSession) || hasMemberOrganizations(renewedSession);
-              const targetRoute = hasOrganizationAccess ? returnUri : BOOTSTRAP_ORGANIZATION_ROUTE;
+              const targetRoute = resolvePostSessionRoute(renewedSession, returnUri);
               const redirectStatus: AppStartupStatus =
                 targetRoute === BOOTSTRAP_ORGANIZATION_ROUTE
                   ? 'redirecting-to-bootstrap'

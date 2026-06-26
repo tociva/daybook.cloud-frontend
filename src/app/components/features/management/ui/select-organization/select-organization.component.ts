@@ -18,6 +18,7 @@ import { DateManagementService } from '../../../../../core/date/date-management.
 import { UserSessionStore } from '../../data/user-session/user-session.store';
 import type { Branch } from '../../data/branch/branch.model';
 import type { FiscalYear } from '../../data/fiscal-year/fiscal-year.model';
+import { OrganizationMemberStatus } from '../../data/organization-member/organization-member.enums';
 import type { Organization } from '../../data/organization/organization.model';
 
 const compareFiscalYearsByStartDate = (left: FiscalYear, right: FiscalYear): number =>
@@ -85,6 +86,7 @@ export class SelectOrganizationComponent {
 
     const own = (session.ownorgs ?? []) as readonly Organization[];
     const member = (session.memberorgs ?? [])
+      .filter((member) => member.status === OrganizationMemberStatus.ACCEPTED)
       .map((member) => member.organization)
       .filter((org): org is Organization => Boolean(org));
 

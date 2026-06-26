@@ -8,4 +8,110 @@
 .workspace-main {
   min-width: 0;
   padding: clamp(1rem, 3vw, 2rem);
+  position: relative;
+}
+
+.workspace-outlet {
+  display: block;
+  min-width: 0;
+}
+
+.workspace-outlet--loading {
+  block-size: 0;
+  inline-size: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+  visibility: hidden;
+}
+
+.workspace-route-skeleton {
+  display: grid;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.workspace-route-skeleton tng-skeleton {
+  max-width: 100%;
+}
+
+.workspace-route-skeleton__header {
+  align-items: start;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.workspace-route-skeleton__copy {
+  display: grid;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.workspace-route-skeleton__actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.workspace-route-skeleton__panel {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+  padding: 1rem;
+}
+
+.workspace-route-skeleton__toolbar {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.workspace-route-skeleton__table {
+  display: grid;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
+.workspace-route-skeleton__table-head,
+.workspace-route-skeleton__table-row {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: minmax(10rem, 1.6fr) minmax(7rem, 0.9fr) minmax(7rem, 0.7fr) minmax(
+      5rem,
+      0.45fr
+    );
+  min-width: 0;
+}
+
+.workspace-route-skeleton__table-head {
+  align-items: center;
+  padding-bottom: 0.35rem;
+}
+
+@media (max-width: 760px) {
+  .workspace-route-skeleton__header {
+    grid-template-columns: 1fr;
+  }
+
+  .workspace-route-skeleton__actions,
+  .workspace-route-skeleton__toolbar {
+    justify-content: flex-start;
+  }
+
+  .workspace-route-skeleton__table-head {
+    display: none;
+  }
+
+  .workspace-route-skeleton__table-row {
+    grid-template-columns: 1fr;
+  }
 }
