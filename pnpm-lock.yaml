@@ -33,8 +33,8 @@ importers:
         specifier: ^0.47.0
         version: 0.47.0(tslib@2.8.1)
       '@tailng-ui/components':
-        specifier: ^0.90.0
-        version: 0.90.0(387f6b760e539f645ac21d1afd72d248)
+        specifier: ^0.91.0
+        version: 0.91.0(387f6b760e539f645ac21d1afd72d248)
       '@tailng-ui/icons':
         specifier: ^0.14.0
         version: 0.14.0(@angular/common@21.2.10(@angular/core@21.2.10(@angular/compiler@21.2.10)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@21.2.10(@angular/compiler@21.2.10)(rxjs@7.8.2))(rxjs@7.8.2)(tslib@2.8.1)
@@ -1366,8 +1366,8 @@ packages:
     peerDependencies:
       tslib: ^2.3.0
 
-  '@tailng-ui/components@0.90.0':
-    resolution: {integrity: sha512-5xm+U1qyXueHH/j0y6wxEOgJccrOgO/5dBoGvhMwHqK+2AE9mxdH72DjLnnRp3ds5wJhyo4A9mhOQpJZM+FH5w==}
+  '@tailng-ui/components@0.91.0':
+    resolution: {integrity: sha512-RnF0fhT4x8D596ruOstAZPTX7/n/EbEYA85Na8NNrT7r9XjfPaf0dyi/ipZ9LHpbGU0JGfkHnrL9TRN3OO0P2A==}
     peerDependencies:
       '@angular/common': ^21.1.0
       '@angular/core': ^21.1.0
@@ -3947,7 +3947,7 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@tailng-ui/components@0.90.0(387f6b760e539f645ac21d1afd72d248)':
+  '@tailng-ui/components@0.91.0(387f6b760e539f645ac21d1afd72d248)':
     dependencies:
       '@angular/common': 21.2.10(@angular/core@21.2.10(@angular/compiler@21.2.10)(rxjs@7.8.2))(rxjs@7.8.2)
       '@angular/core': 21.2.10(@angular/compiler@21.2.10)(rxjs@7.8.2)
