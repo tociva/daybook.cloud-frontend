@@ -12,6 +12,7 @@ import { getApiErrorMessage } from '../../../../../../../core/api/api-error.util
 import { ToastStore } from '../../../../../../../core/toast/toast.store';
 import type { StoredDocument } from '../../../../../trading/data/invoice-document';
 import { InvoiceDocumentService } from '../../../../../trading/data/invoice-document';
+import { CurrencyStore } from '../../../../../management/data/currency/currency.store';
 import { JournalStore } from '../../../../data/journal';
 import type { Journal, JournalCreatePayload } from '../../../../data/journal';
 import { LedgerStore } from '../../../../data/ledger';
@@ -34,6 +35,7 @@ export class JournalCreateFormComponent {
   private readonly toastStore = inject(ToastStore);
   protected readonly journalStore = inject(JournalStore);
   private readonly ledgerStore = inject(LedgerStore);
+  private readonly currencyStore = inject(CurrencyStore);
   private readonly draftStaging = inject(JournalCreateDraftStagingService);
   protected readonly draft = inject(JournalDraftStore);
 
@@ -167,7 +169,10 @@ export class JournalCreateFormComponent {
   private async loadInitialState(journalId: string | null): Promise<void> {
     this.journalStore.clearError();
     this.resolvedId.set(journalId);
-    await this.ledgerStore.loadLedgers({ limit: 50, includes: ['category'] });
+    await Promise.all([
+      this.ledgerStore.loadLedgers({ limit: 50, includes: ['category'] }),
+      this.currencyStore.load(),
+    ]);
 
     if (!journalId) {
       this.journalStore.clearSelectedItem();

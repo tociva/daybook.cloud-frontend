@@ -2,12 +2,14 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { FiscalYearDateRangeService } from '../../../../../../shared/fiscal-year-date-range-picker/fiscal-year-date-range.service';
+import { CurrencyStore } from '../../../../management/data/currency/currency.store';
 import type { UserSession } from '../../../../management/data/user-session/user-session.model';
 import { UserSessionStore } from '../../../../management/data/user-session/user-session.store';
 import { LedgerStore } from '../../../data/ledger';
 import { JournalDraftStore } from './journal-draft.store';
 
 type ConfigureOptions = Readonly<{
+  currencies?: readonly { code: string; minorunit: number | null }[];
   defaultDate?: (value?: string) => string;
   session?: UserSession | null;
   toIsoDate?: (value: unknown) => string | null;
@@ -65,6 +67,10 @@ describe('JournalDraftStore', () => {
       providers: [
         JournalDraftStore,
         { provide: LedgerStore, useValue: { items: vi.fn(() => []) } },
+        {
+          provide: CurrencyStore,
+          useValue: { currencies: vi.fn(() => options.currencies ?? []) },
+        },
         { provide: UserSessionStore, useValue: { session } },
         {
           provide: FiscalYearDateRangeService,
@@ -140,5 +146,55 @@ describe('JournalDraftStore', () => {
     draft.resetForCreate();
 
     expect(draft.journalDateModel()).toBe('2026-05-02');
+  });
+
+  it('rounds and formats totals using the branch currency minor unit', () => {
+    const draft = configure({
+      currencies: [{ code: 'BHD', minorunit: 3 }],
+      session: {
+        ...scopedSession,
+        branch: { ...scopedSession.branch, currencycode: 'BHD' },
+      } as unknown as UserSession,
+    });
+
+    draft.rows.set([
+      { uid: 'row-1', ledgerId: 'ledger-1', ledgerName: 'Ledger 1', debit: '1.2345', credit: '' },
+      { uid: 'row-2', ledgerId: 'ledger-2', ledgerName: 'Ledger 2', debit: '', credit: '1.2' },
+    ]);
+
+    expect(draft.totalsPreview()).toEqual({
+      debit: 1.235,
+      credit: 1.2,
+      diff: 0.035,
+      debitText: '1.235',
+      creditText: '1.200',
+      diffText: '0.035',
+      balanced: false,
+    });
+  });
+
+  it('falls back to two fraction digits when the branch currency is unavailable', () => {
+    const draft = configure({
+      currencies: [],
+      session: {
+        ...scopedSession,
+        branch: { ...scopedSession.branch, currencycode: 'JPY' },
+      } as unknown as UserSession,
+    });
+
+    draft.rows.set([
+      { uid: 'row-1', ledgerId: 'ledger-1', ledgerName: 'Ledger 1', debit: '10.555', credit: '' },
+      { uid: 'row-2', ledgerId: 'ledger-2', ledgerName: 'Ledger 2', debit: '', credit: '0.005' },
+    ]);
+
+    expect(draft.totalsPreview()).toEqual({
+      debit: 10.56,
+      credit: 0.01,
+      diff: 10.55,
+      debitText: '10.56',
+      creditText: '0.01',
+      diffText: '10.55',
+      balanced: false,
+    });
   });
 });

@@ -2,8 +2,10 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import dayjs from 'dayjs';
 import { UserSessionStore } from '../../../../management/data/user-session/user-session.store';
 import { FiscalYearDateRangeService } from '../../../../../../shared/fiscal-year-date-range-picker/fiscal-year-date-range.service';
+import { formatAmountForCurrency, roundMoneyForCurrency } from '../../../../../../shared/format/currency';
 import { toIsoDate } from '../../../../../../core/date/dayjs-date.utils';
 import { DEFAULT_NODE_DATE_FORMAT } from '../../../../../../util/constants';
+import { CurrencyStore } from '../../../../management/data/currency/currency.store';
 import {
   isJournalFormRowComplete,
   isJournalFormRowEmpty,
@@ -48,6 +50,7 @@ export class JournalDraftStore {
   private readonly fiscalYearDateRange = inject(FiscalYearDateRangeService);
   private readonly ledgerStore = inject(LedgerStore);
   private readonly userSession = inject(UserSessionStore);
+  private readonly currencyStore = inject(CurrencyStore);
   private readonly ledgerSearchVersions = new Map<string, number>();
 
   readonly submitted = signal(false);
@@ -116,17 +119,26 @@ export class JournalDraftStore {
   readonly totalsPreview = computed(() => {
     let debit = 0;
     let credit = 0;
-    const minor = 2;
-    const factor = 10 ** minor;
+    const currency = this.branchCurrencyForTotals();
+    const currencyCode = currency?.code ?? null;
     for (const r of this.rows()) {
       const dr = this.parseAmount(r.debit);
       const cr = this.parseAmount(r.credit);
       if (dr != null) debit += dr;
       if (cr != null) credit += cr;
     }
-    debit = Math.round(debit * factor) / factor;
-    credit = Math.round(credit * factor) / factor;
-    return { debit, credit, diff: debit - credit, balanced: debit === credit && debit > 0 };
+    debit = roundMoneyForCurrency(debit, currencyCode, currency);
+    credit = roundMoneyForCurrency(credit, currencyCode, currency);
+    const diff = roundMoneyForCurrency(debit - credit, currencyCode, currency);
+    return {
+      debit,
+      credit,
+      diff,
+      debitText: formatAmountForCurrency(debit, currencyCode, currency),
+      creditText: formatAmountForCurrency(credit, currencyCode, currency),
+      diffText: formatAmountForCurrency(diff, currencyCode, currency),
+      balanced: debit === credit && debit > 0,
+    };
   });
 
   readonly canSave = computed(() => {
@@ -446,6 +458,18 @@ export class JournalDraftStore {
     const n = Number.parseFloat(t);
     if (!Number.isFinite(n) || n <= 0) return null;
     return n;
+  }
+
+  private branchCurrencyForTotals(): { code: string; minorunit: number | null } | null {
+    const branchCurrencyCode = this.userSession.session()?.branch?.currencycode?.trim();
+    if (!branchCurrencyCode) return null;
+
+    const normalizedCode = branchCurrencyCode.toUpperCase();
+    return (
+      this.currencyStore
+        .currencies()
+        .find((currency) => currency.code.trim().toUpperCase() === normalizedCode) ?? null
+    );
   }
 
   private normalizeRememberedDate(value: unknown): string | null {
