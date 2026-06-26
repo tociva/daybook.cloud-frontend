@@ -3,6 +3,13 @@ import type { OrganizationMemberPermissions } from './organization-member.types'
 import type { OrganizationMemberStatus, UserRoles } from './organization-member.enums';
 import type { Lb4ListQuery } from '../../../../../shared/crud';
 
+export type User = Readonly<{
+  id?: string;
+  name: string;
+  email: string;
+  props?: Readonly<Record<string, unknown>>;
+}>;
+
 export type OrganizationMember = Readonly<{
   id?: string;
   userid: string;
@@ -12,6 +19,7 @@ export type OrganizationMember = Readonly<{
   props?: Readonly<Record<string, unknown>>;
   permissions?: OrganizationMemberPermissions;
   organization?: Organization;
+  user?: User;
 }>;
 
 export type OrganizationMemberPayload = Readonly<{

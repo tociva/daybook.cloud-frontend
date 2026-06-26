@@ -7,6 +7,7 @@ export type {
   OrganizationMemberGetQuery,
   OrganizationMemberListQuery,
   OrganizationMemberPayload,
+  User,
 } from './organization-member.model';
 export type { OrganizationMemberPermissions } from './organization-member.types';
 export type {

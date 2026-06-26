@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import {
+  TngAvatarComponent,
   TngButtonComponent,
   TngCardComponent,
   TngTable,
@@ -32,6 +33,7 @@ import { UserSessionStore } from '../../../data/user-session/user-session.store'
   imports: [
     PageHeadingComponent,
     BurlBackButtonComponent,
+    TngAvatarComponent,
     TngButtonComponent,
     TngCardComponent,
     CrudFilterPopoverComponent,
@@ -96,6 +98,18 @@ export class ListUsersComponent {
 
   protected organizationLabel(member: OrganizationMember): string {
     return member.organization?.name ?? member.organizationid ?? '—';
+  }
+
+  protected userDisplayName(member: OrganizationMember): string {
+    return member.user?.name ?? member.userid;
+  }
+
+  protected userEmail(member: OrganizationMember): string {
+    return member.user?.email ?? '';
+  }
+
+  protected isOwner(member: OrganizationMember): boolean {
+    return member.role === UserRoles.OWNER;
   }
 
   protected roleLabel(role: UserRoles): string {
@@ -172,7 +186,7 @@ export class ListUsersComponent {
     const organizationId = this.userSessionStore.session()?.organization?.id;
     return {
       ...filter,
-      includes: ['organization'],
+      includes: ['organization', 'user'],
       ...(organizationId
         ? { where: { ...(filter.where ?? {}), organizationid: organizationId } }
         : {}),

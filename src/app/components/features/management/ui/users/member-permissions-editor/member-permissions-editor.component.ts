@@ -106,15 +106,15 @@ export class MemberPermissionsEditorComponent {
   }
 
   protected readonly defaultExpandedOrganizationDomainKeys = computed(() =>
-    this.organizationDomains.map((domain) => this.domainValue(domain)),
+    this.defaultExpandedKeys(this.organizationDomains),
   );
 
   protected readonly defaultExpandedBranchDomainKeys = computed(() =>
-    this.branchDomains.map((domain) => this.domainValue(domain)),
+    this.defaultExpandedKeys(this.branchDomains),
   );
 
   protected readonly defaultExpandedFiscalYearDomainKeys = computed(() =>
-    this.fiscalYearDomains.map((domain) => this.domainValue(domain)),
+    this.defaultExpandedKeys(this.fiscalYearDomains),
   );
 
   protected organizationScope(): OrganizationScopePermissions | null {
@@ -367,6 +367,12 @@ export class MemberPermissionsEditorComponent {
         [actionKey]: checked,
       },
     }));
+  }
+
+  private defaultExpandedKeys(domains: readonly PermissionDomainDef[]): string[] {
+    return domains
+      .filter((domain) => domain.key === 'management')
+      .map((domain) => this.domainValue(domain));
   }
 
   private getOrganizationDomainFlagValues(

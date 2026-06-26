@@ -70,9 +70,19 @@
           (sortChange)="crudQuery.applySort($event)"
         >
           <ng-template tngTableCellTemplate="userid" let-row="row">
-            <button type="button" class="link-button" (click)="viewUser(row)">
-              {{ row.userid }}
-            </button>
+            <div class="user-cell">
+              <tng-avatar [fallback]="userDisplayName(row)" size="sm" class="user-cell-avatar" />
+              <div class="user-cell-copy">
+                <button type="button" class="link-button user-cell-name" (click)="viewUser(row)">
+                  {{ userDisplayName(row) }}
+                </button>
+                @if (userEmail(row)) {
+                  <span class="user-cell-email">{{ userEmail(row) }}</span>
+                } @else {
+                  <span class="user-cell-email">{{ row.userid }}</span>
+                }
+              </div>
+            </div>
           </ng-template>
 
           <ng-template tngTableCellTemplate="organizationid" let-row="row">

@@ -35,6 +35,38 @@
   padding: 0;
 }
 
+.user-cell {
+  align-items: center;
+  display: flex;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.user-cell-avatar {
+  flex: 0 0 auto;
+}
+
+.user-cell-copy {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.user-cell-name {
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-cell-email {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.78rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .row-actions {
   align-items: center;
   display: inline-flex;
