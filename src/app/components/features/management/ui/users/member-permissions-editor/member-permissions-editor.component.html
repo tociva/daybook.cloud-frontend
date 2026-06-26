@@ -70,225 +70,226 @@
     <h2 class="section-title">Branch permissions</h2>
 
     @if (branches().length === 0) {
-      <p class="empty-copy">No branches available for this organization.</p>
+      @if (branchesLoading()) {
+        <p class="empty-copy">Loading branches…</p>
+      } @else {
+        <p class="empty-copy">No branches available for this organization.</p>
+      }
     } @else {
-      <tng-accordion
-        class="branch-accordion"
-        [type]="'multiple'"
-        [collapsible]="true"
-        [defaultValue]="defaultExpandedBranchKeys()"
-        ariaLabel="Branches"
+      <tng-tabs
+        class="branch-tabs"
+        ariaLabel="Branch permissions"
+        [value]="activeBranchId()"
+        [keepAlive]="true"
+        (valueChange)="onBranchTabChange($event)"
       >
+        <div tngTabList class="branch-tab-list">
+          @for (branch of branches(); track branch.id) {
+            <button type="button" tngTab [value]="branch.id">{{ branch.name }}</button>
+          }
+        </div>
+
         @for (branch of branches(); track branch.id) {
           @if (branchScope(branch.id); as branchPermissions) {
-            <tng-accordion-item [value]="branch.id" class="branch-item">
-              <tng-accordion-trigger>
-                <span class="branch-trigger">
-                  <span class="branch-name">{{ branch.name }}</span>
-                  <span class="branch-meta">{{ branchFiscalYears(branch).length }} fiscal years</span>
-                </span>
-              </tng-accordion-trigger>
-
-              <tng-accordion-panel class="branch-panel">
-                <tng-accordion
-                  class="domain-accordion"
-                  [type]="'multiple'"
-                  [collapsible]="true"
-                  [defaultValue]="defaultExpandedBranchDomainKeys()"
-                  ariaLabel="Branch permission domains"
-                >
-                  @for (domain of branchDomains; track domainValue(domain)) {
-                    <tng-accordion-item [value]="domainValue(domain)" class="domain-item">
-                      <tng-accordion-trigger>
-                        <span class="domain-trigger">
-                          <label class="domain-select-all" (click)="$event.stopPropagation()">
-                            <tng-checkbox
-                              [checked]="isBranchDomainChecked(branchPermissions, domain)"
-                              (checkedChange)="onBranchDomainToggle(branch.id, domain, !!$event)"
-                            />
-                          </label>
-                          <span class="domain-copy">
-                            <span class="domain-label">{{ domain.label }}</span>
-                            <span class="domain-subtitle">{{ domain.subtitle }}</span>
-                          </span>
-                          @if (isBranchDomainIndeterminate(branchPermissions, domain)) {
-                            <span class="domain-partial">Partial</span>
-                          }
+            <div tngTabPanel [value]="branch.id" class="branch-tab-panel">
+              <tng-accordion
+                class="domain-accordion"
+                [type]="'multiple'"
+                [collapsible]="true"
+                [defaultValue]="defaultExpandedBranchDomainKeys()"
+                ariaLabel="Branch permission domains"
+              >
+                @for (domain of branchDomains; track domainValue(domain)) {
+                  <tng-accordion-item [value]="domainValue(domain)" class="domain-item">
+                    <tng-accordion-trigger>
+                      <span class="domain-trigger">
+                        <label class="domain-select-all" (click)="$event.stopPropagation()">
+                          <tng-checkbox
+                            [checked]="isBranchDomainChecked(branchPermissions, domain)"
+                            (checkedChange)="onBranchDomainToggle(branch.id, domain, !!$event)"
+                          />
+                        </label>
+                        <span class="domain-copy">
+                          <span class="domain-label">{{ domain.label }}</span>
+                          <span class="domain-subtitle">{{ domain.subtitle }}</span>
                         </span>
-                      </tng-accordion-trigger>
-
-                      <tng-accordion-panel class="domain-panel">
-                        @for (group of domainGroups(domain); track group.key) {
-                          <div class="permission-group">
-                            <div class="permission-group-header">
-                              <label class="group-select-all">
-                                <tng-checkbox
-                                  [checked]="
-                                    isGroupChecked(branchGroupFlags(branchPermissions, group), group)
-                                  "
-                                  (checkedChange)="onBranchGroupToggle(branch.id, group, !!$event)"
-                                />
-                                <span class="group-label">{{ group.label }}</span>
-                              </label>
-                              @if (
-                                isGroupIndeterminate(branchGroupFlags(branchPermissions, group), group)
-                              ) {
-                                <span class="group-partial">Partial</span>
-                              }
-                            </div>
-
-                            <div class="permission-grid">
-                              @for (action of group.actions; track action.key) {
-                                <label class="permission-item">
-                                  <tng-checkbox
-                                    [checked]="branchGroupFlags(branchPermissions, group)[action.key]"
-                                    (checkedChange)="
-                                      onBranchActionToggle(branch.id, group, action.key, !!$event)
-                                    "
-                                  />
-                                  <span>{{ action.label }}</span>
-                                </label>
-                              }
-                            </div>
-                          </div>
+                        @if (isBranchDomainIndeterminate(branchPermissions, domain)) {
+                          <span class="domain-partial">Partial</span>
                         }
-                      </tng-accordion-panel>
-                    </tng-accordion-item>
-                  }
-                </tng-accordion>
+                      </span>
+                    </tng-accordion-trigger>
 
-                <div class="fiscal-year-stack">
-                  <h3 class="subsection-title">Fiscal year permissions</h3>
-
-                  @if (branchFiscalYears(branch).length === 0) {
-                    <p class="empty-copy">No fiscal years for this branch.</p>
-                  } @else {
-                    @for (fiscalYear of branchFiscalYears(branch); track fiscalYear.id) {
-                      @if (fiscalYearScope(branch.id, fiscalYear.id); as fiscalYearPermissions) {
-                        <tng-card variant="outline" padding="md" class="fiscal-year-card">
-                          <header class="fiscal-year-header">
-                            <h4>{{ fiscalYear.name }}</h4>
-                            @if (fiscalYear.startdate || fiscalYear.enddate) {
-                              <p>{{ fiscalYear.startdate }} – {{ fiscalYear.enddate }}</p>
+                    <tng-accordion-panel class="domain-panel">
+                      @for (group of domainGroups(domain); track group.key) {
+                        <div class="permission-group">
+                          <div class="permission-group-header">
+                            <label class="group-select-all">
+                              <tng-checkbox
+                                [checked]="
+                                  isGroupChecked(branchGroupFlags(branchPermissions, group), group)
+                                "
+                                (checkedChange)="onBranchGroupToggle(branch.id, group, !!$event)"
+                              />
+                              <span class="group-label">{{ group.label }}</span>
+                            </label>
+                            @if (
+                              isGroupIndeterminate(branchGroupFlags(branchPermissions, group), group)
+                            ) {
+                              <span class="group-partial">Partial</span>
                             }
-                          </header>
+                          </div>
 
-                          <tng-accordion
-                            class="domain-accordion"
-                            [type]="'multiple'"
-                            [collapsible]="true"
-                            [defaultValue]="defaultExpandedFiscalYearDomainKeys()"
-                            ariaLabel="Fiscal year permission domains"
-                          >
-                            @for (domain of fiscalYearDomains; track domainValue(domain)) {
-                              <tng-accordion-item [value]="domainValue(domain)" class="domain-item">
-                                <tng-accordion-trigger>
-                                  <span class="domain-trigger">
-                                    <label
-                                      class="domain-select-all"
-                                      (click)="$event.stopPropagation()"
-                                    >
-                                      <tng-checkbox
-                                        [checked]="
-                                          isFiscalYearDomainChecked(fiscalYearPermissions, domain)
-                                        "
-                                        (checkedChange)="
-                                          onFiscalYearDomainToggle(
-                                            branch.id,
-                                            fiscalYear.id,
-                                            domain,
-                                            !!$event
-                                          )
-                                        "
-                                      />
-                                    </label>
-                                    <span class="domain-copy">
-                                      <span class="domain-label">{{ domain.label }}</span>
-                                      <span class="domain-subtitle">{{ domain.subtitle }}</span>
-                                    </span>
-                                    @if (
-                                      isFiscalYearDomainIndeterminate(
-                                        fiscalYearPermissions,
-                                        domain
-                                      )
-                                    ) {
-                                      <span class="domain-partial">Partial</span>
-                                    }
+                          <div class="permission-grid">
+                            @for (action of group.actions; track action.key) {
+                              <label class="permission-item">
+                                <tng-checkbox
+                                  [checked]="branchGroupFlags(branchPermissions, group)[action.key]"
+                                  (checkedChange)="
+                                    onBranchActionToggle(branch.id, group, action.key, !!$event)
+                                  "
+                                />
+                                <span>{{ action.label }}</span>
+                              </label>
+                            }
+                          </div>
+                        </div>
+                      }
+                    </tng-accordion-panel>
+                  </tng-accordion-item>
+                }
+              </tng-accordion>
+
+              <div class="fiscal-year-stack">
+                <h3 class="subsection-title">Fiscal year permissions</h3>
+
+                @if (branchFiscalYears(branch).length === 0) {
+                  <p class="empty-copy">No fiscal years for this branch.</p>
+                } @else {
+                  @for (fiscalYear of branchFiscalYears(branch); track fiscalYear.id) {
+                    @if (fiscalYearScope(branch.id, fiscalYear.id); as fiscalYearPermissions) {
+                      <tng-card variant="outline" padding="md" class="fiscal-year-card">
+                        <header class="fiscal-year-header">
+                          <h4>{{ fiscalYear.name }}</h4>
+                          @if (fiscalYear.startdate || fiscalYear.enddate) {
+                            <p>{{ fiscalYear.startdate }} – {{ fiscalYear.enddate }}</p>
+                          }
+                        </header>
+
+                        <tng-accordion
+                          class="domain-accordion"
+                          [type]="'multiple'"
+                          [collapsible]="true"
+                          [defaultValue]="defaultExpandedFiscalYearDomainKeys()"
+                          ariaLabel="Fiscal year permission domains"
+                        >
+                          @for (domain of fiscalYearDomains; track domainValue(domain)) {
+                            <tng-accordion-item [value]="domainValue(domain)" class="domain-item">
+                              <tng-accordion-trigger>
+                                <span class="domain-trigger">
+                                  <label
+                                    class="domain-select-all"
+                                    (click)="$event.stopPropagation()"
+                                  >
+                                    <tng-checkbox
+                                      [checked]="
+                                        isFiscalYearDomainChecked(fiscalYearPermissions, domain)
+                                      "
+                                      (checkedChange)="
+                                        onFiscalYearDomainToggle(
+                                          branch.id,
+                                          fiscalYear.id,
+                                          domain,
+                                          !!$event
+                                        )
+                                      "
+                                    />
+                                  </label>
+                                  <span class="domain-copy">
+                                    <span class="domain-label">{{ domain.label }}</span>
+                                    <span class="domain-subtitle">{{ domain.subtitle }}</span>
                                   </span>
-                                </tng-accordion-trigger>
+                                  @if (
+                                    isFiscalYearDomainIndeterminate(
+                                      fiscalYearPermissions,
+                                      domain
+                                    )
+                                  ) {
+                                    <span class="domain-partial">Partial</span>
+                                  }
+                                </span>
+                              </tng-accordion-trigger>
 
-                                <tng-accordion-panel class="domain-panel">
-                                  @for (group of domainGroups(domain); track group.key) {
-                                    <div class="permission-group">
-                                      <div class="permission-group-header">
-                                        <label class="group-select-all">
+                              <tng-accordion-panel class="domain-panel">
+                                @for (group of domainGroups(domain); track group.key) {
+                                  <div class="permission-group">
+                                    <div class="permission-group-header">
+                                      <label class="group-select-all">
+                                        <tng-checkbox
+                                          [checked]="
+                                            isGroupChecked(
+                                              fiscalYearGroupFlags(fiscalYearPermissions, group),
+                                              group
+                                            )
+                                          "
+                                          (checkedChange)="
+                                            onFiscalYearGroupToggle(
+                                              branch.id,
+                                              fiscalYear.id,
+                                              group,
+                                              !!$event
+                                            )
+                                          "
+                                        />
+                                        <span class="group-label">{{ group.label }}</span>
+                                      </label>
+                                      @if (
+                                        isGroupIndeterminate(
+                                          fiscalYearGroupFlags(fiscalYearPermissions, group),
+                                          group
+                                        )
+                                      ) {
+                                        <span class="group-partial">Partial</span>
+                                      }
+                                    </div>
+
+                                    <div class="permission-grid">
+                                      @for (action of group.actions; track action.key) {
+                                        <label class="permission-item">
                                           <tng-checkbox
                                             [checked]="
-                                              isGroupChecked(
-                                                fiscalYearGroupFlags(fiscalYearPermissions, group),
-                                                group
-                                              )
+                                              fiscalYearGroupFlags(fiscalYearPermissions, group)[
+                                                action.key
+                                              ]
                                             "
                                             (checkedChange)="
-                                              onFiscalYearGroupToggle(
+                                              onFiscalYearActionToggle(
                                                 branch.id,
                                                 fiscalYear.id,
                                                 group,
+                                                action.key,
                                                 !!$event
                                               )
                                             "
                                           />
-                                          <span class="group-label">{{ group.label }}</span>
+                                          <span>{{ action.label }}</span>
                                         </label>
-                                        @if (
-                                          isGroupIndeterminate(
-                                            fiscalYearGroupFlags(fiscalYearPermissions, group),
-                                            group
-                                          )
-                                        ) {
-                                          <span class="group-partial">Partial</span>
-                                        }
-                                      </div>
-
-                                      <div class="permission-grid">
-                                        @for (action of group.actions; track action.key) {
-                                          <label class="permission-item">
-                                            <tng-checkbox
-                                              [checked]="
-                                                fiscalYearGroupFlags(fiscalYearPermissions, group)[
-                                                  action.key
-                                                ]
-                                              "
-                                              (checkedChange)="
-                                                onFiscalYearActionToggle(
-                                                  branch.id,
-                                                  fiscalYear.id,
-                                                  group,
-                                                  action.key,
-                                                  !!$event
-                                                )
-                                              "
-                                            />
-                                            <span>{{ action.label }}</span>
-                                          </label>
-                                        }
-                                      </div>
+                                      }
                                     </div>
-                                  }
-                                </tng-accordion-panel>
-                              </tng-accordion-item>
-                            }
-                          </tng-accordion>
-                        </tng-card>
-                      }
+                                  </div>
+                                }
+                              </tng-accordion-panel>
+                            </tng-accordion-item>
+                          }
+                        </tng-accordion>
+                      </tng-card>
                     }
                   }
-                </div>
-              </tng-accordion-panel>
-            </tng-accordion-item>
+                }
+              </div>
+            </div>
           }
         }
-      </tng-accordion>
+      </tng-tabs>
     }
   </section>
 } @else {

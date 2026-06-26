@@ -5,6 +5,7 @@ import {
   ElementRef,
   ViewChild,
   computed,
+  effect,
   inject,
   signal,
 } from '@angular/core';
@@ -21,6 +22,7 @@ import {
   TngFormFieldComponent,
   TngInputComponent,
   TngLabelComponent,
+  TngStepperComponent,
 } from '@tailng-ui/components';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
@@ -33,14 +35,12 @@ import {
   mergePermissionTree,
 } from '../../../data/organization-member';
 import type { OrganizationMemberPayload, OrganizationMemberPermissionTree } from '../../../data/organization-member';
+import { BranchStore } from '../../../data/branch';
 import { OrganizationStore } from '../../../data/organization';
 import type { Organization } from '../../../data/organization/organization.model';
 import { UserSessionStore } from '../../../data/user-session/user-session.store';
 import { MemberPermissionsEditorComponent } from '../member-permissions-editor/member-permissions-editor.component';
-import {
-  resolveOrganizationFromSession,
-  resolveOrganizationWithBranches,
-} from './create-user-organization.util';
+import { resolveOrganizationWithBranches } from './create-user-organization.util';
 import { validateEmail } from '../../../../../../shared/validation/email.util';
 
 export type PageLoadState = 'initializing' | 'ready' | 'member-not-found' | 'no-organization';
@@ -60,6 +60,7 @@ export type PageLoadState = 'initializing' | 'ready' | 'member-not-found' | 'no-
     TngFormFieldComponent,
     TngInputComponent,
     TngLabelComponent,
+    TngStepperComponent,
     BurlBackButtonComponent,
     BurlCreateButtonComponent,
     MemberPermissionsEditorComponent,
@@ -75,6 +76,7 @@ export class CreateUserComponent implements AfterViewInit {
   private readonly facade = inject(OrganizationMemberFacade);
   private readonly userSessionStore = inject(UserSessionStore);
   protected readonly memberStore = inject(OrganizationMemberStore);
+  protected readonly branchStore = inject(BranchStore);
   private readonly organizationStore = inject(OrganizationStore);
 
   private organizationid = '';
@@ -83,7 +85,9 @@ export class CreateUserComponent implements AfterViewInit {
   private props: Readonly<Record<string, unknown>> | undefined;
 
   protected readonly id = signal<string | null>(this.route.snapshot.paramMap.get('id'));
-  protected readonly loadState = signal<PageLoadState>('initializing');
+  protected readonly loadState = signal<PageLoadState>(
+    this.route.snapshot.paramMap.get('id') ? 'initializing' : 'ready',
+  );
   protected readonly submitted = signal(false);
   protected readonly isSubmitting = signal(false);
   protected readonly formError = signal<string | null>(null);
@@ -102,11 +106,56 @@ export class CreateUserComponent implements AfterViewInit {
   protected readonly hasErrors = computed(
     () => this.userError() !== null || this.formError() !== null,
   );
-  protected readonly isSaveDisabled = computed(
-    () => this.isSubmitting() || this.loadState() !== 'ready',
-  );
+  protected readonly isSaveDisabled = computed(() => {
+    if (this.isSubmitting()) return true;
+    if (this.mode() === 'create') return false;
+    return this.loadState() !== 'ready';
+  });
+  protected readonly setupSteps = computed(() => {
+    const emailCompleted = this.userid().trim().length > 0 && this.userError() === null;
+
+    return [
+      {
+        value: 'email',
+        label: 'Email',
+        description: 'Invitee address',
+        completed: emailCompleted,
+      },
+      {
+        value: 'permissions',
+        label: 'Permissions',
+        description: 'Organization & branch access',
+        completed: emailCompleted,
+      },
+    ] as const;
+  });
+  protected readonly activeSetupStep = computed(() => {
+    const firstPending = this.setupSteps().find((step) => !step.completed);
+    return firstPending?.value ?? 'permissions';
+  });
 
   constructor() {
+    effect(() => {
+      if (this.mode() !== 'create') return;
+
+      const branches = this.branchStore.branches();
+      if (branches.length === 0) return;
+
+      const orgId =
+        this.userSessionStore.session()?.organization?.id ?? branches[0]?.organizationid;
+      if (!orgId) return;
+
+      const sessionOrg = this.userSessionStore.session()?.organization;
+      this.organization.set({
+        ...(sessionOrg ?? { name: '', email: '', userid: '' }),
+        id: orgId,
+        branches,
+      });
+      this.permissions.update((current) =>
+        mergePermissionTree(createEmptyPermissionTree(orgId, branches), current),
+      );
+    });
+
     void this.initialize();
   }
 
@@ -149,41 +198,30 @@ export class CreateUserComponent implements AfterViewInit {
 
   private async initialize(): Promise<void> {
     this.memberStore.clearError();
-    this.loadState.set('initializing');
-
-    const resolvedOrganization = await resolveOrganizationFromSession(
-      this.userSessionStore.session(),
-      (organizationId) => this.organizationStore.loadOrganizationById(organizationId),
-    );
-    if (!resolvedOrganization?.id) {
-      this.formError.set('No organization is selected. Please select an organization first.');
-      this.loadState.set('no-organization');
-      return;
-    }
-
-    const organization = await resolveOrganizationWithBranches(
-      resolvedOrganization.id,
-      resolvedOrganization,
-      (organizationId) => this.organizationStore.loadOrganizationById(organizationId),
-    );
-    if (!organization?.id) {
-      this.formError.set('No organization is selected. Please select an organization first.');
-      this.loadState.set('no-organization');
-      return;
-    }
-
-    this.organization.set(organization);
-    this.organizationid = organization.id;
 
     const memberId = this.id();
     if (!memberId) {
-      this.permissions.set(
-        createEmptyPermissionTree(organization.id, organization.branches ?? []),
-      );
-      this.loadState.set('ready');
-      this.focusEmailInput();
+      this.initializeCreate();
       return;
     }
+
+    await this.initializeEdit(memberId);
+  }
+
+  private initializeCreate(): void {
+    const sessionOrg = this.userSessionStore.session()?.organization;
+    if (sessionOrg?.id) {
+      this.organization.set(sessionOrg);
+      this.permissions.set(createEmptyPermissionTree(sessionOrg.id, []));
+    }
+
+    this.loadState.set('ready');
+    void this.branchStore.loadBranches({ includes: ['fiscalyears'] });
+    this.focusEmailInput();
+  }
+
+  private async initializeEdit(memberId: string): Promise<void> {
+    this.loadState.set('initializing');
 
     const member = await this.memberStore.loadMemberById(memberId, { includes: ['organization'] });
     if (!member) {
@@ -191,10 +229,16 @@ export class CreateUserComponent implements AfterViewInit {
       return;
     }
 
-    const memberOrganizationId = member.organizationid ?? organization.id;
+    const memberOrganizationId = member.organizationid;
+    if (!memberOrganizationId) {
+      this.formError.set('Unable to load organization for this user.');
+      this.loadState.set('no-organization');
+      return;
+    }
+
     const memberOrganization = await resolveOrganizationWithBranches(
       memberOrganizationId,
-      member.organization ?? organization,
+      member.organization ?? null,
       (organizationId) => this.organizationStore.loadOrganizationById(organizationId),
     );
     if (!memberOrganization?.id) {
@@ -212,10 +256,7 @@ export class CreateUserComponent implements AfterViewInit {
 
     this.permissions.set(
       mergePermissionTree(
-        createEmptyPermissionTree(
-          memberOrganizationId,
-          memberOrganization.branches ?? [],
-        ),
+        createEmptyPermissionTree(memberOrganizationId, memberOrganization.branches ?? []),
         member.permissions,
       ),
     );
@@ -225,19 +266,24 @@ export class CreateUserComponent implements AfterViewInit {
 
   private buildPayload(): OrganizationMemberPayload | null {
     if (this.userError()) return null;
-    if (!this.organizationid) {
-      this.formError.set('Organization is required.');
-      return null;
-    }
 
-    return {
+    const base: OrganizationMemberPayload = {
       userid: this.userid().trim(),
-      organizationid: this.organizationid,
       role: this.role,
       status: this.status,
       permissions: this.permissions(),
       ...(this.props ? { props: this.props } : {}),
     };
+
+    if (this.mode() === 'edit') {
+      if (!this.organizationid) {
+        this.formError.set('Organization is required.');
+        return null;
+      }
+      return { ...base, organizationid: this.organizationid };
+    }
+
+    return base;
   }
 
   private focusEmailInput(): void {

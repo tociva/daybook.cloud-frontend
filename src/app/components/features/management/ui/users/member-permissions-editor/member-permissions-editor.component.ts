@@ -2,8 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   input,
   output,
+  signal,
 } from '@angular/core';
 import {
   TngAccordionComponent,
@@ -12,7 +14,9 @@ import {
   TngAccordionTriggerComponent,
   TngCardComponent,
   TngCheckboxComponent,
+  TngTabsComponent,
 } from '@tailng-ui/components';
+import { TngTab, TngTabList, TngTabPanel } from '@tailng-ui/primitives';
 import type { Branch } from '../../../data/branch/branch.model';
 import type { FiscalYear } from '../../../data/fiscal-year/fiscal-year.model';
 import type { Organization } from '../../../data/organization/organization.model';
@@ -48,6 +52,10 @@ import {
     TngAccordionTriggerComponent,
     TngCardComponent,
     TngCheckboxComponent,
+    TngTab,
+    TngTabList,
+    TngTabPanel,
+    TngTabsComponent,
   ],
   templateUrl: './member-permissions-editor.component.html',
   styleUrl: './member-permissions-editor.component.css',
@@ -56,7 +64,11 @@ import {
 export class MemberPermissionsEditorComponent {
   readonly organization = input.required<Organization | null>();
   readonly permissions = input.required<OrganizationMemberPermissionTree>();
+  readonly branchList = input<readonly Branch[] | undefined>(undefined);
+  readonly branchesLoading = input(false);
   readonly permissionsChange = output<OrganizationMemberPermissionTree>();
+
+  protected readonly activeBranchId = signal<string | null>(null);
 
   protected readonly organizationDomains = getDomainsForScope('organization');
   protected readonly branchDomains = getDomainsForScope('branch');
@@ -65,17 +77,33 @@ export class MemberPermissionsEditorComponent {
   protected readonly organizationId = computed(() => this.organization()?.id ?? null);
 
   protected readonly branches = computed(() => {
-    const organization = this.organization();
-    if (!organization?.id) return [] as readonly (Branch & { id: string })[];
+    const override = this.branchList();
+    const source = override ?? this.organization()?.branches ?? [];
 
-    return (organization.branches ?? []).filter(
-      (branch): branch is Branch & { id: string } => Boolean(branch.id),
-    );
+    return source.filter((branch): branch is Branch & { id: string } => Boolean(branch.id));
   });
 
-  protected readonly defaultExpandedBranchKeys = computed(() =>
-    this.branches().map((branch) => branch.id),
-  );
+  constructor() {
+    effect(() => {
+      const branches = this.branches();
+      const current = this.activeBranchId();
+
+      if (branches.length === 0) {
+        if (current !== null) {
+          this.activeBranchId.set(null);
+        }
+        return;
+      }
+
+      if (!current || !branches.some((branch) => branch.id === current)) {
+        this.activeBranchId.set(branches[0].id);
+      }
+    });
+  }
+
+  protected onBranchTabChange(value: unknown): void {
+    this.activeBranchId.set(typeof value === 'string' ? value : null);
+  }
 
   protected readonly defaultExpandedOrganizationDomainKeys = computed(() =>
     this.organizationDomains.map((domain) => this.domainValue(domain)),

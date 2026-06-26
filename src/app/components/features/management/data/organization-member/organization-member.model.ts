@@ -16,7 +16,7 @@ export type OrganizationMember = Readonly<{
 
 export type OrganizationMemberPayload = Readonly<{
   userid: string;
-  organizationid: string;
+  organizationid?: string;
   role: UserRoles;
   status: OrganizationMemberStatus;
   props?: Readonly<Record<string, unknown>>;

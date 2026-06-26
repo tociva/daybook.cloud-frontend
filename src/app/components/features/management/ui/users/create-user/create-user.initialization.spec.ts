@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { OrganizationMember } from '../../../data/organization-member/organization-member.model';
+import type { OrganizationMemberPermissionTree } from '../../../data/organization-member/organization-member-permissions.model';
 import {
   OrganizationMemberStatus,
   UserRoles,
@@ -8,11 +9,12 @@ import type { Organization } from '../../../data/organization/organization.model
 import type { Branch } from '../../../data/branch/branch.model';
 import type { FiscalYear } from '../../../data/fiscal-year/fiscal-year.model';
 import type { UserSession } from '../../../data/user-session/user-session.model';
-import { createEmptyPermissionTree, mergePermissionTree } from '../../../data/organization-member/organization-member-permissions.util';
 import {
-  resolveOrganizationFromSession,
-  resolveOrganizationWithBranches,
-} from './create-user-organization.util';
+  createEmptyPermissionTree,
+  mergePermissionTree,
+  setFlag,
+} from '../../../data/organization-member/organization-member-permissions.util';
+import { resolveOrganizationWithBranches } from './create-user-organization.util';
 
 const fiscalYear: FiscalYear & { id: string } = {
   id: 'fy-1',
@@ -57,19 +59,40 @@ const organization: Organization & { id: string } = {
   branches: [branch],
 };
 
-async function bootstrapEditPermissions(
+function bootstrapCreatePermissions(session: UserSession): OrganizationMemberPermissionTree {
+  const sessionOrg = session.organization;
+  if (!sessionOrg?.id) {
+    return { organizations: {} };
+  }
+
+  return createEmptyPermissionTree(sessionOrg.id, []);
+}
+
+function mergeBranchesIntoCreatePermissions(
   session: UserSession,
+  branches: readonly Branch[],
+  current: OrganizationMemberPermissionTree,
+): OrganizationMemberPermissionTree {
+  const orgId = session.organization?.id ?? branches[0]?.organizationid;
+  if (!orgId) {
+    return current;
+  }
+
+  return mergePermissionTree(createEmptyPermissionTree(orgId, branches), current);
+}
+
+async function bootstrapEditPermissions(
   member: OrganizationMember,
   loadOrganizationById: (organizationId: string) => Promise<Organization | null>,
 ) {
-  const resolvedOrganization = await resolveOrganizationFromSession(session, loadOrganizationById);
-  if (!resolvedOrganization?.id) {
+  const memberOrganizationId = member.organizationid;
+  if (!memberOrganizationId) {
     return null;
   }
 
   const memberOrganization = await resolveOrganizationWithBranches(
-    member.organizationid ?? resolvedOrganization.id,
-    member.organization ?? resolvedOrganization,
+    memberOrganizationId,
+    member.organization ?? null,
     loadOrganizationById,
   );
   if (!memberOrganization?.id) {
@@ -83,6 +106,59 @@ async function bootstrapEditPermissions(
 }
 
 describe('create-user initialization flows', () => {
+  it('initializes create permissions from session without loading organization', () => {
+    const session: UserSession = {
+      email: 'owner@example.com',
+      member: null,
+      memberorgs: [],
+      name: 'Owner',
+      organization: {
+        id: 'org-1',
+        name: 'Acme',
+        email: 'acme@example.com',
+        userid: 'owner',
+        branches: [],
+      },
+      userid: 'owner',
+    };
+
+    const permissions = bootstrapCreatePermissions(session);
+
+    expect(permissions.organizations['org-1']).toBeDefined();
+    expect(permissions.organizations['org-1']?.branches).toEqual({});
+  });
+
+  it('merges listed branches into create permissions without losing org-level edits', () => {
+    const session: UserSession = {
+      email: 'owner@example.com',
+      member: null,
+      memberorgs: [],
+      name: 'Owner',
+      organization: {
+        id: 'org-1',
+        name: 'Acme',
+        email: 'acme@example.com',
+        userid: 'owner',
+        branches: [],
+      },
+      userid: 'owner',
+    };
+
+    const initial = bootstrapCreatePermissions(session);
+    const edited = setFlag(initial, 'org-1', (organization) => ({
+      ...organization,
+      user: {
+        ...organization.user,
+        inviteMember: true,
+      },
+    }));
+
+    const merged = mergeBranchesIntoCreatePermissions(session, [branch], edited);
+
+    expect(merged.organizations['org-1']?.user.inviteMember).toBe(true);
+    expect(merged.organizations['org-1']?.branches['branch-1']).toBeDefined();
+  });
+
   it('preserves branch permissions when member organization include is shallow', async () => {
     const member: OrganizationMember = {
       id: 'member-1',
@@ -202,16 +278,8 @@ describe('create-user initialization flows', () => {
     };
 
     const loadOrganizationById = vi.fn().mockResolvedValue(organization);
-    const session: UserSession = {
-      email: 'owner@example.com',
-      member: null,
-      memberorgs: [],
-      name: 'Owner',
-      organization,
-      userid: 'owner',
-    };
 
-    const permissions = await bootstrapEditPermissions(session, member, loadOrganizationById);
+    const permissions = await bootstrapEditPermissions(member, loadOrganizationById);
 
     expect(loadOrganizationById).toHaveBeenCalledWith('org-1');
     expect(

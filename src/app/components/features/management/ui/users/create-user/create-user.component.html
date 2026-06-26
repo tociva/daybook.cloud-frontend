@@ -1,65 +1,96 @@
 <main class="management-page">
-  <form (submit)="save($event)">
-    <tng-card variant="outline" padding="lg">
-      <tng-card-header>
-        <tng-card-title>{{ title() }}</tng-card-title>
-        <tng-card-description>{{ subtitle() }}</tng-card-description>
-      </tng-card-header>
+  <section class="setup-layout" [attr.aria-labelledby]="'user-setup-title'">
+    <form class="invite-user-form" (submit)="save($event)">
+      <tng-card variant="outline" padding="lg">
+        <tng-card-header>
+          <tng-card-title>{{ title() }}</tng-card-title>
+          <tng-card-description>{{ subtitle() }}</tng-card-description>
+        </tng-card-header>
 
-      <tng-card-content>
-        @if (memberStore.error()) {
-          <div class="notice notice--danger">{{ memberStore.error() }}</div>
-        }
+        <tng-card-content>
+          @if (memberStore.error()) {
+            <div class="notice notice--danger">{{ memberStore.error() }}</div>
+          }
 
-        @if (formError()) {
-          <div class="notice notice--danger">{{ formError() }}</div>
-        }
+          @if (formError()) {
+            <div class="notice notice--danger">{{ formError() }}</div>
+          }
 
-        @if (loadState() === 'initializing') {
-          <div class="notice">Loading...</div>
-        } @else if (loadState() === 'member-not-found') {
-          <div class="notice notice--danger">User not found.</div>
-        } @else if (loadState() === 'ready') {
-          <div class="fields-grid">
-            <tng-form-field
-              class="field field--full"
-              #userInputRef
-              labelPosition="above"
-              [invalid]="userError() !== null"
-            >
-              <tng-label forId="user-email" required>Email</tng-label>
-              <tng-input
-                id="user-email"
-                [value]="userid()"
-                type="email"
-                [required]="true"
-                [ariaInvalid]="userError() !== null"
-                placeholder="name@example.com"
-                (input)="onUserInput($event)"
-              />
-              <tng-error [show]="userError() !== null">{{ userError() }}</tng-error>
-            </tng-form-field>
+          @if (mode() === 'create' && branchStore.error()) {
+            <div class="notice notice--danger">{{ branchStore.error() }}</div>
+          }
 
-            <div class="field field--full">
-              <app-member-permissions-editor
-                [organization]="organization()"
-                [permissions]="permissions()"
-                (permissionsChange)="onPermissionsChange($event)"
-              />
+          @if (loadState() === 'initializing') {
+            <div class="notice">Loading...</div>
+          } @else if (loadState() === 'member-not-found') {
+            <div class="notice notice--danger">User not found.</div>
+          } @else if (loadState() === 'no-organization') {
+            <div class="notice notice--danger">{{ formError() }}</div>
+          } @else if (loadState() === 'ready') {
+            <div class="fields-grid">
+              <tng-form-field
+                class="field field--full"
+                #userInputRef
+                labelPosition="above"
+                [invalid]="userError() !== null"
+              >
+                <tng-label forId="user-email" required>Email</tng-label>
+                <tng-input
+                  id="user-email"
+                  [value]="userid()"
+                  type="email"
+                  [required]="true"
+                  [ariaInvalid]="userError() !== null"
+                  placeholder="name@example.com"
+                  (input)="onUserInput($event)"
+                />
+                <tng-error [show]="userError() !== null">{{ userError() }}</tng-error>
+              </tng-form-field>
+
+              <div class="field field--full">
+                <app-member-permissions-editor
+                  [organization]="organization()"
+                  [permissions]="permissions()"
+                  [branchList]="mode() === 'create' ? branchStore.branches() : undefined"
+                  [branchesLoading]="mode() === 'create' && branchStore.isLoading()"
+                  (permissionsChange)="onPermissionsChange($event)"
+                />
+              </div>
             </div>
-          </div>
-        }
-      </tng-card-content>
+          }
+        </tng-card-content>
 
-      <tng-card-footer>
-        <tng-card-actions align="end">
-          <app-burl-back-button />
-          <app-burl-create-button
-            [label]="mode() === 'edit' ? 'Save user' : 'Invite user'"
-            [disabled]="isSaveDisabled()"
-          />
-        </tng-card-actions>
-      </tng-card-footer>
-    </tng-card>
-  </form>
+        <tng-card-footer>
+          <tng-card-actions align="end">
+            <app-burl-back-button />
+            <app-burl-create-button
+              [label]="mode() === 'edit' ? 'Save user' : 'Invite user'"
+              [disabled]="isSaveDisabled()"
+            />
+          </tng-card-actions>
+        </tng-card-footer>
+      </tng-card>
+    </form>
+
+    <aside class="setup-overview" aria-labelledby="user-setup-title">
+      <div class="setup-copy">
+        <p class="eyebrow">{{ mode() === 'edit' ? 'User management' : 'Team setup' }}</p>
+        <h1 id="user-setup-title">{{ title() }}</h1>
+        <p>
+          {{
+            mode() === 'edit'
+              ? 'Update the invitee email and fine-tune organization and branch access.'
+              : 'Send an invitation and configure what the new user can access in your workspace.'
+          }}
+        </p>
+        <tng-stepper
+          class="setup-stepper"
+          ariaLabel="User invite progress"
+          [ordered]="true"
+          [steps]="setupSteps()"
+          [value]="activeSetupStep()"
+        />
+      </div>
+    </aside>
+  </section>
 </main>
