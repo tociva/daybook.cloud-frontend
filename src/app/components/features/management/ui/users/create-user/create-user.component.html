@@ -15,9 +15,11 @@
           <div class="notice notice--danger">{{ formError() }}</div>
         }
 
-        @if (memberStore.isLoading() && mode() === 'edit' && !memberStore.selectedItem()) {
-          <div class="notice">Loading user...</div>
-        } @else {
+        @if (loadState() === 'initializing') {
+          <div class="notice">Loading...</div>
+        } @else if (loadState() === 'member-not-found') {
+          <div class="notice notice--danger">User not found.</div>
+        } @else if (loadState() === 'ready') {
           <div class="fields-grid">
             <tng-form-field
               class="field field--full"
@@ -25,16 +27,17 @@
               labelPosition="above"
               [invalid]="userError() !== null"
             >
-              <tng-label>Email</tng-label>
+              <tng-label forId="user-email" required>Email</tng-label>
               <tng-input
+                id="user-email"
                 [value]="userid()"
                 type="email"
+                [required]="true"
+                [ariaInvalid]="userError() !== null"
                 placeholder="name@example.com"
                 (input)="onUserInput($event)"
               />
-              @if (userError()) {
-                <p class="field-error">{{ userError() }}</p>
-              }
+              <tng-error [show]="userError() !== null">{{ userError() }}</tng-error>
             </tng-form-field>
 
             <div class="field field--full">
@@ -53,7 +56,7 @@
           <app-burl-back-button />
           <app-burl-create-button
             [label]="mode() === 'edit' ? 'Save user' : 'Invite user'"
-            [disabled]="isSubmitting() || memberStore.isLoading()"
+            [disabled]="isSaveDisabled()"
           />
         </tng-card-actions>
       </tng-card-footer>

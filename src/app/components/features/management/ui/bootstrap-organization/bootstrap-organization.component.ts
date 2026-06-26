@@ -35,6 +35,7 @@ import { TngInput, TngInputGroup, TngInputFieldSuffix } from '@tailng-ui/primiti
 import { TngIcon } from '@tailng-ui/icons';
 import dayjs from 'dayjs';
 import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
+import { isValidEmail } from '../../../../../shared/validation/email.util';
 import { Country } from '../../data/country/country.model';
 import { CountryStore } from '../../data/country/country.store';
 import { Currency } from '../../data/currency/currency.model';
@@ -143,9 +144,6 @@ type OrganizationFormPayload = Readonly<{
 
 const willPassRequiredStringValidation = (value: string | null | undefined): boolean =>
   typeof value === 'string' && value.trim().length > 0;
-
-const willPassEmailValidation = (value: string): boolean =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 
 const willPassRequiredDateValidation = (value: unknown): boolean => {
   if (typeof value === 'string') {
@@ -428,9 +426,9 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
     }
 
     if (!willPassRequiredStringValidation(model.email)) {
-      errors.email = 'Email is required';
-    } else if (!willPassEmailValidation(model.email)) {
-      errors.email = 'Invalid email address';
+      errors.email = 'Email is required.';
+    } else if (!isValidEmail(model.email)) {
+      errors.email = 'Invalid email address.';
     }
 
     if (!willPassRequiredStringValidation(model.countryCode)) {
@@ -490,7 +488,7 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
     const basicCompleted =
       willPassRequiredStringValidation(model.name) &&
       willPassRequiredStringValidation(model.email) &&
-      willPassEmailValidation(model.email) &&
+      isValidEmail(model.email) &&
       willPassRequiredStringValidation(model.countryCode);
     const addressCompleted = willPassRequiredStringValidation(model.address.line1);
     const fiscalCompleted =

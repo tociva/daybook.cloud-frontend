@@ -16,6 +16,7 @@ import {
 } from '@tailng-ui/components';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
+import { validateEmail } from '../../../../../../shared/validation/email.util';
 import { CountryStore } from '../../../data/country/country.store';
 import type { Country } from '../../../data/country/country.model';
 import { CurrencyStore } from '../../../data/currency/currency.store';
@@ -193,13 +194,7 @@ export class CreateBranchComponent implements AfterViewInit {
   protected readonly nameError = computed(() =>
     this.submitted() && this.name().trim() === '' ? 'Name is required.' : null,
   );
-  protected readonly emailError = computed(() => {
-    if (!this.submitted()) return null;
-    const v = this.email().trim();
-    if (v === '') return 'Email is required.';
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return 'Invalid email address.';
-    return null;
-  });
+  protected readonly emailError = computed(() => validateEmail(this.email(), this.submitted()));
   protected readonly countryError = computed(() =>
     this.submitted() && !this.selectedCountry() ? 'Country is required.' : null,
   );
