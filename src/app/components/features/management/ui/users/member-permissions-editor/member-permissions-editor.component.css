@@ -1,0 +1,180 @@
+.permissions-section {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.section-title {
+  color: var(--tng-semantic-foreground-primary);
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.subsection-title {
+  color: var(--tng-semantic-foreground-primary);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem;
+}
+
+.permission-group {
+  border: 1px solid var(--tng-semantic-border-subtle);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+}
+
+.permission-group + .permission-group {
+  margin-top: 0.75rem;
+}
+
+.permission-group-header {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.group-select-all {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.5rem;
+}
+
+.group-label {
+  color: var(--tng-semantic-foreground-primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.group-partial {
+  color: var(--tng-semantic-foreground-secondary);
+  font-size: 0.75rem;
+}
+
+.permission-grid {
+  display: grid;
+  gap: 0.5rem 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+}
+
+.permission-item {
+  align-items: center;
+  color: var(--tng-semantic-foreground-primary);
+  display: inline-flex;
+  font-size: 0.8125rem;
+  gap: 0.5rem;
+}
+
+.branch-accordion {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.branch-trigger {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.branch-name {
+  font-weight: 600;
+}
+
+.branch-meta {
+  color: var(--tng-semantic-foreground-secondary);
+  font-size: 0.8125rem;
+}
+
+.branch-panel {
+  display: grid;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+}
+
+.fiscal-year-stack {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.fiscal-year-card {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.fiscal-year-header h4 {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.fiscal-year-header p {
+  color: var(--tng-semantic-foreground-secondary);
+  font-size: 0.8125rem;
+  margin: 0.25rem 0 0;
+}
+
+.empty-copy,
+.notice {
+  color: var(--tng-semantic-foreground-secondary);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.domain-accordion {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.domain-trigger {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.domain-select-all {
+  align-items: center;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.domain-copy {
+  display: grid;
+  flex: 1;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.domain-label {
+  color: var(--tng-semantic-foreground-primary);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.domain-subtitle {
+  color: var(--tng-semantic-foreground-secondary);
+  font-size: 0.75rem;
+}
+
+.domain-partial {
+  color: var(--tng-semantic-foreground-secondary);
+  flex-shrink: 0;
+  font-size: 0.75rem;
+}
+
+.domain-panel {
+  display: grid;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+}
+
+@media (max-width: 700px) {
+  .permission-grid {
+    grid-template-columns: 1fr;
+  }
+}

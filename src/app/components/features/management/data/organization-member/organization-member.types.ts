@@ -1,1 +1,3 @@
-export type OrganizationMemberPermissions = Readonly<Record<string, readonly string[]>>;
+import type { OrganizationMemberPermissionTree } from './organization-member-permissions.model';
+
+export type OrganizationMemberPermissions = OrganizationMemberPermissionTree;
