@@ -75,7 +75,7 @@ export const THEME_OPTIONS: ThemeOption[] = [
   },
   {
     value: 'daybook-classic',
-    label: 'Daybook Classic',
+    label: 'Daybook - Classic',
     description: 'Ledger-toned paper, navy, and signal colors for dense finance workflows.',
   },
 ];
@@ -91,15 +91,19 @@ const VALID_THEME_NAMES = new Set<AppThemeName>([
   'daybook-classic',
 ]);
 
+const DEFAULT_THEME_NAME: AppThemeName = 'daybook-classic';
+const DEFAULT_DARK_MODE = false;
+
 function resolveThemeName(raw: unknown): AppThemeName {
   return typeof raw === 'string' && VALID_THEME_NAMES.has(raw as AppThemeName)
     ? (raw as AppThemeName)
-    : 'daybook-classic';
+    : DEFAULT_THEME_NAME;
 }
 
 function resolveDarkMode(raw: unknown): boolean {
+  if (raw === 'dark') return true;
   if (raw === 'light') return false;
-  return true; // default to dark when no preference is stored
+  return DEFAULT_DARK_MODE;
 }
 
 // ── localStorage persistence ──────────────────────────────────────────────────
@@ -111,14 +115,14 @@ type PersistedTheme = { darkMode: boolean; themeName: AppThemeName };
 function loadPersistedTheme(): PersistedTheme {
   try {
     const raw = localStorage.getItem(THEME_STORAGE_KEY);
-    if (!raw) return { darkMode: true, themeName: 'default' };
+    if (!raw) return { darkMode: DEFAULT_DARK_MODE, themeName: DEFAULT_THEME_NAME };
     const parsed = JSON.parse(raw) as Partial<PersistedTheme>;
     return {
-      darkMode: typeof parsed.darkMode === 'boolean' ? parsed.darkMode : true,
+      darkMode: typeof parsed.darkMode === 'boolean' ? parsed.darkMode : DEFAULT_DARK_MODE,
       themeName: resolveThemeName(parsed.themeName),
     };
   } catch {
-    return { darkMode: true, themeName: 'default' };
+    return { darkMode: DEFAULT_DARK_MODE, themeName: DEFAULT_THEME_NAME };
   }
 }
 
@@ -146,7 +150,7 @@ export const AppThemeStore = signalStore(
   withState(() => {
     // Read from localStorage so the correct theme is applied on the very first
     // paint — before any async session/config calls complete. Falls back to
-    // default when nothing is stored yet (first-time visitor).
+    // app default when nothing is stored yet (first-time visitor).
     const persisted = loadPersistedTheme();
     return { darkMode: persisted.darkMode, themeName: persisted.themeName };
   }),
