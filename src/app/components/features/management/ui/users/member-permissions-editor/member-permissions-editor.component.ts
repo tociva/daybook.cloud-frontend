@@ -132,9 +132,9 @@ export class MemberPermissionsEditorComponent {
   }
 
   protected branchFiscalYears(branch: Branch): readonly (FiscalYear & { id: string })[] {
-    return (branch.fiscalyears ?? []).filter(
-      (fiscalYear): fiscalYear is FiscalYear & { id: string } => Boolean(fiscalYear.id),
-    );
+    return [...(branch.fiscalyears ?? [])]
+      .filter((fiscalYear): fiscalYear is FiscalYear & { id: string } => Boolean(fiscalYear.id))
+      .sort((left, right) => left.startdate.localeCompare(right.startdate));
   }
 
   protected domainValue(domain: PermissionDomainDef): string {

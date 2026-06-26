@@ -53,6 +53,7 @@
 }
 
 .user-cell-name {
+  font-weight: 700;
   overflow: hidden;
   text-align: left;
   text-overflow: ellipsis;

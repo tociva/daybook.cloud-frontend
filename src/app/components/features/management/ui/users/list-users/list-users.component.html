@@ -73,9 +73,13 @@
             <div class="user-cell">
               <tng-avatar [fallback]="userDisplayName(row)" size="sm" class="user-cell-avatar" />
               <div class="user-cell-copy">
-                <button type="button" class="link-button user-cell-name" (click)="viewUser(row)">
-                  {{ userDisplayName(row) }}
-                </button>
+                @if (isOwner(row)) {
+                  <span class="user-cell-name">{{ userDisplayName(row) }}</span>
+                } @else {
+                  <button type="button" class="link-button user-cell-name" (click)="viewUser(row)">
+                    {{ userDisplayName(row) }}
+                  </button>
+                }
                 @if (userEmail(row)) {
                   <span class="user-cell-email">{{ userEmail(row) }}</span>
                 } @else {
@@ -100,24 +104,26 @@
           </ng-template>
 
           <ng-template tngTableCellTemplate="actions" let-row="row">
-            <div class="row-actions">
-              <app-table-row-icon-button
-                icon="eye"
-                ariaLabel="View user"
-                (action)="viewUser(row)"
-              />
-              <app-table-row-icon-button
-                icon="pencil"
-                ariaLabel="Edit user"
-                (action)="editUser(row)"
-              />
-              <app-table-row-icon-button
-                icon="trash2"
-                ariaLabel="Remove user"
-                tone="danger"
-                (action)="deleteUser(row)"
-              />
-            </div>
+            @if (!isOwner(row)) {
+              <div class="row-actions">
+                <app-table-row-icon-button
+                  icon="eye"
+                  ariaLabel="View user"
+                  (action)="viewUser(row)"
+                />
+                <app-table-row-icon-button
+                  icon="pencil"
+                  ariaLabel="Edit user"
+                  (action)="editUser(row)"
+                />
+                <app-table-row-icon-button
+                  icon="trash2"
+                  ariaLabel="Remove user"
+                  tone="danger"
+                  (action)="deleteUser(row)"
+                />
+              </div>
+            }
           </ng-template>
         </tng-table>
 
