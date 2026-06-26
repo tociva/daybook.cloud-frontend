@@ -3,6 +3,7 @@ export { OrganizationMemberService } from './organization-member.service';
 export { OrganizationMemberStore } from './organization-member.store';
 export { OrganizationMemberStatus, UserRoles } from './organization-member.enums';
 export type {
+  InviteMemberPayload,
   OrganizationMember,
   OrganizationMemberGetQuery,
   OrganizationMemberListQuery,

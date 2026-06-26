@@ -20,8 +20,43 @@
             <div class="notice notice--danger">{{ branchStore.error() }}</div>
           }
 
-          @if (loadState() === 'initializing') {
-            <div class="notice">Loading...</div>
+          @if (showSkeleton()) {
+            <div class="skeleton-stack" aria-busy="true" aria-label="Loading invite form">
+              <section class="skeleton-panel">
+                <tng-skeleton width="4rem" height="0.85rem"></tng-skeleton>
+                <tng-skeleton width="100%" height="2.25rem"></tng-skeleton>
+              </section>
+
+              <section class="skeleton-panel">
+                <tng-skeleton width="11rem" height="1rem"></tng-skeleton>
+                @for (row of [0, 1, 2]; track row) {
+                  <div class="skeleton-permission-row">
+                    <tng-skeleton width="1.25rem" height="1.25rem"></tng-skeleton>
+                    <div class="skeleton-permission-copy">
+                      <tng-skeleton width="42%" height="0.9rem"></tng-skeleton>
+                      <tng-skeleton width="68%" height="0.75rem"></tng-skeleton>
+                    </div>
+                  </div>
+                }
+              </section>
+
+              <section class="skeleton-panel">
+                <tng-skeleton width="9rem" height="1rem"></tng-skeleton>
+                <div class="skeleton-tab-row">
+                  <tng-skeleton width="6rem" height="2rem"></tng-skeleton>
+                  <tng-skeleton width="7rem" height="2rem"></tng-skeleton>
+                </div>
+                @for (row of [0, 1]; track row) {
+                  <div class="skeleton-permission-row">
+                    <tng-skeleton width="1.25rem" height="1.25rem"></tng-skeleton>
+                    <div class="skeleton-permission-copy">
+                      <tng-skeleton width="36%" height="0.9rem"></tng-skeleton>
+                      <tng-skeleton width="58%" height="0.75rem"></tng-skeleton>
+                    </div>
+                  </div>
+                }
+              </section>
+            </div>
           } @else if (loadState() === 'member-not-found') {
             <div class="notice notice--danger">User not found.</div>
           } @else if (loadState() === 'no-organization') {
@@ -61,36 +96,59 @@
         </tng-card-content>
 
         <tng-card-footer>
-          <tng-card-actions align="end">
-            <app-burl-back-button />
-            <app-burl-create-button
-              [label]="mode() === 'edit' ? 'Save user' : 'Invite user'"
-              [disabled]="isSaveDisabled()"
-            />
-          </tng-card-actions>
+          @if (!showSkeleton()) {
+            <tng-card-actions align="end">
+              <app-burl-back-button />
+              <app-burl-create-button
+                [label]="mode() === 'edit' ? 'Save user' : 'Invite user'"
+                [disabled]="isSaveDisabled()"
+              />
+            </tng-card-actions>
+          }
         </tng-card-footer>
       </tng-card>
     </form>
 
     <aside class="setup-overview" aria-labelledby="user-setup-title">
-      <div class="setup-copy">
-        <p class="eyebrow">{{ mode() === 'edit' ? 'User management' : 'Team setup' }}</p>
-        <h1 id="user-setup-title">{{ title() }}</h1>
-        <p>
-          {{
-            mode() === 'edit'
-              ? 'Update the invitee email and fine-tune organization and branch access.'
-              : 'Send an invitation and configure what the new user can access in your workspace.'
-          }}
-        </p>
-        <tng-stepper
-          class="setup-stepper"
-          ariaLabel="User invite progress"
-          [ordered]="true"
-          [steps]="setupSteps()"
-          [value]="activeSetupStep()"
-        />
-      </div>
+      @if (showSkeleton()) {
+        <div class="setup-copy skeleton-overview" aria-hidden="true">
+          <tng-skeleton width="6rem" height="0.75rem"></tng-skeleton>
+          <tng-skeleton width="72%" height="2.75rem"></tng-skeleton>
+          <tng-skeleton width="100%" height="0.95rem"></tng-skeleton>
+          <tng-skeleton width="88%" height="0.95rem"></tng-skeleton>
+          <div class="skeleton-stepper">
+            @for (step of [0, 1]; track step) {
+              <div class="skeleton-step">
+                <tng-skeleton width="1.25rem" height="1.25rem"></tng-skeleton>
+                <div class="skeleton-step-copy">
+                  <tng-skeleton width="4.5rem" height="0.85rem"></tng-skeleton>
+                  <tng-skeleton width="8rem" height="0.75rem"></tng-skeleton>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      } @else {
+        <div class="setup-copy">
+          <p class="eyebrow">{{ mode() === 'edit' ? 'User management' : 'Team setup' }}</p>
+          <h1 id="user-setup-title">{{ title() }}</h1>
+          <p>
+            {{
+              mode() === 'edit'
+                ? 'Update the invitee email and fine-tune organization and branch access.'
+                : 'Send an invitation and configure what the new user can access in your workspace.'
+            }}
+          </p>
+          <tng-stepper
+            class="setup-stepper"
+            ariaLabel="User invite progress"
+            orientation="vertical"
+            [ordered]="true"
+            [steps]="setupSteps()"
+            [value]="activeSetupStep()"
+          />
+        </div>
+      }
     </aside>
   </section>
 </main>

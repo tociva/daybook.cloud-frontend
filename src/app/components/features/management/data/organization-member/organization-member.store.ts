@@ -2,6 +2,7 @@ import { computed, inject } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
 import type {
+  InviteMemberPayload,
   OrganizationMember,
   OrganizationMemberGetQuery,
   OrganizationMemberListQuery,
@@ -82,6 +83,25 @@ export const OrganizationMemberStore = signalStore(
         setLoading();
         try {
           const member = await service.create(payload);
+          patchState(store, (state) => ({
+            members: [member, ...state.members],
+            count: state.count + 1,
+            selectedMember: member,
+            selectedMemberId: member.id ?? null,
+            error: null,
+            isLoading: false,
+          }));
+          return member;
+        } catch (error) {
+          setError(getApiErrorMessage(error, 'Failed to invite user.'));
+          return null;
+        }
+      },
+
+      async inviteMember(payload: InviteMemberPayload): Promise<OrganizationMember | null> {
+        setLoading();
+        try {
+          const member = await service.inviteMember(payload);
           patchState(store, (state) => ({
             members: [member, ...state.members],
             count: state.count + 1,

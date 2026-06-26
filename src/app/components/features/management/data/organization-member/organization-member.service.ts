@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { CrudApiService } from '../../../../../shared/crud';
 import type {
+  InviteMemberPayload,
   OrganizationMember,
   OrganizationMemberGetQuery,
   OrganizationMemberListQuery,
@@ -8,6 +9,7 @@ import type {
 } from './organization-member.model';
 
 const ENDPOINT = '/organization/organization-member';
+const INVITE_ENDPOINT = '/organization/organization/invite-member';
 
 @Injectable({ providedIn: 'root' })
 export class OrganizationMemberService {
@@ -15,6 +17,10 @@ export class OrganizationMemberService {
 
   async create(payload: OrganizationMemberPayload): Promise<OrganizationMember> {
     return this.crudApi.create<OrganizationMember, OrganizationMemberPayload>(ENDPOINT, payload);
+  }
+
+  async inviteMember(payload: InviteMemberPayload): Promise<OrganizationMember> {
+    return this.crudApi.create<OrganizationMember, InviteMemberPayload>(INVITE_ENDPOINT, payload);
   }
 
   async delete(id: string): Promise<void> {

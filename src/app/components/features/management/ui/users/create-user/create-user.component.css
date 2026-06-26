@@ -98,6 +98,59 @@ tng-input {
   grid-column: 1 / -1;
 }
 
+.skeleton-stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.skeleton-panel {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.skeleton-permission-row {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.skeleton-permission-copy {
+  display: grid;
+  flex: 1;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.skeleton-tab-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.skeleton-overview {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.skeleton-stepper {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.skeleton-step {
+  align-items: flex-start;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.skeleton-step-copy {
+  display: grid;
+  flex: 1;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
 @media (max-width: 900px) {
   .setup-layout {
     grid-template-columns: 1fr;

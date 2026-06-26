@@ -15,6 +15,20 @@ import {
   setFlag,
 } from '../../../data/organization-member/organization-member-permissions.util';
 import { resolveOrganizationWithBranches } from './create-user-organization.util';
+import type { InviteMemberPayload } from '../../../data/organization-member/organization-member.model';
+
+function buildInvitePayload(
+  email: string,
+  permissions: OrganizationMemberPermissionTree,
+  hasUserError: boolean,
+): InviteMemberPayload | null {
+  if (hasUserError) return null;
+
+  return {
+    email: email.trim(),
+    permissions,
+  };
+}
 
 const fiscalYear: FiscalYear & { id: string } = {
   id: 'fy-1',
@@ -106,6 +120,16 @@ async function bootstrapEditPermissions(
 }
 
 describe('create-user initialization flows', () => {
+  it('builds invite payload with email and permissions only', () => {
+    const permissions = createEmptyPermissionTree('org-1', []);
+
+    expect(buildInvitePayload('invitee@example.com', permissions, false)).toEqual({
+      email: 'invitee@example.com',
+      permissions,
+    });
+    expect(buildInvitePayload('invalid', permissions, true)).toBeNull();
+  });
+
   it('initializes create permissions from session without loading organization', () => {
     const session: UserSession = {
       email: 'owner@example.com',

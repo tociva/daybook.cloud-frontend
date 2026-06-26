@@ -5,7 +5,6 @@ import {
   ElementRef,
   ViewChild,
   computed,
-  effect,
   inject,
   signal,
 } from '@angular/core';
@@ -22,6 +21,7 @@ import {
   TngFormFieldComponent,
   TngInputComponent,
   TngLabelComponent,
+  TngSkeletonComponent,
   TngStepperComponent,
 } from '@tailng-ui/components';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
@@ -34,7 +34,7 @@ import {
   createEmptyPermissionTree,
   mergePermissionTree,
 } from '../../../data/organization-member';
-import type { OrganizationMemberPayload, OrganizationMemberPermissionTree } from '../../../data/organization-member';
+import type { OrganizationMemberPayload, OrganizationMemberPermissionTree, InviteMemberPayload } from '../../../data/organization-member';
 import { BranchStore } from '../../../data/branch';
 import { OrganizationStore } from '../../../data/organization';
 import type { Organization } from '../../../data/organization/organization.model';
@@ -60,6 +60,7 @@ export type PageLoadState = 'initializing' | 'ready' | 'member-not-found' | 'no-
     TngFormFieldComponent,
     TngInputComponent,
     TngLabelComponent,
+    TngSkeletonComponent,
     TngStepperComponent,
     BurlBackButtonComponent,
     BurlCreateButtonComponent,
@@ -85,9 +86,7 @@ export class CreateUserComponent implements AfterViewInit {
   private props: Readonly<Record<string, unknown>> | undefined;
 
   protected readonly id = signal<string | null>(this.route.snapshot.paramMap.get('id'));
-  protected readonly loadState = signal<PageLoadState>(
-    this.route.snapshot.paramMap.get('id') ? 'initializing' : 'ready',
-  );
+  protected readonly loadState = signal<PageLoadState>('initializing');
   protected readonly submitted = signal(false);
   protected readonly isSubmitting = signal(false);
   protected readonly formError = signal<string | null>(null);
@@ -106,11 +105,10 @@ export class CreateUserComponent implements AfterViewInit {
   protected readonly hasErrors = computed(
     () => this.userError() !== null || this.formError() !== null,
   );
-  protected readonly isSaveDisabled = computed(() => {
-    if (this.isSubmitting()) return true;
-    if (this.mode() === 'create') return false;
-    return this.loadState() !== 'ready';
-  });
+  protected readonly showSkeleton = computed(() => this.loadState() === 'initializing');
+  protected readonly isSaveDisabled = computed(
+    () => this.isSubmitting() || this.loadState() !== 'ready',
+  );
   protected readonly setupSteps = computed(() => {
     const emailCompleted = this.userid().trim().length > 0 && this.userError() === null;
 
@@ -135,27 +133,6 @@ export class CreateUserComponent implements AfterViewInit {
   });
 
   constructor() {
-    effect(() => {
-      if (this.mode() !== 'create') return;
-
-      const branches = this.branchStore.branches();
-      if (branches.length === 0) return;
-
-      const orgId =
-        this.userSessionStore.session()?.organization?.id ?? branches[0]?.organizationid;
-      if (!orgId) return;
-
-      const sessionOrg = this.userSessionStore.session()?.organization;
-      this.organization.set({
-        ...(sessionOrg ?? { name: '', email: '', userid: '' }),
-        id: orgId,
-        branches,
-      });
-      this.permissions.update((current) =>
-        mergePermissionTree(createEmptyPermissionTree(orgId, branches), current),
-      );
-    });
-
     void this.initialize();
   }
 
@@ -180,16 +157,19 @@ export class CreateUserComponent implements AfterViewInit {
     this.submitted.set(true);
     this.formError.set(null);
 
-    const payload = this.buildPayload();
-    if (!payload || this.hasErrors()) return;
+    if (this.hasErrors()) return;
 
     this.isSubmitting.set(true);
     try {
       const id = this.id();
       if (id) {
+        const payload = this.buildUpdatePayload();
+        if (!payload) return;
         await this.facade.update(id, payload);
       } else {
-        await this.facade.create(payload);
+        const payload = this.buildInvitePayload();
+        if (!payload) return;
+        await this.facade.inviteMember(payload);
       }
     } finally {
       this.isSubmitting.set(false);
@@ -201,22 +181,38 @@ export class CreateUserComponent implements AfterViewInit {
 
     const memberId = this.id();
     if (!memberId) {
-      this.initializeCreate();
+      await this.initializeCreate();
       return;
     }
 
     await this.initializeEdit(memberId);
   }
 
-  private initializeCreate(): void {
+  private async initializeCreate(): Promise<void> {
+    this.loadState.set('initializing');
+
     const sessionOrg = this.userSessionStore.session()?.organization;
     if (sessionOrg?.id) {
       this.organization.set(sessionOrg);
       this.permissions.set(createEmptyPermissionTree(sessionOrg.id, []));
     }
 
+    await this.branchStore.loadBranches({ includes: ['fiscalyears'] });
+
+    const branches = this.branchStore.branches();
+    const orgId = sessionOrg?.id ?? branches[0]?.organizationid;
+    if (orgId) {
+      this.organization.set({
+        ...(sessionOrg ?? { name: '', email: '', userid: '' }),
+        id: orgId,
+        branches,
+      });
+      this.permissions.update((current) =>
+        mergePermissionTree(createEmptyPermissionTree(orgId, branches), current),
+      );
+    }
+
     this.loadState.set('ready');
-    void this.branchStore.loadBranches({ includes: ['fiscalyears'] });
     this.focusEmailInput();
   }
 
@@ -264,26 +260,30 @@ export class CreateUserComponent implements AfterViewInit {
     this.focusEmailInput();
   }
 
-  private buildPayload(): OrganizationMemberPayload | null {
+  private buildInvitePayload(): InviteMemberPayload | null {
     if (this.userError()) return null;
 
-    const base: OrganizationMemberPayload = {
+    return {
+      email: this.userid().trim(),
+      permissions: this.permissions(),
+    };
+  }
+
+  private buildUpdatePayload(): OrganizationMemberPayload | null {
+    if (this.userError()) return null;
+    if (!this.organizationid) {
+      this.formError.set('Organization is required.');
+      return null;
+    }
+
+    return {
       userid: this.userid().trim(),
+      organizationid: this.organizationid,
       role: this.role,
       status: this.status,
       permissions: this.permissions(),
       ...(this.props ? { props: this.props } : {}),
     };
-
-    if (this.mode() === 'edit') {
-      if (!this.organizationid) {
-        this.formError.set('Organization is required.');
-        return null;
-      }
-      return { ...base, organizationid: this.organizationid };
-    }
-
-    return base;
   }
 
   private focusEmailInput(): void {
