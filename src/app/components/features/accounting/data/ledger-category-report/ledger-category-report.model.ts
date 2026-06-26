@@ -1,4 +1,5 @@
 import type { AccountingReportSummary } from '../../shared/accounting-report-summary.util';
+import type { JournalSourceTypeValue } from '../journal';
 
 export type LedgerCategoryReportOppositeLedger = Readonly<{
   ledgerid: string;
@@ -8,6 +9,7 @@ export type LedgerCategoryReportOppositeLedger = Readonly<{
 export type LedgerCategoryReportRow = Readonly<{
   journalid: string;
   journalNumber: string;
+  sourcetype: JournalSourceTypeValue;
   date: string;
   description?: string;
   order: number;

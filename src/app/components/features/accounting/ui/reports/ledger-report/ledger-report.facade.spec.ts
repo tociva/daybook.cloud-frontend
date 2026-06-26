@@ -44,11 +44,14 @@ const emptySummary = (): LedgerReportSummary => ({
 const reportRow = (journalid: string): LedgerReportRow => ({
   journalid,
   journalNumber: journalid,
+  sourcetype: 'journal',
   date: '2026-04-15',
   order: 1,
   debit: 10,
   credit: 0,
   oppositeLedgers: [],
+  runningDebit: 10,
+  runningCredit: 0,
   balanceDebit: 10,
   balanceCredit: 0,
 });

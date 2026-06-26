@@ -13,6 +13,7 @@ import { PageHeadingComponent } from '../../../../../../shared/page-heading/page
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { UserSessionStore } from '../../../../management/data/user-session/user-session.store';
+import { journalSourceTypeLabel } from '../../../data/journal';
 import type { LedgerCategoryReportRow } from '../../../data/ledger-category-report/ledger-category-report.model';
 import {
   buildAccountingReportSummaryMetrics,
@@ -89,6 +90,7 @@ export class LedgerCategoryReportComponent {
   protected readonly columns: readonly TngTableColumn<LedgerCategoryReportRow>[] = [
     { id: 'date', label: 'Date', width: '7.5rem' },
     { id: 'journalNumber', label: 'Journal #', width: '10rem' },
+    { id: 'sourcetype', label: 'Type', width: '9.5rem' },
     { id: 'ledgerName', label: 'Ledger', width: '12rem' },
     { id: 'oppositeLedgers', label: 'Against', width: '12rem' },
     { id: 'debit', label: 'Debit', align: 'end', headerAlign: 'end', width: '7.5rem' },
@@ -116,6 +118,10 @@ export class LedgerCategoryReportComponent {
 
   protected formatDisplayDate(value: string | null | undefined): string {
     return this.dateManagement.formatDisplayDate(value, '—');
+  }
+
+  protected sourceTypeLabel(value: LedgerCategoryReportRow['sourcetype']): string {
+    return journalSourceTypeLabel(value);
   }
 
   protected readonly formatGeneratedAt = (value: string | null | undefined): string =>

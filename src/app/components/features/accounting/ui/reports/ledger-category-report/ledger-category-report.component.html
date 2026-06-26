@@ -95,6 +95,10 @@
             </span>
           </ng-template>
 
+          <ng-template tngTableCellTemplate="sourcetype" let-row="row">
+            <span class="ledger-category-report-cell">{{ sourceTypeLabel(row.sourcetype) }}</span>
+          </ng-template>
+
           <ng-template tngTableCellTemplate="ledgerName" let-row="row">
             <span class="ledger-category-report-cell">
               @if (canOpenLedgerReport()) {

@@ -9,6 +9,7 @@ export type {
   JournalEntryCreatePayload,
   JournalGetQuery,
   JournalListQuery,
+  JournalSourceTypeValue,
   JournalUpdatePayload,
   JournalWritePayload,
 } from './journal.model';

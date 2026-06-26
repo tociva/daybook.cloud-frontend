@@ -32,7 +32,12 @@ import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
-import { JournalService, JournalSourceType, JournalStore, journalSourceTypeLabel } from '../../../data/journal';
+import {
+  JournalService,
+  JournalSourceType,
+  JournalStore,
+  journalSourceTypeLabel,
+} from '../../../data/journal';
 import type { Journal, JournalEntry } from '../../../data/journal';
 import { LedgerStore } from '../../../data/ledger';
 import type { Ledger } from '../../../data/ledger';
@@ -141,6 +146,17 @@ const JOURNAL_IMPORT_CONFIG: Record<JournalImportSource, JournalImportConfig> = 
 
 const DEFAULT_JOURNAL_ORDER = ['date DESC'] as const;
 const COLLAPSED_ENTRY_LIMIT = 2;
+const JOURNAL_SOURCE_TYPE_FILTER_VALUES = [
+  JournalSourceType.GENERAL,
+  JournalSourceType.BANK_TXN,
+  JournalSourceType.SALE_INVOICE,
+  JournalSourceType.PURCHASE_INVOICE,
+  JournalSourceType.RECEIPT,
+  JournalSourceType.PAYMENT,
+  JournalSourceType.CONTRA_TRANSACTION,
+  JournalSourceType.CREDIT_NOTE,
+  JournalSourceType.DEBIT_NOTE,
+] as const;
 
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 @Component({
@@ -291,6 +307,16 @@ export class ListJournalComponent {
   protected readonly filterFields: readonly CrudFilterField[] = [
     { id: 'number', label: 'Number', placeholder: 'Journal number', type: 'text' },
     { id: 'description', label: 'Description', placeholder: 'Description text', type: 'text' },
+    {
+      id: 'sourcetype',
+      label: 'Type',
+      options: JOURNAL_SOURCE_TYPE_FILTER_VALUES.map((value) => ({
+        label: journalSourceTypeLabel(value),
+        value,
+      })),
+      placeholder: 'Any type',
+      type: 'enum',
+    },
     {
       id: 'date',
       label: 'Date',

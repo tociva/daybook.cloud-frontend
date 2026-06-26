@@ -44,6 +44,7 @@ const emptySummary = (): LedgerCategoryReportSummary => ({
 const reportRow = (journalid: string): LedgerCategoryReportRow => ({
   journalid,
   journalNumber: journalid,
+  sourcetype: 'journal',
   date: '2026-04-15',
   order: 1,
   ledgerid: 'ledger-1',

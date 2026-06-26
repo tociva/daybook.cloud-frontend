@@ -13,7 +13,7 @@ import type {
 
 const ENDPOINT = '/accounting/reconciliation-match';
 
-const UNLINK_SOURCE_PATH_BY_TYPE: Readonly<Record<JournalSourceType, string>> = {
+const UNLINK_SOURCE_PATH_BY_TYPE: Readonly<Partial<Record<JournalSourceType, string>>> = {
   [JournalSourceType.BANK_TXN]: 'bank-txn',
   [JournalSourceType.SALE_INVOICE]: 'sale-invoice',
   [JournalSourceType.PURCHASE_INVOICE]: 'purchase-invoice',

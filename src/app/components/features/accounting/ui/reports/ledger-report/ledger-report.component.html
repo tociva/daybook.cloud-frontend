@@ -93,6 +93,10 @@
             </span>
           </ng-template>
 
+          <ng-template tngTableCellTemplate="sourcetype" let-row="row">
+            <span class="ledger-report-cell">{{ sourceTypeLabel(row.sourcetype) }}</span>
+          </ng-template>
+
           <ng-template tngTableCellTemplate="description" let-row="row">
             <span class="ledger-report-cell">
               @if (row.description) {
