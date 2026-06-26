@@ -15,6 +15,12 @@ p {
   margin: 0;
 }
 
+h2 {
+  color: var(--tng-semantic-foreground-primary);
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
 h3 {
   color: var(--tng-semantic-foreground-primary);
   font-size: 1rem;
@@ -41,6 +47,36 @@ h3 {
 .empty-copy {
   color: var(--tng-semantic-foreground-muted);
   font-size: 0.9rem;
+}
+
+.invitations-card {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.section-header {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+}
+
+.section-header div {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.section-header p {
+  color: var(--tng-semantic-foreground-muted);
+  font-size: 0.85rem;
+}
+
+.invitation-actions {
+  align-items: center;
+  display: flex;
+  gap: 0.45rem;
+  justify-content: flex-end;
 }
 
 .organization-accordion {
@@ -148,6 +184,11 @@ h3 {
 }
 
 @media (max-width: 700px) {
+  .invitation-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .branch-header {
     align-items: flex-start;
     flex-direction: column;

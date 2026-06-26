@@ -8,6 +8,7 @@ import type {
   OrganizationMemberListQuery,
   OrganizationMemberPayload,
 } from './organization-member.model';
+import { OrganizationMemberStatus } from './organization-member.enums';
 import { OrganizationMemberService } from './organization-member.service';
 import { initialOrganizationMemberState } from './organization-member.state';
 
@@ -34,6 +35,32 @@ export const OrganizationMemberStore = signalStore(
 
     const setError = (error: string): void => {
       patchState(store, { error, isLoading: false });
+    };
+
+    const patchMemberState = (id: string, member: OrganizationMember): void => {
+      patchState(store, (state) => ({
+        members: state.members.map((item) => (item.id === id ? member : item)),
+        selectedMember: state.selectedMember?.id === id ? member : state.selectedMember,
+        selectedMemberId: member.id ?? id,
+        error: null,
+        isLoading: false,
+      }));
+    };
+
+    const updateInvitationStatus = async (
+      id: string,
+      status: OrganizationMemberStatus,
+      fallbackMessage: string,
+    ): Promise<boolean> => {
+      setLoading();
+      try {
+        const member = await service.updateStatus(id, { status });
+        patchMemberState(id, member);
+        return true;
+      } catch (error) {
+        setError(getApiErrorMessage(error, fallbackMessage));
+        return false;
+      }
     };
 
     return {
@@ -121,18 +148,28 @@ export const OrganizationMemberStore = signalStore(
         setLoading();
         try {
           const member = await service.update(id, payload);
-          patchState(store, (state) => ({
-            members: state.members.map((item) => (item.id === id ? member : item)),
-            selectedMember: state.selectedMember?.id === id ? member : state.selectedMember,
-            selectedMemberId: member.id ?? id,
-            error: null,
-            isLoading: false,
-          }));
+          patchMemberState(id, member);
           return true;
         } catch (error) {
           setError(getApiErrorMessage(error, 'Failed to update user.'));
           return false;
         }
+      },
+
+      async acceptInvitation(id: string): Promise<boolean> {
+        return updateInvitationStatus(
+          id,
+          OrganizationMemberStatus.ACCEPTED,
+          'Failed to accept invitation.',
+        );
+      },
+
+      async rejectInvitation(id: string): Promise<boolean> {
+        return updateInvitationStatus(
+          id,
+          OrganizationMemberStatus.REJECTED,
+          'Failed to reject invitation.',
+        );
       },
 
       async deleteMember(id: string): Promise<boolean> {

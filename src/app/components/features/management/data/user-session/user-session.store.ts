@@ -14,6 +14,8 @@ export const UserSessionStore = signalStore(
   withComputed(({ userSession }) => ({
     error: computed(() => userSession().error),
     hasOwnOrganizations: computed(() => Boolean(userSession().session?.ownorgs?.length)),
+    hasInvitedOrganizations: computed(() => Boolean(userSession().session?.invitedorgs?.length)),
+    invitedOrganizations: computed(() => userSession().session?.invitedorgs ?? []),
     isLoading: computed(() => userSession().isLoading),
     session: computed(() => userSession().session),
   })),

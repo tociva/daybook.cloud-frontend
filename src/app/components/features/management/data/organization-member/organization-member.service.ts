@@ -6,6 +6,7 @@ import type {
   OrganizationMemberGetQuery,
   OrganizationMemberListQuery,
   OrganizationMemberPayload,
+  OrganizationMemberStatusPayload,
 } from './organization-member.model';
 
 const ENDPOINT = '/organization/organization-member';
@@ -41,6 +42,17 @@ export class OrganizationMemberService {
 
   async update(id: string, payload: OrganizationMemberPayload): Promise<OrganizationMember> {
     return this.crudApi.update<OrganizationMember, OrganizationMemberPayload>(
+      ENDPOINT,
+      id,
+      payload,
+    );
+  }
+
+  async updateStatus(
+    id: string,
+    payload: OrganizationMemberStatusPayload,
+  ): Promise<OrganizationMember> {
+    return this.crudApi.update<OrganizationMember, OrganizationMemberStatusPayload>(
       ENDPOINT,
       id,
       payload,

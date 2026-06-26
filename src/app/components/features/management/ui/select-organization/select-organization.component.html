@@ -14,10 +14,83 @@
     Current selection: <strong>{{ getCurrentSelectionLabel() }}</strong>
   </p>
 
+  @if (invitations().length > 0) {
+    <tng-card variant="outline" padding="lg" class="invitations-card">
+      <header class="section-header">
+        <div>
+          <h2>Pending Invitations</h2>
+          <p>Accept an invitation to make the organization available for selection.</p>
+        </div>
+      </header>
+
+      <tng-table
+        ariaLabel="Pending organization invitations"
+        density="comfortable"
+        [columns]="invitationColumns"
+        [items]="invitations()"
+        [loading]="isLoading()"
+      >
+        <ng-template tngTableCellTemplate="organizationid" let-row="row">
+          <strong>{{ getInvitationOrganizationName(row) }}</strong>
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="email" let-row="row">
+          {{ getInvitationOrganizationEmail(row) }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="role" let-row="row">
+          {{ getRoleLabel(row.role) }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="invitedAt" let-row="row">
+          {{ getInvitationDate(row) }}
+        </ng-template>
+
+        <ng-template tngTableCellTemplate="actions" let-row="row">
+          <div class="invitation-actions">
+            <tng-button
+              type="button"
+              size="sm"
+              appearance="solid"
+              tone="primary"
+              [disabled]="
+                !row.id ||
+                isInvitationActionRunning(row, 'accept') ||
+                isInvitationActionRunning(row, 'reject')
+              "
+              (click)="acceptInvitation(row)"
+            >
+              Accept
+            </tng-button>
+            <tng-button
+              type="button"
+              size="sm"
+              appearance="outline"
+              tone="danger"
+              [disabled]="
+                !row.id ||
+                isInvitationActionRunning(row, 'accept') ||
+                isInvitationActionRunning(row, 'reject')
+              "
+              (click)="rejectInvitation(row)"
+            >
+              Reject
+            </tng-button>
+          </div>
+        </ng-template>
+      </tng-table>
+    </tng-card>
+  }
+
   @if (organizationGroups().length === 0) {
     <tng-card variant="outline" padding="lg">
       <p class="empty-copy">
-        No organizations are available on this account yet. Please create one first.
+        @if (invitations().length > 0) {
+          No organizations are available on this account yet. Accept an invitation above or create
+          one first.
+        } @else {
+          No organizations are available on this account yet. Please create one first.
+        }
       </p>
     </tng-card>
   } @else {
@@ -73,9 +146,7 @@
                           }
                         }
                       </div>
-                      <span class="branch-meta">
-                        {{ branchGroup.rows.length }} fiscal years
-                      </span>
+                      <span class="branch-meta"> {{ branchGroup.rows.length }} fiscal years </span>
                     </header>
 
                     @if (branchGroup.rows.length === 0) {

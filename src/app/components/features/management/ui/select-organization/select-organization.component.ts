@@ -16,9 +16,14 @@ import { getApiErrorMessage } from '../../../../../core/api/api-error.util';
 import { PageHeadingComponent } from '../../../../../shared/page-heading/page-heading.component';
 import { DateManagementService } from '../../../../../core/date/date-management.service';
 import { UserSessionStore } from '../../data/user-session/user-session.store';
+import type { UserSessionInvitedOrganization } from '../../data/user-session/user-session.model';
 import type { Branch } from '../../data/branch/branch.model';
 import type { FiscalYear } from '../../data/fiscal-year/fiscal-year.model';
-import { OrganizationMemberStatus } from '../../data/organization-member/organization-member.enums';
+import {
+  OrganizationMemberStatus,
+  UserRoles,
+} from '../../data/organization-member/organization-member.enums';
+import { OrganizationMemberStore } from '../../data/organization-member/organization-member.store';
 import type { Organization } from '../../data/organization/organization.model';
 
 const compareFiscalYearsByStartDate = (left: FiscalYear, right: FiscalYear): number =>
@@ -48,6 +53,8 @@ export type OrganizationGroup = Readonly<{
   branchGroups: readonly BranchGroup[];
 }>;
 
+type InvitationAction = 'accept' | 'reject';
+
 @Component({
   selector: 'app-select-organization',
   standalone: true,
@@ -70,15 +77,20 @@ export type OrganizationGroup = Readonly<{
 export class SelectOrganizationComponent {
   private readonly router = inject(Router);
   private readonly dateManagement = inject(DateManagementService);
+  private readonly organizationMemberStore = inject(OrganizationMemberStore);
   private readonly userSessionStore = inject(UserSessionStore);
 
   protected readonly formatDate = (value: string | null | undefined): string =>
     this.dateManagement.formatDisplayDate(value);
   protected readonly applyingRowKey = signal<string | null>(null);
+  protected readonly invitationActionKey = signal<string | null>(null);
   protected readonly errorMessage = signal<string | null>(null);
 
   protected readonly session = computed(() => this.userSessionStore.session());
   protected readonly isLoading = computed(() => this.userSessionStore.isLoading());
+  protected readonly invitations = computed<readonly UserSessionInvitedOrganization[]>(
+    () => this.session()?.invitedorgs ?? [],
+  );
 
   protected readonly organizations = computed<readonly Organization[]>(() => {
     const session = this.session();
@@ -118,6 +130,15 @@ export class SelectOrganizationComponent {
     { id: 'actions', label: 'Action', align: 'end', headerAlign: 'end', width: '9rem' },
   ];
 
+  protected readonly invitationColumns: readonly TngTableColumn<UserSessionInvitedOrganization>[] =
+    [
+      { id: 'organizationid', label: 'Organization', sortable: false, truncate: true },
+      { id: 'email', label: 'Email', sortable: false, width: '16rem' },
+      { id: 'role', label: 'Role', sortable: false, width: '8rem' },
+      { id: 'invitedAt', label: 'Invited At', sortable: false, width: '11rem' },
+      { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '12rem' },
+    ];
+
   protected getCurrentSelectionLabel(): string {
     const session = this.session();
     if (!session) return 'Not selected';
@@ -155,6 +176,13 @@ export class SelectOrganizationComponent {
     return this.applyingRowKey() === row.rowKey;
   }
 
+  protected isInvitationActionRunning(
+    invitation: UserSessionInvitedOrganization,
+    action: InvitationAction,
+  ): boolean {
+    return this.invitationActionKey() === this.getInvitationActionKey(invitation, action);
+  }
+
   protected trackOrganizationGroup(_: number, group: OrganizationGroup): string {
     return group.groupKey;
   }
@@ -186,6 +214,32 @@ export class SelectOrganizationComponent {
     return parts.join(' • ');
   }
 
+  protected getInvitationOrganizationName(invitation: UserSessionInvitedOrganization): string {
+    return invitation.organization?.name ?? invitation.organizationid;
+  }
+
+  protected getInvitationOrganizationEmail(invitation: UserSessionInvitedOrganization): string {
+    return invitation.organization?.email ?? '—';
+  }
+
+  protected getInvitationDate(invitation: UserSessionInvitedOrganization): string {
+    const inviteTime = invitation.props?.['invitetime'];
+    return typeof inviteTime === 'string' && inviteTime.trim().length > 0
+      ? this.formatDate(inviteTime)
+      : '—';
+  }
+
+  protected getRoleLabel(role: UserRoles): string {
+    const labels: Readonly<Record<UserRoles, string>> = {
+      [UserRoles.SUPER_ADMIN]: 'Super admin',
+      [UserRoles.OWNER]: 'Owner',
+      [UserRoles.ADMIN]: 'Admin',
+      [UserRoles.USER]: 'User',
+    };
+
+    return labels[role] ?? role;
+  }
+
   protected async applyRow(row: FiscalYearRow): Promise<void> {
     if (!row.organizationId || !row.branchId || !row.fiscalYearId) {
       this.errorMessage.set('This row is missing organization, branch or fiscal-year information.');
@@ -207,6 +261,60 @@ export class SelectOrganizationComponent {
     } finally {
       this.applyingRowKey.set(null);
     }
+  }
+
+  protected async acceptInvitation(invitation: UserSessionInvitedOrganization): Promise<void> {
+    await this.updateInvitationStatus(invitation, 'accept');
+  }
+
+  protected async rejectInvitation(invitation: UserSessionInvitedOrganization): Promise<void> {
+    await this.updateInvitationStatus(invitation, 'reject');
+  }
+
+  private async updateInvitationStatus(
+    invitation: UserSessionInvitedOrganization,
+    action: InvitationAction,
+  ): Promise<void> {
+    if (!invitation.id) {
+      this.errorMessage.set('This invitation is missing its member id.');
+      return;
+    }
+
+    this.invitationActionKey.set(this.getInvitationActionKey(invitation, action));
+    this.errorMessage.set(null);
+
+    try {
+      const success =
+        action === 'accept'
+          ? await this.organizationMemberStore.acceptInvitation(invitation.id)
+          : await this.organizationMemberStore.rejectInvitation(invitation.id);
+
+      if (!success) {
+        this.errorMessage.set(
+          this.organizationMemberStore.error() ??
+            `Failed to ${action === 'accept' ? 'accept' : 'reject'} invitation.`,
+        );
+        return;
+      }
+
+      await this.userSessionStore.createUserSession();
+    } catch (error) {
+      this.errorMessage.set(
+        getApiErrorMessage(
+          error,
+          `Failed to ${action === 'accept' ? 'accept' : 'reject'} invitation.`,
+        ),
+      );
+    } finally {
+      this.invitationActionKey.set(null);
+    }
+  }
+
+  private getInvitationActionKey(
+    invitation: UserSessionInvitedOrganization,
+    action: InvitationAction,
+  ): string {
+    return `${invitation.id ?? invitation.organizationid}:${action}`;
   }
 
   private buildOrganizationGroup(organization: Organization): OrganizationGroup {

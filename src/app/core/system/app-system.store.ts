@@ -96,11 +96,15 @@ function hasAcceptedMemberOrganizations(session: UserSession): boolean {
   );
 }
 
+function hasInvitedOrganizations(session: UserSession): boolean {
+  return Boolean(session.invitedorgs?.length);
+}
+
 function resolvePostSessionRoute(session: UserSession, returnUri: string): string {
   if (hasOwnOrganizations(session) || session.organization?.id) {
     return returnUri;
   }
-  if (hasAcceptedMemberOrganizations(session)) {
+  if (hasAcceptedMemberOrganizations(session) || hasInvitedOrganizations(session)) {
     return SELECT_ORGANIZATION_ROUTE;
   }
   return BOOTSTRAP_ORGANIZATION_ROUTE;

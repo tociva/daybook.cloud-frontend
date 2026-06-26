@@ -6,12 +6,16 @@ import {
   OrganizationMemberStatus,
   UserRoles,
 } from '../../data/organization-member/organization-member.enums';
+import { OrganizationMemberStore } from '../../data/organization-member/organization-member.store';
 import type { Organization } from '../../data/organization/organization.model';
+import type { UserSessionInvitedOrganization } from '../../data/user-session/user-session.model';
 import type { UserSession } from '../../data/user-session/user-session.model';
 import { UserSessionStore } from '../../data/user-session/user-session.store';
 import { SelectOrganizationComponent } from './select-organization.component';
 
 type SelectOrganizationComponentHarness = SelectOrganizationComponent & {
+  acceptInvitation: (invitation: UserSessionInvitedOrganization) => Promise<void>;
+  invitations: () => readonly UserSessionInvitedOrganization[];
   organizations: () => readonly Organization[];
 };
 
@@ -22,6 +26,20 @@ describe('SelectOrganizationComponent', () => {
   });
 
   function createComponent(session: UserSession): SelectOrganizationComponentHarness {
+    const userSessionStore = {
+      createUserSession: vi.fn(async () => session),
+      isLoading: vi.fn(() => false),
+      selectBranch: vi.fn(),
+      selectFiscalYear: vi.fn(),
+      selectOrganization: vi.fn(),
+      session: vi.fn(() => session),
+    };
+    const organizationMemberStore = {
+      acceptInvitation: vi.fn(async () => true),
+      error: vi.fn(() => null),
+      rejectInvitation: vi.fn(async () => true),
+    };
+
     TestBed.configureTestingModule({
       providers: [
         { provide: Router, useValue: { navigate: vi.fn() } },
@@ -31,13 +49,11 @@ describe('SelectOrganizationComponent', () => {
         },
         {
           provide: UserSessionStore,
-          useValue: {
-            isLoading: vi.fn(() => false),
-            selectBranch: vi.fn(),
-            selectFiscalYear: vi.fn(),
-            selectOrganization: vi.fn(),
-            session: vi.fn(() => session),
-          },
+          useValue: userSessionStore,
+        },
+        {
+          provide: OrganizationMemberStore,
+          useValue: organizationMemberStore,
         },
       ],
     });
@@ -90,6 +106,15 @@ describe('SelectOrganizationComponent', () => {
       ],
       name: 'Test User',
       organization: null,
+      invitedorgs: [
+        {
+          id: 'invite-1',
+          organization: pendingOrganization,
+          organizationid: pendingOrganization.id,
+          role: UserRoles.USER,
+          status: OrganizationMemberStatus.INVITED,
+        },
+      ],
       ownorgs: [ownOrganization],
       userid: 'user-1',
     } as UserSession;
@@ -101,5 +126,66 @@ describe('SelectOrganizationComponent', () => {
       'Own Organization',
       'Accepted Organization',
     ]);
+    expect(component.invitations().map((invitation) => invitation.organization?.name)).toEqual([
+      'Pending Organization',
+    ]);
+  });
+
+  it('accepts an invitation and refreshes the user session', async () => {
+    const invitation = {
+      id: 'invite-1',
+      organization: {
+        email: 'invited@example.test',
+        id: 'org-invited',
+        name: 'Invited Organization',
+      },
+      organizationid: 'org-invited',
+      role: UserRoles.USER,
+      status: OrganizationMemberStatus.INVITED,
+    } satisfies UserSessionInvitedOrganization;
+    const session = {
+      email: 'user@example.test',
+      invitedorgs: [invitation],
+      member: null,
+      memberorgs: [],
+      name: 'Test User',
+      organization: null,
+      ownorgs: [],
+      userid: 'user-1',
+    } as UserSession;
+    const userSessionStore = {
+      createUserSession: vi.fn(async () => session),
+      isLoading: vi.fn(() => false),
+      selectBranch: vi.fn(),
+      selectFiscalYear: vi.fn(),
+      selectOrganization: vi.fn(),
+      session: vi.fn(() => session),
+    };
+    const organizationMemberStore = {
+      acceptInvitation: vi.fn(async () => true),
+      error: vi.fn(() => null),
+      rejectInvitation: vi.fn(async () => true),
+    };
+
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: Router, useValue: { navigate: vi.fn() } },
+        {
+          provide: DateManagementService,
+          useValue: { formatDisplayDate: vi.fn((value: string) => value) },
+        },
+        { provide: UserSessionStore, useValue: userSessionStore },
+        { provide: OrganizationMemberStore, useValue: organizationMemberStore },
+      ],
+    });
+
+    const component = TestBed.runInInjectionContext(
+      () => new SelectOrganizationComponent(),
+    ) as SelectOrganizationComponentHarness;
+
+    await component.acceptInvitation(invitation);
+
+    expect(organizationMemberStore.acceptInvitation).toHaveBeenCalledWith('invite-1');
+    expect(userSessionStore.createUserSession).toHaveBeenCalledOnce();
   });
 });
