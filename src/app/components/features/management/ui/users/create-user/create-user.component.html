@@ -1,0 +1,109 @@
+<main class="management-page">
+  <form (submit)="save($event)">
+    <tng-card variant="outline" padding="lg">
+      <tng-card-header>
+        <tng-card-title>{{ title() }}</tng-card-title>
+        <tng-card-description>{{ subtitle() }}</tng-card-description>
+      </tng-card-header>
+
+      <tng-card-content>
+        @if (memberStore.error()) {
+          <div class="notice notice--danger">{{ memberStore.error() }}</div>
+        }
+
+        @if (formError()) {
+          <div class="notice notice--danger">{{ formError() }}</div>
+        }
+
+        @if (memberStore.isLoading() && mode() === 'edit' && !memberStore.selectedItem()) {
+          <div class="notice">Loading user...</div>
+        } @else {
+          <div class="fields-grid">
+            <tng-form-field
+              class="field"
+              #userInputRef
+              labelPosition="above"
+              [invalid]="userError() !== null"
+            >
+              <tng-label>User id or email</tng-label>
+              <tng-input
+                [value]="userid()"
+                placeholder="name@example.com"
+                (input)="onUserInput($event)"
+              />
+              @if (userError()) {
+                <p class="field-error">{{ userError() }}</p>
+              }
+            </tng-form-field>
+
+            <label class="field">
+              <span class="field-label">Organization</span>
+              <select
+                class="field-input"
+                [class.field-input--invalid]="organizationError() !== null"
+                [value]="organizationid()"
+                (change)="onOrganizationChange($event)"
+              >
+                <option value="">Select organization</option>
+                @for (organization of organizationStore.items(); track organization.id) {
+                  <option [value]="organization.id">{{ organization.name }}</option>
+                }
+              </select>
+              @if (organizationError()) {
+                <p class="field-error">{{ organizationError() }}</p>
+              }
+            </label>
+
+            <label class="field">
+              <span class="field-label">Role</span>
+              <select class="field-input" [value]="role()" (change)="onRoleChange($event)">
+                @for (option of roles; track option.value) {
+                  <option [value]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </label>
+
+            <label class="field">
+              <span class="field-label">Status</span>
+              <select class="field-input" [value]="status()" (change)="onStatusChange($event)">
+                @for (option of statuses; track option.value) {
+                  <option [value]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </label>
+
+            <tng-form-field class="field field--full">
+              <tng-label>Props JSON</tng-label>
+              <tng-textarea
+                [value]="propsJson()"
+                rows="5"
+                placeholder='{"department":"Finance"}'
+                (input)="onPropsInput($event)"
+              />
+            </tng-form-field>
+
+            <tng-form-field class="field field--full">
+              <tng-label>Permissions JSON</tng-label>
+              <tng-textarea
+                [value]="permissionsJson()"
+                rows="6"
+                placeholder='{"reports":["read"],"users":["read","write"]}'
+                (input)="onPermissionsInput($event)"
+              />
+            </tng-form-field>
+          </div>
+        }
+      </tng-card-content>
+
+      <tng-card-footer>
+        <tng-card-actions align="end">
+          <app-burl-back-button />
+          <app-burl-create-button
+            [label]="mode() === 'edit' ? 'Save user' : 'Invite user'"
+            [disabled]="isSubmitting() || memberStore.isLoading()"
+          />
+        </tng-card-actions>
+      </tng-card-footer>
+    </tng-card>
+  </form>
+</main>

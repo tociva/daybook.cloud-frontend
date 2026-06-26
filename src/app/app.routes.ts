@@ -134,6 +134,11 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'app/management/users',
+    loadChildren: () =>
+      import('./components/features/management/ui/users/users.routes').then((m) => m.userRoutes),
+  },
+  {
     path: 'app/accounting/ledger-category',
     loadChildren: () =>
       import('./components/features/accounting/ui/ledger-category/ledger-category.routes').then(

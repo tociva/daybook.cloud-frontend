@@ -1,0 +1,126 @@
+<main class="management-page">
+  <app-page-heading
+    eyebrow="Management"
+    title="Users"
+    description="Manage organization members, roles, and access status."
+  >
+    <app-burl-back-button />
+    <app-crud-filter-popover
+      ariaLabel="User filters"
+      title="Filter users"
+      [fields]="filterFields"
+      [filter]="crudQuery.filter()"
+      syncUrl
+    />
+
+    <tng-button type="button" appearance="solid" tone="primary" (click)="createUser()">
+      <tng-icon icon="plus" aria-hidden="true" />
+      Invite user
+    </tng-button>
+  </app-page-heading>
+
+  <tng-card variant="outline" padding="lg">
+    @if (memberStore.error()) {
+      <div class="notice notice--danger">{{ memberStore.error() }}</div>
+    }
+
+    <div class="table-stack">
+      @if (
+        !memberStore.isLoading() &&
+        !hasError() &&
+        crudQuery.shouldShowEmptyState(memberStore.items().length, memberStore.count())
+      ) {
+        @if (crudQuery.hasActiveFilter()) {
+          <app-empty-state
+            icon="searchX"
+            title="No users match your filter"
+            description="Try adjusting or clearing your filter."
+          >
+            <tng-button
+              type="button"
+              appearance="outline"
+              tone="neutral"
+              (click)="crudQuery.clearFilter()"
+            >
+              Clear filter
+            </tng-button>
+          </app-empty-state>
+        } @else {
+          <app-empty-state
+            icon="users"
+            title="No users yet"
+            description="Invite a user to grant access to this organization."
+          >
+            <tng-button type="button" appearance="solid" tone="primary" (click)="createUser()">
+              <tng-icon icon="plus" aria-hidden="true" />
+              Invite user
+            </tng-button>
+          </app-empty-state>
+        }
+      } @else {
+        <tng-table
+          ariaLabel="Users"
+          density="comfortable"
+          [columns]="columns"
+          [items]="memberStore.items()"
+          [loading]="memberStore.isLoading()"
+          [error]="hasError()"
+          [sortActive]="crudQuery.sortActive()"
+          [sortDirection]="crudQuery.sortDirection()"
+          (sortChange)="crudQuery.applySort($event)"
+        >
+          <ng-template tngTableCellTemplate="userid" let-row="row">
+            <button type="button" class="link-button" (click)="viewUser(row)">
+              {{ row.userid }}
+            </button>
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="organizationid" let-row="row">
+            {{ organizationLabel(row) }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="role" let-row="row">
+            {{ roleLabel(row.role) }}
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="status" let-row="row">
+            <span class="status-pill" [attr.data-tone]="statusTone(row.status)">
+              {{ statusLabel(row.status) }}
+            </span>
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="actions" let-row="row">
+            <div class="row-actions">
+              <app-table-row-icon-button
+                icon="eye"
+                ariaLabel="View user"
+                (action)="viewUser(row)"
+              />
+              <app-table-row-icon-button
+                icon="pencil"
+                ariaLabel="Edit user"
+                (action)="editUser(row)"
+              />
+              <app-table-row-icon-button
+                icon="trash2"
+                ariaLabel="Remove user"
+                tone="danger"
+                (action)="deleteUser(row)"
+              />
+            </div>
+          </ng-template>
+        </tng-table>
+
+        <div class="table-footer">
+          <app-crud-paginator
+            ariaLabel="User pagination"
+            [filter]="crudQuery.filter()"
+            [totalItems]="memberStore.count()"
+            [pageSizeOptions]="crudQuery.pageSizeOptions()"
+            syncUrl
+          />
+        </div>
+      }
+    </div>
+  </tng-card>
+</main>

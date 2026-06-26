@@ -1,0 +1,59 @@
+<main class="management-page">
+  <tng-card variant="outline" padding="lg">
+    <tng-card-header>
+      <tng-card-title>User Details</tng-card-title>
+      <tng-card-description
+        >Review organization membership and access metadata.</tng-card-description
+      >
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (memberStore.error()) {
+        <div class="notice notice--danger">{{ memberStore.error() }}</div>
+      }
+
+      @if (memberStore.isLoading() && !memberStore.selectedItem()) {
+        <div class="notice">Loading user...</div>
+      } @else if (memberStore.selectedItem(); as member) {
+        <dl class="details-grid">
+          <div>
+            <dt>User</dt>
+            <dd>{{ member.userid }}</dd>
+          </div>
+          <div>
+            <dt>Organization</dt>
+            <dd>{{ organizationLabel(member) }}</dd>
+          </div>
+          <div>
+            <dt>Role</dt>
+            <dd>{{ roleLabel(member.role) }}</dd>
+          </div>
+          <div>
+            <dt>Status</dt>
+            <dd>{{ statusLabel(member.status) }}</dd>
+          </div>
+          <div>
+            <dt>Member ID</dt>
+            <dd>{{ member.id || '—' }}</dd>
+          </div>
+        </dl>
+
+        <div class="section-title">Props</div>
+        <pre>{{ formatJson(member.props) }}</pre>
+
+        <div class="section-title">Permissions</div>
+        <pre>{{ formatJson(member.permissions) }}</pre>
+      } @else {
+        <div class="notice">User not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button />
+        <app-burl-edit-button (clicked)="edit()" />
+        <app-burl-delete-button label="Remove" (clicked)="delete()" />
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>

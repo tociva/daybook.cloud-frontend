@@ -1,0 +1,59 @@
+<main class="management-page">
+  <tng-card variant="outline" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Remove User</tng-card-title>
+      <tng-card-description>This revokes the user's organization membership.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (memberStore.error()) {
+        <div class="notice notice--danger">{{ memberStore.error() }}</div>
+      }
+
+      @if (memberStore.isLoading() && !memberStore.selectedItem()) {
+        <div class="notice">Loading user...</div>
+      } @else if (memberStore.selectedItem(); as member) {
+        <dl class="details-grid">
+          <div>
+            <dt>User</dt>
+            <dd>{{ member.userid }}</dd>
+          </div>
+          <div>
+            <dt>Organization</dt>
+            <dd>{{ organizationLabel(member) }}</dd>
+          </div>
+          <div>
+            <dt>Role</dt>
+            <dd>{{ roleLabel(member.role) }}</dd>
+          </div>
+          <div>
+            <dt>Status</dt>
+            <dd>{{ statusLabel(member.status) }}</dd>
+          </div>
+        </dl>
+
+        <div class="notice notice--danger">
+          You are about to remove <strong>{{ member.userid }}</strong> from this organization.
+        </div>
+
+        <label class="confirm-row">
+          <tng-checkbox [checked]="confirmed()" (checkedChange)="confirmed.set($event)" />
+          I understand this user will lose access.
+        </label>
+      } @else {
+        <div class="notice">User not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button />
+        <app-burl-delete-button
+          [label]="memberStore.isLoading() ? 'Removing...' : 'Remove user'"
+          [disabled]="!confirmed() || memberStore.isLoading()"
+          (clicked)="deleteUser()"
+        />
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>

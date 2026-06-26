@@ -1,7 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  OnInit,
   computed,
   effect,
   inject,
@@ -136,7 +135,7 @@ const amountColumnWidth = '12%';
   styleUrl: './trial-balance.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TrialBalanceComponent implements OnInit {
+export class TrialBalanceComponent {
   private readonly trialBalanceService = inject(TrialBalanceService);
   private readonly ledgerStore = inject(LedgerStore);
   private readonly ledgerCategoryStore = inject(LedgerCategoryStore);
@@ -167,6 +166,8 @@ export class TrialBalanceComponent implements OnInit {
   // Tracks the in-progress selection while the popup is open.
   // Committed to the URL only when the popup closes.
   protected readonly pendingPickerValue = signal<TngDateRangePickerSelectionInput<Date>>(null);
+  private referenceDataLoadPromise: Promise<void> | null = null;
+  private loadToken = 0;
 
   protected readonly displayError = computed(
     () => this.error() ?? this.ledgerCategoryStore.error() ?? this.ledgerStore.error(),
@@ -197,6 +198,8 @@ export class TrialBalanceComponent implements OnInit {
   });
 
   protected readonly trialBalanceTreeData = computed<readonly TrialBalanceTreeRow[]>(() => {
+    if (!this.ledgerCategoryStore.catalogLoaded() || !this.ledgerStore.catalogLoaded()) return [];
+
     const categories = sortLedgerCategoriesByAccountingOrder(this.ledgerCategoryStore.catalog());
     const ledgers = sortLedgersByAccountingOrder(this.ledgerStore.catalog(), categories);
     const balances = this.trialBalanceByLedgerId();
@@ -357,16 +360,14 @@ export class TrialBalanceComponent implements OnInit {
         start: this.parseIsoToDate(start),
         end: this.parseIsoToDate(end),
       });
-      void this.loadTrialBalance(start, end);
+
+      const token = this.nextLoadToken();
+      void this.bootstrapTrialBalance(token, start, end);
     });
 
     effect(() => {
       this.expandedKeys.set(this.expandableTreeKeys());
     });
-  }
-
-  ngOnInit(): void {
-    void this.loadReferenceData();
   }
 
   protected onDateRangeChange(value: { start: Date | null; end: Date | null } | null): void {
@@ -389,8 +390,8 @@ export class TrialBalanceComponent implements OnInit {
 
   protected onRefresh(): void {
     const params = this.queryParams();
-    void this.loadReferenceData();
-    void this.loadTrialBalance(params.get('start') ?? undefined, params.get('end') ?? undefined);
+    const token = this.nextLoadToken();
+    void this.bootstrapTrialBalance(token, params.get('start'), params.get('end'));
   }
 
   protected readonly getTreeRowKey = (row: TrialBalanceTreeRow): string => row.key;
@@ -500,19 +501,69 @@ export class TrialBalanceComponent implements OnInit {
     return total;
   }
 
+  private nextLoadToken(): number {
+    this.loadToken += 1;
+    return this.loadToken;
+  }
+
+  private isActiveLoad(token: number): boolean {
+    return token === this.loadToken;
+  }
+
+  private async bootstrapTrialBalance(
+    token: number,
+    start?: string | null,
+    end?: string | null,
+  ): Promise<void> {
+    try {
+      await this.ensureReferenceDataLoaded();
+      if (!this.isActiveLoad(token)) return;
+      await this.loadTrialBalance(token, start ?? undefined, end ?? undefined);
+    } catch (err) {
+      if (!this.isActiveLoad(token)) return;
+      this.error.set(getApiErrorMessage(err, 'Failed to load trial balance reference data.'));
+      this.reportData.set([]);
+      this.generatedAt.set('');
+      this.isLoading.set(false);
+    }
+  }
+
+  private async ensureReferenceDataLoaded(): Promise<void> {
+    if (!this.referenceDataLoadPromise) {
+      this.referenceDataLoadPromise = this.loadReferenceData().finally(() => {
+        this.referenceDataLoadPromise = null;
+      });
+    }
+
+    await this.referenceDataLoadPromise;
+  }
+
   private async loadReferenceData(): Promise<void> {
-    await Promise.all([this.loadLedgerCategoriesForReport(), this.loadLedgersForReport()]);
+    const [categoriesLoaded, ledgersLoaded] = await Promise.all([
+      this.loadLedgerCategoriesForReport(),
+      this.loadLedgersForReport(),
+    ]);
+
+    if (!categoriesLoaded) {
+      throw new Error(this.ledgerCategoryStore.error() ?? 'Failed to load ledger categories.');
+    }
+
+    if (!ledgersLoaded) {
+      throw new Error(this.ledgerStore.error() ?? 'Failed to load ledgers.');
+    }
   }
 
-  private async loadLedgerCategoriesForReport(): Promise<void> {
-    await this.ledgerCategoryStore.ensureLedgerCategoryCatalogLoaded();
+  private async loadLedgerCategoriesForReport(): Promise<boolean> {
+    return this.ledgerCategoryStore.ensureLedgerCategoryCatalogLoaded(false);
   }
 
-  private async loadLedgersForReport(): Promise<void> {
-    await this.ledgerStore.ensureLedgerCatalogLoaded();
+  private async loadLedgersForReport(): Promise<boolean> {
+    return this.ledgerStore.ensureLedgerCatalogLoaded(false);
   }
 
-  private async loadTrialBalance(start?: string, end?: string): Promise<void> {
+  private async loadTrialBalance(token: number, start?: string, end?: string): Promise<void> {
+    if (!this.isActiveLoad(token)) return;
+
     this.isLoading.set(true);
     this.error.set(null);
 
@@ -522,14 +573,20 @@ export class TrialBalanceComponent implements OnInit {
       if (end) query.end = end;
 
       const report = await this.trialBalanceService.getTrialBalance(query);
+      if (!this.isActiveLoad(token)) return;
+
       this.reportData.set(report.data);
       this.generatedAt.set(report.generatedAt);
       this.error.set(null);
     } catch (err) {
+      if (!this.isActiveLoad(token)) return;
+
       this.error.set(getApiErrorMessage(err, 'Failed to load trial balance.'));
       this.reportData.set([]);
     } finally {
-      this.isLoading.set(false);
+      if (this.isActiveLoad(token)) {
+        this.isLoading.set(false);
+      }
     }
   }
 
