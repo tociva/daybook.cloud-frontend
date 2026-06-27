@@ -12,6 +12,7 @@ import {
 import { CustomerStore, type Customer } from '../../../components/features/trading/data/customer';
 import { VendorStore, type Vendor } from '../../../components/features/trading/data/vendor';
 import { LedgerCachePreferencesStore } from '../../../core/preferences/ledger-cache-preferences.store';
+import { PermissionsStore } from '../../../core/permissions/permissions.store';
 import { FiscalYearDateRangeService } from '../../../shared/fiscal-year-date-range-picker';
 import { SearchIndexService, type SearchEntry, type SearchIndex } from './search-index.service';
 import { WorkspaceSearchButtonComponent } from './workspace-search-button.component';
@@ -118,6 +119,7 @@ async function setup(options: {
     imports: [WorkspaceSearchButtonComponent],
     providers: [
       provideRouter([]),
+      { provide: PermissionsStore, useValue: { can: vi.fn(() => true) } },
       {
         provide: SearchIndexService,
         useValue: { index$: of(createStaticSearchIndex(staticEntries)) },

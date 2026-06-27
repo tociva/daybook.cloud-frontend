@@ -1,0 +1,75 @@
+<main class="trading-page">
+  <tng-card variant="outline" padding="lg">
+    <tng-card-header>
+      <tng-card-title>Vendor Payment Details</tng-card-title>
+      <tng-card-description>Review payment details and linked purchase invoices.</tng-card-description>
+    </tng-card-header>
+
+    <tng-card-content>
+      @if (vendorPaymentStore.error()) {
+        <div class="notice notice--danger">{{ vendorPaymentStore.error() }}</div>
+      }
+
+      @if (vendorPaymentStore.isLoading() && !payment()) {
+        <div class="notice">Loading vendor payment...</div>
+      } @else if (payment(); as payment) {
+        <section aria-labelledby="payment-details-title">
+          <h2 id="payment-details-title" class="section-title">Payment Details</h2>
+          <dl class="details-grid">
+            <div><dt>Number</dt><dd>{{ payment.number || '—' }}</dd></div>
+            <div><dt>Date</dt><dd>{{ formatDate(payment.date) }}</dd></div>
+            <div><dt>Vendor</dt><dd>{{ payment.vendor?.name || '—' }}</dd></div>
+            <div><dt>Amount</dt><dd>{{ formatAmount(payment.amount, payment.currencycode) }}</dd></div>
+            <div><dt>Bank/Cash</dt><dd>{{ payment.bcash?.name || '—' }}</dd></div>
+            <div><dt>Currency</dt><dd>{{ payment.currencycode || '—' }}</dd></div>
+            @if (payment.cprops?.['fx'] != null) {
+              <div><dt>Conversion Rate</dt><dd>{{ formatRate(payment.cprops?.['fx']) }}</dd></div>
+            }
+            @if (payment.cprops?.['lamt'] != null) {
+              <div><dt>Local Amount</dt><dd>{{ formatLocalAmount(payment) }}</dd></div>
+            }
+            <div class="wide"><dt>Description</dt><dd>{{ payment.description || '—' }}</dd></div>
+          </dl>
+        </section>
+
+        <section aria-labelledby="payment-invoices-title">
+          <h2 id="payment-invoices-title" class="section-title">Related Purchase Invoices</h2>
+          @if (linkedInvoices(payment).length) {
+            <div class="table-wrap">
+              <table class="invoice-table">
+                <thead><tr><th scope="col">Invoice</th><th scope="col">Date</th><th scope="col" class="numeric">Amount</th></tr></thead>
+                <tbody>
+                  @for (invoice of linkedInvoices(payment); track $index) {
+                    <tr>
+                      <td>
+                        @if (invoiceRouteId(invoice) && canViewPurchaseInvoice()) {
+                          <button type="button" class="link-button" (click)="viewPurchaseInvoice(invoice)">{{ invoiceNumber(invoice) }}</button>
+                        } @else {
+                          {{ invoiceNumber(invoice) }}
+                        }
+                      </td>
+                      <td>{{ formatDate(invoice.purchaseinvoice?.date) }}</td>
+                      <td class="numeric">{{ formatAmount(invoice.amount, payment.currencycode) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else {
+            <div class="notice">No purchase invoices are linked to this payment.</div>
+          }
+        </section>
+      } @else {
+        <div class="notice">Vendor payment not found.</div>
+      }
+    </tng-card-content>
+
+    <tng-card-footer>
+      <tng-card-actions align="end">
+        <app-burl-back-button />
+        <app-burl-edit-button [disabled]="!payment()?.id" (clicked)="editPayment()" />
+        <app-burl-delete-button [disabled]="!payment()?.id" (clicked)="deletePayment()" />
+      </tng-card-actions>
+    </tng-card-footer>
+  </tng-card>
+</main>

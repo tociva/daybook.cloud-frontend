@@ -157,7 +157,9 @@ describe('LedgerReportFacade', () => {
       ensureLedgerCatalogLoaded: vi.fn(async () => true),
       loadLedgers: vi.fn(async () => undefined),
     };
-    permissions = signal<readonly string[]>(options?.permissions ?? []);
+    permissions = signal<readonly string[]>(
+      options?.permissions ?? ['accountingReports.ledgerReport', 'journal.view'],
+    );
     fiscalYearRange = signal({
       startdate: '2026-04-01',
       enddate: '2027-03-31',
@@ -174,7 +176,13 @@ describe('LedgerReportFacade', () => {
         { provide: ActivatedRoute, useValue: route },
         { provide: Router, useValue: router },
         { provide: LedgerStore, useValue: ledgerStore },
-        { provide: PermissionsStore, useValue: { all: permissions } },
+        {
+          provide: PermissionsStore,
+          useValue: {
+            can: (requirement: { resource?: string; action?: string }) =>
+              permissions().includes(`${requirement.resource}.${requirement.action}`),
+          },
+        },
         {
           provide: FiscalYearDateRangeService,
           useValue: {

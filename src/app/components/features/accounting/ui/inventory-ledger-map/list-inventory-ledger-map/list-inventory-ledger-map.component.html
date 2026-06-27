@@ -13,7 +13,7 @@
       syncUrl
     />
 
-    <tng-button type="button" appearance="solid" tone="primary" (click)="createInventoryLedgerMap()">
+    <tng-button *appCan="'fiscalYear:inventoryLedgerMap:create'" type="button" appearance="solid" tone="primary" (click)="createInventoryLedgerMap()">
       <tng-icon icon="plus" aria-hidden="true" />
       New mapping
     </tng-button>
@@ -42,7 +42,7 @@
             title="No mappings yet"
             description="Create your first inventory ledger mapping."
           >
-            <tng-button type="button" appearance="solid" tone="primary" (click)="createInventoryLedgerMap()">
+            <tng-button *appCan="'fiscalYear:inventoryLedgerMap:create'" type="button" appearance="solid" tone="primary" (click)="createInventoryLedgerMap()">
               <tng-icon icon="plus" aria-hidden="true" />
               New mapping
             </tng-button>

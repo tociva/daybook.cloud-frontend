@@ -16,6 +16,7 @@ import { CatalogCacheCoordinatorService } from '../cache/catalog-cache-coordinat
 import type { AppConfig } from '../config/app-config.model';
 import { AppConfigStore } from '../config/app-config.store';
 import { LedgerCachePreferencesStore } from '../preferences/ledger-cache-preferences.store';
+import { PermissionsStore } from '../permissions/permissions.store';
 import { AppThemeStore } from '../theme/app-theme.store';
 import { AppSystemStore } from './app-system.store';
 
@@ -68,6 +69,7 @@ describe('AppSystemStore refresh-token session recovery', () => {
     TestBed.configureTestingModule({
       providers: [
         AppSystemStore,
+        { provide: PermissionsStore, useValue: { can: vi.fn(() => true), firstAllowedWorkspaceRoute: vi.fn(() => '/app/dashboard') } },
         { provide: Router, useValue: { navigateByUrl } },
         {
           provide: AppConfigStore,
@@ -156,6 +158,7 @@ describe('AppSystemStore refresh-token session recovery', () => {
     TestBed.configureTestingModule({
       providers: [
         AppSystemStore,
+        { provide: PermissionsStore, useValue: { can: vi.fn(() => true), firstAllowedWorkspaceRoute: vi.fn(() => '/app/dashboard') } },
         { provide: Router, useValue: { navigateByUrl } },
         {
           provide: AppConfigStore,
@@ -242,6 +245,7 @@ describe('AppSystemStore refresh-token session recovery', () => {
     TestBed.configureTestingModule({
       providers: [
         AppSystemStore,
+        { provide: PermissionsStore, useValue: { can: vi.fn(() => true), firstAllowedWorkspaceRoute: vi.fn(() => '/app/dashboard') } },
         { provide: Router, useValue: { navigateByUrl } },
         {
           provide: AppConfigStore,
@@ -327,6 +331,7 @@ describe('AppSystemStore refresh-token session recovery', () => {
     TestBed.configureTestingModule({
       providers: [
         AppSystemStore,
+        { provide: PermissionsStore, useValue: { can: vi.fn(() => true), firstAllowedWorkspaceRoute: vi.fn(() => '/app/dashboard') } },
         { provide: Router, useValue: { navigateByUrl } },
         {
           provide: AppConfigStore,
@@ -409,6 +414,7 @@ describe('AppSystemStore refresh-token session recovery', () => {
     TestBed.configureTestingModule({
       providers: [
         AppSystemStore,
+        { provide: PermissionsStore, useValue: { can: vi.fn(() => true), firstAllowedWorkspaceRoute: vi.fn(() => '/app/dashboard') } },
         { provide: Router, useValue: { navigateByUrl } },
         {
           provide: AppConfigStore,
@@ -471,6 +477,7 @@ describe('AppSystemStore refresh-token session recovery', () => {
     TestBed.configureTestingModule({
       providers: [
         AppSystemStore,
+        { provide: PermissionsStore, useValue: { can: vi.fn(() => true), firstAllowedWorkspaceRoute: vi.fn(() => '/app/dashboard') } },
         { provide: Router, useValue: { navigateByUrl } },
         {
           provide: AppConfigStore,

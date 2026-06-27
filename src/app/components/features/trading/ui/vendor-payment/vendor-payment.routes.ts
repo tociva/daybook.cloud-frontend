@@ -18,8 +18,8 @@ export const vendorPaymentRoutes: Routes = [
   {
     path: ':id',
     loadComponent: () =>
-      import('./create-vendor-payment/create-vendor-payment.component').then(
-        (m) => m.CreateVendorPaymentComponent,
+      import('./view-vendor-payment/view-vendor-payment.component').then(
+        (m) => m.ViewVendorPaymentComponent,
       ),
   },
   {

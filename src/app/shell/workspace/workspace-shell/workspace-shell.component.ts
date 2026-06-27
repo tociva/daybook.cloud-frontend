@@ -10,8 +10,9 @@ import {
   ACCOUNTING_REPORTS_BASE_PATH,
   findAccountingReportByRoute,
 } from '../../../components/features/accounting/ui/reports/shared/accounting-reports-nav.model';
-import { BreadcrumbItem, WorkspaceNavItem, workspaceSidebarMenu } from '../workspace-nav.model';
+import { BreadcrumbItem, filterWorkspaceSidebarMenu, MenuNode, WorkspaceNavItem } from '../workspace-nav.model';
 import { WorkspaceSidebarComponent } from '../workspace-sidebar/workspace-sidebar.component';
+import { PermissionsStore } from '../../../core/permissions/permissions.store';
 
 const workspaceNavItems: readonly WorkspaceNavItem[] = [
   {
@@ -48,9 +49,14 @@ const hiddenBreadcrumbRoutes: readonly { path: string; groupName: string; label:
 export class WorkspaceShellComponent {
   private readonly systemStore = inject(AppSystemStore);
   private readonly router = inject(Router);
+  private readonly permissions = inject(PermissionsStore);
   private readonly userSessionStore = inject(UserSessionStore);
   private readonly currentUrl = signal(this.router.url);
   protected readonly workspaceNavItems = workspaceNavItems;
+  protected readonly homeRoute = computed(() => this.permissions.firstAllowedWorkspaceRoute());
+  private readonly visibleSidebarMenu = computed<readonly MenuNode[]>(() =>
+    filterWorkspaceSidebarMenu((permission) => this.permissions.can(permission)),
+  );
   protected readonly organizations = computed(() => this.userSessionStore.session()?.ownorgs ?? []);
   protected readonly activeOrganizationName = computed(() => {
     const session = this.userSessionStore.session();
@@ -110,7 +116,7 @@ export class WorkspaceShellComponent {
     const topLevelMatch = this.workspaceNavItems.find((navItem) => navItem.path === path);
     if (topLevelMatch) {
       return [
-        { label: 'Home', routerLink: '/app/dashboard' },
+        { label: 'Home', routerLink: this.homeRoute() },
         { label: topLevelMatch.label, current: true },
       ];
     }
@@ -118,8 +124,8 @@ export class WorkspaceShellComponent {
     for (const hiddenRoute of hiddenBreadcrumbRoutes) {
       if (path === hiddenRoute.path) {
         return [
-          { label: 'Home', routerLink: '/app/dashboard' },
-          { label: hiddenRoute.groupName, routerLink: '/app/trading/sale-invoice' },
+          { label: 'Home', routerLink: this.homeRoute() },
+          { label: hiddenRoute.groupName, routerLink: this.getVisibleGroupHref('trading') },
           { label: hiddenRoute.label, current: true },
         ];
       }
@@ -128,8 +134,8 @@ export class WorkspaceShellComponent {
         const subPath = path.slice(hiddenRoute.path.length + 1);
         const actionLabel = this.resolveActionLabel(subPath);
         return [
-          { label: 'Home', routerLink: '/app/dashboard' },
-          { label: hiddenRoute.groupName, routerLink: '/app/trading/sale-invoice' },
+          { label: 'Home', routerLink: this.homeRoute() },
+          { label: hiddenRoute.groupName, routerLink: this.getVisibleGroupHref('trading') },
           { label: hiddenRoute.label, routerLink: hiddenRoute.path },
           { label: actionLabel, current: true },
         ];
@@ -142,13 +148,13 @@ export class WorkspaceShellComponent {
     }
 
     // Check sidebar menu groups (e.g. /app/trading/bank-cash)
-    for (const group of workspaceSidebarMenu) {
+    for (const group of this.visibleSidebarMenu()) {
       const groupBase = `/app/${group.path}`;
 
       if (!group.children) {
         if (path === groupBase) {
           return [
-            { label: 'Home', routerLink: '/app/dashboard' },
+            { label: 'Home', routerLink: this.homeRoute() },
             { label: group.name, current: true },
           ];
         }
@@ -163,7 +169,7 @@ export class WorkspaceShellComponent {
 
         if (path === childPath) {
           return [
-            { label: 'Home', routerLink: '/app/dashboard' },
+            { label: 'Home', routerLink: this.homeRoute() },
             { label: group.name, routerLink: groupHref },
             { label: child.name, current: true },
           ];
@@ -173,7 +179,7 @@ export class WorkspaceShellComponent {
           const subPath = path.slice(childPath.length + 1);
           const actionLabel = this.resolveActionLabel(subPath);
           return [
-            { label: 'Home', routerLink: '/app/dashboard' },
+            { label: 'Home', routerLink: this.homeRoute() },
             { label: group.name, routerLink: groupHref },
             { label: child.name, routerLink: childPath },
             { label: actionLabel, current: true },
@@ -183,7 +189,7 @@ export class WorkspaceShellComponent {
     }
 
     return [
-      { label: 'Home', routerLink: '/app/dashboard' },
+      { label: 'Home', routerLink: this.homeRoute() },
       { label: 'Workspace', current: true },
     ];
   });
@@ -217,12 +223,12 @@ export class WorkspaceShellComponent {
       return null;
     }
 
-    const accountingHref = '/app/accounting/ledger';
+    const accountingHref = this.getVisibleGroupHref('accounting');
     const hasSubPath = path.length > report.route.length;
 
     if (!hasSubPath) {
       return [
-        { label: 'Home', routerLink: '/app/dashboard' },
+        { label: 'Home', routerLink: this.homeRoute() },
         { label: 'Accounting', routerLink: accountingHref },
         { label: 'Reports', routerLink: ACCOUNTING_REPORTS_BASE_PATH },
         { label: report.label, current: true },
@@ -230,7 +236,7 @@ export class WorkspaceShellComponent {
     }
 
     return [
-      { label: 'Home', routerLink: '/app/dashboard' },
+      { label: 'Home', routerLink: this.homeRoute() },
       { label: 'Accounting', routerLink: accountingHref },
       { label: 'Reports', routerLink: ACCOUNTING_REPORTS_BASE_PATH },
       { label: report.label, routerLink: report.route },
@@ -249,6 +255,12 @@ export class WorkspaceShellComponent {
     if (parts[1] === 'delete') return 'Delete';
     if (parts.length === 1 && parts[0]) return 'View';
     return 'Details';
+  }
+
+  private getVisibleGroupHref(groupPath: string): string {
+    const group = this.visibleSidebarMenu().find((node) => node.path === groupPath);
+    const child = group?.children?.[0];
+    return child ? `/app/${groupPath}/${child.path}` : this.homeRoute();
   }
 
   private readString(value: unknown): string | null {

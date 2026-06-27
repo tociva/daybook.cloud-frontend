@@ -19,9 +19,6 @@
   @if (contextMessage()) {
     <div class="notice notice--warning">{{ contextMessage() }}</div>
   }
-  @if (!canImport()) {
-    <div class="notice notice--info">You can view reconciliation data, but import access is restricted.</div>
-  }
   @if (store.error()) {
     <div class="notice notice--danger">{{ store.error() }}</div>
   }
@@ -44,26 +41,30 @@
   }
 
   <!-- Hidden shared file input -->
-  <input
-    id="gst-import-file"
-    class="import-file-input"
-    type="file"
-    accept=".json,application/json,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    [disabled]="store.isBusy() || isParsing()"
-    (change)="onBrowse($event)"
-  />
+  @if (canImport()) {
+    <input
+      id="gst-import-file"
+      class="import-file-input"
+      type="file"
+      accept=".json,application/json,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      [disabled]="store.isBusy() || isParsing()"
+      (change)="onBrowse($event)"
+    />
+  }
 
   <!-- ── Confirmation dialog ──────────────────────────────────────────────── -->
-  <app-gst-import-confirm-dialog
-    [open]="confirmDialogOpen()"
-    [pendingFile]="pendingFile()"
-    [parsedPreview]="parsedPreview()"
-    [isParsing]="isParsing()"
-    [pendingError]="pendingError()"
-    [isImporting]="store.isBusy()"
-    (confirmed)="submitImportAs($event)"
-    (cancelled)="cancelConfirmation()"
-  />
+  @if (canImport()) {
+    <app-gst-import-confirm-dialog
+      [open]="confirmDialogOpen()"
+      [pendingFile]="pendingFile()"
+      [parsedPreview]="parsedPreview()"
+      [isParsing]="isParsing()"
+      [pendingError]="pendingError()"
+      [isImporting]="store.isBusy()"
+      (confirmed)="submitImportAs($event)"
+      (cancelled)="cancelConfirmation()"
+    />
+  }
 
   <!-- ── Overview — drag-and-drop zone ───────────────────────────────────── -->
   <div

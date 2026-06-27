@@ -13,7 +13,7 @@
       syncUrl
     />
 
-    <tng-button type="button" appearance="outline" tone="neutral" (click)="openTaxes()">
+    <tng-button *appCan="'branch:tax:view'" type="button" appearance="outline" tone="neutral" (click)="openTaxes()">
       <tng-icon icon="percent" aria-hidden="true" />
       Taxes
     </tng-button>
@@ -24,7 +24,7 @@
       (uploaded)="reloadTaxGroups()"
     />
 
-    <tng-button type="button" appearance="solid" tone="primary" (click)="createTaxGroup()">
+    <tng-button *appCan="'branch:taxGroup:create'" type="button" appearance="solid" tone="primary" (click)="createTaxGroup()">
       <tng-icon icon="plus" aria-hidden="true" />
       New tax group
     </tng-button>
@@ -53,7 +53,7 @@
             title="No tax groups yet"
             description="Get started by creating your first tax group."
           >
-            <tng-button type="button" appearance="solid" tone="primary" (click)="createTaxGroup()">
+            <tng-button *appCan="'branch:taxGroup:create'" type="button" appearance="solid" tone="primary" (click)="createTaxGroup()">
               <tng-icon icon="plus" aria-hidden="true" />
               New tax group
             </tng-button>

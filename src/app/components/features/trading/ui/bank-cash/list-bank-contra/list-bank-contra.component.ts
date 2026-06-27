@@ -10,6 +10,9 @@ import {
 } from '@tailng-ui/components';
 import type { TngTableColumn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
+import { CanDirective } from '../../../../../../core/permissions/can.directive';
+import { PERMISSION } from '../../../../../../core/permissions/permission-requirements';
+import { PermissionsStore } from '../../../../../../core/permissions/permissions.store';
 import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
@@ -41,6 +44,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
   selector: 'app-list-bank-contra',
   standalone: true,
   imports: [
+    CanDirective,
     PageHeadingComponent,
     BurlBackButtonComponent,
     TngButtonComponent,
@@ -62,6 +66,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 })
 export class ListBankContraComponent {
   private readonly dateManagement = inject(DateManagementService);
+  private readonly permissions = inject(PermissionsStore);
   private readonly journalService = inject(JournalService);
   private readonly reconciliationMatchService = inject(ReconciliationMatchService);
   private readonly route = inject(ActivatedRoute);
@@ -154,13 +159,19 @@ export class ListBankContraComponent {
   }
 
   protected viewJournal(journal: ContraTransactionJournal): void {
+    if (!this.permissions.can(PERMISSION.fiscalYear.journal.view)) return;
     void this.router.navigate(['/app/accounting/journal', journal.id], {
       queryParams: { burl: this.router.url },
     });
   }
 
   protected async assignJournal(row: ContraTransaction): Promise<void> {
-    if (!row.id || this.hasJournals(row) || this.isGeneratingJournal(row)) return;
+    if (
+      !this.permissions.can(PERMISSION.fiscalYear.journal.create) ||
+      !row.id ||
+      this.hasJournals(row) ||
+      this.isGeneratingJournal(row)
+    ) return;
 
     this.generatingJournalContraId.set(row.id);
     try {
@@ -222,6 +233,11 @@ export class ListBankContraComponent {
   }
 
   private async loadLinkedJournals(contras: readonly ContraTransaction[]): Promise<void> {
+    if (!this.permissions.can(PERMISSION.fiscalYear.journal.view)) {
+      this.journalsByContraId.set(new Map());
+      this.journalsLoading.set(false);
+      return;
+    }
     const ids = contras.map((contra) => contra.id).filter((id): id is string => Boolean(id));
     if (!ids.length) {
       this.journalsByContraId.set(new Map());

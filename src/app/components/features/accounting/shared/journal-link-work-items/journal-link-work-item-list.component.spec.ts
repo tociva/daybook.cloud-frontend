@@ -78,7 +78,10 @@ async function setup(options: SetupOptions = {}): Promise<{
       {
         provide: PermissionsStore,
         useValue: {
-          all: signal(options.permissions ?? ['accountingReports.accountantDashboard']),
+          can: (requirement: { resource?: string; action?: string }) =>
+            (options.permissions ?? ['accountingReports.accountantDashboard']).includes(
+              `${requirement.resource}.${requirement.action}`,
+            ),
         },
       },
       {

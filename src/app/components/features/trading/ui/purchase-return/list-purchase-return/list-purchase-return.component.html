@@ -13,7 +13,7 @@
       syncUrl
     />
 
-    <tng-button type="button" appearance="solid" tone="primary" (click)="createPurchaseReturn()">
+    <tng-button *appCan="'branch:purchaseReturn:create'" type="button" appearance="solid" tone="primary" (click)="createPurchaseReturn()">
       <tng-icon icon="plus" aria-hidden="true" />
       New Return
     </tng-button>
@@ -42,7 +42,7 @@
             title="No purchase returns yet"
             description="Get started by creating your first purchase return."
           >
-            <tng-button type="button" appearance="solid" tone="primary" (click)="createPurchaseReturn()">
+            <tng-button *appCan="'branch:purchaseReturn:create'" type="button" appearance="solid" tone="primary" (click)="createPurchaseReturn()">
               <tng-icon icon="plus" aria-hidden="true" />
               New purchase return
             </tng-button>

@@ -2,6 +2,10 @@ import { Component, computed, inject, input, output } from '@angular/core';
 import { TngButtonComponent, TngTag, TngTooltipComponent } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { PermissionsStore } from '../../../../../../core/permissions/permissions.store';
+import {
+  documentPermission,
+  type DocumentPermissionResource,
+} from '../../../../../../core/permissions/permission-requirements';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
 
 @Component({
@@ -15,6 +19,7 @@ export class InvoiceDocumentPickerComponent {
   private readonly toastStore = inject(ToastStore);
 
   readonly files = input<readonly File[]>([]);
+  readonly resourceType = input.required<DocumentPermissionResource>();
   readonly disabled = input(false);
   readonly uploading = input(false);
   readonly filesChange = output<readonly File[]>();
@@ -22,12 +27,7 @@ export class InvoiceDocumentPickerComponent {
   protected readonly inputId = `invoice-document-picker-${Math.random().toString(36).slice(2)}`;
 
   protected readonly canAttach = computed(() => {
-    const permissions = this.permissionsStore.all();
-    if (!permissions.length) return true;
-    return permissions.some((permission) => {
-      const normalized = permission.toLowerCase().replace(/[\s:_.-]/g, '');
-      return normalized === 'createdocument' || normalized.endsWith('createdocument');
-    });
+    return this.permissionsStore.can(documentPermission(this.resourceType(), 'createDocument'));
   });
 
   protected readonly isDisabled = computed(
@@ -47,6 +47,7 @@ export class InvoiceDocumentPickerComponent {
 
   protected removeFile(file: File, event?: Event): void {
     event?.stopPropagation();
+    if (this.isDisabled()) return;
     this.filesChange.emit(this.files().filter((item) => item !== file));
   }
 

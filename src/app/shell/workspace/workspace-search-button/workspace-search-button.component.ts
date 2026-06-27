@@ -13,6 +13,11 @@ import { LedgerCachePreferencesStore } from '../../../core/preferences/ledger-ca
 import { isMacPlatform } from '../../../core/system/platform.utils';
 import { FiscalYearDateRangeService } from '../../../shared/fiscal-year-date-range-picker';
 import {
+  PERMISSION,
+  permissionForWorkspaceUrl,
+} from '../../../core/permissions/permission-requirements';
+import { PermissionsStore } from '../../../core/permissions/permissions.store';
+import {
   createCustomerTradingSearchIndex,
   searchCustomerTradingEntries,
 } from './customer-trading-search';
@@ -46,6 +51,7 @@ export class WorkspaceSearchButtonComponent {
   private readonly ledgerStore = inject(LedgerStore);
   private readonly ledgerCategoryStore = inject(LedgerCategoryStore);
   private readonly fiscalYearDateRange = inject(FiscalYearDateRangeService);
+  private readonly permissions = inject(PermissionsStore);
   private readonly index = toSignal(inject(SearchIndexService).index$, { initialValue: null });
   private customerCatalogLoadPromise: Promise<boolean> | null = null;
   private vendorCatalogLoadPromise: Promise<boolean> | null = null;
@@ -80,7 +86,12 @@ export class WorkspaceSearchButtonComponent {
     if (!index) return [];
 
     const q = this.query().trim();
-    const entries = q ? index.fuse.search(q).map((r) => r.item) : index.entries;
+    const entries = (q ? index.fuse.search(q).map((r) => r.item) : index.entries).filter(
+      (entry) => {
+        const requirement = permissionForWorkspaceUrl(entry.url);
+        return requirement ? this.permissions.can(requirement) : false;
+      },
+    );
     const staticResults = entries.map((entry) => ({
       label: entry.title,
       description: entry.description,
@@ -89,33 +100,40 @@ export class WorkspaceSearchButtonComponent {
 
     if (!q || !this.cachePreferences.enabled()) return staticResults;
 
-    const customerResults = searchCustomerTradingEntries(this.customerSearchIndex(), q).map(
-      (entry) => ({
-        label: entry.label,
-        description: entry.description,
-        value: entry.value,
-      }),
-    );
-    const vendorResults = searchVendorTradingEntries(this.vendorSearchIndex(), q).map((entry) => ({
-      label: entry.label,
-      description: entry.description,
-      value: entry.value,
-    }));
-    const ledgerResults = searchLedgerReportEntries(this.ledgerReportSearchIndex(), q).map(
-      (entry) => ({
-        label: entry.label,
-        description: entry.description,
-        value: entry.value,
-      }),
-    );
-    const categoryResults = searchLedgerCategoryReportEntries(
-      this.ledgerCategoryReportSearchIndex(),
-      q,
-    ).map((entry) => ({
-      label: entry.label,
-      description: entry.description,
-      value: entry.value,
-    }));
+    const customerResults = this.permissions.can(PERMISSION.branch.customer.view)
+      ? searchCustomerTradingEntries(this.customerSearchIndex(), q).map((entry) => ({
+          label: entry.label,
+          description: entry.description,
+          value: entry.value,
+        }))
+      : [];
+    const vendorResults = this.permissions.can(PERMISSION.branch.vendor.view)
+      ? searchVendorTradingEntries(this.vendorSearchIndex(), q).map((entry) => ({
+          label: entry.label,
+          description: entry.description,
+          value: entry.value,
+        }))
+      : [];
+    const ledgerResults =
+      this.permissions.can(PERMISSION.fiscalYear.ledger.view) &&
+      this.permissions.can(PERMISSION.fiscalYear.accountingReports.ledgerReport)
+        ? searchLedgerReportEntries(this.ledgerReportSearchIndex(), q).map((entry) => ({
+            label: entry.label,
+            description: entry.description,
+            value: entry.value,
+          }))
+        : [];
+    const categoryResults =
+      this.permissions.can(PERMISSION.fiscalYear.ledgerCategory.view) &&
+      this.permissions.can(PERMISSION.fiscalYear.accountingReports.ledgerCategoryReport)
+        ? searchLedgerCategoryReportEntries(this.ledgerCategoryReportSearchIndex(), q).map(
+            (entry) => ({
+              label: entry.label,
+              description: entry.description,
+              value: entry.value,
+            }),
+          )
+        : [];
 
     return [...staticResults, ...customerResults, ...vendorResults, ...ledgerResults, ...categoryResults];
   });
@@ -164,6 +182,7 @@ export class WorkspaceSearchButtonComponent {
 
   private ensureCustomerSearchCatalogLoaded(): void {
     if (
+      !this.permissions.can(PERMISSION.branch.customer.view) ||
       !this.cachePreferences.enabled() ||
       this.customerStore.catalogLoaded() ||
       this.customerCatalogLoadPromise
@@ -181,6 +200,7 @@ export class WorkspaceSearchButtonComponent {
 
   private ensureVendorSearchCatalogLoaded(): void {
     if (
+      !this.permissions.can(PERMISSION.branch.vendor.view) ||
       !this.cachePreferences.enabled() ||
       this.vendorStore.catalogLoaded() ||
       this.vendorCatalogLoadPromise
@@ -198,6 +218,8 @@ export class WorkspaceSearchButtonComponent {
 
   private ensureLedgerSearchCatalogLoaded(): void {
     if (
+      !this.permissions.can(PERMISSION.fiscalYear.ledger.view) ||
+      !this.permissions.can(PERMISSION.fiscalYear.accountingReports.ledgerReport) ||
       !this.cachePreferences.enabled() ||
       this.ledgerStore.catalogLoaded() ||
       this.ledgerCatalogLoadPromise
@@ -215,6 +237,8 @@ export class WorkspaceSearchButtonComponent {
 
   private ensureLedgerCategorySearchCatalogLoaded(): void {
     if (
+      !this.permissions.can(PERMISSION.fiscalYear.ledgerCategory.view) ||
+      !this.permissions.can(PERMISSION.fiscalYear.accountingReports.ledgerCategoryReport) ||
       !this.cachePreferences.enabled() ||
       this.ledgerCategoryStore.catalogLoaded() ||
       this.ledgerCategoryCatalogLoadPromise

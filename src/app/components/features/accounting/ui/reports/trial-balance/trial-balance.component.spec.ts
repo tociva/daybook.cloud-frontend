@@ -202,7 +202,7 @@ describe('TrialBalanceComponent', () => {
         { provide: LedgerStore, useValue: ledgerStore },
         { provide: LedgerCategoryStore, useValue: ledgerCategoryStore },
         { provide: TrialBalanceService, useValue: trialBalanceService },
-        { provide: PermissionsStore, useValue: { all: signal<readonly string[]>([]) } },
+        { provide: PermissionsStore, useValue: { can: vi.fn(() => true) } },
         {
           provide: FiscalYearDateRangeService,
           useValue: {

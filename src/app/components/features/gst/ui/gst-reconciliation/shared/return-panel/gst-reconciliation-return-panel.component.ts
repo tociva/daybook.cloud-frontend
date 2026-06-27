@@ -52,11 +52,13 @@ export class GstReconciliationReturnPanelComponent {
   protected readonly statusLegend = GST_RECONCILIATION_STATUS_LEGEND;
 
   protected requestImport(): void {
+    if (!this.canImport()) return;
     this.importRequested.emit(this.meta().value);
   }
 
   protected refreshClicked(event: Event, cell: GstReconciliationMonthCell): void {
     event.stopPropagation();
+    if (!this.canImport()) return;
     this.refreshRequested.emit(cell);
   }
 

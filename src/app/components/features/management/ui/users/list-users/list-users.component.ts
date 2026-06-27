@@ -9,6 +9,7 @@ import {
 } from '@tailng-ui/components';
 import type { TngTableColumn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
+import { CanDirective } from '../../../../../../core/permissions/can.directive';
 import {
   CrudFilterPopoverComponent,
   CrudListQueryService,
@@ -31,6 +32,7 @@ import { UserSessionStore } from '../../../data/user-session/user-session.store'
   selector: 'app-list-users',
   standalone: true,
   imports: [
+    CanDirective,
     PageHeadingComponent,
     BurlBackButtonComponent,
     TngAvatarComponent,

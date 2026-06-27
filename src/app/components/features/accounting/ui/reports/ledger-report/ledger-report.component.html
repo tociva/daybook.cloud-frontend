@@ -82,9 +82,11 @@
 
           <ng-template tngTableCellTemplate="journalNumber" let-row="row">
             <span class="ledger-report-cell">
-              <button type="button" class="link-button" (click)="viewJournal(row.journalid)">
+              @if (canOpenJournal()) {
+                <button type="button" class="link-button" (click)="viewJournal(row.journalid)">{{ row.journalNumber }}</button>
+              } @else {
                 {{ row.journalNumber }}
-              </button>
+              }
             </span>
           </ng-template>
 

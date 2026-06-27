@@ -4,7 +4,9 @@
     <div class="field field--full">
       <div class="label-with-action">
         <tng-label forId="cust-search" required>Customer</tng-label>
-        <button type="button" class="create-customer-link" (click)="createNewCustomer()">+ Create new Customer</button>
+        @if (canCreateCustomer()) {
+          <button type="button" class="create-customer-link" (click)="createNewCustomer()">+ Create new Customer</button>
+        }
       </div>
       <tng-form-field [invalid]="draft.customerError() !== null" [requiredMarker]="false">
         <tng-autocomplete

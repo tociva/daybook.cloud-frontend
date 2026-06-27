@@ -5,8 +5,9 @@ import { EmptyRouteComponent } from './empty-route.component';
 import { BootstrapOrganizationComponent } from './components/features/management/ui/bootstrap-organization/bootstrap-organization.component';
 import { DashboardComponent } from './components/features/dashboard/ui/dashboard/dashboard.component';
 import { SubscriptionSelectionComponent } from './components/features/management/ui/subscription-selection/subscription-selection.component';
+import { workspacePermissionGuard } from './core/permissions/permission.guard';
 
-export const routes: Routes = [
+const appRoutes: Routes = [
   { path: '', pathMatch: 'full', component: EmptyRouteComponent },
   { path: 'auth/callback', component: CallbackComponent },
   { path: 'auth/logout', component: EmptyRouteComponent },
@@ -223,4 +224,12 @@ export const routes: Routes = [
       ).then((m) => m.ledgerCategoryReportRoutes),
   },
   { path: 'bootstrap/bootstrap-organization', component: BootstrapOrganizationComponent },
+];
+
+export const routes: Routes = [
+  {
+    path: '',
+    canActivateChild: [workspacePermissionGuard],
+    children: appRoutes,
+  },
 ];

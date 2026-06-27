@@ -9,6 +9,9 @@ import {
 } from '@tailng-ui/components';
 import type { TngTableColumn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
+import { CanDirective } from '../../../../../../core/permissions/can.directive';
+import { PERMISSION } from '../../../../../../core/permissions/permission-requirements';
+import { PermissionsStore } from '../../../../../../core/permissions/permissions.store';
 import {
   CrudFilterPopoverComponent,
   CrudListQueryService,
@@ -52,6 +55,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
   selector: 'app-list-purchase-invoice',
   standalone: true,
   imports: [
+    CanDirective,
     PageHeadingComponent,
     BurlBackButtonComponent,
     TngButtonComponent,
@@ -72,6 +76,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 })
 export class ListPurchaseInvoiceComponent {
   private readonly router = inject(Router);
+  private readonly permissions = inject(PermissionsStore);
   private readonly dateManagement = inject(DateManagementService);
   private readonly journalService = inject(JournalService);
   private readonly reconciliationMatchService = inject(ReconciliationMatchService);
@@ -201,7 +206,9 @@ export class ListPurchaseInvoiceComponent {
   }
 
   constructor() {
-    void this.vendorStore.loadVendors({});
+    if (this.permissions.can(PERMISSION.branch.vendor.view)) {
+      void this.vendorStore.loadVendors({});
+    }
     this.crudQuery.init((filter) => this.loadPurchaseInvoicesWithJournals(filter));
   }
 
@@ -222,6 +229,11 @@ export class ListPurchaseInvoiceComponent {
   }
 
   private async loadLinkedJournals(invoices: readonly PurchaseInvoice[]): Promise<void> {
+    if (!this.permissions.can(PERMISSION.fiscalYear.journal.view)) {
+      this.journalsByInvoiceId.set(new Map());
+      this.journalsLoading.set(false);
+      return;
+    }
     const ids = invoices.map((invoice) => invoice.id).filter((id): id is string => Boolean(id));
     if (!ids.length) {
       this.journalsByInvoiceId.set(new Map());
@@ -258,12 +270,14 @@ export class ListPurchaseInvoiceComponent {
   }
 
   protected viewJournal(journal: PurchaseInvoiceJournal): void {
+    if (!this.permissions.can(PERMISSION.fiscalYear.journal.view)) return;
     void this.router.navigate(['/app/accounting/journal', journal.id], {
       queryParams: { burl: this.router.url },
     });
   }
 
   protected async generateJournal(row: PurchaseInvoice): Promise<void> {
+    if (!this.permissions.can(PERMISSION.fiscalYear.journal.create)) return;
     if (!row.id || this.generatingJournalInvoiceId() === row.id) return;
 
     this.generatingJournalInvoiceId.set(row.id);
@@ -282,12 +296,14 @@ export class ListPurchaseInvoiceComponent {
   }
 
   private searchVendors(query: string): void {
+    if (!this.permissions.can(PERMISSION.branch.vendor.view)) return;
     const q = query.trim();
     void this.vendorStore.loadVendors(q ? { where: { name: { ilike: `%${q}%` } } } : {});
   }
 
   /** Navigate to new vendor payment pre-linked to this invoice. */
   protected createPaymentForInvoice(item: PurchaseInvoice): void {
+    if (!this.permissions.can(PERMISSION.branch.vendorPayment.create)) return;
     this.purchaseInvoiceStore.setSelectedItem(item);
     void this.router.navigate(['/app/trading/vendor-payment/create'], {
       queryParams: { purchaseinvoiceid: item.id, burl: this.router.url },
@@ -296,6 +312,7 @@ export class ListPurchaseInvoiceComponent {
 
   /** Navigate to all vendor payments linked to this invoice. */
   protected viewPaymentsForInvoice(item: PurchaseInvoice): void {
+    if (!this.permissions.can(PERMISSION.branch.vendorPayment.view)) return;
     if (item.id) {
       void this.router.navigate(['/app/trading/purchase-invoice', item.id, 'payments'], {
         queryParams: { burl: this.router.url },

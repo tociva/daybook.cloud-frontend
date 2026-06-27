@@ -1,5 +1,6 @@
 <div
   class="bulk-upload-control"
+  [hidden]="!isAllowed()"
   tngFileUpload
   [accept]="accept()"
   [disabled]="isDisabled()"

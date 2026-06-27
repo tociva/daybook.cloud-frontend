@@ -8,17 +8,19 @@
       </div>
     </div>
 
-    <tng-button
-      type="button"
-      appearance="ghost"
-      tone="neutral"
-      [disabled]="!contextAvailable() || !canImport() || isBusy() || isParsing()"
-      [attr.aria-label]="'Import ' + meta().label + ' file'"
-      (click)="requestImport()"
-    >
-      <tng-icon icon="upload" aria-hidden="true" />
-      Import
-    </tng-button>
+    @if (canImport()) {
+      <tng-button
+        type="button"
+        appearance="ghost"
+        tone="neutral"
+        [disabled]="!contextAvailable() || isBusy() || isParsing()"
+        [attr.aria-label]="'Import ' + meta().label + ' file'"
+        (click)="requestImport()"
+      >
+        <tng-icon icon="upload" aria-hidden="true" />
+        Import
+      </tng-button>
+    }
   </header>
 
   <div class="recon-section__stats" [attr.aria-label]="meta().label + ' status summary'">
@@ -63,19 +65,21 @@
             <small>{{ cell.period }}</small>
           </span>
           <span class="recon-month__actions">
-            <button
-              type="button"
-              class="recon-month__refresh"
-              [attr.aria-label]="'Refresh ' + meta().label + ' ' + cell.period"
-              [disabled]="isUploading() || isRefreshingCell(cell)"
-              (click)="refreshClicked($event, cell)"
-            >
-              <tng-icon
-                icon="refreshCw"
-                [class.spin]="isRefreshingCell(cell)"
-                aria-hidden="true"
-              />
-            </button>
+            @if (canImport()) {
+              <button
+                type="button"
+                class="recon-month__refresh"
+                [attr.aria-label]="'Refresh ' + meta().label + ' ' + cell.period"
+                [disabled]="isUploading() || isRefreshingCell(cell)"
+                (click)="refreshClicked($event, cell)"
+              >
+                <tng-icon
+                  icon="refreshCw"
+                  [class.spin]="isRefreshingCell(cell)"
+                  aria-hidden="true"
+                />
+              </button>
+            }
             <span class="recon-month__status" [attr.title]="statusLabel(cell.status)">
               <tng-icon [icon]="statusIcon(cell.status)" aria-hidden="true" />
             </span>

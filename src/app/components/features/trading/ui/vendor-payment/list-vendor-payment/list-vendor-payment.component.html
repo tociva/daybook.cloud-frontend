@@ -20,7 +20,7 @@
       (uploaded)="reloadVendorPayments()"
     />
 
-    <tng-button type="button" appearance="solid" tone="primary" (click)="createPayment()">
+    <tng-button *appCan="'branch:vendorPayment:create'" type="button" appearance="solid" tone="primary" (click)="createPayment()">
       <tng-icon icon="plus" aria-hidden="true" />
       New Payment
     </tng-button>
@@ -49,7 +49,7 @@
             title="No vendor payments yet"
             description="Get started by creating your first vendor payment."
           >
-            <tng-button type="button" appearance="solid" tone="primary" (click)="createPayment()">
+            <tng-button *appCan="'branch:vendorPayment:create'" type="button" appearance="solid" tone="primary" (click)="createPayment()">
               <tng-icon icon="plus" aria-hidden="true" />
               New payment
             </tng-button>
@@ -110,6 +110,7 @@
             </span>
           } @else {
             <button
+              *appCan="'fiscalYear:journal:create'"
               type="button"
               class="link-button"
               [disabled]="generatingJournalPaymentId() === row.id"
@@ -122,6 +123,11 @@
 
         <ng-template tngTableCellTemplate="actions" let-row="row">
           <div class="row-actions">
+            <app-table-row-icon-button
+              icon="eye"
+              ariaLabel="View vendor payment"
+              (action)="viewPayment(row)"
+            />
             <app-table-row-icon-button
               icon="pencil"
               ariaLabel="Edit vendor payment"

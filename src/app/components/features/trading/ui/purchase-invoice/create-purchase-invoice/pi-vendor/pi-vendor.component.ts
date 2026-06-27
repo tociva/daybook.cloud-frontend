@@ -10,6 +10,8 @@ import type { Vendor } from '../../../../data/vendor';
 import { VendorStore } from '../../../../data/vendor';
 import { PurchaseInvoiceDraftStore } from '../purchase-invoice-draft.store';
 import { PiAddressDialogComponent } from './pi-address-dialog/pi-address-dialog.component';
+import { PERMISSION } from '../../../../../../../core/permissions/permission-requirements';
+import { PermissionsStore } from '../../../../../../../core/permissions/permissions.store';
 
 /** Sentinel id used to represent the "Create new vendor" action inside the options list. */
 const CREATE_VENDOR_SENTINEL_ID = '__create_vendor__';
@@ -37,6 +39,7 @@ export class PiVendorComponent {
   protected readonly draft = inject(PurchaseInvoiceDraftStore);
   private readonly vendorStore = inject(VendorStore);
   private readonly router = inject(Router);
+  private readonly permissions = inject(PermissionsStore);
   readonly readOnly = input(false);
   readonly vendorSelected = output<void>();
 
@@ -46,6 +49,9 @@ export class PiVendorComponent {
 
   /** Expose sentinel id so the template can detect the create-action row. */
   protected readonly createSentinelId = CREATE_VENDOR_SENTINEL_ID;
+  protected readonly canCreateVendor = computed(() =>
+    this.permissions.can(PERMISSION.branch.vendor.create),
+  );
 
   /**
    * Options list passed to the autocomplete.
@@ -54,7 +60,7 @@ export class PiVendorComponent {
    */
   protected readonly filteredVendorsWithCreate = computed(() => {
     const vendors = this.draft.filteredVendors();
-    if (vendors.length === 0) {
+    if (vendors.length === 0 && this.canCreateVendor()) {
       return [CREATE_VENDOR_SENTINEL];
     }
     return vendors;
@@ -97,6 +103,8 @@ export class PiVendorComponent {
   }
 
   protected createNewVendor(): void {
+    if (!this.canCreateVendor()) return;
+
     // Clear stale selected vendor so we can tell whether a new one was created on return.
     this.vendorStore.clearSelectedItem();
     void this.router.navigate(['/app/trading/vendor/create'], {

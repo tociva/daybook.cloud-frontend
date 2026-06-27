@@ -13,7 +13,7 @@
       syncUrl
     />
 
-    <tng-button type="button" appearance="solid" tone="primary" (click)="createUser()">
+    <tng-button *appCan="'organization:user:inviteMember'" type="button" appearance="solid" tone="primary" (click)="createUser()">
       <tng-icon icon="plus" aria-hidden="true" />
       Invite user
     </tng-button>
@@ -51,7 +51,7 @@
             title="No users yet"
             description="Invite a user to grant access to this organization."
           >
-            <tng-button type="button" appearance="solid" tone="primary" (click)="createUser()">
+            <tng-button *appCan="'organization:user:inviteMember'" type="button" appearance="solid" tone="primary" (click)="createUser()">
               <tng-icon icon="plus" aria-hidden="true" />
               Invite user
             </tng-button>

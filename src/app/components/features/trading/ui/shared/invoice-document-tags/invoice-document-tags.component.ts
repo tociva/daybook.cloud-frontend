@@ -2,6 +2,10 @@ import { Component, computed, inject, input, output } from '@angular/core';
 import { TngButtonComponent, TngTag, TngTooltipComponent } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { PermissionsStore } from '../../../../../../core/permissions/permissions.store';
+import {
+  documentPermission,
+  type DocumentPermissionResource,
+} from '../../../../../../core/permissions/permission-requirements';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
 import type { StoredDocument } from '../../../data/invoice-document';
 
@@ -18,6 +22,7 @@ export class InvoiceDocumentTagsComponent {
 
   readonly documents = input<readonly StoredDocument[]>([]);
   readonly files = input<readonly File[]>([]);
+  readonly resourceType = input<DocumentPermissionResource | null>(null);
   readonly editable = input(false);
   readonly disabled = input(false);
   readonly uploading = input(false);
@@ -27,16 +32,20 @@ export class InvoiceDocumentTagsComponent {
   protected readonly inputId = `invoice-document-tags-${Math.random().toString(36).slice(2)}`;
 
   protected readonly canAttach = computed(() => {
-    const permissions = this.permissionsStore.all();
-    if (!permissions.length) return true;
-    return permissions.some((permission) => {
-      const normalized = permission.toLowerCase().replace(/[\s:_.-]/g, '');
-      return normalized === 'createdocument' || normalized.endsWith('createdocument');
-    });
+    const resourceType = this.resourceType();
+    return resourceType
+      ? this.permissionsStore.can(documentPermission(resourceType, 'createDocument'))
+      : false;
+  });
+  protected readonly canDelete = computed(() => {
+    const resourceType = this.resourceType();
+    return resourceType
+      ? this.permissionsStore.can(documentPermission(resourceType, 'deleteDocument'))
+      : false;
   });
 
   protected readonly isDisabled = computed(
-    () => this.disabled() || this.uploading() || !this.canAttach(),
+    () => this.disabled() || this.uploading(),
   );
 
   protected readonly hasAttachments = computed(
@@ -44,7 +53,7 @@ export class InvoiceDocumentTagsComponent {
   );
 
   protected browse(): void {
-    if (!this.editable() || this.isDisabled()) return;
+    if (!this.editable() || this.isDisabled() || !this.canAttach()) return;
     document.getElementById(this.inputId)?.click();
   }
 
@@ -62,12 +71,13 @@ export class InvoiceDocumentTagsComponent {
 
   protected removeFile(file: File, event?: Event): void {
     event?.stopPropagation();
+    if (this.isDisabled() || !this.canAttach()) return;
     this.filesChange.emit(this.files().filter((item) => item !== file));
   }
 
   protected removeDocument(document: StoredDocument, event?: Event): void {
     event?.stopPropagation();
-    if (this.isDisabled()) return;
+    if (this.isDisabled() || !this.canDelete()) return;
     this.documentRemove.emit(document);
   }
 
@@ -105,7 +115,7 @@ export class InvoiceDocumentTagsComponent {
   }
 
   private addFiles(nextFiles: readonly File[]): void {
-    if (this.isDisabled() || !nextFiles.length) return;
+    if (this.isDisabled() || !this.canAttach() || !nextFiles.length) return;
 
     const validFiles = nextFiles.filter((file) => file.size > 0);
     if (validFiles.length !== nextFiles.length) {

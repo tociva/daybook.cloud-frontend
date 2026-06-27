@@ -56,6 +56,7 @@ export class LedgerCategoryReportComponent {
   protected readonly tableRows = this.facade.tableRows;
   protected readonly canViewLedgerCategoryReport = this.facade.canViewLedgerCategoryReport;
   protected readonly canOpenLedgerReport = this.facade.canOpenLedgerReport;
+  protected readonly canOpenJournal = this.facade.canOpenJournal;
   protected readonly hasError = this.facade.hasError;
   protected readonly hasCategorySelected = this.facade.hasCategorySelected;
   protected readonly showSelectCategoryNotice = this.facade.showSelectCategoryNotice;

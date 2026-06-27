@@ -13,7 +13,7 @@
       syncUrl
     />
 
-    <tng-button type="button" appearance="solid" tone="primary" (click)="createBranch()">
+    <tng-button *appCan="'organization:branch:create'" type="button" appearance="solid" tone="primary" (click)="createBranch()">
       <tng-icon icon="plus" aria-hidden="true" />
       New branch
     </tng-button>
@@ -47,7 +47,7 @@
             title="No branches yet"
             description="Get started by creating your first branch."
           >
-            <tng-button type="button" appearance="solid" tone="primary" (click)="createBranch()">
+            <tng-button *appCan="'organization:branch:create'" type="button" appearance="solid" tone="primary" (click)="createBranch()">
               <tng-icon icon="plus" aria-hidden="true" />
               New branch
             </tng-button>

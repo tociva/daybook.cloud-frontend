@@ -42,9 +42,20 @@ export function serializePermissionTree(tree: unknown): SparseOrganizationMember
     return { organizations: {} };
   }
 
-  const organizations = compactPermissionNode((tree as { organizations?: unknown }).organizations);
+  const source = tree as {
+    organization?: unknown;
+    organizations?: unknown;
+    userSubscription?: unknown;
+  };
+  const organization = compactPermissionNode(source.organization);
+  const organizations = compactPermissionNode(source.organizations);
+  const userSubscription = compactPermissionNode(source.userSubscription);
 
-  return { organizations: organizations ?? {} };
+  return {
+    ...(organization ? { organization } : {}),
+    organizations: organizations ?? {},
+    ...(userSubscription ? { userSubscription } : {}),
+  };
 }
 
 function createEmptyFlags(actions: readonly string[]): PermissionFlags {
@@ -220,12 +231,16 @@ export function mergePermissionTree(
     return base;
   }
 
-  const existingOrganizations = (existing as { organizations?: unknown }).organizations;
-  if (!existingOrganizations || typeof existingOrganizations !== 'object') {
-    return base;
-  }
-
-  const organizations = existingOrganizations as Record<string, unknown>;
+  const existingSource = existing as {
+    organization?: unknown;
+    organizations?: unknown;
+    userSubscription?: unknown;
+  };
+  const existingOrganizations = existingSource.organizations;
+  const organizations =
+    existingOrganizations && typeof existingOrganizations === 'object'
+      ? (existingOrganizations as Record<string, unknown>)
+      : {};
 
   const mergedOrganizations = Object.fromEntries(
     Object.entries(base.organizations).map(([organizationId, organizationPermissions]) => [
@@ -234,9 +249,23 @@ export function mergePermissionTree(
     ]),
   );
 
+  const organization = readRootPermissionFlags(existingSource.organization);
+  const userSubscription = readRootPermissionFlags(existingSource.userSubscription);
+
   return {
+    ...(organization ? { organization } : {}),
     organizations: mergedOrganizations,
+    ...(userSubscription ? { userSubscription } : {}),
   };
+}
+
+function readRootPermissionFlags(value: unknown): PermissionFlags | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+
+  const flags = Object.fromEntries(
+    Object.entries(value).filter((entry): entry is [string, boolean] => typeof entry[1] === 'boolean'),
+  );
+  return Object.keys(flags).length ? flags : null;
 }
 
 export function getFlagValues(flags: PermissionFlags, keys: readonly string[]): boolean[] {
@@ -277,6 +306,7 @@ export function setFlag(
   }
 
   return {
+    ...tree,
     organizations: {
       ...tree.organizations,
       [organizationId]: updater(organization),

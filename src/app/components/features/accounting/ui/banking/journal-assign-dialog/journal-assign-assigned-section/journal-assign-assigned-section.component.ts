@@ -41,6 +41,7 @@ export class JournalAssignAssignedSectionComponent {
   readonly assignments = input<readonly ExistingAssignment[]>([]);
   readonly bankTxn = input<BankTxn | null>(null);
   readonly disabled = input(false);
+  readonly canUnassign = input(false);
 
   readonly unassign = output<string>();
 
@@ -158,7 +159,7 @@ export class JournalAssignAssignedSectionComponent {
   }
 
   protected openUnassignConfirm(journalId: string): void {
-    if (this.disabled()) return;
+    if (this.disabled() || !this.canUnassign()) return;
     this.pendingUnassignJournalId.set(journalId);
   }
 
@@ -168,7 +169,7 @@ export class JournalAssignAssignedSectionComponent {
 
   protected confirmUnassign(): void {
     const journalId = this.pendingUnassignJournalId();
-    if (!journalId || this.disabled()) return;
+    if (!journalId || this.disabled() || !this.canUnassign()) return;
     this.pendingUnassignJournalId.set(null);
     this.unassign.emit(journalId);
   }

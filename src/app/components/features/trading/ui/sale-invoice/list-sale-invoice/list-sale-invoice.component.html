@@ -20,7 +20,7 @@
       (uploaded)="reloadSaleInvoices()"
     />
 
-    <tng-button type="button" appearance="solid" tone="primary" (click)="createSaleInvoice()">
+    <tng-button *appCan="'branch:saleInvoice:create'" type="button" appearance="solid" tone="primary" (click)="createSaleInvoice()">
       <tng-icon icon="plus" aria-hidden="true" />
       New Invoice
     </tng-button>
@@ -44,6 +44,7 @@
             description="Try adjusting or clearing your filter to find what you're looking for."
           >
             <tng-button
+              *appCan="'branch:saleInvoice:create'"
               type="button"
               appearance="outline"
               tone="neutral"
@@ -123,6 +124,7 @@
           <ng-template tngTableCellTemplate="received" let-row="row">
             @if (totalReceived(row) === undefined) {
               <button
+                *appCan="'branch:customerReceipt:create'"
                 type="button"
                 class="link-button link-button--muted"
                 (click)="createReceiptForInvoice(row)"
@@ -130,7 +132,7 @@
                 Create Receipt
               </button>
             } @else if (isPaid(row)) {
-              <button type="button" class="link-button" (click)="viewReceiptsForInvoice(row)">
+              <button *appCan="'branch:customerReceipt:view'" type="button" class="link-button" (click)="viewReceiptsForInvoice(row)">
                 {{ formatAmountWithCurrency(totalReceived(row), row.currencycode) }}
               </button>
             } @else {
@@ -160,6 +162,7 @@
               </span>
             } @else {
               <button
+                *appCan="'fiscalYear:journal:create'"
                 type="button"
                 class="link-button"
                 [disabled]="generatingJournalInvoiceId() === row.id"
@@ -178,6 +181,7 @@
                 (action)="viewSaleInvoice(row)"
               />
               <app-table-row-icon-button
+                [permission]="{ level: 'branch', resource: 'customerReceipt', action: 'view' }"
                 icon="receipt"
                 ariaLabel="View sale invoice receipts"
                 (action)="viewReceiptsForInvoice(row)"

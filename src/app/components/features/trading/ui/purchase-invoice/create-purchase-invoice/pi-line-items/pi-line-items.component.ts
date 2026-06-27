@@ -14,6 +14,8 @@ import { ItemStore } from '../../../../data/item';
 import { InvoiceGrandTotalDisplayComponent } from '../../../../../../../shared/invoice-grand-total-display/invoice-grand-total-display.component';
 import { InvoiceDocumentPickerComponent } from '../../../shared/invoice-document-picker/invoice-document-picker.component';
 import { PurchaseInvoiceDraftStore, type ItemRow } from '../purchase-invoice-draft.store';
+import { PERMISSION } from '../../../../../../../core/permissions/permission-requirements';
+import { PermissionsStore } from '../../../../../../../core/permissions/permissions.store';
 
 /** Sentinel id used to represent the "Create new item" action inside the options list. */
 const CREATE_ITEM_SENTINEL_ID = '__create_item__';
@@ -55,6 +57,7 @@ export class PiLineItemsComponent {
   protected readonly draft      = inject(PurchaseInvoiceDraftStore);
   private  readonly itemStore   = inject(ItemStore);
   private  readonly router      = inject(Router);
+  private readonly permissions  = inject(PermissionsStore);
   readonly readOnly = input(false);
   readonly documentFiles = input<readonly File[]>([]);
   readonly documentsDisabled = input(false);
@@ -70,6 +73,9 @@ export class PiLineItemsComponent {
 
   /** Expose sentinel id so the template can detect the create-action row. */
   protected readonly createItemSentinelId = CREATE_ITEM_SENTINEL_ID;
+  protected readonly canCreateItem = computed(() =>
+    this.permissions.can(PERMISSION.branch.item.create),
+  );
 
   // ── Tax column visibility (derived from draft tax option) ──────────────
   // Intra State → CGST + SGST; Inter State → IGST only; Export / Non Taxable → none
@@ -118,7 +124,7 @@ export class PiLineItemsComponent {
    */
   protected itemOptionsForRowWithCreate(row: ItemRow): readonly Item[] {
     const options = this.itemOptionsForRow(row);
-    if (options.length === 0) {
+    if (options.length === 0 && this.canCreateItem()) {
       return [CREATE_ITEM_SENTINEL];
     }
     return options;
@@ -133,6 +139,8 @@ export class PiLineItemsComponent {
   }
 
   protected createNewItem(rowIndex: number): void {
+    if (!this.canCreateItem()) return;
+
     // Clear stale selectedItem so we can distinguish "just created" vs "cancelled" on return.
     this.itemStore.clearSelectedItem();
     void this.router.navigate(['/app/trading/item/create'], {

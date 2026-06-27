@@ -10,6 +10,8 @@ import {
   TngCardTitleComponent,
 } from '@tailng-ui/components';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
+import { PERMISSION } from '../../../../../../core/permissions/permission-requirements';
+import { PermissionsStore } from '../../../../../../core/permissions/permissions.store';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 import { BurlDeleteButtonComponent } from '../../../../../../shared/burl-delete-button/burl-delete-button.component';
 import { BurlEditButtonComponent } from '../../../../../../shared/burl-edit-button/burl-edit-button.component';
@@ -42,6 +44,7 @@ import type { CustomerReceipt, SaleInvoiceReceipt } from '../../../data/customer
 export class ViewCustomerReceiptComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly permissions = inject(PermissionsStore);
   private readonly dateManagement = inject(DateManagementService);
   private readonly userSessionStore = inject(UserSessionStore);
   protected readonly customerReceiptStore = inject(CustomerReceiptStore);
@@ -51,6 +54,9 @@ export class ViewCustomerReceiptComponent {
     const item = this.customerReceiptStore.selectedItem();
     return item?.id === this.receiptId() ? item : null;
   });
+  protected readonly canViewSaleInvoice = computed(() =>
+    this.permissions.can(PERMISSION.branch.saleInvoice.view),
+  );
 
   constructor() {
     void this.loadInitialState();
@@ -87,6 +93,7 @@ export class ViewCustomerReceiptComponent {
   }
 
   protected viewSaleInvoice(invoice: SaleInvoiceReceipt): void {
+    if (!this.canViewSaleInvoice()) return;
     const id = this.invoiceRouteId(invoice);
     if (id) {
       void this.router.navigate(['/app/trading/sale-invoice', id], {

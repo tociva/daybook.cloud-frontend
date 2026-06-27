@@ -98,6 +98,7 @@
               <app-table-row-icon-button
                 icon="eye"
                 ariaLabel="Open source transaction"
+                [permission]="sourcePermission(row)"
                 [disabled]="!row.sourceRoute"
                 (action)="openSource(row)"
               />

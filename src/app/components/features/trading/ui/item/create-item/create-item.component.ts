@@ -24,6 +24,8 @@ import type { ItemCategory } from '../../../data/item-category';
 import { ItemFacade, ItemStore } from '../../../data/item';
 import type { ItemPayload } from '../../../data/item';
 import { DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS } from '../../../../../../util/constants';
+import { PERMISSION } from '../../../../../../core/permissions/permission-requirements';
+import { PermissionsStore } from '../../../../../../core/permissions/permissions.store';
 
 /** Sentinel id used to represent the "Create new category" action inside the options list. */
 const CREATE_CATEGORY_SENTINEL_ID = '__create_category__';
@@ -73,6 +75,7 @@ export class CreateItemComponent implements AfterViewInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly facade = inject(ItemFacade);
+  private readonly permissions = inject(PermissionsStore);
   protected readonly itemStore = inject(ItemStore);
   protected readonly itemCategoryStore = inject(ItemCategoryStore);
   protected readonly categoryQuery = signal('');
@@ -154,6 +157,9 @@ export class CreateItemComponent implements AfterViewInit {
 
   /** Expose sentinel id so the template can detect the create-action row. */
   protected readonly createCategorySentinelId = CREATE_CATEGORY_SENTINEL_ID;
+  protected readonly canCreateCategory = computed(() =>
+    this.permissions.can(PERMISSION.branch.itemCategory.create),
+  );
 
   protected readonly filteredCategories = computed(() =>
     this.filterAutocompleteOptions(
@@ -170,7 +176,7 @@ export class CreateItemComponent implements AfterViewInit {
    */
   protected readonly filteredCategoriesWithCreate = computed(() => {
     const categories = this.filteredCategories();
-    if (categories.length === 0) {
+    if (categories.length === 0 && this.canCreateCategory()) {
       return [CREATE_CATEGORY_SENTINEL];
     }
     return categories;
@@ -281,6 +287,8 @@ export class CreateItemComponent implements AfterViewInit {
   }
 
   protected createNewCategory(): void {
+    if (!this.canCreateCategory()) return;
+
     const m = this.itemModel();
     // Clear any stale category selectedItem so we can distinguish "user just
     // created a category" (selectedItem will be set by createItemCategory())

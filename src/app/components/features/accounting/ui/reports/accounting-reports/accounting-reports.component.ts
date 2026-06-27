@@ -22,13 +22,13 @@ export class AccountingReportsComponent {
   private readonly router = inject(Router);
 
   protected readonly visibleReports = computed(() => {
-    const permissions = this.permissionsStore.all();
     return accountingReportsNavItems.filter((report) =>
-      hasAccountingReportPermission(permissions, report.permissionScope),
+      hasAccountingReportPermission(this.permissionsStore, report.permissionScope),
     );
   });
 
   protected openReport(report: AccountingReportNavItem): void {
+    if (!hasAccountingReportPermission(this.permissionsStore, report.permissionScope)) return;
     void this.router.navigateByUrl(report.route);
   }
 }

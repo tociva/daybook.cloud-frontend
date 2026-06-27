@@ -4,7 +4,9 @@
     <div class="field field--full">
       <div class="label-with-action">
         <tng-label forId="vendor-search" required>Vendor</tng-label>
-        <button type="button" class="create-vendor-link" (click)="createNewVendor()">+ Create new Vendor</button>
+        @if (canCreateVendor()) {
+          <button type="button" class="create-vendor-link" (click)="createNewVendor()">+ Create new Vendor</button>
+        }
       </div>
       <tng-form-field [invalid]="draft.vendorError() !== null" [requiredMarker]="false">
         <tng-autocomplete

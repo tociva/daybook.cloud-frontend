@@ -13,7 +13,7 @@
       syncUrl
     />
 
-    <tng-button type="button" appearance="outline" tone="neutral" (click)="openLedgers()">
+    <tng-button *appCan="'fiscalYear:ledger:view'" type="button" appearance="outline" tone="neutral" (click)="openLedgers()">
       <tng-icon icon="bookOpen" aria-hidden="true" />
       Ledgers
     </tng-button>
@@ -23,6 +23,7 @@
       (uploaded)="reloadJournals()"
     />
 
+    @if (canImportAnySource()) {
     <div class="journal-import-menu">
       <button
         class="journal-import-menu-trigger"
@@ -34,25 +35,26 @@
       </button>
 
       <tng-menu #journalImportMenu="tngMenu" ariaLabel="Journal import options">
-        <button type="button" tngMenuItem (click)="openJournalImportDialog('saleInvoice')">
-          Import from Sale Invoice
-        </button>
-        <button type="button" tngMenuItem (click)="openJournalImportDialog('purchaseInvoice')">
-          Import from Purchase Invoices
-        </button>
-        <button type="button" tngMenuItem (click)="openJournalImportDialog('customerReceipt')">
-          Import from Customer Receipts
-        </button>
-        <button type="button" tngMenuItem (click)="openJournalImportDialog('vendorPayment')">
-          Import from Vendor Payments
-        </button>
-        <button type="button" tngMenuItem (click)="openJournalImportDialog('contraTransaction')">
-          Import from Contra Transactions
-        </button>
+        @if (canImportSource('saleInvoice')) {
+          <button type="button" tngMenuItem (click)="openJournalImportDialog('saleInvoice')">Import from Sale Invoice</button>
+        }
+        @if (canImportSource('purchaseInvoice')) {
+          <button type="button" tngMenuItem (click)="openJournalImportDialog('purchaseInvoice')">Import from Purchase Invoices</button>
+        }
+        @if (canImportSource('customerReceipt')) {
+          <button type="button" tngMenuItem (click)="openJournalImportDialog('customerReceipt')">Import from Customer Receipts</button>
+        }
+        @if (canImportSource('vendorPayment')) {
+          <button type="button" tngMenuItem (click)="openJournalImportDialog('vendorPayment')">Import from Vendor Payments</button>
+        }
+        @if (canImportSource('contraTransaction')) {
+          <button type="button" tngMenuItem (click)="openJournalImportDialog('contraTransaction')">Import from Contra Transactions</button>
+        }
       </tng-menu>
     </div>
+    }
 
-    <tng-button type="button" appearance="solid" tone="primary" (click)="createJournal()">
+    <tng-button *appCan="'fiscalYear:journal:create'" type="button" appearance="solid" tone="primary" (click)="createJournal()">
       <tng-icon icon="plus" aria-hidden="true" />
       New journal
     </tng-button>
@@ -90,7 +92,7 @@
             title="No journals yet"
             description="Create a journal entry to record debits and credits across ledgers."
           >
-            <tng-button type="button" appearance="solid" tone="primary" (click)="createJournal()">
+            <tng-button *appCan="'fiscalYear:journal:create'" type="button" appearance="solid" tone="primary" (click)="createJournal()">
               <tng-icon icon="plus" aria-hidden="true" />
               New journal
             </tng-button>

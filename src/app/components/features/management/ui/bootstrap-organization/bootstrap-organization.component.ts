@@ -57,6 +57,7 @@ import {
 import { ToastStore } from '../../../../../core/toast/toast.store';
 import { UserSessionService } from '../../data/user-session/user-session.service';
 import { UserSessionStore } from '../../data/user-session/user-session.store';
+import { PermissionsStore } from '../../../../../core/permissions/permissions.store';
 import { AutoNumberingTemplateGeneratorComponent } from '../../../../../shared/auto-numbering-template-generator/auto-numbering-template-generator.component';
 import {
   DEFAULT_INVOICE_NUMBER_FORMAT,
@@ -288,6 +289,7 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
   private readonly bootstrapOrganizationStore = inject(BootstrapOrganizationStore);
   private readonly userSessionService = inject(UserSessionService);
   private readonly userSessionStore = inject(UserSessionStore);
+  private readonly permissions = inject(PermissionsStore);
   private readonly toastStore = inject(ToastStore);
   private readonly router = inject(Router);
   protected readonly countries = this.countryStore.countries;
@@ -897,7 +899,7 @@ export class BootstrapOrganizationComponent implements AfterViewInit {
       this.userSessionStore.setSession(session);
       this.saved.set(true);
       this.toastStore.success('Organization created successfully.');
-      await this.router.navigateByUrl('/app/dashboard');
+      await this.router.navigateByUrl(this.permissions.firstAllowedWorkspaceRoute());
     } catch (error) {
       this.saved.set(false);
       this.toastStore.danger(

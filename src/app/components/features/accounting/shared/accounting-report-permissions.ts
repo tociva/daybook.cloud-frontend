@@ -1,17 +1,24 @@
-/** Matches backend accountingReports scopes (e.g. ledgerReport, trialBalance). */
+import { PERMISSION } from '../../../../core/permissions/permission-requirements';
+import type { PermissionMatch } from '../../../../core/permissions/permissions.model';
+import type { PermissionsStore } from '../../../../core/permissions/permissions.store';
+
+const reportPermissions: Readonly<Record<string, PermissionMatch>> = {
+  accountantDashboard: PERMISSION.fiscalYear.accountingReports.accountantDashboard,
+  balanceSheet: PERMISSION.fiscalYear.accountingReports.balanceSheet,
+  ledgerCategoryReport: PERMISSION.fiscalYear.accountingReports.ledgerCategoryReport,
+  ledgerReport: PERMISSION.fiscalYear.accountingReports.ledgerReport,
+  profitLoss: PERMISSION.fiscalYear.accountingReports.profitLoss,
+  trialBalance: PERMISSION.fiscalYear.accountingReports.trialBalance,
+};
+
+export function accountingReportPermission(scope: string): PermissionMatch | null {
+  return reportPermissions[scope] ?? null;
+}
+
 export function hasAccountingReportPermission(
-  permissions: readonly string[],
+  permissions: Pick<PermissionsStore, 'can'>,
   scope: string,
 ): boolean {
-  if (!permissions.length) return true;
-
-  const normalizedScope = scope.toLowerCase();
-  return permissions.some((permission) => {
-    const normalized = permission.toLowerCase();
-    return (
-      normalized === `accountingreports.${normalizedScope}` ||
-      normalized === `accountingreports:${normalizedScope}` ||
-      (normalized.includes('accountingreports') && normalized.includes(normalizedScope))
-    );
-  });
+  const requirement = accountingReportPermission(scope);
+  return requirement ? permissions.can(requirement) : false;
 }

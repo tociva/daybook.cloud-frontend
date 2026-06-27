@@ -155,10 +155,10 @@ export class TrialBalanceComponent {
   protected readonly reportData = signal<readonly TrialBalanceItem[]>([]);
   protected readonly generatedAt = signal<string>('');
   protected readonly canOpenLedgerReport = computed(() =>
-    hasAccountingReportPermission(this.permissionsStore.all(), 'ledgerReport'),
+    hasAccountingReportPermission(this.permissionsStore, 'ledgerReport'),
   );
   protected readonly canOpenLedgerCategoryReport = computed(() =>
-    hasAccountingReportPermission(this.permissionsStore.all(), 'ledgerCategoryReport'),
+    hasAccountingReportPermission(this.permissionsStore, 'ledgerCategoryReport'),
   );
   protected readonly expandedKeys = signal<readonly string[]>([]);
   private readonly expandedKeySet = computed(() => new Set(this.expandedKeys()));

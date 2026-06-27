@@ -25,6 +25,7 @@ import {
 } from '../../data/organization-member/organization-member.enums';
 import { OrganizationMemberStore } from '../../data/organization-member/organization-member.store';
 import type { Organization } from '../../data/organization/organization.model';
+import { PermissionsStore } from '../../../../../core/permissions/permissions.store';
 
 const compareFiscalYearsByStartDate = (left: FiscalYear, right: FiscalYear): number =>
   left.startdate.localeCompare(right.startdate);
@@ -79,6 +80,7 @@ export class SelectOrganizationComponent {
   private readonly dateManagement = inject(DateManagementService);
   private readonly organizationMemberStore = inject(OrganizationMemberStore);
   private readonly userSessionStore = inject(UserSessionStore);
+  private readonly permissions = inject(PermissionsStore);
 
   protected readonly formatDate = (value: string | null | undefined): string =>
     this.dateManagement.formatDisplayDate(value);
@@ -253,7 +255,7 @@ export class SelectOrganizationComponent {
       await this.userSessionStore.selectOrganization(row.organizationId);
       await this.userSessionStore.selectBranch(row.branchId);
       await this.userSessionStore.selectFiscalYear(row.fiscalYearId);
-      void this.router.navigate(['/app/dashboard']);
+      void this.router.navigateByUrl(this.permissions.firstAllowedWorkspaceRoute());
     } catch (error) {
       this.errorMessage.set(
         getApiErrorMessage(error, 'Failed to apply selection. Please try again.'),

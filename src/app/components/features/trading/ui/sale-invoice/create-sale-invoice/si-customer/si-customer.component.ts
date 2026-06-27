@@ -10,6 +10,8 @@ import type { Customer } from '../../../../data/customer';
 import { CustomerStore } from '../../../../data/customer';
 import { SaleInvoiceDraftStore } from '../sale-invoice-draft.store';
 import { SiAddressDialogComponent } from './si-address-dialog/si-address-dialog.component';
+import { PERMISSION } from '../../../../../../../core/permissions/permission-requirements';
+import { PermissionsStore } from '../../../../../../../core/permissions/permissions.store';
 
 /** Sentinel id used to represent the "Create new customer" action inside the options list. */
 const CREATE_CUSTOMER_SENTINEL_ID = '__create_customer__';
@@ -37,6 +39,7 @@ export class SiCustomerComponent {
   protected readonly draft = inject(SaleInvoiceDraftStore);
   private readonly customerStore = inject(CustomerStore);
   private readonly router = inject(Router);
+  private readonly permissions = inject(PermissionsStore);
   readonly readOnly = input(false);
   readonly customerSelected = output<void>();
 
@@ -46,6 +49,9 @@ export class SiCustomerComponent {
 
   /** Expose sentinel id so the template can detect the create-action row. */
   protected readonly createSentinelId = CREATE_CUSTOMER_SENTINEL_ID;
+  protected readonly canCreateCustomer = computed(() =>
+    this.permissions.can(PERMISSION.branch.customer.create),
+  );
 
   /**
    * Options list passed to the autocomplete.
@@ -54,7 +60,7 @@ export class SiCustomerComponent {
    */
   protected readonly filteredCustomersWithCreate = computed(() => {
     const customers = this.draft.filteredCustomers();
-    if (customers.length === 0) {
+    if (customers.length === 0 && this.canCreateCustomer()) {
       return [CREATE_CUSTOMER_SENTINEL];
     }
     return customers;
@@ -110,6 +116,8 @@ export class SiCustomerComponent {
   }
 
   protected createNewCustomer(): void {
+    if (!this.canCreateCustomer()) return;
+
     // Clear stale selected customer so we can tell whether a new one was created on return.
     this.customerStore.clearSelectedItem();
     this.draft.saveDraft();

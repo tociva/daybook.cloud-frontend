@@ -15,12 +15,12 @@
       Refresh
     </tng-button>
 
-    <tng-button type="button" appearance="solid" tone="primary" (click)="createLedgerCategory()">
+    <tng-button *appCan="'fiscalYear:ledgerCategory:create'" type="button" appearance="solid" tone="primary" (click)="createLedgerCategory()">
       <tng-icon icon="plus" aria-hidden="true" />
       New Ledger Category
     </tng-button>
 
-    <tng-button type="button" appearance="solid" tone="primary" (click)="createLedger()">
+    <tng-button *appCan="'fiscalYear:ledger:create'" type="button" appearance="solid" tone="primary" (click)="createLedger()">
       <tng-icon icon="plus" aria-hidden="true" />
       New Ledger
     </tng-button>
@@ -38,7 +38,7 @@
           title="No ledgers or categories yet"
           description="Get started by creating a ledger category or ledger."
         >
-          <tng-button type="button" appearance="solid" tone="primary" (click)="createLedger()">
+          <tng-button *appCan="'fiscalYear:ledger:create'" type="button" appearance="solid" tone="primary" (click)="createLedger()">
             <tng-icon icon="plus" aria-hidden="true" />
             New Ledger
           </tng-button>
@@ -66,16 +66,19 @@
                 <div class="row-actions" (click)="$event.stopPropagation()">
                   @if (row.kind === 'ledger') {
                     <app-table-row-icon-button
+                      [permission]="{ level: 'fiscalYear', resource: 'ledger', action: 'view' }"
                       icon="eye"
                       ariaLabel="View ledger"
                       (action)="viewLedger(row)"
                     />
                     <app-table-row-icon-button
+                      [permission]="{ level: 'fiscalYear', resource: 'ledger', action: 'update' }"
                       icon="pencil"
                       ariaLabel="Edit ledger"
                       (action)="editLedger(row)"
                     />
                     <app-table-row-icon-button
+                      [permission]="{ level: 'fiscalYear', resource: 'ledger', action: 'delete' }"
                       icon="trash2"
                       ariaLabel="Delete ledger"
                       tone="danger"
@@ -83,16 +86,19 @@
                     />
                   } @else {
                     <app-table-row-icon-button
+                      [permission]="{ level: 'fiscalYear', resource: 'ledgerCategory', action: 'view' }"
                       icon="eye"
                       ariaLabel="View ledger category"
                       (action)="viewLedgerCategory(row)"
                     />
                     <app-table-row-icon-button
+                      [permission]="{ level: 'fiscalYear', resource: 'ledgerCategory', action: 'update' }"
                       icon="pencil"
                       ariaLabel="Edit ledger category"
                       (action)="editLedgerCategory(row)"
                     />
                     <app-table-row-icon-button
+                      [permission]="{ level: 'fiscalYear', resource: 'ledgerCategory', action: 'delete' }"
                       icon="trash2"
                       ariaLabel="Delete ledger category"
                       tone="danger"

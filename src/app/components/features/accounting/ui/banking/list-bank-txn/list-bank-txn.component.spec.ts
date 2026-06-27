@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import type { TngTableColumn } from '@tailng-ui/components';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
+import { PermissionsStore } from '../../../../../../core/permissions/permissions.store';
 import { CrudListQueryService } from '../../../../../../shared/crud';
 import type { CrudFilterField, Lb4ListQuery } from '../../../../../../shared/crud';
 import { BankCashStore } from '../../../../trading/data/bank-cash';
@@ -58,6 +59,7 @@ function setup(
 
   TestBed.configureTestingModule({
     providers: [
+      { provide: PermissionsStore, useValue: { can: vi.fn(() => true) } },
       {
         provide: BankCashStore,
         useValue: {

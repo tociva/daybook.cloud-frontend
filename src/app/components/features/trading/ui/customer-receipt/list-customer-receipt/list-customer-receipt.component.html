@@ -20,7 +20,7 @@
       (uploaded)="reloadCustomerReceipts()"
     />
 
-    <tng-button type="button" appearance="solid" tone="primary" (click)="createReceipt()">
+    <tng-button *appCan="'branch:customerReceipt:create'" type="button" appearance="solid" tone="primary" (click)="createReceipt()">
       <tng-icon icon="plus" aria-hidden="true" />
       New Receipt
     </tng-button>
@@ -49,7 +49,7 @@
             title="No customer receipts yet"
             description="Get started by creating your first customer receipt."
           >
-            <tng-button type="button" appearance="solid" tone="primary" (click)="createReceipt()">
+            <tng-button *appCan="'branch:customerReceipt:create'" type="button" appearance="solid" tone="primary" (click)="createReceipt()">
               <tng-icon icon="plus" aria-hidden="true" />
               New receipt
             </tng-button>
@@ -112,6 +112,7 @@
             </span>
           } @else {
             <button
+              *appCan="'fiscalYear:journal:create'"
               type="button"
               class="link-button"
               [disabled]="generatingJournalReceiptId() === row.id"

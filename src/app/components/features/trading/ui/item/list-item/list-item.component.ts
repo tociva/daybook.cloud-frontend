@@ -8,6 +8,7 @@ import {
 } from '@tailng-ui/components';
 import type { TngTableColumn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
+import { CanDirective } from '../../../../../../core/permissions/can.directive';
 import {
   CrudFilterPopoverComponent,
   CrudListQueryService,
@@ -30,6 +31,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 @Component({
   selector: 'app-list-item',
   imports: [
+    CanDirective,
     EmptyStateComponent,
     PageHeadingComponent,
     BurlBackButtonComponent,

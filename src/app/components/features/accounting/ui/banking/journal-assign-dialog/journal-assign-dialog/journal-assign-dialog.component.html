@@ -9,13 +9,16 @@
   (closed)="onDialogClosed()"
 >
   @if (open()) {
+    @if (canViewAssignments()) {
     <app-journal-assign-assigned-section
       [loading]="existingAssignmentsLoading()"
       [assignments]="existingAssignments()"
       [bankTxn]="bankTxn()"
       [disabled]="isSaving()"
+      [canUnassign]="canUnassign()"
       (unassign)="onUnassign($event)"
     />
+    }
 
     @if (!isFullyReconciled()) {
       <tng-tabs
@@ -26,10 +29,15 @@
         (valueChange)="onModeChange($event)"
       >
         <div tngTabList class="assign-dialog-tab-list">
-          <button type="button" tngTab value="create">Create journal</button>
-          <button type="button" tngTab value="select">Select existing</button>
+          @if (canCreateMode()) {
+            <button type="button" tngTab value="create">Create journal</button>
+          }
+          @if (canSelectMode()) {
+            <button type="button" tngTab value="select">Select existing</button>
+          }
         </div>
 
+        @if (canCreateMode()) {
         <div tngTabPanel value="create">
           <app-journal-assign-create
             [dialogOpen]="open()"
@@ -40,7 +48,9 @@
             (assigned)="assigned.emit()"
           />
         </div>
+        }
 
+        @if (canSelectMode()) {
         <div tngTabPanel value="select">
           <app-journal-assign-select
             [dialogOpen]="open()"
@@ -50,6 +60,7 @@
             (assigned)="assigned.emit()"
           />
         </div>
+        }
       </tng-tabs>
     }
   }

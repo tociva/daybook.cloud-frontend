@@ -4,6 +4,7 @@ import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
+import { PermissionsStore } from '../../../../../../core/permissions/permissions.store';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
 import { CrudListQueryService } from '../../../../../../shared/crud';
 import type { Lb4ListQuery } from '../../../../../../shared/crud';
@@ -78,6 +79,7 @@ function setup(
 
   TestBed.configureTestingModule({
     providers: [
+      { provide: PermissionsStore, useValue: { can: vi.fn(() => true) } },
       {
         provide: ActivatedRoute,
         useValue: {

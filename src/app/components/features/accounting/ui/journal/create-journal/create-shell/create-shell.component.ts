@@ -9,6 +9,8 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { TngButtonComponent } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
+import { PERMISSION } from '../../../../../../../core/permissions/permission-requirements';
+import { PermissionsStore } from '../../../../../../../core/permissions/permissions.store';
 import { BurlBackButtonComponent } from '../../../../../../../shared/burl-back-button/burl-back-button.component';
 import { BurlNavigationService } from '../../../../../../../shared/burl-back-button/burl-navigation.service';
 import { BurlCreateButtonComponent } from '../../../../../../../shared/burl-create-button/burl-create-button.component';
@@ -32,6 +34,7 @@ import { JournalCreateFormComponent } from '../journal-create-form/journal-creat
 })
 export class CreateShellComponent {
   private readonly route = inject(ActivatedRoute);
+  private readonly permissions = inject(PermissionsStore);
   private readonly router = inject(Router);
   private readonly navigation = inject(BurlNavigationService);
   private readonly draftStaging = inject(JournalCreateDraftStagingService);
@@ -53,13 +56,16 @@ export class CreateShellComponent {
   protected readonly isSaving = computed(
     () => this.journalStore.isLoading() || this.journalForm().isBusy(),
   );
+  protected readonly canClone = computed(() =>
+    this.mode() === 'edit' && this.permissions.can(PERMISSION.fiscalYear.journal.create),
+  );
 
   constructor() {
     this.id.set(this.route.snapshot.paramMap.get('id'));
   }
 
   protected clone(): void {
-    if (this.mode() !== 'edit') return;
+    if (!this.canClone()) return;
 
     const snapshot = this.journalForm().buildCloneSnapshot();
     this.draftStaging.stage(snapshot);
@@ -70,6 +76,11 @@ export class CreateShellComponent {
 
   protected async onSubmit(event: Event): Promise<void> {
     event.preventDefault();
+
+    const requiredPermission = this.id()
+      ? PERMISSION.fiscalYear.journal.update
+      : PERMISSION.fiscalYear.journal.create;
+    if (!this.permissions.can(requiredPermission)) return;
 
     const form = this.journalForm();
     const payload = form.buildPayload();

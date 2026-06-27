@@ -13,12 +13,12 @@
       syncUrl
     />
 
-    <tng-button type="button" appearance="outline" tone="neutral" (click)="openLedgerCategories()">
+    <tng-button *appCan="'fiscalYear:ledgerCategory:view'" type="button" appearance="outline" tone="neutral" (click)="openLedgerCategories()">
       <tng-icon icon="layers" aria-hidden="true" />
       Ledger Categories
     </tng-button>
 
-    <tng-button type="button" appearance="outline" tone="neutral" (click)="showAllLedgers()">
+    <tng-button *appCan="'fiscalYear:ledgerCategory:view'" type="button" appearance="outline" tone="neutral" (click)="showAllLedgers()">
       <tng-icon icon="list-tree" aria-hidden="true" />
       Show All
     </tng-button>
@@ -29,7 +29,7 @@
       (uploaded)="refreshLedgers()"
     />
 
-    <tng-button type="button" appearance="solid" tone="primary" (click)="createLedger()">
+    <tng-button *appCan="'fiscalYear:ledger:create'" type="button" appearance="solid" tone="primary" (click)="createLedger()">
       <tng-icon icon="plus" aria-hidden="true" />
       New ledger
     </tng-button>
@@ -58,7 +58,7 @@
             title="No ledgers yet"
             description="Get started by creating your first ledger."
           >
-            <tng-button type="button" appearance="solid" tone="primary" (click)="createLedger()">
+            <tng-button *appCan="'fiscalYear:ledger:create'" type="button" appearance="solid" tone="primary" (click)="createLedger()">
               <tng-icon icon="plus" aria-hidden="true" />
               New ledger
             </tng-button>

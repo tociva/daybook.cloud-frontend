@@ -17,6 +17,9 @@ import {
 import { TngIcon } from '@tailng-ui/icons';
 import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
+import { PERMISSION } from '../../../../../../core/permissions/permission-requirements';
+import type { PermissionRequirement } from '../../../../../../core/permissions/permissions.model';
+import { PermissionsStore } from '../../../../../../core/permissions/permissions.store';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { formatAmountWithCurrency } from '../../../../../../shared/format/currency';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
@@ -61,6 +64,7 @@ export class ListBankCashActivityComponent {
   private readonly bankCashReportService = inject(BankCashReportService);
   private readonly dateManagement = inject(DateManagementService);
   private readonly router = inject(Router);
+  private readonly permissions = inject(PermissionsStore);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly bankCashStore = inject(BankCashStore);
 
@@ -129,7 +133,9 @@ export class ListBankCashActivityComponent {
   ];
 
   constructor() {
-    void this.bankCashStore.loadBankCashes({ limit: 1000, offset: 0 });
+    if (this.permissions.can(PERMISSION.branch.bankCash.view)) {
+      void this.bankCashStore.loadBankCashes({ limit: 1000, offset: 0 });
+    }
     this.crudQuery.init((filter) => this.loadReport(this.mapFilterToReportQuery(filter), ++this.loadToken));
   }
 
@@ -150,7 +156,7 @@ export class ListBankCashActivityComponent {
 
 
   protected openSource(row: BankCashActivityRow): void {
-    if (!row.sourceRoute) return;
+    if (!row.sourceRoute || !this.permissions.can(this.sourcePermission(row))) return;
 
     void this.router.navigate(row.sourceRoute, {
       queryParams: { burl: this.router.url },
@@ -158,6 +164,7 @@ export class ListBankCashActivityComponent {
   }
 
   protected onBankCashQueryChange(value: unknown): void {
+    if (!this.permissions.can(PERMISSION.branch.bankCash.view)) return;
     const query = typeof value === 'string' ? value.trim() : '';
     if (this.bankCashSearchTimer) clearTimeout(this.bankCashSearchTimer);
     this.bankCashSearchTimer = setTimeout(() => {
@@ -171,6 +178,14 @@ export class ListBankCashActivityComponent {
 
   protected refresh(): void {
     void this.loadReport(this.mapFilterToReportQuery(this.crudQuery.filter()), ++this.loadToken);
+  }
+
+  protected sourcePermission(row: BankCashActivityRow): PermissionRequirement {
+    switch (row.sourceType) {
+      case 'receipt': return PERMISSION.branch.customerReceipt.view;
+      case 'payment': return PERMISSION.branch.vendorPayment.view;
+      case 'contra': return PERMISSION.branch.contraTransaction.view;
+    }
   }
 
   private mapFilterToReportQuery(filter: Lb4ListQuery): BankCashReportQuery {

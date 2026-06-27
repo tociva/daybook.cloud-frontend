@@ -9,6 +9,9 @@ import {
 } from '@tailng-ui/components';
 import type { TngTableColumn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
+import { CanDirective } from '../../../../../../core/permissions/can.directive';
+import { PERMISSION } from '../../../../../../core/permissions/permission-requirements';
+import { PermissionsStore } from '../../../../../../core/permissions/permissions.store';
 import {
   CrudFilterPopoverComponent,
   CrudListQueryService,
@@ -47,6 +50,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
   selector: 'app-list-vendor-payment',
   standalone: true,
   imports: [
+    CanDirective,
     PageHeadingComponent,
     BurlBackButtonComponent,
     TngButtonComponent,
@@ -67,6 +71,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 })
 export class ListVendorPaymentComponent {
   private readonly router = inject(Router);
+  private readonly permissions = inject(PermissionsStore);
   private readonly dateManagement = inject(DateManagementService);
   private readonly journalService = inject(JournalService);
   private readonly reconciliationMatchService = inject(ReconciliationMatchService);
@@ -178,8 +183,12 @@ export class ListVendorPaymentComponent {
   protected readonly formatAmountWithCurrency = formatAmountWithCurrency;
 
   constructor() {
-    void this.vendorStore.loadVendors({});
-    void this.bankCashStore.loadBankCashes({});
+    if (this.permissions.can(PERMISSION.branch.vendor.view)) {
+      void this.vendorStore.loadVendors({});
+    }
+    if (this.permissions.can(PERMISSION.branch.bankCash.view)) {
+      void this.bankCashStore.loadBankCashes({});
+    }
     this.crudQuery.init((filter) => this.loadVendorPaymentsWithJournals(filter));
   }
 
@@ -200,6 +209,11 @@ export class ListVendorPaymentComponent {
   }
 
   private async loadLinkedJournals(payments: readonly VendorPayment[]): Promise<void> {
+    if (!this.permissions.can(PERMISSION.fiscalYear.journal.view)) {
+      this.journalsByPaymentId.set(new Map());
+      this.journalsLoading.set(false);
+      return;
+    }
     const ids = payments.map((payment) => payment.id).filter((id): id is string => Boolean(id));
     if (!ids.length) {
       this.journalsByPaymentId.set(new Map());
@@ -236,12 +250,14 @@ export class ListVendorPaymentComponent {
   }
 
   protected viewJournal(journal: VendorPaymentJournal): void {
+    if (!this.permissions.can(PERMISSION.fiscalYear.journal.view)) return;
     void this.router.navigate(['/app/accounting/journal', journal.id], {
       queryParams: { burl: this.router.url },
     });
   }
 
   protected async generateJournal(row: VendorPayment): Promise<void> {
+    if (!this.permissions.can(PERMISSION.fiscalYear.journal.create)) return;
     if (!row.id || this.generatingJournalPaymentId() === row.id) return;
 
     this.generatingJournalPaymentId.set(row.id);
@@ -260,12 +276,14 @@ export class ListVendorPaymentComponent {
   }
 
   private searchVendors(query: string): void {
+    if (!this.permissions.can(PERMISSION.branch.vendor.view)) return;
     const q = query.trim();
 
     void this.vendorStore.loadVendors(q ? { where: { name: { ilike: `%${q}%` } } } : {});
   }
 
   private searchBankCash(query: string): void {
+    if (!this.permissions.can(PERMISSION.branch.bankCash.view)) return;
     const q = query.trim();
 
     void this.bankCashStore.loadBankCashes(q ? { where: { name: { ilike: `%${q}%` } } } : {});
@@ -287,6 +305,13 @@ export class ListVendorPaymentComponent {
         queryParams: { burl: this.router.url },
       });
     }
+  }
+
+  protected viewPayment(item: VendorPayment): void {
+    if (!item.id) return;
+    void this.router.navigate(['/app/trading/vendor-payment', item.id], {
+      queryParams: { burl: this.router.url },
+    });
   }
 
   protected deletePayment(item: VendorPayment): void {

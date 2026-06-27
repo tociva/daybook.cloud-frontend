@@ -9,6 +9,9 @@ import {
 } from '@tailng-ui/components';
 import type { TngTableColumn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
+import { CanDirective } from '../../../../../../core/permissions/can.directive';
+import { PERMISSION } from '../../../../../../core/permissions/permission-requirements';
+import { PermissionsStore } from '../../../../../../core/permissions/permissions.store';
 import {
   CrudFilterPopoverComponent,
   CrudListQueryService,
@@ -52,6 +55,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
   selector: 'app-list-sale-invoice',
   standalone: true,
   imports: [
+    CanDirective,
     PageHeadingComponent,
     BurlBackButtonComponent,
     TngButtonComponent,
@@ -72,6 +76,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 })
 export class ListSaleInvoiceComponent {
   private readonly router = inject(Router);
+  private readonly permissions = inject(PermissionsStore);
   private readonly dateManagement = inject(DateManagementService);
   private readonly journalService = inject(JournalService);
   private readonly reconciliationMatchService = inject(ReconciliationMatchService);
@@ -212,7 +217,9 @@ export class ListSaleInvoiceComponent {
   }
 
   constructor() {
-    void this.customerStore.loadCustomers({});
+    if (this.permissions.can(PERMISSION.branch.customer.view)) {
+      void this.customerStore.loadCustomers({});
+    }
     this.crudQuery.init((filter) => this.loadSaleInvoicesWithJournals(filter));
   }
 
@@ -234,6 +241,11 @@ export class ListSaleInvoiceComponent {
   }
 
   private async loadLinkedJournals(invoices: readonly SaleInvoice[]): Promise<void> {
+    if (!this.permissions.can(PERMISSION.fiscalYear.journal.view)) {
+      this.journalsByInvoiceId.set(new Map());
+      this.journalsLoading.set(false);
+      return;
+    }
     const ids = invoices.map((invoice) => invoice.id).filter((id): id is string => Boolean(id));
     if (!ids.length) {
       this.journalsByInvoiceId.set(new Map());
@@ -270,12 +282,14 @@ export class ListSaleInvoiceComponent {
   }
 
   protected viewJournal(journal: SaleInvoiceJournal): void {
+    if (!this.permissions.can(PERMISSION.fiscalYear.journal.view)) return;
     void this.router.navigate(['/app/accounting/journal', journal.id], {
       queryParams: { burl: this.router.url },
     });
   }
 
   protected async generateJournal(row: SaleInvoice): Promise<void> {
+    if (!this.permissions.can(PERMISSION.fiscalYear.journal.create)) return;
     if (!row.id || this.generatingJournalInvoiceId() === row.id) return;
 
     this.generatingJournalInvoiceId.set(row.id);
@@ -294,6 +308,7 @@ export class ListSaleInvoiceComponent {
   }
 
   private searchCustomers(query: string): void {
+    if (!this.permissions.can(PERMISSION.branch.customer.view)) return;
     const q = query.trim();
 
     void this.customerStore.loadCustomers(q ? { where: { name: { ilike: `%${q}%` } } } : {});
@@ -301,6 +316,7 @@ export class ListSaleInvoiceComponent {
 
   /** Navigate to new receipt pre-linked to this invoice. */
   protected createReceiptForInvoice(item: SaleInvoice): void {
+    if (!this.permissions.can(PERMISSION.branch.customerReceipt.create)) return;
     this.saleInvoiceStore.setSelectedItem(item);
     void this.router.navigate(['/app/trading/customer-receipt/create'], {
       queryParams: { saleinvoiceid: item.id, burl: this.router.url },
@@ -309,6 +325,7 @@ export class ListSaleInvoiceComponent {
 
   /** Navigate to all customer receipts linked to this invoice. */
   protected viewReceiptsForInvoice(item: SaleInvoice): void {
+    if (!this.permissions.can(PERMISSION.branch.customerReceipt.view)) return;
     if (item.id) {
       void this.router.navigate(['/app/trading/sale-invoice', item.id, 'receipts'], {
         queryParams: { burl: this.router.url },

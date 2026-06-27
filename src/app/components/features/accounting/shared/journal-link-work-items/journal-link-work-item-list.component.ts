@@ -67,7 +67,7 @@ export class JournalLinkWorkItemListComponent {
   });
 
   protected readonly canViewDashboard = computed(() =>
-    hasAccountingReportPermission(this.permissionsStore.all(), 'accountantDashboard'),
+    hasAccountingReportPermission(this.permissionsStore, 'accountantDashboard'),
   );
 
   protected readonly query = computed(() =>

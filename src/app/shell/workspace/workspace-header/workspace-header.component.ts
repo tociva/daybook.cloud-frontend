@@ -57,10 +57,11 @@ export class WorkspaceHeaderComponent {
   readonly activeBranchName = input('Not set');
   readonly activeFiscalYearName = input('Not set');
   readonly breadcrumbItems = input<readonly BreadcrumbItem[]>([
-    { label: 'Home', routerLink: '/app/dashboard' },
+    { label: 'Home', routerLink: '/app/profile' },
     { label: 'Workspace', current: true },
   ]);
   readonly currentPageTitle = input('Workspace');
+  readonly homeRoute = input('/app/profile');
   readonly organizations = input<readonly Organization[]>([]);
   readonly userDisplayName = input('Daybook User');
   readonly logoutRequested = output<void>();

@@ -26,6 +26,8 @@ import { FiscalYearDatepickerComponent } from '../../../../../../shared/fiscal-y
 import { FiscalYearDateRangeService } from '../../../../../../shared/fiscal-year-date-range-picker';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
+import { PERMISSION } from '../../../../../../core/permissions/permission-requirements';
+import { PermissionsStore } from '../../../../../../core/permissions/permissions.store';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
 import {
   formatAmountForCurrency,
@@ -99,6 +101,7 @@ export class PurchaseInvoicePaymentsPanelComponent {
 
   private readonly hostElement = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly router = inject(Router);
+  private readonly permissions = inject(PermissionsStore);
   private readonly dateManagement = inject(DateManagementService);
   private readonly toastStore = inject(ToastStore);
   private readonly vendorPaymentFacade = inject(VendorPaymentFacade);
@@ -135,7 +138,10 @@ export class PurchaseInvoicePaymentsPanelComponent {
     calculatePurchaseInvoiceOutstanding(this.invoice()),
   );
   protected readonly canAddPayment = computed(
-    () => Boolean(this.invoice()?.id) && this.outstandingBalance() > 0,
+    () =>
+      this.permissions.can(PERMISSION.branch.vendorPayment.create) &&
+      Boolean(this.invoice()?.id) &&
+      this.outstandingBalance() > 0,
   );
   protected readonly filteredBankCashes = computed<BankCash[]>(() =>
     this.withSelectedOption(
@@ -160,7 +166,9 @@ export class PurchaseInvoicePaymentsPanelComponent {
 
   constructor() {
     this.paymentDate.set(this.defaultPaymentDate());
-    void this.bankCashStore.loadBankCashes({});
+    if (this.permissions.can(PERMISSION.branch.bankCash.view)) {
+      void this.bankCashStore.loadBankCashes({});
+    }
 
     effect(() => {
       const id = this.invoiceId();
@@ -186,9 +194,9 @@ export class PurchaseInvoicePaymentsPanelComponent {
   }
 
   protected viewPayment(row: PurchaseInvoicePaymentRow): void {
-    if (!row.paymentId) return;
+    if (!row.paymentId || !this.permissions.can(PERMISSION.branch.vendorPayment.view)) return;
 
-    void this.router.navigate(['/app/trading/vendor-payment', row.paymentId, 'edit'], {
+    void this.router.navigate(['/app/trading/vendor-payment', row.paymentId], {
       queryParams: { burl: this.router.url },
     });
   }
@@ -219,6 +227,7 @@ export class PurchaseInvoicePaymentsPanelComponent {
   }
 
   protected onBankCashQueryChange(event: unknown): void {
+    if (!this.permissions.can(PERMISSION.branch.bankCash.view)) return;
     const query = typeof event === 'string' ? event.trim() : '';
     this.bankCashQuery.set(query);
     if (!query) {
@@ -249,6 +258,7 @@ export class PurchaseInvoicePaymentsPanelComponent {
   }
 
   protected async savePayment(): Promise<void> {
+    if (!this.permissions.can(PERMISSION.branch.vendorPayment.create)) return;
     this.vendorPaymentStore.clearError();
     this.submitted.set(true);
     if (this.addPaymentError() || this.savingPayment()) return;

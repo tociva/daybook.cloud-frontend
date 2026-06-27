@@ -12,6 +12,9 @@ import {
 } from '@tailng-ui/components';
 import type { TngTableColumn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
+import { CanDirective } from '../../../../../../core/permissions/can.directive';
+import { PERMISSION } from '../../../../../../core/permissions/permission-requirements';
+import { PermissionsStore } from '../../../../../../core/permissions/permissions.store';
 import { TngMenuItem } from '@tailng-ui/primitives';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import {
@@ -49,6 +52,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
   selector: 'app-list-bank-txn',
   standalone: true,
   imports: [
+    CanDirective,
     PageHeadingComponent,
     BurlBackButtonComponent,
     TngButtonComponent,
@@ -74,6 +78,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 })
 export class ListBankTxnComponent {
   private readonly router = inject(Router);
+  private readonly permissions = inject(PermissionsStore);
   private readonly dateManagement = inject(DateManagementService);
   private readonly reconciliationMatchService = inject(ReconciliationMatchService);
   protected readonly crudQuery = inject(CrudListQueryService);
@@ -83,6 +88,13 @@ export class ListBankTxnComponent {
   private readonly bankTxnService = inject(BankTxnService);
   private readonly journalDraftStaging = inject(JournalCreateDraftStagingService);
   protected readonly hasError = computed(() => this.bankTxnStore.error() !== null);
+  protected readonly canAssignJournal = computed(() =>
+    this.permissions.can(PERMISSION.fiscalYear.bankTxnReconciliation.create) &&
+    (
+      this.permissions.can(PERMISSION.fiscalYear.journal.create) ||
+      this.permissions.can(PERMISSION.fiscalYear.journal.view)
+    ),
+  );
   protected readonly filterClearQueryParams = JOURNAL_LINK_STATUS_FILTER_CLEAR_QUERY_PARAMS;
   private readonly unfilteredTotalCounter = createCrudUnfilteredTotalCounter((query) =>
     this.bankTxnService.count(query),
@@ -318,6 +330,11 @@ export class ListBankTxnComponent {
   }
 
   private async loadLinkedJournals(txns: readonly BankTxn[]): Promise<void> {
+    if (!this.permissions.can(PERMISSION.fiscalYear.journal.view)) {
+      this.journalsByBankTxnId.set(new Map());
+      this.journalsLoading.set(false);
+      return;
+    }
     const ids = txns.map((txn) => txn.id).filter((id): id is string => Boolean(id));
     if (!ids.length) {
       this.journalsByBankTxnId.set(new Map());
@@ -416,7 +433,7 @@ export class ListBankTxnComponent {
   }
 
   protected assignJournal(item: BankTxn): void {
-    if (!item.id) return;
+    if (!item.id || !this.canAssignJournal()) return;
 
     this.journalDialogBankTxn.set(item);
     this.journalDialogOpen.set(true);
@@ -458,6 +475,7 @@ export class ListBankTxnComponent {
   }
 
   protected viewJournal(journal: BankTxnJournal): void {
+    if (!this.permissions.can(PERMISSION.fiscalYear.journal.view)) return;
     void this.router.navigate(['/app/accounting/journal', journal.id], {
       queryParams: { burl: this.router.url },
     });

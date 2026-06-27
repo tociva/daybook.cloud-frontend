@@ -13,7 +13,7 @@
       syncUrl
     />
 
-    <tng-button type="button" appearance="outline" tone="neutral" (click)="openLedgers()">
+    <tng-button *appCan="'fiscalYear:ledger:view'" type="button" appearance="outline" tone="neutral" (click)="openLedgers()">
       <tng-icon icon="book-open" aria-hidden="true" />
       Ledgers
     </tng-button>
@@ -23,7 +23,7 @@
       (uploaded)="reloadLedgerCategories()"
     />
 
-    <tng-button type="button" appearance="solid" tone="primary" (click)="createLedgerCategory()">
+    <tng-button *appCan="'fiscalYear:ledgerCategory:create'" type="button" appearance="solid" tone="primary" (click)="createLedgerCategory()">
       <tng-icon icon="plus" aria-hidden="true" />
       New category
     </tng-button>
@@ -52,7 +52,7 @@
             title="No ledger categories yet"
             description="Get started by creating your first ledger category."
           >
-            <tng-button type="button" appearance="solid" tone="primary" (click)="createLedgerCategory()">
+            <tng-button *appCan="'fiscalYear:ledgerCategory:create'" type="button" appearance="solid" tone="primary" (click)="createLedgerCategory()">
               <tng-icon icon="plus" aria-hidden="true" />
               New category
             </tng-button>

@@ -9,7 +9,7 @@
         [collapsible]="true"
         ariaLabel="Workspace navigation groups"
       >
-        @for (node of menuList; track node.path) {
+        @for (node of menuList(); track node.path) {
           @if (node.children; as children) {
             <tng-accordion-item [value]="node.path">
               <tng-accordion-trigger>

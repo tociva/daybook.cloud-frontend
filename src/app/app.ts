@@ -5,6 +5,7 @@ import { TngToastComponent } from '@tailng-ui/components';
 import { filter } from 'rxjs';
 import { AuthService } from './components/features/auth/data/auth.service';
 import { ProgressStore } from './core/progress/progress.store';
+import { PermissionsStore } from './core/permissions/permissions.store';
 import { AppSystemStore } from './core/system/app-system.store';
 import { AppToastTone } from './core/toast/toast.model';
 import { ToastStore } from './core/toast/toast.store';
@@ -23,6 +24,7 @@ export class App {
   private readonly router = inject(Router);
   private readonly toastStore = inject(ToastStore);
   private readonly progressStore = inject(ProgressStore);
+  private readonly permissions = inject(PermissionsStore);
   private readonly currentUrl = signal(this.router.url);
   protected readonly toast = viewChild<TngToastComponent>('toast');
   private readonly startupStatus = computed(() => this.systemStore.startupStatus());
@@ -63,10 +65,8 @@ export class App {
       }
 
       // Session is fully loaded but user landed on '/' (e.g. burl fallback with no stored URL).
-      // The landing shell has no handler for 'user-session-ready', so redirect to dashboard
-      // to avoid the user being stuck on the wordmark screen indefinitely.
       if (status === 'user-session-ready' && (path === '' || path === '/')) {
-        void this.router.navigateByUrl('/app/dashboard');
+        void this.router.navigateByUrl(this.permissions.firstAllowedWorkspaceRoute());
       }
     });
 

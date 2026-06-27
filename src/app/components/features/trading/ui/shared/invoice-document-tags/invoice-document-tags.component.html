@@ -4,7 +4,7 @@
     class="document-tags__input"
     type="file"
     multiple
-    [disabled]="isDisabled()"
+    [disabled]="isDisabled() || !canAttach()"
     (change)="onBrowse($event)"
   />
 }
@@ -12,11 +12,11 @@
 @if (hasAttachments()) {
   <div
     class="document-tags"
-    [class.document-tags--clickable]="editable()"
-    [class.document-tags--disabled]="isDisabled()"
+    [class.document-tags--clickable]="editable() && canAttach()"
+    [class.document-tags--disabled]="isDisabled() || !canAttach()"
     aria-label="Attachments"
-    [attr.role]="editable() ? 'button' : null"
-    [attr.tabindex]="editable() && !isDisabled() ? 0 : null"
+    [attr.role]="editable() && canAttach() ? 'button' : null"
+    [attr.tabindex]="editable() && canAttach() && !isDisabled() ? 0 : null"
     (click)="browse()"
     (keydown)="onPanelKeydown($event)"
   >
@@ -38,7 +38,7 @@
           <tng-icon icon="paperclip" aria-hidden="true" />
           <span class="document-chip__name">{{ document.name }}</span>
           <span class="document-chip__size">{{ formatFileSize(document.size) }}</span>
-          @if (editable()) {
+          @if (editable() && canDelete()) {
             <button
               type="button"
               class="document-chip__remove"
@@ -77,7 +77,7 @@
           <tng-icon icon="paperclip" aria-hidden="true" />
           <span class="document-chip__name">{{ file.name }}</span>
           <span class="document-chip__size">{{ formatFileSize(file.size) }}</span>
-          @if (editable()) {
+          @if (editable() && canAttach()) {
             <button
               type="button"
               class="document-chip__remove"

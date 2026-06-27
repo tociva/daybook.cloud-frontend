@@ -26,7 +26,7 @@ export class BurlBackButtonComponent {
 
   readonly appearance = input<BurlBackButtonAppearance>('outline');
   readonly escapeEnabled = input(true);
-  readonly fallbackUrl = input('/app/dashboard');
+  readonly fallbackUrl = input<string | undefined>(undefined);
   readonly label = input('Back');
   readonly tone = input<BurlBackButtonTone>('neutral');
 

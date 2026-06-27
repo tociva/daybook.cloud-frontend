@@ -11,7 +11,8 @@ import {
 import { TngIcon } from '@tailng-ui/icons';
 import { filter } from 'rxjs';
 import { isAccountingReportsSectionRoute } from '../../../components/features/accounting/ui/reports/shared/accounting-reports-nav.model';
-import { MenuNode, workspaceSidebarMenu } from '../workspace-nav.model';
+import { PermissionsStore } from '../../../core/permissions/permissions.store';
+import { filterWorkspaceSidebarMenu, MenuNode } from '../workspace-nav.model';
 
 const groupSubtitleByPath: Readonly<Record<string, string>> = {
   trading: 'Sales and purchase operations',
@@ -36,11 +37,14 @@ const groupSubtitleByPath: Readonly<Record<string, string>> = {
 })
 export class WorkspaceSidebarComponent {
   private readonly router = inject(Router);
+  private readonly permissions = inject(PermissionsStore);
   private readonly currentUrl = signal(this.router.url);
 
-  protected readonly menuList = workspaceSidebarMenu;
+  protected readonly menuList = computed<readonly MenuNode[]>(() =>
+    filterWorkspaceSidebarMenu((permission) => this.permissions.can(permission)),
+  );
   protected readonly defaultExpandedGroups = computed(() =>
-    this.menuList.filter((node) => node.children?.length).map((node) => node.path),
+    this.menuList().filter((node) => node.children?.length).map((node) => node.path),
   );
 
   /**
@@ -51,7 +55,7 @@ export class WorkspaceSidebarComponent {
   protected readonly activeGroupPaths = computed(() => {
     const map = new Map<string, string | null>();
 
-    for (const group of this.menuList) {
+    for (const group of this.menuList()) {
       map.set(group.path, this.getActiveGroupPath(group));
     }
 

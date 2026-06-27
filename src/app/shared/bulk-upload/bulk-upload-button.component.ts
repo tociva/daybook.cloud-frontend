@@ -20,6 +20,8 @@ import {
 } from '@tailng-ui/primitives';
 import { getApiErrorMessage } from '../../core/api/api-error.util';
 import { ToastStore } from '../../core/toast/toast.store';
+import { permissionForBulkUploadEndpoint } from '../../core/permissions/permission-requirements';
+import { PermissionsStore } from '../../core/permissions/permissions.store';
 import type {
   BulkUploadPayload,
   BulkUploadPreviewDetail,
@@ -1123,6 +1125,7 @@ function safeFileName(value: string): string {
 export class BulkUploadButtonComponent {
   private readonly bulkUploadService = inject(BulkUploadService);
   private readonly toastStore = inject(ToastStore);
+  private readonly permissions = inject(PermissionsStore);
 
   readonly accept = input(DEFAULT_ACCEPT);
   readonly disabled = input(false);
@@ -1140,8 +1143,12 @@ export class BulkUploadButtonComponent {
   protected readonly formatErrors = signal<readonly string[]>([]);
   protected readonly pendingUpload = signal<BulkUploadPreview | null>(null);
   protected readonly isDisabled = computed(
-    () => this.disabled() || this.isUploading() || this.isValidating(),
+    () => !this.isAllowed() || this.disabled() || this.isUploading() || this.isValidating(),
   );
+  protected readonly isAllowed = computed(() => {
+    const requirement = permissionForBulkUploadEndpoint(this.endpoint());
+    return requirement ? this.permissions.can(requirement) : false;
+  });
   protected readonly uploadLabel = computed(() => {
     if (this.isUploading()) return 'Uploading...';
     if (this.isValidating()) return 'Validating...';
@@ -1194,7 +1201,7 @@ export class BulkUploadButtonComponent {
   }
 
   private async uploadFile(file: File): Promise<void> {
-    if (this.disabled() || this.isUploading() || this.isValidating()) return;
+    if (!this.isAllowed() || this.disabled() || this.isUploading() || this.isValidating()) return;
 
     this.clearFormatError();
 
@@ -1276,7 +1283,7 @@ export class BulkUploadButtonComponent {
 
   protected async confirmUpload(): Promise<void> {
     const pending = this.pendingUpload();
-    if (!pending || this.isUploading()) return;
+    if (!this.isAllowed() || !pending || this.isUploading()) return;
 
     this.isUploading.set(true);
     try {

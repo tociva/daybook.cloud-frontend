@@ -22,6 +22,8 @@ import {
 } from '@tailng-ui/components';
 import { TngTab, TngTabList, TngTabPanel } from '@tailng-ui/primitives';
 import { TngIcon } from '@tailng-ui/icons';
+import { PERMISSION } from '../../../../../../../core/permissions/permission-requirements';
+import { PermissionsStore } from '../../../../../../../core/permissions/permissions.store';
 import {
   ReconciliationMatchFacade,
   ReconciliationMatchService,
@@ -77,6 +79,7 @@ export class JournalAssignDialogComponent {
   protected readonly createDialogHeight = 'calc(100vh - 2rem)';
 
   private readonly reconciliationMatchFacade = inject(ReconciliationMatchFacade);
+  private readonly permissions = inject(PermissionsStore);
   private readonly reconciliationMatchService = inject(ReconciliationMatchService);
   private readonly journalService = inject(JournalService);
   private readonly inventoryLedgerMapStore = inject(InventoryLedgerMapStore);
@@ -107,6 +110,20 @@ export class JournalAssignDialogComponent {
   );
 
   protected readonly isCreateMode = computed(() => this.mode() === 'create');
+  protected readonly canCreateMode = computed(() =>
+    this.permissions.can(PERMISSION.fiscalYear.bankTxnReconciliation.create) &&
+    this.permissions.can(PERMISSION.fiscalYear.journal.create),
+  );
+  protected readonly canSelectMode = computed(() =>
+    this.permissions.can(PERMISSION.fiscalYear.bankTxnReconciliation.create) &&
+    this.permissions.can(PERMISSION.fiscalYear.journal.view),
+  );
+  protected readonly canViewAssignments = computed(() =>
+    this.permissions.can(PERMISSION.fiscalYear.journal.view),
+  );
+  protected readonly canUnassign = computed(() =>
+    this.permissions.can(PERMISSION.fiscalYear.bankTxnReconciliation.delete),
+  );
 
   protected readonly dialogDescription = computed(() => {
     if (this.isFullyReconciled()) return null;
@@ -205,7 +222,7 @@ export class JournalAssignDialogComponent {
       if (!isOpen || !txn) return;
 
       untracked(() => {
-        this.mode.set('create');
+        this.mode.set(this.canCreateMode() ? 'create' : 'select');
         this.existingAssignments.set([]);
         this.existingAssignmentsLoading.set(false);
         this.unassigningJournalId.set(null);
@@ -228,6 +245,9 @@ export class JournalAssignDialogComponent {
 
   protected onModeChange(value: unknown): void {
     const next = value === 'create' ? 'create' : 'select';
+    if ((next === 'create' && !this.canCreateMode()) || (next === 'select' && !this.canSelectMode())) {
+      return;
+    }
     this.mode.set(next);
     this.bankTxnStore.clearError();
     this.reconciliationMatchFacade.clearError();
@@ -242,7 +262,7 @@ export class JournalAssignDialogComponent {
   protected async onUnassign(journalId: string): Promise<void> {
     const txn = this.bankTxn();
     const bankTxnId = txn?.id;
-    if (!bankTxnId || this.isSaving()) return;
+    if (!bankTxnId || !this.canUnassign() || this.isSaving()) return;
 
     this.unassigningJournalId.set(journalId);
     this.reconciliationMatchFacade.clearError();
@@ -262,14 +282,21 @@ export class JournalAssignDialogComponent {
   }
 
   protected async onAssignSelected(): Promise<void> {
+    if (!this.canSelectMode()) return;
     await this.selectPanel()?.assign();
   }
 
   protected async onCreateJournal(): Promise<void> {
+    if (!this.canCreateMode()) return;
     await this.createPanel()?.create();
   }
 
   private async loadExistingAssignments(txn: BankTxn): Promise<void> {
+    if (!this.canViewAssignments()) {
+      this.existingAssignments.set([]);
+      this.existingAssignmentsLoading.set(false);
+      return;
+    }
     if (!txn.id) {
       this.existingAssignments.set([]);
       this.existingAssignmentsLoading.set(false);

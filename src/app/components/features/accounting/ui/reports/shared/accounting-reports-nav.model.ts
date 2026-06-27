@@ -50,14 +50,6 @@ export const accountingReportsNavItems: readonly AccountingReportNavItem[] = [
     icon: 'layers',
     permissionScope: 'ledgerCategoryReport',
   },
-  {
-    slug: 'daybook',
-    label: 'Daybook',
-    route: '/app/accounting/daybook',
-    description: 'Review daily accounting transactions',
-    icon: 'calendar',
-    permissionScope: 'dayBook',
-  },
 ];
 
 export function findAccountingReportBySlug(slug: string): AccountingReportNavItem | undefined {

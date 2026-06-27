@@ -9,6 +9,9 @@ import {
 } from '@tailng-ui/components';
 import type { TngTableColumn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
+import { CanDirective } from '../../../../../../core/permissions/can.directive';
+import { PERMISSION } from '../../../../../../core/permissions/permission-requirements';
+import { PermissionsStore } from '../../../../../../core/permissions/permissions.store';
 import {
   CrudFilterPopoverComponent,
   CrudListQueryService,
@@ -45,6 +48,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
   selector: 'app-list-customer-receipt',
   standalone: true,
   imports: [
+    CanDirective,
     PageHeadingComponent,
     BurlBackButtonComponent,
     TngButtonComponent,
@@ -65,6 +69,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 })
 export class ListCustomerReceiptComponent {
   private readonly router = inject(Router);
+  private readonly permissions = inject(PermissionsStore);
   private readonly dateManagement = inject(DateManagementService);
   private readonly journalService = inject(JournalService);
   private readonly reconciliationMatchService = inject(ReconciliationMatchService);
@@ -174,8 +179,12 @@ export class ListCustomerReceiptComponent {
   protected readonly formatAmountWithCurrency = formatAmountWithCurrency;
 
   constructor() {
-    void this.customerStore.loadCustomers({});
-    void this.bankCashStore.loadBankCashes({});
+    if (this.permissions.can(PERMISSION.branch.customer.view)) {
+      void this.customerStore.loadCustomers({});
+    }
+    if (this.permissions.can(PERMISSION.branch.bankCash.view)) {
+      void this.bankCashStore.loadBankCashes({});
+    }
     this.crudQuery.init((filter) => this.loadCustomerReceiptsWithJournals(filter));
   }
 
@@ -196,6 +205,11 @@ export class ListCustomerReceiptComponent {
   }
 
   private async loadLinkedJournals(receipts: readonly CustomerReceipt[]): Promise<void> {
+    if (!this.permissions.can(PERMISSION.fiscalYear.journal.view)) {
+      this.journalsByReceiptId.set(new Map());
+      this.journalsLoading.set(false);
+      return;
+    }
     const ids = receipts.map((receipt) => receipt.id).filter((id): id is string => Boolean(id));
     if (!ids.length) {
       this.journalsByReceiptId.set(new Map());
@@ -232,12 +246,14 @@ export class ListCustomerReceiptComponent {
   }
 
   protected viewJournal(journal: CustomerReceiptJournal): void {
+    if (!this.permissions.can(PERMISSION.fiscalYear.journal.view)) return;
     void this.router.navigate(['/app/accounting/journal', journal.id], {
       queryParams: { burl: this.router.url },
     });
   }
 
   protected async generateJournal(row: CustomerReceipt): Promise<void> {
+    if (!this.permissions.can(PERMISSION.fiscalYear.journal.create)) return;
     if (!row.id || this.generatingJournalReceiptId() === row.id) return;
 
     this.generatingJournalReceiptId.set(row.id);
@@ -256,12 +272,14 @@ export class ListCustomerReceiptComponent {
   }
 
   private searchCustomers(query: string): void {
+    if (!this.permissions.can(PERMISSION.branch.customer.view)) return;
     const q = query.trim();
 
     void this.customerStore.loadCustomers(q ? { where: { name: { ilike: `%${q}%` } } } : {});
   }
 
   private searchBankCash(query: string): void {
+    if (!this.permissions.can(PERMISSION.branch.bankCash.view)) return;
     const q = query.trim();
 
     void this.bankCashStore.loadBankCashes(q ? { where: { name: { ilike: `%${q}%` } } } : {});

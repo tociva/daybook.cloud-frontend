@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
+import { PermissionsStore } from '../../../../../../core/permissions/permissions.store';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
 import { FiscalYearDatepickerComponent } from '../../../../../../shared/fiscal-year-datepicker';
 import { FiscalYearDateRangeService } from '../../../../../../shared/fiscal-year-date-range-picker';
@@ -122,6 +123,7 @@ async function setup(options: SetupOptions = {}) {
     imports: [PurchaseInvoicePaymentsPanelComponent],
     providers: [
       provideRouter([]),
+      { provide: PermissionsStore, useValue: { can: vi.fn(() => true) } },
       {
         provide: BankCashStore,
         useValue: {

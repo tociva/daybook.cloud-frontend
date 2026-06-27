@@ -11,6 +11,8 @@ import {
   viewChild,
 } from '@angular/core';
 import { BankTxnFacade } from '../../../../data/bank-txn';
+import { PERMISSION } from '../../../../../../../core/permissions/permission-requirements';
+import { PermissionsStore } from '../../../../../../../core/permissions/permissions.store';
 import type { BankTxn } from '../../../../data/bank-txn';
 import { JournalCreateDraftStagingService } from '../../../journal/create-journal/journal-create-draft-staging.service';
 import { JournalCreateFormComponent } from '../../../journal/create-journal/journal-create-form/journal-create-form.component';
@@ -26,6 +28,7 @@ import { formatAmount, formatAmountForInput, parseMatchedAmount } from '../share
 })
 export class JournalAssignCreateComponent {
   private readonly bankTxnFacade = inject(BankTxnFacade);
+  private readonly permissions = inject(PermissionsStore);
   private readonly journalDraftStaging = inject(JournalCreateDraftStagingService);
 
   private readonly journalForm = viewChild(JournalCreateFormComponent);
@@ -105,6 +108,10 @@ export class JournalAssignCreateComponent {
   }
 
   async create(): Promise<void> {
+    if (
+      !this.permissions.can(PERMISSION.fiscalYear.journal.create) ||
+      !this.permissions.can(PERMISSION.fiscalYear.bankTxnReconciliation.create)
+    ) return;
     this.submitted.set(true);
     if (this.matchedAmountError()) return;
 

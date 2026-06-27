@@ -68,6 +68,7 @@
       </ng-template>
 
       <ng-template tngTableCellTemplate="actions" let-row="row">
+        @if (canUnassign()) {
         <div class="journal-cell actions-cell">
           <app-table-row-icon-button
             icon="link2Off"
@@ -77,11 +78,13 @@
             (action)="openUnassignConfirm(row.journal.id)"
           />
         </div>
+        }
       </ng-template>
     </tng-table>
   </section>
 }
 
+@if (canUnassign()) {
 <tng-dialog
   title="Un-assign journal"
   size="md"
@@ -119,3 +122,4 @@
     </tng-button>
   </div>
 </tng-dialog>
+}

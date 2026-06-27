@@ -19,6 +19,10 @@ import {
 } from '@tailng-ui/components';
 import type { TngTableColumn, TngTableRowClassFn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
+import { CanDirective } from '../../../../../../core/permissions/can.directive';
+import { PERMISSION } from '../../../../../../core/permissions/permission-requirements';
+import type { PermissionRequirement } from '../../../../../../core/permissions/permissions.model';
+import { PermissionsStore } from '../../../../../../core/permissions/permissions.store';
 import { TngMenuItem } from '@tailng-ui/primitives';
 import {
   CrudFilterPopoverComponent,
@@ -163,6 +167,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
   selector: 'app-list-journal',
   standalone: true,
   imports: [
+    CanDirective,
     PageHeadingComponent,
     BurlBackButtonComponent,
     TngButtonComponent,
@@ -188,6 +193,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 })
 export class ListJournalComponent {
   private readonly router = inject(Router);
+  private readonly permissions = inject(PermissionsStore);
   protected readonly crudQuery = inject(CrudListQueryService);
   private readonly journalService = inject(JournalService);
   protected readonly journalStore = inject(JournalStore);
@@ -215,6 +221,11 @@ export class ListJournalComponent {
     const source = this.journalImportSource();
     return source ? JOURNAL_IMPORT_CONFIG[source] : null;
   });
+  protected readonly canImportAnySource = computed(() =>
+    (Object.keys(JOURNAL_IMPORT_CONFIG) as JournalImportSource[]).some((source) =>
+      this.canImportSource(source),
+    ),
+  );
 
   /** Local map of ledger id → name, populated after each journal page load. */
   private readonly ledgerNames = signal(new Map<string, string>());
@@ -342,6 +353,7 @@ export class ListJournalComponent {
     // which would warm the full ledger catalog on first use and slow page load.
     effect(() => {
       const items = this.journalStore.items();
+      if (!this.permissions.can(PERMISSION.fiscalYear.ledger.view)) return;
       if (!items.length) return;
       const ids = this.collectLedgerIds(items);
       if (!ids.length) return;
@@ -366,6 +378,11 @@ export class ListJournalComponent {
 
   private async fetchSourceMatches(journalIds: readonly string[]): Promise<void> {
     const fetchVersion = ++this.sourceMatchFetchVersion;
+
+    if (!this.permissions.canAny(this.reconciliationDeletePermissions())) {
+      this.sourceMatchByJournalId.set(new Map());
+      return;
+    }
 
     try {
       const matches = await this.reconciliationMatchService.findByJournalIds(journalIds);
@@ -579,6 +596,7 @@ export class ListJournalComponent {
   }
 
   protected async openJournalImportDialog(source: JournalImportSource): Promise<void> {
+    if (!this.canImportSource(source)) return;
     this.journalImportSource.set(source);
     await this.loadJournalImportCandidates();
   }
@@ -592,7 +610,7 @@ export class ListJournalComponent {
     const source = this.journalImportSource();
     const ids = this.journalImportCandidates().map((item) => item.id);
 
-    if (!source || !ids.length || this.journalImportGenerating()) return;
+    if (!source || !this.canImportSource(source) || !ids.length || this.journalImportGenerating()) return;
 
     this.journalImportGenerating.set(true);
     this.journalImportError.set(null);
@@ -863,7 +881,8 @@ export class ListJournalComponent {
   }
 
   protected canUnlink(journal: Journal): boolean {
-    return this.sourceMatchByJournalId().has(journal.id);
+    const match = this.sourceMatchByJournalId().get(journal.id);
+    return !!match && this.permissions.can(this.reconciliationDeletePermission(match.sourcetype));
   }
 
   protected unlinkSourceTypeLabel(journal: Journal): string {
@@ -903,6 +922,48 @@ export class ListJournalComponent {
       }
     } finally {
       this.unlinkingJournalId.set(null);
+    }
+  }
+
+  protected canImportSource(source: JournalImportSource): boolean {
+    return (
+      this.permissions.can(PERMISSION.fiscalYear.journal.create) &&
+      this.permissions.can(this.importSourceViewPermission(source))
+    );
+  }
+
+  private importSourceViewPermission(source: JournalImportSource): PermissionRequirement {
+    switch (source) {
+      case 'saleInvoice': return PERMISSION.branch.saleInvoice.view;
+      case 'purchaseInvoice': return PERMISSION.branch.purchaseInvoice.view;
+      case 'customerReceipt': return PERMISSION.branch.customerReceipt.view;
+      case 'vendorPayment': return PERMISSION.branch.vendorPayment.view;
+      case 'contraTransaction': return PERMISSION.branch.contraTransaction.view;
+    }
+  }
+
+  private reconciliationDeletePermissions(): readonly PermissionRequirement[] {
+    return [
+      PERMISSION.fiscalYear.bankTxnReconciliation.delete,
+      PERMISSION.fiscalYear.saleInvoiceReconciliation.delete,
+      PERMISSION.fiscalYear.purchaseInvoiceReconciliation.delete,
+      PERMISSION.fiscalYear.customerReceiptReconciliation.delete,
+      PERMISSION.fiscalYear.vendorPaymentReconciliation.delete,
+      PERMISSION.fiscalYear.contraTransactionReconciliation.delete,
+    ];
+  }
+
+  private reconciliationDeletePermission(
+    sourceType: JournalSourceType,
+  ): PermissionRequirement {
+    switch (sourceType) {
+      case JournalSourceType.BANK_TXN: return PERMISSION.fiscalYear.bankTxnReconciliation.delete;
+      case JournalSourceType.SALE_INVOICE: return PERMISSION.fiscalYear.saleInvoiceReconciliation.delete;
+      case JournalSourceType.PURCHASE_INVOICE: return PERMISSION.fiscalYear.purchaseInvoiceReconciliation.delete;
+      case JournalSourceType.RECEIPT: return PERMISSION.fiscalYear.customerReceiptReconciliation.delete;
+      case JournalSourceType.PAYMENT: return PERMISSION.fiscalYear.vendorPaymentReconciliation.delete;
+      case JournalSourceType.CONTRA_TRANSACTION: return PERMISSION.fiscalYear.contraTransactionReconciliation.delete;
+      default: return { level: 'fiscalYear', resource: '__unsupported__', action: 'delete' };
     }
   }
 

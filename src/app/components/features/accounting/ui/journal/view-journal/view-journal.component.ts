@@ -16,6 +16,8 @@ import { BurlDeleteButtonComponent } from '../../../../../../shared/burl-delete-
 import { BurlEditButtonComponent } from '../../../../../../shared/burl-edit-button/burl-edit-button.component';
 import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
+import { PERMISSION } from '../../../../../../core/permissions/permission-requirements';
+import { PermissionsStore } from '../../../../../../core/permissions/permissions.store';
 import { JournalStore } from '../../../data/journal';
 import type { JournalEntry } from '../../../data/journal';
 import { LedgerStore } from '../../../data/ledger';
@@ -46,6 +48,7 @@ import { JournalCreateDraftStagingService } from '../create-journal/journal-crea
 export class ViewJournalComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly permissions = inject(PermissionsStore);
   private readonly burlNavigation = inject(BurlNavigationService);
   private readonly draftStaging = inject(JournalCreateDraftStagingService);
   protected readonly journalStore = inject(JournalStore);
@@ -54,7 +57,11 @@ export class ViewJournalComponent {
 
   protected readonly canClone = computed(() => {
     const journal = this.journalStore.selectedItem();
-    return !this.journalStore.isLoading() && (journal?.entries?.length ?? 0) > 0;
+    return (
+      this.permissions.can(PERMISSION.fiscalYear.journal.create) &&
+      !this.journalStore.isLoading() &&
+      (journal?.entries?.length ?? 0) > 0
+    );
   });
 
   protected readonly ledgerById = computed(() => {
@@ -81,7 +88,7 @@ export class ViewJournalComponent {
 
     const journal = this.journalStore.selectedItem();
     const ids = [...new Set((journal?.entries ?? []).map((e) => e.ledgerid).filter(Boolean))];
-    if (ids.length > 0) {
+    if (ids.length > 0 && this.permissions.can(PERMISSION.fiscalYear.ledger.view)) {
       await this.ledgerStore.loadLedgers({
         where: { id: { inq: ids } },
         limit: Math.max(ids.length, 10),
@@ -114,6 +121,7 @@ export class ViewJournalComponent {
   }
 
   protected async clone(): Promise<void> {
+    if (!this.permissions.can(PERMISSION.fiscalYear.journal.create)) return;
     const journal = this.journalStore.selectedItem();
     if (!journal?.entries?.length) return;
 

@@ -42,7 +42,9 @@ export type OrganizationScopePermissions = Readonly<{
 }>;
 
 export type OrganizationMemberPermissionTree = Readonly<{
+  organization?: PermissionFlags;
   organizations: Readonly<Record<string, OrganizationScopePermissions>>;
+  userSubscription?: PermissionFlags;
 }>;
 
 export type SparsePermissionNode = {
@@ -50,5 +52,7 @@ export type SparsePermissionNode = {
 };
 
 export type SparseOrganizationMemberPermissionTree = Readonly<{
-  organizations: SparsePermissionNode;
+  organization?: SparsePermissionNode;
+  organizations?: SparsePermissionNode;
+  userSubscription?: SparsePermissionNode;
 }>;

@@ -83,10 +83,12 @@
               @if (!row.booksInvoice) {
                 <span class="invoice-cell invoice-cell--missing-state">
                   <strong>Book invoice not exist</strong>
-                  <button type="button" class="create-vendor-link" (click)="createBookInvoice(row, group)">
-                    <tng-icon icon="plus" aria-hidden="true" />
-                    {{ createBookInvoiceLabel() }}
-                  </button>
+                  @if (canCreateBookInvoice()) {
+                    <button type="button" class="create-vendor-link" (click)="createBookInvoice(row, group)">
+                      <tng-icon icon="plus" aria-hidden="true" />
+                      {{ createBookInvoiceLabel() }}
+                    </button>
+                  }
                 </span>
               } @else {
                 <span class="invoice-cell">

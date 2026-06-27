@@ -1,5 +1,7 @@
 import { computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { PERMISSION } from '../../../../../../../core/permissions/permission-requirements';
+import { PermissionsStore } from '../../../../../../../core/permissions/permissions.store';
 import { UserSessionStore } from '../../../../../management/data/user-session/user-session.store';
 import {
   GstReconciliationStore,
@@ -13,6 +15,7 @@ import {
 
 export abstract class GstReconciliationReturnBase {
   protected readonly router = inject(Router);
+  protected readonly permissions = inject(PermissionsStore);
   protected readonly sessionStore = inject(UserSessionStore);
   protected readonly store = inject(GstReconciliationStore);
 
@@ -37,7 +40,11 @@ export abstract class GstReconciliationReturnBase {
   }
 
   protected async refreshMonth(cell: GstReconciliationMonthCell): Promise<void> {
-    if (this.store.isBusy() || this.refreshingCell()) return;
+    if (
+      !this.permissions.can(PERMISSION.fiscalYear.gstReconciliation.bulkUpload) ||
+      this.store.isBusy() ||
+      this.refreshingCell()
+    ) return;
 
     const key = gstReconciliationMonthDifferenceKey(cell);
     this.refreshingCell.set(key);

@@ -19,7 +19,7 @@
       (uploaded)="reloadCustomers()"
     />
 
-    <tng-button type="button" appearance="solid" tone="primary" (click)="createCustomer()">
+    <tng-button *appCan="'branch:customer:create'" type="button" appearance="solid" tone="primary" (click)="createCustomer()">
       <tng-icon icon="plus" aria-hidden="true" />
       New customer
     </tng-button>
@@ -48,7 +48,7 @@
             title="No customers yet"
             description="Get started by adding your first customer."
           >
-            <tng-button type="button" appearance="solid" tone="primary" (click)="createCustomer()">
+            <tng-button *appCan="'branch:customer:create'" type="button" appearance="solid" tone="primary" (click)="createCustomer()">
               <tng-icon icon="plus" aria-hidden="true" />
               New customer
             </tng-button>

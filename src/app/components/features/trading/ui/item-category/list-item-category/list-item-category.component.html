@@ -13,7 +13,7 @@
       syncUrl
     />
 
-    <tng-button type="button" appearance="outline" tone="neutral" (click)="openItems()">
+    <tng-button *appCan="'branch:item:view'" type="button" appearance="outline" tone="neutral" (click)="openItems()">
       <tng-icon icon="package" aria-hidden="true" />
       Items
     </tng-button>
@@ -24,7 +24,7 @@
       (uploaded)="reloadItemCategories()"
     />
 
-    <tng-button type="button" appearance="solid" tone="primary" (click)="createItemCategory()">
+    <tng-button *appCan="'branch:itemCategory:create'" type="button" appearance="solid" tone="primary" (click)="createItemCategory()">
       <tng-icon icon="plus" aria-hidden="true" />
       New category
     </tng-button>
@@ -53,7 +53,7 @@
             title="No item categories yet"
             description="Get started by creating your first item category."
           >
-            <tng-button type="button" appearance="solid" tone="primary" (click)="createItemCategory()">
+            <tng-button *appCan="'branch:itemCategory:create'" type="button" appearance="solid" tone="primary" (click)="createItemCategory()">
               <tng-icon icon="plus" aria-hidden="true" />
               New category
             </tng-button>

@@ -13,7 +13,7 @@
       syncUrl
     />
 
-    <tng-button type="button" appearance="solid" tone="primary" (click)="createFiscalYear()">
+    <tng-button *appCan="'branch:fiscalYear:create'" type="button" appearance="solid" tone="primary" (click)="createFiscalYear()">
       <tng-icon icon="plus" aria-hidden="true" />
       New fiscal year
     </tng-button>
@@ -42,7 +42,7 @@
             title="No fiscal years yet"
             description="Get started by creating your first fiscal year."
           >
-            <tng-button type="button" appearance="solid" tone="primary" (click)="createFiscalYear()">
+            <tng-button *appCan="'branch:fiscalYear:create'" type="button" appearance="solid" tone="primary" (click)="createFiscalYear()">
               <tng-icon icon="plus" aria-hidden="true" />
               New fiscal year
             </tng-button>

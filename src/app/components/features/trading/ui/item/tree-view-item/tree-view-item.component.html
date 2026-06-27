@@ -15,12 +15,12 @@
       Refresh
     </tng-button>
 
-    <tng-button type="button" appearance="solid" tone="primary" (click)="createItemCategory()">
+    <tng-button *appCan="'branch:itemCategory:create'" type="button" appearance="solid" tone="primary" (click)="createItemCategory()">
       <tng-icon icon="plus" aria-hidden="true" />
       New category
     </tng-button>
 
-    <tng-button type="button" appearance="solid" tone="primary" (click)="createItem()">
+    <tng-button *appCan="'branch:item:create'" type="button" appearance="solid" tone="primary" (click)="createItem()">
       <tng-icon icon="plus" aria-hidden="true" />
       New item
     </tng-button>
@@ -38,7 +38,7 @@
           title="No items or categories yet"
           description="Get started by creating an item category or item."
         >
-          <tng-button type="button" appearance="solid" tone="primary" (click)="createItem()">
+          <tng-button *appCan="'branch:item:create'" type="button" appearance="solid" tone="primary" (click)="createItem()">
             <tng-icon icon="plus" aria-hidden="true" />
             New item
           </tng-button>
@@ -66,16 +66,19 @@
                 <div class="row-actions" (click)="$event.stopPropagation()">
                   @if (row.kind === 'item') {
                     <app-table-row-icon-button
+                      [permission]="{ level: 'branch', resource: 'item', action: 'view' }"
                       icon="eye"
                       ariaLabel="View item"
                       (action)="viewItem(row)"
                     />
                     <app-table-row-icon-button
+                      [permission]="{ level: 'branch', resource: 'item', action: 'update' }"
                       icon="pencil"
                       ariaLabel="Edit item"
                       (action)="editItem(row)"
                     />
                     <app-table-row-icon-button
+                      [permission]="{ level: 'branch', resource: 'item', action: 'delete' }"
                       icon="trash2"
                       ariaLabel="Delete item"
                       tone="danger"
@@ -83,16 +86,19 @@
                     />
                   } @else {
                     <app-table-row-icon-button
+                      [permission]="{ level: 'branch', resource: 'itemCategory', action: 'view' }"
                       icon="eye"
                       ariaLabel="View item category"
                       (action)="viewItemCategory(row)"
                     />
                     <app-table-row-icon-button
+                      [permission]="{ level: 'branch', resource: 'itemCategory', action: 'update' }"
                       icon="pencil"
                       ariaLabel="Edit item category"
                       (action)="editItemCategory(row)"
                     />
                     <app-table-row-icon-button
+                      [permission]="{ level: 'branch', resource: 'itemCategory', action: 'delete' }"
                       icon="trash2"
                       ariaLabel="Delete item category"
                       tone="danger"

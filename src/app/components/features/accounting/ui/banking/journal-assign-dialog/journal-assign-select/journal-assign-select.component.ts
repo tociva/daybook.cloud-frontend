@@ -20,6 +20,8 @@ import type { TngTableColumn, TngTableRowClassFn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { EmptyStateComponent } from '../../../../../../../shared/empty-state';
 import { DateManagementService } from '../../../../../../../core/date/date-management.service';
+import { PERMISSION } from '../../../../../../../core/permissions/permission-requirements';
+import { PermissionsStore } from '../../../../../../../core/permissions/permissions.store';
 import { ReconciliationMatchFacade } from '../../../../data/reconciliation-match';
 import {
   buildJournalDateRangeWhere,
@@ -67,6 +69,7 @@ type SelectEmptyState =
 })
 export class JournalAssignSelectComponent {
   private readonly dateManagement = inject(DateManagementService);
+  private readonly permissions = inject(PermissionsStore);
   private readonly journalService = inject(JournalService);
   private readonly reconciliationMatchFacade = inject(ReconciliationMatchFacade);
   private readonly inventoryLedgerMapStore = inject(InventoryLedgerMapStore);
@@ -297,6 +300,10 @@ export class JournalAssignSelectComponent {
   }
 
   async assign(): Promise<void> {
+    if (
+      !this.permissions.can(PERMISSION.fiscalYear.journal.view) ||
+      !this.permissions.can(PERMISSION.fiscalYear.bankTxnReconciliation.create)
+    ) return;
     this.submitted.set(true);
     if (this.validationError()) return;
 
@@ -345,6 +352,7 @@ export class JournalAssignSelectComponent {
   }
 
   protected async loadMoreCandidates(): Promise<void> {
+    if (!this.canLoadCandidates()) return;
     const txn = this.bankTxn();
     if (!txn || this.candidatesLoadingMore() || !this.hasMoreCandidates()) return;
 
@@ -362,6 +370,13 @@ export class JournalAssignSelectComponent {
     } finally {
       this.candidatesLoadingMore.set(false);
     }
+  }
+
+  private canLoadCandidates(): boolean {
+    return (
+      this.permissions.can(PERMISSION.fiscalYear.journal.view) &&
+      this.permissions.can(PERMISSION.fiscalYear.bankTxnReconciliation.create)
+    );
   }
 
   protected matchAmountFor(journalId: string): string {
@@ -390,7 +405,7 @@ export class JournalAssignSelectComponent {
   }
 
   private async loadCandidates(txn: BankTxn): Promise<void> {
-    if (this.candidatesLoading()) return;
+    if (!this.canLoadCandidates() || this.candidatesLoading()) return;
 
     this.candidatesLoading.set(true);
     this.candidatesError.set(null);

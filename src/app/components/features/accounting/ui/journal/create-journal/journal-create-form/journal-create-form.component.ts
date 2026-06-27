@@ -9,6 +9,8 @@ import {
   untracked,
 } from '@angular/core';
 import { getApiErrorMessage } from '../../../../../../../core/api/api-error.util';
+import { PERMISSION } from '../../../../../../../core/permissions/permission-requirements';
+import { PermissionsStore } from '../../../../../../../core/permissions/permissions.store';
 import { ToastStore } from '../../../../../../../core/toast/toast.store';
 import type { StoredDocument } from '../../../../../trading/data/invoice-document';
 import { InvoiceDocumentService } from '../../../../../trading/data/invoice-document';
@@ -32,6 +34,7 @@ import { JournalEntriesComponent } from '../journal-entries/journal-entries.comp
 })
 export class JournalCreateFormComponent {
   private readonly documentService = inject(InvoiceDocumentService);
+  private readonly permissions = inject(PermissionsStore);
   private readonly toastStore = inject(ToastStore);
   protected readonly journalStore = inject(JournalStore);
   private readonly ledgerStore = inject(LedgerStore);
@@ -109,6 +112,7 @@ export class JournalCreateFormComponent {
 
     const files = this.pendingDocumentFiles();
     if (!files.length) return true;
+    if (!this.permissions.can(PERMISSION.fiscalYear.journal.createDocument)) return false;
     if (!parentId) {
       this.toastStore.danger('Journal saved, but documents could not be attached.');
       return false;
@@ -141,6 +145,7 @@ export class JournalCreateFormComponent {
   }
 
   protected async deleteDocument(document: StoredDocument): Promise<void> {
+    if (!this.permissions.can(PERMISSION.fiscalYear.journal.deleteDocument)) return;
     const parentId = this.resolvedId();
     const documentId = document.id;
     if (!parentId || !documentId || this.deletingDocumentId()) return;

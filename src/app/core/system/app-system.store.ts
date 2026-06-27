@@ -11,6 +11,8 @@ import { UserSessionStore } from '../../components/features/management/data/user
 import { OrganizationMemberStatus } from '../../components/features/management/data/organization-member/organization-member.enums';
 import { getApiErrorMessage, isApiErrorStatus } from '../api/api-error.util';
 import { CatalogCacheCoordinatorService } from '../cache/catalog-cache-coordinator.service';
+import { permissionForWorkspaceUrl } from '../permissions/permission-requirements';
+import { PermissionsStore } from '../permissions/permissions.store';
 import { LedgerCachePreferencesStore } from '../preferences/ledger-cache-preferences.store';
 import { AppThemeStore } from '../theme/app-theme.store';
 import { AppStartupStatus, AppSystemModel } from './app-system.model';
@@ -131,6 +133,7 @@ export const AppSystemStore = signalStore(
       appThemeStore = inject(AppThemeStore),
       ledgerCachePrefsStore = inject(LedgerCachePreferencesStore),
       catalogCacheCoordinator = inject(CatalogCacheCoordinatorService),
+      permissions = inject(PermissionsStore),
     ) => {
       function updateStartupStatus(
         status: AppStartupStatus,
@@ -188,7 +191,11 @@ export const AppSystemStore = signalStore(
           ledgerCachePrefsStore.initFromSession(session);
 
           const returnUri = resolveSessionReturnUri(config, strategy);
-          const targetRoute = resolvePostSessionRoute(session, returnUri);
+          const requestedRoute = resolvePostSessionRoute(session, returnUri);
+          const requirement = permissionForWorkspaceUrl(requestedRoute);
+          const targetRoute = requirement && !permissions.can(requirement)
+            ? permissions.firstAllowedWorkspaceRoute()
+            : requestedRoute;
           const redirectStatus: AppStartupStatus =
             targetRoute === BOOTSTRAP_ORGANIZATION_ROUTE
               ? 'redirecting-to-bootstrap'
@@ -211,7 +218,11 @@ export const AppSystemStore = signalStore(
               ledgerCachePrefsStore.initFromSession(renewedSession);
 
               const returnUri = resolveSessionReturnUri(config, strategy);
-              const targetRoute = resolvePostSessionRoute(renewedSession, returnUri);
+              const requestedRoute = resolvePostSessionRoute(renewedSession, returnUri);
+              const requirement = permissionForWorkspaceUrl(requestedRoute);
+              const targetRoute = requirement && !permissions.can(requirement)
+                ? permissions.firstAllowedWorkspaceRoute()
+                : requestedRoute;
               const redirectStatus: AppStartupStatus =
                 targetRoute === BOOTSTRAP_ORGANIZATION_ROUTE
                   ? 'redirecting-to-bootstrap'

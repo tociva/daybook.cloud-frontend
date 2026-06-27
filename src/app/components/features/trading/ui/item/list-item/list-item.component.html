@@ -13,12 +13,12 @@
       syncUrl
     />
 
-    <tng-button type="button" appearance="outline" tone="neutral" (click)="openItemCategories()">
+    <tng-button *appCan="'branch:itemCategory:view'" type="button" appearance="outline" tone="neutral" (click)="openItemCategories()">
       <tng-icon icon="layers" aria-hidden="true" />
       Categories
     </tng-button>
 
-    <tng-button type="button" appearance="outline" tone="neutral" (click)="showAllItems()">
+    <tng-button *appCan="'branch:itemCategory:view'" type="button" appearance="outline" tone="neutral" (click)="showAllItems()">
       <tng-icon icon="list-tree" aria-hidden="true" />
       Show All
     </tng-button>
@@ -29,7 +29,7 @@
       (uploaded)="reloadItems()"
     />
 
-    <tng-button type="button" appearance="solid" tone="primary" (click)="createItem()">
+    <tng-button *appCan="'branch:item:create'" type="button" appearance="solid" tone="primary" (click)="createItem()">
       <tng-icon icon="plus" aria-hidden="true" />
       New item
     </tng-button>
@@ -58,7 +58,7 @@
             title="No items yet"
             description="Get started by creating your first item. Items are used across invoices and transactions."
           >
-            <tng-button type="button" appearance="solid" tone="primary" (click)="createItem()">
+            <tng-button *appCan="'branch:item:create'" type="button" appearance="solid" tone="primary" (click)="createItem()">
               <tng-icon icon="plus" aria-hidden="true" />
               New item
             </tng-button>

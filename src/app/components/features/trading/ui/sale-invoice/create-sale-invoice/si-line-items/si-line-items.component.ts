@@ -15,6 +15,8 @@ import type { StoredDocument } from '../../../../data/invoice-document';
 import { InvoiceGrandTotalDisplayComponent } from '../../../../../../../shared/invoice-grand-total-display/invoice-grand-total-display.component';
 import { InvoiceDocumentTagsComponent } from '../../../shared/invoice-document-tags/invoice-document-tags.component';
 import { SaleInvoiceDraftStore, type ItemRow } from '../sale-invoice-draft.store';
+import { PERMISSION } from '../../../../../../../core/permissions/permission-requirements';
+import { PermissionsStore } from '../../../../../../../core/permissions/permissions.store';
 
 /** Sentinel id used to represent the "Create new item" action inside the options list. */
 const CREATE_ITEM_SENTINEL_ID = '__create_item__';
@@ -56,6 +58,7 @@ export class SiLineItemsComponent {
   protected readonly draft        = inject(SaleInvoiceDraftStore);
   private  readonly itemStore     = inject(ItemStore);
   private  readonly router        = inject(Router);
+  private readonly permissions    = inject(PermissionsStore);
   readonly readOnly = input(false);
   readonly documentFiles = input<readonly File[]>([]);
   readonly documents = input<readonly StoredDocument[]>([]);
@@ -73,6 +76,9 @@ export class SiLineItemsComponent {
 
   /** Expose sentinel id so the template can detect the create-action row. */
   protected readonly createItemSentinelId = CREATE_ITEM_SENTINEL_ID;
+  protected readonly canCreateItem = computed(() =>
+    this.permissions.can(PERMISSION.branch.item.create),
+  );
 
   // ── Tax column visibility (derived from draft tax option) ──────────────
   // Intra State → CGST + SGST; Inter State → IGST only; Export / Non Taxable → none
@@ -122,13 +128,15 @@ export class SiLineItemsComponent {
    */
   protected itemOptionsForRowWithCreate(row: ItemRow): readonly Item[] {
     const options = this.itemOptionsForRow(row);
-    if (options.length === 0) {
+    if (options.length === 0 && this.canCreateItem()) {
       return [CREATE_ITEM_SENTINEL];
     }
     return options;
   }
 
   protected createNewItem(rowIndex: number): void {
+    if (!this.canCreateItem()) return;
+
     // Clear stale selectedItem so we can distinguish "just created" vs "cancelled" on return.
     this.itemStore.clearSelectedItem();
     // Save full draft state + the row index to restore on return.

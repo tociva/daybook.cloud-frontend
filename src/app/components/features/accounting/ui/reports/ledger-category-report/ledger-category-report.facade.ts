@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import type { TngDateRangePickerSelectionInput } from '@tailng-ui/components';
 import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
 import { PermissionsStore } from '../../../../../../core/permissions/permissions.store';
+import { PERMISSION } from '../../../../../../core/permissions/permission-requirements';
 import { FiscalYearDateRangeService } from '../../../../../../shared/fiscal-year-date-range-picker';
 import { LedgerCategoryStore } from '../../../data/ledger-category';
 import type { LedgerCategory } from '../../../data/ledger-category';
@@ -98,11 +99,14 @@ export class LedgerCategoryReportFacade {
   private readonly selectedCategoryMeta = signal<LedgerCategoryReportCategory | null>(null);
 
   readonly canViewLedgerCategoryReport = computed(() =>
-    hasAccountingReportPermission(this.permissionsStore.all(), 'ledgerCategoryReport'),
+    hasAccountingReportPermission(this.permissionsStore, 'ledgerCategoryReport'),
   );
 
   readonly canOpenLedgerReport = computed(() =>
-    hasAccountingReportPermission(this.permissionsStore.all(), 'ledgerReport'),
+    hasAccountingReportPermission(this.permissionsStore, 'ledgerReport'),
+  );
+  readonly canOpenJournal = computed(() =>
+    this.permissionsStore.can(PERMISSION.fiscalYear.journal.view),
   );
 
   readonly catalogError = computed(() => this.ledgerCategoryStore.error());
@@ -320,6 +324,7 @@ export class LedgerCategoryReportFacade {
   }
 
   viewJournal(journalid: string): void {
+    if (!this.canOpenJournal()) return;
     void this.router.navigate(journalPath(journalid), {
       queryParams: { burl: this.router.url },
     });

@@ -93,8 +93,9 @@
               <td>{{ row.description || '—' }}</td>
               <td class="text-right">
                 <app-table-row-icon-button
-                  icon="pencil"
-                  ariaLabel="Edit vendor payment"
+                  icon="eye"
+                  ariaLabel="View vendor payment"
+                  [permission]="{ level: 'branch', resource: 'vendorPayment', action: 'view' }"
                   [disabled]="!row.paymentId"
                   (action)="viewPayment(row)"
                 />

@@ -46,7 +46,12 @@ export const ORGANIZATION_PERMISSION_GROUPS: readonly PermissionGroupDef[] = [
   {
     key: 'user',
     label: 'User',
-    actions: [action('inviteMember'), action('removeMember'), action('updateMember')],
+    actions: [
+      action('viewMember'),
+      action('inviteMember'),
+      action('removeMember'),
+      action('updateMember'),
+    ],
   },
   {
     key: 'branch',

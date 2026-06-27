@@ -1,6 +1,8 @@
 import { Component, ViewChild, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
+import { PERMISSION } from '../../../../../../core/permissions/permission-requirements';
+import { PermissionsStore } from '../../../../../../core/permissions/permissions.store';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
@@ -55,6 +57,7 @@ import { SiLineItemsComponent } from './si-line-items/si-line-items.component';
 })
 export class CreateSaleInvoiceComponent {
   private readonly route = inject(ActivatedRoute);
+  private readonly permissions = inject(PermissionsStore);
   private readonly facade = inject(SaleInvoiceFacade);
   private readonly invoiceDocumentService = inject(InvoiceDocumentService);
   private readonly navigation = inject(BurlNavigationService);
@@ -218,6 +221,7 @@ export class CreateSaleInvoiceComponent {
   }
 
   protected async deleteDocument(document: StoredDocument): Promise<void> {
+    if (!this.permissions.can(PERMISSION.branch.saleInvoice.deleteDocument)) return;
     const parentId = this.id();
     const documentId = document.id;
     if (!parentId || !documentId || this.deletingDocumentId()) return;
@@ -365,6 +369,10 @@ export class CreateSaleInvoiceComponent {
   }
 
   private async attachPendingDocuments(parentId: string | null): Promise<boolean> {
+    if (
+      this.pendingDocumentFiles().length > 0 &&
+      !this.permissions.can(PERMISSION.branch.saleInvoice.createDocument)
+    ) return false;
     const files = this.pendingDocumentFiles();
     if (!files.length) return true;
     if (!parentId) {

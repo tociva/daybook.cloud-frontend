@@ -7,6 +7,7 @@ import {
 import { TngIcon } from '@tailng-ui/icons';
 import { DateManagementService } from '../../../../../core/date/date-management.service';
 import { PermissionsStore } from '../../../../../core/permissions/permissions.store';
+import { permissionForWorkspaceUrl } from '../../../../../core/permissions/permission-requirements';
 import { PageHeadingComponent } from '../../../../../shared/page-heading/page-heading.component';
 import { hasAccountingReportPermission } from '../../../accounting/shared/accounting-report-permissions';
 import { UserSessionStore } from '../../../management/data/user-session/user-session.store';
@@ -58,7 +59,7 @@ export class DashboardComponent {
 
   protected readonly session = computed(() => this.userSessionStore.session());
   protected readonly canViewDashboard = computed(() =>
-    hasAccountingReportPermission(this.permissionsStore.all(), 'accountantDashboard'),
+    hasAccountingReportPermission(this.permissionsStore, 'accountantDashboard'),
   );
   protected readonly summaryQuery = computed<AccountantDashboardSummaryQuery | null>(() => {
     const session = this.session();
@@ -178,6 +179,8 @@ export class DashboardComponent {
 
   protected openAction(actionKey: AccountantDashboardActionKey): void {
     const target = resolveAccountantDashboardNavigationTarget(actionKey);
+    const requirement = permissionForWorkspaceUrl(target.route);
+    if (!requirement || !this.permissionsStore.can(requirement)) return;
     void this.router.navigate([target.route], {
       queryParams: target.queryParams,
     });
@@ -210,6 +213,9 @@ export class DashboardComponent {
     options: DashboardStatusRowOptions,
   ): DashboardStatusRow | null {
     if (metric.pendingCount <= 0) return null;
+    const target = resolveAccountantDashboardNavigationTarget(metric.actionKey);
+    const requirement = permissionForWorkspaceUrl(target.route);
+    if (!requirement || !this.permissionsStore.can(requirement)) return null;
 
     return {
       actionKey: metric.actionKey,

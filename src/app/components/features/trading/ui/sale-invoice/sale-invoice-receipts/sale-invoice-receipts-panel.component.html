@@ -87,8 +87,9 @@
               <td>{{ row.description || '—' }}</td>
               <td class="text-right">
                 <app-table-row-icon-button
-                  icon="pencil"
-                  ariaLabel="Edit customer receipt"
+                  icon="eye"
+                  ariaLabel="View customer receipt"
+                  [permission]="{ level: 'branch', resource: 'customerReceipt', action: 'view' }"
                   [disabled]="!row.receiptId"
                   (action)="viewReceipt(row)"
                 />

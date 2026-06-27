@@ -9,6 +9,7 @@ import {
   type TngFileUploadSelectedEvent,
 } from '@tailng-ui/primitives';
 import { PermissionsStore } from '../../../../../core/permissions/permissions.store';
+import { PERMISSION } from '../../../../../core/permissions/permission-requirements';
 import { XlsxFileReaderService } from '../../../../../shared/file/xlsx-file-reader.service';
 import { PageHeadingComponent } from '../../../../../shared/page-heading/page-heading.component';
 import { UserSessionStore } from '../../../management/data/user-session/user-session.store';
@@ -90,17 +91,7 @@ export class GstReconciliationComponent implements OnDestroy {
   });
 
   protected readonly canImport = computed(() => {
-    const permissions = this.permissionsStore.all();
-    if (!permissions.length) return true;
-    return permissions.some((p) => {
-      const n = p.toLowerCase();
-      return (
-        n === 'gstreconciliation.bulkupload' ||
-        n === 'gstreconciliation:bulkupload' ||
-        n === 'gstreconciliation:bulk-upload' ||
-        (n.includes('gstreconciliation') && n.includes('bulkupload'))
-      );
-    });
+    return this.permissionsStore.can(PERMISSION.fiscalYear.gstReconciliation.bulkUpload);
   });
 
   protected readonly headerContext = computed(() => this.context()?.branchName ?? 'Branch not selected');
@@ -122,24 +113,28 @@ export class GstReconciliationComponent implements OnDestroy {
 
   // ── Import button on each card ────────────────────────────────────────────
   protected triggerImportForSection(returnType: GstReconciliationReturnType): void {
+    if (!this.canImport()) return;
     this.sectionHint.set(returnType);
     (document.getElementById('gst-import-file') as HTMLInputElement | null)?.click();
   }
 
   // ── TngFileUploadDirective handlers ──────────────────────────────────────
   protected onFilesSelected(event: TngFileUploadSelectedEvent): void {
+    if (!this.canImport()) return;
     const file = event.files[0];
     if (file) void this.receiveFile(file);
     this.resetDrag();
   }
 
   protected onFilesRejected(event: TngFileUploadRejectedEvent): void {
+    if (!this.canImport()) return;
     const first = event.rejected[0];
     this.pendingError.set(first?.message ?? 'That file is not allowed.');
     this.resetDrag();
   }
 
   protected onBrowse(event: Event): void {
+    if (!this.canImport()) return;
     const input = event.target as HTMLInputElement;
     const file  = input.files?.[0] ?? null;
     if (file) void this.receiveFile(file);
@@ -175,7 +170,7 @@ export class GstReconciliationComponent implements OnDestroy {
 
   // ── Import submission ─────────────────────────────────────────────────────
   protected async submitImportAs(returnType: GstReconciliationReturnType): Promise<void> {
-    if (this.store.isBusy()) return;
+    if (!this.canImport() || this.store.isBusy()) return;
 
     const ctx = this.context();
     if (!ctx) { this.pendingError.set(this.contextMessage() || 'Context missing.'); return; }

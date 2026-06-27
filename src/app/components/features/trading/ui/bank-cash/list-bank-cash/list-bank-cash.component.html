@@ -19,17 +19,17 @@
       (uploaded)="reloadBankCashes()"
     />
 
-    <tng-button type="button" appearance="outline" tone="neutral" (click)="viewActivity()">
+    <tng-button *appCan="'branch:inventoryReports:bankCashReport'" type="button" appearance="outline" tone="neutral" (click)="viewActivity()">
       <tng-icon icon="activity" aria-hidden="true" />
       Activity
     </tng-button>
 
-    <tng-button type="button" appearance="outline" tone="neutral" (click)="viewContra()">
+    <tng-button *appCan="'branch:contraTransaction:view'" type="button" appearance="outline" tone="neutral" (click)="viewContra()">
       <tng-icon icon="repeat2" aria-hidden="true" />
       Contra
     </tng-button>
 
-    <tng-button type="button" appearance="solid" tone="primary" (click)="createBankCash()">
+    <tng-button *appCan="'branch:bankCash:create'" type="button" appearance="solid" tone="primary" (click)="createBankCash()">
       <tng-icon icon="plus" aria-hidden="true" />
       New account
     </tng-button>
@@ -67,7 +67,7 @@
             title="No bank & cash accounts yet"
             description="Get started by adding your first bank or cash account."
           >
-            <tng-button type="button" appearance="solid" tone="primary" (click)="createBankCash()">
+            <tng-button *appCan="'branch:bankCash:create'" type="button" appearance="solid" tone="primary" (click)="createBankCash()">
               <tng-icon icon="plus" aria-hidden="true" />
               New account
             </tng-button>

@@ -77,7 +77,7 @@
                   @for (invoice of linkedInvoices(receipt); track $index) {
                     <tr>
                       <td>
-                        @if (invoiceRouteId(invoice)) {
+                        @if (invoiceRouteId(invoice) && canViewSaleInvoice()) {
                           <button
                             type="button"
                             class="link-button"

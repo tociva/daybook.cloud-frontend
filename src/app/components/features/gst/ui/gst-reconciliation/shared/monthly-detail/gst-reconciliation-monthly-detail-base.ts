@@ -2,6 +2,8 @@ import { computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import type { TngTableColumn } from '@tailng-ui/components';
 import { DateManagementService } from '../../../../../../../core/date/date-management.service';
+import { PERMISSION } from '../../../../../../../core/permissions/permission-requirements';
+import { PermissionsStore } from '../../../../../../../core/permissions/permissions.store';
 import { formatAmountWithCurrency } from '../../../../../../../shared/format/currency';
 import type { Lb4ListQuery } from '../../../../../../../shared/crud';
 import { UserSessionStore } from '../../../../../management/data/user-session/user-session.store';
@@ -48,6 +50,7 @@ const GST_AMOUNT_TOLERANCE = 0;
 
 export abstract class GstReconciliationMonthlyDetailBase {
   protected readonly dateManagement = inject(DateManagementService);
+  protected readonly permissions = inject(PermissionsStore);
   protected readonly route = inject(ActivatedRoute);
   protected readonly router = inject(Router);
   protected readonly sessionStore = inject(UserSessionStore);
@@ -244,6 +247,7 @@ export abstract class GstReconciliationMonthlyDetailBase {
   }
 
   protected showCreatePartyLink(group: GstReconciliationPartyGroup): boolean {
+    if (!this.permissions.can(this.partyPermission('create'))) return false;
     if (!group.partyName && !group.partyGstin) {
       return false;
     }
@@ -264,6 +268,7 @@ export abstract class GstReconciliationMonthlyDetailBase {
   }
 
   protected async createParty(group: GstReconciliationPartyGroup): Promise<void> {
+    if (!this.permissions.can(this.partyPermission('create'))) return;
     if (this.config.partyType === 'vendor') {
       this.vendorStore.clearSelectedItem();
     } else {
@@ -284,10 +289,14 @@ export abstract class GstReconciliationMonthlyDetailBase {
   }
 
   protected canViewBookInvoice(invoice: GstReconciliationInvoice | null | undefined): boolean {
-    return !!invoice?.id?.trim();
+    return (
+      this.permissions.can(this.bookInvoicePermission('view')) &&
+      !!invoice?.id?.trim()
+    );
   }
 
   protected async viewBookInvoice(invoice: GstReconciliationInvoice): Promise<void> {
+    if (!this.permissions.can(this.bookInvoicePermission('view'))) return;
     const id = invoice.id?.trim();
     if (!id) return;
 
@@ -300,6 +309,7 @@ export abstract class GstReconciliationMonthlyDetailBase {
     row: GstReconciliationDetailRow,
     group: GstReconciliationPartyGroup,
   ): Promise<void> {
+    if (!this.permissions.can(this.bookInvoicePermission('create'))) return;
     const sourceInvoice = row.gstInvoice;
     const partyName =
       row.partyName || this.localPartyName(row.partyGstin || group.partyGstin) || group.partyName;
@@ -341,6 +351,8 @@ export abstract class GstReconciliationMonthlyDetailBase {
     this.localPartiesByGstin.set(new Map());
     this.partiesLoaded.set(false);
 
+    if (!this.permissions.can(this.partyPermission('view'))) return;
+
     if (gstins.length === 0) {
       this.partiesLoaded.set(true);
       return;
@@ -373,6 +385,22 @@ export abstract class GstReconciliationMonthlyDetailBase {
     if (!partyGstin) return false;
 
     return this.localPartiesByGstin().has(partyGstin);
+  }
+
+  protected canCreateBookInvoice(): boolean {
+    return this.permissions.can(this.bookInvoicePermission('create'));
+  }
+
+  private partyPermission(action: 'create' | 'view') {
+    return this.config.partyType === 'vendor'
+      ? PERMISSION.branch.vendor[action]
+      : PERMISSION.branch.customer[action];
+  }
+
+  private bookInvoicePermission(action: 'create' | 'view') {
+    return this.config.returnType === 'gstr2b'
+      ? PERMISSION.branch.purchaseInvoice[action]
+      : PERMISSION.branch.saleInvoice[action];
   }
 
   private localPartyName(gstin: string | null | undefined): string {

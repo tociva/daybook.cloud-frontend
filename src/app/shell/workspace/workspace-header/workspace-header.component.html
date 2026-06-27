@@ -1,6 +1,6 @@
 <header class="workspace-header">
   <div class="workspace-header-leading">
-    <a class="header-logo" routerLink="/app/dashboard" aria-label="Go to home">
+    <a class="header-logo" [routerLink]="homeRoute()" aria-label="Go to home">
       @if (brandLogoSvg(); as logoSvg) {
         <span
           class="header-logo-inline header-logo-inline--full"

@@ -212,7 +212,9 @@ function setup(options: SetupOptions = {}): {
       {
         provide: PermissionsStore,
         useValue: {
-          all: signal(options.permissions ?? ['accountingReports.accountantDashboard']),
+          can: (requirement: { resource?: string; action?: string }) =>
+            options.permissions === undefined ||
+            options.permissions.includes(`${requirement.resource}.${requirement.action}`),
         },
       },
       {

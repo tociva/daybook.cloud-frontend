@@ -17,6 +17,8 @@ import { FiscalYearDateRangeService } from '../../../../../../shared/fiscal-year
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
+import { PERMISSION } from '../../../../../../core/permissions/permission-requirements';
+import { PermissionsStore } from '../../../../../../core/permissions/permissions.store';
 import { formatAmountWithCurrency } from '../../../../../../shared/format/currency';
 import {
   DEFAULT_AUTOCOMPLETE_SEARCH_DEBOUNCE_MS,
@@ -79,6 +81,7 @@ export class SaleInvoiceReceiptsPanelComponent {
   readonly invoiceId = input.required<string>();
 
   private readonly router = inject(Router);
+  private readonly permissions = inject(PermissionsStore);
   private readonly dateManagement = inject(DateManagementService);
   private readonly customerReceiptFacade = inject(CustomerReceiptFacade);
   private readonly customerReceiptService = inject(CustomerReceiptService);
@@ -114,7 +117,10 @@ export class SaleInvoiceReceiptsPanelComponent {
     calculateSaleInvoiceOutstanding(this.invoice()),
   );
   protected readonly canAddReceipt = computed(
-    () => Boolean(this.invoice()?.id) && this.outstandingBalance() > 0,
+    () =>
+      this.permissions.can(PERMISSION.branch.customerReceipt.create) &&
+      Boolean(this.invoice()?.id) &&
+      this.outstandingBalance() > 0,
   );
   protected readonly filteredBankCashes = computed<BankCash[]>(() =>
     this.withSelectedOption(
@@ -139,7 +145,9 @@ export class SaleInvoiceReceiptsPanelComponent {
 
   constructor() {
     this.receiptDate.set(this.defaultReceiptDate());
-    void this.bankCashStore.loadBankCashes({});
+    if (this.permissions.can(PERMISSION.branch.bankCash.view)) {
+      void this.bankCashStore.loadBankCashes({});
+    }
 
     effect(() => {
       const id = this.invoiceId();
@@ -165,9 +173,9 @@ export class SaleInvoiceReceiptsPanelComponent {
   }
 
   protected viewReceipt(row: SaleInvoiceReceiptRow): void {
-    if (!row.receiptId) return;
+    if (!row.receiptId || !this.permissions.can(PERMISSION.branch.customerReceipt.view)) return;
 
-    void this.router.navigate(['/app/trading/customer-receipt', row.receiptId, 'edit'], {
+    void this.router.navigate(['/app/trading/customer-receipt', row.receiptId], {
       queryParams: { burl: this.router.url },
     });
   }
@@ -198,6 +206,7 @@ export class SaleInvoiceReceiptsPanelComponent {
   }
 
   protected onBankCashQueryChange(event: unknown): void {
+    if (!this.permissions.can(PERMISSION.branch.bankCash.view)) return;
     const query = typeof event === 'string' ? event.trim() : '';
     this.bankCashQuery.set(query);
     if (!query) {
@@ -228,6 +237,7 @@ export class SaleInvoiceReceiptsPanelComponent {
   }
 
   protected async saveReceipt(): Promise<void> {
+    if (!this.permissions.can(PERMISSION.branch.customerReceipt.create)) return;
     this.submitted.set(true);
     if (this.addReceiptError() || this.savingReceipt()) return;
 

@@ -14,9 +14,12 @@
       syncUrl
     />
 
-    <app-bank-statement-upload (uploaded)="reloadBankTxns()" />
+    <app-bank-statement-upload
+      *appCan="'fiscalYear:bankTxn:create'"
+      (uploaded)="reloadBankTxns()"
+    />
 
-    <tng-button type="button" appearance="solid" tone="primary" (click)="createBankTxn()">
+    <tng-button *appCan="'fiscalYear:bankTxn:create'" type="button" appearance="solid" tone="primary" (click)="createBankTxn()">
       <tng-icon icon="plus" aria-hidden="true" />
       New transaction
     </tng-button>
@@ -54,7 +57,7 @@
             title="No bank transactions yet"
             description="Create a transaction or upload an original bank statement file."
           >
-            <tng-button type="button" appearance="solid" tone="primary" (click)="createBankTxn()">
+            <tng-button *appCan="'fiscalYear:bankTxn:create'" type="button" appearance="solid" tone="primary" (click)="createBankTxn()">
               <tng-icon icon="plus" aria-hidden="true" />
               New transaction
             </tng-button>
@@ -145,9 +148,9 @@
                 }
               </span>
             } @else {
-              <button type="button" class="link-button" (click)="assignJournal(row)">
-                Assign
-              </button>
+              @if (canAssignJournal()) {
+                <button type="button" class="link-button" (click)="assignJournal(row)">Assign</button>
+              }
             }
           </ng-template>
 
@@ -161,6 +164,7 @@
               </tng-button>
 
               <tng-menu #bankTxnActionMenu="tngMenu" ariaLabel="Bank transaction actions">
+                @if (canAssignJournal()) {
                 <button
                   type="button"
                   class="row-action-menu-item"
@@ -170,7 +174,9 @@
                   <tng-icon class="row-action-menu-item-icon" icon="bookOpen" aria-hidden="true" />
                   <span>Assign journal</span>
                 </button>
+                }
                 <button
+                  *appCan="'branch:contraTransaction:create'"
                   type="button"
                   class="row-action-menu-item"
                   tngMenuItem
@@ -180,6 +186,7 @@
                   <span>Create contra entry</span>
                 </button>
                 <button
+                  *appCan="'fiscalYear:bankTxn:view'"
                   type="button"
                   class="row-action-menu-item"
                   tngMenuItem
@@ -189,6 +196,7 @@
                   <span>View</span>
                 </button>
                 <button
+                  *appCan="'fiscalYear:bankTxn:update'"
                   type="button"
                   class="row-action-menu-item"
                   tngMenuItem
@@ -198,6 +206,7 @@
                   <span>Edit</span>
                 </button>
                 <button
+                  *appCan="'fiscalYear:bankTxn:delete'"
                   type="button"
                   class="row-action-menu-item"
                   tngMenuItem

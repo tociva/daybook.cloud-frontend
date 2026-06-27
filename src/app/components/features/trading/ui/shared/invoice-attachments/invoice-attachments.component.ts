@@ -8,6 +8,7 @@ import {
 } from '@tailng-ui/primitives';
 import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
 import { PermissionsStore } from '../../../../../../core/permissions/permissions.store';
+import { documentPermission } from '../../../../../../core/permissions/permission-requirements';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import {
@@ -83,7 +84,7 @@ export class InvoiceAttachmentsComponent {
   }
 
   private async uploadFiles(files: readonly File[]): Promise<void> {
-    if (!files.length || this.isBusy()) return;
+    if (!files.length || this.isBusy() || !this.canAttach()) return;
 
     const validFiles = files.filter((file) => file.size > 0);
     const emptyFiles = files.filter((file) => file.size <= 0);
@@ -207,14 +208,7 @@ export class InvoiceAttachmentsComponent {
   }
 
   private hasPermission(permissionName: 'createDocument' | 'deleteDocument'): boolean {
-    const permissions = this.permissionsStore.all();
-    if (!permissions.length) return true;
-
-    const target = permissionName.toLowerCase();
-    return permissions.some((permission) => {
-      const normalized = permission.toLowerCase().replace(/[\s:_.-]/g, '');
-      return normalized === target.toLowerCase() || normalized.endsWith(target.toLowerCase());
-    });
+    return this.permissionsStore.can(documentPermission(this.resourceType(), permissionName));
   }
 
   private extensionFromName(name: string): string {
