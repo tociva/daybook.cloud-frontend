@@ -275,8 +275,8 @@ export class SelectOrganizationComponent {
     invitation: UserSessionInvitedOrganization,
     action: InvitationAction,
   ): Promise<void> {
-    if (!invitation.id) {
-      this.errorMessage.set('This invitation is missing its member id.');
+    if (!invitation.organizationid) {
+      this.errorMessage.set('This invitation is missing its organization id.');
       return;
     }
 
@@ -286,8 +286,8 @@ export class SelectOrganizationComponent {
     try {
       const success =
         action === 'accept'
-          ? await this.organizationMemberStore.acceptInvitation(invitation.id)
-          : await this.organizationMemberStore.rejectInvitation(invitation.id);
+          ? await this.organizationMemberStore.acceptInvitation(invitation.organizationid)
+          : await this.organizationMemberStore.rejectInvitation(invitation.organizationid);
 
       if (!success) {
         this.errorMessage.set(

@@ -11,7 +11,7 @@ describe('OrganizationMemberStore invitation actions', () => {
   });
 
   it('accepts an invitation by setting member status to accepted', async () => {
-    const updateStatus = vi.fn(async () => ({
+    const acceptInvitation = vi.fn(async () => ({
       id: 'member-1',
       organizationid: 'org-1',
       role: UserRoles.USER,
@@ -22,21 +22,19 @@ describe('OrganizationMemberStore invitation actions', () => {
     TestBed.configureTestingModule({
       providers: [
         OrganizationMemberStore,
-        { provide: OrganizationMemberService, useValue: { updateStatus } },
+        { provide: OrganizationMemberService, useValue: { acceptInvitation } },
       ],
     });
 
     const store = TestBed.inject(OrganizationMemberStore);
-    const result = await store.acceptInvitation('member-1');
+    const result = await store.acceptInvitation('org-1');
 
     expect(result).toBe(true);
-    expect(updateStatus).toHaveBeenCalledWith('member-1', {
-      status: OrganizationMemberStatus.ACCEPTED,
-    });
+    expect(acceptInvitation).toHaveBeenCalledWith('org-1');
   });
 
   it('rejects an invitation by setting member status to rejected', async () => {
-    const updateStatus = vi.fn(async () => ({
+    const rejectInvitation = vi.fn(async () => ({
       id: 'member-1',
       organizationid: 'org-1',
       role: UserRoles.USER,
@@ -47,16 +45,14 @@ describe('OrganizationMemberStore invitation actions', () => {
     TestBed.configureTestingModule({
       providers: [
         OrganizationMemberStore,
-        { provide: OrganizationMemberService, useValue: { updateStatus } },
+        { provide: OrganizationMemberService, useValue: { rejectInvitation } },
       ],
     });
 
     const store = TestBed.inject(OrganizationMemberStore);
-    const result = await store.rejectInvitation('member-1');
+    const result = await store.rejectInvitation('org-1');
 
     expect(result).toBe(true);
-    expect(updateStatus).toHaveBeenCalledWith('member-1', {
-      status: OrganizationMemberStatus.REJECTED,
-    });
+    expect(rejectInvitation).toHaveBeenCalledWith('org-1');
   });
 });

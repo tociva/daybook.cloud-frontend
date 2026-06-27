@@ -21,6 +21,7 @@ export class LandingShellComponent {
   private readonly configStore = inject(AppConfigStore);
   protected readonly startupStatus = computed(() => this.systemStore.startupStatus());
   protected readonly startupError = computed(() => this.systemStore.error());
+  protected readonly showRouteOutlet = computed(() => this.startupStatus() !== 'logging-out');
   protected readonly authNotice = computed(() => {
     const status = this.startupStatus();
 

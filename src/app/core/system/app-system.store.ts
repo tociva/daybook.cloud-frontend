@@ -17,6 +17,7 @@ import { AppStartupStatus, AppSystemModel } from './app-system.model';
 import { initialAppSystemState } from './app-system.state';
 
 const BOOTSTRAP_ORGANIZATION_ROUTE = '/bootstrap/bootstrap-organization';
+const LOGOUT_ROUTE = '/auth/logout';
 const SELECT_ORGANIZATION_ROUTE = '/app/select-organization';
 
 type SessionReturnRouteStrategy = 'consume-login-return-uri' | 'preserve-current-uri';
@@ -387,6 +388,7 @@ export const AppSystemStore = signalStore(
         },
         async logout(): Promise<void> {
           updateStartupStatus('logging-out');
+          await router.navigateByUrl(LOGOUT_ROUTE, { replaceUrl: true });
 
           const config = appConfigStore.config() ?? (await appConfigStore.load());
 

@@ -4,13 +4,15 @@ import type {
   InviteMemberPayload,
   OrganizationMember,
   OrganizationMemberGetQuery,
+  OrganizationMemberInvitationDecisionPayload,
   OrganizationMemberListQuery,
   OrganizationMemberPayload,
-  OrganizationMemberStatusPayload,
 } from './organization-member.model';
 
 const ENDPOINT = '/organization/organization-member';
 const INVITE_ENDPOINT = '/organization/organization/invite-member';
+const ACCEPT_INVITATION_ENDPOINT = '/organization/organization/accept-invitation';
+const REJECT_INVITATION_ENDPOINT = '/organization/organization-member/reject-invitation';
 
 @Injectable({ providedIn: 'root' })
 export class OrganizationMemberService {
@@ -48,14 +50,20 @@ export class OrganizationMemberService {
     );
   }
 
-  async updateStatus(
-    id: string,
-    payload: OrganizationMemberStatusPayload,
-  ): Promise<OrganizationMember> {
-    return this.crudApi.update<OrganizationMember, OrganizationMemberStatusPayload>(
-      ENDPOINT,
-      id,
-      payload,
+  async acceptInvitation(organizationid: string): Promise<OrganizationMember> {
+    return this.crudApi.create<
+      OrganizationMember,
+      OrganizationMemberInvitationDecisionPayload
+    >(ACCEPT_INVITATION_ENDPOINT, { organizationid });
+  }
+
+  async rejectInvitation(organizationid: string): Promise<OrganizationMember> {
+    return this.crudApi.create<
+      OrganizationMember,
+      OrganizationMemberInvitationDecisionPayload
+    >(
+      REJECT_INVITATION_ENDPOINT,
+      { organizationid },
     );
   }
 }

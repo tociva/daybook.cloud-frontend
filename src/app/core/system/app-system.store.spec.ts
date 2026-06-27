@@ -389,4 +389,136 @@ describe('AppSystemStore refresh-token session recovery', () => {
     expect(navigateByUrl).toHaveBeenCalledWith('/app/select-organization');
     expect(store.startupStatus()).toBe('user-session-ready');
   });
+
+  it('moves to the local logout route before clearing session data and starting provider logout', async () => {
+    const callOrder: string[] = [];
+    const navigateByUrl = vi.fn(async () => {
+      callOrder.push('navigate');
+      return true;
+    });
+    const clearAllPersistedCatalogsForUser = vi.fn(async () => {
+      callOrder.push('clear-catalogs');
+    });
+    const clearUserSession = vi.fn(async () => {
+      callOrder.push('clear-session');
+    });
+    const startLogout = vi.fn(async () => {
+      callOrder.push('start-logout');
+    });
+
+    TestBed.configureTestingModule({
+      providers: [
+        AppSystemStore,
+        { provide: Router, useValue: { navigateByUrl } },
+        {
+          provide: AppConfigStore,
+          useValue: {
+            config: vi.fn(() => appConfig),
+            load: vi.fn(async () => appConfig),
+          },
+        },
+        {
+          provide: AuthStore,
+          useValue: {
+            resetSessionState: vi.fn(),
+            setSessionState: vi.fn(),
+          },
+        },
+        {
+          provide: AuthService,
+          useValue: {
+            startLogout,
+          },
+        },
+        {
+          provide: UserSessionService,
+          useValue: { clearUserSession },
+        },
+        {
+          provide: UserSessionStore,
+          useValue: {
+            resetSession: vi.fn(),
+            setError: vi.fn(),
+            setLoading: vi.fn(),
+            setSession: vi.fn(),
+          },
+        },
+        { provide: AppThemeStore, useValue: { initFromSession: vi.fn() } },
+        { provide: LedgerCachePreferencesStore, useValue: { initFromSession: vi.fn() } },
+        {
+          provide: CatalogCacheCoordinatorService,
+          useValue: { clearAllPersistedCatalogsForUser },
+        },
+      ],
+    });
+
+    const store = TestBed.inject(AppSystemStore);
+    await store.logout();
+
+    expect(navigateByUrl).toHaveBeenCalledWith('/auth/logout', { replaceUrl: true });
+    expect(clearUserSession).toHaveBeenCalledWith(appConfig.apiBaseUrl);
+    expect(startLogout).toHaveBeenCalledWith(appConfig.auth);
+    expect(callOrder).toEqual(['navigate', 'clear-catalogs', 'clear-session', 'start-logout']);
+    expect(store.startupStatus()).toBe('logging-out');
+  });
+
+  it('keeps logout failures on the local logout route', async () => {
+    const navigateByUrl = vi.fn(async () => true);
+    const startLogout = vi.fn(async () => {
+      throw new Error('Provider logout failed');
+    });
+
+    TestBed.configureTestingModule({
+      providers: [
+        AppSystemStore,
+        { provide: Router, useValue: { navigateByUrl } },
+        {
+          provide: AppConfigStore,
+          useValue: {
+            config: vi.fn(() => appConfig),
+            load: vi.fn(async () => appConfig),
+          },
+        },
+        {
+          provide: AuthStore,
+          useValue: {
+            resetSessionState: vi.fn(),
+            setSessionState: vi.fn(),
+          },
+        },
+        {
+          provide: AuthService,
+          useValue: {
+            startLogout,
+          },
+        },
+        {
+          provide: UserSessionService,
+          useValue: { clearUserSession: vi.fn(async () => undefined) },
+        },
+        {
+          provide: UserSessionStore,
+          useValue: {
+            resetSession: vi.fn(),
+            setError: vi.fn(),
+            setLoading: vi.fn(),
+            setSession: vi.fn(),
+          },
+        },
+        { provide: AppThemeStore, useValue: { initFromSession: vi.fn() } },
+        { provide: LedgerCachePreferencesStore, useValue: { initFromSession: vi.fn() } },
+        {
+          provide: CatalogCacheCoordinatorService,
+          useValue: { clearAllPersistedCatalogsForUser: vi.fn(async () => undefined) },
+        },
+      ],
+    });
+
+    const store = TestBed.inject(AppSystemStore);
+    await store.logout();
+
+    expect(navigateByUrl).toHaveBeenCalledWith('/auth/logout', { replaceUrl: true });
+    expect(store.startupStatus()).toBe('logout-error');
+    expect(store.error()).toBe('Provider logout failed');
+  });
 });

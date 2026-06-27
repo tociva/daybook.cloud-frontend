@@ -8,7 +8,6 @@ import type {
   OrganizationMemberListQuery,
   OrganizationMemberPayload,
 } from './organization-member.model';
-import { OrganizationMemberStatus } from './organization-member.enums';
 import { OrganizationMemberService } from './organization-member.service';
 import { initialOrganizationMemberState } from './organization-member.state';
 
@@ -48,14 +47,17 @@ export const OrganizationMemberStore = signalStore(
     };
 
     const updateInvitationStatus = async (
-      id: string,
-      status: OrganizationMemberStatus,
+      organizationid: string,
+      action: 'accept' | 'reject',
       fallbackMessage: string,
     ): Promise<boolean> => {
       setLoading();
       try {
-        const member = await service.updateStatus(id, { status });
-        patchMemberState(id, member);
+        const member =
+          action === 'accept'
+            ? await service.acceptInvitation(organizationid)
+            : await service.rejectInvitation(organizationid);
+        patchMemberState(member.id ?? organizationid, member);
         return true;
       } catch (error) {
         setError(getApiErrorMessage(error, fallbackMessage));
@@ -156,20 +158,12 @@ export const OrganizationMemberStore = signalStore(
         }
       },
 
-      async acceptInvitation(id: string): Promise<boolean> {
-        return updateInvitationStatus(
-          id,
-          OrganizationMemberStatus.ACCEPTED,
-          'Failed to accept invitation.',
-        );
+      async acceptInvitation(organizationid: string): Promise<boolean> {
+        return updateInvitationStatus(organizationid, 'accept', 'Failed to accept invitation.');
       },
 
-      async rejectInvitation(id: string): Promise<boolean> {
-        return updateInvitationStatus(
-          id,
-          OrganizationMemberStatus.REJECTED,
-          'Failed to reject invitation.',
-        );
+      async rejectInvitation(organizationid: string): Promise<boolean> {
+        return updateInvitationStatus(organizationid, 'reject', 'Failed to reject invitation.');
       },
 
       async deleteMember(id: string): Promise<boolean> {

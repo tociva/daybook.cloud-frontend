@@ -54,7 +54,7 @@
               appearance="solid"
               tone="primary"
               [disabled]="
-                !row.id ||
+                !row.organizationid ||
                 isInvitationActionRunning(row, 'accept') ||
                 isInvitationActionRunning(row, 'reject')
               "
@@ -68,7 +68,7 @@
               appearance="outline"
               tone="danger"
               [disabled]="
-                !row.id ||
+                !row.organizationid ||
                 isInvitationActionRunning(row, 'accept') ||
                 isInvitationActionRunning(row, 'reject')
               "

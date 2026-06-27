@@ -185,7 +185,7 @@ describe('SelectOrganizationComponent', () => {
 
     await component.acceptInvitation(invitation);
 
-    expect(organizationMemberStore.acceptInvitation).toHaveBeenCalledWith('invite-1');
+    expect(organizationMemberStore.acceptInvitation).toHaveBeenCalledWith('org-invited');
     expect(userSessionStore.createUserSession).toHaveBeenCalledOnce();
   });
 });

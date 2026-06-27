@@ -36,8 +36,8 @@ export type InviteMemberPayload = Readonly<{
   permissions?: OrganizationMemberPermissions;
 }>;
 
-export type OrganizationMemberStatusPayload = Readonly<{
-  status: OrganizationMemberStatus;
+export type OrganizationMemberInvitationDecisionPayload = Readonly<{
+  organizationid: string;
 }>;
 
 export type OrganizationMemberListQuery = Lb4ListQuery;
