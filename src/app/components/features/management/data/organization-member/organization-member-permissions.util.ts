@@ -12,7 +12,40 @@ import type {
   OrganizationMemberPermissionTree,
   OrganizationScopePermissions,
   PermissionFlags,
+  SparseOrganizationMemberPermissionTree,
+  SparsePermissionNode,
 } from './organization-member-permissions.model';
+
+function compactPermissionNode(value: unknown): SparsePermissionNode | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return null;
+  }
+
+  const entries: [string, true | SparsePermissionNode][] = [];
+  for (const [key, child] of Object.entries(value)) {
+    if (child === true) {
+      entries.push([key, true]);
+      continue;
+    }
+
+    const compacted = compactPermissionNode(child);
+    if (compacted && Object.keys(compacted).length > 0) {
+      entries.push([key, compacted]);
+    }
+  }
+
+  return entries.length > 0 ? Object.fromEntries(entries) : null;
+}
+
+export function serializePermissionTree(tree: unknown): SparseOrganizationMemberPermissionTree {
+  if (!tree || typeof tree !== 'object' || Array.isArray(tree)) {
+    return { organizations: {} };
+  }
+
+  const organizations = compactPermissionNode((tree as { organizations?: unknown }).organizations);
+
+  return { organizations: organizations ?? {} };
+}
 
 function createEmptyFlags(actions: readonly string[]): PermissionFlags {
   return Object.fromEntries(actions.map((key) => [key, false]));
@@ -45,7 +78,9 @@ function createEmptyBranchPermissions(fiscalYears: readonly FiscalYear[]): Branc
   };
 }
 
-function createEmptyOrganizationPermissions(branches: readonly Branch[]): OrganizationScopePermissions {
+function createEmptyOrganizationPermissions(
+  branches: readonly Branch[],
+): OrganizationScopePermissions {
   const organizationGroups = Object.fromEntries(
     ORGANIZATION_PERMISSION_GROUPS.map((group) => [group.key, createEmptyFlagsFromGroup(group)]),
   ) as Pick<OrganizationScopePermissions, 'user' | 'branch'>;
@@ -115,7 +150,10 @@ function mergeBranchPermissions(
   const mergedBranchGroups = Object.fromEntries(
     BRANCH_PERMISSION_GROUPS.map((group) => [
       group.key,
-      mergeFlags(base[group.key as keyof BranchScopePermissions] as PermissionFlags, source[group.key]),
+      mergeFlags(
+        base[group.key as keyof BranchScopePermissions] as PermissionFlags,
+        source[group.key],
+      ),
     ]),
   ) as Omit<BranchScopePermissions, 'fiscalyears'>;
 
@@ -149,7 +187,10 @@ function mergeOrganizationPermissions(
   const mergedOrganizationGroups = Object.fromEntries(
     ORGANIZATION_PERMISSION_GROUPS.map((group) => [
       group.key,
-      mergeFlags(base[group.key as keyof OrganizationScopePermissions] as PermissionFlags, source[group.key]),
+      mergeFlags(
+        base[group.key as keyof OrganizationScopePermissions] as PermissionFlags,
+        source[group.key],
+      ),
     ]),
   ) as Pick<OrganizationScopePermissions, 'user' | 'branch'>;
 
@@ -173,19 +214,23 @@ function mergeOrganizationPermissions(
 
 export function mergePermissionTree(
   base: OrganizationMemberPermissionTree,
-  existing: OrganizationMemberPermissionTree | null | undefined,
+  existing: unknown,
 ): OrganizationMemberPermissionTree {
-  if (!existing?.organizations) {
+  if (!existing || typeof existing !== 'object') {
     return base;
   }
+
+  const existingOrganizations = (existing as { organizations?: unknown }).organizations;
+  if (!existingOrganizations || typeof existingOrganizations !== 'object') {
+    return base;
+  }
+
+  const organizations = existingOrganizations as Record<string, unknown>;
 
   const mergedOrganizations = Object.fromEntries(
     Object.entries(base.organizations).map(([organizationId, organizationPermissions]) => [
       organizationId,
-      mergeOrganizationPermissions(
-        organizationPermissions,
-        existing.organizations[organizationId],
-      ),
+      mergeOrganizationPermissions(organizationPermissions, organizations[organizationId]),
     ]),
   );
 

@@ -44,3 +44,11 @@ export type OrganizationScopePermissions = Readonly<{
 export type OrganizationMemberPermissionTree = Readonly<{
   organizations: Readonly<Record<string, OrganizationScopePermissions>>;
 }>;
+
+export type SparsePermissionNode = {
+  readonly [key: string]: true | SparsePermissionNode;
+};
+
+export type SparseOrganizationMemberPermissionTree = Readonly<{
+  organizations: SparsePermissionNode;
+}>;

@@ -28,13 +28,15 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 import { BurlCreateButtonComponent } from '../../../../../../shared/burl-create-button/burl-create-button.component';
 import {
   OrganizationMemberFacade,
-  OrganizationMemberStatus,
   OrganizationMemberStore,
-  UserRoles,
   createEmptyPermissionTree,
   mergePermissionTree,
 } from '../../../data/organization-member';
-import type { OrganizationMemberPayload, OrganizationMemberPermissionTree, InviteMemberPayload } from '../../../data/organization-member';
+import type {
+  OrganizationMemberPermissionTree,
+  OrganizationMemberUpdatePayload,
+  InviteMemberPayload,
+} from '../../../data/organization-member';
 import { BranchStore } from '../../../data/branch';
 import { OrganizationStore } from '../../../data/organization';
 import type { Organization } from '../../../data/organization/organization.model';
@@ -43,7 +45,12 @@ import { MemberPermissionsEditorComponent } from '../member-permissions-editor/m
 import { resolveOrganizationWithBranches } from './create-user-organization.util';
 import { validateEmail } from '../../../../../../shared/validation/email.util';
 
-export type PageLoadState = 'initializing' | 'ready' | 'member-not-found' | 'no-organization';
+export type PageLoadState =
+  | 'initializing'
+  | 'ready'
+  | 'member-not-found'
+  | 'no-organization'
+  | 'load-error';
 
 @Component({
   selector: 'app-create-user',
@@ -80,17 +87,12 @@ export class CreateUserComponent implements AfterViewInit {
   protected readonly branchStore = inject(BranchStore);
   private readonly organizationStore = inject(OrganizationStore);
 
-  private organizationid = '';
-  private role = UserRoles.USER;
-  private status = OrganizationMemberStatus.INVITED;
-  private props: Readonly<Record<string, unknown>> | undefined;
-
   protected readonly id = signal<string | null>(this.route.snapshot.paramMap.get('id'));
   protected readonly loadState = signal<PageLoadState>('initializing');
   protected readonly submitted = signal(false);
   protected readonly isSubmitting = signal(false);
   protected readonly formError = signal<string | null>(null);
-  protected readonly userid = signal('');
+  protected readonly email = signal('');
   protected readonly organization = signal<Organization | null>(null);
   protected readonly permissions = signal<OrganizationMemberPermissionTree>({ organizations: {} });
 
@@ -98,10 +100,10 @@ export class CreateUserComponent implements AfterViewInit {
   protected readonly title = computed(() => (this.mode() === 'edit' ? 'Edit User' : 'Invite User'));
   protected readonly subtitle = computed(() =>
     this.mode() === 'edit'
-      ? 'Update email and access permissions.'
+      ? 'Review the user email and update access permissions.'
       : 'Invite a user to the current organization.',
   );
-  protected readonly userError = computed(() => validateEmail(this.userid(), this.submitted()));
+  protected readonly userError = computed(() => validateEmail(this.email(), this.submitted()));
   protected readonly hasErrors = computed(
     () => this.userError() !== null || this.formError() !== null,
   );
@@ -110,7 +112,7 @@ export class CreateUserComponent implements AfterViewInit {
     () => this.isSubmitting() || this.loadState() !== 'ready',
   );
   protected readonly setupSteps = computed(() => {
-    const emailCompleted = this.userid().trim().length > 0 && this.userError() === null;
+    const emailCompleted = this.email().trim().length > 0 && this.userError() === null;
 
     return [
       {
@@ -137,13 +139,14 @@ export class CreateUserComponent implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    if (this.loadState() === 'ready') {
+    if (this.mode() === 'create' && this.loadState() === 'ready') {
       this.focusEmailInput();
     }
   }
 
   protected onUserInput(event: Event): void {
-    this.userid.set((event.target as HTMLInputElement).value);
+    if (this.mode() === 'edit') return;
+    this.email.set((event.target as HTMLInputElement).value);
   }
 
   protected onPermissionsChange(permissions: OrganizationMemberPermissionTree): void {
@@ -164,7 +167,6 @@ export class CreateUserComponent implements AfterViewInit {
       const id = this.id();
       if (id) {
         const payload = this.buildUpdatePayload();
-        if (!payload) return;
         await this.facade.update(id, payload);
       } else {
         const payload = this.buildInvitePayload();
@@ -219,9 +221,18 @@ export class CreateUserComponent implements AfterViewInit {
   private async initializeEdit(memberId: string): Promise<void> {
     this.loadState.set('initializing');
 
-    const member = await this.memberStore.loadMemberById(memberId, { includes: ['organization'] });
+    const member = await this.memberStore.loadMemberById(memberId, {
+      includes: ['organization', 'user'],
+    });
     if (!member) {
       this.loadState.set('member-not-found');
+      return;
+    }
+
+    const memberEmail = member.user?.email?.trim();
+    if (!memberEmail) {
+      this.formError.set('Unable to load email for this user.');
+      this.loadState.set('load-error');
       return;
     }
 
@@ -232,57 +243,56 @@ export class CreateUserComponent implements AfterViewInit {
       return;
     }
 
-    const memberOrganization = await resolveOrganizationWithBranches(
-      memberOrganizationId,
-      member.organization ?? null,
-      (organizationId) => this.organizationStore.loadOrganizationById(organizationId),
-    );
+    const [memberOrganization] = await Promise.all([
+      resolveOrganizationWithBranches(
+        memberOrganizationId,
+        member.organization ?? null,
+        (organizationId) => this.organizationStore.loadOrganizationById(organizationId),
+      ),
+      this.branchStore.loadBranches({
+        where: { organizationid: memberOrganizationId },
+        includes: ['fiscalyears'],
+      }),
+    ]);
     if (!memberOrganization?.id) {
       this.formError.set('Unable to load organization for this user.');
       this.loadState.set('no-organization');
       return;
     }
+    if (this.branchStore.error()) {
+      this.formError.set('Unable to load permissions for this user.');
+      this.loadState.set('load-error');
+      return;
+    }
 
-    this.userid.set(member.userid ?? '');
-    this.organizationid = memberOrganizationId;
-    this.role = member.role ?? UserRoles.USER;
-    this.status = member.status ?? OrganizationMemberStatus.INVITED;
-    this.props = member.props;
-    this.organization.set(memberOrganization);
+    const branches = this.branchStore
+      .branches()
+      .filter((branch) => branch.organizationid === memberOrganizationId);
+
+    this.email.set(memberEmail);
+    this.organization.set({ ...memberOrganization, branches });
 
     this.permissions.set(
       mergePermissionTree(
-        createEmptyPermissionTree(memberOrganizationId, memberOrganization.branches ?? []),
+        createEmptyPermissionTree(memberOrganizationId, branches),
         member.permissions,
       ),
     );
     this.loadState.set('ready');
-    this.focusEmailInput();
   }
 
   private buildInvitePayload(): InviteMemberPayload | null {
     if (this.userError()) return null;
 
     return {
-      email: this.userid().trim(),
+      email: this.email().trim(),
       permissions: this.permissions(),
     };
   }
 
-  private buildUpdatePayload(): OrganizationMemberPayload | null {
-    if (this.userError()) return null;
-    if (!this.organizationid) {
-      this.formError.set('Organization is required.');
-      return null;
-    }
-
+  private buildUpdatePayload(): OrganizationMemberUpdatePayload {
     return {
-      userid: this.userid().trim(),
-      organizationid: this.organizationid,
-      role: this.role,
-      status: this.status,
       permissions: this.permissions(),
-      ...(this.props ? { props: this.props } : {}),
     };
   }
 

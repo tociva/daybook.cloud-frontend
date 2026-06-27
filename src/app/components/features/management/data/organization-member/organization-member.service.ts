@@ -7,7 +7,9 @@ import type {
   OrganizationMemberInvitationDecisionPayload,
   OrganizationMemberListQuery,
   OrganizationMemberPayload,
+  OrganizationMemberUpdatePayload,
 } from './organization-member.model';
+import { serializePermissionTree } from './organization-member-permissions.util';
 
 const ENDPOINT = '/organization/organization-member';
 const INVITE_ENDPOINT = '/organization/organization/invite-member';
@@ -19,11 +21,19 @@ export class OrganizationMemberService {
   private readonly crudApi = inject(CrudApiService);
 
   async create(payload: OrganizationMemberPayload): Promise<OrganizationMember> {
-    return this.crudApi.create<OrganizationMember, OrganizationMemberPayload>(ENDPOINT, payload);
+    const request =
+      payload.permissions === undefined
+        ? payload
+        : { ...payload, permissions: serializePermissionTree(payload.permissions) };
+    return this.crudApi.create<OrganizationMember, typeof request>(ENDPOINT, request);
   }
 
   async inviteMember(payload: InviteMemberPayload): Promise<OrganizationMember> {
-    return this.crudApi.create<OrganizationMember, InviteMemberPayload>(INVITE_ENDPOINT, payload);
+    const request =
+      payload.permissions === undefined
+        ? payload
+        : { ...payload, permissions: serializePermissionTree(payload.permissions) };
+    return this.crudApi.create<OrganizationMember, typeof request>(INVITE_ENDPOINT, request);
   }
 
   async delete(id: string): Promise<void> {
@@ -42,26 +52,20 @@ export class OrganizationMemberService {
     return this.crudApi.count(ENDPOINT, query);
   }
 
-  async update(id: string, payload: OrganizationMemberPayload): Promise<OrganizationMember> {
-    return this.crudApi.update<OrganizationMember, OrganizationMemberPayload>(
-      ENDPOINT,
-      id,
-      payload,
-    );
+  async update(id: string, payload: OrganizationMemberUpdatePayload): Promise<OrganizationMember> {
+    const request = { ...payload, permissions: serializePermissionTree(payload.permissions) };
+    return this.crudApi.update<OrganizationMember, typeof request>(ENDPOINT, id, request);
   }
 
   async acceptInvitation(organizationid: string): Promise<OrganizationMember> {
-    return this.crudApi.create<
-      OrganizationMember,
-      OrganizationMemberInvitationDecisionPayload
-    >(ACCEPT_INVITATION_ENDPOINT, { organizationid });
+    return this.crudApi.create<OrganizationMember, OrganizationMemberInvitationDecisionPayload>(
+      ACCEPT_INVITATION_ENDPOINT,
+      { organizationid },
+    );
   }
 
   async rejectInvitation(organizationid: string): Promise<OrganizationMember> {
-    return this.crudApi.create<
-      OrganizationMember,
-      OrganizationMemberInvitationDecisionPayload
-    >(
+    return this.crudApi.create<OrganizationMember, OrganizationMemberInvitationDecisionPayload>(
       REJECT_INVITATION_ENDPOINT,
       { organizationid },
     );

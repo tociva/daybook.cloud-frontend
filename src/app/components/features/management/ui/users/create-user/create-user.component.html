@@ -61,6 +61,8 @@
             <div class="notice notice--danger">User not found.</div>
           } @else if (loadState() === 'no-organization') {
             <div class="notice notice--danger">{{ formError() }}</div>
+          } @else if (loadState() === 'load-error') {
+            <div class="notice notice--danger">{{ formError() }}</div>
           } @else if (loadState() === 'ready') {
             <div class="fields-grid">
               <tng-form-field
@@ -72,8 +74,9 @@
                 <tng-label forId="user-email" required>Email</tng-label>
                 <tng-input
                   id="user-email"
-                  [value]="userid()"
+                  [value]="email()"
                   type="email"
+                  [readonly]="mode() === 'edit'"
                   [required]="true"
                   [ariaInvalid]="userError() !== null"
                   placeholder="name@example.com"
@@ -86,8 +89,8 @@
                 <app-member-permissions-editor
                   [organization]="organization()"
                   [permissions]="permissions()"
-                  [branchList]="mode() === 'create' ? branchStore.branches() : undefined"
-                  [branchesLoading]="mode() === 'create' && branchStore.isLoading()"
+                  [branchList]="branchStore.branches()"
+                  [branchesLoading]="branchStore.isLoading()"
                   (permissionsChange)="onPermissionsChange($event)"
                 />
               </div>
@@ -135,7 +138,7 @@
           <p>
             {{
               mode() === 'edit'
-                ? 'Update the invitee email and fine-tune organization and branch access.'
+                ? 'The user email cannot be changed. Fine-tune organization and branch access.'
                 : 'Send an invitation and configure what the new user can access in your workspace.'
             }}
           </p>

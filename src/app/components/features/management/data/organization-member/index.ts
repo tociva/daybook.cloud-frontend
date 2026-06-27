@@ -8,6 +8,7 @@ export type {
   OrganizationMemberGetQuery,
   OrganizationMemberListQuery,
   OrganizationMemberPayload,
+  OrganizationMemberUpdatePayload,
   User,
 } from './organization-member.model';
 export type { OrganizationMemberPermissions } from './organization-member.types';
@@ -17,6 +18,8 @@ export type {
   OrganizationMemberPermissionTree,
   OrganizationScopePermissions,
   PermissionFlags,
+  SparseOrganizationMemberPermissionTree,
+  SparsePermissionNode,
 } from './organization-member-permissions.model';
 export {
   BRANCH_PERMISSION_GROUPS,
@@ -42,6 +45,7 @@ export {
   isGroupFullyChecked,
   isGroupPartiallyChecked,
   mergePermissionTree,
+  serializePermissionTree,
   setFlag,
   toggleGroup,
 } from './organization-member-permissions.util';

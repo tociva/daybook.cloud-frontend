@@ -7,13 +7,15 @@ import type {
   InviteMemberPayload,
   OrganizationMember,
   OrganizationMemberPayload,
+  OrganizationMemberUpdatePayload,
 } from './organization-member.model';
 import { OrganizationMemberStore } from './organization-member.store';
 
 @Injectable({ providedIn: 'root' })
 export class OrganizationMemberFacade extends CrudFacadeBase<
   OrganizationMember,
-  OrganizationMemberPayload
+  OrganizationMemberPayload,
+  OrganizationMemberUpdatePayload
 > {
   private readonly store = inject(OrganizationMemberStore);
   private readonly memberToast = inject(ToastStore);
@@ -29,7 +31,7 @@ export class OrganizationMemberFacade extends CrudFacadeBase<
     return this.store.createMember(payload);
   }
 
-  protected doUpdate(id: string, payload: OrganizationMemberPayload): Promise<boolean> {
+  protected doUpdate(id: string, payload: OrganizationMemberUpdatePayload): Promise<boolean> {
     return this.store.updateMember(id, payload);
   }
 

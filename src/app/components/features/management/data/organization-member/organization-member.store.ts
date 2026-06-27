@@ -7,6 +7,7 @@ import type {
   OrganizationMemberGetQuery,
   OrganizationMemberListQuery,
   OrganizationMemberPayload,
+  OrganizationMemberUpdatePayload,
 } from './organization-member.model';
 import { OrganizationMemberService } from './organization-member.service';
 import { initialOrganizationMemberState } from './organization-member.state';
@@ -146,7 +147,7 @@ export const OrganizationMemberStore = signalStore(
         }
       },
 
-      async updateMember(id: string, payload: OrganizationMemberPayload): Promise<boolean> {
+      async updateMember(id: string, payload: OrganizationMemberUpdatePayload): Promise<boolean> {
         setLoading();
         try {
           const member = await service.update(id, payload);

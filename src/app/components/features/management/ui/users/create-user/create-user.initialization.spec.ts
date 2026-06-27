@@ -37,8 +37,6 @@ const fiscalYear: FiscalYear & { id: string } = {
   enddate: '2026-03-31',
   currencycode: 'INR',
   branchid: 'branch-1',
-  organizationid: 'org-1',
-  userid: 'owner',
 };
 
 const branch: Branch & { id: string } = {
@@ -97,6 +95,7 @@ function mergeBranchesIntoCreatePermissions(
 
 async function bootstrapEditPermissions(
   member: OrganizationMember,
+  branches: readonly Branch[],
   loadOrganizationById: (organizationId: string) => Promise<Organization | null>,
 ) {
   const memberOrganizationId = member.organizationid;
@@ -114,7 +113,7 @@ async function bootstrapEditPermissions(
   }
 
   return mergePermissionTree(
-    createEmptyPermissionTree(memberOrganization.id, memberOrganization.branches ?? []),
+    createEmptyPermissionTree(memberOrganization.id, branches),
     member.permissions,
   );
 }
@@ -173,13 +172,13 @@ describe('create-user initialization flows', () => {
       ...organization,
       user: {
         ...organization.user,
-        inviteMember: true,
+        ['inviteMember']: true,
       },
     }));
 
     const merged = mergeBranchesIntoCreatePermissions(session, [branch], edited);
 
-    expect(merged.organizations['org-1']?.user.inviteMember).toBe(true);
+    expect(merged.organizations['org-1']?.user['inviteMember']).toBe(true);
     expect(merged.organizations['org-1']?.branches['branch-1']).toBeDefined();
   });
 
@@ -210,7 +209,13 @@ describe('create-user initialization flows', () => {
             branches: {
               'branch-1': {
                 fiscalYear: { create: true, update: false, view: false, delete: false },
-                item: { create: false, update: false, view: false, delete: false, bulkUpload: false },
+                item: {
+                  create: false,
+                  update: false,
+                  view: false,
+                  delete: false,
+                  bulkUpload: false,
+                },
                 itemCategory: {
                   create: false,
                   update: false,
@@ -218,7 +223,13 @@ describe('create-user initialization flows', () => {
                   delete: false,
                   bulkUpload: false,
                 },
-                tax: { create: false, update: false, view: false, delete: false, bulkUpload: false },
+                tax: {
+                  create: false,
+                  update: false,
+                  view: false,
+                  delete: false,
+                  bulkUpload: false,
+                },
                 taxGroup: {
                   create: false,
                   update: false,
@@ -303,11 +314,11 @@ describe('create-user initialization flows', () => {
 
     const loadOrganizationById = vi.fn().mockResolvedValue(organization);
 
-    const permissions = await bootstrapEditPermissions(member, loadOrganizationById);
+    const permissions = await bootstrapEditPermissions(member, [branch], loadOrganizationById);
 
     expect(loadOrganizationById).toHaveBeenCalledWith('org-1');
-    expect(
-      permissions?.organizations['org-1']?.branches['branch-1']?.fiscalYear.create,
-    ).toBe(true);
+    expect(permissions?.organizations['org-1']?.branches['branch-1']?.fiscalYear['create']).toBe(
+      true,
+    );
   });
 });

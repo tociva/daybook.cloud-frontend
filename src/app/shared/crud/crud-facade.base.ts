@@ -12,16 +12,16 @@ export type CudOptions = Readonly<{ navigateBack?: boolean }>;
 
 const DEFAULTS: Required<CudOptions> = { navigateBack: true };
 
-export abstract class CrudFacadeBase<TEntity, TPayload> {
+export abstract class CrudFacadeBase<TEntity, TCreatePayload, TUpdatePayload = TCreatePayload> {
   private readonly toast = inject(ToastStore);
   private readonly navigation = inject(BurlNavigationService);
 
   protected abstract readonly messages: CudMessages;
-  protected abstract doCreate(payload: TPayload): Promise<TEntity | null>;
-  protected abstract doUpdate(id: string, payload: TPayload): Promise<boolean>;
+  protected abstract doCreate(payload: TCreatePayload): Promise<TEntity | null>;
+  protected abstract doUpdate(id: string, payload: TUpdatePayload): Promise<boolean>;
   protected abstract doDelete(id: string): Promise<boolean>;
 
-  async create(payload: TPayload, options: CudOptions = {}): Promise<TEntity | null> {
+  async create(payload: TCreatePayload, options: CudOptions = {}): Promise<TEntity | null> {
     const { navigateBack } = { ...DEFAULTS, ...options };
     const result = await this.doCreate(payload);
     if (result) {
@@ -31,7 +31,7 @@ export abstract class CrudFacadeBase<TEntity, TPayload> {
     return result;
   }
 
-  async update(id: string, payload: TPayload, options: CudOptions = {}): Promise<boolean> {
+  async update(id: string, payload: TUpdatePayload, options: CudOptions = {}): Promise<boolean> {
     const { navigateBack } = { ...DEFAULTS, ...options };
     const result = await this.doUpdate(id, payload);
     if (result) {

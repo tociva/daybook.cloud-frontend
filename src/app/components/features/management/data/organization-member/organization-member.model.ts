@@ -31,6 +31,10 @@ export type OrganizationMemberPayload = Readonly<{
   permissions?: OrganizationMemberPermissions;
 }>;
 
+export type OrganizationMemberUpdatePayload = Readonly<{
+  permissions: OrganizationMemberPermissions;
+}>;
+
 export type InviteMemberPayload = Readonly<{
   email: string;
   permissions?: OrganizationMemberPermissions;

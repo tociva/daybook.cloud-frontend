@@ -2,7 +2,10 @@ import { describe, expect, it, vi } from 'vitest';
 import type { Organization } from '../../../data/organization/organization.model';
 import type { Branch } from '../../../data/branch/branch.model';
 import type { FiscalYear } from '../../../data/fiscal-year/fiscal-year.model';
-import { OrganizationMemberStatus } from '../../../data/organization-member/organization-member.enums';
+import {
+  OrganizationMemberStatus,
+  UserRoles,
+} from '../../../data/organization-member/organization-member.enums';
 import type { UserSession } from '../../../data/user-session/user-session.model';
 import {
   getAvailableOrganizations,
@@ -17,8 +20,6 @@ const fiscalYear: FiscalYear & { id: string } = {
   enddate: '2026-03-31',
   currencycode: 'INR',
   branchid: 'branch-1',
-  organizationid: 'org-1',
-  userid: 'owner',
 };
 
 const branch: Branch & { id: string } = {
@@ -68,7 +69,7 @@ describe('create-user-organization.util', () => {
             branches: [],
           },
           organizationid: 'org-member',
-          role: 'user' as const,
+          role: UserRoles.USER,
           status: OrganizationMemberStatus.ACCEPTED,
           userid: 'member@example.com',
         },
@@ -81,7 +82,7 @@ describe('create-user-organization.util', () => {
             branches: [],
           },
           organizationid: 'org-pending',
-          role: 'user' as const,
+          role: UserRoles.USER,
           status: OrganizationMemberStatus.INVITED,
           userid: 'pending@example.com',
         },
@@ -91,7 +92,10 @@ describe('create-user-organization.util', () => {
       userid: 'owner',
     };
 
-    expect(getAvailableOrganizations(session).map((org) => org.id)).toEqual(['org-1', 'org-member']);
+    expect(getAvailableOrganizations(session).map((org) => org.id)).toEqual([
+      'org-1',
+      'org-member',
+    ]);
   });
 
   it('falls back to ownorgs when session organization is missing', async () => {

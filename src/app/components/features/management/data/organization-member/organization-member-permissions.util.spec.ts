@@ -6,6 +6,7 @@ import {
   isGroupFullyChecked,
   isGroupPartiallyChecked,
   mergePermissionTree,
+  serializePermissionTree,
   toggleGroup,
 } from './organization-member-permissions.util';
 
@@ -16,8 +17,6 @@ const fiscalYear: FiscalYear & { id: string } = {
   enddate: '2026-03-31',
   currencycode: 'INR',
   branchid: 'branch-1',
-  organizationid: 'org-1',
-  userid: 'owner',
 };
 
 const branch: Branch & { id: string } = {
@@ -49,14 +48,14 @@ describe('organization-member-permissions.util', () => {
     const tree = createEmptyPermissionTree('org-1', [branch]);
     const organization = tree.organizations['org-1'];
 
-    expect(organization.user.inviteMember).toBe(false);
-    expect(organization.branch.create).toBe(false);
-    expect(organization.branches['branch-1'].item.bulkUpload).toBe(false);
-    expect(organization.branches['branch-1'].fiscalyears['fy-1'].journal.createDocument).toBe(
+    expect(organization.user['inviteMember']).toBe(false);
+    expect(organization.branch['create']).toBe(false);
+    expect(organization.branches['branch-1'].item['bulkUpload']).toBe(false);
+    expect(organization.branches['branch-1'].fiscalyears['fy-1'].journal['createDocument']).toBe(
       false,
     );
     expect(
-      organization.branches['branch-1'].fiscalyears['fy-1'].accountingReports.trialBalance,
+      organization.branches['branch-1'].fiscalyears['fy-1'].accountingReports['trialBalance'],
     ).toBe(false);
   });
 
@@ -103,13 +102,116 @@ describe('organization-member-permissions.util', () => {
     });
 
     const organization = merged.organizations['org-1'];
-    expect(organization.user.inviteMember).toBe(true);
-    expect(organization.branch.view).toBe(true);
-    expect(organization.branches['branch-1'].item.create).toBe(true);
+    expect(organization.user['inviteMember']).toBe(true);
+    expect(organization.branch['view']).toBe(true);
+    expect(organization.branches['branch-1'].item['create']).toBe(true);
     expect(
-      organization.branches['branch-1'].fiscalyears['fy-1'].accountingReports.trialBalance,
+      organization.branches['branch-1'].fiscalyears['fy-1'].accountingReports['trialBalance'],
     ).toBe(true);
-    expect(organization.branches['branch-1'].fiscalyears['fy-1'].journal.create).toBe(false);
+    expect(organization.branches['branch-1'].fiscalyears['fy-1'].journal['create']).toBe(false);
+  });
+
+  it('treats missing, false, and non-boolean permission values as unchecked', () => {
+    const base = createEmptyPermissionTree('org-1', [branch]);
+    const merged = mergePermissionTree(base, {
+      organizations: {
+        'org-1': {
+          user: {
+            inviteMember: true,
+            removeMember: false,
+            updateMember: 'true',
+          },
+          branches: {
+            'branch-1': {
+              item: { create: true, update: false, view: 1 },
+            },
+          },
+        },
+      },
+    });
+
+    const organization = merged.organizations['org-1'];
+    expect(organization.user['inviteMember']).toBe(true);
+    expect(organization.user['removeMember']).toBe(false);
+    expect(organization.user['updateMember']).toBe(false);
+    expect(organization.branch['create']).toBe(false);
+    expect(organization.branches['branch-1'].item['create']).toBe(true);
+    expect(organization.branches['branch-1'].item['update']).toBe(false);
+    expect(organization.branches['branch-1'].item['view']).toBe(false);
+    expect(organization.branches['branch-1'].item['delete']).toBe(false);
+  });
+
+  it('serializes only true permission leaves and required ancestor objects', () => {
+    const base = createEmptyPermissionTree('org-1', [branch]);
+    const dense = mergePermissionTree(base, {
+      organizations: {
+        'org-1': {
+          user: { inviteMember: true, removeMember: false },
+          branch: { view: true, update: false },
+          branches: {
+            'branch-1': {
+              item: { create: true, update: false },
+              tax: { view: false },
+              fiscalyears: {
+                'fy-1': {
+                  journal: { view: true, create: false },
+                  ledger: { view: false },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const sparse = serializePermissionTree(dense);
+
+    expect(sparse).toEqual({
+      organizations: {
+        'org-1': {
+          user: { inviteMember: true },
+          branch: { view: true },
+          branches: {
+            'branch-1': {
+              item: { create: true },
+              fiscalyears: {
+                'fy-1': {
+                  journal: { view: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const roundTrip = mergePermissionTree(base, sparse);
+    expect(roundTrip.organizations['org-1'].user['inviteMember']).toBe(true);
+    expect(roundTrip.organizations['org-1'].user['removeMember']).toBe(false);
+    expect(roundTrip.organizations['org-1'].branches['branch-1'].item['create']).toBe(true);
+    expect(roundTrip.organizations['org-1'].branches['branch-1'].item['update']).toBe(false);
+    expect(
+      roundTrip.organizations['org-1'].branches['branch-1'].fiscalyears['fy-1'].journal['view'],
+    ).toBe(true);
+    expect(
+      roundTrip.organizations['org-1'].branches['branch-1'].fiscalyears['fy-1'].journal['create'],
+    ).toBe(false);
+  });
+
+  it('serializes an all-false or invalid tree to an empty organizations object', () => {
+    expect(serializePermissionTree(createEmptyPermissionTree('org-1', [branch]))).toEqual({
+      organizations: {},
+    });
+    expect(
+      serializePermissionTree({
+        organizations: {
+          'org-1': {
+            user: { inviteMember: false, updateMember: 'true' },
+            branches: [],
+          },
+        },
+      }),
+    ).toEqual({ organizations: {} });
   });
 
   it('supports group toggle helpers', () => {
