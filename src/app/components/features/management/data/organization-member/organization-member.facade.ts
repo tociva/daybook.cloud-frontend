@@ -51,4 +51,12 @@ export class OrganizationMemberFacade extends CrudFacadeBase<
     }
     return result;
   }
+
+  async resendInvitation(id: string): Promise<boolean> {
+    const ok = await this.store.resendInvitation(id);
+    if (ok) {
+      this.memberToast.success('Invitation resent.');
+    }
+    return ok;
+  }
 }

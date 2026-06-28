@@ -141,4 +141,33 @@ describe('OrganizationMemberService contracts', () => {
       organizationid: 'org-1',
     });
   });
+
+  it('uses resend-invitation subresource endpoint with member id', async () => {
+    const postSubresource = vi.fn(async () => ({
+      id: 'member-1',
+      organizationid: 'org-1',
+      role: UserRoles.USER,
+      status: OrganizationMemberStatus.INVITED,
+      userid: 'user-1',
+    }));
+
+    TestBed.configureTestingModule({
+      providers: [
+        OrganizationMemberService,
+        {
+          provide: CrudApiService,
+          useValue: { postSubresource },
+        },
+      ],
+    });
+
+    const service = TestBed.inject(OrganizationMemberService);
+    await service.resendInvitation('member-1');
+
+    expect(postSubresource).toHaveBeenCalledWith(
+      ORGANIZATION_MEMBER_ENDPOINT,
+      'member-1',
+      'resend-invitation',
+    );
+  });
 });

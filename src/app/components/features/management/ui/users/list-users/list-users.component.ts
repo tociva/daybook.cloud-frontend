@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
   TngAvatarComponent,
@@ -10,6 +10,7 @@ import {
 import type { TngTableColumn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { CanDirective } from '../../../../../../core/permissions/can.directive';
+import { PERMISSION } from '../../../../../../core/permissions/permission-requirements';
 import {
   CrudFilterPopoverComponent,
   CrudListQueryService,
@@ -21,6 +22,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import {
+  OrganizationMemberFacade,
   OrganizationMemberStatus,
   OrganizationMemberStore,
   UserRoles,
@@ -53,17 +55,20 @@ import { UserSessionStore } from '../../../data/user-session/user-session.store'
 })
 export class ListUsersComponent {
   private readonly router = inject(Router);
+  private readonly facade = inject(OrganizationMemberFacade);
   private readonly userSessionStore = inject(UserSessionStore);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly memberStore = inject(OrganizationMemberStore);
   protected readonly hasError = computed(() => this.memberStore.error() !== null);
+  protected readonly invitePermission = PERMISSION.organization.user.invite;
+  protected readonly resendingMemberId = signal<string | null>(null);
 
   protected readonly columns: readonly TngTableColumn<OrganizationMember>[] = [
     { id: 'userid', label: 'User', sortable: true, truncate: true },
     { id: 'organizationid', label: 'Organization', sortable: true, truncate: true },
     { id: 'role', label: 'Role', sortable: true, width: '10rem' },
     { id: 'status', label: 'Status', sortable: true, width: '11rem' },
-    { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '8rem' },
+    { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '10rem' },
   ];
 
   protected readonly filterFields: readonly CrudFilterField[] = [
@@ -181,6 +186,28 @@ export class ListUsersComponent {
       void this.router.navigate(['/app/management/users', member.id, 'delete'], {
         queryParams: { burl: this.router.url },
       });
+    }
+  }
+
+  protected canResendInvitation(member: OrganizationMember): boolean {
+    return (
+      member.status === OrganizationMemberStatus.INVITED ||
+      member.status === OrganizationMemberStatus.INVITE_EXPIRED ||
+      member.status === OrganizationMemberStatus.REJECTED
+    );
+  }
+
+  protected async resendInvitation(member: OrganizationMember): Promise<void> {
+    const id = member.id;
+    if (!id || this.resendingMemberId() === id) {
+      return;
+    }
+
+    this.resendingMemberId.set(id);
+    try {
+      await this.facade.resendInvitation(id);
+    } finally {
+      this.resendingMemberId.set(null);
     }
   }
 

@@ -55,4 +55,27 @@ describe('OrganizationMemberStore invitation actions', () => {
     expect(result).toBe(true);
     expect(rejectInvitation).toHaveBeenCalledWith('org-1');
   });
+
+  it('resends an invitation and patches the member in state', async () => {
+    const resendInvitation = vi.fn(async () => ({
+      id: 'member-1',
+      organizationid: 'org-1',
+      role: UserRoles.USER,
+      status: OrganizationMemberStatus.INVITED,
+      userid: 'user-1',
+    }));
+
+    TestBed.configureTestingModule({
+      providers: [
+        OrganizationMemberStore,
+        { provide: OrganizationMemberService, useValue: { resendInvitation } },
+      ],
+    });
+
+    const store = TestBed.inject(OrganizationMemberStore);
+    const result = await store.resendInvitation('member-1');
+
+    expect(result).toBe(true);
+    expect(resendInvitation).toHaveBeenCalledWith('member-1');
+  });
 });

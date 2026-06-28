@@ -116,6 +116,15 @@
                   ariaLabel="Edit user"
                   (action)="editUser(row)"
                 />
+                @if (canResendInvitation(row)) {
+                  <app-table-row-icon-button
+                    icon="mail"
+                    ariaLabel="Resend invitation"
+                    [permission]="invitePermission"
+                    [disabled]="resendingMemberId() === row.id"
+                    (action)="resendInvitation(row)"
+                  />
+                }
                 <app-table-row-icon-button
                   icon="trash2"
                   ariaLabel="Remove user"

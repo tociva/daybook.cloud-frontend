@@ -167,6 +167,17 @@ export const OrganizationMemberStore = signalStore(
         return updateInvitationStatus(organizationid, 'reject', 'Failed to reject invitation.');
       },
 
+      async resendInvitation(id: string): Promise<boolean> {
+        try {
+          const member = await service.resendInvitation(id);
+          patchMemberState(id, member);
+          return true;
+        } catch (error) {
+          setError(getApiErrorMessage(error, 'Failed to resend invitation.'));
+          return false;
+        }
+      },
+
       async deleteMember(id: string): Promise<boolean> {
         setLoading();
         try {

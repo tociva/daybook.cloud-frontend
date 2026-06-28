@@ -70,4 +70,8 @@ export class OrganizationMemberService {
       { organizationid },
     );
   }
+
+  async resendInvitation(id: string): Promise<OrganizationMember> {
+    return this.crudApi.postSubresource<OrganizationMember>(ENDPOINT, id, 'resend-invitation');
+  }
 }

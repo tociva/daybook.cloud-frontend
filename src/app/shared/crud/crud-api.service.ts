@@ -73,6 +73,18 @@ export class CrudApiService {
     );
   }
 
+  async postSubresource<TEntity>(
+    endpointPath: string,
+    id: string,
+    subpath: string,
+    payload: Record<string, never> = {},
+  ): Promise<TEntity> {
+    return this.api.post<TEntity, Record<string, never>>(
+      `${await this.collectionUrl(endpointPath)}/${id}/${subpath}`,
+      payload,
+    );
+  }
+
   private async collectionUrl(endpointPath: string): Promise<string> {
     const config = this.appConfigStore.config() ?? (await this.appConfigStore.load());
     if (!config) {
