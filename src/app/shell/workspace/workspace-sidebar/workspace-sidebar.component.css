@@ -24,6 +24,7 @@
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
+  scroll-padding-bottom: 1rem;
   scrollbar-gutter: stable;
 }
 
@@ -34,6 +35,7 @@
   display: grid;
   gap: 0.4rem;
   min-height: 0;
+  padding-bottom: 1rem;
   padding-right: 0;
 }
 
