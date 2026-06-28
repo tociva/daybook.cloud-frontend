@@ -42,6 +42,8 @@ import {
   toggleGroup,
 } from '../../../data/organization-member/organization-member-permissions.util';
 
+type OrganizationPermissionGroupKey = keyof Omit<OrganizationScopePermissions, 'branches'>;
+
 @Component({
   selector: 'app-member-permissions-editor',
   standalone: true,
@@ -127,7 +129,10 @@ export class MemberPermissionsEditorComponent {
     return this.organizationScope()?.branches[branchId] ?? null;
   }
 
-  protected fiscalYearScope(branchId: string, fiscalYearId: string): FiscalYearScopePermissions | null {
+  protected fiscalYearScope(
+    branchId: string,
+    fiscalYearId: string,
+  ): FiscalYearScopePermissions | null {
     return this.branchScope(branchId)?.fiscalyears[fiscalYearId] ?? null;
   }
 
@@ -149,7 +154,7 @@ export class MemberPermissionsEditorComponent {
     scope: OrganizationScopePermissions,
     group: PermissionGroupDef,
   ): PermissionFlags {
-    return scope[group.key as 'user' | 'branch'];
+    return scope[group.key as OrganizationPermissionGroupKey];
   }
 
   protected branchGroupFlags(
@@ -170,7 +175,10 @@ export class MemberPermissionsEditorComponent {
     return group.actions.map((action) => action.key);
   }
 
-  protected isGroupChecked(flags: PermissionFlags | null | undefined, group: PermissionGroupDef): boolean {
+  protected isGroupChecked(
+    flags: PermissionFlags | null | undefined,
+    group: PermissionGroupDef,
+  ): boolean {
     if (!flags) return false;
     return isGroupFullyChecked(flags, this.groupActionKeys(group));
   }
@@ -199,7 +207,10 @@ export class MemberPermissionsEditorComponent {
     return values.some(Boolean) && !values.every(Boolean);
   }
 
-  protected isBranchDomainChecked(scope: BranchScopePermissions, domain: PermissionDomainDef): boolean {
+  protected isBranchDomainChecked(
+    scope: BranchScopePermissions,
+    domain: PermissionDomainDef,
+  ): boolean {
     const values = this.getBranchDomainFlagValues(scope, domain);
     return values.length > 0 && values.every(Boolean);
   }
@@ -228,15 +239,12 @@ export class MemberPermissionsEditorComponent {
     return values.some(Boolean) && !values.every(Boolean);
   }
 
-  protected onOrganizationDomainToggle(
-    domain: PermissionDomainDef,
-    checked: boolean,
-  ): void {
+  protected onOrganizationDomainToggle(domain: PermissionDomainDef, checked: boolean): void {
     this.updateOrganizationScope((organization) => {
       const next = { ...organization };
       for (const group of getGroupsForDomain(domain)) {
-        next[group.key as 'user' | 'branch'] = toggleGroup(
-          organization[group.key as 'user' | 'branch'],
+        next[group.key as OrganizationPermissionGroupKey] = toggleGroup(
+          organization[group.key as OrganizationPermissionGroupKey],
           this.groupActionKeys(group),
           checked,
         );
@@ -249,7 +257,7 @@ export class MemberPermissionsEditorComponent {
     this.updateOrganizationScope((organization) => ({
       ...organization,
       [group.key]: toggleGroup(
-        organization[group.key as 'user' | 'branch'],
+        organization[group.key as OrganizationPermissionGroupKey],
         this.groupActionKeys(group),
         checked,
       ),
@@ -264,7 +272,7 @@ export class MemberPermissionsEditorComponent {
     this.updateOrganizationScope((organization) => ({
       ...organization,
       [group.key]: {
-        ...organization[group.key as 'user' | 'branch'],
+        ...organization[group.key as OrganizationPermissionGroupKey],
         [actionKey]: checked,
       },
     }));
@@ -312,7 +320,9 @@ export class MemberPermissionsEditorComponent {
     this.updateBranchScope(branchId, (branch) => ({
       ...branch,
       [group.key]: {
-        ...(branch[group.key as keyof Omit<BranchScopePermissions, 'fiscalyears'>] as PermissionFlags),
+        ...(branch[
+          group.key as keyof Omit<BranchScopePermissions, 'fiscalyears'>
+        ] as PermissionFlags),
         [actionKey]: checked,
       },
     }));

@@ -50,10 +50,15 @@ describe('organization-member-permissions.util', () => {
 
     expect(organization.user['inviteMember']).toBe(false);
     expect(organization.branch['create']).toBe(false);
+    expect(organization.organizationDocument['create']).toBe(false);
     expect(organization.branches['branch-1'].item['bulkUpload']).toBe(false);
-    expect(organization.branches['branch-1'].fiscalyears['fy-1'].journal['createDocument']).toBe(
+    expect(organization.branches['branch-1'].purchaseInvoiceDocument['create']).toBe(false);
+    expect(organization.branches['branch-1'].fiscalyears['fy-1'].journalDocument['create']).toBe(
       false,
     );
+    expect(
+      organization.branches['branch-1'].fiscalyears['fy-1'].gstReconciliationDocument['create'],
+    ).toBe(false);
     expect(
       organization.branches['branch-1'].fiscalyears['fy-1'].accountingReports['trialBalance'],
     ).toBe(false);

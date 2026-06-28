@@ -34,19 +34,17 @@ export class InvoiceDocumentTagsComponent {
   protected readonly canAttach = computed(() => {
     const resourceType = this.resourceType();
     return resourceType
-      ? this.permissionsStore.can(documentPermission(resourceType, 'createDocument'))
+      ? this.permissionsStore.can(documentPermission(resourceType, 'create'))
       : false;
   });
   protected readonly canDelete = computed(() => {
     const resourceType = this.resourceType();
     return resourceType
-      ? this.permissionsStore.can(documentPermission(resourceType, 'deleteDocument'))
+      ? this.permissionsStore.can(documentPermission(resourceType, 'delete'))
       : false;
   });
 
-  protected readonly isDisabled = computed(
-    () => this.disabled() || this.uploading(),
-  );
+  protected readonly isDisabled = computed(() => this.disabled() || this.uploading());
 
   protected readonly hasAttachments = computed(
     () => this.documents().length > 0 || this.files().length > 0,

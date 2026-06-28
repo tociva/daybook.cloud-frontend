@@ -94,7 +94,7 @@ function createEmptyOrganizationPermissions(
 ): OrganizationScopePermissions {
   const organizationGroups = Object.fromEntries(
     ORGANIZATION_PERMISSION_GROUPS.map((group) => [group.key, createEmptyFlagsFromGroup(group)]),
-  ) as Pick<OrganizationScopePermissions, 'user' | 'branch'>;
+  ) as Omit<OrganizationScopePermissions, 'branches'>;
 
   const branchEntries = branches
     .filter((branch): branch is Branch & { id: string } => Boolean(branch.id))
@@ -203,7 +203,7 @@ function mergeOrganizationPermissions(
         source[group.key],
       ),
     ]),
-  ) as Pick<OrganizationScopePermissions, 'user' | 'branch'>;
+  ) as Omit<OrganizationScopePermissions, 'branches'>;
 
   const existingBranches =
     source['branches'] && typeof source['branches'] === 'object'
@@ -263,7 +263,9 @@ function readRootPermissionFlags(value: unknown): PermissionFlags | null {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
 
   const flags = Object.fromEntries(
-    Object.entries(value).filter((entry): entry is [string, boolean] => typeof entry[1] === 'boolean'),
+    Object.entries(value).filter(
+      (entry): entry is [string, boolean] => typeof entry[1] === 'boolean',
+    ),
   );
   return Object.keys(flags).length ? flags : null;
 }

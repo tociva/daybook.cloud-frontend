@@ -206,6 +206,8 @@ describe('create-user initialization flows', () => {
               viewInvoiceTemplate: false,
               deleteInvoiceTemplate: false,
             },
+            organizationDocument: { create: false, update: false, view: false, delete: false },
+            organizationLogoDocument: { create: false, update: false, view: false, delete: false },
             branches: {
               'branch-1': {
                 fiscalYear: { create: true, update: false, view: false, delete: false },
@@ -257,8 +259,6 @@ describe('create-user initialization flows', () => {
                   view: false,
                   delete: false,
                   bulkUpload: false,
-                  createDocument: false,
-                  deleteDocument: false,
                 },
                 saleInvoice: {
                   create: false,
@@ -266,8 +266,6 @@ describe('create-user initialization flows', () => {
                   view: false,
                   delete: false,
                   bulkUpload: false,
-                  createDocument: false,
-                  deleteDocument: false,
                 },
                 purchaseReturn: {
                   create: false,
@@ -275,8 +273,30 @@ describe('create-user initialization flows', () => {
                   view: false,
                   delete: false,
                   bulkUpload: false,
-                  createDocument: false,
-                  deleteDocument: false,
+                },
+                purchaseInvoiceDocument: {
+                  create: false,
+                  update: false,
+                  view: false,
+                  delete: false,
+                },
+                saleInvoiceDocument: {
+                  create: false,
+                  update: false,
+                  view: false,
+                  delete: false,
+                },
+                purchaseReturnDocument: {
+                  create: false,
+                  update: false,
+                  view: false,
+                  delete: false,
+                },
+                saleInvoiceTemplateDocument: {
+                  create: false,
+                  update: false,
+                  view: false,
+                  delete: false,
                 },
                 customerReceipt: {
                   create: false,

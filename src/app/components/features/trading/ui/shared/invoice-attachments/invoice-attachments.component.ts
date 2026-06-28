@@ -49,9 +49,11 @@ export class InvoiceAttachmentsComponent {
   protected readonly deletingDocumentId = signal<string | null>(null);
   protected readonly isUploading = signal(false);
 
-  protected readonly isBusy = computed(() => this.isUploading() || this.deletingDocumentId() !== null);
-  protected readonly canAttach = computed(() => this.hasPermission('createDocument'));
-  protected readonly canDelete = computed(() => this.hasPermission('deleteDocument'));
+  protected readonly isBusy = computed(
+    () => this.isUploading() || this.deletingDocumentId() !== null,
+  );
+  protected readonly canAttach = computed(() => this.hasPermission('create'));
+  protected readonly canDelete = computed(() => this.hasPermission('delete'));
 
   constructor() {
     effect(() => {
@@ -173,7 +175,9 @@ export class InvoiceAttachmentsComponent {
   }
 
   protected documentType(document: StoredDocument): string {
-    return document.type?.toUpperCase() || this.extensionFromName(document.name).toUpperCase() || 'FILE';
+    return (
+      document.type?.toUpperCase() || this.extensionFromName(document.name).toUpperCase() || 'FILE'
+    );
   }
 
   protected fileIcon(document: StoredDocument): string {
@@ -207,7 +211,7 @@ export class InvoiceAttachmentsComponent {
     );
   }
 
-  private hasPermission(permissionName: 'createDocument' | 'deleteDocument'): boolean {
+  private hasPermission(permissionName: 'create' | 'delete'): boolean {
     return this.permissionsStore.can(documentPermission(this.resourceType(), permissionName));
   }
 

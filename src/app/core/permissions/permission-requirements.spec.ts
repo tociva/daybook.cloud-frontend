@@ -3,22 +3,35 @@ import {
   ITEM_TREE_MATCH,
   LEDGER_TREE_MATCH,
   PERMISSION,
+  documentPermission,
   permissionForBulkUploadEndpoint,
   permissionForWorkspaceUrl,
 } from './permission-requirements';
 
 describe('permissionForWorkspaceUrl', () => {
   it('maps CRUD routes to their exact actions', () => {
-    expect(permissionForWorkspaceUrl('/app/trading/customer')).toEqual(PERMISSION.branch.customer.view);
-    expect(permissionForWorkspaceUrl('/app/trading/customer/create')).toEqual(PERMISSION.branch.customer.create);
-    expect(permissionForWorkspaceUrl('/app/trading/customer/customer-1')).toEqual(PERMISSION.branch.customer.view);
-    expect(permissionForWorkspaceUrl('/app/trading/customer/customer-1/edit')).toEqual(PERMISSION.branch.customer.update);
-    expect(permissionForWorkspaceUrl('/app/trading/customer/customer-1/delete')).toEqual(PERMISSION.branch.customer.delete);
+    expect(permissionForWorkspaceUrl('/app/trading/customer')).toEqual(
+      PERMISSION.branch.customer.view,
+    );
+    expect(permissionForWorkspaceUrl('/app/trading/customer/create')).toEqual(
+      PERMISSION.branch.customer.create,
+    );
+    expect(permissionForWorkspaceUrl('/app/trading/customer/customer-1')).toEqual(
+      PERMISSION.branch.customer.view,
+    );
+    expect(permissionForWorkspaceUrl('/app/trading/customer/customer-1/edit')).toEqual(
+      PERMISSION.branch.customer.update,
+    );
+    expect(permissionForWorkspaceUrl('/app/trading/customer/customer-1/delete')).toEqual(
+      PERMISSION.branch.customer.delete,
+    );
   });
 
   it('maps composite trees, reports, Documents, and Subscription', () => {
     expect(permissionForWorkspaceUrl('/app/trading/item/tree-view')).toEqual(ITEM_TREE_MATCH);
-    expect(permissionForWorkspaceUrl('/app/accounting/ledger/tree-view')).toEqual(LEDGER_TREE_MATCH);
+    expect(permissionForWorkspaceUrl('/app/accounting/ledger/tree-view')).toEqual(
+      LEDGER_TREE_MATCH,
+    );
     expect(permissionForWorkspaceUrl('/app/accounting/reports/trial-balance')).toEqual(
       PERMISSION.fiscalYear.accountingReports.trialBalance,
     );
@@ -36,5 +49,17 @@ describe('permissionForWorkspaceUrl', () => {
       PERMISSION.fiscalYear.journal.bulkUpload,
     );
     expect(permissionForBulkUploadEndpoint('/unknown')).toBeNull();
+  });
+
+  it('maps document operations to stored-document permission resources', () => {
+    expect(documentPermission('purchaseInvoice', 'create')).toEqual(
+      PERMISSION.branch.purchaseInvoiceDocument.create,
+    );
+    expect(documentPermission('saleInvoice', 'delete')).toEqual(
+      PERMISSION.branch.saleInvoiceDocument.delete,
+    );
+    expect(documentPermission('journal', 'create')).toEqual(
+      PERMISSION.fiscalYear.journalDocument.create,
+    );
   });
 });

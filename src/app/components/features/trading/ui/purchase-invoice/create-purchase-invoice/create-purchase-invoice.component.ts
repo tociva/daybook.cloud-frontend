@@ -1,6 +1,8 @@
 import { Component, ViewChild, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
+import { PERMISSION } from '../../../../../../core/permissions/permission-requirements';
+import { PermissionsStore } from '../../../../../../core/permissions/permissions.store';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 import { BurlNavigationService } from '../../../../../../shared/burl-back-button/burl-navigation.service';
@@ -57,6 +59,7 @@ export class CreatePurchaseInvoiceComponent {
   private readonly facade = inject(PurchaseInvoiceFacade);
   private readonly invoiceDocumentService = inject(InvoiceDocumentService);
   private readonly navigation = inject(BurlNavigationService);
+  private readonly permissions = inject(PermissionsStore);
   private readonly toastStore = inject(ToastStore);
 
   protected readonly purchaseInvoiceStore = inject(PurchaseInvoiceStore);
@@ -264,6 +267,7 @@ export class CreatePurchaseInvoiceComponent {
   private async attachPendingDocuments(parentId: string | null): Promise<boolean> {
     const files = this.pendingDocumentFiles();
     if (!files.length) return true;
+    if (!this.permissions.can(PERMISSION.branch.purchaseInvoiceDocument.create)) return false;
     if (!parentId) {
       this.toastStore.danger('Invoice saved, but documents could not be attached.');
       return false;

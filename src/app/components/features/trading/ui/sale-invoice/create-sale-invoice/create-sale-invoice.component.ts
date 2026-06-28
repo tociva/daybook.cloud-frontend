@@ -221,7 +221,7 @@ export class CreateSaleInvoiceComponent {
   }
 
   protected async deleteDocument(document: StoredDocument): Promise<void> {
-    if (!this.permissions.can(PERMISSION.branch.saleInvoice.deleteDocument)) return;
+    if (!this.permissions.can(PERMISSION.branch.saleInvoiceDocument.delete)) return;
     const parentId = this.id();
     const documentId = document.id;
     if (!parentId || !documentId || this.deletingDocumentId()) return;
@@ -371,8 +371,9 @@ export class CreateSaleInvoiceComponent {
   private async attachPendingDocuments(parentId: string | null): Promise<boolean> {
     if (
       this.pendingDocumentFiles().length > 0 &&
-      !this.permissions.can(PERMISSION.branch.saleInvoice.createDocument)
-    ) return false;
+      !this.permissions.can(PERMISSION.branch.saleInvoiceDocument.create)
+    )
+      return false;
     const files = this.pendingDocumentFiles();
     if (!files.length) return true;
     if (!parentId) {

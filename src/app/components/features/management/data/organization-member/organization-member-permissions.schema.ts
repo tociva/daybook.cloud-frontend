@@ -21,16 +21,7 @@ const crud = (): readonly PermissionActionDef[] => [
   action('delete'),
 ];
 
-const crudWithBulkUpload = (): readonly PermissionActionDef[] => [
-  ...crud(),
-  action('bulkUpload'),
-];
-
-const crudWithDocuments = (): readonly PermissionActionDef[] => [
-  ...crudWithBulkUpload(),
-  action('createDocument'),
-  action('deleteDocument'),
-];
+const crudWithBulkUpload = (): readonly PermissionActionDef[] => [...crud(), action('bulkUpload')];
 
 const reconciliation = (): readonly PermissionActionDef[] => crud();
 
@@ -63,6 +54,8 @@ export const ORGANIZATION_PERMISSION_GROUPS: readonly PermissionGroupDef[] = [
       action('deleteInvoiceTemplate'),
     ],
   },
+  { key: 'organizationDocument', label: 'Organization document', actions: crud() },
+  { key: 'organizationLogoDocument', label: 'Organization logo document', actions: crud() },
 ] as const;
 
 export const BRANCH_PERMISSION_GROUPS: readonly PermissionGroupDef[] = [
@@ -73,9 +66,13 @@ export const BRANCH_PERMISSION_GROUPS: readonly PermissionGroupDef[] = [
   { key: 'taxGroup', label: 'Tax group', actions: crudWithBulkUpload() },
   { key: 'customer', label: 'Customer', actions: crudWithBulkUpload() },
   { key: 'vendor', label: 'Vendor', actions: crudWithBulkUpload() },
-  { key: 'purchaseInvoice', label: 'Purchase invoice', actions: crudWithDocuments() },
-  { key: 'saleInvoice', label: 'Sale invoice', actions: crudWithDocuments() },
-  { key: 'purchaseReturn', label: 'Purchase return', actions: crudWithDocuments() },
+  { key: 'purchaseInvoice', label: 'Purchase invoice', actions: crudWithBulkUpload() },
+  { key: 'saleInvoice', label: 'Sale invoice', actions: crudWithBulkUpload() },
+  { key: 'purchaseReturn', label: 'Purchase return', actions: crudWithBulkUpload() },
+  { key: 'purchaseInvoiceDocument', label: 'Purchase invoice document', actions: crud() },
+  { key: 'saleInvoiceDocument', label: 'Sale invoice document', actions: crud() },
+  { key: 'purchaseReturnDocument', label: 'Purchase return document', actions: crud() },
+  { key: 'saleInvoiceTemplateDocument', label: 'Sale invoice template document', actions: crud() },
   { key: 'customerReceipt', label: 'Customer receipt', actions: crudWithBulkUpload() },
   { key: 'vendorPayment', label: 'Vendor payment', actions: crudWithBulkUpload() },
   { key: 'bankCash', label: 'Bank cash', actions: crudWithBulkUpload() },
@@ -88,7 +85,8 @@ export const BRANCH_PERMISSION_GROUPS: readonly PermissionGroupDef[] = [
 ] as const;
 
 export const FISCAL_YEAR_PERMISSION_GROUPS: readonly PermissionGroupDef[] = [
-  { key: 'journal', label: 'Journal', actions: crudWithDocuments() },
+  { key: 'journal', label: 'Journal', actions: crudWithBulkUpload() },
+  { key: 'journalDocument', label: 'Journal document', actions: crud() },
   { key: 'ledger', label: 'Ledger', actions: crudWithBulkUpload() },
   { key: 'ledgerCategory', label: 'Ledger category', actions: crudWithBulkUpload() },
   {
@@ -105,7 +103,11 @@ export const FISCAL_YEAR_PERMISSION_GROUPS: readonly PermissionGroupDef[] = [
   },
   { key: 'inventoryLedgerMap', label: 'Inventory ledger map', actions: crudWithBulkUpload() },
   { key: 'bankTxn', label: 'Bank transaction', actions: crudWithBulkUpload() },
-  { key: 'bankTxnReconciliation', label: 'Bank transaction reconciliation', actions: reconciliation() },
+  {
+    key: 'bankTxnReconciliation',
+    label: 'Bank transaction reconciliation',
+    actions: reconciliation(),
+  },
   {
     key: 'saleInvoiceReconciliation',
     label: 'Sale invoice reconciliation',
@@ -132,6 +134,7 @@ export const FISCAL_YEAR_PERMISSION_GROUPS: readonly PermissionGroupDef[] = [
     actions: reconciliation(),
   },
   { key: 'gstReconciliation', label: 'GST reconciliation', actions: crudWithBulkUpload() },
+  { key: 'gstReconciliationDocument', label: 'GST reconciliation document', actions: crud() },
 ] as const;
 
 export function getGroupActionKeys(groups: readonly PermissionGroupDef[]): readonly string[] {
@@ -156,7 +159,7 @@ export const PERMISSION_DOMAINS: readonly PermissionDomainDef[] = [
     label: 'Management',
     subtitle: 'Organization and access setup',
     scope: 'organization',
-    groupKeys: ['user', 'branch'],
+    groupKeys: ['user', 'branch', 'organizationDocument', 'organizationLogoDocument'],
   },
   {
     key: 'management',
@@ -180,6 +183,10 @@ export const PERMISSION_DOMAINS: readonly PermissionDomainDef[] = [
       'purchaseInvoice',
       'saleInvoice',
       'purchaseReturn',
+      'purchaseInvoiceDocument',
+      'saleInvoiceDocument',
+      'purchaseReturnDocument',
+      'saleInvoiceTemplateDocument',
       'customerReceipt',
       'vendorPayment',
       'bankCash',
@@ -194,6 +201,7 @@ export const PERMISSION_DOMAINS: readonly PermissionDomainDef[] = [
     scope: 'fiscalYear',
     groupKeys: [
       'journal',
+      'journalDocument',
       'ledger',
       'ledgerCategory',
       'accountingReports',
@@ -212,7 +220,7 @@ export const PERMISSION_DOMAINS: readonly PermissionDomainDef[] = [
     label: 'GST',
     subtitle: 'GST compliance',
     scope: 'fiscalYear',
-    groupKeys: ['gstReconciliation'],
+    groupKeys: ['gstReconciliation', 'gstReconciliationDocument'],
   },
 ] as const;
 

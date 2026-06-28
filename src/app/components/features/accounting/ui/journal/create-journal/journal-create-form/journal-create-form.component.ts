@@ -104,7 +104,10 @@ export class JournalCreateFormComponent {
     };
   }
 
-  async attachPendingDocuments(parentId: string | null, journal?: Journal | null): Promise<boolean> {
+  async attachPendingDocuments(
+    parentId: string | null,
+    journal?: Journal | null,
+  ): Promise<boolean> {
     if (journal) {
       this.journalStore.setSelectedItem(journal);
       if (journal.id) this.resolvedId.set(journal.id);
@@ -112,7 +115,7 @@ export class JournalCreateFormComponent {
 
     const files = this.pendingDocumentFiles();
     if (!files.length) return true;
-    if (!this.permissions.can(PERMISSION.fiscalYear.journal.createDocument)) return false;
+    if (!this.permissions.can(PERMISSION.fiscalYear.journalDocument.create)) return false;
     if (!parentId) {
       this.toastStore.danger('Journal saved, but documents could not be attached.');
       return false;
@@ -145,7 +148,7 @@ export class JournalCreateFormComponent {
   }
 
   protected async deleteDocument(document: StoredDocument): Promise<void> {
-    if (!this.permissions.can(PERMISSION.fiscalYear.journal.deleteDocument)) return;
+    if (!this.permissions.can(PERMISSION.fiscalYear.journalDocument.delete)) return;
     const parentId = this.resolvedId();
     const documentId = document.id;
     if (!parentId || !documentId || this.deletingDocumentId()) return;

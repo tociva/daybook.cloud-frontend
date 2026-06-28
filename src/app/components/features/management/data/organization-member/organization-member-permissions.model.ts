@@ -2,6 +2,7 @@ export type PermissionFlags = Readonly<Record<string, boolean>>;
 
 export type FiscalYearScopePermissions = Readonly<{
   journal: PermissionFlags;
+  journalDocument: PermissionFlags;
   ledger: PermissionFlags;
   ledgerCategory: PermissionFlags;
   accountingReports: PermissionFlags;
@@ -14,6 +15,7 @@ export type FiscalYearScopePermissions = Readonly<{
   vendorPaymentReconciliation: PermissionFlags;
   contraTransactionReconciliation: PermissionFlags;
   gstReconciliation: PermissionFlags;
+  gstReconciliationDocument: PermissionFlags;
 }>;
 
 export type BranchScopePermissions = Readonly<{
@@ -25,8 +27,12 @@ export type BranchScopePermissions = Readonly<{
   customer: PermissionFlags;
   vendor: PermissionFlags;
   purchaseInvoice: PermissionFlags;
+  purchaseInvoiceDocument: PermissionFlags;
   saleInvoice: PermissionFlags;
+  saleInvoiceDocument: PermissionFlags;
   purchaseReturn: PermissionFlags;
+  purchaseReturnDocument: PermissionFlags;
+  saleInvoiceTemplateDocument: PermissionFlags;
   customerReceipt: PermissionFlags;
   vendorPayment: PermissionFlags;
   bankCash: PermissionFlags;
@@ -38,6 +44,8 @@ export type BranchScopePermissions = Readonly<{
 export type OrganizationScopePermissions = Readonly<{
   user: PermissionFlags;
   branch: PermissionFlags;
+  organizationDocument: PermissionFlags;
+  organizationLogoDocument: PermissionFlags;
   branches: Readonly<Record<string, BranchScopePermissions>>;
 }>;
 

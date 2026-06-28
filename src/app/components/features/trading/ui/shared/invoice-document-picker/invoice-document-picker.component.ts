@@ -27,7 +27,7 @@ export class InvoiceDocumentPickerComponent {
   protected readonly inputId = `invoice-document-picker-${Math.random().toString(36).slice(2)}`;
 
   protected readonly canAttach = computed(() => {
-    return this.permissionsStore.can(documentPermission(this.resourceType(), 'createDocument'));
+    return this.permissionsStore.can(documentPermission(this.resourceType(), 'create'));
   });
 
   protected readonly isDisabled = computed(

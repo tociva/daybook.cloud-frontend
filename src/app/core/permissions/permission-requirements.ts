@@ -16,7 +16,10 @@ const branch = (resource: string, action: string): PermissionRequirement =>
 const fiscalYear = (resource: string, action: string): PermissionRequirement =>
   permission('fiscalYear', resource, action);
 
-const crud = (factory: (resource: string, action: string) => PermissionRequirement, resource: string) => ({
+const crud = (
+  factory: (resource: string, action: string) => PermissionRequirement,
+  resource: string,
+) => ({
   create: factory(resource, 'create'),
   delete: factory(resource, 'delete'),
   update: factory(resource, 'update'),
@@ -41,6 +44,8 @@ export const PERMISSION = {
       uploadInvoiceTemplate: organization('branch', 'uploadInvoiceTemplate'),
       viewInvoiceTemplate: organization('branch', 'viewInvoiceTemplate'),
     },
+    organizationDocument: crud(organization, 'organizationDocument'),
+    organizationLogoDocument: crud(organization, 'organizationLogoDocument'),
     user: {
       invite: organization('user', 'inviteMember'),
       remove: organization('user', 'removeMember'),
@@ -66,21 +71,19 @@ export const PERMISSION = {
     purchaseInvoice: {
       ...crud(branch, 'purchaseInvoice'),
       bulkUpload: branch('purchaseInvoice', 'bulkUpload'),
-      createDocument: branch('purchaseInvoice', 'createDocument'),
-      deleteDocument: branch('purchaseInvoice', 'deleteDocument'),
     },
+    purchaseInvoiceDocument: crud(branch, 'purchaseInvoiceDocument'),
     purchaseReturn: {
       ...crud(branch, 'purchaseReturn'),
       bulkUpload: branch('purchaseReturn', 'bulkUpload'),
-      createDocument: branch('purchaseReturn', 'createDocument'),
-      deleteDocument: branch('purchaseReturn', 'deleteDocument'),
     },
+    purchaseReturnDocument: crud(branch, 'purchaseReturnDocument'),
     saleInvoice: {
       ...crud(branch, 'saleInvoice'),
       bulkUpload: branch('saleInvoice', 'bulkUpload'),
-      createDocument: branch('saleInvoice', 'createDocument'),
-      deleteDocument: branch('saleInvoice', 'deleteDocument'),
     },
+    saleInvoiceDocument: crud(branch, 'saleInvoiceDocument'),
+    saleInvoiceTemplateDocument: crud(branch, 'saleInvoiceTemplateDocument'),
     tax: { ...crud(branch, 'tax'), bulkUpload: branch('tax', 'bulkUpload') },
     taxGroup: { ...crud(branch, 'taxGroup'), bulkUpload: branch('taxGroup', 'bulkUpload') },
     vendor: { ...crud(branch, 'vendor'), bulkUpload: branch('vendor', 'bulkUpload') },
@@ -106,6 +109,7 @@ export const PERMISSION = {
       ...crud(fiscalYear, 'gstReconciliation'),
       bulkUpload: fiscalYear('gstReconciliation', 'bulkUpload'),
     },
+    gstReconciliationDocument: crud(fiscalYear, 'gstReconciliationDocument'),
     inventoryLedgerMap: {
       ...crud(fiscalYear, 'inventoryLedgerMap'),
       bulkUpload: fiscalYear('inventoryLedgerMap', 'bulkUpload'),
@@ -113,9 +117,8 @@ export const PERMISSION = {
     journal: {
       ...crud(fiscalYear, 'journal'),
       bulkUpload: fiscalYear('journal', 'bulkUpload'),
-      createDocument: fiscalYear('journal', 'createDocument'),
-      deleteDocument: fiscalYear('journal', 'deleteDocument'),
     },
+    journalDocument: crud(fiscalYear, 'journalDocument'),
     ledger: { ...crud(fiscalYear, 'ledger'), bulkUpload: fiscalYear('ledger', 'bulkUpload') },
     ledgerCategory: {
       ...crud(fiscalYear, 'ledgerCategory'),
@@ -164,7 +167,10 @@ function crudRoutePermission(
   if (path === `${base}/create`) return permissions.create;
   if (!path.startsWith(`${base}/`)) return null;
 
-  const suffix = path.slice(base.length + 1).split('/').filter(Boolean);
+  const suffix = path
+    .slice(base.length + 1)
+    .split('/')
+    .filter(Boolean);
   if (suffix.length === 1) return permissions.view;
   if (suffix.length === 2 && suffix[1] === 'edit') return permissions.update;
   if (suffix.length === 2 && suffix[1] === 'delete') return permissions.delete;
@@ -186,7 +192,10 @@ export function permissionForWorkspaceUrl(url: string): PermissionMatch | null {
     ['/app/accounting/reports/trial-balance', PERMISSION.fiscalYear.accountingReports.trialBalance],
     ['/app/accounting/reports/profit-loss', PERMISSION.fiscalYear.accountingReports.profitLoss],
     ['/app/accounting/reports/balance-sheet', PERMISSION.fiscalYear.accountingReports.balanceSheet],
-    ['/app/accounting/reports/ledger-category', PERMISSION.fiscalYear.accountingReports.ledgerCategoryReport],
+    [
+      '/app/accounting/reports/ledger-category',
+      PERMISSION.fiscalYear.accountingReports.ledgerCategoryReport,
+    ],
     ['/app/accounting/reports/ledger', PERMISSION.fiscalYear.accountingReports.ledgerReport],
   ];
   for (const [base, match] of reportRoutes) {
@@ -196,15 +205,25 @@ export function permissionForWorkspaceUrl(url: string): PermissionMatch | null {
 
   if (path === '/app/trading/item/tree-view') return ITEM_TREE_MATCH;
   if (path === '/app/accounting/ledger/tree-view') return LEDGER_TREE_MATCH;
-  if (path === '/app/trading/bank-cash/activity') return PERMISSION.branch.inventoryReports.bankCashReport;
+  if (path === '/app/trading/bank-cash/activity')
+    return PERMISSION.branch.inventoryReports.bankCashReport;
   if (path === '/app/trading/bank-cash/contra') return PERMISSION.branch.contraTransaction.view;
-  if (path === '/app/trading/bank-cash/contra/create') return PERMISSION.branch.contraTransaction.create;
-  if (/^\/app\/trading\/bank-cash\/contra\/[^/]+\/edit$/.test(path)) return PERMISSION.branch.contraTransaction.update;
-  if (/^\/app\/trading\/bank-cash\/contra\/[^/]+\/delete$/.test(path)) return PERMISSION.branch.contraTransaction.delete;
-  if (/^\/app\/trading\/bank-cash\/contra\/[^/]+$/.test(path)) return PERMISSION.branch.contraTransaction.view;
-  if (/^\/app\/trading\/sale-invoice\/[^/]+\/receipts$/.test(path)) return PERMISSION.branch.customerReceipt.view;
-  if (/^\/app\/trading\/purchase-invoice\/[^/]+\/payments$/.test(path)) return PERMISSION.branch.vendorPayment.view;
-  if (path === '/app/trading/gst-reconciliation' || path.startsWith('/app/trading/gst-reconciliation/')) {
+  if (path === '/app/trading/bank-cash/contra/create')
+    return PERMISSION.branch.contraTransaction.create;
+  if (/^\/app\/trading\/bank-cash\/contra\/[^/]+\/edit$/.test(path))
+    return PERMISSION.branch.contraTransaction.update;
+  if (/^\/app\/trading\/bank-cash\/contra\/[^/]+\/delete$/.test(path))
+    return PERMISSION.branch.contraTransaction.delete;
+  if (/^\/app\/trading\/bank-cash\/contra\/[^/]+$/.test(path))
+    return PERMISSION.branch.contraTransaction.view;
+  if (/^\/app\/trading\/sale-invoice\/[^/]+\/receipts$/.test(path))
+    return PERMISSION.branch.customerReceipt.view;
+  if (/^\/app\/trading\/purchase-invoice\/[^/]+\/payments$/.test(path))
+    return PERMISSION.branch.vendorPayment.view;
+  if (
+    path === '/app/trading/gst-reconciliation' ||
+    path.startsWith('/app/trading/gst-reconciliation/')
+  ) {
     return PERMISSION.fiscalYear.gstReconciliation.view;
   }
   if (path === '/app/accounting/documents' || path.startsWith('/app/accounting/documents/')) {
@@ -214,16 +233,21 @@ export function permissionForWorkspaceUrl(url: string): PermissionMatch | null {
   const usersBase = '/app/management/users';
   if (path === usersBase) return PERMISSION.organization.user.view;
   if (path === `${usersBase}/create`) return PERMISSION.organization.user.invite;
-  if (/^\/app\/management\/users\/[^/]+\/edit$/.test(path)) return PERMISSION.organization.user.update;
-  if (/^\/app\/management\/users\/[^/]+\/delete$/.test(path)) return PERMISSION.organization.user.remove;
+  if (/^\/app\/management\/users\/[^/]+\/edit$/.test(path))
+    return PERMISSION.organization.user.update;
+  if (/^\/app\/management\/users\/[^/]+\/delete$/.test(path))
+    return PERMISSION.organization.user.remove;
   if (path.startsWith(`${usersBase}/`)) return PERMISSION.organization.user.view;
 
   const vendorPaymentBase = '/app/trading/vendor-payment';
   if (path === vendorPaymentBase) return PERMISSION.branch.vendorPayment.view;
   if (path === `${vendorPaymentBase}/create`) return PERMISSION.branch.vendorPayment.create;
-  if (/^\/app\/trading\/vendor-payment\/[^/]+$/.test(path)) return PERMISSION.branch.vendorPayment.view;
-  if (/^\/app\/trading\/vendor-payment\/[^/]+\/edit$/.test(path)) return PERMISSION.branch.vendorPayment.update;
-  if (/^\/app\/trading\/vendor-payment\/[^/]+\/delete$/.test(path)) return PERMISSION.branch.vendorPayment.delete;
+  if (/^\/app\/trading\/vendor-payment\/[^/]+$/.test(path))
+    return PERMISSION.branch.vendorPayment.view;
+  if (/^\/app\/trading\/vendor-payment\/[^/]+\/edit$/.test(path))
+    return PERMISSION.branch.vendorPayment.update;
+  if (/^\/app\/trading\/vendor-payment\/[^/]+\/delete$/.test(path))
+    return PERMISSION.branch.vendorPayment.delete;
 
   const routes: ReadonlyArray<readonly [string, CrudPermissionSet]> = [
     ['/app/management/organization', PERMISSION.root.organization],
@@ -309,13 +333,19 @@ export const WORKSPACE_PERMISSION_DESTINATIONS: readonly Readonly<{
   { path: '/app/trading/vendor', permission: PERMISSION.branch.vendor.view },
   { path: '/app/trading/purchase-invoice', permission: PERMISSION.branch.purchaseInvoice.view },
   { path: '/app/trading/vendor-payment', permission: PERMISSION.branch.vendorPayment.view },
-  { path: '/app/trading/gst-reconciliation', permission: PERMISSION.fiscalYear.gstReconciliation.view },
+  {
+    path: '/app/trading/gst-reconciliation',
+    permission: PERMISSION.fiscalYear.gstReconciliation.view,
+  },
   { path: '/app/trading/purchase-return', permission: PERMISSION.branch.purchaseReturn.view },
   { path: '/app/accounting/ledger', permission: PERMISSION.fiscalYear.ledger.view },
   { path: '/app/accounting/journal', permission: PERMISSION.fiscalYear.journal.view },
   { path: '/app/accounting/documents', permission: PERMISSION.ownerOnly },
   { path: '/app/accounting/banking', permission: PERMISSION.fiscalYear.bankTxn.view },
-  { path: '/app/accounting/inventory-ledger-map', permission: PERMISSION.fiscalYear.inventoryLedgerMap.view },
+  {
+    path: '/app/accounting/inventory-ledger-map',
+    permission: PERMISSION.fiscalYear.inventoryLedgerMap.view,
+  },
   { path: '/app/accounting/reports', permission: ACCOUNTING_REPORTS_MATCH },
   { path: '/app/management/organization', permission: PERMISSION.root.organization.view },
   { path: '/app/management/branch', permission: PERMISSION.organization.branch.view },
@@ -330,11 +360,16 @@ export type DocumentPermissionResource =
   | 'purchaseReturn'
   | 'saleInvoice';
 
+const DOCUMENT_PERMISSIONS = {
+  journal: PERMISSION.fiscalYear.journalDocument,
+  purchaseInvoice: PERMISSION.branch.purchaseInvoiceDocument,
+  purchaseReturn: PERMISSION.branch.purchaseReturnDocument,
+  saleInvoice: PERMISSION.branch.saleInvoiceDocument,
+} as const;
+
 export function documentPermission(
   resource: DocumentPermissionResource,
-  action: 'createDocument' | 'deleteDocument',
+  action: 'create' | 'delete',
 ): PermissionRequirement {
-  return resource === 'journal'
-    ? PERMISSION.fiscalYear.journal[action]
-    : PERMISSION.branch[resource][action];
+  return DOCUMENT_PERMISSIONS[resource][action];
 }
