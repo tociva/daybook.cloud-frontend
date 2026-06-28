@@ -119,6 +119,10 @@ export class ListUsersComponent {
     return member.role === UserRoles.OWNER;
   }
 
+  protected isRemoved(member: OrganizationMember): boolean {
+    return member.status === OrganizationMemberStatus.REMOVED;
+  }
+
   protected roleLabel(role: UserRoles): string {
     const labels: Readonly<Record<UserRoles, string>> = {
       [UserRoles.SUPER_ADMIN]: 'Super admin',

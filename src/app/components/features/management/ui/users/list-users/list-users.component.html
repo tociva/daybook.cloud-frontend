@@ -111,11 +111,13 @@
                   ariaLabel="View user"
                   (action)="viewUser(row)"
                 />
-                <app-table-row-icon-button
-                  icon="pencil"
-                  ariaLabel="Edit user"
-                  (action)="editUser(row)"
-                />
+                @if (!isRemoved(row)) {
+                  <app-table-row-icon-button
+                    icon="pencil"
+                    ariaLabel="Edit user"
+                    (action)="editUser(row)"
+                  />
+                }
                 @if (canResendInvitation(row)) {
                   <app-table-row-icon-button
                     icon="mail"
@@ -125,12 +127,14 @@
                     (action)="resendInvitation(row)"
                   />
                 }
-                <app-table-row-icon-button
-                  icon="trash2"
-                  ariaLabel="Remove user"
-                  tone="danger"
-                  (action)="deleteUser(row)"
-                />
+                @if (!isRemoved(row)) {
+                  <app-table-row-icon-button
+                    icon="trash2"
+                    ariaLabel="Remove user"
+                    tone="danger"
+                    (action)="deleteUser(row)"
+                  />
+                }
               </div>
             }
           </ng-template>
