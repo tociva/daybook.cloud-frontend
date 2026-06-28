@@ -53,6 +53,14 @@ export class DeleteUserComponent {
     return member.organization?.name ?? member.organizationid ?? '—';
   }
 
+  protected userEmail(member: OrganizationMember): string {
+    return member.user?.email ?? '';
+  }
+
+  protected userLabel(member: OrganizationMember): string {
+    return this.userEmail(member) || member.userid;
+  }
+
   protected roleLabel(role: UserRoles): string {
     const labels: Readonly<Record<UserRoles, string>> = {
       [UserRoles.SUPER_ADMIN]: 'Super admin',
@@ -89,7 +97,7 @@ export class DeleteUserComponent {
 
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
-      await this.memberStore.loadMemberById(id, { includes: ['organization'] });
+      await this.memberStore.loadMemberById(id, { includes: ['organization', 'user'] });
     }
   }
 }

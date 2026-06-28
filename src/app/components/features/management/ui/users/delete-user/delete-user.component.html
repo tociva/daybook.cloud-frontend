@@ -16,7 +16,7 @@
         <dl class="details-grid">
           <div>
             <dt>User</dt>
-            <dd>{{ member.userid }}</dd>
+            <dd>{{ userLabel(member) }}</dd>
           </div>
           <div>
             <dt>Organization</dt>
@@ -33,7 +33,7 @@
         </dl>
 
         <div class="notice notice--danger">
-          You are about to remove <strong>{{ member.userid }}</strong> from this organization.
+          You are about to remove <strong>{{ userLabel(member) }}</strong> from this organization.
         </div>
 
         <label class="confirm-row">
