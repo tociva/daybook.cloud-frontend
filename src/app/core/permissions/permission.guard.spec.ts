@@ -1,6 +1,8 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router, type RouterStateSnapshot } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { UserSessionStore } from '../../components/features/management/data/user-session/user-session.store';
 import { ToastStore } from '../toast/toast.store';
 import { workspacePermissionGuard } from './permission.guard';
 import { PermissionsStore } from './permissions.store';
@@ -9,12 +11,15 @@ describe('workspacePermissionGuard', () => {
   const can = vi.fn();
   const warning = vi.fn();
   const parseUrl = vi.fn((url: string) => ({ redirectedTo: url }));
+  const session = signal<unknown>({ member: {} });
 
   beforeEach(() => {
     TestBed.resetTestingModule();
     vi.clearAllMocks();
+    session.set({ member: {} });
     TestBed.configureTestingModule({
       providers: [
+        { provide: UserSessionStore, useValue: { session } },
         {
           provide: PermissionsStore,
           useValue: {
@@ -46,6 +51,16 @@ describe('workspacePermissionGuard', () => {
       redirectedTo: '/app/trading/vendor',
     });
     expect(warning).toHaveBeenCalledWith('You do not have permission to view this page.');
+  });
+
+  it('defers permission checks until startup loads the user session', () => {
+    session.set(null);
+    can.mockReturnValue(false);
+
+    expect(run('/app/accounting/ledger')).toBe(true);
+    expect(can).not.toHaveBeenCalled();
+    expect(warning).not.toHaveBeenCalled();
+    expect(parseUrl).not.toHaveBeenCalled();
   });
 
   it('keeps Profile outside ordinary workspace permissions', () => {
