@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   TngCardActionsComponent,
@@ -17,8 +17,18 @@ import {
   OrganizationMemberStatus,
   OrganizationMemberStore,
   UserRoles,
+  createEmptyPermissionTree,
+  mergePermissionTree,
 } from '../../../data/organization-member';
-import type { OrganizationMember } from '../../../data/organization-member';
+import type {
+  OrganizationMember,
+  OrganizationMemberPermissionTree,
+} from '../../../data/organization-member';
+import { BranchStore } from '../../../data/branch';
+import { OrganizationStore } from '../../../data/organization';
+import type { Organization } from '../../../data/organization/organization.model';
+import { MemberPermissionsEditorComponent } from '../member-permissions-editor/member-permissions-editor.component';
+import { resolveOrganizationWithBranches } from '../create-user/create-user-organization.util';
 
 @Component({
   selector: 'app-view-user',
@@ -34,6 +44,7 @@ import type { OrganizationMember } from '../../../data/organization-member';
     BurlBackButtonComponent,
     BurlDeleteButtonComponent,
     BurlEditButtonComponent,
+    MemberPermissionsEditorComponent,
   ],
   templateUrl: './view-user.component.html',
   styleUrl: './view-user.component.css',
@@ -43,7 +54,14 @@ export class ViewUserComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly burlNavigation = inject(BurlNavigationService);
+  private readonly organizationStore = inject(OrganizationStore);
   protected readonly memberStore = inject(OrganizationMemberStore);
+  protected readonly branchStore = inject(BranchStore);
+
+  protected readonly organization = signal<Organization | null>(null);
+  protected readonly permissions = signal<OrganizationMemberPermissionTree>({ organizations: {} });
+  protected readonly permissionsReady = signal(false);
+  protected readonly permissionsError = signal<string | null>(null);
 
   constructor() {
     void this.loadInitialState();
@@ -51,6 +69,10 @@ export class ViewUserComponent {
 
   protected organizationLabel(member: OrganizationMember): string {
     return member.organization?.name ?? member.organizationid ?? '—';
+  }
+
+  protected userLabel(member: OrganizationMember): string {
+    return member.user?.email ?? member.userid;
   }
 
   protected roleLabel(role: UserRoles): string {
@@ -77,10 +99,6 @@ export class ViewUserComponent {
     return labels[status] ?? 'Unknown';
   }
 
-  protected formatJson(value: unknown): string {
-    return JSON.stringify(value ?? {}, null, 2);
-  }
-
   protected edit(): void {
     const id = this.memberStore.selectedItem()?.id;
     if (id) {
@@ -101,10 +119,56 @@ export class ViewUserComponent {
 
   private async loadInitialState(): Promise<void> {
     this.memberStore.clearError();
+    this.permissionsReady.set(false);
+    this.permissionsError.set(null);
+    this.organization.set(null);
 
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      await this.memberStore.loadMemberById(id, { includes: ['organization'] });
+    if (!id) return;
+
+    const member = await this.memberStore.loadMemberById(id, {
+      includes: ['organization', 'user'],
+    });
+    if (!member) return;
+
+    const memberOrganizationId = member.organizationid;
+    if (!memberOrganizationId) {
+      this.permissionsError.set('Unable to load organization for this user.');
+      return;
     }
+
+    const [memberOrganization] = await Promise.all([
+      resolveOrganizationWithBranches(
+        memberOrganizationId,
+        member.organization ?? null,
+        (organizationId) => this.organizationStore.loadOrganizationById(organizationId),
+      ),
+      this.branchStore.loadBranches({
+        where: { organizationid: memberOrganizationId },
+        includes: ['fiscalyears'],
+      }),
+    ]);
+
+    if (!memberOrganization?.id) {
+      this.permissionsError.set('Unable to load organization for this user.');
+      return;
+    }
+    if (this.branchStore.error()) {
+      this.permissionsError.set('Unable to load permissions for this user.');
+      return;
+    }
+
+    const branches = this.branchStore
+      .branches()
+      .filter((branch) => branch.organizationid === memberOrganizationId);
+
+    this.organization.set({ ...memberOrganization, branches });
+    this.permissions.set(
+      mergePermissionTree(
+        createEmptyPermissionTree(memberOrganizationId, branches),
+        member.permissions,
+      ),
+    );
+    this.permissionsReady.set(true);
   }
 }

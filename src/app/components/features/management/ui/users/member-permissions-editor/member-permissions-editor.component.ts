@@ -47,6 +47,9 @@ type OrganizationPermissionGroupKey = keyof Omit<OrganizationScopePermissions, '
 @Component({
   selector: 'app-member-permissions-editor',
   standalone: true,
+  host: {
+    '[class.permissions-editor--readonly]': 'readonly()',
+  },
   imports: [
     TngAccordionComponent,
     TngAccordionItemComponent,
@@ -68,6 +71,7 @@ export class MemberPermissionsEditorComponent {
   readonly permissions = input.required<OrganizationMemberPermissionTree>();
   readonly branchList = input<readonly Branch[] | undefined>(undefined);
   readonly branchesLoading = input(false);
+  readonly readonly = input(false);
   readonly permissionsChange = output<OrganizationMemberPermissionTree>();
 
   protected readonly activeBranchId = signal<string | null>(null);

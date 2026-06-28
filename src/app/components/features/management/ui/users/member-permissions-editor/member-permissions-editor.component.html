@@ -14,7 +14,7 @@
           <tng-accordion-trigger>
             <span class="domain-trigger">
               <label class="domain-select-all" (click)="$event.stopPropagation()">
-                <tng-checkbox
+                <tng-checkbox [disabled]="readonly()"
                   [checked]="isOrganizationDomainChecked(organizationScope, domain)"
                   (checkedChange)="onOrganizationDomainToggle(domain, !!$event)"
                 />
@@ -34,7 +34,7 @@
               <div class="permission-group">
                 <div class="permission-group-header">
                   <label class="group-select-all">
-                    <tng-checkbox
+                    <tng-checkbox [disabled]="readonly()"
                       [checked]="
                         isGroupChecked(organizationGroupFlags(organizationScope, group), group)
                       "
@@ -50,7 +50,7 @@
                 <div class="permission-grid">
                   @for (action of group.actions; track action.key) {
                     <label class="permission-item">
-                      <tng-checkbox
+                      <tng-checkbox [disabled]="readonly()"
                         [checked]="organizationGroupFlags(organizationScope, group)[action.key]"
                         (checkedChange)="onOrganizationActionToggle(group, action.key, !!$event)"
                       />
@@ -104,7 +104,7 @@
                     <tng-accordion-trigger>
                       <span class="domain-trigger">
                         <label class="domain-select-all" (click)="$event.stopPropagation()">
-                          <tng-checkbox
+                          <tng-checkbox [disabled]="readonly()"
                             [checked]="isBranchDomainChecked(branchPermissions, domain)"
                             (checkedChange)="onBranchDomainToggle(branch.id, domain, !!$event)"
                           />
@@ -124,7 +124,7 @@
                         <div class="permission-group">
                           <div class="permission-group-header">
                             <label class="group-select-all">
-                              <tng-checkbox
+                              <tng-checkbox [disabled]="readonly()"
                                 [checked]="
                                   isGroupChecked(branchGroupFlags(branchPermissions, group), group)
                                 "
@@ -142,7 +142,7 @@
                           <div class="permission-grid">
                             @for (action of group.actions; track action.key) {
                               <label class="permission-item">
-                                <tng-checkbox
+                                <tng-checkbox [disabled]="readonly()"
                                   [checked]="branchGroupFlags(branchPermissions, group)[action.key]"
                                   (checkedChange)="
                                     onBranchActionToggle(branch.id, group, action.key, !!$event)
@@ -190,7 +190,7 @@
                                     class="domain-select-all"
                                     (click)="$event.stopPropagation()"
                                   >
-                                    <tng-checkbox
+                                    <tng-checkbox [disabled]="readonly()"
                                       [checked]="
                                         isFiscalYearDomainChecked(fiscalYearPermissions, domain)
                                       "
@@ -224,7 +224,7 @@
                                   <div class="permission-group">
                                     <div class="permission-group-header">
                                       <label class="group-select-all">
-                                        <tng-checkbox
+                                        <tng-checkbox [disabled]="readonly()"
                                           [checked]="
                                             isGroupChecked(
                                               fiscalYearGroupFlags(fiscalYearPermissions, group),
@@ -255,7 +255,7 @@
                                     <div class="permission-grid">
                                       @for (action of group.actions; track action.key) {
                                         <label class="permission-item">
-                                          <tng-checkbox
+                                          <tng-checkbox [disabled]="readonly()"
                                             [checked]="
                                               fiscalYearGroupFlags(fiscalYearPermissions, group)[
                                                 action.key

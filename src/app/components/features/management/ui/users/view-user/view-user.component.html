@@ -12,13 +12,17 @@
         <div class="notice notice--danger">{{ memberStore.error() }}</div>
       }
 
+      @if (permissionsError()) {
+        <div class="notice notice--danger">{{ permissionsError() }}</div>
+      }
+
       @if (memberStore.isLoading() && !memberStore.selectedItem()) {
         <div class="notice">Loading user...</div>
       } @else if (memberStore.selectedItem(); as member) {
         <dl class="details-grid">
           <div>
-            <dt>User</dt>
-            <dd>{{ member.userid }}</dd>
+            <dt>Email</dt>
+            <dd>{{ userLabel(member) }}</dd>
           </div>
           <div>
             <dt>Organization</dt>
@@ -32,17 +36,19 @@
             <dt>Status</dt>
             <dd>{{ statusLabel(member.status) }}</dd>
           </div>
-          <div>
-            <dt>Member ID</dt>
-            <dd>{{ member.id || '—' }}</dd>
-          </div>
         </dl>
 
-        <div class="section-title">Props</div>
-        <pre>{{ formatJson(member.props) }}</pre>
-
-        <div class="section-title">Permissions</div>
-        <pre>{{ formatJson(member.permissions) }}</pre>
+        @if (!permissionsReady()) {
+          <div class="notice">Loading permissions...</div>
+        } @else {
+          <app-member-permissions-editor
+            [readonly]="true"
+            [organization]="organization()"
+            [permissions]="permissions()"
+            [branchList]="branchStore.branches()"
+            [branchesLoading]="branchStore.isLoading()"
+          />
+        }
       } @else {
         <div class="notice">User not found.</div>
       }

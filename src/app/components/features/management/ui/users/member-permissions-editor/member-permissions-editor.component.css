@@ -168,6 +168,13 @@
   padding-top: 0.75rem;
 }
 
+:host.permissions-editor--readonly .domain-select-all,
+:host.permissions-editor--readonly .group-select-all,
+:host.permissions-editor--readonly .permission-item {
+  cursor: default;
+  pointer-events: none;
+}
+
 @media (max-width: 700px) {
   .permission-grid {
     grid-template-columns: 1fr;

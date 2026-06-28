@@ -3,13 +3,13 @@
 }
 
 tng-card {
-  max-width: 60rem;
+  max-width: 76rem;
 }
 
 .details-grid {
   display: grid;
   gap: 1rem;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   margin: 0 0 1.25rem;
 }
 
@@ -31,24 +31,6 @@ dd {
   color: var(--tng-semantic-foreground-primary);
   margin: 0;
   word-break: break-word;
-}
-
-.section-title {
-  color: var(--tng-semantic-foreground-primary);
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  margin: 1rem 0 0.75rem;
-  text-transform: uppercase;
-}
-
-pre {
-  background: var(--tng-semantic-surface-subtle);
-  border: 1px solid var(--tng-semantic-border-subtle);
-  border-radius: 0.5rem;
-  color: var(--tng-semantic-foreground-primary);
-  overflow: auto;
-  padding: 1rem;
 }
 
 .notice {
