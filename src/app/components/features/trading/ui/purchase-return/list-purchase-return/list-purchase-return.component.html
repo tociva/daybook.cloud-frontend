@@ -13,6 +13,8 @@
       syncUrl
     />
 
+    <app-xlsx-export-button [exportData]="exportPurchaseReturns" />
+
     <tng-button *appCan="'branch:purchaseReturn:create'" type="button" appearance="solid" tone="primary" (click)="createPurchaseReturn()">
       <tng-icon icon="plus" aria-hidden="true" />
       New Return

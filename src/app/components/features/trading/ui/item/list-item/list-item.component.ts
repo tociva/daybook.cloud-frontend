@@ -24,7 +24,13 @@ import type { BulkUploadPreviewConfig } from '../../../../../../shared/bulk-uplo
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
-import { ItemStore } from '../../../data/item';
+import {
+  XlsxExportButtonComponent,
+  columnsFromTable,
+  createCrudListXlsxDocument,
+  text,
+} from '../../../../../../shared/xlsx-export';
+import { ItemService, ItemStore } from '../../../data/item';
 import type { Item } from '../../../data/item';
 
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
@@ -44,6 +50,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
     TngTableCellTpl,
     TableRowIconButtonComponent,
     BulkUploadButtonComponent,
+    XlsxExportButtonComponent,
   ],
   templateUrl: './list-item.component.html',
   styleUrl: './list-item.component.css',
@@ -51,6 +58,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 })
 export class ListItemComponent {
   private readonly router = inject(Router);
+  private readonly itemService = inject(ItemService);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly itemStore = inject(ItemStore);
   protected readonly hasError = computed(() => this.itemStore.error() !== null);
@@ -115,6 +123,27 @@ export class ListItemComponent {
       (filter) => void this.itemStore.loadItems({ ...filter, includes: ['category'] }),
     );
   }
+
+  protected readonly exportItems = () =>
+    createCrudListXlsxDocument({
+      cachedRows: this.itemStore.items(),
+      cachedTotal: this.itemStore.count(),
+      columns: columnsFromTable(this.columns),
+      count: (query) => this.itemService.count(query),
+      fileNameBase: 'items',
+      list: (query) => this.itemService.list({ ...query, includes: ['category'] }),
+      mapRow: (item) => [
+        text(item.name),
+        text(item.code),
+        text(item.displayname),
+        text(item.category?.name ?? item.categoryid),
+        text(item.barcode),
+        text(item.description),
+      ],
+      query: this.crudQuery.filter(),
+      sheetName: 'Items',
+      title: 'Items',
+    });
 
   protected createItem(): void {
     void this.router.navigate(['/app/trading/item/create'], {

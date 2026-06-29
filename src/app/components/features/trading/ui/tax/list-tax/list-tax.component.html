@@ -24,6 +24,8 @@
       (uploaded)="reloadTaxes()"
     />
 
+    <app-xlsx-export-button [exportData]="exportTaxes" />
+
     <tng-button *appCan="'branch:tax:create'" type="button" appearance="solid" tone="primary" (click)="createTax()">
       <tng-icon icon="plus" aria-hidden="true" />
       New tax

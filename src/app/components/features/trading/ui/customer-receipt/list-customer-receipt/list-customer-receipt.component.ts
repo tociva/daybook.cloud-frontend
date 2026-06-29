@@ -23,6 +23,15 @@ import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload'
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
+import {
+  XlsxExportButtonComponent,
+  createXlsxListDocument,
+  date,
+  fetchAllLb4Rows,
+  journalNumbersBySourceId,
+  number,
+  text,
+} from '../../../../../../shared/xlsx-export';
 import { JournalService, JournalSourceType } from '../../../../accounting/data/journal';
 import {
   JOURNAL_LINK_STATUS_FILTER_CLEAR_QUERY_PARAMS,
@@ -62,6 +71,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
     TngTableCellTpl,
     TableRowIconButtonComponent,
     BulkUploadButtonComponent,
+    XlsxExportButtonComponent,
   ],
   templateUrl: './list-customer-receipt.component.html',
   styleUrl: './list-customer-receipt.component.css',
@@ -187,6 +197,54 @@ export class ListCustomerReceiptComponent {
     }
     this.crudQuery.init((filter) => this.loadCustomerReceiptsWithJournals(filter));
   }
+
+  protected readonly exportCustomerReceipts = async () => {
+    const query = {
+      ...this.crudQuery.filter(),
+      order: this.crudQuery.filter().order?.length
+        ? this.crudQuery.filter().order
+        : DEFAULT_CUSTOMER_RECEIPT_ORDER,
+      includes: ['customer', 'bcash'],
+    };
+    const receipts = await fetchAllLb4Rows(
+      (pageQuery) => this.customerReceiptService.list(pageQuery),
+      query,
+      { count: (countQuery) => this.customerReceiptService.count(countQuery) },
+    );
+    const ids = receipts.map((receipt) => receipt.id).filter((id): id is string => Boolean(id));
+    const journalNumbers = this.permissions.can(PERMISSION.fiscalYear.journal.view)
+      ? journalNumbersBySourceId(
+          await this.reconciliationMatchService.findJournalsBySourceIds(
+            JournalSourceType.RECEIPT,
+            ids,
+          ),
+        )
+      : new Map<string, string>();
+
+    return createXlsxListDocument({
+      columns: [
+        { header: 'Number', width: 14 },
+        { header: 'Date', kind: 'date', format: 'yyyy-mm-dd', width: 12 },
+        { header: 'Customer', width: 24 },
+        { header: 'Amount', kind: 'number', format: '#,##0.00', align: 'right', width: 14 },
+        { header: 'Bank/Cash', width: 20 },
+        { header: 'Description', width: 28 },
+        { header: 'Journals', width: 18 },
+      ],
+      fileNameBase: 'customer-receipts',
+      rows: receipts.map((receipt) => [
+        text(receipt.number),
+        date(receipt.date),
+        text(receipt.customer?.name ?? receipt.customerid),
+        number(receipt.amount),
+        text(receipt.bcash?.name ?? receipt.bcashid),
+        text(receipt.description),
+        text(receipt.id ? journalNumbers.get(receipt.id) : ''),
+      ]),
+      sheetName: 'Customer Receipts',
+      title: 'Customer Receipts',
+    });
+  };
 
   private async loadCustomerReceiptsWithJournals(filter: Lb4ListQuery): Promise<void> {
     void this.unfilteredTotalCounter.refresh(filter);

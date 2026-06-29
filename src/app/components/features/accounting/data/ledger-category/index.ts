@@ -1,4 +1,5 @@
 export { LedgerCategoryFacade } from './ledger-category.facade';
+export { LedgerCategoryService } from './ledger-category.service';
 export { LedgerCategoryStore } from './ledger-category.store';
 export {
   LEDGER_CATEGORY_CAPITAL_CHILD_TYPES,

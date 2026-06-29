@@ -22,7 +22,13 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import {
+  XlsxExportButtonComponent,
+  createCrudListXlsxDocument,
+  text,
+} from '../../../../../../shared/xlsx-export';
+import {
   OrganizationMemberFacade,
+  OrganizationMemberService,
   OrganizationMemberStatus,
   OrganizationMemberStore,
   UserRoles,
@@ -47,6 +53,7 @@ import { UserSessionStore } from '../../../data/user-session/user-session.store'
     TngTable,
     TngTableCellTpl,
     TableRowIconButtonComponent,
+    XlsxExportButtonComponent,
   ],
   templateUrl: './list-users.component.html',
   styleUrl: './list-users.component.css',
@@ -56,6 +63,7 @@ import { UserSessionStore } from '../../../data/user-session/user-session.store'
 export class ListUsersComponent {
   private readonly router = inject(Router);
   private readonly facade = inject(OrganizationMemberFacade);
+  private readonly memberService = inject(OrganizationMemberService);
   private readonly userSessionStore = inject(UserSessionStore);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly memberStore = inject(OrganizationMemberStore);
@@ -102,6 +110,32 @@ export class ListUsersComponent {
   constructor() {
     this.crudQuery.init((filter) => void this.memberStore.loadMembers(this.memberQuery(filter)));
   }
+
+  protected readonly exportUsers = () =>
+    createCrudListXlsxDocument({
+      cachedRows: this.memberStore.items(),
+      cachedTotal: this.memberStore.count(),
+      columns: [
+        { header: 'Name', width: 20 },
+        { header: 'Email', width: 28 },
+        { header: 'Organization', width: 24 },
+        { header: 'Role', width: 14 },
+        { header: 'Status', width: 16 },
+      ],
+      count: (query) => this.memberService.count(this.memberQuery(query)),
+      fileNameBase: 'users',
+      list: (query) => this.memberService.list(this.memberQuery(query)),
+      mapRow: (member) => [
+        text(this.userDisplayName(member)),
+        text(this.userEmail(member)),
+        text(this.organizationLabel(member)),
+        text(this.roleLabel(member.role)),
+        text(this.statusLabel(member.status)),
+      ],
+      query: this.crudQuery.filter(),
+      sheetName: 'Users',
+      title: 'Users',
+    });
 
   protected organizationLabel(member: OrganizationMember): string {
     return member.organization?.name ?? member.organizationid ?? '—';

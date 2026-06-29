@@ -26,7 +26,14 @@ import type { BulkUploadPreviewConfig } from '../../../../../../shared/bulk-uplo
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
-import { Status, TaxStore } from '../../../data/tax';
+import {
+  XlsxExportButtonComponent,
+  columnsFromTable,
+  createCrudListXlsxDocument,
+  number,
+  text,
+} from '../../../../../../shared/xlsx-export';
+import { Status, TaxService, TaxStore } from '../../../data/tax';
 import type { Tax } from '../../../data/tax';
 import { TngTagIcon } from '../../bank-cash/tng-tag-icon.directive';
 
@@ -51,6 +58,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
     TngTableCellTpl,
     TableRowIconButtonComponent,
     BulkUploadButtonComponent,
+    XlsxExportButtonComponent,
   ],
   templateUrl: './list-tax.component.html',
   styleUrl: './list-tax.component.css',
@@ -58,6 +66,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 })
 export class ListTaxComponent {
   private readonly router = inject(Router);
+  private readonly taxService = inject(TaxService);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly taxStore = inject(TaxStore);
   protected readonly hasError = computed(() => this.taxStore.error() !== null);
@@ -121,6 +130,27 @@ export class ListTaxComponent {
   constructor() {
     this.crudQuery.init((filter) => void this.taxStore.loadTaxes(filter));
   }
+
+  protected readonly exportTaxes = () =>
+    createCrudListXlsxDocument({
+      cachedRows: this.taxStore.items(),
+      cachedTotal: this.taxStore.count(),
+      columns: columnsFromTable(this.columns),
+      count: (query) => this.taxService.count(query),
+      fileNameBase: 'taxes',
+      list: (query) => this.taxService.list(query),
+      mapRow: (tax) => [
+        text(tax.name),
+        text(tax.shortname),
+        number(tax.rate),
+        number(tax.appliedto),
+        text(this.getStatusLabel(tax.status)),
+        text(tax.description),
+      ],
+      query: this.crudQuery.filter(),
+      sheetName: 'Taxes',
+      title: 'Taxes',
+    });
 
   protected createTax(): void {
     void this.router.navigate(['/app/trading/tax/create'], {

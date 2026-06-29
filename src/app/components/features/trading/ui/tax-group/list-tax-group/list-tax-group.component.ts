@@ -26,7 +26,14 @@ import type { BulkUploadPreviewConfig } from '../../../../../../shared/bulk-uplo
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
-import { TaxGroupStore } from '../../../data/tax-group';
+import {
+  XlsxExportButtonComponent,
+  columnsFromTable,
+  createCrudListXlsxDocument,
+  number,
+  text,
+} from '../../../../../../shared/xlsx-export';
+import { TaxGroupService, TaxGroupStore } from '../../../data/tax-group';
 import type { TaxGroup } from '../../../data/tax-group';
 
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
@@ -46,6 +53,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
     TngTableCellTpl,
     TableRowIconButtonComponent,
     BulkUploadButtonComponent,
+    XlsxExportButtonComponent,
   ],
   templateUrl: './list-tax-group.component.html',
   styleUrl: './list-tax-group.component.css',
@@ -53,6 +61,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 })
 export class ListTaxGroupComponent {
   private readonly router = inject(Router);
+  private readonly taxGroupService = inject(TaxGroupService);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly taxGroupStore = inject(TaxGroupStore);
   protected readonly hasError = computed(() => this.taxGroupStore.error() !== null);
@@ -98,6 +107,24 @@ export class ListTaxGroupComponent {
   constructor() {
     this.crudQuery.init((filter) => void this.taxGroupStore.loadTaxGroups(filter));
   }
+
+  protected readonly exportTaxGroups = () =>
+    createCrudListXlsxDocument({
+      cachedRows: this.taxGroupStore.items(),
+      cachedTotal: this.taxGroupStore.count(),
+      columns: columnsFromTable(this.columns),
+      count: (query) => this.taxGroupService.count(query),
+      fileNameBase: 'tax-groups',
+      list: (query) => this.taxGroupService.list(query),
+      mapRow: (taxGroup) => [
+        text(taxGroup.name),
+        number(taxGroup.rate),
+        text(taxGroup.description),
+      ],
+      query: this.crudQuery.filter(),
+      sheetName: 'Tax Groups',
+      title: 'Tax Groups',
+    });
 
   protected createTaxGroup(): void {
     void this.router.navigate(['/app/trading/tax-group/create'], {

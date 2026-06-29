@@ -23,7 +23,14 @@ import type { BulkUploadPreviewConfig } from '../../../../../../shared/bulk-uplo
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
-import { VendorStore } from '../../../data/vendor';
+import {
+  XlsxExportButtonComponent,
+  columnsFromTable,
+  createCrudListXlsxDocument,
+  readPath,
+  text,
+} from '../../../../../../shared/xlsx-export';
+import { VendorService, VendorStore } from '../../../data/vendor';
 import type { Vendor } from '../../../data/vendor';
 
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
@@ -44,6 +51,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
     TngTableCellTpl,
     TableRowIconButtonComponent,
     BulkUploadButtonComponent,
+    XlsxExportButtonComponent,
   ],
   templateUrl: './list-vendor.component.html',
   styleUrl: './list-vendor.component.css',
@@ -51,6 +59,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 })
 export class ListVendorComponent {
   private readonly router = inject(Router);
+  private readonly vendorService = inject(VendorService);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly vendorStore = inject(VendorStore);
   protected readonly hasError = computed(() => this.vendorStore.error() !== null);
@@ -137,6 +146,29 @@ export class ListVendorComponent {
   constructor() {
     this.crudQuery.init((filter) => void this.vendorStore.loadVendors(filter));
   }
+
+  protected readonly exportVendors = () =>
+    createCrudListXlsxDocument({
+      cachedRows: this.vendorStore.items(),
+      cachedTotal: this.vendorStore.count(),
+      columns: columnsFromTable(this.columns),
+      count: (query) => this.vendorService.count(query),
+      fileNameBase: 'vendors',
+      list: (query) => this.vendorService.list(query),
+      mapRow: (vendor) => [
+        text(vendor.name),
+        text(vendor.mobile),
+        text(vendor.email),
+        text(vendor.gstin),
+        text(vendor.pan),
+        text(readPath(vendor, 'address.city')),
+        text(vendor.state),
+        text(vendor.description),
+      ],
+      query: this.crudQuery.filter(),
+      sheetName: 'Vendors',
+      title: 'Vendors',
+    });
 
   protected createVendor(): void {
     void this.router.navigate(['/app/trading/vendor/create'], {

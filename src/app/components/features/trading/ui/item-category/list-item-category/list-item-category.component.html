@@ -24,6 +24,8 @@
       (uploaded)="reloadItemCategories()"
     />
 
+    <app-xlsx-export-button [exportData]="exportItemCategories" />
+
     <tng-button *appCan="'branch:itemCategory:create'" type="button" appearance="solid" tone="primary" (click)="createItemCategory()">
       <tng-icon icon="plus" aria-hidden="true" />
       New category

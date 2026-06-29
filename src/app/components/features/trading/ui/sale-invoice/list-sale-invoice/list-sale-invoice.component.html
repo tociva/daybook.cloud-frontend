@@ -20,6 +20,8 @@
       (uploaded)="reloadSaleInvoices()"
     />
 
+    <app-xlsx-export-button [exportData]="exportSaleInvoices" />
+
     <tng-button *appCan="'branch:saleInvoice:create'" type="button" appearance="solid" tone="primary" (click)="createSaleInvoice()">
       <tng-icon icon="plus" aria-hidden="true" />
       New Invoice

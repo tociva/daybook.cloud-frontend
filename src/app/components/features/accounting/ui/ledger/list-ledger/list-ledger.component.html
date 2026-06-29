@@ -29,6 +29,8 @@
       (uploaded)="refreshLedgers()"
     />
 
+    <app-xlsx-export-button [exportData]="exportLedgers" />
+
     <tng-button *appCan="'fiscalYear:ledger:create'" type="button" appearance="solid" tone="primary" (click)="createLedger()">
       <tng-icon icon="plus" aria-hidden="true" />
       New ledger

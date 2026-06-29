@@ -1,4 +1,5 @@
 export { InventoryLedgerMapFacade } from './inventory-ledger-map.facade';
+export { InventoryLedgerMapService } from './inventory-ledger-map.service';
 export { InventoryLedgerMapStore } from './inventory-ledger-map.store';
 export {
   INVENTORY_LEDGER_ENTITY_TYPES,

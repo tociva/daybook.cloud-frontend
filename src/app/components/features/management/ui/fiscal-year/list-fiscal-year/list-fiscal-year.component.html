@@ -13,6 +13,8 @@
       syncUrl
     />
 
+    <app-xlsx-export-button [exportData]="exportFiscalYears" />
+
     <tng-button *appCan="'branch:fiscalYear:create'" type="button" appearance="solid" tone="primary" (click)="createFiscalYear()">
       <tng-icon icon="plus" aria-hidden="true" />
       New fiscal year

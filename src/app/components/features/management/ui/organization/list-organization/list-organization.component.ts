@@ -18,7 +18,13 @@ import type { CrudFilterField } from '../../../../../../shared/crud';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
-import { OrganizationStore } from '../../../data/organization';
+import {
+  XlsxExportButtonComponent,
+  columnsFromTable,
+  createCrudListXlsxDocument,
+  text,
+} from '../../../../../../shared/xlsx-export';
+import { OrganizationService, OrganizationStore } from '../../../data/organization';
 import type { Organization } from '../../../data/organization';
 
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
@@ -38,6 +44,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
     TngTable,
     TngTableCellTpl,
     TableRowIconButtonComponent,
+    XlsxExportButtonComponent,
   ],
   templateUrl: './list-organization.component.html',
   styleUrl: './list-organization.component.css',
@@ -45,6 +52,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 })
 export class ListOrganizationComponent {
   private readonly router = inject(Router);
+  private readonly organizationService = inject(OrganizationService);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly organizationStore = inject(OrganizationStore);
   protected readonly hasError = computed(() => this.organizationStore.error() !== null);
@@ -66,6 +74,25 @@ export class ListOrganizationComponent {
   constructor() {
     this.crudQuery.init((filter) => void this.organizationStore.loadOrganizations(filter));
   }
+
+  protected readonly exportOrganizations = () =>
+    createCrudListXlsxDocument({
+      cachedRows: this.organizationStore.items(),
+      cachedTotal: this.organizationStore.count(),
+      columns: columnsFromTable(this.columns),
+      count: (query) => this.organizationService.count(query),
+      fileNameBase: 'organizations',
+      list: (query) => this.organizationService.list(query),
+      mapRow: (organization) => [
+        text(organization.name),
+        text(organization.email),
+        text(organization.mobile),
+        text(organization.description),
+      ],
+      query: this.crudQuery.filter(),
+      sheetName: 'Organizations',
+      title: 'Organizations',
+    });
 
   protected createOrganization(): void {
     void this.router.navigate(['/app/management/organization/create'], {

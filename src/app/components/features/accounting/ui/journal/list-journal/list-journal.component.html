@@ -23,6 +23,8 @@
       (uploaded)="reloadJournals()"
     />
 
+    <app-xlsx-export-button [exportData]="exportJournals" />
+
     @if (canImportAnySource()) {
     <div class="journal-import-menu">
       <button

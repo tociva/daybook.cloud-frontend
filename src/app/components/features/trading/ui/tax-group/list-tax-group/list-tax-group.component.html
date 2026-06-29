@@ -24,6 +24,8 @@
       (uploaded)="reloadTaxGroups()"
     />
 
+    <app-xlsx-export-button [exportData]="exportTaxGroups" />
+
     <tng-button *appCan="'branch:taxGroup:create'" type="button" appearance="solid" tone="primary" (click)="createTaxGroup()">
       <tng-icon icon="plus" aria-hidden="true" />
       New tax group

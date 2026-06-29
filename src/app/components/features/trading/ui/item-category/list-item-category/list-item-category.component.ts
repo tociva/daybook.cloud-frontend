@@ -24,7 +24,13 @@ import type { BulkUploadPreviewConfig } from '../../../../../../shared/bulk-uplo
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
-import { ItemCategoryStore } from '../../../data/item-category';
+import {
+  XlsxExportButtonComponent,
+  columnsFromTable,
+  createCrudListXlsxDocument,
+  text,
+} from '../../../../../../shared/xlsx-export';
+import { ItemCategoryService, ItemCategoryStore } from '../../../data/item-category';
 import type { ItemCategory } from '../../../data/item-category';
 
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
@@ -45,6 +51,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
     TngTableCellTpl,
     TableRowIconButtonComponent,
     BulkUploadButtonComponent,
+    XlsxExportButtonComponent,
   ],
   templateUrl: './list-item-category.component.html',
   styleUrl: './list-item-category.component.css',
@@ -52,6 +59,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 })
 export class ListItemCategoryComponent {
   private readonly router = inject(Router);
+  private readonly itemCategoryService = inject(ItemCategoryService);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly itemCategoryStore = inject(ItemCategoryStore);
   protected readonly hasError = computed(() => this.itemCategoryStore.error() !== null);
@@ -120,6 +128,26 @@ export class ListItemCategoryComponent {
         void this.itemCategoryStore.loadItemCategories({ ...filter, includes: ['parent'] }),
     );
   }
+
+  protected readonly exportItemCategories = () =>
+    createCrudListXlsxDocument({
+      cachedRows: this.itemCategoryStore.items(),
+      cachedTotal: this.itemCategoryStore.count(),
+      columns: columnsFromTable(this.columns),
+      count: (query) => this.itemCategoryService.count(query),
+      fileNameBase: 'item-categories',
+      list: (query) => this.itemCategoryService.list({ ...query, includes: ['parent'] }),
+      mapRow: (category) => [
+        text(category.name),
+        text(category.code),
+        text(category.type),
+        text(category.parent?.name ?? category.parentid),
+        text(category.description),
+      ],
+      query: this.crudQuery.filter(),
+      sheetName: 'Item Categories',
+      title: 'Item Categories',
+    });
 
   protected createItemCategory(): void {
     void this.router.navigate(['/app/trading/item-category/create'], {

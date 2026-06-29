@@ -18,7 +18,14 @@ import type { CrudFilterField } from '../../../../../../shared/crud';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
-import { FiscalYearStore } from '../../../data/fiscal-year';
+import {
+  XlsxExportButtonComponent,
+  columnsFromTable,
+  createCrudListXlsxDocument,
+  date,
+  text,
+} from '../../../../../../shared/xlsx-export';
+import { FiscalYearService, FiscalYearStore } from '../../../data/fiscal-year';
 import type { FiscalYear } from '../../../data/fiscal-year';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 
@@ -39,6 +46,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
     TngTable,
     TngTableCellTpl,
     TableRowIconButtonComponent,
+    XlsxExportButtonComponent,
   ],
   templateUrl: './list-fiscal-year.component.html',
   styleUrl: './list-fiscal-year.component.css',
@@ -48,6 +56,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 export class ListFiscalYearComponent {
   private readonly router = inject(Router);
   private readonly dateManagement = inject(DateManagementService);
+  private readonly fiscalYearService = inject(FiscalYearService);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly fiscalYearStore = inject(FiscalYearStore);
   protected readonly hasError = computed(() => this.fiscalYearStore.error() !== null);
@@ -76,6 +85,30 @@ export class ListFiscalYearComponent {
       }),
     );
   }
+
+  protected readonly exportFiscalYears = () =>
+    createCrudListXlsxDocument({
+      cachedRows: this.fiscalYearStore.items(),
+      cachedTotal: this.fiscalYearStore.count(),
+      columns: columnsFromTable(this.columns),
+      count: (query) => this.fiscalYearService.count(query),
+      fileNameBase: 'fiscal-years',
+      list: (query) =>
+        this.fiscalYearService.list({
+          ...query,
+          includes: ['currency'],
+          order: query.order?.length ? query.order : ['startdate ASC'],
+        }),
+      mapRow: (fiscalYear) => [
+        text(fiscalYear.name),
+        date(fiscalYear.startdate),
+        date(fiscalYear.enddate),
+        text(fiscalYear.currencycode),
+      ],
+      query: this.crudQuery.filter(),
+      sheetName: 'Fiscal Years',
+      title: 'Fiscal Years',
+    });
 
   protected createFiscalYear(): void {
     void this.router.navigate(['/app/management/fiscal-year/create'], {

@@ -1,5 +1,6 @@
 export { BranchFacade } from './branch.facade';
 export { BranchSaleInvoiceTemplateService } from './branch-sale-invoice-template.service';
+export { BranchService } from './branch.service';
 export { BranchStore } from './branch.store';
 export type {
   Branch,

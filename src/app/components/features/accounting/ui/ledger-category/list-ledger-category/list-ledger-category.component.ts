@@ -20,7 +20,14 @@ import { PageHeadingComponent } from '../../../../../../shared/page-heading/page
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import {
+  XlsxExportButtonComponent,
+  columnsFromTable,
+  createCrudListXlsxDocument,
+  text,
+} from '../../../../../../shared/xlsx-export';
+import {
   LEDGER_CATEGORY_FILTER_TYPES,
+  LedgerCategoryService,
   LedgerCategoryStore,
 } from '../../../data/ledger-category';
 import type { LedgerCategory } from '../../../data/ledger-category';
@@ -43,6 +50,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
     TngTableCellTpl,
     TableRowIconButtonComponent,
     BulkUploadButtonComponent,
+    XlsxExportButtonComponent,
   ],
   templateUrl: './list-ledger-category.component.html',
   styleUrl: './list-ledger-category.component.css',
@@ -51,6 +59,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 })
 export class ListLedgerCategoryComponent {
   private readonly router = inject(Router);
+  private readonly ledgerCategoryService = inject(LedgerCategoryService);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly ledgerCategoryStore = inject(LedgerCategoryStore);
   protected readonly hasError = computed(() => this.ledgerCategoryStore.error() !== null);
@@ -84,6 +93,25 @@ export class ListLedgerCategoryComponent {
         void this.ledgerCategoryStore.loadLedgerCategories({ ...filter, includes: ['parent'] }),
     );
   }
+
+  protected readonly exportLedgerCategories = () =>
+    createCrudListXlsxDocument({
+      cachedRows: this.ledgerCategoryStore.items(),
+      cachedTotal: this.ledgerCategoryStore.count(),
+      columns: columnsFromTable(this.columns),
+      count: (query) => this.ledgerCategoryService.count(query),
+      fileNameBase: 'ledger-categories',
+      list: (query) => this.ledgerCategoryService.list({ ...query, includes: ['parent'] }),
+      mapRow: (category) => [
+        text(category.name),
+        text(category.props?.type),
+        text(category.parent?.name ?? category.parentid),
+        text(category.description),
+      ],
+      query: this.crudQuery.filter(),
+      sheetName: 'Ledger Categories',
+      title: 'Ledger Categories',
+    });
 
   protected createLedgerCategory(): void {
     void this.router.navigate(['/app/accounting/ledger-category/create'], {

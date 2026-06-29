@@ -20,6 +20,8 @@
       (uploaded)="reloadCustomerReceipts()"
     />
 
+    <app-xlsx-export-button [exportData]="exportCustomerReceipts" />
+
     <tng-button *appCan="'branch:customerReceipt:create'" type="button" appearance="solid" tone="primary" (click)="createReceipt()">
       <tng-icon icon="plus" aria-hidden="true" />
       New Receipt

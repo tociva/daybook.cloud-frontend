@@ -20,6 +20,8 @@
       (uploaded)="reloadVendorPayments()"
     />
 
+    <app-xlsx-export-button [exportData]="exportVendorPayments" />
+
     <tng-button *appCan="'branch:vendorPayment:create'" type="button" appearance="solid" tone="primary" (click)="createPayment()">
       <tng-icon icon="plus" aria-hidden="true" />
       New Payment

@@ -13,6 +13,8 @@
       syncUrl
     />
 
+    <app-xlsx-export-button [exportData]="exportBranches" />
+
     <tng-button *appCan="'organization:branch:create'" type="button" appearance="solid" tone="primary" (click)="createBranch()">
       <tng-icon icon="plus" aria-hidden="true" />
       New branch

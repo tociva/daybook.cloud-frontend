@@ -13,6 +13,8 @@
       syncUrl
     />
 
+    <app-xlsx-export-button [exportData]="exportOrganizations" />
+
     <tng-button *appCan="'root:organization:create'" type="button" appearance="solid" tone="primary" (click)="createOrganization()">
       <tng-icon icon="plus" aria-hidden="true" />
       New organization

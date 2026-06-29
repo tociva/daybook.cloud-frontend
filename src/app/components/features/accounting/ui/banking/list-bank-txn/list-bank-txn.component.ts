@@ -25,6 +25,15 @@ import {
 } from '../../../../../../shared/crud';
 import type { CrudFilterField, Lb4ListQuery } from '../../../../../../shared/crud';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
+import {
+  XlsxExportButtonComponent,
+  createXlsxListDocument,
+  date,
+  fetchAllLb4Rows,
+  journalNumbersBySourceId,
+  number,
+  text,
+} from '../../../../../../shared/xlsx-export';
 import { BankCashStore } from '../../../../trading/data/bank-cash';
 import { InventoryLedgerMapStore } from '../../../data/inventory-ledger-map';
 import type { InventoryLedgerMap } from '../../../data/inventory-ledger-map';
@@ -70,6 +79,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
     TngTooltipComponent,
     BankStatementUploadComponent,
     JournalAssignDialogComponent,
+    XlsxExportButtonComponent,
   ],
   templateUrl: './list-bank-txn.component.html',
   styleUrl: './list-bank-txn.component.css',
@@ -484,6 +494,53 @@ export class ListBankTxnComponent {
   protected reloadBankTxns(): void {
     void this.loadBankTxnsWithJournals(this.crudQuery.filter());
   }
+
+  protected readonly exportBankTxns = async () => {
+    const query = {
+      ...this.crudQuery.filter(),
+      includes: ['inventoryledgermap'],
+    };
+    const txns = await fetchAllLb4Rows(
+      async (pageQuery) => (await this.bankTxnService.list(pageQuery)).transactions,
+      query,
+      { count: (countQuery) => this.bankTxnService.count(countQuery) },
+    );
+    const ids = txns.map((txn) => txn.id).filter((id): id is string => Boolean(id));
+    const journalNumbers = this.permissions.can(PERMISSION.fiscalYear.journal.view)
+      ? journalNumbersBySourceId(
+          await this.reconciliationMatchService.findJournalsBySourceIds(
+            JournalSourceType.BANK_TXN,
+            ids,
+          ),
+        )
+      : new Map<string, string>();
+
+    return createXlsxListDocument({
+      columns: [
+        { header: 'Date', kind: 'date', format: 'yyyy-mm-dd', width: 12 },
+        { header: 'Bank', width: 24 },
+        { header: 'Deposit', kind: 'number', format: '#,##0.00', align: 'right', width: 14 },
+        { header: 'Withdrawal', kind: 'number', format: '#,##0.00', align: 'right', width: 14 },
+        { header: 'Balance', kind: 'number', format: '#,##0.00', align: 'right', width: 14 },
+        { header: 'Description', width: 30 },
+        { header: 'Reference', width: 18 },
+        { header: 'Journals', width: 18 },
+      ],
+      fileNameBase: 'bank-transactions',
+      rows: txns.map((txn) => [
+        date(txn.txndate),
+        text(this.bankName(txn)),
+        number(txn.debit),
+        number(txn.credit),
+        number(txn.balance),
+        text(txn.description),
+        text(txn.bankref),
+        text(txn.id ? journalNumbers.get(txn.id) : ''),
+      ]),
+      sheetName: 'Bank Transactions',
+      title: 'Bank Transactions',
+    });
+  };
 
   protected bankName(item: BankTxn): string {
     const mapId = item.inventoryledgermapid;

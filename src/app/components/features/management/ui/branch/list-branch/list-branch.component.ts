@@ -18,7 +18,13 @@ import type { CrudFilterField } from '../../../../../../shared/crud';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
-import { BranchStore } from '../../../data/branch';
+import {
+  XlsxExportButtonComponent,
+  columnsFromTable,
+  createCrudListXlsxDocument,
+  text,
+} from '../../../../../../shared/xlsx-export';
+import { BranchService, BranchStore } from '../../../data/branch';
 import type { Branch } from '../../../data/branch';
 import { CountryStore } from '../../../data/country/country.store';
 import { CurrencyStore } from '../../../data/currency/currency.store';
@@ -40,6 +46,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
     TngTable,
     TngTableCellTpl,
     TableRowIconButtonComponent,
+    XlsxExportButtonComponent,
   ],
   templateUrl: './list-branch.component.html',
   styleUrl: './list-branch.component.css',
@@ -48,6 +55,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 })
 export class ListBranchComponent {
   private readonly router = inject(Router);
+  private readonly branchService = inject(BranchService);
   private readonly countryStore = inject(CountryStore);
   private readonly currencyStore = inject(CurrencyStore);
   protected readonly crudQuery = inject(CrudListQueryService);
@@ -88,6 +96,27 @@ export class ListBranchComponent {
       (filter) => void this.branchStore.loadBranches({ ...filter, includes: ['country'] }),
     );
   }
+
+  protected readonly exportBranches = () =>
+    createCrudListXlsxDocument({
+      cachedRows: this.branchStore.items(),
+      cachedTotal: this.branchStore.count(),
+      columns: columnsFromTable(this.columns),
+      count: (query) => this.branchService.count(query),
+      fileNameBase: 'branches',
+      list: (query) => this.branchService.list({ ...query, includes: ['country'] }),
+      mapRow: (branch) => [
+        text(branch.name),
+        text(branch.email),
+        text(branch.mobile),
+        text(this.currencyLabel(branch)),
+        text(this.countryLabel(branch)),
+        text(branch.description),
+      ],
+      query: this.crudQuery.filter(),
+      sheetName: 'Branches',
+      title: 'Branches',
+    });
 
   protected countryLabel(branch: Branch): string {
     return (

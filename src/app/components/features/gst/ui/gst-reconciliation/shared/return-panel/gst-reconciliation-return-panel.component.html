@@ -145,9 +145,11 @@
             }
           </span>
 
-          <span class="recon-month__diff" [class.recon-month__diff--active]="hasMonthDifference(cell)">
-            {{ formatAmount(monthDifferenceAmount(cell)) }}
-          </span>
+          @if (shouldShowMonthDifference(cell)) {
+            <span class="recon-month__diff" [class.recon-month__diff--active]="hasMonthDifference(cell)">
+              {{ formatAmount(monthDifferenceAmount(cell)) }}
+            </span>
+          }
         }
       </tng-card>
     }

@@ -89,4 +89,8 @@ export class GstReconciliationReturnPanelComponent {
   protected hasMonthDifference(cell: GstReconciliationMonthCell): boolean {
     return cell.differenceAmount !== 0;
   }
+
+  protected shouldShowMonthDifference(cell: GstReconciliationMonthCell): boolean {
+    return cell.status !== 'matched' || this.hasMonthDifference(cell);
+  }
 }

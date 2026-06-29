@@ -24,6 +24,15 @@ import type { BulkUploadPreviewConfig } from '../../../../../../shared/bulk-uplo
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
+import {
+  XlsxExportButtonComponent,
+  createXlsxListDocument,
+  date,
+  fetchAllLb4Rows,
+  journalNumbersBySourceId,
+  number,
+  text,
+} from '../../../../../../shared/xlsx-export';
 import { JournalService, JournalSourceType } from '../../../../accounting/data/journal';
 import {
   JOURNAL_LINK_STATUS_FILTER_CLEAR_QUERY_PARAMS,
@@ -64,6 +73,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
     TngTableCellTpl,
     TableRowIconButtonComponent,
     BulkUploadButtonComponent,
+    XlsxExportButtonComponent,
   ],
   templateUrl: './list-vendor-payment.component.html',
   styleUrl: './list-vendor-payment.component.css',
@@ -191,6 +201,54 @@ export class ListVendorPaymentComponent {
     }
     this.crudQuery.init((filter) => this.loadVendorPaymentsWithJournals(filter));
   }
+
+  protected readonly exportVendorPayments = async () => {
+    const query = {
+      ...this.crudQuery.filter(),
+      order: this.crudQuery.filter().order?.length
+        ? this.crudQuery.filter().order
+        : DEFAULT_VENDOR_PAYMENT_ORDER,
+      includes: ['vendor', 'bcash'],
+    };
+    const payments = await fetchAllLb4Rows(
+      (pageQuery) => this.vendorPaymentService.list(pageQuery),
+      query,
+      { count: (countQuery) => this.vendorPaymentService.count(countQuery) },
+    );
+    const ids = payments.map((payment) => payment.id).filter((id): id is string => Boolean(id));
+    const journalNumbers = this.permissions.can(PERMISSION.fiscalYear.journal.view)
+      ? journalNumbersBySourceId(
+          await this.reconciliationMatchService.findJournalsBySourceIds(
+            JournalSourceType.PAYMENT,
+            ids,
+          ),
+        )
+      : new Map<string, string>();
+
+    return createXlsxListDocument({
+      columns: [
+        { header: 'Number', width: 14 },
+        { header: 'Date', kind: 'date', format: 'yyyy-mm-dd', width: 12 },
+        { header: 'Vendor', width: 24 },
+        { header: 'Amount', kind: 'number', format: '#,##0.00', align: 'right', width: 14 },
+        { header: 'Bank/Cash', width: 20 },
+        { header: 'Description', width: 28 },
+        { header: 'Journals', width: 18 },
+      ],
+      fileNameBase: 'vendor-payments',
+      rows: payments.map((payment) => [
+        text(payment.number),
+        date(payment.date),
+        text(payment.vendor?.name ?? payment.vendorid),
+        number(payment.amount),
+        text(payment.bcash?.name ?? payment.bcashid),
+        text(payment.description),
+        text(payment.id ? journalNumbers.get(payment.id) : ''),
+      ]),
+      sheetName: 'Vendor Payments',
+      title: 'Vendor Payments',
+    });
+  };
 
   private async loadVendorPaymentsWithJournals(filter: Lb4ListQuery): Promise<void> {
     void this.unfilteredTotalCounter.refresh(filter);

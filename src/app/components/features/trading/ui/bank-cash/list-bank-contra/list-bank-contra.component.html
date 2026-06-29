@@ -24,6 +24,8 @@
       Refresh
     </tng-button>
 
+    <app-xlsx-export-button [exportData]="exportContraTransactions" />
+
     <tng-button *appCan="'branch:contraTransaction:create'" type="button" appearance="solid" tone="primary" (click)="createContra()">
       <tng-icon icon="plus" aria-hidden="true" />
       New contra

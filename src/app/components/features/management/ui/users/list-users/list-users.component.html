@@ -13,6 +13,8 @@
       syncUrl
     />
 
+    <app-xlsx-export-button [exportData]="exportUsers" />
+
     <tng-button *appCan="'organization:user:inviteMember'" type="button" appearance="solid" tone="primary" (click)="createUser()">
       <tng-icon icon="plus" aria-hidden="true" />
       Invite user

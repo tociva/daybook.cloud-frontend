@@ -19,6 +19,8 @@
       (uploaded)="reloadBankCashes()"
     />
 
+    <app-xlsx-export-button [exportData]="exportBankCashes" />
+
     <tng-button *appCan="'branch:inventoryReports:bankCashReport'" type="button" appearance="outline" tone="neutral" (click)="viewActivity()">
       <tng-icon icon="activity" aria-hidden="true" />
       Activity

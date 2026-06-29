@@ -25,7 +25,13 @@ import type { BulkUploadPreviewConfig } from '../../../../../../shared/bulk-uplo
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
-import { LedgerStore } from '../../../data/ledger';
+import {
+  XlsxExportButtonComponent,
+  createCrudListXlsxDocument,
+  number,
+  text,
+} from '../../../../../../shared/xlsx-export';
+import { LedgerService, LedgerStore } from '../../../data/ledger';
 import type { Ledger } from '../../../data/ledger';
 
 const openingHeaderBorder =
@@ -49,6 +55,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
     TngTableCellTpl,
     BulkUploadButtonComponent,
     TableRowIconButtonComponent,
+    XlsxExportButtonComponent,
   ],
   templateUrl: './list-ledger.component.html',
   styleUrl: './list-ledger.component.css',
@@ -57,6 +64,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 })
 export class ListLedgerComponent {
   private readonly router = inject(Router);
+  private readonly ledgerService = inject(LedgerService);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly ledgerStore = inject(LedgerStore);
   protected readonly hasError = computed(() => this.ledgerStore.error() !== null);
@@ -158,6 +166,42 @@ export class ListLedgerComponent {
       (filter) => void this.ledgerStore.loadLedgers({ ...filter, includes: ['category'] }),
     );
   }
+
+  protected readonly exportLedgers = () =>
+    createCrudListXlsxDocument({
+      cachedRows: this.ledgerStore.items(),
+      cachedTotal: this.ledgerStore.count(),
+      columns: [
+        { header: 'Name', width: 22 },
+        { header: 'Category', width: 20 },
+        { header: 'Debit', align: 'right', format: '#,##0.00', kind: 'number', width: 14 },
+        { header: 'Credit', align: 'right', format: '#,##0.00', kind: 'number', width: 14 },
+        { header: 'Description', width: 28 },
+      ],
+      count: (query) => this.ledgerService.count(query),
+      fileNameBase: 'ledgers',
+      headerRows: [
+        [text('Name'), text('Category'), text('Opening'), null, text('Description')],
+        [null, null, text('Debit'), text('Credit'), null],
+      ],
+      list: (query) => this.ledgerService.list({ ...query, includes: ['category'] }),
+      mapRow: (ledger) => [
+        text(ledger.name),
+        text(ledger.category?.name ?? ledger.categoryid),
+        number(ledger.openingdr),
+        number(ledger.openingcr),
+        text(ledger.description),
+      ],
+      merges: [
+        { startRow: 2, startColumn: 1, endRow: 3, endColumn: 1 },
+        { startRow: 2, startColumn: 2, endRow: 3, endColumn: 2 },
+        { startRow: 2, startColumn: 3, endRow: 2, endColumn: 4 },
+        { startRow: 2, startColumn: 5, endRow: 3, endColumn: 5 },
+      ],
+      query: this.crudQuery.filter(),
+      sheetName: 'Ledgers',
+      title: 'Ledgers',
+    });
 
   protected createLedger(): void {
     void this.router.navigate(['/app/accounting/ledger/create'], {

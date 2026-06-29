@@ -21,6 +21,15 @@ import { formatAmountWithCurrency } from '../../../../../../shared/format/curren
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import {
+  XlsxExportButtonComponent,
+  createXlsxListDocument,
+  date,
+  fetchAllLb4Rows,
+  journalNumbersBySourceId,
+  number,
+  text,
+} from '../../../../../../shared/xlsx-export';
+import {
   CrudFilterPopoverComponent,
   CrudListQueryService,
   CrudPaginatorComponent,
@@ -34,7 +43,7 @@ import {
 import type { JournalLinkWorkItemSourceType } from '../../../../accounting/data/journal-link-work-item';
 import { ReconciliationMatchService } from '../../../../accounting/data/reconciliation-match';
 import { JournalLinkWorkItemListComponent } from '../../../../accounting/shared/journal-link-work-items';
-import { ContraTransactionStore } from '../../../data/contra-transaction';
+import { ContraTransactionService, ContraTransactionStore } from '../../../data/contra-transaction';
 import type { ContraTransaction, ContraTransactionJournal } from '../../../data/contra-transaction';
 
 const DEFAULT_BANK_CONTRA_ORDER = ['date ASC'] as const;
@@ -58,6 +67,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
     TngTableCellTpl,
     TableRowIconButtonComponent,
     JournalLinkWorkItemListComponent,
+    XlsxExportButtonComponent,
   ],
   templateUrl: './list-bank-contra.component.html',
   styleUrl: './list-bank-contra.component.css',
@@ -72,6 +82,7 @@ export class ListBankContraComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly toastStore = inject(ToastStore);
+  private readonly contraTransactionService = inject(ContraTransactionService);
   protected readonly contraTransactionStore = inject(ContraTransactionStore);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly hasError = computed(() => this.contraTransactionStore.error() !== null);
@@ -125,6 +136,52 @@ export class ListBankContraComponent {
   constructor() {
     this.crudQuery.init((filter) => this.loadContraTransactionsWithJournals(filter));
   }
+
+  protected readonly exportContraTransactions = async () => {
+    const query = {
+      ...this.crudQuery.filter(),
+      order: this.crudQuery.filter().order?.length
+        ? this.crudQuery.filter().order
+        : DEFAULT_BANK_CONTRA_ORDER,
+      includes: ['frombcash', 'tobcash'],
+    };
+    const contras = await fetchAllLb4Rows(
+      (pageQuery) => this.contraTransactionService.list(pageQuery),
+      query,
+      { count: (countQuery) => this.contraTransactionService.count(countQuery) },
+    );
+    const ids = contras.map((contra) => contra.id).filter((id): id is string => Boolean(id));
+    const journalNumbers = this.permissions.can(PERMISSION.fiscalYear.journal.view)
+      ? journalNumbersBySourceId(
+          await this.reconciliationMatchService.findJournalsBySourceIds(
+            JournalSourceType.CONTRA_TRANSACTION,
+            ids,
+          ),
+        )
+      : new Map<string, string>();
+
+    return createXlsxListDocument({
+      columns: [
+        { header: 'Date', kind: 'date', format: 'yyyy-mm-dd', width: 12 },
+        { header: 'From', width: 24 },
+        { header: 'To', width: 24 },
+        { header: 'Amount', kind: 'number', format: '#,##0.00', align: 'right', width: 14 },
+        { header: 'Description', width: 28 },
+        { header: 'Journals', width: 18 },
+      ],
+      fileNameBase: 'bank-contra',
+      rows: contras.map((contra) => [
+        date(contra.date),
+        text(contra.frombcash?.name ?? contra.frombcashid),
+        text(contra.tobcash?.name ?? contra.tobcashid),
+        number(contra.amount),
+        text(contra.description),
+        text(contra.id ? journalNumbers.get(contra.id) : ''),
+      ]),
+      sheetName: 'Bank Contra',
+      title: 'Bank Contra',
+    });
+  };
 
   protected formatDate(value: string | undefined): string {
     return this.dateManagement.formatDisplayDate(value, '-');

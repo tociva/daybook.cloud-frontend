@@ -24,6 +24,15 @@ import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload'
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
+import {
+  XlsxExportButtonComponent,
+  createXlsxListDocument,
+  date,
+  fetchAllLb4Rows,
+  journalNumbersBySourceId,
+  number,
+  text,
+} from '../../../../../../shared/xlsx-export';
 import { CustomerStore } from '../../../data/customer';
 import type { Customer } from '../../../data/customer';
 import { JournalService, JournalSourceType } from '../../../../accounting/data/journal';
@@ -69,6 +78,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
     TngTableCellTpl,
     TableRowIconButtonComponent,
     BulkUploadButtonComponent,
+    XlsxExportButtonComponent,
   ],
   templateUrl: './list-sale-invoice.component.html',
   styleUrl: './list-sale-invoice.component.css',
@@ -222,6 +232,58 @@ export class ListSaleInvoiceComponent {
     }
     this.crudQuery.init((filter) => this.loadSaleInvoicesWithJournals(filter));
   }
+
+  protected readonly exportSaleInvoices = async () => {
+    const query: SaleInvoiceListQuery = {
+      ...this.crudQuery.filter(),
+      order: this.crudQuery.filter().order?.length
+        ? this.crudQuery.filter().order
+        : DEFAULT_SALE_INVOICE_ORDER,
+      includes: ['customer', 'receipts'],
+    };
+    const invoices = await fetchAllLb4Rows(
+      (pageQuery) => this.saleInvoiceService.list(pageQuery),
+      query,
+      { count: (countQuery) => this.saleInvoiceService.count(countQuery) },
+    );
+    const ids = invoices.map((invoice) => invoice.id).filter((id): id is string => Boolean(id));
+    const journalNumbers = this.permissions.can(PERMISSION.fiscalYear.journal.view)
+      ? journalNumbersBySourceId(
+          await this.reconciliationMatchService.findJournalsBySourceIds(
+            JournalSourceType.SALE_INVOICE,
+            ids,
+          ),
+        )
+      : new Map<string, string>();
+
+    return createXlsxListDocument({
+      columns: [
+        { header: 'Number', width: 14 },
+        { header: 'Customer', width: 24 },
+        { header: 'Date', kind: 'date', format: 'yyyy-mm-dd', width: 12 },
+        { header: 'Item Total', kind: 'number', format: '#,##0.00', align: 'right', width: 14 },
+        { header: 'Discount', kind: 'number', format: '#,##0.00', align: 'right', width: 12 },
+        { header: 'Tax', kind: 'number', format: '#,##0.00', align: 'right', width: 12 },
+        { header: 'Grand Total', kind: 'number', format: '#,##0.00', align: 'right', width: 14 },
+        { header: 'Received', kind: 'number', format: '#,##0.00', align: 'right', width: 14 },
+        { header: 'Journals', width: 18 },
+      ],
+      fileNameBase: 'sale-invoices',
+      rows: invoices.map((invoice) => [
+        text(invoice.number),
+        text(invoice.customer?.name ?? invoice.customerid),
+        date(invoice.date),
+        number(invoice.itemtotal),
+        number(invoice.discount),
+        number(invoice.tax),
+        number(invoice.grandtotal),
+        number(this.totalReceived(invoice)),
+        text(invoice.id ? journalNumbers.get(invoice.id) : ''),
+      ]),
+      sheetName: 'Sale Invoices',
+      title: 'Sale Invoices',
+    });
+  };
 
   private async loadSaleInvoicesWithJournals(filter: Lb4ListQuery): Promise<void> {
     void this.unfilteredTotalCounter.refresh(filter);

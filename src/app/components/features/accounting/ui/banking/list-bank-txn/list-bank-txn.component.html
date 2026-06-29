@@ -19,6 +19,8 @@
       (uploaded)="reloadBankTxns()"
     />
 
+    <app-xlsx-export-button [exportData]="exportBankTxns" />
+
     <tng-button *appCan="'fiscalYear:bankTxn:create'" type="button" appearance="solid" tone="primary" (click)="createBankTxn()">
       <tng-icon icon="plus" aria-hidden="true" />
       New transaction

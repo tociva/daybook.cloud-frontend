@@ -12,7 +12,15 @@ import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { UserSessionStore } from '../../../../management/data/user-session/user-session.store';
-import { StoredDocumentStore } from '../../../data/stored-document';
+import {
+  XlsxExportButtonComponent,
+  columnsFromTable,
+  createCrudListXlsxDocument,
+  date,
+  number,
+  text,
+} from '../../../../../../shared/xlsx-export';
+import { StoredDocumentService, StoredDocumentStore } from '../../../data/stored-document';
 import type { StoredDocument } from '../../../data/stored-document';
 
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
@@ -29,6 +37,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
     EmptyStateComponent,
     TngTable,
     TngTableCellTpl,
+    XlsxExportButtonComponent,
   ],
   templateUrl: './list-document.component.html',
   styleUrl: './list-document.component.css',
@@ -37,6 +46,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 })
 export class ListDocumentComponent {
   private readonly router = inject(Router);
+  private readonly documentService = inject(StoredDocumentService);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly documentStore = inject(StoredDocumentStore);
   private readonly userSessionStore = inject(UserSessionStore);
@@ -69,6 +79,33 @@ export class ListDocumentComponent {
       });
     });
   }
+
+  protected readonly exportDocuments = () =>
+    createCrudListXlsxDocument({
+      cachedRows: this.documentStore.items(),
+      cachedTotal: this.documentStore.count(),
+      columns: columnsFromTable(this.columns),
+      count: (query) => this.documentService.count(query),
+      fileNameBase: 'documents',
+      list: (query) =>
+        this.documentService.list({
+          ...query,
+          includes: ['addedby'],
+          order: query.order?.length ? query.order : ['createdat DESC'],
+        }),
+      mapRow: (document) => [
+        text(document.name),
+        text(document.category),
+        text(document.type),
+        number(document.size, '#,##0'),
+        text(document.status),
+        text(this.resolveAddedByName(document)),
+        date(document.createdat),
+      ],
+      query: this.crudQuery.filter(),
+      sheetName: 'Documents',
+      title: 'Documents',
+    });
 
   protected viewDocument(item: StoredDocument): void {
     if (!item.id) return;

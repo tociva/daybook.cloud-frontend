@@ -19,6 +19,8 @@
       (uploaded)="reloadCustomers()"
     />
 
+    <app-xlsx-export-button [exportData]="exportCustomers" />
+
     <tng-button *appCan="'branch:customer:create'" type="button" appearance="solid" tone="primary" (click)="createCustomer()">
       <tng-icon icon="plus" aria-hidden="true" />
       New customer

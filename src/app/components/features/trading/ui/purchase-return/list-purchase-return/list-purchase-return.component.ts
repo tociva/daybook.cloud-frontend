@@ -18,7 +18,16 @@ import type { CrudFilterField } from '../../../../../../shared/crud';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
-import { PurchaseReturnStore } from '../../../data/purchase-return';
+import {
+  XlsxExportButtonComponent,
+  columnsFromTable,
+  createCrudListXlsxDocument,
+  date,
+  number,
+  readPath,
+  text,
+} from '../../../../../../shared/xlsx-export';
+import { PurchaseReturnService, PurchaseReturnStore } from '../../../data/purchase-return';
 import type { PurchaseReturn } from '../../../data/purchase-return';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { formatAmountWithCurrency } from '../../../../../../shared/format/currency';
@@ -40,6 +49,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
     TngTable,
     TngTableCellTpl,
     TableRowIconButtonComponent,
+    XlsxExportButtonComponent,
   ],
   templateUrl: './list-purchase-return.component.html',
   styleUrl: './list-purchase-return.component.css',
@@ -48,6 +58,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 export class ListPurchaseReturnComponent {
   private readonly router = inject(Router);
   private readonly dateManagement = inject(DateManagementService);
+  private readonly purchaseReturnService = inject(PurchaseReturnService);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly purchaseReturnStore = inject(PurchaseReturnStore);
   protected readonly hasError = computed(() => this.purchaseReturnStore.error() !== null);
@@ -125,6 +136,38 @@ export class ListPurchaseReturnComponent {
         }),
     );
   }
+
+  protected readonly exportPurchaseReturns = () =>
+    createCrudListXlsxDocument({
+      cachedRows: this.purchaseReturnStore.items(),
+      cachedTotal: this.purchaseReturnStore.count(),
+      columns: columnsFromTable(this.columns),
+      count: (query) => this.purchaseReturnService.count(query),
+      fileNameBase: 'purchase-returns',
+      list: (query) =>
+        this.purchaseReturnService.list({
+          ...query,
+          includes: [
+            {
+              relation: 'purchaseinvoice',
+              scope: { include: [{ relation: 'vendor' }] },
+            },
+          ],
+        }),
+      mapRow: (row) => [
+        text(row.number),
+        text(readPath(row, 'purchaseinvoice.number')),
+        text(readPath(row, 'purchaseinvoice.vendor.name')),
+        date(row.date),
+        date(row.duedate),
+        number(row.itemtotal),
+        number(row.tax),
+        number(row.grandtotal),
+      ],
+      query: this.crudQuery.filter(),
+      sheetName: 'Purchase Returns',
+      title: 'Purchase Returns',
+    });
 
   protected createPurchaseReturn(): void {
     void this.router.navigate(['/app/trading/purchase-return/create'], {

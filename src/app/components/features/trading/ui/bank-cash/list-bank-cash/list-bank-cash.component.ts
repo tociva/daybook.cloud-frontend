@@ -25,7 +25,13 @@ import type { BulkUploadPreviewConfig } from '../../../../../../shared/bulk-uplo
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
-import { BankCashStore, Status } from '../../../data/bank-cash';
+import {
+  XlsxExportButtonComponent,
+  columnsFromTable,
+  createCrudListXlsxDocument,
+  text,
+} from '../../../../../../shared/xlsx-export';
+import { BankCashService, BankCashStore, Status } from '../../../data/bank-cash';
 import type { BankCash } from '../../../data/bank-cash';
 import { TngTagIcon } from '../tng-tag-icon.directive';
 
@@ -50,6 +56,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
     TngTableCellTpl,
     TableRowIconButtonComponent,
     BulkUploadButtonComponent,
+    XlsxExportButtonComponent,
   ],
   templateUrl: './list-bank-cash.component.html',
   styleUrl: './list-bank-cash.component.css',
@@ -57,6 +64,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 })
 export class ListBankCashComponent {
   private readonly router = inject(Router);
+  private readonly bankCashService = inject(BankCashService);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly bankCashStore = inject(BankCashStore);
   protected readonly hasError = computed(() => this.bankCashStore.error() !== null);
@@ -117,6 +125,24 @@ export class ListBankCashComponent {
   constructor() {
     this.crudQuery.init((filter) => void this.bankCashStore.loadBankCashes(filter));
   }
+
+  protected readonly exportBankCashes = () =>
+    createCrudListXlsxDocument({
+      cachedRows: this.bankCashStore.items(),
+      cachedTotal: this.bankCashStore.count(),
+      columns: columnsFromTable(this.columns),
+      count: (query) => this.bankCashService.count(query),
+      fileNameBase: 'bank-cash-accounts',
+      list: (query) => this.bankCashService.list(query),
+      mapRow: (bankCash) => [
+        text(bankCash.name),
+        text(bankCash.description),
+        text(this.getStatusLabel(bankCash.status)),
+      ],
+      query: this.crudQuery.filter(),
+      sheetName: 'Bank Cash',
+      title: 'Bank/Cash Accounts',
+    });
 
   protected createBankCash(): void {
     void this.router.navigate(['/app/trading/bank-cash/create'], {

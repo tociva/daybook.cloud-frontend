@@ -34,6 +34,15 @@ import { BulkUploadButtonComponent } from '../../../../../../shared/bulk-upload'
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
+import {
+  XlsxExportButtonComponent,
+  createXlsxListDocument,
+  date,
+  fetchAllLb4Rows,
+  number,
+  text,
+} from '../../../../../../shared/xlsx-export';
+import type { XlsxMergeRange } from '../../../../../../shared/xlsx-export';
 import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
 import {
@@ -185,6 +194,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
     TngTable,
     TngTableCellTpl,
     TableRowIconButtonComponent,
+    XlsxExportButtonComponent,
   ],
   templateUrl: './list-journal.component.html',
   styleUrl: './list-journal.component.css',
@@ -374,6 +384,91 @@ export class ListJournalComponent {
       if (!journalIds.length) return;
       void untracked(() => this.fetchSourceMatches(journalIds));
     });
+  }
+
+  protected readonly exportJournals = async () => {
+    const filter = this.crudQuery.filter();
+    const journals = await fetchAllLb4Rows(
+      (query) => this.journalService.list(query),
+      {
+        ...filter,
+        includes: ['entries'],
+        order: filter.order?.length ? filter.order : DEFAULT_JOURNAL_ORDER,
+      },
+      { count: (query) => this.journalService.count(query) },
+    );
+    const ledgerNames = await this.exportLedgerNames(journals);
+    const rows: ReturnType<typeof text>[][] = [];
+    const merges: XlsxMergeRange[] = [];
+    let sheetRow = 3;
+
+    journals.forEach((journal, journalIndex) => {
+      const journalRows = this.toJournalRows(journal, journalIndex);
+      const rowCount = Math.max(journalRows.length, 1);
+      if (rowCount > 1) {
+        for (const column of [1, 2, 3, 7]) {
+          merges.push({
+            startRow: sheetRow,
+            startColumn: column,
+            endRow: sheetRow + rowCount - 1,
+            endColumn: column,
+          });
+        }
+      }
+
+      for (const row of journalRows) {
+        rows.push([
+          text(row.number),
+          date(row.date),
+          text(this.getSourceTypeLabel(row.sourcetype)),
+          text(row.ledgerid ? ledgerNames.get(row.ledgerid) ?? row.ledgerid : ''),
+          number(row.debit),
+          number(row.credit),
+          text(row.description),
+        ]);
+      }
+      sheetRow += rowCount;
+    });
+
+    return createXlsxListDocument({
+      columns: [
+        { header: 'Number', width: 14 },
+        { header: 'Date', kind: 'date', format: 'yyyy-mm-dd', width: 12 },
+        { header: 'Type', width: 16 },
+        { header: 'Ledger', width: 26 },
+        { header: 'Debit', kind: 'number', format: '#,##0.00', align: 'right', width: 14 },
+        { header: 'Credit', kind: 'number', format: '#,##0.00', align: 'right', width: 14 },
+        { header: 'Description', width: 30 },
+      ],
+      fileNameBase: 'journals',
+      merges,
+      rows,
+      sheetName: 'Journals',
+      title: 'Journals',
+    });
+  };
+
+  private async exportLedgerNames(journals: readonly Journal[]): Promise<ReadonlyMap<string, string>> {
+    const ids = this.collectLedgerIds(journals);
+    const cached = new Map(this.resolveCachedLedgerNames(ids));
+    const missing = ids.filter((id) => !cached.has(id));
+
+    if (!missing.length || !this.permissions.can(PERMISSION.fiscalYear.ledger.view)) {
+      return cached;
+    }
+
+    const ledgers = await this.ledgerService.list({
+      limit: missing.length,
+      offset: 0,
+      where: { id: { inq: missing } },
+    });
+    for (const ledger of ledgers) {
+      if (ledger.id) {
+        cached.set(ledger.id, ledger.name ?? ledger.id);
+      }
+    }
+    this.mergeLedgerNames(cached);
+    return cached;
   }
 
   private async fetchSourceMatches(journalIds: readonly string[]): Promise<void> {

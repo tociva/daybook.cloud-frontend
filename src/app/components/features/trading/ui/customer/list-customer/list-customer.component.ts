@@ -23,7 +23,14 @@ import type { BulkUploadPreviewConfig } from '../../../../../../shared/bulk-uplo
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
-import { CustomerStore } from '../../../data/customer';
+import {
+  XlsxExportButtonComponent,
+  columnsFromTable,
+  createCrudListXlsxDocument,
+  readPath,
+  text,
+} from '../../../../../../shared/xlsx-export';
+import { CustomerService, CustomerStore } from '../../../data/customer';
 import type { Customer } from '../../../data/customer';
 
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
@@ -44,6 +51,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
     TngTableCellTpl,
     TableRowIconButtonComponent,
     BulkUploadButtonComponent,
+    XlsxExportButtonComponent,
   ],
   templateUrl: './list-customer.component.html',
   styleUrl: './list-customer.component.css',
@@ -51,6 +59,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 })
 export class ListCustomerComponent {
   private readonly router = inject(Router);
+  private readonly customerService = inject(CustomerService);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly customerStore = inject(CustomerStore);
   protected readonly hasError = computed(() => this.customerStore.error() !== null);
@@ -133,6 +142,28 @@ export class ListCustomerComponent {
   constructor() {
     this.crudQuery.init((filter) => void this.customerStore.loadCustomers(filter));
   }
+
+  protected readonly exportCustomers = () =>
+    createCrudListXlsxDocument({
+      cachedRows: this.customerStore.items(),
+      cachedTotal: this.customerStore.count(),
+      columns: columnsFromTable(this.columns),
+      count: (query) => this.customerService.count(query),
+      fileNameBase: 'customers',
+      list: (query) => this.customerService.list(query),
+      mapRow: (customer) => [
+        text(customer.name),
+        text(customer.mobile),
+        text(customer.email),
+        text(customer.gstin),
+        text(readPath(customer, 'address.city')),
+        text(customer.state),
+        text(customer.description),
+      ],
+      query: this.crudQuery.filter(),
+      sheetName: 'Customers',
+      title: 'Customers',
+    });
 
   protected createCustomer(): void {
     void this.router.navigate(['/app/trading/customer/create'], {

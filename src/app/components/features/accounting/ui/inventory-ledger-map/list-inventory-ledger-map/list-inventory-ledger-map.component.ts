@@ -18,10 +18,19 @@ import type { CrudFilterField } from '../../../../../../shared/crud';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
+import {
+  XlsxExportButtonComponent,
+  columnsFromTable,
+  createCrudListXlsxDocument,
+  text,
+} from '../../../../../../shared/xlsx-export';
 import { LedgerStore } from '../../../data/ledger';
 import { BankCashStore } from '../../../../trading/data/bank-cash';
 import { CustomerStore } from '../../../../trading/data/customer';
-import { InventoryLedgerMapStore } from '../../../data/inventory-ledger-map';
+import {
+  InventoryLedgerMapService,
+  InventoryLedgerMapStore,
+} from '../../../data/inventory-ledger-map';
 import type { InventoryLedgerMap } from '../../../data/inventory-ledger-map';
 import { ItemStore } from '../../../../trading/data/item';
 import { TaxStore } from '../../../../trading/data/tax';
@@ -50,6 +59,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
     TngTable,
     TngTableCellTpl,
     TableRowIconButtonComponent,
+    XlsxExportButtonComponent,
   ],
   templateUrl: './list-inventory-ledger-map.component.html',
   styleUrl: './list-inventory-ledger-map.component.css',
@@ -58,6 +68,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
 })
 export class ListInventoryLedgerMapComponent {
   private readonly router = inject(Router);
+  private readonly inventoryLedgerMapService = inject(InventoryLedgerMapService);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly inventoryLedgerMapStore = inject(InventoryLedgerMapStore);
   protected readonly ledgerStore = inject(LedgerStore);
@@ -99,6 +110,28 @@ export class ListInventoryLedgerMapComponent {
     this.crudQuery.init((filter) => void this.inventoryLedgerMapStore.loadInventoryLedgerMaps(filter));
     void this.loadLookupCatalogs();
   }
+
+  protected readonly exportInventoryLedgerMaps = async () => {
+    await this.loadLookupCatalogs();
+
+    return createCrudListXlsxDocument({
+      cachedRows: this.inventoryLedgerMapStore.items(),
+      cachedTotal: this.inventoryLedgerMapStore.count(),
+      columns: columnsFromTable(this.columns),
+      count: (query) => this.inventoryLedgerMapService.count(query),
+      fileNameBase: 'inventory-ledger-maps',
+      list: (query) => this.inventoryLedgerMapService.list(query),
+      mapRow: (map) => [
+        text(this.formatEntityType(map.entitytype)),
+        text(this.entityName(map)),
+        text(this.formatLedgerType(map.ledgertype)),
+        text(map.ledgerid ? this.ledgerName(map.ledgerid) : '—'),
+      ],
+      query: this.crudQuery.filter(),
+      sheetName: 'Inventory Ledger Maps',
+      title: 'Inventory Ledger Mappings',
+    });
+  };
 
   protected createInventoryLedgerMap(): void {
     void this.router.navigate(['/app/accounting/inventory-ledger-map/create'], {

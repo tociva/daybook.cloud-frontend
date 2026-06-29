@@ -23,6 +23,8 @@
       (uploaded)="reloadLedgerCategories()"
     />
 
+    <app-xlsx-export-button [exportData]="exportLedgerCategories" />
+
     <tng-button *appCan="'fiscalYear:ledgerCategory:create'" type="button" appearance="solid" tone="primary" (click)="createLedgerCategory()">
       <tng-icon icon="plus" aria-hidden="true" />
       New category

@@ -26,6 +26,13 @@ import { PageHeadingComponent } from '../../../../../../shared/page-heading/page
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import { CrudFilterPopoverComponent, CrudListQueryService } from '../../../../../../shared/crud';
 import type { CrudFilterField } from '../../../../../../shared/crud';
+import {
+  XlsxExportButtonComponent,
+  createXlsxListDocument,
+  date,
+  number,
+  text,
+} from '../../../../../../shared/xlsx-export';
 import type { BankCash } from '../../../data/bank-cash';
 import { BankCashStore } from '../../../data/bank-cash';
 import { BankCashReportService } from '../../../data/bank-cash-report';
@@ -54,6 +61,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
     TngTable,
     TngTableCellTpl,
     TableRowIconButtonComponent,
+    XlsxExportButtonComponent,
   ],
   templateUrl: './list-bank-cash-activity.component.html',
   styleUrl: './list-bank-cash-activity.component.css',
@@ -179,6 +187,37 @@ export class ListBankCashActivityComponent {
   protected refresh(): void {
     void this.loadReport(this.mapFilterToReportQuery(this.crudQuery.filter()), ++this.loadToken);
   }
+
+  protected readonly exportBankCashActivity = async () => {
+    const report = await this.bankCashReportService.getBankCashReport(
+      this.mapFilterToReportQuery(this.crudQuery.filter()),
+    );
+    const rows = (report.transactions ?? []).map(normalizeBankCashReportTransaction);
+
+    return createXlsxListDocument({
+      columns: [
+        { header: 'Date', kind: 'date', format: 'yyyy-mm-dd', width: 12 },
+        { header: 'Type', width: 12 },
+        { header: 'Leg', width: 10 },
+        { header: 'Counterparty', width: 24 },
+        { header: 'Receipt', kind: 'number', format: '#,##0.00', align: 'right', width: 14 },
+        { header: 'Payment', kind: 'number', format: '#,##0.00', align: 'right', width: 14 },
+        { header: 'Description', width: 30 },
+      ],
+      fileNameBase: 'bank-cash-activity',
+      rows: rows.map((row) => [
+        date(row.date),
+        text(row.sourceLabel),
+        text(row.contraLeg),
+        text(row.counterpartyName),
+        number(row.receipt),
+        number(row.payment),
+        text(row.description),
+      ]),
+      sheetName: 'Bank Cash Activity',
+      title: 'Bank & Cash Activity',
+    });
+  };
 
   protected sourcePermission(row: BankCashActivityRow): PermissionRequirement {
     switch (row.sourceType) {

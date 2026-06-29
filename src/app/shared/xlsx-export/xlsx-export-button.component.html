@@ -1,0 +1,11 @@
+<tng-button
+  type="button"
+  appearance="outline"
+  tone="neutral"
+  [disabled]="isExporting()"
+  (click)="export()"
+>
+  <tng-icon [icon]="isExporting() ? 'loaderCircle' : 'download'" aria-hidden="true" />
+  {{ isExporting() ? 'Exporting…' : label() }}
+</tng-button>
+

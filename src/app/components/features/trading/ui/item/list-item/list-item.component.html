@@ -29,6 +29,8 @@
       (uploaded)="reloadItems()"
     />
 
+    <app-xlsx-export-button [exportData]="exportItems" />
+
     <tng-button *appCan="'branch:item:create'" type="button" appearance="solid" tone="primary" (click)="createItem()">
       <tng-icon icon="plus" aria-hidden="true" />
       New item
