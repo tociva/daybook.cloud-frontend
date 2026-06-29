@@ -8,6 +8,7 @@ const reportPermissions: Readonly<Record<string, PermissionMatch>> = {
   ledgerCategoryReport: PERMISSION.fiscalYear.accountingReports.ledgerCategoryReport,
   ledgerReport: PERMISSION.fiscalYear.accountingReports.ledgerReport,
   profitLoss: PERMISSION.fiscalYear.accountingReports.profitLoss,
+  taxReport: PERMISSION.branch.inventoryReports.taxReport,
   trialBalance: PERMISSION.fiscalYear.accountingReports.trialBalance,
 };
 

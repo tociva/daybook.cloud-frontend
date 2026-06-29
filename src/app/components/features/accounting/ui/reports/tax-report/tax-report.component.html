@@ -1,0 +1,108 @@
+<main class="management-page">
+  <app-page-heading
+    eyebrow="Accounting"
+    title="Tax Report"
+    description="Monthly input and output tax totals for the selected period"
+  >
+    <app-burl-back-button [fallbackUrl]="'/app/accounting/reports'" />
+    <app-xlsx-export-button [exportData]="exportTaxReport" [disabled]="isLoading() || hasError()" />
+    <div class="date-filter">
+      <tng-date-range-picker
+        [adapter]="datepickerAdapter.adapter()"
+        id="tax-report-date-range"
+        placeholder="Select report period"
+        [fullWidth]="false"
+        [value]="pickerValue()"
+        (valueChange)="onDateRangeChange($event)"
+        (closed)="onPickerClosed()"
+      />
+    </div>
+    <tng-button
+      type="button"
+      appearance="outline"
+      tone="neutral"
+      (click)="onRefresh()"
+      [disabled]="isLoading()"
+    >
+      <tng-icon icon="refresh-cw" aria-hidden="true" />
+      Refresh
+    </tng-button>
+  </app-page-heading>
+
+  <tng-card variant="outline" padding="lg">
+    @if (hasError()) {
+      <div class="notice notice--danger">
+        {{ error() }}
+      </div>
+    } @else if (isLoading()) {
+      <div class="loading-state">Loading tax report...</div>
+    } @else if (reportData().length === 0) {
+      <div class="notice notice--info">No months were returned for the selected period.</div>
+    } @else {
+      @if (reportTitle()) {
+        <h2 class="report-title">{{ reportTitle() }}</h2>
+      }
+
+      <div class="table-scroll">
+        <table class="tax-table" [attr.aria-label]="reportTitle() || 'Tax report'">
+          <colgroup>
+            <col class="month-col" />
+            @for (taxName of taxNames(); track taxName) {
+              <col class="amount-col" />
+              <col class="amount-col" />
+            }
+            <col class="amount-col" />
+            <col class="amount-col" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th class="month-column" scope="col" rowspan="2">Month</th>
+              @for (taxName of taxNames(); track taxName) {
+                <th class="tax-heading" scope="colgroup" colspan="2">{{ taxName }}</th>
+              }
+              <th class="tax-heading total-heading" scope="colgroup" colspan="2">Total</th>
+            </tr>
+            <tr>
+              @for (taxName of taxNames(); track taxName) {
+                <th class="amount-heading" scope="col">Debit</th>
+                <th class="amount-heading tax-group-end" scope="col">Credit</th>
+              }
+              <th class="amount-heading total-column" scope="col">Debit</th>
+              <th class="amount-heading total-column" scope="col">Credit</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of reportData(); track taxMonthRowKey(row)) {
+              <tr>
+                <th class="month-cell" scope="row">{{ monthLabel(row) }}</th>
+                @for (taxName of taxNames(); track taxName) {
+                  <td class="amount-cell">{{ monthAmount(row, taxName, 'debit') }}</td>
+                  <td class="amount-cell tax-group-end">
+                    {{ monthAmount(row, taxName, 'credit') }}
+                  </td>
+                }
+                <td class="amount-cell total-column">{{ monthTotalAmount(row, 'debit') }}</td>
+                <td class="amount-cell total-column">{{ monthTotalAmount(row, 'credit') }}</td>
+              </tr>
+            }
+          </tbody>
+          <tfoot>
+            <tr>
+              <th class="month-cell" scope="row">Total</th>
+              @for (taxName of taxNames(); track taxName) {
+                <td class="amount-cell">{{ totalAmount(taxName, 'debit') }}</td>
+                <td class="amount-cell tax-group-end">{{ totalAmount(taxName, 'credit') }}</td>
+              }
+              <td class="amount-cell total-column">{{ grandTotalAmount('debit') }}</td>
+              <td class="amount-cell total-column">{{ grandTotalAmount('credit') }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      @if (generatedAt()) {
+        <div class="table-footer">Generated at: {{ formatGeneratedAt(generatedAt()) }}</div>
+      }
+    }
+  </tng-card>
+</main>

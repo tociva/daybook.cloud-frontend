@@ -35,6 +35,9 @@ describe('permissionForWorkspaceUrl', () => {
     expect(permissionForWorkspaceUrl('/app/accounting/reports/trial-balance')).toEqual(
       PERMISSION.fiscalYear.accountingReports.trialBalance,
     );
+    expect(permissionForWorkspaceUrl('/app/accounting/reports/tax')).toEqual(
+      PERMISSION.branch.inventoryReports.taxReport,
+    );
     expect(permissionForWorkspaceUrl('/app/accounting/documents')).toEqual(PERMISSION.ownerOnly);
     expect(permissionForWorkspaceUrl('/app/management/subscription')).toEqual(
       PERMISSION.root.userSubscription.view,

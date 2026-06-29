@@ -62,7 +62,10 @@ export const PERMISSION = {
       bulkUpload: branch('customerReceipt', 'bulkUpload'),
     },
     fiscalYear: crud(branch, 'fiscalYear'),
-    inventoryReports: { bankCashReport: branch('inventoryReports', 'bankCashReport') },
+    inventoryReports: {
+      bankCashReport: branch('inventoryReports', 'bankCashReport'),
+      taxReport: branch('inventoryReports', 'taxReport'),
+    },
     item: { ...crud(branch, 'item'), bulkUpload: branch('item', 'bulkUpload') },
     itemCategory: {
       ...crud(branch, 'itemCategory'),
@@ -139,7 +142,10 @@ export const ACCOUNTING_REPORT_PERMISSIONS = [
   PERMISSION.fiscalYear.accountingReports.ledgerCategoryReport,
 ] as const;
 
-export const ACCOUNTING_REPORTS_MATCH = anyPermission(...ACCOUNTING_REPORT_PERMISSIONS);
+export const ACCOUNTING_REPORTS_MATCH = anyPermission(
+  ...ACCOUNTING_REPORT_PERMISSIONS,
+  PERMISSION.branch.inventoryReports.taxReport,
+);
 
 export const ITEM_TREE_MATCH = allPermissions(
   PERMISSION.branch.item.view,
@@ -192,6 +198,7 @@ export function permissionForWorkspaceUrl(url: string): PermissionMatch | null {
     ['/app/accounting/reports/trial-balance', PERMISSION.fiscalYear.accountingReports.trialBalance],
     ['/app/accounting/reports/profit-loss', PERMISSION.fiscalYear.accountingReports.profitLoss],
     ['/app/accounting/reports/balance-sheet', PERMISSION.fiscalYear.accountingReports.balanceSheet],
+    ['/app/accounting/reports/tax', PERMISSION.branch.inventoryReports.taxReport],
     [
       '/app/accounting/reports/ledger-category',
       PERMISSION.fiscalYear.accountingReports.ledgerCategoryReport,

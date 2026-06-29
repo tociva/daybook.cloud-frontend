@@ -181,8 +181,8 @@
   },
   {
     "title": "Reports",
-    "description": "Browse accounting reports including trial balance, profit and loss, balance sheet, and daybook.",
-    "keywords": ["reports", "accounting", "financial statements", "trial balance", "profit and loss", "balance sheet", "daybook"],
+    "description": "Browse accounting reports including trial balance, profit and loss, balance sheet, tax report, and daybook.",
+    "keywords": ["reports", "accounting", "financial statements", "trial balance", "profit and loss", "balance sheet", "tax report", "daybook"],
     "url": "/app/accounting/reports"
   },
   {
@@ -208,6 +208,12 @@
     "description": "View balance sheet report.",
     "keywords": ["balance sheet", "report", "financials", "accounting"],
     "url": "/app/accounting/reports/balance-sheet"
+  },
+  {
+    "title": "Tax report",
+    "description": "Monthly input and output tax totals for the selected period.",
+    "keywords": ["tax report", "tax", "gst", "igst", "cgst", "sgst", "input tax", "output tax", "accounting", "report"],
+    "url": "/app/accounting/reports/tax"
   },
   {
     "title": "Ledger report",

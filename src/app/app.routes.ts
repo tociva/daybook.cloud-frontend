@@ -210,6 +210,13 @@ const appRoutes: Routes = [
       ),
   },
   {
+    path: 'app/accounting/reports/tax',
+    loadChildren: () =>
+      import('./components/features/accounting/ui/reports/tax-report/tax-report.routes').then(
+        (m) => m.taxReportRoutes,
+      ),
+  },
+  {
     path: 'app/accounting/reports/ledger',
     loadChildren: () =>
       import('./components/features/accounting/ui/reports/ledger-report/ledger-report.routes').then(

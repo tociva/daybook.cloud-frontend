@@ -35,6 +35,14 @@ export const accountingReportsNavItems: readonly AccountingReportNavItem[] = [
     permissionScope: 'balanceSheet',
   },
   {
+    slug: 'tax',
+    label: 'Tax report',
+    route: `${ACCOUNTING_REPORTS_BASE_PATH}/tax`,
+    description: 'Monthly input and output tax totals for the selected period',
+    icon: 'percent',
+    permissionScope: 'taxReport',
+  },
+  {
     slug: 'ledger',
     label: 'Ledger report',
     route: `${ACCOUNTING_REPORTS_BASE_PATH}/ledger`,

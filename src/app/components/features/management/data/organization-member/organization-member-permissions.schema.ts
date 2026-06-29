@@ -80,7 +80,7 @@ export const BRANCH_PERMISSION_GROUPS: readonly PermissionGroupDef[] = [
   {
     key: 'inventoryReports',
     label: 'Inventory reports',
-    actions: [action('bankCashReport')],
+    actions: [action('bankCashReport'), action('taxReport')],
   },
 ] as const;
 
