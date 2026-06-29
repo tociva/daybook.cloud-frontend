@@ -5,6 +5,10 @@
     description="Financial position as of the selected date"
   >
     <app-burl-back-button [fallbackUrl]="'/app/accounting/reports'" />
+    <app-xlsx-export-button
+      [exportData]="exportBalanceSheet"
+      [disabled]="isLoading() || hasError()"
+    />
     <div class="date-filter">
       <app-fiscal-year-datepicker
         id="end-date"

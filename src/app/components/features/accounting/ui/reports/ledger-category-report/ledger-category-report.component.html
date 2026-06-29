@@ -6,6 +6,10 @@
   >
     <app-burl-back-button [fallbackUrl]="'/app/accounting/reports'" />
     <app-ledger-category-report-filter-popover />
+    <app-xlsx-export-button
+      [exportData]="exportLedgerCategoryReport"
+      [disabled]="isLoading() || !hasCategorySelected() || !canViewLedgerCategoryReport() || hasError()"
+    />
 
     <tng-button
       type="button"

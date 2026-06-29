@@ -22,6 +22,8 @@ import { DateManagementService } from '../../../../../../core/date/date-manageme
 import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
 import { ProfitLossService } from '../../../data/profit-loss/profit-loss.service';
 import type { ProfitLossItem, ProfitLossReport, ProfitLossQuery } from '../../../data/profit-loss/profit-loss.model';
+import { XlsxExportButtonComponent } from '../../../../../../shared/xlsx-export';
+import { createProfitLossXlsxDocument } from '../shared/report-xlsx-export.util';
 
 const amountFormatter = new Intl.NumberFormat('en-IN', {
   minimumFractionDigits: 2,
@@ -66,6 +68,7 @@ const emptyData = (): ProfitLossReport['data'] => ({
     TngCardComponent,
     TngIcon,
     FiscalYearDateRangePickerComponent,
+    XlsxExportButtonComponent,
   ],
   templateUrl: './profit-loss.component.html',
   styleUrl: './profit-loss.component.css',
@@ -164,6 +167,16 @@ export class ProfitLossComponent {
 
   protected readonly formatGeneratedAt = (value: string | null | undefined): string =>
     this.dateManagement.formatDisplayDateTime(value, '—');
+
+  protected readonly exportProfitLoss = async () => {
+    const params = this.queryParams();
+    return createProfitLossXlsxDocument({
+      data: this.reportData(),
+      end: params.get('end'),
+      generatedAt: this.generatedAt(),
+      start: params.get('start'),
+    });
+  };
 
   protected itemAmount(item: ProfitLossItem): string {
     return formatAmount(item.amount);

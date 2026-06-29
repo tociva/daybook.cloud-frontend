@@ -111,6 +111,7 @@ function writeRow(
       | 'right';
     sheetCell.alignment = {
       horizontal,
+      indent: cell.style?.indent,
       vertical: 'middle',
       wrapText: cell.style?.wrap ?? true,
     };

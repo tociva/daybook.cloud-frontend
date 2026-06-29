@@ -14,6 +14,7 @@ import { XlsxExportService } from './xlsx-export.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class XlsxExportButtonComponent {
+  readonly disabled = input(false);
   readonly exportData = input.required<XlsxExportCallback>();
   readonly label = input('Export');
 
@@ -23,7 +24,7 @@ export class XlsxExportButtonComponent {
   private readonly toastStore = inject(ToastStore);
 
   protected async export(): Promise<void> {
-    if (this.isExporting()) {
+    if (this.isExporting() || this.disabled()) {
       return;
     }
 

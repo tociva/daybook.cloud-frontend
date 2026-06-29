@@ -10,6 +10,7 @@ export type XlsxCellStyle = Readonly<{
   fill?: string;
   fontColor?: string;
   format?: string;
+  indent?: number;
   wrap?: boolean;
 }>;
 
@@ -55,4 +56,3 @@ export type XlsxExportDocument = Readonly<{
 }>;
 
 export type XlsxExportCallback = () => Promise<XlsxExportDocument>;
-

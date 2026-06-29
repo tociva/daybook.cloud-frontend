@@ -103,6 +103,35 @@ export function createXlsxListDocument(options: Readonly<{
   };
 }
 
+export function createXlsxReportDocument(options: Readonly<{
+  columns: readonly XlsxColumn[];
+  fileNameBase: string;
+  rows: readonly XlsxRow[];
+  sheetName: string;
+  title: string;
+  autoFilter?: boolean;
+  freezeRows?: number;
+  headerRows?: readonly XlsxRow[];
+  merges?: XlsxExportDocument['worksheet']['merges'];
+  rowCount?: number;
+}>): XlsxExportDocument {
+  const fileNameBase = sanitizeFileName(options.fileNameBase);
+  return {
+    fileName: `${fileNameBase}-${new Date().toISOString().slice(0, 10)}.xlsx`,
+    rowCount: options.rowCount ?? options.rows.length,
+    worksheet: {
+      autoFilter: options.autoFilter ?? false,
+      columns: options.columns,
+      freezeRows: options.freezeRows,
+      headerRows: options.headerRows,
+      merges: options.merges,
+      name: sanitizeWorksheetName(options.sheetName),
+      rows: options.rows,
+      title: options.title,
+    },
+  };
+}
+
 export function exportQuery(query: Lb4ListQuery): Lb4ListQuery {
   return {
     ...(query.includes?.length ? { includes: query.includes } : {}),

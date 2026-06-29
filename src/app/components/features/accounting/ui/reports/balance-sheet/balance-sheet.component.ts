@@ -24,6 +24,8 @@ import {
   getBalanceSheetCapitalRows,
   shouldShowLegacyCurrentYearLoss,
 } from './balance-sheet.view-model';
+import { XlsxExportButtonComponent } from '../../../../../../shared/xlsx-export';
+import { createBalanceSheetXlsxDocument } from '../shared/report-xlsx-export.util';
 
 const amountFormatter = new Intl.NumberFormat('en-IN', {
   minimumFractionDigits: 2,
@@ -62,6 +64,7 @@ const emptyData = (): BalanceSheetReport['data'] => ({
     TngCardComponent,
     TngIcon,
     FiscalYearDatepickerComponent,
+    XlsxExportButtonComponent,
   ],
   templateUrl: './balance-sheet.component.html',
   styleUrl: './balance-sheet.component.css',
@@ -138,6 +141,15 @@ export class BalanceSheetComponent {
 
   protected readonly formatGeneratedAt = (value: string | null | undefined): string =>
     this.dateManagement.formatDisplayDateTime(value, '—');
+
+  protected readonly exportBalanceSheet = async () =>
+    createBalanceSheetXlsxDocument({
+      asOf: this.queryParams().get('end'),
+      capitalRows: this.capitalRows(),
+      data: this.reportData(),
+      generatedAt: this.generatedAt(),
+      shouldShowLegacyCurrentYearLoss: this.shouldShowLegacyCurrentYearLoss(),
+    });
 
   protected itemAmount(item: BalanceSheetItem): string {
     return formatAmount(item.amount);

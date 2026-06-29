@@ -22,6 +22,8 @@ import {
 import { createReportAmountFormatter, formatNetBalance } from '../../../shared/report-amount.util';
 import { LedgerReportFilterPopoverComponent } from './ledger-report-filter-popover/ledger-report-filter-popover.component';
 import { LedgerReportFacade } from './ledger-report.facade';
+import { XlsxExportButtonComponent } from '../../../../../../shared/xlsx-export';
+import { createLedgerReportXlsxDocument } from '../shared/report-xlsx-export.util';
 
 const COLLAPSED_OPPOSITE_LEDGER_LIMIT = 1;
 
@@ -39,6 +41,7 @@ const COLLAPSED_OPPOSITE_LEDGER_LIMIT = 1;
     TngTable,
     TngTableCellTpl,
     LedgerReportFilterPopoverComponent,
+    XlsxExportButtonComponent,
   ],
   templateUrl: './ledger-report.component.html',
   styleUrl: './ledger-report.component.css',
@@ -128,6 +131,15 @@ export class LedgerReportComponent {
 
   protected readonly formatGeneratedAt = (value: string | null | undefined): string =>
     this.dateManagement.formatDisplayDateTime(value, '—');
+
+  protected readonly exportLedgerReport = async () =>
+    createLedgerReportXlsxDocument({
+      generatedAt: this.generatedAt(),
+      ledgerName: this.selectedLedgerName(),
+      rows: this.tableRows(),
+      summaryMetrics: this.summaryMetrics(),
+      title: this.reportTitle(),
+    });
 
   protected formatRowBalance(row: LedgerReportRow): string {
     return formatNetBalance(row.balanceDebit, row.balanceCredit, this.formatAmount());

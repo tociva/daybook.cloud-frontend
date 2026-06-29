@@ -40,6 +40,8 @@ import type {
   TrialBalanceItem,
   TrialBalanceListQuery,
 } from '../../../data/trial-balance/trial-balance.model';
+import { XlsxExportButtonComponent } from '../../../../../../shared/xlsx-export';
+import { createTrialBalanceXlsxDocument } from '../shared/report-xlsx-export.util';
 
 type TrialBalanceAmountKey =
   | 'openingDebit'
@@ -130,6 +132,7 @@ const amountColumnWidth = '12%';
     TngTreeTable,
     TngTreeTableCellTpl,
     FiscalYearDateRangePickerComponent,
+    XlsxExportButtonComponent,
   ],
   templateUrl: './trial-balance.component.html',
   styleUrl: './trial-balance.component.css',
@@ -405,6 +408,16 @@ export class TrialBalanceComponent {
 
   protected readonly formatGeneratedAt = (value: string | null | undefined): string =>
     this.dateManagement.formatDisplayDateTime(value, '—');
+
+  protected readonly exportTrialBalance = async () => {
+    const params = this.queryParams();
+    return createTrialBalanceXlsxDocument({
+      end: params.get('end'),
+      generatedAt: this.generatedAt(),
+      rows: this.trialBalanceTreeData(),
+      start: params.get('start'),
+    });
+  };
 
   protected onExpandedKeysChange(keys: readonly unknown[]): void {
     this.expandedKeys.set(keys.filter((key): key is string => typeof key === 'string'));

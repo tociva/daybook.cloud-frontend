@@ -22,6 +22,8 @@ import {
 import { createReportAmountFormatter, formatNetBalance } from '../../../shared/report-amount.util';
 import { LedgerCategoryReportFilterPopoverComponent } from './ledger-category-report-filter-popover/ledger-category-report-filter-popover.component';
 import { LedgerCategoryReportFacade } from './ledger-category-report.facade';
+import { XlsxExportButtonComponent } from '../../../../../../shared/xlsx-export';
+import { createLedgerCategoryReportXlsxDocument } from '../shared/report-xlsx-export.util';
 
 @Component({
   selector: 'app-ledger-category-report',
@@ -37,6 +39,7 @@ import { LedgerCategoryReportFacade } from './ledger-category-report.facade';
     TngTable,
     TngTableCellTpl,
     LedgerCategoryReportFilterPopoverComponent,
+    XlsxExportButtonComponent,
   ],
   templateUrl: './ledger-category-report.component.html',
   styleUrl: './ledger-category-report.component.css',
@@ -127,6 +130,15 @@ export class LedgerCategoryReportComponent {
 
   protected readonly formatGeneratedAt = (value: string | null | undefined): string =>
     this.dateManagement.formatDisplayDateTime(value, '—');
+
+  protected readonly exportLedgerCategoryReport = async () =>
+    createLedgerCategoryReportXlsxDocument({
+      categoryName: this.selectedCategoryName(),
+      generatedAt: this.generatedAt(),
+      rows: this.tableRows(),
+      summaryMetrics: this.summaryMetrics(),
+      title: this.reportTitle(),
+    });
 
   protected formatRowBalance(row: LedgerCategoryReportRow): string {
     return formatNetBalance(row.balanceDebit, row.balanceCredit, this.formatAmount());
