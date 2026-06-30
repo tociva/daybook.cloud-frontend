@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import * as xlsx from 'xlsx';
 
 export type XlsxCellValue = boolean | Date | number | string | null;
 export type XlsxRow = readonly XlsxCellValue[];
@@ -6,7 +7,6 @@ export type XlsxRow = readonly XlsxCellValue[];
 @Injectable({ providedIn: 'root' })
 export class XlsxFileReaderService {
   async readFirstSheetRows(file: File): Promise<readonly XlsxRow[]> {
-    const xlsx = await import('xlsx');
     const workbook = xlsx.read(await file.arrayBuffer(), { cellDates: true });
     const firstSheetName = workbook.SheetNames[0];
     if (!firstSheetName) return [];

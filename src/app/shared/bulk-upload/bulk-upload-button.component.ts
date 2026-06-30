@@ -18,6 +18,7 @@ import {
   type TngFileUploadRejectedEvent,
   type TngFileUploadSelectedEvent,
 } from '@tailng-ui/primitives';
+import * as xlsx from 'xlsx';
 import { getApiErrorMessage } from '../../core/api/api-error.util';
 import { ToastStore } from '../../core/toast/toast.store';
 import { permissionForBulkUploadEndpoint } from '../../core/permissions/permission-requirements';
@@ -1260,7 +1261,6 @@ export class BulkUploadButtonComponent {
     if (!config) return;
 
     try {
-      const xlsx = await import('xlsx');
       const columns = [...xlsxColumnsForConfig(config)];
       const headers = columns.map((column) => column.header);
       const sampleRows = config.xlsxSampleRows ?? config.sampleRows;
@@ -1387,7 +1387,6 @@ export class BulkUploadButtonComponent {
   ): Promise<BulkUploadReadResult | string> {
     let rows: unknown[][];
     try {
-      const xlsx = await import('xlsx');
       const workbook = xlsx.read(await file.arrayBuffer(), { cellDates: true });
       const sheetName = workbook.SheetNames[0];
       if (!sheetName) {

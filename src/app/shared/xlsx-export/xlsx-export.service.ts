@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
+import ExcelJS, { type Border, type Fill, type Worksheet } from 'exceljs';
 import type { XlsxCell, XlsxExportDocument, XlsxRow } from './xlsx-export.model';
 
 const TITLE_FILL = '1E3A5F';
 const HEADER_FILL = '27496D';
 const HEADER_FONT = 'FFFFFF';
 const ALT_FILL = 'F8FAFC';
-const BORDER: Partial<import('exceljs').Border> = { style: 'thin', color: { argb: 'D8DEE9' } };
+const BORDER: Partial<Border> = { style: 'thin', color: { argb: 'D8DEE9' } };
 const XLSX_MAX_ROWS = 1_048_576;
 
 @Injectable({ providedIn: 'root' })
@@ -15,7 +16,6 @@ export class XlsxExportService {
       return;
     }
 
-    const ExcelJS = await import('exceljs');
     const workbook = new ExcelJS.Workbook();
     workbook.creator = 'Daybook Cloud';
     workbook.created = new Date();
@@ -89,7 +89,7 @@ export class XlsxExportService {
 }
 
 function writeRow(
-  sheet: import('exceljs').Worksheet,
+  sheet: Worksheet,
   rowNumber: number,
   row: XlsxRow,
   columns: readonly { align?: string; format?: string; kind?: string }[],
@@ -156,7 +156,7 @@ function asExcelValue(cell: XlsxCell): string | number | boolean | Date | null {
   return cell.value;
 }
 
-function solidFill(argb: string): import('exceljs').Fill {
+function solidFill(argb: string): Fill {
   return { fgColor: { argb }, pattern: 'solid', type: 'pattern' };
 }
 

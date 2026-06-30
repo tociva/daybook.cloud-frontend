@@ -3,8 +3,10 @@ import { Router } from '@angular/router';
 import {
   TngButtonComponent,
   TngCardComponent,
+  TngTag,
   TngTable,
   TngTableCellTpl,
+  TngTooltipComponent,
 } from '@tailng-ui/components';
 import type { TngTableColumn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
@@ -18,6 +20,7 @@ import {
 import type { CrudFilterField } from '../../../../../../shared/crud';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
+import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { UserSessionStore } from '../../../../management/data/user-session/user-session.store';
 import {
@@ -28,7 +31,15 @@ import {
   number,
   text,
 } from '../../../../../../shared/xlsx-export';
-import { StoredDocumentService, StoredDocumentStore } from '../../../data/stored-document';
+import {
+  DocumentCategory,
+  DocumentStatus,
+  StoredDocumentService,
+  StoredDocumentStore,
+  documentCategoryLabel,
+  documentStatusLabel,
+  documentStatusTone,
+} from '../../../data/stored-document';
 import type {
   StoredDocument,
   StoredDocumentListQuery,
@@ -45,11 +56,14 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
     TngButtonComponent,
     TngCardComponent,
     TngIcon,
+    TngTag,
+    TngTooltipComponent,
     CrudFilterPopoverComponent,
     CrudPaginatorComponent,
     EmptyStateComponent,
     TngTable,
     TngTableCellTpl,
+    TableRowIconButtonComponent,
     XlsxExportButtonComponent,
   ],
   templateUrl: './list-document.component.html',
@@ -67,22 +81,42 @@ export class ListDocumentComponent {
   private readonly dateManagement = inject(DateManagementService);
   protected readonly hasError = computed(() => this.documentStore.error() !== null);
   protected readonly isValidatingUploads = signal(false);
+  protected readonly downloadingDocumentId = signal<string | null>(null);
 
   protected readonly columns: readonly TngTableColumn<StoredDocument>[] = [
-    { id: 'name', label: 'Name', sortable: true, width: '16rem' },
-    { id: 'category', label: 'Category', sortable: true, width: '10rem' },
-    { id: 'type', label: 'Type', sortable: true, width: '8rem' },
-    { id: 'size', label: 'Size', sortable: true, align: 'end', headerAlign: 'end', width: '8rem' },
-    { id: 'status', label: 'Status', sortable: true, width: '9rem' },
-    { id: 'addedby', label: 'Added By', sortable: true, width: '12rem' },
-    { id: 'createdat', label: 'Created', sortable: true, width: '10rem' },
+    { id: 'name', label: 'Name', sortable: true, width: '15rem' },
+    { id: 'category', label: 'Category', sortable: true, width: '13rem' },
+    { id: 'type', label: 'Type', sortable: true, width: '7rem' },
+    { id: 'size', label: 'Size', sortable: true, align: 'end', headerAlign: 'end', width: '6rem' },
+    { id: 'status', label: 'Status', sortable: true, width: '7rem' },
+    { id: 'addedby', label: 'Added By', sortable: true, width: '11rem' },
+    { id: 'createdat', label: 'Created', sortable: true, width: '11rem' },
+    { id: 'actions', label: 'Actions', align: 'end', headerAlign: 'end', width: '6rem' },
   ];
 
   protected readonly filterFields: readonly CrudFilterField[] = [
     { id: 'name', label: 'Name', placeholder: 'Document name', type: 'text' },
-    { id: 'category', label: 'Category', placeholder: 'Category', type: 'text' },
+    {
+      id: 'category',
+      label: 'Category',
+      options: Object.values(DocumentCategory).map((value) => ({
+        label: documentCategoryLabel(value),
+        value,
+      })),
+      placeholder: 'Any category',
+      type: 'enum',
+    },
     { id: 'type', label: 'Type', placeholder: 'File type', type: 'text' },
-    { id: 'status', label: 'Status', placeholder: 'Status', type: 'text' },
+    {
+      id: 'status',
+      label: 'Status',
+      options: Object.values(DocumentStatus).map((value) => ({
+        label: documentStatusLabel(value),
+        value,
+      })),
+      placeholder: 'Any status',
+      type: 'enum',
+    },
   ];
 
   constructor() {
@@ -106,10 +140,10 @@ export class ListDocumentComponent {
         }),
       mapRow: (document) => [
         text(document.name),
-        text(document.category),
+        text(this.formatCategory(document.category)),
         text(document.type),
         number(document.size, '#,##0'),
-        text(document.status),
+        text(this.formatStatus(document.status)),
         text(this.resolveAddedByName(document)),
         date(document.createdat),
       ],
@@ -117,6 +151,28 @@ export class ListDocumentComponent {
       sheetName: 'Documents',
       title: 'Documents',
     });
+
+  protected async downloadDocument(item: StoredDocument): Promise<void> {
+    if (!item.id || this.downloadingDocumentId()) return;
+
+    this.downloadingDocumentId.set(item.id);
+    try {
+      const downloadUrl = await this.documentService.getDownloadUrl(item.id);
+      window.open(downloadUrl, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      this.toastStore.danger(getApiErrorMessage(error, 'Failed to generate download link.'));
+    } finally {
+      this.downloadingDocumentId.set(null);
+    }
+  }
+
+  protected deleteDocument(item: StoredDocument): void {
+    if (!item.id) return;
+    this.documentStore.setSelectedItem(item);
+    void this.router.navigate(['/app/accounting/documents', item.id, 'delete'], {
+      queryParams: { burl: this.router.url },
+    });
+  }
 
   protected async refreshDocumentStatus(): Promise<void> {
     if (this.isValidatingUploads()) return;
@@ -157,6 +213,31 @@ export class ListDocumentComponent {
 
   protected formatDate(value?: string): string {
     return this.dateManagement.formatDisplayDateTime(value, '—');
+  }
+
+  protected formatCategory(value?: string): string {
+    return documentCategoryLabel(value);
+  }
+
+  protected formatStatus(value?: string): string {
+    return documentStatusLabel(value);
+  }
+
+  protected statusTone(value?: string): ReturnType<typeof documentStatusTone> {
+    return documentStatusTone(value);
+  }
+
+  protected shouldTruncate(value: string | null | undefined, limit: number): boolean {
+    return this.tooltipText(value).length > limit;
+  }
+
+  protected tooltipText(value: string | null | undefined): string {
+    const normalized = value?.trim() ?? '';
+    return normalized.length ? normalized : '—';
+  }
+
+  protected truncateText(value: string, limit: number): string {
+    return value.length > limit ? `${value.slice(0, limit)}...` : value;
   }
 
   protected resolveAddedByName(item: StoredDocument): string {

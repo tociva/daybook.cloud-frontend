@@ -19,6 +19,57 @@ export enum DocumentCategory {
   OTHER_DOCUMENT = 'OTHER_DOCUMENT',
 }
 
+export type DocumentStatusTone = 'neutral' | 'success' | 'warning';
+
+const DOCUMENT_CATEGORY_LABELS: Record<DocumentCategory, string> = {
+  [DocumentCategory.ORGANIZATION_LEVEL_DOCUMENT]: 'Organization Level Document',
+  [DocumentCategory.ORGANIZATION_LOGO]: 'Organization Logo',
+  [DocumentCategory.BRANCH_LEVEL_DOCUMENT]: 'Branch Level Document',
+  [DocumentCategory.USER_LEVEL_DOCUMENT]: 'User Level Document',
+  [DocumentCategory.FISCAL_YEAR_LEVEL_DOCUMENT]: 'Fiscal Year Level Document',
+  [DocumentCategory.INVOICE_DOCUMENT]: 'Invoice Document',
+  [DocumentCategory.RECEIPT_DOCUMENT]: 'Receipt Document',
+  [DocumentCategory.JOURNAL_SUPPORTING_DOCUMENT]: 'Journal Supporting Document',
+  [DocumentCategory.GST_RECONCILIATION_FILE]: 'GST Reconciliation File',
+  [DocumentCategory.EMPLOYEE_DOCUMENT]: 'Employee Document',
+  [DocumentCategory.OTHER_DOCUMENT]: 'Other Document',
+};
+
+const DOCUMENT_STATUS_LABELS: Record<DocumentStatus, string> = {
+  [DocumentStatus.INITIATED]: 'Initiated',
+  [DocumentStatus.UPLOADED]: 'Uploaded',
+};
+
+export function documentCategoryLabel(value: string | null | undefined): string {
+  if (!value) return '—';
+  return DOCUMENT_CATEGORY_LABELS[value as DocumentCategory] ?? titleCaseEnumValue(value);
+}
+
+export function documentStatusLabel(value: string | null | undefined): string {
+  if (!value) return '—';
+  return DOCUMENT_STATUS_LABELS[value as DocumentStatus] ?? titleCaseEnumValue(value);
+}
+
+export function documentStatusTone(value: string | null | undefined): DocumentStatusTone {
+  switch (value) {
+    case DocumentStatus.INITIATED:
+      return 'warning';
+    case DocumentStatus.UPLOADED:
+      return 'success';
+    default:
+      return 'neutral';
+  }
+}
+
+function titleCaseEnumValue(value: string): string {
+  return value
+    .toLowerCase()
+    .split('_')
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
 export type StoredDocumentAddedBy = Readonly<{
   id?: string;
   name?: string;

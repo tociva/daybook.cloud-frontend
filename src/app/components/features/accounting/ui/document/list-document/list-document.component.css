@@ -32,7 +32,6 @@
   justify-content: flex-end;
 }
 
-
 .link-button {
   background: transparent;
   border: 0;
@@ -41,4 +40,51 @@
   font: inherit;
   font-weight: 700;
   padding: 0;
+}
+
+:host ::ng-deep .table-cell-tooltip .tng-tooltip-trigger,
+:host ::ng-deep .table-cell-tooltip .tng-tooltip-trigger:hover,
+:host ::ng-deep .table-cell-tooltip .tng-tooltip-trigger[data-state='open'] {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  color: inherit;
+  font: inherit;
+  justify-content: flex-start;
+  line-height: inherit;
+  min-height: 0;
+  min-width: 0;
+  padding: 0;
+}
+
+:host ::ng-deep .table-cell-tooltip .tng-tooltip-trigger:focus-visible {
+  box-shadow: none;
+  outline: none;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+:host ::ng-deep .document-name-tooltip .tng-tooltip-trigger {
+  color: var(--tng-semantic-accent-brand);
+  font-weight: 700;
+}
+
+.truncate-cell {
+  display: inline-block;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+  white-space: nowrap;
+}
+
+.cell-tooltip-content {
+  max-width: 18rem;
+  overflow-wrap: anywhere;
+}
+
+:host ::ng-deep .tng-table td {
+  min-width: 0;
 }

@@ -65,8 +65,15 @@ export function createBalanceSheetXlsxDocument(options: Readonly<{
   generatedAt?: string | null;
   shouldShowLegacyCurrentYearLoss: boolean;
 }>): XlsxExportDocument {
-  const rows: XlsxRow[] = [
-    metaRow(`As of: ${options.asOf || '—'}`, `Generated at: ${options.generatedAt || '—'}`, 6),
+  const columns: readonly XlsxColumn[] = [
+    { header: 'Asset', key: 'asset', width: 28 },
+    { header: 'Category', key: 'assetCategory', width: 22 },
+    { header: 'Amount', key: 'assetAmount', width: 16, kind: 'number', format: AMOUNT_FORMAT, align: 'right' },
+    { header: 'Liability / Equity', key: 'liabilityEquity', width: 28 },
+    { header: 'Category', key: 'liabilityEquityCategory', width: 22 },
+    { header: 'Amount', key: 'liabilityEquityAmount', width: 16, kind: 'number', format: AMOUNT_FORMAT, align: 'right' },
+  ];
+  const reportRows: XlsxRow[] = [
     sectionRow('Assets', 'Liabilities & Equity', 6),
     ...parallelRows(
       [
@@ -87,20 +94,25 @@ export function createBalanceSheetXlsxDocument(options: Readonly<{
       ],
     ),
   ];
+  const footerRowNumber = reportRows.length + 3;
 
   return createXlsxReportDocument({
-    columns: [
-      { header: 'Asset', key: 'asset', width: 28 },
-      { header: 'Category', key: 'assetCategory', width: 22 },
-      { header: 'Amount', key: 'assetAmount', width: 16, kind: 'number', format: AMOUNT_FORMAT, align: 'right' },
-      { header: 'Liability / Equity', key: 'liabilityEquity', width: 28 },
-      { header: 'Category', key: 'liabilityEquityCategory', width: 22 },
-      { header: 'Amount', key: 'liabilityEquityAmount', width: 16, kind: 'number', format: AMOUNT_FORMAT, align: 'right' },
-    ],
+    columns,
     fileNameBase: 'balance-sheet',
     freezeRows: 2,
+    merges: [
+      {
+        startRow: footerRowNumber,
+        startColumn: 1,
+        endRow: footerRowNumber,
+        endColumn: columns.length,
+      },
+    ],
     rowCount: balanceSheetRowCount(options.data, options.capitalRows, options.shouldShowLegacyCurrentYearLoss),
-    rows,
+    rows: [
+      ...reportRows,
+      [textCell(`Generated at: ${options.generatedAt || '—'}`, { fill: META_FILL })],
+    ],
     sheetName: 'Balance Sheet',
     title: `Balance Sheet${options.asOf ? ` - As of ${options.asOf}` : ''}`,
   });
@@ -193,20 +205,29 @@ export function createTrialBalanceXlsxDocument(options: Readonly<{
   start?: string | null;
 }>): XlsxExportDocument {
   const rows = flattenTrialBalanceRows(options.rows);
+  const columns: readonly XlsxColumn[] = [
+    { header: 'Type', key: 'type', width: 12 },
+    { header: 'Name', key: 'name', width: 36 },
+    ...amountColumns,
+  ];
+  const footerRowNumber = rows.length + 3;
 
   return createXlsxReportDocument({
-    columns: [
-      { header: 'Level', key: 'level', width: 10, kind: 'number', align: 'right' },
-      { header: 'Type', key: 'type', width: 12 },
-      { header: 'Name', key: 'name', width: 36 },
-      ...amountColumns,
-    ],
+    columns,
     fileNameBase: 'trial-balance',
     freezeRows: 2,
+    merges: [
+      {
+        startRow: footerRowNumber,
+        startColumn: 1,
+        endRow: footerRowNumber,
+        endColumn: columns.length,
+      },
+    ],
     rowCount: rows.length,
     rows: [
-      metaRow(periodLabel(options.start, options.end), `Generated at: ${options.generatedAt || '—'}`, 9),
       ...rows,
+      [textCell(`Generated at: ${options.generatedAt || '—'}`, { fill: META_FILL })],
     ],
     sheetName: 'Trial Balance',
     title: `Trial Balance - ${periodLabel(options.start, options.end)}`,
@@ -379,16 +400,21 @@ function flattenTrialBalanceRows(
   for (const row of rows) {
     const fill = row.kind === 'total' ? GRAND_TOTAL_FILL : row.kind === 'category' ? TOTAL_FILL : undefined;
     const bold = row.kind !== 'ledger';
+    const style = { bold, fill };
+    const amountValues = [
+      row.openingDebit,
+      row.openingCredit,
+      row.runningDebit,
+      row.runningCredit,
+      row.closingDebit,
+      row.closingCredit,
+    ];
     flattened.push([
-      number(level, '#,##0'),
-      textCell(row.kind, { bold, fill }),
-      textCell(row.name, { bold, fill, indent: level }),
-      amountCell(row.openingDebit, { bold, fill }),
-      amountCell(row.openingCredit, { bold, fill }),
-      amountCell(row.runningDebit, { bold, fill }),
-      amountCell(row.runningCredit, { bold, fill }),
-      amountCell(row.closingDebit, { bold, fill }),
-      amountCell(row.closingCredit, { bold, fill }),
+      textCell(row.kind, style),
+      textCell(row.name, { ...style, indent: level }),
+      ...amountValues.map((value) =>
+        row.kind === 'category' ? textCell('', style) : trialBalanceAmountCell(value, style),
+      ),
     ]);
     flattened.push(...flattenTrialBalanceRows(row.children, level + 1));
   }
@@ -489,4 +515,8 @@ function textCell(value: unknown, style?: XlsxCellStyle): XlsxCell {
 function amountCell(value: unknown, style?: XlsxCellStyle): XlsxCell {
   const cell = number(value, AMOUNT_FORMAT);
   return { ...cell, style: { ...cell.style, ...style } };
+}
+
+function trialBalanceAmountCell(value: number, style?: XlsxCellStyle): XlsxCell {
+  return value === 0 ? textCell('', style) : amountCell(value, style);
 }

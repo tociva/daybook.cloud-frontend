@@ -71,17 +71,49 @@
           (sortChange)="crudQuery.applySort($event)"
         >
           <ng-template tngTableCellTemplate="name" let-row="row">
-            <button type="button" class="link-button" (click)="viewDocument(row)">
-              {{ row.name }}
-            </button>
+            @let nameText = tooltipText(row.name);
+            @let namePreview = truncateText(nameText, 40);
+            @if (shouldTruncate(row.name, 40)) {
+              <tng-tooltip
+                class="table-cell-tooltip document-name-tooltip"
+                side="top"
+                [openDelay]="150"
+                [ariaLabel]="nameText"
+              >
+                <button trigger type="button" class="link-button truncate-cell" (click)="viewDocument(row)">
+                  {{ namePreview }}
+                </button>
+                <div class="cell-tooltip-content">{{ nameText }}</div>
+              </tng-tooltip>
+            } @else {
+              <button type="button" class="link-button truncate-cell" (click)="viewDocument(row)">
+                {{ namePreview }}
+              </button>
+            }
           </ng-template>
 
           <ng-template tngTableCellTemplate="category" let-row="row">
-            {{ row.category || '—' }}
+            @let categoryText = formatCategory(row.category);
+            @if (shouldTruncate(categoryText, 28)) {
+              <tng-tooltip class="table-cell-tooltip" side="top" [openDelay]="150" [ariaLabel]="categoryText">
+                <span trigger class="truncate-cell">{{ categoryText }}</span>
+                <div class="cell-tooltip-content">{{ categoryText }}</div>
+              </tng-tooltip>
+            } @else {
+              <span class="truncate-cell">{{ categoryText }}</span>
+            }
           </ng-template>
 
           <ng-template tngTableCellTemplate="type" let-row="row">
-            {{ row.type || '—' }}
+            @let typeText = tooltipText(row.type);
+            @if (shouldTruncate(row.type, 18)) {
+              <tng-tooltip class="table-cell-tooltip" side="top" [openDelay]="150" [ariaLabel]="typeText">
+                <span trigger class="truncate-cell">{{ typeText }}</span>
+                <div class="cell-tooltip-content">{{ typeText }}</div>
+              </tng-tooltip>
+            } @else {
+              <span class="truncate-cell">{{ typeText }}</span>
+            }
           </ng-template>
 
           <ng-template tngTableCellTemplate="size" let-row="row">
@@ -89,15 +121,60 @@
           </ng-template>
 
           <ng-template tngTableCellTemplate="status" let-row="row">
-            {{ row.status || '—' }}
+            <tng-tag
+              appearance="soft"
+              size="sm"
+              [tone]="statusTone(row.status)"
+              [label]="formatStatus(row.status)"
+            >
+              {{ formatStatus(row.status) }}
+            </tng-tag>
           </ng-template>
 
           <ng-template tngTableCellTemplate="addedby" let-row="row">
-            {{ resolveAddedByName(row) }}
+            @let addedByText = resolveAddedByName(row);
+            @if (shouldTruncate(addedByText, 24)) {
+              <tng-tooltip class="table-cell-tooltip" side="top" [openDelay]="150" [ariaLabel]="addedByText">
+                <span trigger class="truncate-cell">{{ addedByText }}</span>
+                <div class="cell-tooltip-content">{{ addedByText }}</div>
+              </tng-tooltip>
+            } @else {
+              <span class="truncate-cell">{{ addedByText }}</span>
+            }
           </ng-template>
 
           <ng-template tngTableCellTemplate="createdat" let-row="row">
-            {{ formatDate(row.createdat) }}
+            @let createdAtText = formatDate(row.createdat);
+            @if (shouldTruncate(createdAtText, 22)) {
+              <tng-tooltip class="table-cell-tooltip" side="top" [openDelay]="150" [ariaLabel]="createdAtText">
+                <span trigger class="truncate-cell">{{ createdAtText }}</span>
+                <div class="cell-tooltip-content">{{ createdAtText }}</div>
+              </tng-tooltip>
+            } @else {
+              <span class="truncate-cell">{{ createdAtText }}</span>
+            }
+          </ng-template>
+
+          <ng-template tngTableCellTemplate="actions" let-row="row">
+            <div class="row-actions">
+              <app-table-row-icon-button
+                icon="eye"
+                ariaLabel="View document"
+                (action)="viewDocument(row)"
+              />
+              <app-table-row-icon-button
+                icon="download"
+                ariaLabel="Download document"
+                [disabled]="downloadingDocumentId() === row.id"
+                (action)="downloadDocument(row)"
+              />
+              <app-table-row-icon-button
+                icon="trash2"
+                ariaLabel="Delete document"
+                tone="danger"
+                (action)="deleteDocument(row)"
+              />
+            </div>
           </ng-template>
         </tng-table>
 

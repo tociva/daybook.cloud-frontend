@@ -57,8 +57,26 @@ describe('report XLSX export utilities', () => {
     });
 
     expect(document.worksheet.name).toBe('Balance Sheet');
+    expect(document.worksheet.title).toBe('Balance Sheet - As of 2026-06-29');
     expect(document.rowCount).toBe(3);
     expect(document.worksheet.columns).toHaveLength(6);
+    expect(cellValue(document.worksheet.rows[0]?.[0])).toBe('Assets');
+    expect(
+      document.worksheet.rows.some((row) =>
+        row.some((cell) => cellValue(cell) === 'As of: 2026-06-29'),
+      ),
+    ).toBe(false);
+    expect(cellValue(document.worksheet.rows.at(-1)?.[0])).toBe(
+      'Generated at: 2026-06-29T10:00:00Z',
+    );
+    expect(
+      document.worksheet.rows.filter((row) =>
+        row.some((cell) => cellValue(cell) === 'Generated at: 2026-06-29T10:00:00Z'),
+      ),
+    ).toHaveLength(1);
+    expect(document.worksheet.merges).toEqual([
+      { startRow: 11, startColumn: 1, endRow: 11, endColumn: 6 },
+    ]);
     expect(document.worksheet.rows.some((row) => row.some((cell) => cellValue(cell) === 'Cash'))).toBe(true);
     expect(document.worksheet.rows.some((row) => row.some((cell) => cellValue(cell) === 1000))).toBe(true);
   });
@@ -103,6 +121,17 @@ describe('report XLSX export utilities', () => {
         closingDebit: 15,
         closingCredit: 0,
       },
+      {
+        children: [],
+        kind: 'total',
+        name: 'Total',
+        openingDebit: 10,
+        openingCredit: 0,
+        runningDebit: 5,
+        runningCredit: 0,
+        closingDebit: 15,
+        closingCredit: 0,
+      },
     ];
 
     const document = createTrialBalanceXlsxDocument({
@@ -115,10 +144,45 @@ describe('report XLSX export utilities', () => {
     const ledgerRow = document.worksheet.rows.find((row) =>
       row.some((cell) => cellValue(cell) === 'Cash'),
     );
+    const categoryRow = document.worksheet.rows[0];
+    const totalRow = document.worksheet.rows.find((row) =>
+      row.some((cell) => cellValue(cell) === 'Total'),
+    );
+    const footerRow = document.worksheet.rows.at(-1);
 
-    expect(document.rowCount).toBe(2);
-    expect(document.worksheet.columns.map((column) => column.header)).toContain('Closing Credit');
-    expect(cellStyle(ledgerRow?.[2])?.indent).toBe(1);
+    expect(document.rowCount).toBe(3);
+    expect(document.worksheet.columns.map((column) => column.header)).toEqual([
+      'Type',
+      'Name',
+      'Opening Debit',
+      'Opening Credit',
+      'Running Debit',
+      'Running Credit',
+      'Closing Debit',
+      'Closing Credit',
+    ]);
+    expect(cellValue(categoryRow?.[1])).toBe('Assets');
+    expect(categoryRow?.slice(2).map(cellValue)).toEqual(['', '', '', '', '', '']);
+    expect(cellStyle(categoryRow?.[2])).toMatchObject({ bold: true, fill: 'E2E8F0' });
+    expect(
+      document.worksheet.rows.some((row) =>
+        row.some((cell) => cellValue(cell) === 'Period: 2026-04-01 to 2027-03-31'),
+      ),
+    ).toBe(false);
+    expect(cellValue(footerRow?.[0])).toBe('Generated at: 2026-06-29T10:00:00Z');
+    expect(document.worksheet.merges).toEqual([
+      { startRow: 6, startColumn: 1, endRow: 6, endColumn: 8 },
+    ]);
+    expect(cellStyle(ledgerRow?.[1])?.indent).toBe(1);
+    expect(cellValue(ledgerRow?.[2])).toBe(10);
+    expect(cellKind(ledgerRow?.[2])).toBe('number');
+    expect(cellStyle(ledgerRow?.[2])?.format).toBe('#,##0.00');
+    expect(cellValue(ledgerRow?.[3])).toBe('');
+    expect(cellValue(ledgerRow?.[6])).toBe(15);
+    expect(cellValue(ledgerRow?.[7])).toBe('');
+    expect(cellValue(totalRow?.[2])).toBe(10);
+    expect(cellKind(totalRow?.[2])).toBe('number');
+    expect(cellValue(totalRow?.[3])).toBe('');
   });
 
   it('creates ledger transaction exports with full opposite ledger names', () => {
@@ -194,8 +258,18 @@ function cellValue(cell: unknown): unknown {
     : cell;
 }
 
-function cellStyle(cell: unknown): { indent?: number } | undefined {
+function cellKind(cell: unknown): unknown {
+  return typeof cell === 'object' && cell !== null && 'kind' in cell
+    ? (cell as { kind?: unknown }).kind
+    : undefined;
+}
+
+function cellStyle(
+  cell: unknown,
+): { bold?: boolean; fill?: string; format?: string; indent?: number } | undefined {
   return typeof cell === 'object' && cell !== null && 'style' in cell
-    ? (cell as { style?: { indent?: number } }).style
+    ? (cell as {
+        style?: { bold?: boolean; fill?: string; format?: string; indent?: number };
+      }).style
     : undefined;
 }

@@ -1,4 +1,5 @@
 import Fuse, { type IFuseOptions } from 'fuse.js';
+import * as xlsx from 'xlsx';
 
 export type StatementCell = string | number | boolean | Date | null | undefined;
 export type StatementRow = readonly StatementCell[];
@@ -10,7 +11,6 @@ export type StatementColumnOption = Readonly<{
 
 export async function readFirstSheetRows(file: File): Promise<readonly StatementRow[] | string> {
   try {
-    const xlsx = await import('xlsx');
     const workbook = xlsx.read(await file.arrayBuffer(), { cellDates: true });
     const sheetName = workbook.SheetNames[0];
     if (!sheetName) return 'XLSX file does not contain any sheets.';
