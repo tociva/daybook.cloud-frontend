@@ -5,6 +5,7 @@ import {
   effect,
   inject,
   signal,
+  untracked,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -170,6 +171,7 @@ export class TrialBalanceComponent {
   // Committed to the URL only when the popup closes.
   protected readonly pendingPickerValue = signal<TngDateRangePickerSelectionInput<Date>>(null);
   private referenceDataLoadPromise: Promise<void> | null = null;
+  private lastBootstrapKey: string | null = null;
   private loadToken = 0;
 
   protected readonly displayError = computed(
@@ -364,8 +366,14 @@ export class TrialBalanceComponent {
         end: this.parseIsoToDate(end),
       });
 
-      const token = this.nextLoadToken();
-      void this.bootstrapTrialBalance(token, start, end);
+      const bootstrapKey = `${start}|${end}`;
+      if (this.lastBootstrapKey === bootstrapKey) return;
+      this.lastBootstrapKey = bootstrapKey;
+
+      untracked(() => {
+        const token = this.nextLoadToken();
+        void this.bootstrapTrialBalance(token, start, end);
+      });
     });
 
     effect(() => {

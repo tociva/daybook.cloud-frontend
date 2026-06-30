@@ -305,6 +305,22 @@ describe('TrialBalanceComponent', () => {
     expect(component.trialBalanceTreeData()).toEqual([]);
   });
 
+  it('does not refetch when the effective date query has not changed', async () => {
+    configure();
+
+    await settle();
+    expect(trialBalanceService.getTrialBalance).toHaveBeenCalledTimes(1);
+
+    fiscalYearRange.set({
+      startdate: '2026-04-01',
+      enddate: '2027-03-31',
+      name: 'FY 2026-27',
+    });
+    await settle();
+
+    expect(trialBalanceService.getTrialBalance).toHaveBeenCalledTimes(1);
+  });
+
   it('ignores stale report responses from an earlier date range', async () => {
     const firstReport = deferred<TrialBalanceReport>();
     const secondReport = deferred<TrialBalanceReport>();
