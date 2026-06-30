@@ -9,4 +9,7 @@ export type {
   StoredDocumentGetQuery,
   StoredDocumentListQuery,
   StoredDocumentUpdatePayload,
+  StoredDocumentValidateUploadDocument,
+  StoredDocumentValidateUploadResponse,
+  StoredDocumentValidateUploadS3Result,
 } from './stored-document.model';

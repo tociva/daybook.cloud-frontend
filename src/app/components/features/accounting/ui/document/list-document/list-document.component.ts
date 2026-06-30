@@ -1,7 +1,15 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { TngButtonComponent, TngCardComponent, TngTable, TngTableCellTpl } from '@tailng-ui/components';
+import {
+  TngButtonComponent,
+  TngCardComponent,
+  TngTable,
+  TngTableCellTpl,
+} from '@tailng-ui/components';
 import type { TngTableColumn } from '@tailng-ui/components';
+import { TngIcon } from '@tailng-ui/icons';
+import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
+import { ToastStore } from '../../../../../../core/toast/toast.store';
 import {
   CrudFilterPopoverComponent,
   CrudListQueryService,
@@ -21,7 +29,11 @@ import {
   text,
 } from '../../../../../../shared/xlsx-export';
 import { StoredDocumentService, StoredDocumentStore } from '../../../data/stored-document';
-import type { StoredDocument } from '../../../data/stored-document';
+import type {
+  StoredDocument,
+  StoredDocumentListQuery,
+  StoredDocumentValidateUploadResponse,
+} from '../../../data/stored-document';
 
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
 @Component({
@@ -32,6 +44,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
     BurlBackButtonComponent,
     TngButtonComponent,
     TngCardComponent,
+    TngIcon,
     CrudFilterPopoverComponent,
     CrudPaginatorComponent,
     EmptyStateComponent,
@@ -49,9 +62,11 @@ export class ListDocumentComponent {
   private readonly documentService = inject(StoredDocumentService);
   protected readonly crudQuery = inject(CrudListQueryService);
   protected readonly documentStore = inject(StoredDocumentStore);
+  private readonly toastStore = inject(ToastStore);
   private readonly userSessionStore = inject(UserSessionStore);
   private readonly dateManagement = inject(DateManagementService);
   protected readonly hasError = computed(() => this.documentStore.error() !== null);
+  protected readonly isValidatingUploads = signal(false);
 
   protected readonly columns: readonly TngTableColumn<StoredDocument>[] = [
     { id: 'name', label: 'Name', sortable: true, width: '16rem' },
@@ -72,11 +87,7 @@ export class ListDocumentComponent {
 
   constructor() {
     this.crudQuery.init((filter) => {
-      void this.documentStore.loadDocuments({
-        ...filter,
-        includes: ['addedby'],
-        order: filter.order?.length ? filter.order : ['createdat DESC'],
-      });
+      void this.loadDocuments(filter);
     });
   }
 
@@ -106,6 +117,23 @@ export class ListDocumentComponent {
       sheetName: 'Documents',
       title: 'Documents',
     });
+
+  protected async refreshDocumentStatus(): Promise<void> {
+    if (this.isValidatingUploads()) return;
+
+    this.isValidatingUploads.set(true);
+    try {
+      const result = await this.documentService.validateUploads();
+      if (result.uploaded > 0) {
+        await this.loadDocuments();
+      }
+      this.showValidateUploadsToast(result);
+    } catch (error) {
+      this.toastStore.danger(getApiErrorMessage(error, 'Failed to refresh document status.'));
+    } finally {
+      this.isValidatingUploads.set(false);
+    }
+  }
 
   protected viewDocument(item: StoredDocument): void {
     if (!item.id) return;
@@ -151,5 +179,40 @@ export class ListDocumentComponent {
     }
 
     return '—';
+  }
+
+  private loadDocuments(filter: StoredDocumentListQuery = this.crudQuery.filter()): Promise<void> {
+    return this.documentStore.loadDocuments({
+      ...filter,
+      includes: ['addedby'],
+      order: filter.order?.length ? filter.order : ['createdat DESC'],
+    });
+  }
+
+  private showValidateUploadsToast(result: StoredDocumentValidateUploadResponse): void {
+    const summary = [
+      `${result.scanned.toLocaleString()} scanned`,
+      `${result.uploaded.toLocaleString()} uploaded`,
+      `${result.missing.toLocaleString()} missing`,
+      `${result.sizeMismatch.toLocaleString()} size mismatch`,
+      `${result.failed.toLocaleString()} failed`,
+    ].join(', ');
+
+    if (result.failed > 0) {
+      this.toastStore.danger(`Document status refresh completed with errors: ${summary}.`);
+      return;
+    }
+
+    if (result.sizeMismatch > 0) {
+      this.toastStore.warning(`Document status refresh found size mismatches: ${summary}.`);
+      return;
+    }
+
+    if (result.uploaded > 0) {
+      this.toastStore.success(`Document status refreshed: ${summary}.`);
+      return;
+    }
+
+    this.toastStore.neutral(`Document status refreshed: ${summary}.`);
   }
 }

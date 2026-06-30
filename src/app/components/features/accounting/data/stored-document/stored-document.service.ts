@@ -10,6 +10,7 @@ import type {
   StoredDocumentGetQuery,
   StoredDocumentListQuery,
   StoredDocumentUpdatePayload,
+  StoredDocumentValidateUploadResponse,
 } from './stored-document.model';
 
 const ENDPOINT = '/storage/stored-document';
@@ -37,6 +38,14 @@ export class StoredDocumentService {
     return this.crudApi.count(ENDPOINT, query);
   }
 
+  async validateUploads(): Promise<StoredDocumentValidateUploadResponse> {
+    return this.api.post<StoredDocumentValidateUploadResponse, null>(
+      `${await this.collectionUrl()}/validate-upload`,
+      null,
+      { headers: { 'Content-Type': 'application/json' } },
+    );
+  }
+
   async getDownloadUrl(id: string): Promise<string> {
     const response = await this.api.get<Record<string, unknown> | string>(
       `${await this.collectionUrl()}/${id}/download-url`,
@@ -50,11 +59,10 @@ export class StoredDocumentService {
 
   /** Backend returns 204 No Content. */
   async update(id: string, payload: StoredDocumentUpdatePayload): Promise<void> {
-    const response = await this.http.patch(
-      `${await this.collectionUrl()}/${id}`,
-      payload,
-      { observe: 'response', responseType: 'text' },
-    );
+    const response = await this.http.patch(`${await this.collectionUrl()}/${id}`, payload, {
+      observe: 'response',
+      responseType: 'text',
+    });
     const result = await firstValueFrom(response);
     if (result.status < 200 || result.status >= 300) {
       throw new Error(`Unexpected response status ${result.status}.`);
@@ -63,10 +71,10 @@ export class StoredDocumentService {
 
   /** Backend returns 204 No Content. */
   async delete(id: string): Promise<void> {
-    const response = await this.http.delete(
-      `${await this.collectionUrl()}/${id}`,
-      { observe: 'response', responseType: 'text' },
-    );
+    const response = await this.http.delete(`${await this.collectionUrl()}/${id}`, {
+      observe: 'response',
+      responseType: 'text',
+    });
     const result = await firstValueFrom(response);
     if (result.status < 200 || result.status >= 300) {
       throw new Error(`Unexpected response status ${result.status}.`);

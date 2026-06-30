@@ -68,3 +68,39 @@ export type StoredDocumentListQuery = Lb4ListQuery;
 export type StoredDocumentGetQuery = Readonly<{
   includes?: readonly Lb4Include[];
 }>;
+
+export type StoredDocumentValidateUploadS3Result = Readonly<{
+  validatedat: string;
+  exists: boolean;
+  completed: boolean;
+  contentLength?: number;
+  eTag?: string;
+  lastModified?: string;
+  contentType?: string;
+  metadata?: Record<string, string>;
+  sizeMatches?: boolean;
+  expectedSize?: number;
+  actualSize?: number;
+  error?: string;
+}>;
+
+export type StoredDocumentValidateUploadDocument = Readonly<{
+  id: string;
+  name: string;
+  category: string;
+  path: string;
+  previousStatus: DocumentStatus.INITIATED;
+  status: DocumentStatus.INITIATED | DocumentStatus.UPLOADED;
+  action: 'uploaded' | 'missing' | 'sizeMismatch' | 'failed';
+  s3?: StoredDocumentValidateUploadS3Result;
+  error?: string;
+}>;
+
+export type StoredDocumentValidateUploadResponse = Readonly<{
+  scanned: number;
+  uploaded: number;
+  missing: number;
+  sizeMismatch: number;
+  failed: number;
+  documents: readonly StoredDocumentValidateUploadDocument[];
+}>;

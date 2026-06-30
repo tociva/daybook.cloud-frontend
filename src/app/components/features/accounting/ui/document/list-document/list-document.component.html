@@ -5,6 +5,16 @@
     description="Browse and review organization documents."
   >
     <app-burl-back-button />
+    <tng-button
+      type="button"
+      appearance="outline"
+      tone="neutral"
+      [disabled]="isValidatingUploads() || documentStore.isLoading()"
+      (click)="refreshDocumentStatus()"
+    >
+      <tng-icon [icon]="isValidatingUploads() ? 'loaderCircle' : 'refresh-cw'" aria-hidden="true" />
+      {{ isValidatingUploads() ? 'Refreshing…' : 'Refresh status' }}
+    </tng-button>
     <app-crud-filter-popover
       ariaLabel="Document filters"
       title="Filter documents"
@@ -21,14 +31,23 @@
     }
 
     <div class="table-stack">
-      @if (!documentStore.isLoading() && !hasError() && crudQuery.shouldShowEmptyState(documentStore.items().length, documentStore.count())) {
+      @if (
+        !documentStore.isLoading() &&
+        !hasError() &&
+        crudQuery.shouldShowEmptyState(documentStore.items().length, documentStore.count())
+      ) {
         @if (crudQuery.hasActiveFilter()) {
           <app-empty-state
             icon="searchX"
             title="No documents match your filter"
             description="Try adjusting or clearing your filter to find what you're looking for."
           >
-            <tng-button type="button" appearance="outline" tone="neutral" (click)="crudQuery.clearFilter()">
+            <tng-button
+              type="button"
+              appearance="outline"
+              tone="neutral"
+              (click)="crudQuery.clearFilter()"
+            >
               Clear filter
             </tng-button>
           </app-empty-state>
@@ -80,7 +99,6 @@
           <ng-template tngTableCellTemplate="createdat" let-row="row">
             {{ formatDate(row.createdat) }}
           </ng-template>
-
         </tng-table>
 
         <div class="table-footer">
