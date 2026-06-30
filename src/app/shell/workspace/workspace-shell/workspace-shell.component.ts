@@ -99,6 +99,14 @@ export class WorkspaceShellComponent {
     const session = this.userSessionStore.session();
     return this.readString(session?.fiscalyear?.name) ?? 'Not set';
   });
+  protected readonly profileContextLabel = computed(() => {
+    const session = this.userSessionStore.session();
+    return (
+      this.readString(session?.fiscalyear?.name) ??
+      this.readString(session?.branch?.name) ??
+      ''
+    );
+  });
   protected readonly userDisplayName = computed(() => {
     const session = this.userSessionStore.session();
     const name =

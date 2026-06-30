@@ -56,6 +56,7 @@ export class WorkspaceHeaderComponent {
   readonly activeOrganizationId = input<string | null>(null);
   readonly activeBranchName = input('Not set');
   readonly activeFiscalYearName = input('Not set');
+  readonly profileContextLabel = input('');
   readonly breadcrumbItems = input<readonly BreadcrumbItem[]>([
     { label: 'Home', routerLink: '/app/profile' },
     { label: 'Workspace', current: true },

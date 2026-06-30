@@ -103,7 +103,9 @@
         <tng-avatar [fallback]="userDisplayName()" size="md"></tng-avatar>
         <span class="profile-trigger-copy">
           <span>{{ userDisplayName() }}</span>
-          <small>Account</small>
+          @if (profileContextLabel(); as contextLabel) {
+            <small>{{ contextLabel }}</small>
+          }
         </span>
       </button>
 
