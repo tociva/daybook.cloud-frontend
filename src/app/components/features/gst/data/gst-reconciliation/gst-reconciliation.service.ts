@@ -10,9 +10,14 @@ import type {
   GstReconciliationSummaryResponse,
   GstReconciliationUploadUrlPayload,
   GstReconciliationUploadUrlResponse,
+  GstSourceFormat,
 } from './gst-reconciliation.model';
 
 const ENDPOINT = '/gst-reconciliation';
+const GST_UPLOAD_CONTENT_TYPES: Record<GstSourceFormat, string> = {
+  json: 'application/json',
+  xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+};
 
 @Injectable({ providedIn: 'root' })
 export class GstReconciliationService {
@@ -35,8 +40,17 @@ export class GstReconciliationService {
    * We use fetch() here because HttpClient would add the auth header to the
    * pre-signed S3 URL which would cause a signature mismatch.
    */
-  async uploadFileToSignedUrl(putUrl: string, file: File): Promise<void> {
-    await this.signedUrlUpload.uploadFileToSignedUrl(putUrl, file);
+  async uploadFileToSignedUrl(
+    putUrl: string,
+    file: File,
+    sourceFormat: GstSourceFormat,
+  ): Promise<void> {
+    await this.signedUrlUpload.uploadFileToSignedUrl(
+      putUrl,
+      file,
+      undefined,
+      GST_UPLOAD_CONTENT_TYPES[sourceFormat],
+    );
   }
 
   /** Step 3: Trigger reconciliation refresh after the file has been uploaded. */

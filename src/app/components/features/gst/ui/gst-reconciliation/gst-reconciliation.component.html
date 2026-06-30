@@ -46,7 +46,7 @@
       id="gst-import-file"
       class="import-file-input"
       type="file"
-      accept=".json,application/json,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      [accept]="acceptedFileTypes"
       [disabled]="store.isBusy() || isParsing()"
       (change)="onBrowse($event)"
     />
@@ -72,7 +72,7 @@
     [class.recon-overview--drag-active]="overviewDragActive()"
     [attr.aria-busy]="store.isLoadingSummary()"
     tngFileUpload
-    accept=".json,application/json,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    [accept]="acceptedFileTypes"
     [maxSize]="maxFileSize"
     [multiple]="false"
     [disabled]="store.isBusy() || isParsing() || !canImport() || !context()"
@@ -101,7 +101,7 @@
       <div class="recon-drop-overlay__inner">
         <tng-icon icon="upload" aria-hidden="true" />
         <span>Drop file here</span>
-        <small>JSON or XLSX · max 10 MB</small>
+        <small>GST portal JSON · max 10 MB</small>
       </div>
     </div>
 

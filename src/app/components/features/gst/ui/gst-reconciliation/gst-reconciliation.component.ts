@@ -10,7 +10,6 @@ import {
 } from '@tailng-ui/primitives';
 import { PermissionsStore } from '../../../../../core/permissions/permissions.store';
 import { PERMISSION } from '../../../../../core/permissions/permission-requirements';
-import { XlsxFileReaderService } from '../../../../../shared/file/xlsx-file-reader.service';
 import { PageHeadingComponent } from '../../../../../shared/page-heading/page-heading.component';
 import { UserSessionStore } from '../../../management/data/user-session/user-session.store';
 import {
@@ -30,9 +29,7 @@ import { GST_RECONCILIATION_STATUS_LEGEND } from './shared/return-panel/gst-reco
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
-
-/** 15-char GSTIN pattern */
-const GSTIN_RE = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/;
+const GST_JSON_ACCEPT = '.json,application/json';
 
 const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] as const;
 
@@ -54,7 +51,6 @@ const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct
 export class GstReconciliationComponent implements OnDestroy {
   private readonly permissionsStore = inject(PermissionsStore);
   private readonly sessionStore = inject(UserSessionStore);
-  private readonly xlsxFileReader = inject(XlsxFileReaderService);
   protected readonly store = inject(GstReconciliationStore);
 
   // ── File state ────────────────────────────────────────────────────────────
@@ -73,6 +69,7 @@ export class GstReconciliationComponent implements OnDestroy {
   private overviewDragCounter = 0;
 
   // ── Static data ───────────────────────────────────────────────────────────
+  protected readonly acceptedFileTypes = GST_JSON_ACCEPT;
   protected readonly maxFileSize = MAX_FILE_SIZE;
   protected readonly statusLegend = GST_RECONCILIATION_STATUS_LEGEND;
 
@@ -183,6 +180,11 @@ export class GstReconciliationComponent implements OnDestroy {
       return;
     }
 
+    if (!this.isJsonFile(file)) {
+      this.pendingError.set('Upload GST portal JSON files. GSTR-2B no longer supports XLSX.');
+      return;
+    }
+
     const month = this.uploadMonth();
     if (!month) {
       this.pendingError.set('Could not detect the GST return month from this file.');
@@ -213,12 +215,11 @@ export class GstReconciliationComponent implements OnDestroy {
     await this.waitForNextPaint();
 
     try {
-      const name = file.name.toLowerCase();
       let preview: ParsedFilePreview | null = null;
 
-      if (name.endsWith('.xlsx')) {
-        preview = await this.parseXlsxGstr(file);
-      } else if (name.endsWith('.json')) {
+      if (!this.isJsonFile(file)) {
+        this.pendingError.set('Upload GST portal JSON files. GSTR-2B no longer supports XLSX.');
+      } else {
         preview = await this.parseJsonGstr(file);
       }
 
@@ -237,143 +238,211 @@ export class GstReconciliationComponent implements OnDestroy {
     return new Promise((resolve) => requestAnimationFrame(() => resolve()));
   }
 
-  // ── Private: XLSX → GSTR-2B parser ──────────────────────────────────────
-  private async parseXlsxGstr(file: File): Promise<ParsedFilePreview | null> {
+  // ── Private: GST portal JSON parser ──────────────────────────────────────
+  private async parseJsonGstr(file: File): Promise<ParsedFilePreview | null> {
     try {
-      const rows = await this.xlsxFileReader.readFirstSheetRows(file);
+      const text = await file.text();
+      const parsed = JSON.parse(text) as Record<string, unknown>;
+      const data = this.gstPortalPayload(parsed);
 
-      const title = String(rows[0]?.[0] ?? '').toLowerCase();
-      let detectedReturnType: GstReconciliationReturnType | null = null;
-      if      (title.includes('gstr-2b') || title.includes('gstr2b')) detectedReturnType = 'gstr2b';
-      else if (title.includes('gstr-1')  || title.includes('gstr1'))  detectedReturnType = 'gstr1';
-
-      let dataStart = rows.length;
-      for (let i = 0; i < rows.length; i++) {
-        if (GSTIN_RE.test(String(rows[i]?.[0] ?? ''))) { dataStart = i; break; }
-      }
-
-      const invoices: ParsedInvoice[] = rows
-        .slice(dataStart)
-        .filter((row) => GSTIN_RE.test(String(row?.[0] ?? '')))
-        .map((row) => ({
-          gstin:        String(row[0]  ?? ''),
-          supplierName: String(row[1]  ?? ''),
-          invoiceNo:    String(row[2]  ?? ''),
-          invoiceDate:  this.xlsxFileReader.formatCell(row[4]),
-          invoiceValue: Number(row[5])  || 0,
-          taxableValue: Number(row[8])  || 0,
-          igst:         Number(row[9])  || 0,
-          cgst:         Number(row[10]) || 0,
-          sgst:         Number(row[11]) || 0,
-          itcAvailable: String(row[15] ?? '').toLowerCase() === 'yes',
-          period:       String(row[13] ?? ''),
-        }));
-
-      if (!invoices.length) return null;
-
-      return {
-        detectedReturnType,
-        period: invoices[0]?.period ?? '',
-        invoices,
-        totalInvoiceValue: invoices.reduce((s, i) => s + i.invoiceValue, 0),
-        totalTaxableValue: invoices.reduce((s, i) => s + i.taxableValue, 0),
-        totalIgst:         invoices.reduce((s, i) => s + i.igst,         0),
-        totalCgst:         invoices.reduce((s, i) => s + i.cgst,         0),
-        totalSgst:         invoices.reduce((s, i) => s + i.sgst,         0),
-      };
+      if (this.isGstr2bJson(data)) return this.parseJsonGstr2b(data);
+      if (this.isGstr1Json(data)) return this.parseJsonGstr1(data);
+      return null;
     } catch {
       return null;
     }
   }
 
-  // ── Private: JSON → GSTR-1 parser ────────────────────────────────────────
-  private async parseJsonGstr(file: File): Promise<ParsedFilePreview | null> {
-    try {
-      const text = await file.text();
-      const data = JSON.parse(text) as Record<string, unknown>;
+  private parseJsonGstr1(data: Record<string, unknown>): ParsedFilePreview | null {
+    if (!data['gstin'] || !data['fp']) return null;
 
-      if (!data['gstin'] || !data['fp']) return null;
+    const detectedReturnType: GstReconciliationReturnType = 'gstr1';
+    const period = this.parseFiscalPeriod(String(data['fp'] ?? ''));
+    const gstin  = String(data['gstin'] ?? '');
 
-      const detectedReturnType: GstReconciliationReturnType = 'gstr1';
-      const period = this.parseFiscalPeriod(String(data['fp'] ?? ''));
-      const gstin  = String(data['gstin'] ?? '');
+    const invoices: ParsedInvoice[] = [];
 
-      const invoices: ParsedInvoice[] = [];
+    const expArr = this.asList<Record<string, unknown>>(data['exp']);
+    for (const exp of expArr) {
+      const rawType = String(exp['exp_typ'] ?? '');
+      const label   = rawType === 'WOPAY' ? 'Export (No Tax)'
+                    : rawType === 'WPAY'  ? 'Export (With Tax)'
+                    : rawType;
 
-      const expArr = this.asList<Record<string, unknown>>(data['exp']);
-      for (const exp of expArr) {
-        const rawType = String(exp['exp_typ'] ?? '');
-        const label   = rawType === 'WOPAY' ? 'Export (No Tax)'
-                      : rawType === 'WPAY'  ? 'Export (With Tax)'
-                      : rawType;
-
-        for (const inv of this.asList<Record<string, unknown>>(exp['inv'])) {
-          const itms = this.asList<Record<string, unknown>>(inv['itms']);
-          invoices.push({
-            invoiceNo:    String(inv['inum'] ?? ''),
-            invoiceDate:  String(inv['idt']  ?? ''),
-            invoiceValue: Number(inv['val'])  || 0,
-            taxableValue: itms.reduce((s, i) => s + (Number(i['txval']) || 0), 0),
-            igst:         itms.reduce((s, i) => s + (Number(i['iamt'])  || 0), 0),
-            cgst:         itms.reduce((s, i) => s + (Number(i['camt'])  || 0), 0),
-            sgst:         itms.reduce((s, i) => s + (Number(i['samt'])  || 0), 0),
-            taxRate:      Number(itms[0]?.['rt']) || 0,
-            exportType:   label,
-            period,
-          });
-        }
+      for (const inv of this.asList<Record<string, unknown>>(exp['inv'])) {
+        const itms = this.asList<Record<string, unknown>>(inv['itms']);
+        invoices.push({
+          invoiceNo:    String(inv['inum'] ?? ''),
+          invoiceDate:  String(inv['idt']  ?? ''),
+          invoiceValue: Number(inv['val'])  || 0,
+          taxableValue: itms.reduce((s, i) => s + (Number(i['txval']) || 0), 0),
+          igst:         itms.reduce((s, i) => s + (Number(i['iamt'])  || 0), 0),
+          cgst:         itms.reduce((s, i) => s + (Number(i['camt'])  || 0), 0),
+          sgst:         itms.reduce((s, i) => s + (Number(i['samt'])  || 0), 0),
+          taxRate:      Number(itms[0]?.['rt']) || 0,
+          exportType:   label,
+          period,
+        });
       }
+    }
 
-      for (const supplier of this.asList<Record<string, unknown>>(data['b2b'])) {
-        const ctin = String(supplier['ctin'] ?? '');
-        const name = String(supplier['trdnm'] ?? supplier['lgnm'] ?? '');
+    for (const supplier of this.asList<Record<string, unknown>>(data['b2b'])) {
+      const ctin = String(supplier['ctin'] ?? '');
+      const name = String(supplier['trdnm'] ?? supplier['lgnm'] ?? '');
 
-        for (const inv of this.asList<Record<string, unknown>>(supplier['inv'])) {
-          const itms = this.asList<Record<string, unknown>>(inv['itms']);
-          const itemDetails = itms.map((item) => item['itm_det'] as Record<string, unknown> | undefined);
-          const igst = itemDetails.reduce((s, i) => s + (Number(i?.['iamt'])  || 0), 0);
-          const cgst = itemDetails.reduce((s, i) => s + (Number(i?.['camt'])  || 0), 0);
-          const sgst = itemDetails.reduce((s, i) => s + (Number(i?.['samt'])  || 0), 0);
-          invoices.push({
-            gstin:        ctin,
-            supplierName: name,
-            invoiceNo:    String(inv['inum'] ?? ''),
-            invoiceDate:  String(inv['idt']  ?? ''),
-            invoiceValue: Number(inv['val'])  || 0,
-            taxableValue: itemDetails.reduce((s, i) => s + (Number(i?.['txval']) || 0), 0),
-            igst,
-            cgst,
-            sgst,
-            taxRate:      Number(itemDetails[0]?.['rt']) || 0,
-            exportType:   this.gstr1InvoiceTypeLabel(String(inv['inv_typ'] ?? ''), { igst, cgst, sgst }),
-            period,
-          });
-        }
+      for (const inv of this.asList<Record<string, unknown>>(supplier['inv'])) {
+        const itms = this.asList<Record<string, unknown>>(inv['itms']);
+        const itemDetails = itms.map((item) => item['itm_det'] as Record<string, unknown> | undefined);
+        const igst = itemDetails.reduce((s, i) => s + (Number(i?.['iamt'])  || 0), 0);
+        const cgst = itemDetails.reduce((s, i) => s + (Number(i?.['camt'])  || 0), 0);
+        const sgst = itemDetails.reduce((s, i) => s + (Number(i?.['samt'])  || 0), 0);
+        invoices.push({
+          gstin:        ctin,
+          supplierName: name,
+          invoiceNo:    String(inv['inum'] ?? ''),
+          invoiceDate:  String(inv['idt']  ?? ''),
+          invoiceValue: Number(inv['val'])  || 0,
+          taxableValue: itemDetails.reduce((s, i) => s + (Number(i?.['txval']) || 0), 0),
+          igst,
+          cgst,
+          sgst,
+          taxRate:      Number(itemDetails[0]?.['rt']) || 0,
+          exportType:   this.gstr1InvoiceTypeLabel(String(inv['inv_typ'] ?? ''), { igst, cgst, sgst }),
+          period,
+        });
       }
+    }
+
+    return this.buildPreview('gstr1', period, invoices, gstin);
+  }
+
+  private parseJsonGstr2b(data: Record<string, unknown>): ParsedFilePreview | null {
+    const period = this.parseFiscalPeriod(String(data['rtnprd'] ?? data['fp'] ?? ''));
+    const gstin = String(data['gstin'] ?? '');
+    const docdata = this.asRecord(data['docdata']);
+    if (!docdata) return this.buildPreview('gstr2b', period, [], gstin || undefined);
+
+    const invoices: ParsedInvoice[] = [];
+    for (const documents of Object.values(docdata)) {
+      for (const supplier of this.asList<Record<string, unknown>>(documents)) {
+        invoices.push(...this.parseGstr2bSupplierDocuments(supplier, period));
+      }
+    }
+
+    return this.buildPreview('gstr2b', period, invoices, gstin || undefined);
+  }
+
+  private parseGstr2bSupplierDocuments(
+    supplier: Record<string, unknown>,
+    defaultPeriod: string,
+  ): ParsedInvoice[] {
+    const gstin = String(supplier['ctin'] ?? supplier['stin'] ?? '');
+    const supplierName = String(supplier['trdnm'] ?? supplier['lgnm'] ?? supplier['name'] ?? '');
+    const docs = [
+      ...this.asList<Record<string, unknown>>(supplier['inv']),
+      ...this.asList<Record<string, unknown>>(supplier['nt']),
+      ...this.asList<Record<string, unknown>>(supplier['docs']),
+    ];
+    const supplierPeriod = this.parseFiscalPeriod(String(supplier['supprd'] ?? defaultPeriod));
+
+    return docs.map((doc) => {
+      const itemDetails = this.gstr2bItemDetails(doc);
+      const igst = itemDetails.length
+        ? itemDetails.reduce((s, i) => s + this.numberFrom(i['iamt'], i['igst']), 0)
+        : this.numberFrom(doc['igst'], doc['iamt']);
+      const cgst = itemDetails.length
+        ? itemDetails.reduce((s, i) => s + this.numberFrom(i['camt'], i['cgst']), 0)
+        : this.numberFrom(doc['cgst'], doc['camt']);
+      const sgst = itemDetails.length
+        ? itemDetails.reduce((s, i) => s + this.numberFrom(i['samt'], i['sgst']), 0)
+        : this.numberFrom(doc['sgst'], doc['samt']);
+      const taxableValue = itemDetails.length
+        ? itemDetails.reduce((s, i) => s + this.numberFrom(i['txval'], i['taxableValue']), 0)
+        : this.numberFrom(doc['txval'], doc['taxableValue']);
 
       return {
-        detectedReturnType,
-        period,
         gstin,
-        invoices,
-        totalInvoiceValue: invoices.reduce((s, i) => s + i.invoiceValue, 0),
-        totalTaxableValue: invoices.reduce((s, i) => s + i.taxableValue, 0),
-        totalIgst:         invoices.reduce((s, i) => s + i.igst,         0),
-        totalCgst:         invoices.reduce((s, i) => s + i.cgst,         0),
-        totalSgst:         invoices.reduce((s, i) => s + i.sgst,         0),
+        supplierName,
+        invoiceNo:    String(doc['inum'] ?? doc['nt_num'] ?? doc['docnum'] ?? ''),
+        invoiceDate:  String(doc['dt'] ?? doc['idt'] ?? doc['nt_dt'] ?? ''),
+        invoiceValue: this.numberFrom(doc['val'], doc['invval']),
+        taxableValue,
+        igst,
+        cgst,
+        sgst,
+        itcAvailable: this.yesLike(doc['itcavl'] ?? doc['itcAvailable'] ?? doc['itc_avl']),
+        period:       this.parseFiscalPeriod(String(doc['supprd'] ?? supplierPeriod)),
       };
-    } catch {
-      return null;
-    }
+    });
   }
 
   private asList<T>(val: unknown): T[] {
     return Array.isArray(val) ? (val as T[]) : [];
   }
 
+  private asRecord(val: unknown): Record<string, unknown> | null {
+    return val && typeof val === 'object' && !Array.isArray(val) ? val as Record<string, unknown> : null;
+  }
+
+  private gstPortalPayload(data: Record<string, unknown>): Record<string, unknown> {
+    return this.asRecord(data['data']) ?? data;
+  }
+
+  private buildPreview(
+    detectedReturnType: GstReconciliationReturnType,
+    period: string,
+    invoices: readonly ParsedInvoice[],
+    gstin?: string,
+  ): ParsedFilePreview {
+    return {
+      detectedReturnType,
+      period,
+      gstin,
+      invoices,
+      totalInvoiceValue: invoices.reduce((s, i) => s + i.invoiceValue, 0),
+      totalTaxableValue: invoices.reduce((s, i) => s + i.taxableValue, 0),
+      totalIgst:         invoices.reduce((s, i) => s + i.igst,         0),
+      totalCgst:         invoices.reduce((s, i) => s + i.cgst,         0),
+      totalSgst:         invoices.reduce((s, i) => s + i.sgst,         0),
+    };
+  }
+
+  private gstr2bItemDetails(doc: Record<string, unknown>): Record<string, unknown>[] {
+    const items = [
+      ...this.asList<Record<string, unknown>>(doc['items']),
+      ...this.asList<Record<string, unknown>>(doc['itms']),
+    ];
+    return items.map((item) => this.asRecord(item['itm_det']) ?? item);
+  }
+
+  private isGstr1Json(data: Record<string, unknown>): boolean {
+    return Boolean(data['gstin'] && data['fp']);
+  }
+
+  private isGstr2bJson(data: Record<string, unknown>): boolean {
+    return Boolean(data['docdata'] || data['itcsumm'] || data['rtnprd']);
+  }
+
+  private isJsonFile(file: File): boolean {
+    return file.name.toLowerCase().endsWith('.json');
+  }
+
+  private numberFrom(...values: unknown[]): number {
+    for (const value of values) {
+      const num = Number(value);
+      if (Number.isFinite(num)) return num;
+    }
+    return 0;
+  }
+
+  private yesLike(value: unknown): boolean {
+    return ['y', 'yes', 'true'].includes(String(value ?? '').trim().toLowerCase());
+  }
+
   private parseFiscalPeriod(fp: string): string {
     if (fp.length < 6) return fp;
     const month = parseInt(fp.slice(0, 2), 10);
+    if (!Number.isInteger(month) || month < 1 || month > 12) return fp;
     const year  = fp.slice(4);
     return `${MONTH_LABELS[(month - 1) % 12]}'${year}`;
   }

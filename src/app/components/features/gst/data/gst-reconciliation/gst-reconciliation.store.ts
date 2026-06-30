@@ -5,6 +5,7 @@ import type {
   GstReconciliationRefreshPayload,
   GstReconciliationReturnType,
   GstReconciliationUploadUrlPayload,
+  GstSourceFormat,
 } from './gst-reconciliation.model';
 import { GstReconciliationService } from './gst-reconciliation.service';
 import { initialGstReconciliationState } from './gst-reconciliation.state';
@@ -105,16 +106,26 @@ export const GstReconciliationStore = signalStore(
 
       try {
         // Step 1 – obtain signed upload URL
-        const { putUrl } = await service.createUploadUrl({
+        const uploadUrl = await service.createUploadUrl({
           returnType: payload.returnType,
           month: payload.month,
         });
+        const { putUrl, sourceFormat } = uploadUrl;
         if (!putUrl) {
           throw new Error('Upload URL response did not include putUrl.');
         }
+        const fileSourceFormat = sourceFormatFromFile(payload.file);
+        if (!fileSourceFormat) {
+          throw new Error(`Unsupported GST upload file type for ${payload.file.name}.`);
+        }
+        if (fileSourceFormat !== sourceFormat) {
+          throw new Error(
+            `Upload URL expects a ${sourceFormat.toUpperCase()} file, but ${payload.file.name} is ${fileSourceFormat.toUpperCase()}.`,
+          );
+        }
 
         // Step 2 – stream file directly to storage
-        await service.uploadFileToSignedUrl(putUrl, payload.file);
+        await service.uploadFileToSignedUrl(putUrl, payload.file, sourceFormat);
 
         patchState(store, (s) => ({
           gstReconciliation: { ...s.gstReconciliation, isUploading: false, isRefreshing: true },
@@ -200,6 +211,13 @@ export const GstReconciliationStore = signalStore(
     },
   })),
 );
+
+function sourceFormatFromFile(file: File): GstSourceFormat | null {
+  const name = file.name.toLowerCase();
+  if (name.endsWith('.json')) return 'json';
+  if (name.endsWith('.xlsx')) return 'xlsx';
+  return null;
+}
 
 // Re-export types so UI components can import from a single path.
 export type {

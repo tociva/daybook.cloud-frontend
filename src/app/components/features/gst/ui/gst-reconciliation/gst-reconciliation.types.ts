@@ -51,7 +51,7 @@ export const GSTR1_RETURN_TYPE_META: ReturnTypeMeta = {
 };
 
 export const GSTR2B_RETURN_TYPE_META: ReturnTypeMeta = {
-  description: 'Portal GSTR-2B against book purchase invoices',
+  description: 'GST portal JSON GSTR-2B against book purchase invoices',
   icon: 'fileCheck',
   label: 'GSTR-2B',
   value: 'gstr2b',

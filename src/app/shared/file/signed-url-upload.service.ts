@@ -12,11 +12,12 @@ export class SignedUrlUploadService {
     putUrl: string,
     file: File,
     onProgress?: (event: SignedUrlUploadProgress) => void,
+    contentType?: string,
   ): Promise<void> {
     return new Promise((resolve, reject) => {
       const request = new XMLHttpRequest();
       request.open('PUT', putUrl);
-      request.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+      request.setRequestHeader('Content-Type', contentType || file.type || 'application/octet-stream');
 
       request.upload.onprogress = (event): void => {
         if (!event.lengthComputable) return;
