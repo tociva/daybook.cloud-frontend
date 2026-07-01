@@ -487,7 +487,7 @@ export class SaleInvoicePrintService {
 
     try {
       const document = await this.organizationService.getLogoReadUrl(organizationId, variant);
-      const url = document.getUrl || document.path || '';
+      const url = document.getUrl;
       if (!url) return '';
 
       const logo = await this.imageUrlToDataUrl(url);

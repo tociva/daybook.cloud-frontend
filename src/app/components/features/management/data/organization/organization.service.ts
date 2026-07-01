@@ -3,6 +3,7 @@ import { ApiClientService } from '../../../../../core/api/api-client.service';
 import { AppConfigStore } from '../../../../../core/config/app-config.store';
 import { CrudApiService } from '../../../../../shared/crud';
 import { SignedUrlUploadService } from '../../../../../shared/file/signed-url-upload.service';
+import { SignedUrlDownloadService } from '../../../../../shared/file/signed-url-download.service';
 import type {
   Organization,
   OrganizationBootstrap,
@@ -22,6 +23,7 @@ export class OrganizationService {
   private readonly appConfigStore = inject(AppConfigStore);
   private readonly crudApi = inject(CrudApiService);
   private readonly signedUrlUpload = inject(SignedUrlUploadService);
+  private readonly signedUrlDownload = inject(SignedUrlDownloadService);
 
   async create(payload: OrganizationPayload): Promise<Organization> {
     return this.crudApi.create<Organization, OrganizationPayload>(ORG_ENDPOINT, payload);
@@ -64,8 +66,8 @@ export class OrganizationService {
     organizationId: string,
     variant: OrganizationLogoVariant,
   ): Promise<OrganizationLogoReadUrl> {
-    return this.api.get<OrganizationLogoReadUrl>(
-      `${await this.baseUrl()}${ORG_ENDPOINT}/${organizationId}/logo/${variant}/url`,
+    return this.signedUrlDownload.get<OrganizationLogoReadUrl>(
+      `${ORG_ENDPOINT}/${encodeURIComponent(organizationId)}/logo/${encodeURIComponent(variant)}/url`,
     );
   }
 

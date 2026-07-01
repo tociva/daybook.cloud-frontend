@@ -12,6 +12,10 @@ export enum DocumentCategory {
   USER_LEVEL_DOCUMENT = 'USER_LEVEL_DOCUMENT',
   FISCAL_YEAR_LEVEL_DOCUMENT = 'FISCAL_YEAR_LEVEL_DOCUMENT',
   INVOICE_DOCUMENT = 'INVOICE_DOCUMENT',
+  SALE_INVOICE_DOCUMENT = 'SALE_INVOICE_DOCUMENT',
+  PURCHASE_INVOICE_DOCUMENT = 'PURCHASE_INVOICE_DOCUMENT',
+  PURCHASE_RETURN_DOCUMENT = 'PURCHASE_RETURN_DOCUMENT',
+  SALE_INVOICE_TEMPLATE_DOCUMENT = 'SALE_INVOICE_TEMPLATE_DOCUMENT',
   RECEIPT_DOCUMENT = 'RECEIPT_DOCUMENT',
   JOURNAL_SUPPORTING_DOCUMENT = 'JOURNAL_SUPPORTING_DOCUMENT',
   GST_RECONCILIATION_FILE = 'GST_RECONCILIATION_FILE',
@@ -28,6 +32,10 @@ const DOCUMENT_CATEGORY_LABELS: Record<DocumentCategory, string> = {
   [DocumentCategory.USER_LEVEL_DOCUMENT]: 'User Level Document',
   [DocumentCategory.FISCAL_YEAR_LEVEL_DOCUMENT]: 'Fiscal Year Level Document',
   [DocumentCategory.INVOICE_DOCUMENT]: 'Invoice Document',
+  [DocumentCategory.SALE_INVOICE_DOCUMENT]: 'Sale Invoice Document',
+  [DocumentCategory.PURCHASE_INVOICE_DOCUMENT]: 'Purchase Invoice Document',
+  [DocumentCategory.PURCHASE_RETURN_DOCUMENT]: 'Purchase Return Document',
+  [DocumentCategory.SALE_INVOICE_TEMPLATE_DOCUMENT]: 'Sale Invoice Template Document',
   [DocumentCategory.RECEIPT_DOCUMENT]: 'Receipt Document',
   [DocumentCategory.JOURNAL_SUPPORTING_DOCUMENT]: 'Journal Supporting Document',
   [DocumentCategory.GST_RECONCILIATION_FILE]: 'GST Reconciliation File',
@@ -94,6 +102,7 @@ export type StoredDocument = Readonly<{
   addedby?: StoredDocumentAddedBy;
   addedbyid: string;
   organizationid: string;
+  downloadEndpoint?: string;
   putUrl?: string;
 }>;
 

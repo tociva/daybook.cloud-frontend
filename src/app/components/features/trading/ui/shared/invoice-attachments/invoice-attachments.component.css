@@ -95,6 +95,12 @@
   overflow-wrap: anywhere;
 }
 
+.attachment-row__actions {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.25rem;
+}
+
 .attachment-row--upload {
   background: var(--tng-semantic-background-surface);
 }
@@ -142,6 +148,6 @@
   }
 
   .attachment-row {
-    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-columns: auto minmax(0, 1fr) auto;
   }
 }

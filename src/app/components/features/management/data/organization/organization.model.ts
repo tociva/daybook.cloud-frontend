@@ -4,6 +4,7 @@ import type { DateFormat } from '../date-format/date-format.model';
 import type { Branch } from '../branch/branch.model';
 import type { Address } from '../../../../../util/types/address';
 import type { Lb4ListQuery } from '../../../../../shared/crud';
+import type { SignedDownloadUrlResponse } from '../../../../../shared/file/signed-url-download.service';
 
 export type Organization = Readonly<{
   id?: string;
@@ -37,11 +38,7 @@ export type OrganizationLogoDocument = Readonly<{
   putUrl?: string;
 }>;
 
-export type OrganizationLogoReadUrl = OrganizationLogoDocument &
-  Readonly<{
-    getUrl: string;
-    expiresIn: number;
-  }>;
+export type OrganizationLogoReadUrl = OrganizationLogoDocument & SignedDownloadUrlResponse;
 
 export type OrganizationLogoUploadPayload = Readonly<{
   name: string;

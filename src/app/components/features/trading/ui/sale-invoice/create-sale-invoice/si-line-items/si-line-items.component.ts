@@ -62,6 +62,7 @@ export class SiLineItemsComponent {
   readonly readOnly = input(false);
   readonly documentFiles = input<readonly File[]>([]);
   readonly documents = input<readonly StoredDocument[]>([]);
+  readonly documentParentId = input<string | null>(null);
   readonly documentsDisabled = input(false);
   readonly documentsUploading = input(false);
   readonly documentFilesChange = output<readonly File[]>();

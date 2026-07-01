@@ -19,6 +19,7 @@
     >
       <app-si-customer (customerSelected)="onCustomerSelected()" />
       <app-si-line-items
+        [documentParentId]="id()"
         [documentFiles]="pendingDocumentFiles()"
         [documents]="
           saleInvoiceStore.selectedItem()?.id === id()

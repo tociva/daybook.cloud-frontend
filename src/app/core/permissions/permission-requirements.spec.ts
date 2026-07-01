@@ -5,6 +5,7 @@ import {
   PERMISSION,
   documentPermission,
   permissionForBulkUploadEndpoint,
+  permissionForCurrentResourceAction,
   permissionForWorkspaceUrl,
 } from './permission-requirements';
 
@@ -64,5 +65,14 @@ describe('permissionForWorkspaceUrl', () => {
     expect(documentPermission('journal', 'create')).toEqual(
       PERMISSION.fiscalYear.journalDocument.create,
     );
+  });
+
+  it('preserves owner-only permission for document actions', () => {
+    expect(
+      permissionForCurrentResourceAction(
+        '/app/accounting/documents/document-1/delete',
+        'delete',
+      ),
+    ).toEqual(PERMISSION.ownerOnly);
   });
 });

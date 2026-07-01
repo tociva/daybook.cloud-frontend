@@ -160,18 +160,22 @@
               <app-table-row-icon-button
                 icon="eye"
                 ariaLabel="View document"
+                [permission]="documentActionPermission"
                 (action)="viewDocument(row)"
               />
-              <app-table-row-icon-button
-                icon="download"
-                ariaLabel="Download document"
-                [disabled]="downloadingDocumentId() === row.id"
-                (action)="downloadDocument(row)"
-              />
+              @if (row.status === DocumentStatus.UPLOADED) {
+                <app-table-row-icon-button
+                  [icon]="downloadingDocumentIds().has(row.id) ? 'loaderCircle' : 'download'"
+                  ariaLabel="Download document"
+                  [disabled]="downloadingDocumentIds().has(row.id)"
+                  (action)="downloadDocument(row)"
+                />
+              }
               <app-table-row-icon-button
                 icon="trash2"
                 ariaLabel="Delete document"
                 tone="danger"
+                [permission]="documentActionPermission"
                 (action)="deleteDocument(row)"
               />
             </div>

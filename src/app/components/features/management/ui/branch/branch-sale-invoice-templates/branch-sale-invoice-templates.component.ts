@@ -1,8 +1,14 @@
-import { ChangeDetectionStrategy, Component, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
 import { TngButtonComponent } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
+import { PERMISSION } from '../../../../../../core/permissions/permission-requirements';
+import { PermissionsStore } from '../../../../../../core/permissions/permissions.store';
+import {
+  getDownloadErrorMessage,
+  startSignedDownload,
+} from '../../../../../../shared/file/signed-url-download.service';
 import { UserSessionStore } from '../../../data/user-session/user-session.store';
 import {
   BranchSaleInvoiceTemplateService,
@@ -49,6 +55,7 @@ export class BranchSaleInvoiceTemplatesComponent {
   private readonly templateService = inject(BranchSaleInvoiceTemplateService);
   private readonly toastStore = inject(ToastStore);
   private readonly userSessionStore = inject(UserSessionStore);
+  private readonly permissionsStore = inject(PermissionsStore);
 
   readonly branch = input<Branch | null>(null);
 
@@ -62,6 +69,10 @@ export class BranchSaleInvoiceTemplatesComponent {
   protected readonly previewLoadingType = signal<SaleInvoiceTemplateType | null>(null);
   protected readonly uploadProgress = signal<Partial<Record<SaleInvoiceTemplateType, number>>>({});
   protected readonly uploadingType = signal<SaleInvoiceTemplateType | null>(null);
+  protected readonly downloadingTypes = signal<ReadonlySet<SaleInvoiceTemplateType>>(new Set());
+  protected readonly canDownload = computed(() =>
+    this.permissionsStore.can(PERMISSION.branch.saleInvoiceTemplateDocument.view),
+  );
 
   private loadToken = 0;
 
@@ -159,9 +170,37 @@ export class BranchSaleInvoiceTemplatesComponent {
     }
   }
 
+  protected async downloadTemplate(type: SaleInvoiceTemplateType): Promise<void> {
+    const branch = this.branch();
+    if (!branch?.id || !this.canDownload() || this.downloadingTypes().has(type)) return;
+
+    this.setTemplateDownloading(type, true);
+    this.error.set(null);
+    try {
+      await this.ensureTemplateSession(branch);
+      const response = await this.templateService.getDownloadUrl(type);
+      startSignedDownload(response);
+    } catch (error) {
+      const message = getDownloadErrorMessage(error, 'Failed to download sale invoice template.');
+      this.error.set(message);
+      this.toastStore.danger(message);
+    } finally {
+      this.setTemplateDownloading(type, false);
+    }
+  }
+
   protected closePreview(): void {
     this.previewType.set(null);
     this.previewHtml.set('');
+  }
+
+  private setTemplateDownloading(type: SaleInvoiceTemplateType, downloading: boolean): void {
+    this.downloadingTypes.update((current) => {
+      const next = new Set(current);
+      if (downloading) next.add(type);
+      else next.delete(type);
+      return next;
+    });
   }
 
   protected sourceLabel(metadata: SaleInvoiceTemplateMetadata | null): string {

@@ -48,3 +48,13 @@
   block-size: 1rem;
   inline-size: 1rem;
 }
+
+.spin {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

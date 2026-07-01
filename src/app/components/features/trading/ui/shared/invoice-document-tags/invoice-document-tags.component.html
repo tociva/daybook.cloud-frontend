@@ -38,10 +38,25 @@
           <tng-icon icon="paperclip" aria-hidden="true" />
           <span class="document-chip__name">{{ document.name }}</span>
           <span class="document-chip__size">{{ formatFileSize(document.size) }}</span>
+          @if (canDownload() && parentId() && document.id) {
+            <button
+              type="button"
+              class="document-chip__action"
+              [disabled]="isDisabled() || downloadingDocumentIds().has(document.id)"
+              (click)="downloadDocument(document, $event)"
+              [attr.aria-label]="'Download ' + document.name"
+            >
+              <tng-icon
+                [icon]="downloadingDocumentIds().has(document.id) ? 'loaderCircle' : 'download'"
+                [class.spin]="downloadingDocumentIds().has(document.id)"
+                aria-hidden="true"
+              />
+            </button>
+          }
           @if (editable() && canDelete()) {
             <button
               type="button"
-              class="document-chip__remove"
+              class="document-chip__action"
               [disabled]="isDisabled()"
               (click)="removeDocument(document, $event)"
               [attr.aria-label]="'Remove ' + document.name"
@@ -80,7 +95,7 @@
           @if (editable() && canAttach()) {
             <button
               type="button"
-              class="document-chip__remove"
+              class="document-chip__action"
               [disabled]="isDisabled()"
               (click)="removeFile(file, $event)"
               [attr.aria-label]="'Remove ' + file.name"

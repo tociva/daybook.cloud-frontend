@@ -291,7 +291,8 @@ export function permissionForCurrentResourceAction(
   action: 'create' | 'delete' | 'update' | 'view',
 ): PermissionMatch | null {
   const current = permissionForWorkspaceUrl(url);
-  if (!current || !('level' in current)) return null;
+  if (!current) return null;
+  if (!('level' in current)) return current;
 
   if (current.level === 'organization' && current.resource === 'user') {
     const userActions = {
@@ -376,7 +377,7 @@ const DOCUMENT_PERMISSIONS = {
 
 export function documentPermission(
   resource: DocumentPermissionResource,
-  action: 'create' | 'delete',
+  action: 'create' | 'delete' | 'view',
 ): PermissionRequirement {
   return DOCUMENT_PERMISSIONS[resource][action];
 }

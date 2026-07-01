@@ -74,22 +74,40 @@
               {{ formatDate(document.createdat) }}
             </small>
           </div>
-          @if (canDelete()) {
-            <tng-button
-              type="button"
-              appearance="ghost"
-              tone="danger"
-              [disabled]="isBusy() || !document.id"
-              (click)="deleteDocument(document)"
-            >
-              @if (deletingDocumentId() === document.id) {
-                <tng-icon icon="loaderCircle" aria-hidden="true" class="spin" />
-              } @else {
-                <tng-icon icon="trash2" aria-hidden="true" />
-              }
-              <span class="sr-only">Delete {{ document.name }}</span>
-            </tng-button>
-          }
+          <div class="attachment-row__actions">
+            @if (canDownload()) {
+              <tng-button
+                type="button"
+                appearance="ghost"
+                tone="neutral"
+                [disabled]="!document.id || downloadingDocumentIds().has(document.id)"
+                (click)="downloadDocument(document)"
+              >
+                @if (document.id && downloadingDocumentIds().has(document.id)) {
+                  <tng-icon icon="loaderCircle" aria-hidden="true" class="spin" />
+                } @else {
+                  <tng-icon icon="download" aria-hidden="true" />
+                }
+                <span class="sr-only">Download {{ document.name }}</span>
+              </tng-button>
+            }
+            @if (canDelete()) {
+              <tng-button
+                type="button"
+                appearance="ghost"
+                tone="danger"
+                [disabled]="isBusy() || !document.id"
+                (click)="deleteDocument(document)"
+              >
+                @if (deletingDocumentId() === document.id) {
+                  <tng-icon icon="loaderCircle" aria-hidden="true" class="spin" />
+                } @else {
+                  <tng-icon icon="trash2" aria-hidden="true" />
+                }
+                <span class="sr-only">Delete {{ document.name }}</span>
+              </tng-button>
+            }
+          </div>
         </article>
       }
 

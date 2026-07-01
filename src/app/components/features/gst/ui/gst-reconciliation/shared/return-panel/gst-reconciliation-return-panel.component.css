@@ -25,10 +25,10 @@
 .recon-month small{color:var(--tng-semantic-foreground-muted);display:block;font-size:.66rem}
 .recon-month__actions{align-items:center;display:flex;gap:.15rem}
 .recon-month__status{color:var(--status-color);font-size:.95rem}
-.recon-month__refresh{align-items:center;background:none;border:none;border-radius:.3rem;color:var(--tng-semantic-foreground-muted);cursor:pointer;display:flex;font-size:.85rem;opacity:0;padding:.15rem;transition:opacity .15s,color .15s}
-.recon-month:hover .recon-month__refresh,.recon-month__refresh:focus-visible{opacity:1}
-.recon-month__refresh:hover{color:var(--tng-semantic-foreground-primary)}
-.recon-month__refresh:disabled{cursor:not-allowed;opacity:.35 !important}
+.recon-month__action{align-items:center;background:none;border:none;border-radius:.3rem;color:var(--tng-semantic-foreground-muted);cursor:pointer;display:flex;font-size:.85rem;opacity:0;padding:.15rem;transition:opacity .15s,color .15s}
+.recon-month:hover .recon-month__action,.recon-month__action:focus-visible{opacity:1}
+.recon-month__action:hover{color:var(--tng-semantic-foreground-primary)}
+.recon-month__action:disabled{cursor:not-allowed;opacity:.35 !important}
 .recon-month__tags{display:flex;flex-wrap:wrap;gap:.3rem}
 .recon-month__diff{color:var(--tng-semantic-foreground-secondary);font-size:.72rem;font-weight:650}
 .recon-month__diff--active{color:var(--tng-semantic-accent-danger)}

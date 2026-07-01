@@ -34,6 +34,7 @@ export class JournalEntriesComponent {
   protected readonly draft = inject(JournalDraftStore);
 
   readonly documents = input<readonly StoredDocument[]>([]);
+  readonly documentParentId = input<string | null>(null);
   readonly pendingFiles = input<readonly File[]>([]);
   readonly documentsDisabled = input(false);
   readonly documentsUploading = input(false);

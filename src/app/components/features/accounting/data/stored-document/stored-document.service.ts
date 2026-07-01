@@ -4,6 +4,10 @@ import { firstValueFrom } from 'rxjs';
 import { ApiClientService } from '../../../../../core/api/api-client.service';
 import { AppConfigStore } from '../../../../../core/config/app-config.store';
 import { CrudApiService } from '../../../../../shared/crud';
+import {
+  SignedUrlDownloadService,
+  type SignedDownloadUrlResponse,
+} from '../../../../../shared/file/signed-url-download.service';
 import type {
   StoredDocument,
   StoredDocumentCreatePayload,
@@ -21,6 +25,7 @@ export class StoredDocumentService {
   private readonly crudApi = inject(CrudApiService);
   private readonly http = inject(HttpClient);
   private readonly appConfigStore = inject(AppConfigStore);
+  private readonly signedUrlDownload = inject(SignedUrlDownloadService);
 
   async create(payload: StoredDocumentCreatePayload): Promise<StoredDocument> {
     return this.crudApi.create<StoredDocument, StoredDocumentCreatePayload>(ENDPOINT, payload);
@@ -46,15 +51,8 @@ export class StoredDocumentService {
     );
   }
 
-  async getDownloadUrl(id: string): Promise<string> {
-    const response = await this.api.get<Record<string, unknown> | string>(
-      `${await this.collectionUrl()}/${id}/download-url`,
-    );
-    const url = this.extractSignedUrl(response);
-    if (!url) {
-      throw new Error('Download URL is missing from response.');
-    }
-    return url;
+  async getDownloadUrl(id: string): Promise<SignedDownloadUrlResponse> {
+    return this.signedUrlDownload.get(`${ENDPOINT}/${encodeURIComponent(id)}/download-url`);
   }
 
   /** Backend returns 204 No Content. */
@@ -90,20 +88,4 @@ export class StoredDocumentService {
     return `${config.apiBaseUrl.replace(/\/$/, '')}/${ENDPOINT.replace(/^\/+/, '')}`;
   }
 
-  private extractSignedUrl(payload: Record<string, unknown> | string): string | null {
-    if (typeof payload === 'string') {
-      const normalized = payload.trim();
-      return normalized.length ? normalized : null;
-    }
-
-    const candidate =
-      payload['downloadUrl'] ??
-      payload['signedUrl'] ??
-      payload['url'] ??
-      payload['getUrl'] ??
-      payload['href'];
-    if (typeof candidate !== 'string') return null;
-    const normalized = candidate.trim();
-    return normalized.length ? normalized : null;
-  }
 }

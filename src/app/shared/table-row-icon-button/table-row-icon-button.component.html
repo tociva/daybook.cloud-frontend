@@ -9,6 +9,6 @@
   [disabled]="disabled()"
   (click)="onAction()"
 >
-  <tng-icon [icon]="icon()" aria-hidden="true" />
+  <tng-icon [icon]="icon()" [class.spin]="icon() === 'loaderCircle'" aria-hidden="true" />
 </tng-button>
 }

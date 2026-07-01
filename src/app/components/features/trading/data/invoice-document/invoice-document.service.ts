@@ -2,6 +2,10 @@ import { Injectable, inject } from '@angular/core';
 import { ApiClientService } from '../../../../../core/api/api-client.service';
 import { AppConfigStore } from '../../../../../core/config/app-config.store';
 import { SignedUrlUploadService } from '../../../../../shared/file/signed-url-upload.service';
+import {
+  SignedUrlDownloadService,
+  type SignedDownloadUrlResponse,
+} from '../../../../../shared/file/signed-url-download.service';
 import type {
   InvoiceDocumentCreatePayload,
   InvoiceDocumentResourceType,
@@ -20,6 +24,7 @@ export class InvoiceDocumentService {
   private readonly api = inject(ApiClientService);
   private readonly appConfigStore = inject(AppConfigStore);
   private readonly signedUrlUpload = inject(SignedUrlUploadService);
+  private readonly signedUrlDownload = inject(SignedUrlDownloadService);
 
   async attachInvoiceDocuments(
     resourceType: InvoiceDocumentResourceType,
@@ -57,6 +62,17 @@ export class InvoiceDocumentService {
     docId: string,
   ): Promise<void> {
     await this.api.delete<void>(`${await this.documentsUrl(resourceType, parentId)}/${docId}`);
+  }
+
+  async getDownloadUrl(
+    resourceType: InvoiceDocumentResourceType,
+    parentId: string,
+    docId: string,
+  ): Promise<SignedDownloadUrlResponse> {
+    const endpoint = INVOICE_DOCUMENT_ENDPOINTS[resourceType];
+    return this.signedUrlDownload.get(
+      `${endpoint}/${encodeURIComponent(parentId)}/documents/${encodeURIComponent(docId)}/download-url`,
+    );
   }
 
   private async createDocumentMetadata(

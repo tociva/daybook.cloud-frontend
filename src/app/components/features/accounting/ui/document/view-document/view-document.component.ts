@@ -2,12 +2,15 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { ActivatedRoute } from '@angular/router';
 import { TngTable, TngTableCellTpl } from '@tailng-ui/components';
 import type { TngTableColumn } from '@tailng-ui/components';
-import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
 import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-button/burl-back-button.component';
+import {
+  getDownloadErrorMessage,
+  startSignedDownload,
+} from '../../../../../../shared/file/signed-url-download.service';
 import { UserSessionStore } from '../../../../management/data/user-session/user-session.store';
-import { StoredDocumentService, StoredDocumentStore } from '../../../data/stored-document';
+import { DocumentStatus, StoredDocumentService, StoredDocumentStore } from '../../../data/stored-document';
 import type { StoredDocument, StoredDocumentAddedBy } from '../../../data/stored-document';
 
 type DocumentDetailRow = Readonly<{
@@ -52,7 +55,7 @@ export class ViewDocumentComponent {
       {
         id: 'download',
         label: 'Download',
-        value: item.id ? 'Download file' : '—',
+        value: item.id && item.status === DocumentStatus.UPLOADED ? 'Download file' : '—',
       },
       {
         id: 'createdat',
@@ -121,13 +124,13 @@ export class ViewDocumentComponent {
 
   protected async downloadDocument(): Promise<void> {
     const item = this.documentStore.selectedItem();
-    if (!item?.id || this.isDownloading()) return;
+    if (!item?.id || item.status !== DocumentStatus.UPLOADED || this.isDownloading()) return;
     this.isDownloading.set(true);
     try {
-      const downloadUrl = await this.documentService.getDownloadUrl(item.id);
-      window.open(downloadUrl, '_blank', 'noopener,noreferrer');
+      const response = await this.documentService.getDownloadUrl(item.id);
+      startSignedDownload(response);
     } catch (error) {
-      this.toastStore.danger(getApiErrorMessage(error, 'Failed to generate download link.'));
+      this.toastStore.danger(getDownloadErrorMessage(error, 'Failed to generate download link.'));
     } finally {
       this.isDownloading.set(false);
     }

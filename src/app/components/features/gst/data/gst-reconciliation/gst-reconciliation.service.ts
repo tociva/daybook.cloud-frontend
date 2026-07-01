@@ -2,6 +2,10 @@ import { Injectable, inject } from '@angular/core';
 import { ApiClientService } from '../../../../../core/api/api-client.service';
 import { AppConfigStore } from '../../../../../core/config/app-config.store';
 import { SignedUrlUploadService } from '../../../../../shared/file/signed-url-upload.service';
+import {
+  SignedUrlDownloadService,
+  type SignedDownloadUrlResponse,
+} from '../../../../../shared/file/signed-url-download.service';
 import type {
   GstReconciliationDetailResponse,
   GstReconciliationRefreshPayload,
@@ -24,6 +28,7 @@ export class GstReconciliationService {
   private readonly api = inject(ApiClientService);
   private readonly appConfigStore = inject(AppConfigStore);
   private readonly signedUrlUpload = inject(SignedUrlUploadService);
+  private readonly signedUrlDownload = inject(SignedUrlDownloadService);
 
   /** Step 1: Obtain a signed upload URL for the GST return file. */
   async createUploadUrl(
@@ -77,6 +82,15 @@ export class GstReconciliationService {
   ): Promise<GstReconciliationDetailResponse> {
     return this.api.get<GstReconciliationDetailResponse>(
       `${await this.baseUrl()}${ENDPOINT}/${returnType}/${month}`,
+    );
+  }
+
+  async getDownloadUrl(
+    returnType: GstReconciliationReturnType,
+    month: number,
+  ): Promise<SignedDownloadUrlResponse> {
+    return this.signedUrlDownload.get(
+      `${ENDPOINT}/${encodeURIComponent(returnType)}/${encodeURIComponent(String(month))}/download-url`,
     );
   }
 

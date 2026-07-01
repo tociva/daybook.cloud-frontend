@@ -11,6 +11,7 @@ import {
 import type { TngTableColumn } from '@tailng-ui/components';
 import { TngIcon } from '@tailng-ui/icons';
 import { getApiErrorMessage } from '../../../../../../core/api/api-error.util';
+import { PERMISSION } from '../../../../../../core/permissions/permission-requirements';
 import { ToastStore } from '../../../../../../core/toast/toast.store';
 import {
   CrudFilterPopoverComponent,
@@ -21,6 +22,10 @@ import type { CrudFilterField } from '../../../../../../shared/crud';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import { PageHeadingComponent } from '../../../../../../shared/page-heading/page-heading.component';
 import { TableRowIconButtonComponent } from '../../../../../../shared/table-row-icon-button';
+import {
+  getDownloadErrorMessage,
+  startSignedDownload,
+} from '../../../../../../shared/file/signed-url-download.service';
 import { DateManagementService } from '../../../../../../core/date/date-management.service';
 import { UserSessionStore } from '../../../../management/data/user-session/user-session.store';
 import {
@@ -72,6 +77,7 @@ import { BurlBackButtonComponent } from '../../../../../../shared/burl-back-butt
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ListDocumentComponent {
+  protected readonly DocumentStatus = DocumentStatus;
   private readonly router = inject(Router);
   private readonly documentService = inject(StoredDocumentService);
   protected readonly crudQuery = inject(CrudListQueryService);
@@ -81,7 +87,8 @@ export class ListDocumentComponent {
   private readonly dateManagement = inject(DateManagementService);
   protected readonly hasError = computed(() => this.documentStore.error() !== null);
   protected readonly isValidatingUploads = signal(false);
-  protected readonly downloadingDocumentId = signal<string | null>(null);
+  protected readonly downloadingDocumentIds = signal<ReadonlySet<string>>(new Set());
+  protected readonly documentActionPermission = PERMISSION.ownerOnly;
 
   protected readonly columns: readonly TngTableColumn<StoredDocument>[] = [
     { id: 'name', label: 'Name', sortable: true, width: '15rem' },
@@ -153,16 +160,22 @@ export class ListDocumentComponent {
     });
 
   protected async downloadDocument(item: StoredDocument): Promise<void> {
-    if (!item.id || this.downloadingDocumentId()) return;
+    if (
+      !item.id ||
+      item.status !== DocumentStatus.UPLOADED ||
+      this.downloadingDocumentIds().has(item.id)
+    ) {
+      return;
+    }
 
-    this.downloadingDocumentId.set(item.id);
+    this.setDocumentDownloading(item.id, true);
     try {
-      const downloadUrl = await this.documentService.getDownloadUrl(item.id);
-      window.open(downloadUrl, '_blank', 'noopener,noreferrer');
+      const response = await this.documentService.getDownloadUrl(item.id);
+      startSignedDownload(response);
     } catch (error) {
-      this.toastStore.danger(getApiErrorMessage(error, 'Failed to generate download link.'));
+      this.toastStore.danger(getDownloadErrorMessage(error, 'Failed to generate download link.'));
     } finally {
-      this.downloadingDocumentId.set(null);
+      this.setDocumentDownloading(item.id, false);
     }
   }
 
@@ -238,6 +251,15 @@ export class ListDocumentComponent {
 
   protected truncateText(value: string, limit: number): string {
     return value.length > limit ? `${value.slice(0, limit)}...` : value;
+  }
+
+  private setDocumentDownloading(documentId: string, downloading: boolean): void {
+    this.downloadingDocumentIds.update((current) => {
+      const next = new Set(current);
+      if (downloading) next.add(documentId);
+      else next.delete(documentId);
+      return next;
+    });
   }
 
   protected resolveAddedByName(item: StoredDocument): string {

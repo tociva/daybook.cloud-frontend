@@ -37,6 +37,11 @@ dd {
   word-break: break-word;
 }
 
+:host ::ng-deep .journal-document-tags .document-tags {
+  justify-content: flex-start;
+  padding-bottom: 0;
+}
+
 .section-title {
   color: var(--tng-semantic-foreground-primary);
   font-size: 0.85rem;

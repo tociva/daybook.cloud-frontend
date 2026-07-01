@@ -1,5 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { CrudApiService } from '../../../../../shared/crud';
+import {
+  SignedUrlDownloadService,
+  type SignedDownloadUrlResponse,
+} from '../../../../../shared/file/signed-url-download.service';
 import type {
   FiscalYear,
   FiscalYearGetQuery,
@@ -12,6 +16,7 @@ const FISCAL_YEAR_ENDPOINT = '/organization/fiscal-year';
 @Injectable({ providedIn: 'root' })
 export class FiscalYearService {
   private readonly crudApi = inject(CrudApiService);
+  private readonly signedUrlDownload = inject(SignedUrlDownloadService);
 
   async create(payload: FiscalYearPayload): Promise<FiscalYear> {
     return this.crudApi.create<FiscalYear, FiscalYearPayload>(FISCAL_YEAR_ENDPOINT, payload);
@@ -35,5 +40,11 @@ export class FiscalYearService {
 
   async update(id: string, payload: FiscalYearPayload): Promise<FiscalYear> {
     return this.crudApi.update<FiscalYear, FiscalYearPayload>(FISCAL_YEAR_ENDPOINT, id, payload);
+  }
+
+  async getDocumentDownloadUrl(documentId: string): Promise<SignedDownloadUrlResponse> {
+    return this.signedUrlDownload.get(
+      `/storage/fiscal-year-document/${encodeURIComponent(documentId)}/download-url`,
+    );
   }
 }

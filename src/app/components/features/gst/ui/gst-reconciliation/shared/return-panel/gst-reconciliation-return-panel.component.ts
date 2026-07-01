@@ -38,16 +38,19 @@ export class GstReconciliationReturnPanelComponent {
   readonly meta = input.required<ReturnTypeMeta>();
   readonly months = input.required<readonly GstReconciliationMonthCell[]>();
   readonly canImport = input(false);
+  readonly canDownload = input(false);
   readonly contextAvailable = input(false);
   readonly isBusy = input(false);
   readonly isParsing = input(false);
   readonly isUploading = input(false);
   readonly refreshingCellKey = input<string | null>(null);
+  readonly downloadingCellKeys = input<ReadonlySet<string>>(new Set());
   readonly currencyCode = input<string | undefined>(undefined);
 
   readonly importRequested = output<ReturnTypeMeta['value']>();
   readonly monthOpened = output<GstReconciliationMonthCell>();
   readonly refreshRequested = output<GstReconciliationMonthCell>();
+  readonly downloadRequested = output<GstReconciliationMonthCell>();
 
   protected readonly statusLegend = GST_RECONCILIATION_STATUS_LEGEND;
 
@@ -62,12 +65,22 @@ export class GstReconciliationReturnPanelComponent {
     this.refreshRequested.emit(cell);
   }
 
+  protected downloadClicked(event: Event, cell: GstReconciliationMonthCell): void {
+    event.stopPropagation();
+    if (!this.canDownload() || cell.status === 'upcoming') return;
+    this.downloadRequested.emit(cell);
+  }
+
   protected cellKey(cell: GstReconciliationMonthCell): string {
     return gstReconciliationMonthDifferenceKey(cell);
   }
 
   protected isRefreshingCell(cell: GstReconciliationMonthCell): boolean {
     return this.refreshingCellKey() === this.cellKey(cell);
+  }
+
+  protected isDownloadingCell(cell: GstReconciliationMonthCell): boolean {
+    return this.downloadingCellKeys().has(this.cellKey(cell));
   }
 
   protected statusLabel = gstReconciliationStatusLabel;

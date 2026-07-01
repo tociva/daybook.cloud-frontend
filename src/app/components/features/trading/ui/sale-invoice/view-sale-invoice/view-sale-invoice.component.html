@@ -15,6 +15,7 @@
         <app-si-customer [readOnly]="true" />
         <app-si-line-items
           [readOnly]="true"
+          [documentParentId]="saleInvoiceStore.selectedItem()?.id ?? null"
           [documents]="saleInvoiceStore.selectedItem()?.documents ?? []"
         />
       </div>

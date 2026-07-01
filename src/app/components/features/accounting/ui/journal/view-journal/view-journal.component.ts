@@ -23,6 +23,7 @@ import type { JournalEntry } from '../../../data/journal';
 import { LedgerStore } from '../../../data/ledger';
 import type { Ledger } from '../../../data/ledger';
 import { JournalCreateDraftStagingService } from '../create-journal/journal-create-draft-staging.service';
+import { InvoiceDocumentTagsComponent } from '../../../../trading/ui/shared/invoice-document-tags/invoice-document-tags.component';
 
 @Component({
   selector: 'app-view-journal',
@@ -40,6 +41,7 @@ import { JournalCreateDraftStagingService } from '../create-journal/journal-crea
     BurlEditButtonComponent,
     TngButtonComponent,
     TngIcon,
+    InvoiceDocumentTagsComponent,
   ],
   templateUrl: './view-journal.component.html',
   styleUrl: './view-journal.component.css',

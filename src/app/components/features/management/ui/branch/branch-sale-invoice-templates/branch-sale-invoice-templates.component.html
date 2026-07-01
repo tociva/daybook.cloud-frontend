@@ -66,6 +66,22 @@
           </div>
 
           <div class="template-row__actions">
+            @if (canDownload()) {
+              <tng-button
+                appearance="ghost"
+                tone="neutral"
+                type="button"
+                [disabled]="downloadingTypes().has(definition.type) || uploadingType() !== null"
+                (click)="downloadTemplate(definition.type)"
+              >
+                @if (downloadingTypes().has(definition.type)) {
+                  <tng-icon icon="loaderCircle" aria-hidden="true" class="spin" />
+                } @else {
+                  <tng-icon icon="download" aria-hidden="true" />
+                }
+                Download
+              </tng-button>
+            }
             <tng-button
               appearance="outline"
               tone="neutral"

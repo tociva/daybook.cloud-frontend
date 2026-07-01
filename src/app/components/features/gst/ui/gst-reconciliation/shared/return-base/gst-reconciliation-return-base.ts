@@ -3,10 +3,16 @@ import { Router } from '@angular/router';
 import { PERMISSION } from '../../../../../../../core/permissions/permission-requirements';
 import { PermissionsStore } from '../../../../../../../core/permissions/permissions.store';
 import { UserSessionStore } from '../../../../../management/data/user-session/user-session.store';
+import { ToastStore } from '../../../../../../../core/toast/toast.store';
+import {
+  getDownloadErrorMessage,
+  startSignedDownload,
+} from '../../../../../../../shared/file/signed-url-download.service';
 import {
   GstReconciliationStore,
   type GstReconciliationReturnType,
 } from '../../../../data/gst-reconciliation/gst-reconciliation.store';
+import { GstReconciliationService } from '../../../../data/gst-reconciliation/gst-reconciliation.service';
 import type { GstReconciliationMonthCell } from '../../gst-reconciliation.types';
 import {
   buildGstReconciliationMonthCells,
@@ -18,8 +24,14 @@ export abstract class GstReconciliationReturnBase {
   protected readonly permissions = inject(PermissionsStore);
   protected readonly sessionStore = inject(UserSessionStore);
   protected readonly store = inject(GstReconciliationStore);
+  private readonly service = inject(GstReconciliationService);
+  private readonly toastStore = inject(ToastStore);
 
   protected readonly refreshingCell = signal<string | null>(null);
+  protected readonly downloadingCells = signal<ReadonlySet<string>>(new Set());
+  protected readonly canDownload = computed(() =>
+    this.permissions.can(PERMISSION.fiscalYear.gstReconciliation.view),
+  );
 
   protected readonly months = computed(() =>
     buildGstReconciliationMonthCells({
@@ -58,11 +70,35 @@ export abstract class GstReconciliationReturnBase {
     }
   }
 
+  protected async downloadMonth(cell: GstReconciliationMonthCell): Promise<void> {
+    const key = gstReconciliationMonthDifferenceKey(cell);
+    if (cell.status === 'upcoming' || !this.canDownload() || this.downloadingCells().has(key)) return;
+
+    this.setCellDownloading(key, true);
+    try {
+      const response = await this.service.getDownloadUrl(cell.returnType, cell.month);
+      startSignedDownload(response);
+    } catch (error) {
+      this.toastStore.danger(getDownloadErrorMessage(error, 'Failed to download GST return file.'));
+    } finally {
+      this.setCellDownloading(key, false);
+    }
+  }
+
   protected currencyCode(): string | undefined {
     return (
       this.sessionStore.session()?.fiscalyear?.currencycode ??
       this.sessionStore.session()?.branch?.currencycode
     );
+  }
+
+  private setCellDownloading(key: string, downloading: boolean): void {
+    this.downloadingCells.update((current) => {
+      const next = new Set(current);
+      if (downloading) next.add(key);
+      else next.delete(key);
+      return next;
+    });
   }
 
   private fiscalYearStartYear(): number {

@@ -12,6 +12,10 @@ import { documentPermission } from '../../../../../../core/permissions/permissio
 import { ToastStore } from '../../../../../../core/toast/toast.store';
 import { EmptyStateComponent } from '../../../../../../shared/empty-state';
 import {
+  getDownloadErrorMessage,
+  startSignedDownload,
+} from '../../../../../../shared/file/signed-url-download.service';
+import {
   InvoiceDocumentService,
   type InvoiceDocumentResourceType,
   type StoredDocument,
@@ -47,6 +51,7 @@ export class InvoiceAttachmentsComponent {
   protected readonly localDocuments = signal<readonly StoredDocument[]>([]);
   protected readonly uploadEntries = signal<readonly UploadEntry[]>([]);
   protected readonly deletingDocumentId = signal<string | null>(null);
+  protected readonly downloadingDocumentIds = signal<ReadonlySet<string>>(new Set());
   protected readonly isUploading = signal(false);
 
   protected readonly isBusy = computed(
@@ -54,6 +59,7 @@ export class InvoiceAttachmentsComponent {
   );
   protected readonly canAttach = computed(() => this.hasPermission('create'));
   protected readonly canDelete = computed(() => this.hasPermission('delete'));
+  protected readonly canDownload = computed(() => this.hasPermission('view'));
 
   constructor() {
     effect(() => {
@@ -151,6 +157,25 @@ export class InvoiceAttachmentsComponent {
     }
   }
 
+  protected async downloadDocument(document: StoredDocument): Promise<void> {
+    const docId = document.id;
+    if (!docId || this.downloadingDocumentIds().has(docId) || !this.canDownload()) return;
+
+    this.setDocumentDownloading(docId, true);
+    try {
+      const response = await this.documentService.getDownloadUrl(
+        this.resourceType(),
+        this.parentId(),
+        docId,
+      );
+      startSignedDownload(response);
+    } catch (error) {
+      this.toastStore.danger(getDownloadErrorMessage(error, 'Failed to download document.'));
+    } finally {
+      this.setDocumentDownloading(docId, false);
+    }
+  }
+
   protected formatFileSize(bytes: number): string {
     if (!Number.isFinite(bytes) || bytes <= 0) return '0 B';
     const units = ['B', 'KB', 'MB', 'GB'] as const;
@@ -205,13 +230,22 @@ export class InvoiceAttachmentsComponent {
     };
   }
 
+  private setDocumentDownloading(documentId: string, downloading: boolean): void {
+    this.downloadingDocumentIds.update((current) => {
+      const next = new Set(current);
+      if (downloading) next.add(documentId);
+      else next.delete(documentId);
+      return next;
+    });
+  }
+
   private patchUploadEntry(file: File, patch: Partial<UploadEntry>): void {
     this.uploadEntries.update((entries) =>
       entries.map((entry) => (entry.file === file ? { ...entry, ...patch } : entry)),
     );
   }
 
-  private hasPermission(permissionName: 'create' | 'delete'): boolean {
+  private hasPermission(permissionName: 'create' | 'delete' | 'view'): boolean {
     return this.permissionsStore.can(documentPermission(this.resourceType(), permissionName));
   }
 

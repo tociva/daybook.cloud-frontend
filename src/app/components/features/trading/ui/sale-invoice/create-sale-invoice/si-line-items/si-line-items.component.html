@@ -28,6 +28,7 @@
     <app-invoice-document-tags
       class="si-li-document-picker"
       resourceType="saleInvoice"
+      [parentId]="documentParentId()"
       [editable]="true"
       [documents]="documents()"
       [files]="documentFiles()"
@@ -51,7 +52,11 @@
 }
 
 @if (readOnly() && documents().length) {
-  <app-invoice-document-tags [documents]="documents()" />
+  <app-invoice-document-tags
+    resourceType="saleInvoice"
+    [parentId]="documentParentId()"
+    [documents]="documents()"
+  />
 }
 
 <!-- ── Table ─────────────────────────────────────────────────────────────── -->

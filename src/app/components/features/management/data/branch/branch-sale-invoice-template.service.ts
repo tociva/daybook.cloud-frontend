@@ -4,6 +4,10 @@ import { firstValueFrom } from 'rxjs';
 import { ApiClientService } from '../../../../../core/api/api-client.service';
 import { AppConfigStore } from '../../../../../core/config/app-config.store';
 import { SignedUrlUploadService } from '../../../../../shared/file/signed-url-upload.service';
+import {
+  SignedUrlDownloadService,
+  type SignedDownloadUrlResponse,
+} from '../../../../../shared/file/signed-url-download.service';
 import type {
   SaleInvoiceTemplateMetadata,
   SaleInvoiceTemplateType,
@@ -19,6 +23,7 @@ export class BranchSaleInvoiceTemplateService {
   private readonly appConfigStore = inject(AppConfigStore);
   private readonly http = inject(HttpClient);
   private readonly signedUrlUpload = inject(SignedUrlUploadService);
+  private readonly signedUrlDownload = inject(SignedUrlDownloadService);
 
   async listTemplates(): Promise<readonly SaleInvoiceTemplateMetadata[]> {
     return this.api.get<readonly SaleInvoiceTemplateMetadata[]>(
@@ -32,6 +37,12 @@ export class BranchSaleInvoiceTemplateService {
         headers: new HttpHeaders({ Accept: 'text/html' }),
         responseType: 'text',
       }),
+    );
+  }
+
+  async getDownloadUrl(templateType: SaleInvoiceTemplateType): Promise<SignedDownloadUrlResponse> {
+    return this.signedUrlDownload.get(
+      `${SALE_INVOICE_TEMPLATE_ENDPOINT}/${encodeURIComponent(templateType)}/download-url`,
     );
   }
 

@@ -8,6 +8,7 @@
         <app-invoice-document-tags
           class="entries-document-picker"
           resourceType="journal"
+          [parentId]="documentParentId()"
           [editable]="true"
           [documents]="documents()"
           [files]="pendingFiles()"

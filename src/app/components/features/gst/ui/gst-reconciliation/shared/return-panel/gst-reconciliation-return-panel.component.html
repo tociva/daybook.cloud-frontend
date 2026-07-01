@@ -65,10 +65,25 @@
             <small>{{ cell.period }}</small>
           </span>
           <span class="recon-month__actions">
+            @if (canDownload() && cell.status !== 'upcoming') {
+              <button
+                type="button"
+                class="recon-month__action"
+                [attr.aria-label]="'Download ' + meta().label + ' ' + cell.period"
+                [disabled]="isDownloadingCell(cell)"
+                (click)="downloadClicked($event, cell)"
+              >
+                <tng-icon
+                  [icon]="isDownloadingCell(cell) ? 'loaderCircle' : 'download'"
+                  [class.spin]="isDownloadingCell(cell)"
+                  aria-hidden="true"
+                />
+              </button>
+            }
             @if (canImport()) {
               <button
                 type="button"
-                class="recon-month__refresh"
+                class="recon-month__action"
                 [attr.aria-label]="'Refresh ' + meta().label + ' ' + cell.period"
                 [disabled]="isUploading() || isRefreshingCell(cell)"
                 (click)="refreshClicked($event, cell)"

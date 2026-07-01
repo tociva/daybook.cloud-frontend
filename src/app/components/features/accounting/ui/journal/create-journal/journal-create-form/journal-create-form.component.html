@@ -6,6 +6,7 @@
   <div class="journal-layout">
     <div class="journal-main">
       <app-journal-entries
+        [documentParentId]="resolvedJournalId()"
         [documents]="selectedDocuments()"
         [pendingFiles]="pendingDocumentFiles()"
         [documentsDisabled]="isBusy()"

@@ -26,10 +26,17 @@
             <dt>Description</dt>
             <dd>{{ journal.description || '' }}</dd>
           </div>
-          @if (journal.documentids; as docIds) {
-            <div>
+          @if (journal.documents?.length) {
+            <div class="wide">
               <dt>Documents</dt>
-              <dd>{{ docIds.length }} attached</dd>
+              <dd>
+                <app-invoice-document-tags
+                  class="journal-document-tags"
+                  resourceType="journal"
+                  [parentId]="journal.id"
+                  [documents]="journal.documents ?? []"
+                />
+              </dd>
             </div>
           }
         </dl>
